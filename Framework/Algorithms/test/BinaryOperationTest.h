@@ -294,6 +294,108 @@ public:
     }
   }
 
+  BinaryOperation::BinaryOperationTable_sptr
+  do_test_buildBinaryOperationTable(std::vector<std::vector<int>> lhs,
+                                    std::vector<std::vector<int>> rhs,
+                                    bool expect_throw = false) {
+    EventWorkspace_sptr lhsWS =
+        WorkspaceCreationHelper::createGroupedEventWorkspace(std::move(lhs), 50,
+                                                             1.0);
+    EventWorkspace_sptr rhsWS =
+        WorkspaceCreationHelper::createGroupedEventWorkspace(std::move(rhs), 50,
+                                                             1.0);
+    BinaryOperation::BinaryOperationTable_sptr table;
+    Mantid::Kernel::Timer timer1;
+    if (expect_throw) {
+      TS_ASSERT_THROWS(
+          table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS),
+          const std::runtime_error &);
+    } else {
+      TS_ASSERT_THROWS_NOTHING(
+          table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS));
+      // std::cout << timer1.elapsed() << " sec to run
+      // buildBinaryOperationTable\n";
+      TS_ASSERT(table);
+      TS_ASSERT_EQUALS(table->size(), lhsWS->getNumberHistograms());
+    }
+    return table;
+  }
+
+  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS() {
+    std::vector<std::vector<int>> lhs(6), rhs(2);
+    for (int i = 0; i < 6; i++) {
+      // one detector per pixel in lhs
+      lhs[i].emplace_back(i);
+      // 3 detectors in each on the rhs
+      rhs[i / 3].emplace_back(i);
+    }
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs);
+    for (int i = 0; i < 6; i++) {
+      TS_ASSERT_EQUALS((*table)[i], i / 3);
+    }
+  }
+
+  void
+  test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_mismatched_throws() {
+    // one detector per pixel in lhs, but they start at 3
+    std::vector<std::vector<int>> lhs{{3}, {4}, {5}, {6}, {7}, {8}};
+    // 3 detectors in each on the rhs
+    std::vector<std::vector<int>> rhs{{0, 1, 2}, {3, 4, 5}};
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs, false);
+    TS_ASSERT_EQUALS((*table)[0], 1);
+    TS_ASSERT_EQUALS((*table)[1], 1);
+    TS_ASSERT_EQUALS((*table)[2], 1);
+    TS_ASSERT_EQUALS((*table)[3], -1);
+    TS_ASSERT_EQUALS((*table)[4], -1);
+    TS_ASSERT_EQUALS((*table)[5], -1);
+  }
+
+  void test_buildBinaryOperationTable_groupedLHS_by_groupedRHS() {
+    // two detectors per pixel in lhs
+    std::vector<std::vector<int>> lhs{{0, 1}, {2, 3},   {4, 5},   {6, 7},
+                                      {8, 9}, {10, 11}, {12, 13}, {14, 15}};
+    // 4 detectors in each on the rhs
+    std::vector<std::vector<int>> rhs{
+        {0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}};
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs);
+    for (int i = 0; i < 8; i++) {
+      TS_ASSERT_EQUALS((*table)[i], i / 2);
+    }
+  }
+
+  void
+  test_buildBinaryOperationTable_groupedLHS_by_groupedRHS_bad_overlap_throws() {
+    // 4 detectors per pixel in lhs
+    std::vector<std::vector<int>> lhs{{0, 1, 2, 3},     {4, 5, 6, 7},
+                                      {8, 9, 10, 11},   {12, 13, 14, 15},
+                                      {16, 17, 18, 19}, {20, 21, 22, 23}};
+    // 6 detectors in each on the rhs
+    std::vector<std::vector<int>> rhs{{0, 1, 2, 3, 4, 5},
+                                      {6, 7, 8, 9, 10, 11},
+                                      {12, 13, 14, 15, 16, 17},
+                                      {18, 19, 20, 21, 22, 23}};
+
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs, false);
+    TS_ASSERT_EQUALS((*table)[0], 0);  // 0-3 go into 0-5
+    TS_ASSERT_EQUALS((*table)[1], -1); // 4-7 fails to go anywhere
+    TS_ASSERT_EQUALS((*table)[2], 1);  // 8-11 goes into 6-11
+  }
+
+  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_large() {
+    std::vector<std::vector<int>> lhs(2000, std::vector<int>(1)),
+        rhs(20, std::vector<int>(100));
+    for (int i = 0; i < 2000; i++) {
+      // 1 detector per pixel in lhs
+      lhs[i][0] = i;
+      // 1000 detectors in each on the rhs
+      rhs[i / 100][i % 100] = i;
+    }
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs);
+    for (int i = 0; i < 2000; i++) {
+      TS_ASSERT_EQUALS((*table)[i], i / 100);
+    }
+  }
+
   void test_parallel_Distributed() {
     ParallelTestHelpers::runParallel(run_parallel,
                                      Parallel::StorageMode::Distributed);

@@ -9,7 +9,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;
@@ -42,7 +42,7 @@ MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input,
                                     const MatrixWorkspace_sptr &flood) {
   auto newFlood =
       WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
-  auto const table = OperatorOverloads::buildBinaryOperationTable(input, flood);
+  auto const table = BinaryOperation::buildBinaryOperationTable(input, flood);
   auto const floodBlocksize = flood->blocksize();
   const ISpectrum *missingSpectrum = nullptr;
   for (size_t i = 0; i < table->size(); ++i) {
