@@ -272,6 +272,7 @@ public:
     auto alg = createAlgorithm(inputWS);
     alg->setProperty("Environment", createEnvironmentProps("10mm_empty"));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
+    config.setString("instrumentDefinition.directory", defaultDirs);
   }
 
   void test_Setting_Geometry_As_FlatPlate() {
@@ -890,6 +891,7 @@ public:
     alg->setProperty("Environment", props);
     alg->setProperty("Geometry", createOverrideGeometryProps());
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    config.setString("instrumentDefinition.directory", defaultDirs);
   }
 
   void test_Geometry_Override_On_Environment_Without_Sample_Gives_Error() {
@@ -910,6 +912,7 @@ public:
     alg->setProperty("Environment", createEnvironmentProps("10mm_empty"));
     alg->setProperty("Geometry", createOverrideGeometryProps());
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    config.setString("instrumentDefinition.directory", defaultDirs);
   }
 
   //----------------------------------------------------------------------------
