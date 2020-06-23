@@ -167,4 +167,3 @@ def get_axes_object_variable(ax):
         # No numRows or NumCols members, so no list use the default
         pass
     return ax_object_var
-
