@@ -14,6 +14,7 @@ from workbench.widgets.settings.fitting.view import FittingSettingsView
 from qtpy.QtCore import Qt
 from enum import Enum
 
+
 class FittingProperties(Enum):
     AUTO_BACKGROUND = "curvefitting.autoBackground"
     DEFAULT_PEAK = "curvefitting.defaultPeak"

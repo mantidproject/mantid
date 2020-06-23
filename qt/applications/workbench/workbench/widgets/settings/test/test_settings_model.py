@@ -42,8 +42,8 @@ class SettingsModelTest(TestCase):
     @patch("workbench.widgets.settings.model.CONF", new_callable=MockCONF)
     def test_save_settings_to_file(self, mock_conf, mock_configService):
         settings = list(test_config_settings.keys()) + list(test_CONF_settings.keys())
-        expected_calls = [call(setting + '=' + str(test_config_settings[setting]) + '\n') for setting in test_config_settings]\
-                         + [call(setting + '=' + str(test_CONF_settings[setting]) + '\n') for setting in test_CONF_settings]
+        expected_calls = [call(setting + '=' + str(test_config_settings[setting]) + '\n') for setting in test_config_settings] + \
+                         [call(setting + '=' + str(test_CONF_settings[setting]) + '\n') for setting in test_CONF_settings]
 
         with patch("workbench.widgets.settings.model.open", mock_open()) as open_mock:
             SettingsModel.save_settings_to_file("filepath", settings)

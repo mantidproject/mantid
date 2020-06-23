@@ -99,12 +99,14 @@ class SettingsPresenter(object):
 
     def action_save_settings_to_file(self):
         ConfigService.saveConfig(ConfigService.getUserFilename())
-        filepath = self.view.get_properties_filename(parent=self.parent, accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile)
+        filepath = self.view.get_properties_filename(parent=self.parent, accept_mode=QFileDialog.AcceptSave,
+                                                     file_mode=QFileDialog.AnyFile)
         if filepath:
             self.model.save_settings_to_file(filepath, self.all_properties)
 
     def action_load_settings_from_file(self):
-        filepath = self.view.get_properties_filename(parent=self.parent, accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile)
+        filepath = self.view.get_properties_filename(parent=self.parent, accept_mode=QFileDialog.AcceptOpen,
+                                                     file_mode=QFileDialog.ExistingFile)
         if filepath:
             self.model.load_settings_from_file(filepath, self.all_properties)
             self._update_all_properties()
