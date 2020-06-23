@@ -11,6 +11,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
 
@@ -37,6 +38,19 @@ using namespace CurveFitting;
 using namespace Kernel;
 using namespace API;
 using std::placeholders::_1;
+
+void evaluateFunctionOnRange(const IFunction_sptr &function, size_t domainSize,
+                             const double *range, std::vector<double> &output) {
+  const IFunction1D_sptr fun = std::dynamic_pointer_cast<IFunction1D>(function);
+  if (!fun) {
+    FunctionDomain1DView ds(range, domainSize);
+    FunctionValues outs(ds);
+    function->function(ds, outs);
+    output = outs.toVector();
+  } else {
+    fun->function1D(output.data(), range, domainSize);
+  }
+}
 
 DECLARE_FUNCTION(Convolution)
 
@@ -155,13 +169,17 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     xr[0] = -n2 * dx;
     if (odd)
       xr[nData - 1] = -xr[0];
-
-    IFunction1D_sptr fun =
-        std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
-    if (!fun) {
-      throw std::runtime_error("Convolution can work only with 1D functions");
-    }
-    fun->function1D(m_resolution.data(), xr.data(), nData);
+    evaluateFunctionOnRange(getFunction(0), nData, &xr[0], m_resolution);
+    // IFunction1D_sptr fun =
+    //     std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
+    // if (!fun) {
+    //   FunctionDomain1DView ds(&xr[0], nData);
+    //   FunctionValues outs(ds);
+    //   getFunction(0)->function(ds, outs);
+    //   m_resolution = outs.toVector();
+    // } else {
+    //   fun->function1D(m_resolution.data(), xr.data(), nData);
+    // }
 
     // rotate the data to produce the right transform
     if (odd) {
@@ -284,7 +302,8 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     // If model contains any delta functions their effect is addition of scaled
     // resolution
     std::vector<double> tmp(nData);
-    resolution->function1D(tmp.data(), xValues, nData);
+    evaluateFunctionOnRange(getFunction(0), nData, xValues, tmp);
+    // resolution->function1D(tmp.data(), xValues, nData);
     std::transform(tmp.begin(), tmp.end(), tmp.begin(),
                    std::bind(std::multiplies<double>(), _1, dltF));
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
@@ -296,7 +315,8 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
       std::transform(xValues, xValues + nData, x.data(),
                      std::bind(std::plus<double>(), _1, shift));
       std::vector<double> tmp(nData);
-      resolution->function1D(tmp.data(), x.data(), nData);
+      evaluateFunctionOnRange(getFunction(0), nData, &x[0], tmp);
+      // resolution->function1D(tmp.data(), x.data(), nData);
       std::transform(tmp.begin(), tmp.end(), tmp.begin(),
                      std::bind(std::multiplies<double>(), _1, dltF));
       std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
@@ -338,18 +358,23 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
     xValuesExtd[i] = -Dx + static_cast<double>(i) * dx;
   }
 
-  // Fill m_resolution with the resolution function data
-  // Lines 341-349 is duplicated in functionFFTmode. To be cleanup
-  // in issue 16064
-  IFunction1D_sptr resolution =
-      std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
-  if (!resolution) {
-    throw std::runtime_error("Convolution can work only with 1D functions");
-  }
   if (m_resolution.empty()) {
     m_resolution.resize(nData);
   }
-  resolution->function1D(m_resolution.data(), xValues, nData);
+  // Fill m_resolution with the resolution function data
+  // Lines 341-349 is duplicated in functionFFTmode. To be cleanup
+  // in issue 16064
+  evaluateFunctionOnRange(getFunction(0), nData, &xValues[0], m_resolution);
+  // IFunction1D_sptr resolution =
+  //     std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
+  // if (!resolution) {
+  //   FunctionDomain1DView ds(&xValues[0], nData);
+  //   FunctionValues outs(ds);
+  //   getFunction(0)->function(ds, outs);
+  //   m_resolution = outs.toVector();
+  // } else {
+  //   resolution->function1D(m_resolution.data(), xValues, nData);
+  // }
 
   // Reverse the axis of the resolution data
   std::reverse(m_resolution.begin(), m_resolution.end());
@@ -414,7 +439,8 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
     // Lines 412-430 is duplicated in functionFFTmode. To be cleanup
     // in issue 16064
     std::vector<double> tmp(nData);
-    resolution->function1D(tmp.data(), xValues, nData);
+    evaluateFunctionOnRange(getFunction(0), nData, xValues, tmp);
+    // resolution->function1D(tmp.data(), xValues, nData);
     std::transform(tmp.begin(), tmp.end(), tmp.begin(),
                    std::bind(std::multiplies<double>(), _1, dltF));
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
@@ -426,7 +452,8 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
       std::transform(xValues, xValues + nData, x.data(),
                      std::bind(std::plus<double>(), _1, shift));
       std::vector<double> tmp(nData);
-      resolution->function1D(tmp.data(), x.data(), nData);
+      evaluateFunctionOnRange(getFunction(0), nData, &x[0], tmp);
+      // resolution->function1D(tmp.data(), x.data(), nData);
       std::transform(tmp.begin(), tmp.end(), tmp.begin(),
                      std::bind(std::multiplies<double>(), _1, dltF));
       std::transform(out, out + nData, tmp.data(), out, std::plus<double>());

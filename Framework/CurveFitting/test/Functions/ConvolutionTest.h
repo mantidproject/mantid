@@ -11,8 +11,6 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
-#include "MantidCurveFitting/Functions/FlatBackground.h"
-#include "MantidCurveFitting/Functions/Gaussian.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -407,17 +405,25 @@ public:
     Convolution conv;
     auto compositeFunction1 = std::make_shared<CompositeFunction>();
     auto compositeFunction2 = std::make_shared<CompositeFunction>();
-    auto deltaFunction1 = std::make_shared<DeltaFunction>();
-    auto deltaFunction2 = std::make_shared<DeltaFunction>();
-    auto flatBackground = std::make_shared<FlatBackground>();
-    auto gaussOsc = std::make_shared<Gaussian>();
+    auto deltaFunction1 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=DeltaFunction, Centre=0.0, Height=3");
+    auto deltaFunction2 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=DeltaFunction, Centre=1.0, Height=5");
+    auto background1 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=LinearBackground, A0=0.0, A1=1.0");
+    auto background2 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=LinearBackground, A0=1.0, A1=2.0");
 
     compositeFunction1->addFunction(deltaFunction1);
     compositeFunction1->addFunction(deltaFunction2);
-    compositeFunction2->addFunction(flatBackground);
-    compositeFunction2->addFunction(gaussOsc);
-    conv.addFunction(compositeFunction1);
+    compositeFunction2->addFunction(background1);
+    compositeFunction2->addFunction(background2);
     conv.addFunction(compositeFunction2);
+    conv.addFunction(compositeFunction1);
 
     // Define domains
     const int N = 116;
@@ -436,18 +442,10 @@ public:
     conv.function(ds, outs);
     conv.function(da, outa);
 
-    // TS_ASSERT_DELTA(outs.getCalculated(0), 7, 1e-10);
-    //   xs[i]),
-    //                   1e-10);
-    // Check output is the original resolution function
-    // for (int i = 0; i < N; i++) {
-    //   TS_ASSERT_DELTA(outs.getCalculated(i), h1 * h2 * exp(-s1 * xs[i] *
-    //   xs[i]),
-    //                   1e-10);
-    //   TS_ASSERT_DELTA(outa.getCalculated(i), h1 * h2 * exp(-s1 * xa[i] *
-    //   xa[i]),
-    //                   1e-10);
-    // }
+    for (int i = 0; i < N; i++) {
+      TS_ASSERT_DELTA(outs.getCalculated(i), 24.0 * xs[i] - 7.0, 1e-10);
+      TS_ASSERT_DELTA(outa.getCalculated(i), 24.0 * xa[i] - 7.0, 1e-10);
+    }
   }
 
   void testForCategories() {
