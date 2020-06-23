@@ -569,12 +569,12 @@ public:
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
       TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
                        "Wavelength")
-      TS_ASSERT_EQUALS(workspaceEntry->getAxis(1)->getValue(0), 0)
-      TS_ASSERT_EQUALS(workspaceEntry->getAxis(1)->getValue(0), 0)
-      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(2), 12.66, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(3), 13.45, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(132), 142.78, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(133), 143.57, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(0), 12.66, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(1), 13.45, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(2), 14.66, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(3), 15.45, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(132), 0.00, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(133), 0.00, 0.01)
     }
   }
 
