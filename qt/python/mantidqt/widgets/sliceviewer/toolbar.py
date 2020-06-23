@@ -80,9 +80,6 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         # Adjust icon size or they are too small in PyQt5 by default
         self.setIconSize(QSize(24, 24))
 
-        # Set the zoom button to be selected on startup.
-        self.zoom()
-
     def edit_parameters(self):
         NavigationToolbar2QT.edit_parameters(self)
         self.plotOptionsChanged.emit()
