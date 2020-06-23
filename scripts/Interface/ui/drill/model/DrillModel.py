@@ -342,6 +342,8 @@ class DrillModel(QObject):
             try:
                 tasks.append(DrillTask(e, self.algorithm, **kwargs))
             except Exception as ex:
+                logger.error("Error while processing sample {0}: {1}"
+                        .format(e, ex))
                 errors.append((e, str(ex)))
         if errors:
             raise DrillException(errors)
