@@ -94,11 +94,52 @@ class DrillTest(unittest.TestCase):
         QTest.mouseDClick(self.view.table.viewport(),
                           Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
 
+    def setCellContents(self, row, column, contents):
+        """
+        Fill a cell.
+
+        Args:
+            row (int): row index
+            column (int): column index
+            contents (str): cell contents
+        """
+        self.view.table.setCellContents(row, column, contents)
+
+    def fillTable(self, nrows):
+        """
+        Fill the table with data. This methods creates rows and fills all the
+        cells with unique text. It then returns a list of all the cell contents.
+
+        Args:
+            nrows (int): number of rows that the table will contain
+
+        Returns:
+            list(dict(str: str)): list of row contents
+        """
+        data = list()
+        text = "test"
+        for n in range(nrows):
+            if n >= self.view.table.rowCount():
+                self.selectRow(n-1, Qt.NoModifier)
+                self.view.add_row_after()
+            for c in range(self.view.table.columnCount()):
+                self.setCellContents(n, c, text + str(n) + str(c))
+            data.append(dict())
+            data[-1].update(self.model.samples[n])
+            n += 1
+        self.view.table.selectionModel().clear()
+        return data
+
     ###########################################################################
     # tests                                                                   #
     ###########################################################################
 
     def setUp(self):
+        # avoid popup messages
+        patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
+        self.mMessageBox = patch.start()
+        self.addCleanup(patch.stop)
+
         self.view = DrillView()
         self.presenter = self.view._presenter
         self.model = self.presenter.model
@@ -213,6 +254,150 @@ class DrillTest(unittest.TestCase):
                 'Samples': []
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
+
+    def test_addRow(self):
+        data = self.fillTable(2)
+
+        # 1 row at the end
+        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
+        data.append(dict())
+        self.assertEqual(self.model.samples, data)
+
+        # 2 rows at the end
+        self.view.nrows.setValue(2)
+        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
+        data.append(dict())
+        data.append(dict())
+        self.assertEqual(self.model.samples, data)
+
+        # 1 row after the first
+        self.view.nrows.setValue(1)
+        self.selectRow(0, Qt.NoModifier)
+        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
+        data.insert(1, dict())
+        self.assertEqual(self.model.samples, data)
+
+    def test_deleteRows(self):
+        data = self.fillTable(10)
+
+        # no selection
+        QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+
+        # 1 row
+        self.selectRow(0, Qt.NoModifier)
+        QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
+        del data[0]
+        self.assertEqual(self.model.samples, data)
+
+        # several rows
+        self.selectRow(0, Qt.NoModifier)
+        self.selectRow(2, Qt.ControlModifier)
+        QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
+        del data[2]
+        del data[0]
+        self.assertEqual(self.model.samples, data)
+        self.selectRow(0, Qt.NoModifier)
+        self.selectRow(2, Qt.ShiftModifier)
+        QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
+        del data[2]
+        del data[1]
+        del data[0]
+        self.assertEqual(self.model.samples, data)
+
+    def test_cut(self):
+        data = self.fillTable(10)
+
+        # no selection
+        QTest.mouseClick(self.view.cut, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+
+        # 1 row
+        self.selectRow(0, Qt.NoModifier)
+        QTest.mouseClick(self.view.cut, Qt.LeftButton)
+        data[0] = {}
+        self.assertEqual(self.model.samples, data)
+
+        # several rows
+        self.selectRow(0, Qt.NoModifier)
+        self.selectRow(2, Qt.ControlModifier)
+        QTest.mouseClick(self.view.cut, Qt.LeftButton)
+        data[0] = {}
+        data[2] = {}
+        self.assertEqual(self.model.samples, data)
+        self.selectRow(3, Qt.NoModifier)
+        self.selectRow(5, Qt.ShiftModifier)
+        QTest.mouseClick(self.view.cut, Qt.LeftButton)
+        data[3] = {}
+        data[4] = {}
+        data[5] = {}
+        self.assertEqual(self.model.samples, data)
+
+        # cells
+        self.selectCell(6, 0, Qt.NoModifier)
+        self.selectCell(6, 1, Qt.ControlModifier)
+        QTest.mouseClick(self.view.cut, Qt.LeftButton)
+        del data[6][self.view.columns[0]]
+        del data[6][self.view.columns[1]]
+        self.assertEqual(self.model.samples, data)
+
+    def test_copy(self):
+        data = self.fillTable(10)
+
+        # no selection
+        QTest.mouseClick(self.view.copy, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+
+        # row(s)
+        self.selectRow(0, Qt.NoModifier)
+        QTest.mouseClick(self.view.copy, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+        self.selectRow(0, Qt.NoModifier)
+        self.selectRow(5, Qt.ControlModifier)
+        QTest.mouseClick(self.view.copy, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+
+        # cells
+        self.selectCell(0, 0, Qt.NoModifier)
+        QTest.mouseClick(self.view.copy, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+        self.selectCell(0, 0, Qt.NoModifier)
+        self.selectCell(5, 0, Qt.ShiftModifier)
+        QTest.mouseClick(self.view.copy, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+
+    def test_paste(self):
+        data = self.fillTable(8)
+
+        # no selection
+        QTest.mouseClick(self.view.paste, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+
+        # copy paste
+        self.selectRow(0, Qt.NoModifier)
+        QTest.mouseClick(self.view.copy, Qt.LeftButton)
+        self.selectRow(1, Qt.NoModifier)
+        QTest.mouseClick(self.view.paste, Qt.LeftButton)
+        self.assertDictEqual(self.model.samples[1], data[0])
+        self.selectCell(2, 0, Qt.NoModifier)
+        QTest.mouseClick(self.view.copy, Qt.LeftButton)
+        self.selectRow(3, Qt.NoModifier)
+        QTest.mouseClick(self.view.paste, Qt.LeftButton)
+        for (k, v) in self.model.samples[3].items():
+            self.assertEqual(v, data[2][self.view.columns[0]])
+
+        # cut paste
+        self.selectRow(4, Qt.NoModifier)
+        QTest.mouseClick(self.view.cut, Qt.LeftButton)
+        self.selectRow(5, Qt.NoModifier)
+        QTest.mouseClick(self.view.paste, Qt.LeftButton)
+        self.assertDictEqual(self.model.samples[1], data[0])
+        self.selectCell(6, 0, Qt.NoModifier)
+        QTest.mouseClick(self.view.cut, Qt.LeftButton)
+        self.selectRow(7, Qt.NoModifier)
+        QTest.mouseClick(self.view.paste, Qt.LeftButton)
+        for (k, v) in self.model.samples[7].items():
+            self.assertEqual(v, data[6][self.view.columns[0]])
 
 
 if __name__ == "__main__":
