@@ -249,6 +249,20 @@ class DrillModel(QObject):
         """
         self.controller.addParameter(Parameter(param, value, sample))
 
+    def checkAllParameters(self):
+        """
+        Check all the parameters.
+        """
+        for i in range(len(self.samples)):
+            for (n, v) in self.samples[i].items():
+                if n == "CustomOptions":
+                    for (nn, vv) in v.items():
+                        self.controller.addParameter(Parameter(nn, vv, i))
+                else:
+                    self.controller.addParameter(Parameter(n, v, i))
+        for (n, v) in self.settings.items():
+            self.controller.addParameter(Parameter(n, v, -1))
+
     def changeParameter(self, row, column, contents):
         """
         Change parameter value and update the model samples. The method is able
