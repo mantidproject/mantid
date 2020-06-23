@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt
 # std imports
 from collections import namedtuple
+from functools import lru_cache
 from typing import Any, Optional
 
 # 3rd party imports
@@ -222,6 +223,7 @@ class PixelLinePlot(CursorTracker):
 CursorInfo = namedtuple("CursorInfo", ("array", "extent", "point"))
 
 
+@lru_cache(maxsize=32)
 def cursor_info(image: AxesImage, xdata: float, ydata: float) -> Optional[CursorInfo]:
     """Return information on the image for the given position in
     data coordinates.
