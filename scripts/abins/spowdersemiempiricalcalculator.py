@@ -10,7 +10,7 @@ import numpy as np
 import abins
 from abins.constants import (ANGLE_MESSAGE_INDENTATION,
                              CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
-                             HIGHER_ORDER_QUANTUM_EVENTS, INCIDENT_ENERGY_MESSAGE_INDENTATION
+                             HIGHER_ORDER_QUANTUM_EVENTS, INCIDENT_ENERGY_MESSAGE_INDENTATION,
                              MAX_ORDER, MIN_SIZE, PYTHON_INDEX_SHIFT,
                              ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS,
                              Q_BEGIN, Q_END,
@@ -391,7 +391,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
             elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
 
-                instrument_params = AbinsParameters.instruments[self._instrument.get_name()]
+                instrument_params = abins.parameters.instruments[self._instrument.get_name()]
 
                 first_angle = instrument_params['angles'][0]
                 self._instrument.set_detector_angle(angle=first_angle)
@@ -415,13 +415,6 @@ class SPowderSemiEmpiricalCalculator(object):
 
                 local_coeff = opt_local_coeff
                 local_freq = opt_local_freq
-
-
-            broadening_scheme = abins.parameters.sampling['broadening_scheme']
-            _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq,
-                                                                                            bins=self._bins,
-                                                                                            s_dft=value_dft,
-                                                                                            scheme=broadening_scheme)
 
         else:
             rebinned_broad_spectrum = np.zeros_like(self._frequencies)
@@ -474,11 +467,9 @@ class SPowderSemiEmpiricalCalculator(object):
             all_q2 = self._instrument.calculate_q_powder(input_data=self._frequencies)
             all_q = np.sqrt(all_q2)
 
-            _q_bins = np.linspace(start=Q_BEGIN,
-                                  stop=Q_END,
-                                  num=q_size)
-
+            _q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=q_size)
             bins_q = np.digitize(all_q, _q_bins) - PYTHON_INDEX_SHIFT
+
             small_q_indx = all_q < Q_END
             temp_full_s[bins_q[small_q_indx], small_q_indx] = rebinned_broad_spectrum[small_q_indx]
             # the last q-bin stores data outside the range requested by a user so should be neglected

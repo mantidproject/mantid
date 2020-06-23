@@ -7,6 +7,7 @@
 # flake8: noqa
 from abins.constants import ALL_INSTRUMENTS
 from .toscainstrument import ToscaInstrument
+from .twodmap import TwoDMap
 from .instrument import Instrument
 
 def get_instrument(name: str) -> Instrument:
