@@ -46,7 +46,7 @@ SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
                  "\n"
                  "# Scripting Plots in Mantid:"
                  "\n"
-                 "https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+                 "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
 SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
                           "import matplotlib.pyplot as plt\n"
@@ -74,7 +74,7 @@ SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
                           "\n"
                           "# Scripting Plots in Mantid:"
                           "\n"
-                          "https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+                          "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
 
 class PlotScriptGeneratorTest(unittest.TestCase):

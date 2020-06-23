@@ -8,6 +8,8 @@
 
 from numpy import isclose
 
+from matplotlib.ticker import NullLocator
+
 from mantid.plots.utility import get_autoscale_limits
 from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_string
 
@@ -49,3 +51,28 @@ def generate_axis_scale_commands(ax):
         if scale != 'linear':
             commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, scale))
     return commands
+
+
+def generate_tick_commands(ax):
+    commands = []
+    if not isinstance(ax.xaxis.minor.locator, NullLocator):
+        commands.append("axes.minorticks_on()")
+
+        if hasattr(ax, 'show_minor_gridlines'):
+            commands.append(f"axes.show_minor_gridlines = {ax.show_minor_gridlines}")
+
+    return commands
+
+
+def generate_grid_commands(ax):
+    if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
+        axis = 'both'
+    elif ax.xaxis._gridOnMajor:
+        axis = 'x'
+    elif ax.yaxis._gridOnMajor:
+        axis = 'y'
+    else:
+        return []
+
+    which = 'both' if hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
+    return [f"axes.grid(True, axis='{axis}', which='{which}')"]
