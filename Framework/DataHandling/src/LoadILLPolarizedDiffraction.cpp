@@ -448,6 +448,7 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(
   convertSpectrumAxis->setProperty("OutputWorkspace", "__unused_for_child");
   convertSpectrumAxis->setProperty("Target", "Theta");
   convertSpectrumAxis->setProperty("EMode", "Direct");
+  convertSpectrumAxis->setProperty("OrderAxis", false);
   convertSpectrumAxis->execute();
   return convertSpectrumAxis->getProperty("OutputWorkspace");
 }
