@@ -25,8 +25,8 @@ public:
     TS_ASSERT_EQUALS(
         "composite=Convolution,FixResolution=false,NumDeriv=true;name=ExpDecay,"
         "Height=5,Lifetime=2;(name=DeltaFunction,"
-        "Height=1,Centre=-5,ties=(Height=1,Centre=-5);name="
-        "DeltaFunction,Height=2,Centre=0,ties=(Height=2,Centre=0)"
+        "Height=1,Centre=-2.5,ties=(Height=1,Centre=-2.5);name="
+        "DeltaFunction,Height=2,Centre=2.5,ties=(Height=2,Centre=2.5)"
         ")",
         doublePulseFunction->asString());
   }
@@ -40,12 +40,13 @@ public:
     TS_ASSERT_EQUALS(
         "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
         "FixResolution=false,NumDeriv=true,$domains=i;name=ExpDecay,Height=5,"
-        "Lifetime=2;(name=DeltaFunction,Height=1,Centre=-5,ties=(Height=1,"
-        "Centre=-5);name=DeltaFunction,Height=2,Centre=0,ties=(Height=2,Centre="
-        "0)));(composite=Convolution,FixResolution=false,NumDeriv=true,$"
+        "Lifetime=2;(name=DeltaFunction,Height=1,Centre=-2.5,ties=(Height=1,"
+        "Centre=-2.5);name=DeltaFunction,Height=2,Centre=2.5,ties=(Height=2,"
+        "Centre="
+        "2.5)));(composite=Convolution,FixResolution=false,NumDeriv=true,$"
         "domains=i;name=ExpDecay,Height=5,Lifetime=2;(name=DeltaFunction,"
-        "Height=1,Centre=-5,ties=(Height=1,Centre=-5);name=DeltaFunction,"
-        "Height=2,Centre=0,ties=(Height=2,Centre=0)))",
+        "Height=1,Centre=-2.5,ties=(Height=1,Centre=-2.5);name=DeltaFunction,"
+        "Height=2,Centre=2.5,ties=(Height=2,Centre=2.5)))",
         doublePulseFunction->asString());
   }
 

@@ -75,10 +75,10 @@ Mantid::API::IFunction_sptr getDoublePulseFunction(
   auto deltaComposite = std::make_shared<Mantid::API::CompositeFunction>();
 
   convolution->setAttributeValue("FixResolution", false);
-  delta1->setParameter("Centre", -offset);
+  delta1->setParameter("Centre", -0.5 * offset);
   delta1->setParameter("Height", firstPulseWeight);
   delta1->fixAll();
-  delta2->setParameter("Centre", 0.0);
+  delta2->setParameter("Centre", 0.5 * offset);
   delta2->setParameter("Height", secondPulseWeight);
   delta2->fixAll();
   deltaComposite->addFunction(delta1);
@@ -212,8 +212,8 @@ void DoublePulseFit::initConcrete() {
                   "(default is false, ignored if CreateOutput is false and "
                   "Output is an empty string).");
   declareProperty("PulseOffset", 0.0, "The time offset between the two pulses");
-  declareProperty("FirstPulseWeight", 1.0, "Weighting of first pulse.");
-  declareProperty("SecondPulseWeight", 1.0, "Weighting of first pulse.");
+  declareProperty("FirstPulseWeight", 0.5, "Weighting of first pulse.");
+  declareProperty("SecondPulseWeight", 0.5, "Weighting of first pulse.");
 }
 
 void DoublePulseFit::execConcrete() {
