@@ -128,7 +128,7 @@ For more advice:
 Contour Plots 
 =============
 
-A Contour Plot is essientially a Colorfill Plot, with Contour lines overlaid.
+A Contour Plot is essentially a Colorfill Plot with Contour lines overlaid.
 
 |
 |
