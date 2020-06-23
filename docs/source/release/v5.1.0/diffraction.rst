@@ -22,6 +22,7 @@ Improvements
 - :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been updated to allow for the algorithm to be run on a PDF to obtain a spectrum density function.
 - :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` now accepts the crystalographic density of the sample to correct for the powder density.
 - Square beam profile of 5mm x 5mm added to the PEARL_Definition_new_lowangle instrument definition file
+- running `Polaris.create_total_scattering_pdf` with `debug=true` will preserve the `self_scattering_correction` workspace.
 
 Bugfixes
 ^^^^^^^^
