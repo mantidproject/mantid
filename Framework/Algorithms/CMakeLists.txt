@@ -13,6 +13,7 @@ set(SRC_FILES
     src/AppendSpectra.cpp
     src/ApplyCalibration.cpp
     src/ApplyDetailedBalance.cpp
+    src/ApplyFloodWorkspace.cpp
     src/ApplyTransmissionCorrection.cpp
     src/AverageLogData.cpp
     src/Bin2DPowderDiffraction.cpp
@@ -79,6 +80,7 @@ set(SRC_FILES
     src/CreateDummyCalFile.cpp
     src/CreateEPP.cpp
     src/CreateFlatEventWorkspace.cpp
+    src/CreateFloodWorkspace.cpp
     src/CreateGroupingWorkspace.cpp
     src/CreateLogPropertyTable.cpp
     src/CreateLogTimeCorrection.cpp
@@ -338,6 +340,7 @@ set(INC_FILES
     inc/MantidAlgorithms/AppendSpectra.h
     inc/MantidAlgorithms/ApplyCalibration.h
     inc/MantidAlgorithms/ApplyDetailedBalance.h
+    inc/MantidAlgorithms/ApplyFloodWorkspace.h
     inc/MantidAlgorithms/ApplyTransmissionCorrection.h
     inc/MantidAlgorithms/AverageLogData.h
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
@@ -404,6 +407,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CreateDummyCalFile.h
     inc/MantidAlgorithms/CreateEPP.h
     inc/MantidAlgorithms/CreateFlatEventWorkspace.h
+    inc/MantidAlgorithms/CreateFloodWorkspace.h
     inc/MantidAlgorithms/CreateGroupingWorkspace.h
     inc/MantidAlgorithms/CreateLogPropertyTable.h
     inc/MantidAlgorithms/CreateLogTimeCorrection.h
@@ -679,6 +683,7 @@ set(TEST_FILES
     AppendSpectraTest.h
     ApplyCalibrationTest.h
     ApplyDetailedBalanceTest.h
+    ApplyFloodWorkspaceTest.h
     ApplyTransmissionCorrectionTest.h
     AverageLogDataTest.h
     Bin2DPowderDiffractionTest.h

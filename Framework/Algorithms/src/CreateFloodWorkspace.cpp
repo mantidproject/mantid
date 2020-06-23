@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidReflectometry/CreateFloodWorkspace.h"
+#include "MantidAlgorithms/CreateFloodWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -42,7 +42,7 @@ std::map<std::string, std::string> const funMap{
 } // namespace
 
 namespace Mantid {
-namespace Reflectometry {
+namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateFloodWorkspace)
@@ -316,5 +316,5 @@ void CreateFloodWorkspace::exec() {
   setProperty(Prop::OUTPUT_WORKSPACE, ws);
 }
 
-} // namespace Reflectometry
+} // namespace Algorithms
 } // namespace Mantid

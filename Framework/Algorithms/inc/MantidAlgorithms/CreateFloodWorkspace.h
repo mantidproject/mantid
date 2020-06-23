@@ -8,16 +8,16 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidReflectometry/DllConfig.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
-namespace Reflectometry {
+namespace Algorithms {
 
 /**
  Algorithm to create a flood correction workspace for reflectometry
  data reduction.
  */
-class MANTID_REFLECTOMETRY_DLL CreateFloodWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateFloodWorkspace : public API::Algorithm {
 public:
   const std::string name() const override;
   const std::string summary() const override;
@@ -41,5 +41,5 @@ private:
   std::vector<double> m_excludedSpectra;
 };
 
-} // namespace Reflectometry
+} // namespace Algorithms
 } // namespace Mantid

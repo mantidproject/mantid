@@ -1,8 +1,6 @@
 set(SRC_FILES
-    src/ApplyFloodWorkspace.cpp
     src/CalculateSlits.cpp
     src/ConvertToReflectometryQ.cpp
-    src/CreateFloodWorkspace.cpp
     src/CreateTransmissionWorkspace2.cpp
     src/CreateTransmissionWorkspaceAuto2.cpp
     src/FindReflectometryLines2.cpp
@@ -27,10 +25,8 @@ set(SRC_FILES
     src/SpecularReflectionPositionCorrect2.cpp)
 
 set(INC_FILES
-    inc/MantidReflectometry/ApplyFloodWorkspace.h
     inc/MantidReflectometry/CalculateSlits.h
     inc/MantidReflectometry/ConvertToReflectometryQ.h
-    inc/MantidReflectometry/CreateFloodWorkspace.h
     inc/MantidReflectometry/CreateTransmissionWorkspace2.h
     inc/MantidReflectometry/CreateTransmissionWorkspaceAuto2.h
     inc/MantidReflectometry/FindReflectometryLines2.h
@@ -55,7 +51,6 @@ set(INC_FILES
     inc/MantidReflectometry/SpecularReflectionPositionCorrect2.h)
 
 set(TEST_FILES
-    ApplyFloodWorkspaceTest.h
     CalculateSlitsTest.h
     ConvertToReflectometryQTest.h
     CreateTransmissionWorkspace2Test.h
