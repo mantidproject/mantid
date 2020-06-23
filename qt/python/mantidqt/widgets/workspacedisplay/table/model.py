@@ -31,6 +31,7 @@ class TableWorkspaceColumnTypeMapping(object):
 class TableWorkspaceDisplayModel:
     SPECTRUM_PLOT_LEGEND_STRING = '{}-{}'
     BIN_PLOT_LEGEND_STRING = '{}-bin-{}'
+    EDITABLE_COLUMN_NAMES = ['h', 'k', 'l']
 
     ALLOWED_WORKSPACE_TYPES = [ITableWorkspace]
 
@@ -102,21 +103,36 @@ class TableWorkspaceDisplayModel:
     def get_column_header(self, index):
         return self.get_column_headers()[index]
 
+    def is_editable_column(self, icol):
+        if self.is_peaks_workspace():
+            return self.ws.getColumnNames()[icol] in self.EDITABLE_COLUMN_NAMES
+        else:
+            return False
+
     def is_peaks_workspace(self):
         return isinstance(self.ws, IPeaksWorkspace)
 
     def set_cell_data(self, row, col, data, is_v3d):
-        # if the cell contains V3D data, construct a V3D object
-        # from the string to that it can be properly set
-        if is_v3d:
-            data = self._get_v3d_from_str(data)
-        # The False stops the replace workspace ADS event from being triggered
-        # The replace event causes the TWD model to be replaced, which in turn
-        # deletes the previous table item objects, however this happens
-        # at the same time as we are trying to locally update the data in the
-        # item object itself, which causes a Qt exception that the object has
-        # already been deleted and a crash
-        self.ws.setCell(row, col, data, notify_replace=False)
+        if self.is_peaks_workspace():
+            p = self.ws.getPeak(row)
+            if self.ws.getColumnNames()[col] == "h":
+                p.setH(data)
+            elif self.ws.getColumnNames()[col] == "k":
+                p.setK(data)
+            elif self.ws.getColumnNames()[col] == "l":
+                p.setL(data)
+        else:
+            # if the cell contains V3D data, construct a V3D object
+            # from the string to that it can be properly set
+            if is_v3d:
+                data = self._get_v3d_from_str(data)
+            # The False stops the replace workspace ADS event from being triggered
+            # The replace event causes the TWD model to be replaced, which in turn
+            # deletes the previous table item objects, however this happens
+            # at the same time as we are trying to locally update the data in the
+            # item object itself, which causes a Qt exception that the object has
+            # already been deleted and a crash
+            self.ws.setCell(row, col, data, notify_replace=False)
 
     def workspace_equals(self, workspace_name):
         return self.ws.name() == workspace_name

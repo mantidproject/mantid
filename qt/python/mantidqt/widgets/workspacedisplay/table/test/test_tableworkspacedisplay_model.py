@@ -10,8 +10,9 @@
 import functools
 import unittest
 
+from mantid.dataobjects import PeaksWorkspace
 from mantid.kernel import V3D
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping, TableWorkspaceDisplayModel
@@ -87,6 +88,29 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         # -> the one for the column for which the data is being set
         model.ws.setCell.assert_called_once_with(expected_row, expected_col, V3D(1, 2, 3), notify_replace=False)
 
+    @with_mock_workspace
+    def test_set_cell_data_hkl(self, model):
+        """
+        :type model: TableWorkspaceDisplayModel
+        """
+        mock_peaksWorkspace = Mock(spec=PeaksWorkspace)
+        mock_peaksWorkspace.getColumnNames.return_value = ['h', 'k', 'l']
+        mock_peak = Mock()
+        mock_peaksWorkspace.getPeak.return_value = mock_peak
+        model.ws = mock_peaksWorkspace
+
+        row = 1
+        HKL = [4, 3, 2]
+        for col in range(0, len(HKL)):
+            model.set_cell_data(row, col, HKL[col], False)
+
+        # check the correct index was set
+        mock_peak.setH.assert_called_once_with(HKL[0])
+        mock_peak.setK.assert_called_once_with(HKL[1])
+        mock_peak.setL.assert_called_once_with(HKL[2])
+        # check setCell not called
+        model.ws.setCell.assert_not_called()
+
     def test_no_raise_with_supported_workspace(self):
         from mantid.simpleapi import CreateEmptyTableWorkspace
         ws = MockWorkspace()
@@ -108,7 +132,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         mock_column_types = [TableWorkspaceColumnTypeMapping.X, TableWorkspaceColumnTypeMapping.Y,
                              TableWorkspaceColumnTypeMapping.YERR] * num_of_repeated_columns
         ws.getPlotType = lambda i: mock_column_types[i]
-        ws.getLinkedYCol = lambda i: i-1
+        ws.getLinkedYCol = lambda i: i - 1
         model = TableWorkspaceDisplayModel(ws)
 
         self.assertEqual(num_of_repeated_columns, len(model.marked_columns.as_x))
@@ -128,7 +152,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         ws.columnCount = StrictMock(return_value=len(mock_column_types))
 
         ws.getPlotType = lambda i: mock_column_types[i]
-        ws.getLinkedYCol = StrictMock(side_effect=[1,3,4])
+        ws.getLinkedYCol = StrictMock(side_effect=[1, 3, 4])
         model = TableWorkspaceDisplayModel(ws)
 
         self.assertEqual(2, len(model.marked_columns.as_x))
