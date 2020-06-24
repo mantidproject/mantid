@@ -90,12 +90,12 @@
    <item row="5" column="1">
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Significant Figures</string>
+      <string>Tick Format</string>
      </property>
     </widget>
    </item>
    <item row="5" column="2">
-    <widget class="QSpinBox" name="editor_dec_place"/>
+    <widget class="QComboBox" name="editor_format"/>
    </item>
   </layout>
  </widget>
