@@ -38,6 +38,7 @@ BUNDLED_PY_MODULES_COMMON = [
   'mistune.py',
   'mock',
   'mpl_toolkits',
+  'notebook',
   'numpy',
   'pexpect',
   'pickleshare.py',
