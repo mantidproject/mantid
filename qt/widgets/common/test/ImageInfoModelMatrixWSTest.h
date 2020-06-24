@@ -114,14 +114,15 @@ public:
     TS_ASSERT_EQUALS(0, list2.size())
   }
 
-  void test_getInfoList_returns_dashes_if_includeValues_is_false() {
+  void test_getInfoList_returns_dashes_if_given_DBLMAX() {
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
     ImageInfoModelMatrixWS model;
     model.setWorkspace(workspace);
 
-    auto list = model.getInfoList(2, 4, 7, false);
+    constexpr auto dblmax = std::numeric_limits<double>::max();
+    auto list = model.getInfoList(dblmax, dblmax, dblmax);
 
     const std::array<QString, 22> expectList{
         "Signal",

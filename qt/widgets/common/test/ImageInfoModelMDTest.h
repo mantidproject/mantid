@@ -32,12 +32,12 @@ public:
     }
   }
 
-  void test_getInfoList_returns_dashes_when_getValues_is_false() {
+  void test_getInfoList_returns_dashes_when_given_double_max() {
     ImageInfoModelMD model;
 
-    auto list = model.getInfoList(2, 4, 7, false);
+    auto list = model.getInfoList(2, std::numeric_limits<double>::max(), 7);
 
-    const std::array<QString, 6> expectList{"x", "-", "y", "-", "Signal", "-"};
+    const std::array<QString, 6> expectList{"x", "2", "y", "-", "Signal", "7"};
     TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
