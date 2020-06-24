@@ -122,21 +122,20 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         :param depth: current iteration
         :return:
         """
+        # smooth with hat function
+        yy = np.copy(y)
+        yy = np.convolve(yy, np.ones(nwindow) / nwindow, mode="same")
+        # normalise end values effected by convolution
+        ends = np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode='same')
+        yy[0:nwindow // 2] = yy[0:nwindow // 2] / ends[0:nwindow // 2]
+        yy[-nwindow // 2:] = yy[-nwindow // 2:] / ends[-nwindow // 2:]
         if depth < maxdepth:
-            # smooth with hat function
-            yy = np.copy(y)
-            yy = np.convolve(yy, np.ones(nwindow) / nwindow, mode="same")
-            # normalise end values effected by convolution
-            ends = np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode='same')
-            yy[0:nwindow // 2] = yy[0:nwindow // 2] / ends[0:nwindow // 2]
-            yy[-nwindow // 2:] = yy[-nwindow // 2:] / ends[-nwindow // 2:]
             # compare pt by pt with original and keep lowest
             idx = yy > y
             yy[idx] = y[idx]
             return self.doIterativeSmoothing(yy, nwindow, maxdepth, depth + 1)
         else:
-            # perform final smoothing
-            return np.convolve(y, np.ones(nwindow) / nwindow, mode="same")
+            return yy
 
 
 # register algorithm with mantid
