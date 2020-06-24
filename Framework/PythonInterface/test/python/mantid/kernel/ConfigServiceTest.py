@@ -162,8 +162,7 @@ class ConfigServiceTest(unittest.TestCase):
                            'logging.channels.consoleChannel.class', 'logging.channels.consoleChannel.formatter', 'logging.formatters.f1.class', 'logging.formatters.f1.pattern', 'logging.formatters.f1.times', 'logging.loggers.root.channel.channel1', 'logging.loggers.root.channel.class',
                            'MantidOptions.ReusePlotInstances',
                            'mantidqt.python_interfaces', 'mantidqt.python_interfaces_directory',
-                           'paraview.ignore', 'paraview.path', 'paraview.pythonpaths', 'pvplugins.directory',
-                           'python.plugins.directories', "python.plugins.manifest"
+                           'paraview.ignore', 'paraview.path', 'paraview.pythonpaths', 'pvplugins.directory'
                            ]
 
         # create the list of things
