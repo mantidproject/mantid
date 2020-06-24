@@ -58,12 +58,11 @@ class DrillTask(QRunnable):
         """
         self.signals.started.emit(self.ref)
         try:
-            self.alg.execute()
-        except Exception as e:
-            print(e)
-            self.signals.error.emit(self.ref)
+            ret = self.alg.execute()
+            if not ret:
+                self.signals.finished.emit(self.ref, 1)
         except:
-            self.signals.error.emit(self.ref)
+            self.signals.finished.emit(self.ref, 1)
 
     def cancel(self):
         """
