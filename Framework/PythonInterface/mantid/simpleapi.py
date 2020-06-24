@@ -1497,7 +1497,9 @@ from . import _plugins  # noqa
 # but we need to do this earlier
 setattr(mantid, MODULE_NAME, sys.modules['mantid.{}'.format(MODULE_NAME)])
 try:
-    # Use a cmake generated manifest of all the python algorithms to load them into the api
+    _user_key = 'user.python.plugins.directories'
+    _user_plugin_dirs = _plugin_helper.get_plugin_paths_as_set(_user_key)
+    # Use a cmake generated manifest of all the built in python algorithms to load them into the api
     plugins_manifest_path = ConfigService.Instance()["python.plugins.manifest"]
     plugins_dir = os.path.dirname(plugins_manifest_path)
     with open(plugins_manifest_path) as manifest:
@@ -1510,6 +1512,16 @@ try:
                 path = os.path.join(plugins_dir, path)
             _plugin_dirs.add(os.path.dirname(path))
             _plugin_files.append(path)
+
+    # Look for and import the user plugins
+    for directory in _user_plugin_dirs:
+        try:
+            plugins, _ = _plugin_helper.find_plugins(directory)
+            _plugin_files.extend(plugins)
+            _plugin_dirs.add(directory)
+        except ValueError as e:
+            logger.warning("Error occured during plugin discovery: {0}".format(str(e)))
+            continue
 
     # Mock out the expected functions
     _mockup(_plugin_files)
