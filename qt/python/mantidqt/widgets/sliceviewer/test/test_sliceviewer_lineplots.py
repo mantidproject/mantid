@@ -10,26 +10,25 @@ import unittest
 from unittest.mock import MagicMock, call, patch
 
 # 3rd party imports
-from mantidqt.widgets.sliceviewer.lineplots import LinePlotter, PixelLinePlot
+from mantidqt.widgets.sliceviewer.lineplots import LinePlots, PixelLinePlot
 from mantidqt.utils.testing.compare import ArraysEqual
 
 from matplotlib.figure import SubplotParams
 import numpy as np
 
 
-class LinePlotterTest(unittest.TestCase):
+class LinePlotsTest(unittest.TestCase):
     def setUp(self):
         self.image_axes = _create_mock_axes()
         self.axx, self.axy = MagicMock(), MagicMock()
         self.image_axes.figure.add_subplot.side_effect = [self.axx, self.axy]
         self.mock_colorbar = MagicMock(cmin_value=1.0, cmax_value=50.)
-        self.plotimpl_cls = MagicMock()
 
     @patch('mantidqt.widgets.sliceviewer.lineplots.GridSpec')
     def test_construction_adds_line_plots_to_axes(self, mock_gridspec):
         gs = mock_gridspec()
         mock_gridspec.reset_mock()
-        LinePlotter(self.image_axes, self.mock_colorbar, self.plotimpl_cls)
+        LinePlots(self.image_axes, self.mock_colorbar)
 
         fig = self.image_axes.figure
         self.assertEqual(2, fig.add_subplot.call_count)
@@ -39,18 +38,13 @@ class LinePlotterTest(unittest.TestCase):
         self.assertTrue('sharex' in fig.add_subplot.call_args_list[0].kwargs)
         self.assertTrue('sharey' in fig.add_subplot.call_args_list[1].kwargs)
 
-    def test_construction_creates_plot_impl_instance(self):
-        plotter = LinePlotter(self.image_axes, self.mock_colorbar, self.plotimpl_cls)
-
-        self.plotimpl_cls.assert_called_once_with(plotter)
-
     def test_delete_plot_lines_handles_empty_plots(self):
-        plotter = LinePlotter(self.image_axes, self.mock_colorbar, self.plotimpl_cls)
+        plotter = LinePlots(self.image_axes, self.mock_colorbar)
 
         plotter.delete_line_plot_lines()
 
     def test_delete_plot_lines_with_plots_present(self):
-        plotter = LinePlotter(self.image_axes, self.mock_colorbar, self.plotimpl_cls)
+        plotter = LinePlots(self.image_axes, self.mock_colorbar)
         xfig, yfig = MagicMock(), MagicMock()
         self.axx.plot.side_effect = [[xfig]]
         self.axy.plot.side_effect = [[yfig]]
@@ -64,26 +58,22 @@ class LinePlotterTest(unittest.TestCase):
         yfig.remove.assert_called_once()
 
     def test_plot_with_no_line_present_creates_line_artist(self):
-        plotter = LinePlotter(self.image_axes, self.mock_colorbar, self.plotimpl_cls)
+        plotter = LinePlots(self.image_axes, self.mock_colorbar)
         self.axx.set_xlabel.reset_mock()
         x, y = np.arange(10.), np.arange(10.) * 2
 
         plotter.plot_x_line(x, y)
         self.axx.plot.assert_called_once_with(x, y, scalex=False)
         self.axx.set_xlabel.assert_called_once_with(self.image_axes.get_xlabel())
-        self.axx.set_ylim.assert_called_once_with(self.mock_colorbar.cmin_value,
-                                                  self.mock_colorbar.cmax_value)
 
         self.axy.set_ylabel.reset_mock()
         self.axy.set_xlim.reset_mock()
         plotter.plot_y_line(x, y)
         self.axy.plot.assert_called_once_with(y, x, scaley=False)
         self.axy.set_ylabel.assert_called_once_with(self.image_axes.get_ylabel())
-        self.axy.set_xlim.assert_called_once_with(self.mock_colorbar.cmin_value,
-                                                  self.mock_colorbar.cmax_value)
 
     def test_plot_with_line_present_sets_data(self):
-        plotter = LinePlotter(self.image_axes, self.mock_colorbar, self.plotimpl_cls)
+        plotter = LinePlots(self.image_axes, self.mock_colorbar)
         x, y = np.arange(10.), np.arange(10.) * 2
         plotter.plot_x_line(x, y)
         plotter.plot_y_line(x, y)

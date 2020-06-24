@@ -12,8 +12,10 @@
 import mantid.api
 
 # local imports
+from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
 from .model import SliceViewerModel, WS_TYPE
 from .sliceinfo import SliceInfo
+from .toolbar import ToolItemText
 from .view import SliceViewerView
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 
@@ -51,9 +53,9 @@ class SliceViewer(object):
             self.view.data_view.set_normalization(ws)
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
         if not self.model.can_support_peaks_overlays():
-            self.view.data_view.disable_peaks_button()
+            self.view.data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
         if not self.model.can_support_nonorthogonal_axes():
-            self.view.data_view.disable_nonorthogonal_axes_button()
+            self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
         if self.model.get_ws_type() == WS_TYPE.MATRIX:
             self.view.data_view.image_info_widget.setWorkspace(ws)
@@ -63,7 +65,7 @@ class SliceViewer(object):
         self.new_plot()
 
         # Start the GUI with zoom selected.
-        self.view.data_view.select_zoom()
+        self.view.data_view.activate_tool(ToolItemText.ZOOM)
 
     def new_plot_MDH(self):
         """
@@ -138,13 +140,13 @@ class SliceViewer(object):
                 data_view.create_axes_nonorthogonal(
                     self.model.create_nonorthogonal_transform(sliceinfo))
             else:
-                data_view.disable_nonorthogonal_axes_button()
+                data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
                 data_view.create_axes_orthogonal()
         else:
             if sliceinfo.can_support_nonorthogonal_axes():
-                data_view.enable_nonorthogonal_axes_button()
+                data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
             else:
-                data_view.disable_nonorthogonal_axes_button()
+                data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
         self.new_plot()
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
@@ -178,11 +180,39 @@ class SliceViewer(object):
         """
         Toggle the attached line plots for the integrated signal over each dimension for the current cursor
         position
+        :param state: If true a request is being made to turn them on, else they should be turned off
+        :param region_selection: If true the region selection rather than single pixel selection should
+                                 be enabled
         """
+        tool = PixelLinePlot
+        data_view = self.view.data_view
         if state:
-            self.view.data_view.add_line_plots()
+            data_view.add_line_plots(tool)
         else:
-            self.view.data_view.remove_line_plots()
+            data_view.deactivate_tool(ToolItemText.REGIONSELECTION)
+            data_view.remove_line_plots()
+
+    def region_selection(self, state):
+        """
+        Toggle the region selection tool. If the line plots are disabled then they are enabled.
+        :param state: If true a request is being made to turn them on, else they should be turned off
+        :param region_selection: If true the region selection rather than single pixel selection should
+                                 be enabled.
+        """
+        data_view = self.view.data_view
+        if state:
+            # incompatible with drag zooming/panning as they both require drag selection
+            data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
+            data_view.deactivate_and_disable_tool(ToolItemText.PAN)
+            tool = RectangleSelectionLinePlot
+            if data_view.line_plots_active:
+                data_view.switch_line_plots_tool(RectangleSelectionLinePlot)
+            else:
+                data_view.add_line_plots(tool)
+        else:
+            data_view.enable_tool_button(ToolItemText.ZOOM)
+            data_view.enable_tool_button(ToolItemText.PAN)
+            data_view.switch_line_plots_tool(PixelLinePlot)
 
     def nonorthogonal_axes(self, state: bool):
         """
@@ -190,17 +220,18 @@ class SliceViewer(object):
         :param state: If true a request is being made to turn them on, else they should be turned off
         """
         data_view = self.view.data_view
-        data_view.remove_line_plots()
         if state:
-            data_view.disable_lineplots_button()
-            data_view.disable_peaks_button()
+            data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
+            data_view.disable_tool_button(ToolItemText.LINEPLOTS)
+            data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
             data_view.create_axes_nonorthogonal(
                 self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
             self.new_plot()
         else:
             data_view.create_axes_orthogonal()
-            data_view.enable_lineplots_button()
-            data_view.enable_peaks_button()
+            data_view.enable_tool_button(ToolItemText.LINEPLOTS)
+            data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
+            data_view.enable_tool_button(ToolItemText.OVERLAY_PEAKS)
             self.new_plot()
 
     def normalization_changed(self, norm_type):

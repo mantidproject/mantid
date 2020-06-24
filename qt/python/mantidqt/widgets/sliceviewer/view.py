@@ -24,7 +24,7 @@ from mantidqt.MPLwidgets import FigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
 from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
-from .lineplots import LinePlotter, PixelLinePlot
+from .lineplots import LinePlots
 from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar, ToolItemText
 from .peaksviewer.workspaceselection import \
@@ -50,12 +50,12 @@ class SliceViewerDataView(QWidget):
         self.presenter = presenter
 
         self.image = None
-        self.line_plots = False
+        self.line_plots_active = False
         self.can_normalise = can_normalise
         self.nonortho_tr = None
         self.ws_type = dims_info[0]['type']
 
-        self._line_plotter = None
+        self._line_plots = None
         self._image_info_tracker = None
 
         # Dimension widget
@@ -116,6 +116,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self, False)
         self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
         self.mpl_toolbar.linePlotsClicked.connect(self.on_line_plots_toggle)
+        self.mpl_toolbar.regionSelectionClicked.connect(self.on_region_selection_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
@@ -149,7 +150,7 @@ class SliceViewerDataView(QWidget):
         self.enable_zoom_on_mouse_scroll(redraw_on_zoom)
         if self.grid_on:
             self.ax.grid(self.grid_on)
-        if self.line_plots:
+        if self.line_plots_active:
             self.add_line_plots()
 
         self.plot_MDH = self.plot_MDH_orthogonal
@@ -182,25 +183,43 @@ class SliceViewerDataView(QWidget):
                                           toolbar=self.mpl_toolbar,
                                           callback=self.on_data_limits_changed)
 
-    def add_line_plots(self):
+    def add_line_plots(self, toolcls):
         """Assuming line plots are currently disabled, enable them on the current figure
         The image axes must have been created first.
+        :param toolcls: Use this class to handle creating the plots
         """
-        if self.line_plots:
+        if self.line_plots_active:
             return
-        self.line_plots = True
+
         self._line_plotter = LinePlotter(self.ax, self.colorbar, PixelLinePlot)
+        self.line_plots_active = True
+        self._line_plots = toolcls(LinePlots(self.ax, self.colorbar))
+        self.mpl_toolbar.set_action_checked(ToolItemText.LINEPLOTS, True, trigger=False)
+
+    def switch_line_plots_tool(self, toolcls):
+        """Assuming line plots are currently enabled then switch the tool used to
+        generate the plot curves.
+        :param toolcls: Use this class to handle creating the plots
+        """
+        if not self.line_plots_active:
+            return
+
+        # Keep the same set of line plots axes but swap the selection tool
+        plotter = self._line_plots.plotter
+        plotter.delete_line_plot_lines()
+        self._line_plots.disconnect()
+        self._line_plots = toolcls(plotter)
+        self.canvas.draw_idle()
 
     def remove_line_plots(self):
         """Assuming line plots are currently enabled, remove them from the current figure
         """
-        if not self.line_plots:
+        if not self.line_plots_active:
             return
 
-        #self._cursor_tracker.unsubscribe(self._line_plotter)
-        self._line_plotter.close()
-        self._line_plotter = None
-        self.line_plots = False
+        self._line_plots.plotter.close()
+        self._line_plots = None
+        self.line_plots_active = False
 
     def plot_MDH_orthogonal(self, ws, **kwargs):
         """
@@ -274,16 +293,16 @@ class SliceViewerDataView(QWidget):
     def clear_image(self):
         """Removes any image from the axes"""
         if self.image is not None:
-            if self.line_plots:
-                self._line_plotter.delete_line_plot_lines()
+            if self.line_plots_active:
+                self._line_plots.plotter.delete_line_plot_lines()
             self.image_info_widget.updateTable(DBLMAX, DBLMAX, DBLMAX)
             self.image.remove()
             self.image = None
 
     def clear_figure(self):
         """Removes everything from the figure"""
-        if self.line_plots:
-            self._line_plotter.close()
+        if self.line_plots_active:
+            self._line_plots.plotter.close()
         self.image = None
         self.canvas.disable_zoom_on_scroll()
         self.fig.clf()
@@ -294,14 +313,10 @@ class SliceViewerDataView(QWidget):
         self.colorbar.set_mappable(self.image)
         self.colorbar.update_clim()
         self.mpl_toolbar.update()  # clear nav stack
-        if self.line_plots:
-            self._line_plotter.delete_line_plot_lines()
-            self._line_plotter.update_line_plot_labels()
+        if self.line_plots_active:
+            self._line_plots.plotter.delete_line_plot_lines()
+            self._line_plots.plotter.update_line_plot_labels()
         self.canvas.draw_idle()
-
-    def select_zoom(self):
-        """Select the zoom control on the toolbar"""
-        self.mpl_toolbar.zoom()
 
     def update_plot_data(self, data):
         """
@@ -338,7 +353,7 @@ class SliceViewerDataView(QWidget):
         """Switch state of the line plots"""
         self.presenter.line_plots(state)
 
-    def on_region_selection_toggled(self, state):
+    def on_region_selection_toggle(self, state):
         """Switch state of the region selection"""
         self.presenter.region_selection(state)
 
@@ -354,47 +369,26 @@ class SliceViewerDataView(QWidget):
         """
         self.presenter.data_limits_changed()
 
-    def enable_lineplots_button(self):
-        """
-        Enable line plot button
-        """
-        self.mpl_toolbar.set_action_enabled(ToolItemText.LINEPLOTS, True)
+    def deactivate_and_disable_tool(self, tool_text):
+        """Deactivate a tool as if the control had been pressed and disable the functionality"""
+        self.deactivate_tool(tool_text)
+        self.disable_tool_button(tool_text)
 
-    def disable_lineplots_button(self):
-        """
-        Disable line plot button
-        """
-        self.mpl_toolbar.set_action_enabled(ToolItemText.LINEPLOTS, False)
+    def activate_tool(self, tool_text):
+        """Activate a given tool as if the control had been pressed"""
+        self.mpl_toolbar.set_action_checked(tool_text, True)
 
-    def deactivate_lineplots(self):
-        """
-        Turn off the lineplots as if a user had clicked the button
-        """
-        self.mpl_toolbar.set_action_checked(ToolItemText.LINEPLOTS, False)
+    def deactivate_tool(self, tool_text):
+        """Deactivate a given tool as if the tool button had been pressed"""
+        self.mpl_toolbar.set_action_checked(tool_text, False)
 
-    def enable_peaks_button(self):
-        """
-        Enables line plots functionality
-        """
-        self.mpl_toolbar.set_action_enabled(ToolItemText.OVERLAYPEAKS, True)
+    def enable_tool_button(self, tool_text):
+        """Set a given tool button enabled so it can be interacted with"""
+        self.mpl_toolbar.set_action_enabled(tool_text, True)
 
-    def disable_peaks_button(self):
-        """
-        Disables line plots functionality
-        """
-        self.mpl_toolbar.set_action_enabled(ToolItemText.OVERLAYPEAKS, False)
-
-    def enable_nonorthogonal_axes_button(self):
-        """
-        Enables access to non-orthogonal axes functionality
-        """
-        self.mpl_toolbar.set_action_enabled(ToolItemText.NONORTHOGONAL_AXES, True)
-
-    def disable_nonorthogonal_axes_button(self):
-        """
-        Disables non-orthorognal axes functionality
-        """
-        self.mpl_toolbar.set_action_enabled(ToolItemText.NONORTHOGONAL_AXES, state=False)
+    def disable_tool_button(self, tool_text):
+        """Set a given tool button disabled so it cannot be interacted with"""
+        self.mpl_toolbar.set_action_enabled(tool_text, False)
 
     def get_axes_limits(self):
         """
@@ -448,8 +442,8 @@ class SliceViewerDataView(QWidget):
 
     def update_data_clim(self):
         self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())
-        if self.line_plots:
-            self._line_plotter.update_line_plot_limits()
+        if self.line_plots_active:
+            self._line_plots.plotter.update_line_plot_limits()
         self.canvas.draw_idle()
 
     def set_normalization(self, ws, **kwargs):

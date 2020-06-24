@@ -27,12 +27,6 @@ class CursorTracker:
         if autoconnect:
             self.connect()
 
-    def __del__(self):
-        try:
-            self.disconnect()
-        except AttributeError:
-            pass
-
     def connect(self):
         canvas = self._im_axes.figure.canvas
         self._mouse_move_cid = canvas.mpl_connect('motion_notify_event', self.on_mouse_move)

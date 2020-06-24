@@ -8,7 +8,7 @@
 # std imports
 from collections import namedtuple
 from functools import lru_cache
-from typing import Any, Optional
+from typing import Optional
 
 # 3rd party imports
 from matplotlib.artist import setp as set_artist_property
@@ -16,6 +16,7 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.gridspec import GridSpec
 from matplotlib.transforms import Bbox, BboxTransform
+from matplotlib.widgets import RectangleSelector
 import numpy as np
 
 # local imports
@@ -23,15 +24,15 @@ from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .cursortracker import CursorTracker
 
 
-class LinePlotter:
+class LinePlots:
     """
-    Provides facilities to add line cut plots to an exist
+    Provides facilities to add line cut plots to an existing
     image axes
     """
-    __slots__ = ("_axx", "_axy", "_canvas", "_colorbar", "_fig", "_im_ax", "_image", "_plot_impl",
-                 "_xfig", "_yfig")
+    __slots__ = ("_axx", "_axy", "_canvas", "_colorbar", "_fig", "_im_ax", "_image", "_xfig",
+                 "_yfig")
 
-    def __init__(self, image_axes: Axes, colorbar: ColorbarWidget, plottype_cls: Any):
+    def __init__(self, image_axes: Axes, colorbar: ColorbarWidget):
         """
         :param image_axes: A reference to the image axes containing the
                            source Image data for the cuts. It is assumed
@@ -46,7 +47,6 @@ class LinePlotter:
         self._fig = image_axes.figure
         self._canvas = self._fig.canvas
         self._colorbar = colorbar
-        self._plot_impl = plottype_cls(self)
 
         self._add_line_plots()
 
@@ -92,8 +92,6 @@ class LinePlotter:
             self._axx.clear()
             self._xfig = self._axx.plot(x, y, scalex=False)[0]
             self.update_line_plot_labels()
-            self.update_line_plot_limits()
-        self._canvas.draw_idle()
 
     def plot_y_line(self, x: np.array, y: np.array):
         """
@@ -107,16 +105,28 @@ class LinePlotter:
             self._axy.clear()
             self._yfig = self._axy.plot(y, x, scaley=False)[0]
             self.update_line_plot_labels()
-            self.update_line_plot_limits()
+
+    def redraw(self):
+        """Redraw the canvas"""
         self._canvas.draw_idle()
 
-    def update_line_plot_limits(self):
+    def sync_plot_limits_with_colorbar(self):
         """
         Update limits of line plots to match colorbar scale
         """
         # set line plot intensity axes to match colorbar limits
         self._axx.set_ylim(self._colorbar.cmin_value, self._colorbar.cmax_value)
         self._axy.set_xlim(self._colorbar.cmin_value, self._colorbar.cmax_value)
+
+    def update_line_plot_limits(self):
+        """
+        Update line plot limits based on the data in them
+        """
+        # ensure plot labels are in sync with main axes
+        self._axx.relim()
+        self._axx.autoscale(axis='y')
+        self._axy.relim()
+        self._axy.autoscale(axis='x')
 
     def update_line_plot_labels(self):
         """
@@ -186,15 +196,20 @@ class LinePlotter:
 
 class PixelLinePlot(CursorTracker):
     """
-    Draws X/Y line plots from single rows/columns of an image.
+    Draws X/Y line plots from single rows/columns of an image into a given
+    set of line plots.
     """
-    def __init__(self, plotter: LinePlotter):
+    def __init__(self, plotter: LinePlots):
         """
         :param plotter: The object responsible for drawing the curves.
                         Must have plot_x_line & plot_y_line methods.
         """
         super().__init__(image_axes=plotter.image_axes)
         self._plotter = plotter
+
+    @property
+    def plotter(self):
+        return self._plotter
 
     # CursorTracker interface
     def on_cursor_at(self, xdata: float, ydata: float):
@@ -203,20 +218,73 @@ class PixelLinePlot(CursorTracker):
         :param xdata: X position in data coordinates
         :param ydata: Y position in data coordinates
         """
-        plotter = self._plotter
+        plotter = self.plotter
         cinfo = cursor_info(plotter.image, xdata, ydata)
         if cinfo is not None:
             arr, (xmin, xmax, ymin, ymax), (i, j) = cinfo
-            if 0 <= i < arr.shape[0]:
-                plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
-            if 0 <= j < arr.shape[1]:
-                plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
+            plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
+            plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
+            plotter.sync_plot_limits_with_colorbar()
+            plotter.redraw()
 
     def on_cursor_outside_axes(self):
         """
         Called when the mouse moves outside of the image axes
         """
         self._plotter.delete_line_plot_lines()
+
+
+class RectangleSelectionLinePlot:
+    """
+    Draws X/Y line plots from a rectangular selection by summing across
+    the orthogonal direction.
+    """
+    def __init__(self, plotter: LinePlots):
+        """
+        :param plotter: The object responsible for drawing the curves.
+                        Must have plot_x_line & plot_y_line methods.
+        """
+        self._plotter = plotter
+        self._selector = RectangleSelector(
+            plotter.image_axes,
+            self._on_region_selected,
+            drawtype='box',
+            useblit=False,  # rectangle persists on button release
+            button=[1],
+            minspanx=5,
+            minspany=5,
+            spancoords='pixels',
+            interactive=True)
+
+    def disconnect(self):
+        for artist in self._selector.artists:
+            artist.remove()
+        del self._selector
+
+    @property
+    def plotter(self):
+        return self._plotter
+
+    # private api
+    def _on_region_selected(self, eclick, erelease):
+        plotter = self._plotter
+        cinfo_click = cursor_info(plotter.image, eclick.xdata, eclick.ydata)
+        if cinfo_click is None:
+            return
+        cinfo_release = cursor_info(plotter.image, erelease.xdata, erelease.ydata)
+        if cinfo_release is None:
+            return
+
+        arr, (xmin, xmax, ymin, ymax), (imin, jmin) = cinfo_click
+        _, __, (imax, jmax) = cinfo_release
+        plotter.plot_x_line(
+            np.linspace(xmin, xmax, arr.shape[1])[jmin:jmax],
+            np.sum(arr[imin:imax, jmin:jmax], axis=0))
+        plotter.plot_y_line(
+            np.linspace(ymin, ymax, arr.shape[0])[imin:imax],
+            np.sum(arr[imin:imax, jmin:jmax], axis=1))
+        plotter.update_line_plot_limits()
+        plotter.redraw()
 
 
 # Data type to store information related to a cursor over an image
@@ -233,13 +301,17 @@ def cursor_info(image: AxesImage, xdata: float, ydata: float) -> Optional[Cursor
     :return: None if point is not valid on the image else return CursorInfo type
     """
     extent = image.get_extent()
-    xmin, xmax, ymin, ymax = image.get_extent()
+    xmin, xmax, ymin, ymax = extent
     arr = image.get_array()
-    data_extent = Bbox([[extent[2], extent[0]], [extent[3], extent[1]]])
+    data_extent = Bbox([[ymin, xmin], [ymax, xmax]])
     array_extent = Bbox([[0, 0], arr.shape[:2]])
     trans = BboxTransform(boxin=data_extent, boxout=array_extent)
     point = trans.transform_point([ydata, xdata])
     if any(np.isnan(point)):
         return None
 
-    return CursorInfo(array=arr, extent=extent, point=point.astype(int))
+    point = point.astype(int)
+    if 0 <= point[0] < arr.shape[0] and 0 <= point[1] < arr.shape[1]:
+        return CursorInfo(array=arr, extent=extent, point=point)
+    else:
+        return None
