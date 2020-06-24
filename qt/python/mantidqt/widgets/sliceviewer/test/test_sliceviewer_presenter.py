@@ -276,6 +276,10 @@ class SliceViewerTest(unittest.TestCase):
         mock_peaks_presenter.assert_called_once()
         mock_peaks_presenter.overlay_peaksworkspaces.asssert_called_once()
 
+    def test_gui_starts_with_zoom_selected(self):
+        SliceViewer(None, model=self.model, view=self.view)
+        self.assertEqual(1, self.view.data_view.select_zoom.call_count)
+
 
 if __name__ == '__main__':
     unittest.main()

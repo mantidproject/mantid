@@ -59,6 +59,9 @@ class SliceViewer(object):
 
         self.new_plot()
 
+        # Start the GUI with zoom selected.
+        self.view.data_view.select_zoom()
+
     def new_plot_MDH(self):
         """
         Tell the view to display a new plot of an MDHistoWorkspace

@@ -21,6 +21,7 @@ Improvements
 - Polaris.create_total_scattering_pdf now no longer calculates the PDF with the Lorch filter enabled by default and must be enabled.
 - :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been updated to allow for the algorithm to be run on a PDF to obtain a spectrum density function.
 - :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` now accepts the crystalographic density of the sample to correct for the powder density.
+- Square beam profile of 5mm x 5mm added to the PEARL_Definition_new_lowangle instrument definition file
 
 Bugfixes
 ^^^^^^^^
