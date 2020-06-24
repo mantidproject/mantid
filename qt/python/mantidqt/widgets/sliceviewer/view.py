@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+# std imports
+import sys
 
 # 3rd party imports
 
@@ -34,6 +36,10 @@ from .peaksviewer.workspaceselection import \
 from .peaksviewer.view import PeaksViewerCollectionView
 from .peaksviewer.representation.painter import MplPainter
 from .zoom import ScrollZoomMixin
+
+
+# Constants
+DBLMAX = sys.float_info.max
 
 
 class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
@@ -307,6 +313,7 @@ class SliceViewerDataView(QWidget):
         if self.image is not None:
             if self.line_plots:
                 self.delete_line_plot_lines()
+            self.image_info_widget.updateTable(DBLMAX, DBLMAX, DBLMAX)
             self.image.remove()
             self.image = None
 
