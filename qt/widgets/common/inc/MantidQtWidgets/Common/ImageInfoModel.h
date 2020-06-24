@@ -27,8 +27,6 @@ public:
   @param y: y data coordinate, for a matrix workspace this will be the spectrum
   number
   @param signal: the signal value at x,y
-  @param getValues: if false the returned list will have the information
-  headers and '-' for each of the values
   @return a vector containing pairs of strings
   */
   virtual std::vector<QString> getInfoList(const double x, const double y,

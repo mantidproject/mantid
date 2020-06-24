@@ -5,12 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-#
-#
+# std imports
+import sys
+
 from mantidqt.utils.qt import import_qt
 from matplotlib.image import AxesImage
 
 from .lineplots import CursorTracker, cursor_info
+
+# Constants
+DBLMAX = sys.float_info.max
 
 ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
@@ -47,4 +51,4 @@ class ImageInfoTracker(CursorTracker):
 
     def on_cursor_outside_axes(self):
         """Update the image table given the mouse has moved out of the image axes"""
-        self._widget.updateTable(0.0, 0.0, 0.0)
+        self._widget.updateTable(DBLMAX, DBLMAX, DBLMAX)

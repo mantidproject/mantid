@@ -35,8 +35,6 @@ public:
   @param x: x data coordinate
   @param specNum: the spectrum number of the coordinate
   @param signal: the signal value at x, y
-  @param getValues: if false the returned list will have the information
-  headers and '-' for each of the values
   @return a vector containing pairs of strings
   */
   std::vector<QString> getInfoList(const double x, const double specNum,
