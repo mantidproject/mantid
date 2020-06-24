@@ -45,6 +45,8 @@ class DrillModel(QObject):
         super(DrillModel, self).__init__()
         self.instrument = None
         self.acquisitionMode = None
+        self.cycleNumber = None
+        self.experimentId = None
         self.algorithm = None
         self.samples = list()
         self.settings = dict()
@@ -396,6 +398,12 @@ class DrillModel(QObject):
         self.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
         self.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
 
+        # experiments
+        if RundexSettings.CYCLE_JSON_KEY in json_data:
+            self.cycleNumber = json_data[RundexSettings.CYCLE_JSON_KEY]
+        if RundexSettings.EXPERIMENT_JSON_KEY in json_data:
+            self.experimentId = json_data[RundexSettings.EXPERIMENT_JSON_KEY]
+
         # visual setings
         if RundexSettings.VISUAL_SETTINGS_JSON_KEY in json_data:
             self.visualSettings = json_data[
@@ -434,6 +442,12 @@ class DrillModel(QObject):
         json_data = dict()
         json_data[RundexSettings.INSTRUMENT_JSON_KEY] = self.instrument
         json_data[RundexSettings.MODE_JSON_KEY] = self.acquisitionMode
+
+        # experiment
+        if self.cycleNumber:
+            json_data[RundexSettings.CYCLE_JSON_KEY] = self.cycleNumber
+        if self.experimentId:
+            json_data[RundexSettings.EXPERIMENT_JSON_KEY] = self.experimentId
 
         # visual setings
         if visualSettings:
