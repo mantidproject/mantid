@@ -298,6 +298,10 @@ class SliceViewerDataView(QWidget):
         """Reset the view to encompass all of the data"""
         self.presenter.show_all_data_requested()
 
+    def select_zoom(self):
+        """Select the zoom control on the toolbar"""
+        self.mpl_toolbar.zoom()
+
     def update_plot_data(self, data):
         """
         This just updates the plot data without creating a new plot
