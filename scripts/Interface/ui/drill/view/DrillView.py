@@ -592,7 +592,7 @@ class DrillView(QMainWindow):
         self.modeSelector.setCurrentText(mode)
         self.modeSelector.blockSignals(False)
 
-    def set_table(self, columns):
+    def set_table(self, columns, tooltips=None):
         """
         Set the table header.
 
@@ -606,6 +606,8 @@ class DrillView(QMainWindow):
         self.table.setRowCount(0)
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
+        if tooltips:
+            self.table.setColumnHeaderToolTips(tooltips)
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
 

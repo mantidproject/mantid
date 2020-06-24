@@ -312,6 +312,18 @@ class DrillTableWidget(QTableWidget):
         self.item(row, column).setToolTip(contents)
         self.blockSignals(False)
 
+    def setColumnHeaderToolTips(self, tooltips):
+        """
+        Set the tooltip of each column header.
+
+        Args:
+            tooltips (list(str)): a list of tooltips
+        """
+        for c in range(self.columnCount()):
+            item = self.horizontalHeaderItem(c)
+            if item and c < len(tooltips):
+                item.setToolTip(tooltips[c])
+
     def setHeaderFoldingState(self, columns):
         """
         Give a folding state for each column.

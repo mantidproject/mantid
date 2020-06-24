@@ -22,6 +22,7 @@ class DrillPresenterTest(unittest.TestCase):
         patch = mock.patch(
                 'Interface.ui.drill.presenter.DrillPresenter.DrillModel')
         self.mModel = patch.start()
+        self.mModel.return_value.getColumnHeaderData.return_value = [], []
         self.addCleanup(patch.stop)
 
         self.view = mock.Mock()
@@ -79,7 +80,7 @@ class DrillPresenterTest(unittest.TestCase):
 
         self.model.getAvailableAcquisitionModes.assert_called_once()
         self.model.getAcquisitionMode.assert_called_once()
-        self.model.get_columns.assert_called_once()
+        self.model.getColumnHeaderData.assert_called_once()
         self.model.get_rows_contents.assert_called_once()
 
         self.view.set_available_modes.assert_called_once()

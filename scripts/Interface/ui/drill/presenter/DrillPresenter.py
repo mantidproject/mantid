@@ -174,7 +174,8 @@ class DrillPresenter:
                 self.model.getAvailableAcquisitionModes())
         self.view.set_acquisition_mode(self.model.getAcquisitionMode())
         # update the table
-        self.view.set_table(self.model.get_columns())
+        columns, tooltips = self.model.getColumnHeaderData()
+        self.view.set_table(columns, tooltips)
         self.view.fill_table(self.model.get_rows_contents())
         # set the visual settings if they exist
         vs = self.model.getVisualSettings()
