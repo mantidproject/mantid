@@ -38,6 +38,9 @@ class ScrollZoomMixin:
         callback = callback if callback is not None else _noop
 
         def zoom_fun(event):
+            if event.inaxes != axes:
+                return
+
             # get the current x and y limits
             cur_xlim = axes.get_xlim()
             cur_ylim = axes.get_ylim()
