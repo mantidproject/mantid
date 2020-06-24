@@ -28,7 +28,8 @@ class SettingsModel:
     @staticmethod
     def load_settings_from_file(filepath, settings):
         with open(filepath, 'r') as file:
-            for line in file:
+            line = file.readline()
+            while line:
                 setting = line.rstrip('\n').split('=', 1)
                 prop = setting[0].strip()
                 if prop in settings:
@@ -47,3 +48,4 @@ class SettingsModel:
                             CONF.set(setting[0].strip(), value)
                     else:
                         ConfigService.setString(prop, setting[1])
+                line = file.readline()
