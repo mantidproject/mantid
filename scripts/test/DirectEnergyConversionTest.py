@@ -188,7 +188,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_dgreduce_works(self):
         """ Test for old interface """
-        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
+        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=5, NumEvents=10000)
         LoadInstrument(run_ws,InstrumentName='MARI', RewriteSpectraMap=True)
 
         #mono_ws = CloneWorkspace(run_ws)
@@ -198,7 +198,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         dgreduce.setup('MAR')
         par = {}
-        par['ei_mon_spectra']=[4,5]
+        par['ei_mon_spectra']=[5,6]
         par['abs_units_van_range']=[-4000,8000]
         # overwrite parameters, which are necessary from command line, but we want them to have test values
         dgreduce.getReducer().map_file=None
@@ -210,7 +210,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_dgreduce_works_with_name(self):
         """ Test for old interface """
-        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
+        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=5, NumEvents=10000)
         LoadInstrument(run_ws,InstrumentName='MARI', RewriteSpectraMap=True)
         AddSampleLog(run_ws,LogName='run_number',LogText='200',LogType='Number')
         #mono_ws = CloneWorkspace(run_ws)
@@ -220,7 +220,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         dgreduce.setup('MAR')
         par = {}
-        par['ei_mon_spectra']=[4,5]
+        par['ei_mon_spectra']=[5,6]
         par['abs_units_van_range']=[-4000,8000]
         # overwrite parameters, which are necessary from command line, but we want them to have test values
         dgreduce.getReducer().map_file=None
@@ -307,7 +307,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         ei_guess = 67.
         mono_s = tReducer.mono_sample(run, ei_guess,wb_ws)
 
-
         #
         mono_ref = tReducer.mono_sample(ref_ws, ei_guess,wb_clone)
 
@@ -317,7 +316,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_tof_range(self):
 
-        run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10,\
+        run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=7, BankPixelWidth=1, NumEvents=10,\
                                   XUnit='Energy', XMin=5, XMax=75, BinWidth=0.2)
         LoadInstrument(run,InstrumentName='MARI', RewriteSpectraMap=True)
 
@@ -325,7 +324,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         red.prop_man.incident_energy = 26.2
         red.prop_man.energy_bins =  [-20,0.1,20]
-        red.prop_man.multirep_tof_specta_list = [4,5,6]
+        red.prop_man.multirep_tof_specta_list = [5,6,7]
         MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1102, Z=3)
         MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1103,Z=6)
 
@@ -348,7 +347,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertLess(tof_range[2], xMax)
 
         # check another working mode
-        red.prop_man.multirep_tof_specta_list = 4
+        red.prop_man.multirep_tof_specta_list = 5
         red.prop_man.incident_energy = 47.505
         red.prop_man.energy_bins =  [-20,0.1,45]
   
