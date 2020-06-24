@@ -15,7 +15,6 @@ set(SRC_FILES
     src/ReflectometryTransformP.cpp
     src/ReflectometryTransformQxQz.cpp
     src/ReflectometrySumInQ.cpp
-    src/ReflectometryWorkflowBase.cpp
     src/ReflectometryWorkflowBase2.cpp
     src/RefRoi.cpp
     src/SpecularReflectionAlgorithm.cpp
@@ -41,7 +40,6 @@ set(INC_FILES
     inc/MantidReflectometry/ReflectometryTransformP.h
     inc/MantidReflectometry/ReflectometryTransformQxQz.h
     inc/MantidReflectometry/ReflectometrySumInQ.h
-    inc/MantidReflectometry/ReflectometryWorkflowBase.h
     inc/MantidReflectometry/ReflectometryWorkflowBase2.h
     inc/MantidReflectometry/RefRoi.h
     inc/MantidReflectometry/SpecularReflectionAlgorithm.h
