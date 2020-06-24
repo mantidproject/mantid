@@ -1502,16 +1502,22 @@ try:
     # Use a cmake generated manifest of all the built in python algorithms to load them into the api
     plugins_manifest_path = ConfigService.Instance()["python.plugins.manifest"]
     plugins_dir = os.path.dirname(plugins_manifest_path)
-    with open(plugins_manifest_path) as manifest:
-        _plugin_files = []
-        _plugin_dirs = set()
-        plugin_paths = manifest.read().splitlines()
-        for path in plugin_paths:
-            plugin_name = os.path.splitext(path)[0]
-            if not os.path.isabs(path):
-                path = os.path.join(plugins_dir, path)
-            _plugin_dirs.add(os.path.dirname(path))
-            _plugin_files.append(path)
+    _plugin_files = []
+    _plugin_dirs = set()
+    if not plugins_manifest_path:
+        logger.information("Path to plugins manifest is empty. The python plugins will not be loaded.")
+    elif not os.path.exists(plugins_manifest_path):
+        logger.warning("The path to the python plugins manifest is invalid. The built in python plugins will "
+                       "not be loaded into the simpleapi.")
+    else:
+        with open(plugins_manifest_path) as manifest:
+            plugin_paths = manifest.read().splitlines()
+            for path in plugin_paths:
+                plugin_name = os.path.splitext(path)[0]
+                if not os.path.isabs(path):
+                    path = os.path.join(plugins_dir, path)
+                _plugin_dirs.add(os.path.dirname(path))
+                _plugin_files.append(path)
 
     # Look for and import the user plugins
     for directory in _user_plugin_dirs:
@@ -1520,7 +1526,7 @@ try:
             _plugin_files.extend(plugins)
             _plugin_dirs.add(directory)
         except ValueError as e:
-            logger.warning("Error occured during plugin discovery: {0}".format(str(e)))
+            logger.warning(f"Error occurred during plugin discovery: {str(e)}")
             continue
 
     # Mock out the expected functions
