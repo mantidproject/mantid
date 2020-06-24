@@ -73,6 +73,10 @@ Python
 - Property.units now attempts to encode with windows-1252 if utf-8 fails.
 - Property.unitsAsBytes has been added to retrieve the raw bytes from the units string.
 
+Improvements
+------------
+- Updated the convolution function in the fitting framework to allow the convolution of two composite functions.
+
 Bugfixes
 --------
 - Fix an uncaught exception when loading empty fields from NeXus files. Now returns an empty vector.

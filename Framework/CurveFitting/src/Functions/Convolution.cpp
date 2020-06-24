@@ -40,6 +40,7 @@ using namespace API;
 using std::placeholders::_1;
 
 bool is1DCompositeFunction(const IFunction_sptr &function) {
+  bool is1D = true;
   const auto compositeFunction =
       std::dynamic_pointer_cast<CompositeFunction>(function);
   if (compositeFunction) {
@@ -52,9 +53,9 @@ bool is1DCompositeFunction(const IFunction_sptr &function) {
   } else {
     const IFunction1D_sptr fun =
         std::dynamic_pointer_cast<IFunction1D>(function);
-    bool is1D = fun ? true : false;
-    return is1D;
+    is1D = fun ? true : false;
   }
+  return is1D;
 }
 
 void evaluateFunctionOnRange(const IFunction_sptr &function, size_t domainSize,
