@@ -28,7 +28,7 @@
      <item>
       <widget class="QLabel" name="user_layout">
        <property name="text">
-        <string>User information:</string>
+        <string>User information (shared with the server):</string>
        </property>
       </widget>
      </item>

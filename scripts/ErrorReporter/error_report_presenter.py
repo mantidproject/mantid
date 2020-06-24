@@ -106,5 +106,6 @@ class ErrorReporterPresenter(object):
 
         error_message_json = json.loads(error_reporter.generateErrorMessage())
         stacktrace_text = error_message_json["stacktrace"]
+        del error_message_json["stacktrace"]  # remove this entry so it doesn't appear twice.
         user_information = ''.join('{}: {}\n'.format(key, error_message_json[key]) for key in error_message_json)
         self._view.display_more_details(user_information, stacktrace_text)
