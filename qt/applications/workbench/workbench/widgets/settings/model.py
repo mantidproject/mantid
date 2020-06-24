@@ -42,7 +42,6 @@ class SettingsModel:
                         else:
                             try:
                                 value = ast.literal_eval(setting[1])
-                                pass
                             except (SyntaxError, ValueError):
                                 value = setting[1]
                             CONF.set(setting[0].strip(), value)

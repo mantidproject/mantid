@@ -36,6 +36,6 @@ class SettingsView(base, form):
                                      self.presenter.ASK_BEFORE_CLOSE_MESSAGE, QMessageBox.Yes, QMessageBox.No)
         return True if reply == QMessageBox.Yes else False
 
-    def get_properties_filename(self, parent, accept_mode, file_mode):
-        return open_a_file_dialog(parent=parent, default_suffix=".properties", file_filter="PROPERTIES file (*.properties)",
+    def get_properties_filename(self, accept_mode, file_mode):
+        return open_a_file_dialog(parent=self, default_suffix=".properties", file_filter="PROPERTIES file (*.properties)",
                                   accept_mode=accept_mode, file_mode=file_mode)

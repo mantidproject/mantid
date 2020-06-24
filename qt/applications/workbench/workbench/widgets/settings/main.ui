@@ -76,7 +76,7 @@ QListView::item {
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <property name="spacing">
-           <number>0</number>
+           <number>5</number>
           </property>
           <property name="sizeConstraint">
            <enum>QLayout::SetMinimumSize</enum>
