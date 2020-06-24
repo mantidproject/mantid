@@ -379,7 +379,19 @@ class DrillModel(QObject):
             filename(str): rundex file path
         """
         with open(filename) as json_file:
-            json_data = json.load(json_file)
+            try:
+                json_data = json.load(json_file)
+            except Exception as ex:
+                logger.error("Wrong file format for: {0}".format(filename))
+                logger.error(str(ex))
+                raise ex
+
+        if ((RundexSettings.MODE_JSON_KEY not in json_data)
+                or (RundexSettings.INSTRUMENT_JSON_KEY not in json_data)):
+            logger.error("Unable to load {0}".format(filename))
+            raise ValueError("Json mandatory fields '{0}' or '{1}' not found."
+                             .format(RundexSettings.CYCLE_JSON_KEY,
+                                     RundexSettings.INSTRUMENT_JSON_KEY))
 
         self.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
         self.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
@@ -392,12 +404,23 @@ class DrillModel(QObject):
             self.visualSettings = None
 
         # global settings
-        self.settings.update(json_data[RundexSettings.SETTINGS_JSON_KEY])
+        if (RundexSettings.SETTINGS_JSON_KEY in json_data):
+            self.settings.update(json_data[RundexSettings.SETTINGS_JSON_KEY])
+        else:
+            logger.warning("No global settings found when importing {0}. "
+                           "Default settings will be used."
+                           .format(filename))
 
         # samples
         self.samples = list()
-        for sample in json_data[RundexSettings.SAMPLES_JSON_KEY]:
-            self.samples.append(sample)
+        if ((RundexSettings.SAMPLES_JSON_KEY in json_data)
+                and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
+            for sample in json_data[RundexSettings.SAMPLES_JSON_KEY]:
+                self.samples.append(sample)
+        else:
+            logger.warning("No sample found when importing {0}."
+                           .format(filename))
+
         self.rundexFile = filename
 
     def exportRundexData(self, filename, visualSettings=None):

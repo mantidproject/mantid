@@ -793,3 +793,17 @@ class DrillView(QMainWindow):
         vs["FoldingState"] = self.table.getHeaderFoldingState()
 
         return vs
+
+    def errorPopup(self, title, msg, details=None):
+        """
+        Display an error popup to inform the user.
+
+        Args:
+            title (str): popup title
+            msg (str): popup message
+            details (str): facultative detailed text
+        """
+        w = QMessageBox(QMessageBox.Critical, title, msg, QMessageBox.Ok, self)
+        if details:
+            w.setDetailedText(details)
+        w.exec()
