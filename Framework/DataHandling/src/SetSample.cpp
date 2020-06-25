@@ -549,9 +549,11 @@ void SetSample::exec() {
   double sampleVolume = 0.;
   if (geometryArgs || sampleEnviron) {
     setSampleShape(*experimentInfo, geometryArgs, sampleEnviron);
-    // get the volume back out to use in setting the material
-    sampleVolume =
-        CUBIC_METRE_TO_CM * experimentInfo->sample().getShape().volume();
+    if (experimentInfo->sample().getShape().hasValidShape()) {
+      // get the volume back out to use in setting the material
+      sampleVolume =
+          CUBIC_METRE_TO_CM * experimentInfo->sample().getShape().volume();
+    }
   }
 
   // Finally the material arguments
@@ -782,6 +784,10 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
       }
       experiment.mutableSample().setShape(shapeObject);
     } else if (sampleEnv->getContainer().hasFixedSampleShape()) {
+      if (args) {
+        throw std::runtime_error("The can has a fixed sample shape that cannot "
+                                 "be adjusted using the Geometry parameter.");
+      }
       auto shapeObject = can.getSampleShape();
 
       // apply Goniometer rotation
@@ -799,10 +805,14 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
 
       experiment.mutableSample().setShape(shapeObject);
     } else {
-      throw std::runtime_error("The can does not define the sample shape. "
-                               "Please either provide a 'Shape' argument "
-                               "or update the environment definition with "
-                               "this information.");
+      if (args) {
+        throw std::runtime_error("Cannot override the sample shape because the "
+                                 "environment definition does not define a "
+                                 "default sample shape. Please either provide "
+                                 "a 'Shape' argument in the dictionary for the "
+                                 "Geometry parameter or update the environment "
+                                 "definition with this information.");
+      }
     }
   } else {
     throw std::runtime_error("No sample environment defined, please provide "
