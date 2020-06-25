@@ -35,7 +35,7 @@ class PlotsSettingsTest(unittest.TestCase):
 
         mock_ConfigService.getString.assert_has_calls([call(PlotProperties.NORMALIZATION.value),
                                                        call(PlotProperties.SHOW_TITLE.value),
-                                                       call(PlotProperties.SHOW_MINOR_TICKS).value,
+                                                       call(PlotProperties.SHOW_MINOR_TICKS.value),
                                                        call(PlotProperties.SHOW_MINOR_GRIDLINES.value),
                                                        call(PlotProperties.X_AXES_SCALE.value),
                                                        call(PlotProperties.Y_AXES_SCALE.value),
