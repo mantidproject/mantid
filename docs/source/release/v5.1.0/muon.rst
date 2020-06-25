@@ -41,4 +41,8 @@ Improvements
   These changes will make the addition of new functionality in the future easier.
 - The plot guess option within the fitting tab will now update when a parameter is changed.
 
+Bug fixes
+---------
+- Fixed an issue where ties set in Muon Analysis were not being respected.
+
 :ref:`Release 5.1.0 <v5.1.0>`
