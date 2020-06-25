@@ -6,15 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from mantid.plots.mantidaxes import MantidAxes
-from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from matplotlib.legend import Legend
 
+from mantid.plots.mantidaxes import MantidAxes
+from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.config import DEFAULT_SCRIPT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
-                                                         generate_axis_scale_commands)
+                                                         generate_axis_scale_commands,
+                                                         generate_tick_commands,
+                                                         generate_grid_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
@@ -68,6 +70,9 @@ def generate_script(fig, exclude_headers=False):
             if not curve_in_ax(ax):
                 continue
             plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
+
+        plot_commands.extend(generate_tick_commands(ax))
+        plot_commands.extend(generate_grid_commands(ax))
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
@@ -93,7 +98,7 @@ def generate_script(fig, exclude_headers=False):
     cmds.extend(plot_commands)
     cmds.append("plt.show()")
     cmds.append("# Scripting Plots in Mantid:")
-    cmds.append("https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+    cmds.append("# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
     return '\n'.join(cmds)
 

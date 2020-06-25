@@ -41,6 +41,8 @@ class AxesTabWidgetPresenter:
             self.update_view)
         self.view.axis_button_group.buttonClicked.connect(
             self.axis_changed)
+        self.view.show_minor_ticks_check_box.toggled.connect(
+            self.show_minor_ticks_checked)
 
     def apply_properties(self):
         """Update the axes with the user inputted properties"""
@@ -50,6 +52,25 @@ class AxesTabWidgetPresenter:
         ax = self.get_selected_ax()
 
         self.set_ax_title(ax, self.current_view_props['title'])
+
+        if not isinstance(ax, Axes3D):
+            if self.current_view_props['minor_ticks']:
+                ax.minorticks_on()
+            else:
+                ax.minorticks_off()
+
+            ax.show_minor_gridlines = self.current_view_props['minor_gridlines']
+
+            # If the grid is enabled update it
+            if ax.show_minor_gridlines:
+                if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
+                    ax.grid(True, which='minor')
+                elif ax.xaxis._gridOnMajor:
+                    ax.grid(True, axis='x', which='minor')
+                elif ax.yaxis._gridOnMajor:
+                    ax.grid(True, axis='y', which='minor')
+            else:
+                ax.grid(False, which='minor')
 
         if "xlabel" in self.current_view_props:
             ax.set_xlabel(self.current_view_props['xlabel'])
@@ -127,8 +148,18 @@ class AxesTabWidgetPresenter:
         # so the scale option is disabled.
         self.view.scale_combo_box.setEnabled("zlim" not in ax_props)
 
+        # Minor ticks/gridlines are currently not supported for 3D plots.
+        self.view.show_minor_gridlines_check_box.setVisible(not plot_is_3d)
+        self.view.show_minor_ticks_check_box.setVisible(not plot_is_3d)
+
         ax = self.view.get_axis()
         self.view.set_title(ax_props.title)
+
+        if not plot_is_3d:
+            self.view.set_show_minor_ticks(ax_props.minor_ticks)
+            self.view.show_minor_gridlines_check_box.setEnabled(ax_props.minor_ticks)
+            self.view.set_show_minor_gridlines(ax_props.minor_gridlines)
+
         lim = ax_props[f"{ax}lim"]
         self.view.set_lower_limit(lim[0])
         self.view.set_upper_limit(lim[1])
@@ -141,6 +172,8 @@ class AxesTabWidgetPresenter:
         ax = self.current_axis
 
         self.current_view_props['title'] = self.view.get_title()
+        self.current_view_props['minor_ticks'] = self.view.get_show_minor_ticks()
+        self.current_view_props['minor_gridlines'] = self.view.get_show_minor_gridlines()
         self.current_view_props[f"{ax}lim"] = (self.view.get_lower_limit(), self.view.get_upper_limit())
         self.current_view_props[f"{ax}label"] = self.view.get_label()
         self.current_view_props[f"{ax}scale"] = self.view.get_scale()
@@ -162,3 +195,10 @@ class AxesTabWidgetPresenter:
             self.view.set_upper_limit(lim[1])
             self.view.set_label(ax_props[f"{ax}label"])
             self.view.set_scale(ax_props[f"{ax}scale"])
+
+    def show_minor_ticks_checked(self, checked):
+        # Can't have minor gridlines without minor ticks
+        self.view.show_minor_gridlines_check_box.setEnabled(checked)
+
+        if not checked:
+            self.view.show_minor_gridlines_check_box.setChecked(False)

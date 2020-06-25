@@ -13,6 +13,7 @@ from matplotlib import use as mpl_use
 
 mpl_use('Agg')  # noqa
 from matplotlib.colors import LogNorm
+from matplotlib.ticker import NullLocator
 from matplotlib.patches import BoxStyle
 from matplotlib.pyplot import figure
 
@@ -37,7 +38,9 @@ new_ax_view_props = {
     'xscale': 'log',
     'ylim': [0.2, 3],
     'ylabel': 'New Y Label',
-    'yscale': 'log'}
+    'yscale': 'log',
+    'minor_ticks': True,
+    'minor_gridlines': True}
 
 new_curve_view_props = {
     'label': 'New label',
@@ -379,6 +382,13 @@ class ApplyAllPropertiesTest(unittest.TestCase):
 
     def test_apply_properties_on_figure_with_legend_sets_marker_label_padding(self):
         self.assertEqual(new_legend_props['marker_label_padding'], self.new_legend.handletextpad)
+
+    def test_apply_properties_on_figure_sets_minor_ticks(self):
+        self.assertEqual(new_ax_view_props['minor_ticks'], not isinstance(self.ax.xaxis.minor.locator, NullLocator))
+        self.assertEqual(new_ax_view_props['minor_ticks'], not isinstance(self.ax.yaxis.minor.locator, NullLocator))
+
+    def test_apply_properties_on_figure_sets_minor_gridlines(self):
+        self.assertEqual(new_ax_view_props['minor_gridlines'], self.ax.show_minor_gridlines)
 
 
 if __name__ == '__main__':

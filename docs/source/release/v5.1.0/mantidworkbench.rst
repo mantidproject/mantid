@@ -71,6 +71,7 @@ Improvements
 - Monitors are no longer shown on bin and colorfill plots.
 - User data directories are no longer checked at startup, reducing launch times with slow network drives.
 - When choosing a marker in the figure options, if one of the marker colours would not be used that selection is disabled.
+- There are now options in the settings window and the figure options for showing minor ticks and minor gridlines on plots.
 - Added an option to set the default ```drawstyle``` within the workbench settings window. Additionally, the ```linestyle``` can now be set to 'None'.
 - Added an option to matrix workspaces to export bins and spectra to a table workspace.
 - Improved the handling of ``WorkspaceSingleValue`` workspaces in workbench. This fixes a crash which occurred when interacting with workspaces of this type.
