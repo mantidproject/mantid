@@ -14,10 +14,10 @@ Grouping
 
 The **Grouping** tab allows:
 
-* grouping files to be loaded, saved, modified or cleared
-* regrouped data to be plotted
-* alpha values to be determined from T20 measurements
-* raw data plotting options to be selected
+* Grouping files to be loaded, saved, modified or cleared.
+* Regrouped data to be plotted.
+* :math:`{\alpha}` values to be determined from T20 measurements.
+* Raw data plotting options to be selected.
 
 The **Grouping** options are shown below
 
@@ -35,7 +35,7 @@ Data Grouping
 -------------
 
 When a workspace is opened using the Muon Analysis GUI, a plot of the data automatically opens with it. For measurements not taken in transverse fields, this 
-plot is set to show the asymmetry by default, which is the normalised ratio of the Forward (F) and Backward (B) detector banks' positron counts; as given by the equation:
+plot is set to show the asymmetry by default, which is the normalised ratio of the Forward (:math:`F`) and Backward (:math:`B`) detector banks' positron counts; as given by the equation:
 
 .. math:: P_z(t) = A_0G_z(t) = \frac{F(t) - \alpha B(t)}{F(t) + \alpha B(t)}
     :name: Equation 2
@@ -43,12 +43,12 @@ plot is set to show the asymmetry by default, which is the normalised ratio of t
 .. figure:: /images/PlotWindow2.PNG
     :align: center
 
-    Figure 19: The default plot window for MUSR00024563 showing raw (unbinned) data for the long pair asymmetry.
+    Figure 19: The default plot window for `MUSR00024563` showing raw (unbinned) data for the long pair asymmetry.
 
 Data collected only in the Forward, or Backward, detector banks can be viewed in the plotting window of the Muon Analysis GUI.
 
-1. Load the MUSR00024563 file in the Muon Analysis GUI.
-2. On the Grouping Tab, untick the checkbox next to 'long' and tick the checkbox next to 'fwd'. Do the same for the backward (bwd) detector arrays.
+1. Load the `MUSR00024563` file in the Muon Analysis GUI.
+2. On the Grouping Tab tick the checkboxes next to forward (`fwd`) and backward (`bwd`) detector arrays. Then untick the checkbox next to `long`.
 3. Observe and consider the difference in the plot. This is shown in Figure 18.
 	
 .. figure:: /images/thetabsgroupingfig20.gif
@@ -88,31 +88,31 @@ Adding Detector Groups and Pairs
 --------------------------------
 
 Different detector grouping configurations can be entered manually, as can Group Pairs.
-A Group Pair is a combination of two different detector groups. For example, the default detector groups fwd 
-and bwd are in a pair called 'long'. This combines the detectors from both groups in order to be able to view them together, for example
-for the MuSR equipment this default case means viewing all 64 detectors. A detector group pair can include any two groups found in the group table. 
+A Group Pair is a combination of two different detector groups. For example, the default detector groups `fwd` 
+and `bwd` are used a pair called `long`. This combines the detectors from both groups in order to be able to view them together.
+For the MuSR equipment this default case means viewing all 64 detectors. A detector group pair can include any two groups found in the group table. 
 
-To try assigning new detector groups and pairs with the MUSR00024563 file (see :ref:`Home <the_tabs_home>` for how to load files), 
+To try assigning new detector groups and pairs with the `MUSR00024563` file (see :ref:`Home <the_tabs_home>` for how to load files), 
 follow the instructions below. For assistance, see figures 22 and 23.
 
-1.  First, go to the Grouping tab in the mantid muon GUI.
-2.  Under the box labelled 'Description:', there is a table of the existing groups, with 'Group Name', 'Detector IDs' and 'N Detectors' as columns. 
-    'bwd' and 'fwd' should already be saved as groups.
-3.  In the blank space under the existing group names, right click, select Add Group and enter the name 'sample_fwd'. This will be one of our new groups.
-4.  Assign this new group Detector IDs of 1-2, in the blank space in the same row. Ndet will then fill automatically.
-5.  Repeat this process to also add a group called 'sample_bwd' with Detector IDs of 10-11.
+1.  First, go to the Grouping tab in the muon analysis GUI.
+2.  Under the 'Description:', there is a table of the existing groups, with `Group Name`, `Analyse (plot/fit)`, `Detector IDs` and `N Detectors` as columns. 
+    `bwd` and `fwd` should already be saved as groups.
+3.  In the blank space under the existing group names, right click, select `Add Group` and enter the name `sample_fwd`. This will be one of our new groups.
+4.  Assign this new group `Detector IDs` of `1-2`, in the blank space in the same row. `Ndet` will then fill automatically.
+5.  Repeat this process to also add a group called `sample_bwd` with `Detector IDs` of `10-11`.
 
 .. figure:: /images/thetabsgroupingfig22.gif
     :align: center
 
     Figure 22: How to add a new detector group using the Muon analysis GUI.
         
-*NB any string of numbers can be defined as Detector IDs, so long as they are within the number of detectors on the equipment 
-used. E.g. '1,3-5,15,17-18' would be valid.*
+*NB any string of numbers can be defined as `Detector IDs`, so long as they are within the number of detectors on the equipment 
+used (i.e. `1,3-5,15,17-18` would be valid and `1,3-5,10324` would be invalid).*
     
-6.  At the bottom of the tab there should be a table containing the default 'long' pair details. The columns in this table read 'Pair Name', 'Group 1', 'Group 2', 'Alpha', and 'Guess Alpha'.
-7.  In the blank space under 'long' in the Name column, right click and enter a name for the new pair, such as 'sample_long'. 
-8.  In the same row as the new pair, in the Forward drop down list select 'sample_fwd' and the Backward list select 'sample_bwd'. To update the Alpha value, click Guess Alpha. This process is 
+6.  At the bottom of the tab there should be a table containing the default `long` pair details. The columns in this table read `Pair Name`, `Analyse (plot/fit)`, `Group 1`, `Group 2`, `Alpha`, and `Guess Alpha`.
+7.  In the blank space under `long` in the `Name` column, right click and enter a name for a new pair, such as `sample_long`. 
+8.  In the same row as the new pair, in the `Group 1` column select `sample_fwd` from the drop down menu and in the `Group 2` column select `sample_bwd`. To update the:math:`{\alpha}` value, click `Guess Alpha`. This process is 
     shown in figure 21 below.
 
 .. figure:: /images/thetabsgroupingfig23.gif
@@ -125,9 +125,9 @@ For example, in the :ref:`Home <the_tabs_home>`, the options under Group/Group P
 updated to include user defined detector configurations. From there, the new groups can be plotted
 as they would be for the default long, bwd and fwd groups. 
 
-Finally, alpha can be determined for any given detector pairing (via the analysis of
-transverse field data) by clicking on Guess Alpha. Click on a specific Group Pair name to
-select it. The alpha value column is automatically updated. The value in the column is
+Finally, :math:`{\alpha}` can be determined for any given detector pairing (via the analysis of
+transverse field data) by clicking on `Guess Alpha`. Click on a specific Group Pair name to
+select it. The :math:`{\alpha}` value column is automatically updated. The value in the column is
 applied to all subsequent data reduction when asymmetry plots are desired. The detector calibration
 factor, :math:`{\alpha}` is described in more detail in :ref:`basics_of_data_reductions`.
 

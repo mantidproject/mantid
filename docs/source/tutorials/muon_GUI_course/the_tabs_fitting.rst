@@ -14,21 +14,21 @@ Fitting
 
 The Fitting tab allows the user to:
 
-* Select functions to fit to the data
-* Change fit ranges and parameters
-* Fit data
+* Select functions to fit to the data.
+* Change fit ranges and parameters.
+* Fit data.
 
 .. figure:: /images/thetabsfittingfig24.png
     :align: center
     
     Figure 24: The Fitting tab options.
 
-MantidPlot comes with a number of pre-compiled fitting functions. Further functions may
-be compiled and installed or, alternatively, user specific functions can be defined within the
-fitter. A number of fit functions have been programmed which are specific to the analysis of
+Mantid comes with a number of fitting functions. Additional functions may
+be added or a user may define their own function.
+ A number of fit functions have been programmed which are specific to the analysis of
 muon spectra.
 
-Some of the muon specific functions in MantidPlot include:
+Some of the muon specific functions in Mantid include:
 
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | :ref:`func-ExpDecayOsc`       | :math:`{f(t)=A\exp(-\lambda t)\cos(\omega t + \phi)}`                                                                                                                                |
@@ -52,11 +52,11 @@ Some of the muon specific functions in MantidPlot include:
 
 Where:
 
-* :math:`{\lambda}` and :math:`{\sigma}` are in :math:`{\mu s^{-1}}`
-* :math:`{\phi}` is in radians
-* :math:`{\omega}` is in :math:`{MHz}`
-* :math:`{\tau}` is in :math:`{\mu s}`
-* :math:`{\Delta}` is in :math:`{MHz}`
+* :math:`{\lambda}` and :math:`{\sigma}` are in :math:`{\mu s^{-1}}`.
+* :math:`{\phi}` is in radians.
+* :math:`{\omega}` is in :math:`{MHz}`.
+* :math:`{\tau}` is in :math:`{\mu s}`.
+* :math:`{\Delta}` is in :math:`{MHz}`.
 
 The compilation of custom functions is possible using C++ or Python, however this is beyond the scope of this tutorial. Detailed instructions for completing this for a 64-bit Windows
 platform can be found at http://www.mantidproject.org/Writing_a_Fit_Function and https://www.mantidproject.org/Introduction_to_Python_Fit_Functions, for fit functions in C++ and Python respectively.
@@ -64,17 +64,16 @@ platform can be found at http://www.mantidproject.org/Writing_a_Fit_Function and
 Using Fit Functions
 -------------------
 
-To select a function right click in the white box beneath where 'Fit Status' is written and select Add Function.
+To select a function right click in the box beneath where `Fit Status` is written and select `Add Function`.
 
-A new window will appear with several drop-down titles; 'Background', 'Calibrate' etc.; this is the MantidPlot-Fit dialog box, 
-from which one can select a function to use.
+A new window will appear with several drop-down titles; `Background`, `Calibrate` etc.; this is the Mantid-Fit dialog box.
 
 Follow the following instructions for an example of fitting: 
     
-1. Load the HIFI00062798 file from the reference material folder in the home tab. 
-2. Open the Fitting tab and right click in the functions box and select Add Function.
-3. Go to the Muon drop-down title in the Fit dialogue box.
-4. Select MuonGeneric and then ExpDecayOsc, and press the fit button. This process is shown in Figure 25.
+1. Load the `HIFI00062798` file from the reference material folder in the home tab. 
+2. Open the Fitting tab and right click in the functions box and select `Add Function`.
+3. Go to the `Muon` drop-down title in the Fit dialogue box.
+4. Expand the `MuonGeneric` section and then select `ExpDecayOsc`, and press the `OK` button. This process is shown in Figure 25.
 
 .. figure:: /images/thetabsfittingfig25.gif
     :align: center
@@ -95,14 +94,14 @@ The parameters of a function can be adjusted in order to give the user maximum c
 These parameters can be adjusted before or after fitting initially, however it will require re-fitting for the changes to apply. 
 Factors such as the time range fitted and fixing constraint boundaries can be adjusted. 
 
-Once the user is happy with the initial fit parameters, clicking Fit will fit the chosen function
+Once the user is happy with the initial fit parameters, clicking `Fit` will perform chosen fit
 to the data. The fit parameters will then be updated. 
 
 To illustrate this: 
 
-1. If not already done, load the HIFI00062798 file and add ExpDecayOsc function (see above for instructions).
-2. Adjust the fit limits in the lower table, for instance set start and end times of 0.2 and 12 :math:`{\mu s}` respectively.
-3. Click on the large Fit button top of the tab. This process is shown in Figure 26. Note that a better fit can be achieved if Alpha is guessed via the grouping tab.
+1. If not already done, load the `HIFI00062798` file and add `ExpDecayOsc` function (see above for instructions).
+2. Adjust the fit limits in the lower table, for instance set `start` and `end` times of `0.2` and `12` :math:`{\mu s}` respectively.
+3. Click on the `Fit` button top of the tab. This process is shown in Figure 26. Note that a better fit can be achieved if :math:`{\alpha}` is guessed via the grouping tab.
 4. The resulting plot should look like Figure 27.
 
 .. figure:: /images/thetabsfittingfig26.gif
@@ -113,7 +112,7 @@ To illustrate this:
 .. figure:: /images/thetabsfittingfig27.png
         :align: center
 
-    Figure 27: The result of fitting function ‘ExpDecayOsc’ to HIFI00062798. The fit is shown in orange, while the green line indicates the difference between it and the data.
+    Figure 27: The result of fitting function `ExpDecayOsc` to `HIFI00062798`. The fit is shown in orange, while the green line indicates the difference between it and the data.
 
 Each fit parameter can also be bound by certain fit limits (+/- 10% of its starting value, +/- 50% or
 a custom value), fixed at a specific user determined value, or tied together using some functional form.
@@ -121,7 +120,7 @@ a custom value), fixed at a specific user determined value, or tied together usi
 To demonstrate setting bound limits:
      
 1. Go to the function name and ensure the top down arrow is clicked so all fit parameters are visible.
-2. Right click the parameter 'A' and select Constraints > 50%. The parameter, 'A', now has both of its' upper and lower bounds fixed at 50%.
+2. Right click the parameter `A` and select `Constraints` > `Both Bounds` > `50%`. The `A` parameter now has both its' upper and lower bounds fixed to `50%` of the value of `A`.
 
 Composite Functions
 -------------------
@@ -129,30 +128,30 @@ Composite Functions
 Data will sometimes require a function which is made up of multiple other functions, these combinations can be through addition or multiplication.
 To create a fit function involving adding and multiplying functions, follow the examples below.
 
-1.  Load the EMU00019631.nxs file
-2.  Add the function StaticKuboToyabe (under MuonGeneric) to the data, using the method from `Using Fit Functions`_. 
-3.  Repeat the same method to add a second function, ExpDecayMuon, to the same data set. Simply adding a function creates a composite where all functions are summed. See Figure 26 for the process.
+1.  Load the `EMU00019631.nxs` file
+2.  Add the function `StaticKuboToyabe` (under `MuonGeneric`) to the data, using the method from `Using Fit Functions`_. 
+3.  Repeat the same method to add a second function, `ExpDecayMuon`, to the same data set. Simply adding a function creates a composite where all functions are summed. See Figure 26 for the process.
     
 .. figure:: /images/thetabsfittingfig28.gif
     :align: center
     
     Figure 28: How to add two functions together. 
     
-4.  At this point, it is possible to fit the composite function to the data. Do so now, and consider the quality of the fit between from X=0 and X=12 
+4.  At this point, it is possible to fit the composite function to the data. Do so now, and consider the quality of the fit between from :math:`x=0` and :math:`x=12`. 
     (see Overlaying and Styling Plots in :ref:`other_mantid_functions` for changing plot limits).
 
 .. figure:: /images/thetabsfittingfig29.png
     :align: center
 
-Figure 29: A plot of the ExpDecayMuon and StaticKuboToyabe functions added together and fitted to EMU19631. 
+Figure 29: A plot of the `ExpDecayMuon` and `StaticKuboToyabe` functions added together and fitted to `EMU19631`. 
     
 5.  It should be clear that the sum of these functions does not properly model the oscillations in the data set, to rectify this a product function can be used.       
-6.  Add the ProductFunction function (from the General function type), and remove ExpDecayMuon by right clicking on it and selecting remove function.
-7.  Right click on the newly added ProductFunction and add two functions to it - ExpDecayMuon and GausOsc.
+6.  Add the `ProductFunction` function (from the `General` function type), and remove `ExpDecayMuon` by right clicking on it and selecting `Remove`.
+7.  Right click on the newly added `ProductFunction` and add two functions to it - `ExpDecayMuon` and `GausOsc`.
 8.  The total function now consists of :math:`StaticKuboToyabe + (ExpDecayMuon * GausOsc)`. 
-    (The perceptive reader may have noticed that the same effect can be achieved by adding StaticKuboToyabe and GausOsc, this is true, however it would not demonstrate the use of the ProductFunction)
-9.  Fit the new function to the data, note that Chi squared has decreased from 6.844 to 2.026 - the new fit function is a much better fit to the data. (Note: for a view of the plot with only this fit,
-    plot the workspace 'EMU19631; Pair Asym; long; MA; Fitted; StaticKuboToyabe, Productfunction')
+    (The perceptive reader may have noticed that the same effect can be achieved by adding `StaticKuboToyabe` and `GausOsc`, this is true, however it would not demonstrate the use of the `ProductFunction`)
+9.  Fit the new function to the data, note that :math:`{\chi}` (chi) squared has decreased from 6.844 to 2.026 - the new fit function is a much better fit to the data. (Note: the workspace is stored in
+     `EMU19631; Pair Asym; long; MA; Fitted; StaticKuboToyabe, Productfunction`)
 
 .. figure:: /images/thetabsfittingfig30.gif
     :align: center
@@ -166,10 +165,11 @@ which allows Mantid to fit one function with a consistent set of parameters to a
 
 Follow the instructions below in order to sequentially fit a function to a range of data. 
 
-1.  Load the data sets from EMU00019631-EMU00019634.
-2.  Set up a function where StaticKuboToyabe and ExpDecayMuon are added together in the Fitting tab.
-3.  Navigate to the Sequential Fitting tab and click Sequential Fit.
-4.  To make a custom selection of data to fit, click on the run number in the table below, and then click Sequential Fit.
+1.  Load the data sets from `EMU00019631-EMU00019634`.
+2.  Set up a function where `StaticKuboToyabe` and `ExpDecayMuon` are added together in the Fitting tab.
+3.  Navigate to the Sequential Fitting tab and click `Sequentially fit all`.
+4.  To make a custom selection of data to fit, click on the run number in the table below, and then click `Fit selected`.
+5. The plot will automatically show the selected fit. Use this to check all of the fits.
         
 .. figure:: /images/thetabsfittingfig31.gif
     :align: center
