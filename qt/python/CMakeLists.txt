@@ -123,6 +123,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_sliceinfo.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py

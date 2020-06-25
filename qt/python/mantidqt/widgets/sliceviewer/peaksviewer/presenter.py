@@ -93,8 +93,11 @@ class PeaksViewerPresenter(object):
         if selected_index is None:
             return
 
+        # Two step:
+        #   - first update slice point so we are in the correct plane
+        #   - find and set limits required to "zoom" to the selected peak
         self._view.set_slicepoint(self.model.slicepoint(selected_index, self._view.sliceinfo))
-        self.model.zoom_to(selected_index)
+        self._view.set_axes_limits(*self.model.viewlimits(selected_index))
 
     # private api
     @staticmethod
