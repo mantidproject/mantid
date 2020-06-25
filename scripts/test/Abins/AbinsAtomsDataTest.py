@@ -17,31 +17,34 @@ class AtomsDataTest(unittest.TestCase):
     def setUp(self):
         self._tester = AtomsData(self._good_data)
 
+    def test_direct_access(self):
+        self.assertEqual(1, self._tester[1]['sort'])
+        self.assertEqual([self._good_data["atom_0"],
+                          self._good_data["atom_1"]],
+                         self._tester[0:])
+
     def test_wrong_sort(self):
         # too large
-        wrong_data = {"atom_0": {"sort": 3,
+        wrong_data = {"atom_0": {"sort": 2,
                                  "symbol":  self._good_data["atom_0"]["symbol"],
                                  "coord": self._good_data["atom_0"]["coord"],
                                  "mass": self._good_data["atom_0"]["mass"]
                                  }}
-        with self.assertRaises(ValueError):
-            AtomsData._check_item(wrong_data)
 
-        wrong_data["atom_0"]["sort"] = 2  # we count from zero so 2 is also to large
         with self.assertRaises(ValueError):
-            AtomsData._check_item(wrong_data)
+            AtomsData._check_item(wrong_data["atom_0"], n_atoms=1)
 
         # negative
         wrong_data["atom_0"]["sort"] = -1,
 
         with self.assertRaises(ValueError):
-            AtomsData._check_item(wrong_data)
+            AtomsData._check_item(wrong_data["atom_0"])
 
         # string instead of number
         wrong_data["atom_0"]["sort"] = "-1"
 
         with self.assertRaises(ValueError):
-            AtomsData._check_item(wrong_data)
+            AtomsData._check_item(wrong_data["atom_0"])
 
     def test_wrong_symbol(self):
         wrong_data = {"atom_0": {"sort": self._good_data["atom_0"]["sort"],

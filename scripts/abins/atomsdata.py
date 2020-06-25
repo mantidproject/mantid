@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 import numbers
-from typing import Any, Dict, List, overload, Sequence
+from typing import Any, Dict, List, Optional, overload, Sequence
 import re
 import numpy as np
 import abins
@@ -19,6 +19,7 @@ class AtomsData(collections.abc.Sequence):
         test = re.compile(r'^atom_(\d+)$')
         atom_keys = {int(test.match(key).groups()[0]): key for key in atoms_data if test.match(key)}
         sorted_atom_keys = [atom_keys[index] for index in sorted(atom_keys)]
+        n_atoms = len(sorted_atom_keys)
 
         # Check that indices run up from zero with no gaps
         if set(atom_keys) != set(range(len(atom_keys))):
@@ -27,14 +28,15 @@ class AtomsData(collections.abc.Sequence):
                              'where I is count starting from zero.'.format('\n'.join(sorted_atom_keys)))
 
         # Store in a list. Indices should correspond to input keys if the above test passed.
-        self._data = [self._check_item(atoms_data[key]) for key in sorted_atom_keys]
+        self._data = [self._check_item(atoms_data[key], n_atoms=n_atoms) for key in sorted_atom_keys]
 
     @staticmethod
-    def _check_item(item: Dict[str, Any]) -> Dict[str, Any]:
+    def _check_item(item: Dict[str, Any], n_atoms: Optional[int] = None) -> Dict[str, Any]:
         """
         Raise an error if Atoms data item is unsuitable
 
         :param item: element to be added
+        :param n_atoms: Number of atoms in data. If provided, check that "sort" value is not higher than expected.
         """
 
         if not isinstance(item, dict):
@@ -66,6 +68,9 @@ class AtomsData(collections.abc.Sequence):
 
         if sort < 0:
             raise ValueError("Parameter 'sort' cannot be negative.")
+
+        if n_atoms is not None and (sort + 1) > n_atoms:
+            raise ValueError("Parameter 'sort' should not exceed atom indices")
 
         # "mass"
         mass = item["mass"]
