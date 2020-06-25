@@ -22,6 +22,12 @@ class TestAbinsData(unittest.TestCase):
         with self.assertRaises(TypeError):
             AbinsData(k_points_data=self.mock_kpd, atoms_data={'key': 'value'})
 
+    def test_init_noloader(self):
+        with self.assertRaises(ValueError):
+            AbinsData.from_calculation_data(
+                abins.test_helpers.find_file("squaricn_sum_LoadCASTEP.phonon"),
+                ab_initio_program='fake_program')
+
     def test_data_content(self):
         abins_data = AbinsData(k_points_data=self.mock_kpd,
                                atoms_data=self.mock_ad)
