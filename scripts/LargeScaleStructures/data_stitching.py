@@ -19,15 +19,16 @@ if "workbench.app.mainwindow" in sys.modules:
     IS_IN_MANTIDGUI = True
 else:
     try:
-        import mantidplot
+        import mantidplot # noqa: F401
         IS_IN_MANTIDGUI = True
     except(ImportError, ImportWarning):
         pass
 if IS_IN_MANTIDGUI:
-    from qtpy.QtCore import QObject, Signal, Slot
+    from qtpy.QtCore import QObject
     from mantid.plots._compatability import plotSpectrum
     from matplotlib import pyplot
     from mantidqt.plotting.markers import RangeMarker
+
 
 class RangeSelector(object):
     """
@@ -51,8 +52,8 @@ class RangeSelector(object):
             if IS_IN_MANTIDGUI:
                 fig = pyplot.gcf()
                 if len(fig.axes) > 0:
-                  ax = fig.axes[0]
-                  ax.remove_callback(self.cid)
+                    ax = fig.axes[0]
+                    ax.remove_callback(self.cid)
 
         def connect(self, ws, call_back, xmin=None, xmax=None,
                     range_min=None, range_max=None, x_title=None,
@@ -88,7 +89,6 @@ class RangeSelector(object):
                 self.fit_range = RangeMarker(l.figure.canvas, 'green', 0.0, 0.0)
 
             self.cid = l.callbacks.connect('xlim_changed', self._call_back)
-
 
     @classmethod
     def connect(cls, ws, call_back, xmin=None, xmax=None,
