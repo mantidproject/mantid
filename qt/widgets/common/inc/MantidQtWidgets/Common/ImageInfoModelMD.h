@@ -21,13 +21,10 @@ public:
   @param x: x data coordinate
   @param y: y data coordinate
   @param signal: the signal value at x, y
-  @param getValues: if false the list will contain the header names and "-" for
-  each of the numeric values
   @return a vector containing pairs of strings
   */
   std::vector<QString> getInfoList(const double x, const double y,
-                                   const double signal,
-                                   bool getValues = true) override;
+                                   const double signal) override;
 
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override {
     UNUSED_ARG(ws);

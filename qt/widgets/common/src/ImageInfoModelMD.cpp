@@ -6,18 +6,19 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/ImageInfoModelMD.h"
+#include <climits>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 std::vector<QString> ImageInfoModelMD::getInfoList(const double x,
                                                    const double y,
-                                                   const double signal,
-                                                   bool getValues) {
+                                                   const double signal) {
   std::vector<QString> list;
-  addNameAndValue("x", list, x, 4, getValues);
-  addNameAndValue("y", list, y, 4, getValues);
-  addNameAndValue("Signal", list, signal, 4, getValues);
+  constexpr auto dblmax(std::numeric_limits<double>::max());
+  addNameAndValue("x", list, x, 4, (x != dblmax));
+  addNameAndValue("y", list, y, 4, (y != dblmax));
+  addNameAndValue("Signal", list, signal, 4, (signal != dblmax));
 
   return list;
 }

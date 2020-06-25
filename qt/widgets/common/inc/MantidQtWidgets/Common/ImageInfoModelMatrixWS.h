@@ -38,8 +38,7 @@ public:
   @return a vector containing pairs of strings
   */
   std::vector<QString> getInfoList(const double x, const double specNum,
-                                   const double signal,
-                                   bool getValues = true) override;
+                                   const double signal) override;
 
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
 
