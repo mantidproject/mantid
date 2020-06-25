@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
+from typing import Any, Dict, Optional
 import numpy as np
 
 import abins
@@ -80,8 +81,8 @@ class Tester(object):
         # advanced_parameters is stored as a str but we unpack/compare to dict
         # so comparison will tolerate unimportant formatting changes
 
-        self.assertEqual(correct_data["attributes"]["advanced_parameters"],
-                         json.loads(data["attributes"]["advanced_parameters"]))
+        self._compare_advanced_parameters(correct_data["attributes"]["advanced_parameters"],
+                                          json.loads(data["attributes"]["advanced_parameters"]))
 
         try:
             self.assertEqual(abins.test_helpers.find_file(filename + "." + extension),
@@ -92,6 +93,39 @@ class Tester(object):
 
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
+
+    def _compare_advanced_parameters(self,
+                                     ref_params: Dict[str, Any],
+                                     test_params: Dict[str, Any],
+                                     instrument: Optional[str] = None) -> None:
+        """Assert that relevant parts of advanced_parameters dict agree
+
+        Args:
+            instrument: identity of instrument for test
+            ref_params: advanced_parameters dictionary from reference data
+            test_params: advanded_parameters dictionary from test file
+
+        Raises:
+            AssertionError if data does not agree
+            ValueError if instrument does not match ref_params
+        """
+
+        if 'fwhm' in ref_params['instruments']:
+            self.assertEqual(test_params['instruments'], ref_params['instruments'])
+        else:
+            assert 'fwhm' not in test_params
+
+        #raise Exception("IS THIS EVEN WORTH CHECKING FOR THIS KIND OF TEST?")
+        if instrument:
+            if instrument not in ref_params['instruments']:
+                raise ValueError(f'Instrument "{instrument}" parameters are not in the reference data')
+            self.assertIn(instrument, ref_params['instruments'])
+            self.assertEqual(test_params['instruments'][instrument],
+                             ref_params['instruments'][instrument])
+
+        self.assertEqual(test_params['hdf_groups'], ref_params['hdf_groups'])
+        self.assertEqual(test_params['sampling'], ref_params['sampling'])
+        
 
     def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
 
@@ -180,7 +214,7 @@ class Tester(object):
     @staticmethod
     def _get_reader_data(ab_initio_reader):
         """
-        :param ab_initio_reader: object of type  AbInitioProgram
+        :param ab_initio_reader: object of type AbInitioLoader
         :returns: read data
         """
         abins_type_data = ab_initio_reader.read_vibrational_or_phonon_data()
@@ -205,6 +239,7 @@ class Tester(object):
         """
 
         data = cls._get_reader_data(ab_initio_reader)
+
         # Unpack advanced parameters into a dictionary for ease of comparison later.
         # It might be wise to remove this and store escaped strings for consistency,
         # but for now we don't want to disturb the old test data so follow its format.
