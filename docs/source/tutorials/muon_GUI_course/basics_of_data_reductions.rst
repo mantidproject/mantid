@@ -55,7 +55,7 @@ the correction of detector deadtime see: Kilcoyne, RAL report RAL-94-080 (1994).
 
 To observe the effect of dead time, follow the instructions below:
 
-1.  Open the Muon Analysis GUI and make sure 'none' is selected for Dead Time Correction (in the Instrument section of the Home :ref:`Tab<the_tabs>`)
+1.  Open the Muon Analysis GUI and make sure 'none' is selected for Dead Time Correction (in the Instrument section of the Home :ref:`Tab<the_tabs_home>`)
 2.  Load data file EMU00034998.nxs using the GUI. 
 3.  This example is best viewed with a fixed rebin with steps of 10, select Fixed from the dropdown menu and then type 10 into the box.
 4.  To compare this data to some with dead time correction, its name must be changed so that Mantid does not automatically update the workspace. 

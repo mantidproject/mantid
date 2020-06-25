@@ -17,7 +17,7 @@ however, it is not restricted to muon analysis, and thus contains many more buil
 To demonstrate the process of fitting a function to a workspace with the Fit Function tool, follow the instructions below.
 
 1.  Open the file HIFI00062798.nxs using  the Muon analysis GUI, this can then be closed, as it won't be used for data analysis.
-2.  Plot the long pair from HIFI62798 Pairs (plotting spectrums described in `Loading Data`_).
+2.  Plot the long pair from HIFI62798 Pairs (plotting spectrums described in `03_displaying_1D_data`_).
 3.  Click on the data plot window and click the Fit button next to the gear icon. See Figure 36.
 
 .. figure:: /images/Fit_Button2.PNG
@@ -36,7 +36,7 @@ Alternatively, right clicking the plot, with the Fit Function tool open, and sel
 This will bring up a selection box which lists all available fitting functions in alphabetical order.
 
 7.  Fit ExpDecayOsc to the data by selecting Fit in the Fit drop down box. Figure 37 shows the process. 
-    Again note that a better fit is achieved if Alpha has been guessed via the Grouping :ref:`tab<the_tabs>`.
+    Again note that a better fit is achieved if Alpha has been guessed via the Grouping :ref:`tab<the_tabs_grouping>`.
 
 .. figure:: /images/datafittingfig37.gif
     :align: center

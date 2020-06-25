@@ -133,7 +133,7 @@ To create a fit function involving adding and multiplying functions, follow the 
 2.  Add the function StaticKuboToyabe (under MuonGeneric) to the data, using the method from `Using Fit Functions`_. 
 3.  Repeat the same method to add a second function, ExpDecayMuon, to the same data set. Simply adding a function creates a composite where all functions are summed. See Figure 26 for the process.
     
-.. figure:: /images/thefittingfig28.gif
+.. figure:: /images/thetabsfittingfig28.gif
     :align: center
     
     Figure 28: How to add two functions together. 

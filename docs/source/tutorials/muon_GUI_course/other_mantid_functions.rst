@@ -40,9 +40,9 @@ When a muon data set is loaded via the GUI, the Matrix Workspaces are created au
     There is one spectrum per detector. In the window that opens up, the number of the spectrum/detector
     to plot, or a range of spectra, can be selected.
 *   **NAME12345 Groups MA** contains data in raw counts and asymmetry, collated 
-    into the groups specified in the Grouping tab of the interface (see the Grouping section in :ref:`the_tabs` for more). 
+    into the groups specified in the Grouping tab of the interface (see the Grouping section in :ref:`the_tabs_grouping` for more). 
     Each workspace's name contains the name of the group it holds data for.
-*   **NAME12345 Pairs MA** these workspaces contain the Pairs (such as 'long' which is created by default) specified in the *Grouping Options* tab of the interface (see the Grouping section in :ref:`the_tabs` for more).
+*   **NAME12345 Pairs MA** these workspaces contain the Pairs (such as 'long' which is created by default) specified in the *Grouping Options* tab of the interface (see the Grouping section in :ref:`the_tabs_grouping` for more).
     Each workspace's name contains the name of the pair it holds data for. 
 
 *   **Fitting Results MA** contains the workspaces produced when data is fitted, the spectra and tables within are named with the convention 'NAME12345; Group/Pair Asym; Asymmetry; MA; Fitted; FunctionName'. 
@@ -205,7 +205,7 @@ One can also change the axis settings, such as the maximum and minimum values, a
 The axis limits can be changed either through the Figure options menu, or by double clicking on the relevant axis, while other .
 See the instructions below for an example on how to change the X-Axis limits and set the Y-Scale to logarithmic.
 
-1. Load the MUSR00024563 dataset using the muon analysis GUI. How to do this is described in the Home section of :ref:`the_tabs`.
+1. Load the MUSR00024563 dataset using the muon analysis GUI. How to do this is described in the Home section of :ref:`the_tabs_home`.
 2. Plot the backwards counts in the Workspace pane
 3. Open the Figure options menu, or **or** double click on the X axis to Edit axis.
 4. In the Axes tab of the Figure options, set the value in the box labelled Upper Limit to 16 **or** do the same for the box labelled Max in the Edit axis dialog.
