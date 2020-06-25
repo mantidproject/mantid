@@ -48,8 +48,8 @@ class PropertiesDialogTest(unittest.TestCase):
         self.assertEqual(yEditor._memento.min, ax.get_ylim()[0])
         self.assertEqual(yEditor._memento.max, ax.get_ylim()[1])
         # test format
-        self.assertEqual(xEditor._memento.formatter, 'Scalar Format')
-        self.assertEqual(yEditor._memento.formatter, 'Log Format')
+        self.assertEqual(xEditor._memento.formatter, 'Decimal Format')
+        self.assertEqual(yEditor._memento.formatter, 'Scientific Format')
         # test scale
         self.assertEqual(xEditor._memento.log, False)
         self.assertEqual(yEditor._memento.log, True)

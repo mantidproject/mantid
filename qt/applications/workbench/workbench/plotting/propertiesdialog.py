@@ -118,8 +118,8 @@ class AxisEditor(PropertiesEditorBase):
         if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
-        self.ui.editor_format.addItem('Scalar Format')
-        self.ui.editor_format.addItem('Log Format')
+        self.ui.editor_format.addItem('Decimal Format')
+        self.ui.editor_format.addItem('Scientific Format')
         self.axes = axes
         self.axis_id = axis_id
         self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
@@ -141,9 +141,9 @@ class AxisEditor(PropertiesEditorBase):
         memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
         memento.grid = self.axis._gridOnMajor
         if type(self.axis.get_major_formatter()) is ScalarFormatter:
-            memento.formatter = 'Scalar Format'
+            memento.formatter = 'Decimal Format'
         elif type(self.axis.get_major_formatter()) is LogFormatterSciNotation:
-            memento.formatter = 'Log Format'
+            memento.formatter = 'Scientific Format'
         self._fill(memento)
 
     def changes_accepted(self):
@@ -159,6 +159,7 @@ class AxisEditor(PropertiesEditorBase):
             self.scale_setter('linear')
 
         self.lim_setter(self.limit_min, self.limit_max)
+        self._set_tick_format()
         which = 'both' if hasattr(axes, 'show_minor_gridlines') and axes.show_minor_gridlines else 'major'
         axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
 
@@ -188,9 +189,9 @@ class AxisEditor(PropertiesEditorBase):
 
     def _set_tick_format(self):
         formatter = self.ui.editor_format.currentText()
-        if formatter == 'Scalar Format':
+        if formatter == 'Decimal Format':
             fmt = ScalarFormatter(useOffset=True)
-        elif formatter == 'Log Format':
+        elif formatter == 'Scientific Format':
             fmt = LogFormatterSciNotation()
         getattr(self.axes, 'get_{}axis'.format(self.axis_id))().set_major_formatter(fmt)
         return
@@ -238,6 +239,7 @@ class ColorbarAxisEditor(AxisEditor):
                     self.images.append(img)
 
         self.create_model()
+        self.ui.editor_format.setEnabled(False)
 
     def changes_accepted(self):
         self.ui.errors.hide()
