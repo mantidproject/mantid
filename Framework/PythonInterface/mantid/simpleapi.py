@@ -86,39 +86,53 @@ def extract_progress_kwargs(kwargs):
     return start, end, kwargs
 
 
-def _create_generic_signature(algm_object):
-    """
-    Create a function signature appropriate for the given algorithm.
-    :param algm_object: An algorithm instance
-    :return: An inspect.Signature object if available else a 2 tuple
-             suitable for replacing co_varnames
-    """
-    # Calling help(...) on the wrapper function will produce a function
-    # signature along the lines of AlgorithmName(*args, **kwargs).
-    # We will replace the name "args" by the list of properties, and
-    # the name "kwargs" by "Version=X".
-    #   1 - Get the algorithm properties and build a string to list them,
-    #       taking care of giving no default values to mandatory parameters
-    #   2 - All output properties will be removed from the function
-    #       argument list
-    from inspect import Parameter, Signature
-    pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
-    parameters = []
-    for name in algm_object.mandatoryProperties():
-        prop = algm_object.getProperty(name)
-        # Mandatory parameters are those for which the default value is not valid
-        if isinstance(prop.isValid, str):
-            valid_str = prop.isValid
-        else:
-            valid_str = prop.isValid()
-        if len(valid_str) > 0:
-            parameters.append(Parameter(name, pos_or_keyword))
-        else:
-            # None is not quite accurate here, but we are reproducing the
-            # behavior found in the C++ code for SimpleAPI.
-            parameters.append(Parameter(name, pos_or_keyword, default=None))
-    return Signature(parameters)
+class LazySignature(inspect.Signature):
 
+    __slots__ = ('_alg_name', '__sig', 'args', 'kwargs')
+
+    def __init__(self, *args, **kwargs):
+        if "alg_name" not in kwargs:
+            super().__init__(*args, **kwargs)
+            self.__sig = self
+        else:
+            self._alg_name = kwargs.pop("alg_name")
+            self.__sig = None
+
+    @property
+    def _signature(self):
+        if self.__sig is None:
+            self.__sig = self._create_signature(self._alg_name)
+
+        return self.__sig
+
+    def __getattr__(self, item):
+        # Called for each attribute access.
+        if item in LazySignature.__slots__:
+            return getattr(self, item)
+        else:
+            return getattr(self._signature, item)
+
+    def _create_signature(self, alg_name):
+        from mantid.api import AlgorithmManager
+        alg_object = AlgorithmManager.Instance().createUnmanaged(alg_name)
+        alg_object.initialize()
+        from inspect import Parameter, Signature
+        pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
+        parameters = []
+        for name in alg_object.mandatoryProperties():
+            prop = alg_object.getProperty(name)
+            # Mandatory parameters are those for which the default value is not valid
+            if isinstance(prop.isValid, str):
+                valid_str = prop.isValid
+            else:
+                valid_str = prop.isValid()
+            if len(valid_str) > 0:
+                parameters.append(Parameter(name, pos_or_keyword))
+            else:
+                # None is not quite accurate here, but we are reproducing the
+                # behavior found in the C++ code for SimpleAPI.
+                parameters.append(Parameter(name, pos_or_keyword, default=None))
+        return Signature(parameters)
 
 def _show_dialog_fn_deprecation_warning(name):
     """Raise a deprecation warning for a *Dialog being used.
@@ -1146,7 +1160,7 @@ def _create_algorithm_function(name, version, algm_object):
     # enddef
     # Insert definition in to global dict
     algm_wrapper = _customise_func(algorithm_wrapper, name,
-                                   _create_generic_signature(algm_object),
+                                   LazySignature(alg_name=name),
                                    algm_object.docString())
     globals()[name] = algm_wrapper
     # Register aliases - split on whitespace
@@ -1404,7 +1418,7 @@ def _translate():
         try:
             # Create the algorithm object
             algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
-            algm_object.initialize()
+            # algm_object.initialize()
         except Exception as exc:
             logger.warning("Error initializing {0} on registration: '{1}'".format(name, str(exc)))
             continue
@@ -1446,10 +1460,10 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
                            "Algorithm::workspaceMethodInputProperty() has returned an empty string."
                            "This method is required to map the calling object to the correct property."
                            % algm_object.name())
-    if input_prop not in algm_object:
-        raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
-                           "Algorithm::workspaceMethodInputProperty() has returned a property name that "
-                           "does not exist on the algorithm." % algm_object.name())
+    # if input_prop not in algm_object:
+    #     raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
+    #                        "Algorithm::workspaceMethodInputProperty() has returned a property name that "
+    #                        "does not exist on the algorithm." % algm_object.name())
     _api._workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop,
                                              algm_object.workspaceMethodOn())
 

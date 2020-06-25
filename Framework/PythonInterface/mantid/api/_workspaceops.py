@@ -249,6 +249,7 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
     if hasattr(func_obj, '__signature__'):
         from inspect import Parameter
         func_parameters = list(func_obj.__signature__.parameters.values())
+        func_parameters.pop(0)
         func_parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
         signature = func_obj.__signature__.replace(parameters=func_parameters)
     else:
