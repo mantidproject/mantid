@@ -21,10 +21,7 @@ ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view)
 std::vector<QString> ImageInfoPresenter::getInfoList(const double x,
                                                      const double y,
                                                      const double z) {
-  bool getValues(true);
-  if (x == DBL_MAX || y == DBL_MAX || z == DBL_MAX)
-    getValues = false;
-  return getModel()->getInfoList(x, y, z, getValues);
+  return getModel()->getInfoList(x, y, z);
 }
 
 void ImageInfoPresenter::createImageInfoModel(

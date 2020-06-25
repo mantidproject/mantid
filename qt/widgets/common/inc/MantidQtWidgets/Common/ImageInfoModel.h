@@ -30,8 +30,7 @@ public:
   @return a vector containing pairs of strings
   */
   virtual std::vector<QString> getInfoList(const double x, const double y,
-                                           const double signal,
-                                           bool getValues = true) = 0;
+                                           const double signal) = 0;
 
   virtual void setWorkspace(const Mantid::API::Workspace_sptr &ws) = 0;
 
@@ -39,7 +38,7 @@ protected:
   void addNameAndValue(const std::string &label, std::vector<QString> &list,
                        const double value, const int precision,
                        bool includeValue = true,
-                       Mantid::Kernel::Unit_sptr units = nullptr);
+                       const Mantid::Kernel::Unit_sptr &units = nullptr);
 };
 
 } // namespace MantidWidgets

@@ -19,7 +19,7 @@ void ImageInfoModel::addNameAndValue(const std::string &label,
                                      std::vector<QString> &list,
                                      const double value, const int precision,
                                      bool includeValue,
-                                     Mantid::Kernel::Unit_sptr units) {
+                                     const Mantid::Kernel::Unit_sptr &units) {
   std::wstring unit;
   auto headerLabel = QString::fromStdString(label);
   if (units && !(unit = units->label().utf8()).empty()) {

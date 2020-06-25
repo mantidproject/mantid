@@ -37,13 +37,17 @@ ImageInfoModelMatrixWS::ImageInfoModelMatrixWS()
 // coordinates in the workspace.
 std::vector<QString> ImageInfoModelMatrixWS::getInfoList(const double x,
                                                          const double specNum,
-                                                         const double signal,
-                                                         bool getValues) {
+                                                         const double signal) {
+
   std::vector<QString> list;
 
   if (!m_workspace) {
     return list;
   }
+  constexpr auto dblmax(std::numeric_limits<double>::max());
+  bool getValues(true);
+  if (x == dblmax || specNum == dblmax || signal == dblmax)
+    getValues = false;
 
   const int spectrumNumber = static_cast<int>(specNum + 0.5);
   size_t wsIndex = 0;
