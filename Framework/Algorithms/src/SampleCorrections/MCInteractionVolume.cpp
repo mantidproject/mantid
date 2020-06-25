@@ -37,10 +37,6 @@ MCInteractionVolume::MCInteractionVolume(
     : m_sample(sample.getShape().clone()), m_env(nullptr),
       m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts),
       m_pointsIn(pointsIn) {
-  if (!m_sample->hasValidShape()) {
-    throw std::invalid_argument(
-        "MCInteractionVolume() - Sample shape does not have a valid shape.");
-  }
   try {
     m_env = &sample.getEnvironment();
     assert(m_env);
@@ -50,6 +46,21 @@ MCInteractionVolume::MCInteractionVolume(
     }
   } catch (std::runtime_error &) {
     // swallow this as no defined environment from getEnvironment
+  }
+
+  bool atLeastOneValidShape = m_sample->hasValidShape();
+  if (!atLeastOneValidShape && m_env) {
+    for (size_t i = 0; i < m_env->nelements(); i++) {
+      if (m_env->getComponent(i).hasValidShape()) {
+        atLeastOneValidShape = true;
+        break;
+      }
+    }
+  }
+  if (!atLeastOneValidShape) {
+    throw std::invalid_argument(
+        "MCInteractionVolume() - Either the Sample or one of the "
+        "environment parts must have a valid shape.");
   }
 }
 

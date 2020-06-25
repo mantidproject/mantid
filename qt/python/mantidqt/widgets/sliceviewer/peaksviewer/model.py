@@ -103,13 +103,13 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
         return slicepoint
 
-    def zoom_to(self, index):
+    def viewlimits(self, index):
         """
-        Set the view to display the peak center at the given index. It is assumed
+        Retrieve the view to limits to display the peak center at the given index. It is assumed
         that slice point has been updated so it contains this peak
         :param index: Index of peak in list
         """
-        self._representations[index].zoom_to()
+        return self._representations[index].viewlimits()
 
     def _frame_to_slice_fn(self, frame):
         """

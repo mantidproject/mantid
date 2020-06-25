@@ -131,7 +131,8 @@ class PlotsSaver(object):
                 "xAxisScale": ax.xaxis.get_scale(),
                 "xLim": ax.get_xlim(),
                 "yAxisScale": ax.yaxis.get_scale(),
-                "yLim": ax.get_ylim()}
+                "yLim": ax.get_ylim(),
+                "showMinorGrid": hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines}
 
     def get_dict_from_axis_properties(self, ax):
         prop_dict = {"majorTickLocator": type(ax.get_major_locator()).__name__,
@@ -193,6 +194,7 @@ class PlotsSaver(object):
             grid_style["color"] = to_hex(gridlines[0].get_color())
             grid_style["alpha"] = gridlines[0].get_alpha()
             grid_style["gridOn"] = True
+            grid_style["minorGridOn"] = ax._gridOnMinor
         else:
             grid_style["gridOn"] = False
         return grid_style

@@ -87,6 +87,20 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QCheckBox" name="show_minor_ticks">
+              <property name="text">
+               <string>Show Minor Ticks</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="show_minor_gridlines">
+              <property name="text">
+               <string>Show Minor Gridlines</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -423,6 +437,45 @@
             <string>Legend</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_13">
+              <item>
+               <widget class="QLabel" name="legend_size_label">
+                <property name="text">
+                 <string>Legend font size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="legend_font_size">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="minimum">
+                 <double>0.500000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>20.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.500000000000000</double>
+                </property>
+                <property name="value">
+                 <double>8.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_11">
               <property name="spacing">

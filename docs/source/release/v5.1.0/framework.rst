@@ -28,6 +28,7 @@ Algorithms
 - Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Bug fixed where setting ResimulateTracksForDifferentWavelengths parameter to True was being ignored
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections are not calculated anymore for masked spectra
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections can be calculated for a workspace without a sample eg container only
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has received a number of updates:
 
   - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
