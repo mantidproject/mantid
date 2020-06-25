@@ -39,6 +39,24 @@ using namespace Kernel;
 using namespace API;
 using std::placeholders::_1;
 
+bool is1DCompositeFunction(const IFunction_sptr &function) {
+  const auto compositeFunction =
+      std::dynamic_pointer_cast<CompositeFunction>(function);
+  if (compositeFunction) {
+    for (size_t index = 0; index < compositeFunction->nFunctions(); index++) {
+      if (!is1DCompositeFunction(compositeFunction->getFunction(index))) {
+        is1D = false;
+        break;
+      }
+    }
+  } else {
+    const IFunction1D_sptr fun =
+        std::dynamic_pointer_cast<IFunction1D>(function);
+    bool is1D = fun ? true : false;
+    return is1D;
+  }
+}
+
 void evaluateFunctionOnRange(const IFunction_sptr &function, size_t domainSize,
                              const double *range, std::vector<double> &output) {
   const IFunction1D_sptr fun = std::dynamic_pointer_cast<IFunction1D>(function);
@@ -112,6 +130,8 @@ struct RealFFTWorkspace {
  */
 void Convolution::function(const FunctionDomain &domain,
                            FunctionValues &values) const {
+  innerFunctionsAre1D();
+
   if (nFunctions() == 0) {
     values.zeroCalculated();
     return;
@@ -132,6 +152,17 @@ void Convolution::function(const FunctionDomain &domain,
     functionDirectMode(domain, values);
   } else {
     functionFFTMode(domain, values);
+  }
+}
+
+/**
+ * Checks that the functions being convolted are 1D and throws if not.
+ */
+void Convolution::innerFunctionsAre1D() const {
+  for (size_t index = 0; index < nFunctions(); index++) {
+    if (!is1DCompositeFunction(getFunction(index))) {
+      throw std::runtime_error("Convolution only enabled for 1D functions.");
+    }
   }
 }
 
