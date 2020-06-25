@@ -12,7 +12,8 @@ New
 - There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
 - A default legend location can be set in the Workbench settings.
 - The Sample Transmission Calculator is now implemented in workbench.
-- The axis tick markers in a plot can be switched between Log and decimal formats indepentantly of the axes scale.
+- The axis tick markers in a plot can be switched between Log and decimal formats independently of the axes scale.
+- Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
 
 Improvements
 ############
