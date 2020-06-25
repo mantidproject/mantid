@@ -179,7 +179,7 @@ Shape2D *Shape2DCollection::createShape(const QString &type, int x,
   } else if (type.toLower() == "rectangle") {
     return new Shape2DRectangle(p, QSizeF(0, 0));
   } else if (type.toLower() == "sector") {
-    return new Shape2DSector(0, 0, 0, 4.28, p);
+    return new Shape2DSector(0.00001, 0.00002, 0, 5.28, p);
   } else if (type.toLower() == "free") {
     return new Shape2DFree(p);
   }

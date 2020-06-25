@@ -104,7 +104,6 @@ void Shape2D::setControlPoint(size_t i, const QPointF &pos) {
 
   if (i < 4) {
     m_boundingRect.setVertex(i, pos);
-    std::cout << "Pos " << pos << std::endl;
 
     refit();
   }
@@ -654,10 +653,11 @@ bool Shape2DSector::contains(const QPointF &p) const {
     return false;
   }
 
-  double angle = atan2(relPos.x(), relPos.y());
+  double angle = atan2(relPos.y(), relPos.x());
   if (angle < 0) {
     angle += 2 * M_PI;
   }
+
   return ((m_startAngle <= angle && angle <= m_endAngle) ||
           (m_startAngle > m_endAngle &&
            (angle <= m_endAngle || angle >= m_startAngle)));
@@ -673,6 +673,9 @@ void Shape2DSector::drawShape(QPainter &painter) const {
   double y_arcEnd = m_center.y() + sin(m_endAngle) * m_outerRadius;
 
   double sweepLength = (m_endAngle - m_startAngle) * to_degrees;
+  if (sweepLength < 0) {
+    sweepLength += 360;
+  }
 
   path.moveTo(x_origin, y_origin);
   QRectF absoluteBBox(QPointF(-1, 1), QPointF(1, -1));
@@ -749,13 +752,10 @@ void Shape2DSector::refit() {
   // current real bounding box of the sector
   QRectF BBox(topLeft, bottomRight);
 
-  // check if the bounding box has been modified
-
   QPointF xProj, yProj, proj;
-  qreal xPos, yPos;
+  qreal xPosX, yPosX, xPosY, yPosY;
   QVector2D slope;
 
-  // first case : the top left corner is the one being modified
   QPointF bRectTopLeft(
       std::min(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
       std::max(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
@@ -763,23 +763,28 @@ void Shape2DSector::refit() {
       std::max(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
       std::min(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
 
+  // check if the bounding box has been modified
   if (BBox.topLeft().x() != bRectTopLeft.x() &&
-      BBox.topLeft().y() != bRectTopLeft.y()) {
+      BBox.topLeft().y() != bRectTopLeft.y() &&
+      BBox.bottomRight().x() == bRectBottomRight.x() &&
+      BBox.bottomRight().y() == bRectBottomRight.y()) {
+    // top left corner is moving
+
     // first we need to find the best projection of the new corner on the
     // diagonal line of the rectangle, so its shape won't be modified, only
     // scaled.
-    //    m_outerRadius += 0.05;
+
     slope = QVector2D(BBox.topLeft() - BBox.bottomRight());
-    xPos = (m_boundingRect.p0() - BBox.topLeft()).x();
-    yPos = slope.y() * xPos / slope.x(); // TODO : check if non zero
-    xProj.setX(xPos);
-    xProj.setY(yPos);
+    xPosX = (bRectTopLeft - BBox.topLeft()).x();
+    yPosX = slope.y() * xPosX / slope.x(); // TODO : check if non zero
+    xProj.setX(xPosX);
+    xProj.setY(yPosX);
 
-    yPos = (m_boundingRect.p0() - BBox.topLeft()).y();
-    xPos = slope.x() * yPos / slope.y();
+    yPosY = (bRectTopLeft - BBox.topLeft()).y();
+    xPosY = slope.x() * yPosY / slope.y();
 
-    yProj.setX(xPos);
-    yProj.setY(yPos);
+    yProj.setX(xPosY);
+    yProj.setY(yPosY);
 
     if (distanceBetween(xProj, QPointF(0, 0)) <
         distanceBetween(yProj, QPointF(0, 0))) {
@@ -788,28 +793,152 @@ void Shape2DSector::refit() {
       proj = yProj;
     }
     proj += BBox.topLeft();
-    m_boundingRect.setVertex(0, proj);
-
     // then we need to adapt the shape to the new size
     qreal ratio = distanceBetween(proj, BBox.bottomRight()) /
                   distanceBetween(slope.toPointF(), QPointF(0, 0));
-    std::cout << ratio << std::endl;
-    std::cout << m_boundingRect.p0() << std::endl;
-    std::cout << "Slope " << slope.x() << " " << slope.y() << std::endl;
-    std::cout << proj << std::endl;
-    std::cout << std::endl;
+
+    m_boundingRect.setVertex(0, proj);
+
     m_innerRadius *= ratio;
     m_outerRadius *= ratio;
     m_center.setX((m_center.x() - BBox.bottomRight().x()) * ratio +
                   BBox.bottomRight().x());
     m_center.setY((m_center.y() - BBox.bottomRight().y()) * ratio +
                   BBox.bottomRight().y());
+  } else if (BBox.topLeft().x() != bRectTopLeft.x() &&
+             BBox.bottomRight().y() != bRectBottomRight.y() &&
+             BBox.bottomRight().x() == bRectBottomRight.x() &&
+             BBox.topLeft().y() == bRectTopLeft.y()) {
+    // bottom left corner is moving
+
+    slope = QVector2D(BBox.bottomLeft() - BBox.topRight());
+    xPosX = bRectTopLeft.x() - BBox.topLeft().x();
+    yPosX = slope.y() * xPosX / slope.x(); // TODO : check if non zero
+    xProj.setX(xPosX);
+    xProj.setY(yPosX);
+
+    yPosY = bRectBottomRight.y() - BBox.bottomRight().y();
+    xPosY = slope.x() * yPosY / slope.y();
+
+    yProj.setX(xPosY);
+    yProj.setY(yPosY);
+
+    if (distanceBetween(xProj, QPointF(0, 0)) <
+        distanceBetween(yProj, QPointF(0, 0))) {
+      proj = xProj;
+    } else {
+      proj = yProj;
+    }
+    proj += BBox.bottomLeft();
+
+    m_boundingRect.setVertex(1, proj);
+
+    // then we need to adapt the shape to the new size
+    qreal ratio = distanceBetween(proj, BBox.topRight()) /
+                  distanceBetween(slope.toPointF(), QPointF(0, 0));
+
+    m_innerRadius *= ratio;
+    m_outerRadius *= ratio;
+    m_center.setX((m_center.x() - BBox.topRight().x()) * ratio +
+                  BBox.topRight().x());
+    m_center.setY((m_center.y() - BBox.topRight().y()) * ratio +
+                  BBox.topRight().y());
+  } else if (BBox.bottomRight().x() != bRectBottomRight.x() &&
+             BBox.bottomRight().y() != bRectBottomRight.y() &&
+             BBox.topLeft().x() == bRectTopLeft.x() &&
+             BBox.topLeft().y() == bRectTopLeft.y()) {
+    // bottom right corner is moving
+    slope = QVector2D(BBox.bottomRight() - BBox.topLeft());
+    xPosX = bRectBottomRight.x() - BBox.bottomLeft().x();
+    yPosX = slope.y() * xPosX / slope.x(); // TODO : check if non zero
+    xProj.setX(xPosX);
+    xProj.setY(yPosX);
+
+    yPosY = bRectBottomRight.y() - BBox.bottomRight().y();
+    xPosY = slope.x() * yPosY / slope.y();
+
+    yProj.setX(xPosY);
+    yProj.setY(yPosY);
+
+    if (distanceBetween(xProj, QPointF(0, 0)) <
+        distanceBetween(yProj, QPointF(0, 0))) {
+      proj = xProj;
+    } else {
+      proj = yProj;
+    }
+    proj += BBox.bottomRight();
+
+    m_boundingRect.setVertex(2, proj);
+
+    // then we need to adapt the shape to the new size
+    qreal ratio = distanceBetween(proj, BBox.topLeft()) /
+                  distanceBetween(slope.toPointF(), QPointF(0, 0));
+
+    m_innerRadius *= ratio;
+    m_outerRadius *= ratio;
+    m_center.setX((m_center.x() - BBox.topLeft().x()) * ratio +
+                  BBox.topLeft().x());
+    m_center.setY((m_center.y() - BBox.topLeft().y()) * ratio +
+                  BBox.topLeft().y());
+  } else if (BBox.bottomRight().x() != bRectBottomRight.x() &&
+             BBox.topLeft().y() != bRectTopLeft.y() &&
+             BBox.topLeft().x() == bRectTopLeft.x() &&
+             BBox.bottomRight().y() == bRectBottomRight.y()) {
+    // top right corner is moving
+    slope = QVector2D(BBox.topRight() - BBox.bottomLeft());
+    xPosX = bRectBottomRight.x() - BBox.bottomRight().x();
+    yPosX = slope.y() * xPosX / slope.x(); // TODO : check if non zero
+    xProj.setX(xPosX);
+    xProj.setY(yPosX);
+
+    yPosY = bRectTopLeft.y() - BBox.topLeft().y();
+    xPosY = slope.x() * yPosY / slope.y();
+
+    yProj.setX(xPosY);
+    yProj.setY(yPosY);
+
+    if (distanceBetween(xProj, QPointF(0, 0)) <
+        distanceBetween(yProj, QPointF(0, 0))) {
+      proj = xProj;
+    } else {
+      proj = yProj;
+    }
+    proj += BBox.topRight();
+
+    m_boundingRect.setVertex(3, proj);
+
+    // then we need to adapt the shape to the new size
+    qreal ratio = distanceBetween(proj, BBox.bottomLeft()) /
+                  distanceBetween(slope.toPointF(), QPointF(0, 0));
+
+    m_innerRadius *= ratio;
+    m_outerRadius *= ratio;
+    m_center.setX((m_center.x() - BBox.bottomLeft().x()) * ratio +
+                  BBox.bottomLeft().x());
+    m_center.setY((m_center.y() - BBox.bottomLeft().y()) * ratio +
+                  BBox.bottomLeft().y());
+  }
+
+  if ((BBox.bottomRight().x() != bRectBottomRight.x() &&
+       BBox.topLeft().x() != bRectTopLeft.x() &&
+       BBox.bottomRight().x() - bRectBottomRight.x() ==
+           BBox.topLeft().x() - bRectTopLeft.x()) ||
+      (BBox.bottomRight().y() != bRectBottomRight.y() &&
+       BBox.topLeft().y() != bRectTopLeft.y() &&
+       BBox.bottomRight().y() - bRectBottomRight.y() ==
+           BBox.topLeft().y() - bRectTopLeft.y())) {
+    // every corner has moved by the same distance -> the shape is being moved
+    qreal xDiff = bRectBottomRight.x() - BBox.bottomRight().x();
+    qreal yDiff = bRectBottomRight.y() - BBox.bottomRight().y();
+
+    m_center.setX(m_center.x() + xDiff);
+    m_center.setY(m_center.y() + yDiff);
   }
   resetBoundingRect();
 }
 
 double distanceBetween(const QPointF &p0, const QPointF &p1) {
-  return sqrt(pow(p0.x() - p1.x(), 2) + pow(p0.y() + p1.y(), 2));
+  return sqrt(pow(p0.x() - p1.x(), 2) + pow(p0.y() - p1.y(), 2));
 }
 
 void Shape2DSector::resetBoundingRect() {
@@ -854,13 +983,14 @@ void Shape2DSector::resetBoundingRect() {
 
   top_left += m_center;
   bottom_right += m_center;
+
   m_boundingRect = RectF(top_left, bottom_right);
 }
 
 QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
   double halfAngle =
       m_startAngle < m_endAngle
-          ? fmod(m_startAngle + m_endAngle, 2 * M_PI) / 2.
+          ? fmod((m_startAngle + m_endAngle) / 2., 2 * M_PI)
           : fmod((m_startAngle + m_endAngle + 2 * M_PI) / 2, 2 * M_PI);
   double halfLength = (m_outerRadius + m_innerRadius) / 2;
 
