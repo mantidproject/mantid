@@ -25,8 +25,7 @@ The Fitting tab allows the user to:
 
 Mantid comes with a number of fitting functions. Additional functions may
 be added or a user may define their own function.
- A number of fit functions have been programmed which are specific to the analysis of
-muon spectra.
+A number of fit functions have been programmed which are specific to the analysis of muon spectra.
 
 Some of the muon specific functions in Mantid include:
 
@@ -110,7 +109,7 @@ To illustrate this:
     Figure 26: How to change the fitting scale of a function. 
 
 .. figure:: /images/thetabsfittingfig27.png
-        :align: center
+    :align: center
 
     Figure 27: The result of fitting function `ExpDecayOsc` to `HIFI00062798`. The fit is shown in orange, while the green line indicates the difference between it and the data.
 

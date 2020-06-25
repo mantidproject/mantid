@@ -17,7 +17,7 @@ however, it is not restricted to muon analysis, and thus contains many more buil
 To demonstrate the process of fitting a function to a workspace with the Fit Function browser, follow the instructions below.
 
 1.  Open the file `HIFI00062798.nxs` using  the Muon analysis GUI and then close Muon Analysis, as it won't be used for data analysis.
-2.  Plot the long pair from HIFI62798 Pairs (plotting spectrums described in `03_displaying_1D_data`_).
+2.  Plot the long pair from HIFI62798 Pairs (plotting spectrums described in :ref:`displaying 1D data<03_displaying_1D_data>`).
 3.  Click on the data plot window and click the`Fit` button next to the gear icon. See Figure 36.
 
 .. figure:: /images/Fit_Button2.PNG
@@ -49,7 +49,7 @@ User Defined Functions
 User Defined functions can be added using the Fit Function browser, see below for instructions on how to do this.
 
 1.  Load the file `EMU00011888.nxs` using the Muon Analysis GUI
-2.  Click on the arrow next to the `EMU11888` workspace in the ADS and plot the workspace ending in `fwd; Counts' as described in Loading Data.
+2.  Click on the arrow next to the `EMU11888` workspace in the ADS and plot the workspace ending in `fwd; Counts` as described in Loading Data.
 3.  Click the `Fit` button at the right hand side of the toolbar to open the fit function browser. 
 4.  Add the `UserFunction` function, this can be found in the `General` section of the fit function selection menu.
 5.  In the Functions panel, there will now be an undefined `UserFunction`. Expand it to see the parameters and click on the empty box next to the `Formula` input box, and then the `...` button which appears. 

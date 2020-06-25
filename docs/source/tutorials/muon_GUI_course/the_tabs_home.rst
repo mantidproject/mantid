@@ -55,11 +55,10 @@ For example, to set the plot to a fixed bin-width of choice, follow the instruct
 
 1.  Load HIFI run number `00062798` (as described above).
 2.  In the `Rebin` section of the Home tab, use the drop-down menu and change its value from `None` to `Fixed`.
-3.  In the box adjacent to it, input a suitable value - `10` is suggested - and press enter. This will cause a new workspace, `HIFI62798; Pair Asym; long; Rebin; MA` to appear in `HIFI62798'.
+3.  In the box adjacent to it, input a suitable value - `10` is suggested - and press enter. This will cause a new workspace, `HIFI62798; Pair Asym; long; Rebin; MA` to appear in `HIFI62798`.
 4.  The effect of rebinning is best viewed on only a certain portion of the data, use the Figure options as described in the Overlaying and Styling Plots section of :ref:`other_mantid_functions`
 5.  Go to the ADS and plot `HIFI62798; Pair Asym; long; MA`.
-6.	Navigate to, `HIFI62798; Pair Asym; long; Rebin; MA`, then right click it and select `Plot` > `Overplot spectrum with errors`.
-The rebinned data should appear over the unbinned dataset. If this does not happen, check the Loading Data section of :ref:`other_mantid_functions` and ensure the plotting has been carried out correctly. An example of this process is shown in Figure 17 below.
+6.	Navigate to, `HIFI62798; Pair Asym; long; Rebin; MA`, then right click it and select `Plot` > `Overplot spectrum with errors`. The rebinned data should appear over the unbinned dataset. If this does not happen, check the Loading Data section of :ref:`other_mantid_functions` and ensure the plotting has been carried out correctly. An example of this process is shown in Figure 17 below.
 
 .. figure:: /images/thetabshomefig17.gif
     :align: center
