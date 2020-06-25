@@ -176,7 +176,12 @@ file(
 set(MANTIDPYTHON_PREAMBLE
     "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%"
 )
-
+# Launch script
+# Developer verison
+set(MANTIDLAUNCH_PREAMBLE
+    "$QT_PLUGIN_PATH=\"${THIRD_PARTY_DIR}\\lib\\qt5\\plugins\"\n$PYTHONHOME=\"${THIRD_PARTY_DIR}\\lib\\python3.8\"\n$ERROR_REPORTER_DIR=\"${PROJECT_SOURCE_DIR}\\scripts\\ErrorReporter\"\n
+    $LAUNCH_SCRIPT=\"workbench-script.pyw\""
+)
 configure_file ( ${PACKAGING_DIR}/launch_workbench.ps1.in
     ${PROJECT_BINARY_DIR}/launch_workbench.ps1.in @ONLY )
 # place it in the appropriate directory
@@ -186,6 +191,15 @@ file(GENERATE
      INPUT
      ${PROJECT_BINARY_DIR}/launch_workbench.ps1.in
   )
+# Install version
+set(MANTIDLAUNCH_PREAMBLE
+    "$QT_PLUGIN_PATH=\"..\\plugins\\qt5\"\n$PYTHONHOME=\".\"\n$ERROR_REPORTER_DIR=\"..\\scripts\\ErrorReporter\"
+     $LAUNCH_SCRIPT=\"launch_workbench.pyw\""
+)
+configure_file(
+  ${PACKAGING_DIR}/launch_workbench.ps1.in
+  ${PROJECT_BINARY_DIR}/launch_workbench.install.ps1 @ONLY
+)
 
 #  Semi-colon gen exp prevents future generators converting to CMake lists
 set ( MSVC_IDE_ENV "PYTHONPATH=${MSVC_BIN_DIR}$<SEMICOLON>PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}" )

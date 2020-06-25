@@ -1,17 +1,23 @@
 ################################################################
 # Note: All commands here must be COMPATIBLE with PowerShell 2.0
 ################################################################
+# Process command line arguments
+param(
+  # Switch to toggle between Python and PythonW interpreter executables
+  [switch]$console,
+  # Switch to display help and exit
+  [switch]$help
+)
+
+if ($help) {
+  Write-Output("Available command line flags:
+    -console: Display the Python console in the background. All output will be redirected to it.
+    -help: Display this help message.")
+  exit
+}
+
 ## Setup some initial paths
-$CM_THIRD_PARTY_DIR="@THIRD_PARTY_DIR@"
-$THIRD_PARTY_DIR=$CM_THIRD_PARTY_DIR -replace '/', '\'
-$CM_SOURCE_DIR = "@PROJECT_SOURCE_DIR@"
-$SOURCE_DIR=$CM_SOURCE_DIR -replace '/', '\'
-$ERROR_REPORTER_DIR = "$SOURCE_DIR\scripts\ErrorReporter"
-
-## turn the error reporter on
-$properties = 'Mantid.properties'
-(Get-Content $properties) -replace 'usagereports\.enabled = 0', 'usagereports.enabled = 1' | Set-Content $properties
-
+@MANTIDLAUNCH_PREAMBLE@
 
 # Getting script directory in PowerShell 2.0, sourced from PS2EXE `Get-ScriptPath.ps1` example
 if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript") {
@@ -29,16 +35,21 @@ if ($console) {
 else {
   $python_executable = "pythonw.exe"
 }
+
 # Set the Qt plugins path to point QT to the correct directory
-$env:QT_PLUGIN_PATH = Resolve-Path("$THIRD_PARTY_DIR/lib/qt5")
+$env:QT_PLUGIN_PATH = Resolve-Path("$QT_PLUGIN_PATH")
 # Setup python path
-$env:PYTHONHOME = Resolve-Path("$THIRD_PARTY_DIR/lib/python3.8")
-$env:PYTHONPATH = $scriptRootDirectory
+$env:PYTHONHOME = Resolve-Path("$PYTHONHOME")
+# Appends the Mantid bin directory to the PATH so that the import can find the QT DLLs
+$env:PATH += ";$scriptRootDirectory"
+# Set Python warnings filter to ignore SyntaxWarnings
+$env:PYTHONWARNINGS = "default::DeprecationWarning:__main__,ignore::DeprecationWarning,ignore::PendingDeprecationWarning,ignore::ImportWarning,ignore::ResourceWarning,ignore::SyntaxWarning"
+
 # The 2>&1 at the end flushes STDERR into STDOUT and removes the new popup Windows that come from PS2EXE
 # Additionally that will correctly capture the output when run with just python.exe (console visible)
 # The -PassThru parameter tells PowerShell to return the process object
 
-$p = Start-Process -NoNewWindow -PassThru -FilePath "$env:PYTHONHOME/$python_executable" "./workbench-script.pyw" 2>&1
+$p = Start-Process -NoNewWindow -PassThru -FilePath "$env:PYTHONHOME/$python_executable" "./$LAUNCH_SCRIPT" 2>&1
 
 # Getting the process ExitCode, source from https://stackoverflow.com/a/23797762/2823526
 # It is important that we cache the handle here, otherwise when reading
@@ -47,5 +58,5 @@ $p = Start-Process -NoNewWindow -PassThru -FilePath "$env:PYTHONHOME/$python_exe
 $handle = $p.Handle
 $p.WaitForExit();
 if ($p.ExitCode -ne 0) {
-  Start-Process -NoNewWindow -FilePath "$env:PYTHONHOME\$python_executable" "$ERROR_REPORTER_DIR/error_dialog_app.py --exitcode=$($p.ExitCode) --qtdir=$env:QT_PLUGIN_PATH\plugins --directory=$scriptRootDirectory --application=workbench"
+  Start-Process -NoNewWindow -FilePath "$env:PYTHONHOME\$python_executable" "$ERROR_REPORTER_DIR/error_dialog_app.py --exitcode=$($p.ExitCode) --qtdir=$env:QT_PLUGIN_PATH --directory=$scriptRootDirectory --application=workbench"
 }
