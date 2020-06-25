@@ -110,5 +110,6 @@ Bugfixes
 - Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
 - Changing a curve's properties on a plot no longer changes the order of the plot legend.
+- Fixed a bug which prevented the double click axis editor menus from working for tiled plots.
 
 :ref:`Release 5.1.0 <v5.1.0>`
