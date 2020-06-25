@@ -37,22 +37,15 @@ class AbinsData:
         Get AbinsData from ab initio calculation output file.
 
         :param filename: Path to vibration/phonon data file
-        :type filename: str
         :param ab_initio_program: Program which generated data file; this should be a key in AbinsData.ab_initio_loaders
-        :type ab_initio_program: str
         """
-        import abins.input  # Defer import to avoid loops when abins.__init__ imports AbinsData
+        from abins.input import all_loaders  # Defer import to avoid loops when abins.__init__ imports AbinsData
 
-        # This should live closer to the Loaders but for now it is the only place the dict is used.
-        ab_initio_loaders = {"CASTEP": abins.input.CASTEPLoader, "CRYSTAL": abins.input.CRYSTALLoader,
-                             "DMOL3": abins.input.DMOL3Loader, "GAUSSIAN": abins.input.GAUSSIANLoader,
-                             "VASP": abins.input.VASPLoader}
-
-        if ab_initio_program.upper() not in ab_initio_loaders:
+        if ab_initio_program.upper() not in all_loaders:
             raise ValueError("No loader available for {}: unknown program. "
                              "supported loaders: {}".format(ab_initio_program.upper(),
-                                                            ' '.join(ab_initio_loaders.keys())))
-        loader = ab_initio_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
+                                                            ' '.join(loaders.keys())))
+        loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
         data = loader.get_formatted_data()
         return data
 
@@ -78,4 +71,4 @@ class AbinsData:
                 "atoms_data": self.get_atoms_data().extract()}
 
     def __str__(self) -> str:
-        return "DFT data"
+        return "Abins data"
