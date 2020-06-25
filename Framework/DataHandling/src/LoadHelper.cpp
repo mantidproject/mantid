@@ -154,9 +154,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
   NXstatus getnextentry_status =
       NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
-    if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) { /*
-       if (std::string(nxname) == "entry0" ||
-           !std::string(nxname).compare(entryName)) {*/
+    if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
       recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr, emptyStr,
                                       1 /* level */);
       NXclosegroup(nxfileID);
