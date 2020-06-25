@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Dict, List
+from Muon.GUI.Common.ADSHandler.workspace_naming import remove_rebin_from_name, add_rebin_to_name
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
@@ -233,13 +234,31 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             return
         workspace_list = []
         indices = []
+        raw = self._view.is_raw_plot()
         for fit_information in fit_information_list:
             fit = fit_information.fit
             fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit)
-            workspace_list += fit_information.input_workspaces + fit_workspaces
+            workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces
             indices += [0] * len(fit_information.input_workspaces) + fit_indices
-
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+
+    # turn fit to raw off and on will cause a crash
+    def match_raw_selection(self, workspace_names, plot_raw):
+        ws_list = []
+        workspace_list = workspace_names
+        if type(workspace_names) != list:
+            workspace_list = [workspace_names]
+        for workspace_name in workspace_list:
+            fit_raw_data = self.context.fitting_context.fit_raw
+            # binned data but want raw plot
+            if plot_raw and not fit_raw_data:
+                ws_list.append(remove_rebin_from_name(workspace_name))
+            # raw data but want binned plot
+            elif not plot_raw and  fit_raw_data:
+                ws_list.append(add_rebin_to_name(workspace_name))
+            else:
+                ws_list.append(workspace_name)
+        return ws_list
 
     def handle_plot_guess_changed(self):
         if self.context.fitting_context.guess_ws is None:

@@ -129,8 +129,8 @@ class FittingTabPresenter(object):
         else:
             self.selected_data = self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(
                 self.selected_data)
+        self.context.fitting_context.fit_raw = self.view.fit_to_raw
         self.update_model_from_view(fit_to_raw=self.view.fit_to_raw)
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_type_changed(self):
         self.view.undo_fit_button.setEnabled(False)

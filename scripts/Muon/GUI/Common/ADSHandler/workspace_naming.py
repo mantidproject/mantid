@@ -236,3 +236,15 @@ def create_parameter_table_name(input_workspace_name, function_name):
     name = input_workspace_name + '; Fitted Parameters;' + function_name
 
     return name, directory
+
+def remove_rebin_from_name(name):
+    if REBIN_STR not in name:
+        return name
+    index =  [ch.start() for ch in re.finditer(r";",name)]
+    return name[:index[3]]+name[index[4]:]
+
+def add_rebin_to_name(name):
+    if REBIN_STR in name:
+        return name
+    index =  [ch.start() for ch in re.finditer(r";",name)]
+    return name[:index[-1]]+"; "+REBIN_STR+name[index[-1]:]
