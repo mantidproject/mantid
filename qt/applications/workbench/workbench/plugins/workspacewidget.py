@@ -179,8 +179,8 @@ class WorkspaceWidget(PluginWidget):
             except Exception as exception:
                 logger.warning("Could not open slice viewer for workspace '{}'."
                                "".format(ws.name()))
-                logger.debug("{}: {}".format(type(exception).__name__,
-                                             exception))
+                logger.warning("{}: {}".format(type(exception).__name__,
+                                               exception))
 
     def _do_show_instrument(self, names):
         """

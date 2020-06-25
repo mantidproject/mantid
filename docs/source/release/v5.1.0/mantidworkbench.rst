@@ -11,6 +11,7 @@ New
 - The Advanced Plotting menu is now in Workbench. This enables creating surface and contour plots of three or more workspaces, and choosing which log value to plot against.
 - There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
 - A default legend location can be set in the Workbench settings.
+- The Sample Transmission Calculator is now implemented in workbench.
 
 Improvements
 ############
@@ -75,8 +76,8 @@ Improvements
 - Improved the handling of ``WorkspaceSingleValue`` workspaces in workbench. This fixes a crash which occurred when interacting with workspaces of this type.
 - Right-clicking a plot without dragging while using the zoom tool now resets the axes limits.
 - The Slice Viewer now starts with the zoom option selected by default.
-
 - The curves in the dropdown list in the Curves tab of the figure options are now listed in the same order as the plot legend.
+- Added an option in the settings to specify the default legend size.
 
 Bugfixes
 ########

@@ -21,7 +21,7 @@ Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
 
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Frequency_Domain_Analysis_Old.py Muon/Muon_Analysis.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Frequency_Domain_Analysis_Old.py Muon/Muon_Analysis.py General/Sample_Transmission_Calculator.py
 
 # Directory containing the above startup scripts
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
@@ -262,3 +262,9 @@ plots.errorbar.errorEvery = 1
 
 # Default width of error bars in 1d plots
 plots.errorbar.Width = 1.0
+
+# Default legend location
+plots.legend.Location = best
+
+# Default legend size
+plots.legend.FontSize = 8

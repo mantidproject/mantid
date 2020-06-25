@@ -29,7 +29,8 @@ class PlotSettings(object):
     MARKER_SIZE = "plots.marker.Size"
     NORMALIZATION = "graph1d.autodistribution"
     SHOW_TITLE = "plots.ShowTitle"
-    LEGEND_LOCATION = "plots.LegendLocation"
+    LEGEND_FONT_SIZE = "plots.legend.FontSize"
+    LEGEND_LOCATION = "plots.legend.Location"
     AXES_SCALE = ['Linear', 'Log']
     LEGEND_LOCATION_LIST = ['best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left',
                             'center left', 'upper left', 'upper center']
@@ -42,7 +43,7 @@ class PlotSettings(object):
         self.setup_line_group()
         self.setup_marker_group()
         self.setup_error_bar_group()
-        self.setup_layout_group()
+        self.setup_legend_group()
         self.setup_signals()
 
     def load_general_setting_values(self):
@@ -100,11 +101,13 @@ class PlotSettings(object):
         self.view.cap_thickness.setValue(cap_thickness)
         self.view.error_every.setValue(error_every)
 
-    def setup_layout_group(self):
+    def setup_legend_group(self):
         legend_location = ConfigService.getString(self.LEGEND_LOCATION)
         self.view.legend_location.addItems(self.LEGEND_LOCATION_LIST)
         if legend_location in self.LEGEND_LOCATION_LIST:
             self.view.legend_location.setCurrentIndex(self.view.legend_location.findText(legend_location))
+        legend_font_size = float(ConfigService.getString(self.LEGEND_FONT_SIZE))
+        self.view.legend_font_size.setValue(legend_font_size)
 
     @staticmethod
     def _setup_style_combo_boxes(current_style, style_combo, combo_items):
@@ -129,6 +132,7 @@ class PlotSettings(object):
         self.view.cap_thickness.valueChanged.connect(self.action_cap_thickness_changed)
         self.view.error_every.valueChanged.connect(self.action_error_every_changed)
         self.view.legend_location.currentTextChanged.connect(self.action_legend_location_changed)
+        self.view.legend_font_size.valueChanged.connect(self.action_legend_size_changed)
 
     def action_normalization_changed(self, state):
         ConfigService.setString(self.NORMALIZATION, "On" if state == Qt.Checked else "Off")
@@ -171,3 +175,6 @@ class PlotSettings(object):
 
     def action_legend_location_changed(self, location):
         ConfigService.setString(self.LEGEND_LOCATION, str(location))
+
+    def action_legend_size_changed(self, value):
+        ConfigService.setString(self.LEGEND_FONT_SIZE, str(value))
