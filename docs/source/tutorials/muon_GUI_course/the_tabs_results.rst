@@ -48,7 +48,7 @@ As an exercise, follow the instructions below in order to produce a results tabl
 2.  In the Results tab, the default individual fit table should already be set up. Check that the `Function Name` and workspace(s) selected in the lower part of the tab show the 
     fit function and data used so far, respectively.
 3.  Use the table in the `Log Values` section to select parameters to include in the results table. This is done by checking the box next to them - try this now for 
-    run number and Temp_Sample.
+    `run number` and `Temp_Sample`.
 4.  Pick a name for the table, then click `Output Results`. See figure 33 for the process for an individual fit, and 34 for sequential.
 5. To view a table, right click it in the ADS and then select `Show Data`.
 
