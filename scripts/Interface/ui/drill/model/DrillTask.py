@@ -72,5 +72,5 @@ class DrillTask(QRunnable):
         """
         if self.alg.isRunning():
             self.alg.cancel()
-            self.signals.error.emit(self.ref)
+            self.signals.finished.emit(self.ref, 1)
 
