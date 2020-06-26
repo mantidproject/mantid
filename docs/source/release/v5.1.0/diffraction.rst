@@ -43,5 +43,6 @@ Improvements
 - New algorithm :ref:`FindGoniometerFromUB <algm-FindGoniometerFromUB-v1>` for making UBs for runs at different goniometer angles share common indexing and determine the goniometer axis and rotation required to match UBs to a reference.
 - New instrument geometry for MaNDi instrument at SNS
 - New algorithm :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths-v1>` for calculating the absorption weighted path length for each peak in a peaks workspace. The absorption weighted path length is used downstream from Mantid in extinction correction calculations
+- Can now edit H,K,L in the table of a peaks workspace in workbench (now consistent with Mantid Plot)
 
 :ref:`Release 5.1.0 <v5.1.0>`
