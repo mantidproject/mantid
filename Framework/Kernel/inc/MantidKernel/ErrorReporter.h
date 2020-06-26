@@ -38,10 +38,10 @@ public:
                 const std::string &textBox, const std::string &stacktrace);
   /// Sends an error report
   int sendErrorReport();
+  /// Generates an error string in json format
+  virtual std::string generateErrorMessage() const;
 
 protected:
-  /// Generates an error string in json format
-  virtual std::string generateErrorMessage();
   /// Sends report using Internet Helper
   virtual int sendReport(const std::string &message, const std::string &url);
 
