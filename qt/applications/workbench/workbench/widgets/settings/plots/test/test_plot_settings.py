@@ -49,7 +49,8 @@ class PlotsSettingsTest(unittest.TestCase):
                                                        call(PlotSettings.CAP_THICKNESS),
                                                        call(PlotSettings.ERROR_EVERY),
                                                        call(PlotSettings.LEGEND_LOCATION),
-                                                       call(PlotSettings.LEGEND_FONT_SIZE)])
+                                                       call(PlotSettings.LEGEND_FONT_SIZE),
+                                                       call(PlotSettings.COLORMAP)])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_normalization_changed(self, mock_ConfigService):
@@ -274,6 +275,27 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_legend_size_changed(8)
         mock_ConfigService.setString.assert_called_once_with(PlotSettings.LEGEND_FONT_SIZE, '8')
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_default_colormap_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        presenter.view.default_colormap_combo_box.setCurrentIndex(4)
+        colormap = presenter.view.default_colormap_combo_box.currentText()
+
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_default_colormap_changed()
+        mock_ConfigService.setString.assert_called_once_with(PlotSettings.COLORMAP, colormap)
+
+        presenter.view.default_colormap_combo_box.setCurrentIndex(5)
+        colormap = presenter.view.default_colormap_combo_box.currentText()
+        presenter.view.reverse_colormap_check_box.setChecked(True)
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_default_colormap_changed()
+        mock_ConfigService.setString.assert_called_once_with(PlotSettings.COLORMAP, colormap+"_r")
 
 
 if __name__ == "__main__":

@@ -14,16 +14,10 @@ our custom window.
 # std imports
 import numpy as np
 
-# 3rd party imports
-try:
-    from matplotlib.cm import viridis as DEFAULT_CMAP
-except ImportError:
-    from matplotlib.cm import jet as DEFAULT_CMAP
-
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
-                                       create_subplots,raise_if_not_sequence
+                                       create_subplots, raise_if_not_sequence
 from mantid.kernel import Logger, ConfigService
 from mantid.plots.datafunctions import add_colorbar_label
 from mantid.plots.utility import get_single_workspace_log_value
@@ -252,9 +246,9 @@ def pcolormesh_on_axis(ax, ws):
     ax.clear()
     ax.set_title(ws.name())
     if use_imshow(ws):
-        pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
+        pcm = ax.imshow(ws, cmap=ConfigService.getString("plots.images.Colormap"), aspect='auto', origin='lower')
     else:
-        pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
+        pcm = ax.pcolormesh(ws, cmap=ConfigService.getString("plots.images.Colormap"))
 
     return pcm
 
@@ -275,7 +269,7 @@ def plot_surface(workspaces, fig=None):
         else:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
 
-        surface = ax.plot_surface(ws, cmap=DEFAULT_CMAP)
+        surface = ax.plot_surface(ws, cmap=ConfigService.getString("plots.images.Colormap"))
         ax.set_title(ws.name())
         fig.colorbar(surface, ax=[ax])
         fig.show()

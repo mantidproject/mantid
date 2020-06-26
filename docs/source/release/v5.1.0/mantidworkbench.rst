@@ -79,6 +79,7 @@ Improvements
 - Right-clicking a plot without dragging while using the zoom tool now resets the axes limits.
 - The Slice Viewer now starts with the zoom option selected by default.
 - Added an option in the settings to specify the default legend size.
+- Added an option to the settings window to set the default colormap for image plots.
 
 Bugfixes
 ########
