@@ -22,7 +22,6 @@ class State(Enum):
 class DimensionWidget(QWidget):
     dimensionsChanged = Signal()
     valueChanged = Signal()
-
     """
     Hold all the individual dimensions
 
@@ -124,10 +123,13 @@ class DimensionWidget(QWidget):
         ]
 
     def get_bin_params(self):
-        return [
-            d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness()
-            for d in self.dims
-        ]
+        try:
+            return [
+                d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness()
+                for d in self.dims
+            ]
+        except AttributeError:
+            return None
 
     def set_slicepoint(self, point):
         """

@@ -174,7 +174,8 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_orthogonal.reset_mock()
         presenter.nonorthogonal_axes(True)
 
-        data_view_mock.deactivate_tool.assert_called_once_with(ToolItemText.LINEPLOTS)
+        data_view_mock.deactivate_and_disable_tool.assert_called_once_with(
+            ToolItemText.REGIONSELECTION)
         data_view_mock.create_axes_nonorthogonal.assert_called_once()
         data_view_mock.create_axes_orthogonal.assert_not_called()
         data_view_mock.plot_matrix.assert_called_once()
@@ -200,7 +201,8 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
         data_view_mock.plot_matrix.assert_called_once()
         data_view_mock.enable_tool_button.assert_has_calls(
-            (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.OVERLAY_PEAKS)))
+            (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION),
+             mock.call(ToolItemText.OVERLAY_PEAKS)))
 
     def test_request_to_show_all_data_sets_correct_limits_on_view(self):
         presenter = SliceViewer(None, model=self.model, view=self.view)

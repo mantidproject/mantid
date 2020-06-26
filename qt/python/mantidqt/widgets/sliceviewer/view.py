@@ -17,7 +17,8 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QVBoxLayout, QWidget
+from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
+                            QStatusBar, QVBoxLayout, QWidget)
 
 # local imports
 from mantidqt.MPLwidgets import FigureCanvas
@@ -123,18 +124,28 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
+        # Status bar
+        self.status_bar = QStatusBar(parent=self)
+        self.status_bar_label = QLabel()
+        self.status_bar.addWidget(self.status_bar_label)
+
         # layout
         layout = QGridLayout(self)
         layout.setSpacing(1)
         layout.addLayout(self.dimensions_layout, 0, 0, 1, 2)
         layout.addLayout(self.toolbar_layout, 1, 0, 1, 2)
+        layout.addLayout(self.colorbar_layout, 1, 1, 3, 1)
         layout.addWidget(self.canvas, 2, 0, 1, 1)
-        layout.addLayout(self.colorbar_layout, 1, 1, 2, 1)
+        layout.addWidget(self.status_bar, 3, 0, 1, 1)
         layout.setRowStretch(2, 1)
 
     @property
     def grid_on(self):
         return self._grid_on
+
+    @property
+    def line_plotter(self):
+        return self._line_plots
 
     @property
     def nonorthogonal_mode(self):
@@ -191,9 +202,9 @@ class SliceViewerDataView(QWidget):
         if self.line_plots_active:
             return
 
-        self._line_plotter = LinePlotter(self.ax, self.colorbar, PixelLinePlot)
         self.line_plots_active = True
-        self._line_plots = toolcls(LinePlots(self.ax, self.colorbar))
+        self._line_plots = toolcls(LinePlots(self.ax, self.colorbar), self.export_region)
+        self.status_bar_label.setText(self._line_plots.status_message())
         self.mpl_toolbar.set_action_checked(ToolItemText.LINEPLOTS, True, trigger=False)
 
     def switch_line_plots_tool(self, toolcls):
@@ -208,7 +219,9 @@ class SliceViewerDataView(QWidget):
         plotter = self._line_plots.plotter
         plotter.delete_line_plot_lines()
         self._line_plots.disconnect()
-        self._line_plots = toolcls(plotter)
+        self._line_plots = toolcls(plotter, self.export_region)
+        self.status_bar.showMessage(self._line_plots.status_message())
+        self.canvas.setFocus()
         self.canvas.draw_idle()
 
     def remove_line_plots(self):
@@ -218,6 +231,7 @@ class SliceViewerDataView(QWidget):
             return
 
         self._line_plots.plotter.close()
+        self.status_bar.clearMessage()
         self._line_plots = None
         self.line_plots_active = False
 
@@ -316,7 +330,17 @@ class SliceViewerDataView(QWidget):
         if self.line_plots_active:
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
+
+        self.canvas.setFocus()
         self.canvas.draw_idle()
+
+    def export_region(self, limits, cut):
+        """
+        React to a region selection that should be exported
+        :param limits: 2-tuple of ((left, right), (bottom, top))
+        :param cut: A str denoting which cuts to export.
+        """
+        self.presenter.export_region(limits, cut)
 
     def update_plot_data(self, data):
         """
@@ -423,6 +447,14 @@ class SliceViewerDataView(QWidget):
                           coordinates to display coordinates
         """
         self.nonortho_tr = transform.tr
+
+    def show_temporary_status_message(self, msg, timeout_ms):
+        """
+        Show a message in the status bar that disappears after a set period
+        :param msg: A str message to display
+        :param timeout_ms: Timeout in milliseconds to display the message for
+        """
+        self.status_bar.showMessage(msg, timeout_ms)
 
     def toggle_grid(self, state):
         """

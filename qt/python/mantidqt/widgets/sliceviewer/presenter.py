@@ -21,6 +21,8 @@ from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 
 
 class SliceViewer(object):
+    TEMPORARY_STATUS_TIMEOUT = 2000
+
     def __init__(self, ws, parent=None, model=None, view=None):
         """
         Create a presenter for controlling the slice display for a workspace
@@ -78,10 +80,13 @@ class SliceViewer(object):
         Tell the view to display a new plot of an MDEventWorkspace
         """
         data_view = self.view.data_view
+        limits = data_view.get_axes_limits()
+        if data_view.dimensions.transpose:
+            limits = limits[1], limits[0]
         data_view.plot_MDH(
             self.model.get_ws(slicepoint=self.get_slicepoint(),
                               bin_params=data_view.dimensions.get_bin_params(),
-                              limits=data_view.get_axes_limits()))
+                              limits=limits))
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
@@ -165,6 +170,22 @@ class SliceViewer(object):
             self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
         else:
             data_view.draw_plot()
+
+    def export_region(self, limits, export_type):
+        """Notify that a cut region has been selected for export to a workspace
+        :param limits: 2-tuple of ((left, right), (bottom, top))
+        :param export_type: A str denoting the region to export
+        """
+        data_view = self.view.data_view
+        transpose = data_view.dimensions.transpose
+        if transpose:
+            limits = limits[1], limits[0]
+        help_message = self.model.export_region(self.get_slicepoint(),
+                                                bin_params=data_view.dimensions.get_bin_params(),
+                                                limits=limits,
+                                                transpose=transpose,
+                                                export_type=export_type)
+        data_view.show_temporary_status_message(help_message, self.TEMPORARY_STATUS_TIMEOUT)
 
     def show_all_data_requested(self):
         """Instructs the view to show all data"""
