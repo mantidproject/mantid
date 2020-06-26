@@ -170,6 +170,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.radius = self.getProperty('BeamRadius').value
         self.dimensionality = len(self.sample)
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
+        self.cleanup = self.getProperty('ClearCorrected2DWorkspace').value
 
     def PyInit(self):
 
@@ -289,6 +290,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
+        self.declareProperty('ClearCorrected2DWorkspace', True,
+                             'Whether to clear the fully corrected 2D workspace.')
 
     def PyExec(self):
 
@@ -475,6 +478,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                            WedgeOffset=self.getProperty('WedgeOffset').value,
                            AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
                            PanelOutputWorkspaces=panel_ws_group)
+        if self.cleanup:
+            DeleteWorkspace(sample_name)
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)
