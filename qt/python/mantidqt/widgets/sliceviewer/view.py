@@ -306,7 +306,7 @@ class SliceViewerDataView(QWidget):
     def update_plot_data(self, data):
         """
         This just updates the plot data without creating a new plot. The extents
-        can change if the data has been rebinned
+        can change if the data has been rebinned.
         """
         if self.nonortho_tr:
             self.image.set_array(data.T.ravel())
@@ -318,11 +318,17 @@ class SliceViewerDataView(QWidget):
         """
         Called to notify the current state of the track cursor box
         """
+        if self._image_info_tracker is not None:
+            self._image_info_tracker.disconnect()
+
         self._image_info_tracker = ImageInfoTracker(image=self.image,
                                                     transpose_xy=self.dimensions.transpose,
                                                     widget=self.image_info_widget)
+
         if state:
             self._image_info_tracker.connect()
+        else:
+            self._image_info_tracker.disconnect()
 
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""
