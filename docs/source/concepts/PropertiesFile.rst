@@ -285,7 +285,7 @@ Plotting Settings
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.legend.Location``        |Default legend location                                           |``best``             |
 +---------------------------------+------------------------------------------------------------------+---------------------+
-|``plots.images.Colormap``        |Default colormap for image plots                                  |``cool``             |
+|``plots.images.Colormap``        |Default colormap for image plots                                  |``viridis``          |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 
 Getting access to Mantid properties

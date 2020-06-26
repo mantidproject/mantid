@@ -276,4 +276,4 @@ plots.legend.Location = best
 plots.legend.FontSize = 8
 
 # Default colormap for image plots
-plots.images.Colormap = jet
+plots.images.Colormap = viridis
