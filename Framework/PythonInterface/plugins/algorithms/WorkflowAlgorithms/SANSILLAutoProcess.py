@@ -4,8 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
+    WorkspaceGroupProperty, FileAction
+from mantid.kernel import Direction, FloatBoundedValidator
 from mantid.simpleapi import *
 from os import path
 
@@ -239,23 +240,18 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                             ['ThetaDependent'])
         self.setPropertyGroup('ThetaDependent', 'Transmissions')
 
-        self.declareProperty(MultipleFileProperty('SensitivityMaps',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
-                             doc='File(s) containing the map of relative detector efficiencies.')
+        self.declareProperty('SensitivityMaps', '',
+                             doc='File(s) or workspaces containing the maps of relative detector efficiencies.')
 
-        self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='File containing the default mask to be applied to all the detector configurations.')
+        self.declareProperty('DefaultMaskFile', '',
+                             doc='File or workspace containing the default mask (typically the detector edges and dead pixels/tubes)'
+                                 ' to be applied to all the detector configurations.')
 
-        self.declareProperty(MultipleFileProperty('MaskFiles',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
-                             doc='File(s) containing the beam stop and other detector mask.')
+        self.declareProperty('MaskFiles','',
+                             doc='File(s) or workspaces containing the detector mask (typically beam stop).')
 
-        self.declareProperty(MultipleFileProperty('ReferenceFiles',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
-                             doc='File(s) containing the corrected water data for absolute normalisation.')
+        self.declareProperty('ReferenceFiles', '',
+                             doc='File(s) or workspaces containing the corrected water data (in 2D) for absolute normalisation.')
 
         self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
                                                      direction=Direction.Output,
