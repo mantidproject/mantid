@@ -89,6 +89,7 @@ Improvements
 
 - Added an option in the settings to specify the default legend size.
 - Added an option to the settings window to set the default colormap for image plots.
+- Colorfill plots of very large workspaces now take less than 10 seconds to plot
 - Improved loading of python plugins at startup on slow disks.
 - Added a circular sector shape in the Pick and Mask tab of the instrument view.
 - Workbench will now spot if it is about to create the settings window off the available screen, and will move it so it is all visible. This is important as it is a modal dialog and could freeze the application in an unrecoverable way before.
