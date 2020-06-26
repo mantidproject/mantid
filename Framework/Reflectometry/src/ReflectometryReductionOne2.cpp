@@ -199,6 +199,10 @@ ReflectometryReductionOne2::validateInputs() {
   const auto transmission = validateTransmissionProperties();
   results.insert(transmission.begin(), transmission.end());
 
+  const std::string summationType = getProperty("SummationType");
+  if (summationType == "SumInLambda" && (*getProperty("ThetaIn")).isDefault())
+    results["ThetaIn"] = "ThetaIn must be specified when summing in lambda";
+
   return results;
 }
 
@@ -645,41 +649,39 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
  */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
-  bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
-  bool const shouldCorrectAngle =
-      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
-  if (shouldCorrectAngle && moreThanOneDetector) {
-    if (inputWS->getNumberHistograms() > 1) {
+  // Get theta for the Q calculation.
+  double theta;
+  if (summingInQ()) {
+    // If summing in Q, this twoThetaR - theta0. In theory we support multiple
+    // groups, and they could each have a different reference angle, which
+    // would make the conversion here a bit more involved. In practice this is
+    // not used so for now just disallow this.
+    if (detectorGroups().size() != 1) {
       throw std::invalid_argument(
           "Expected a single group in "
           "ProcessingInstructions to be able to "
           "perform angle correction, found " +
           std::to_string(inputWS->getNumberHistograms()));
     }
-    MatrixWorkspace_sptr IvsQ = inputWS->clone();
-    auto &XOut0 = IvsQ->mutableX(0);
-    const auto &XIn0 = inputWS->x(0);
-    double const theta = getProperty("ThetaIn");
-    double const factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
-    std::transform(XIn0.rbegin(), XIn0.rend(), XOut0.begin(),
-                   [factor](double x) { return factor / x; });
-    auto &Y0 = IvsQ->mutableY(0);
-    auto &E0 = IvsQ->mutableE(0);
-    std::reverse(Y0.begin(), Y0.end());
-    std::reverse(E0.begin(), E0.end());
-    IvsQ->getAxis(0)->unit() =
-        UnitFactory::Instance().create("MomentumTransfer");
-    return IvsQ;
+    auto &detectors = detectorGroups()[0];
+    theta =
+        getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors)) *
+        (180.0 / M_PI) / 2.0;
   } else {
-    auto convertUnits = this->createChildAlgorithm("ConvertUnits");
-    convertUnits->initialize();
-    convertUnits->setProperty("InputWorkspace", inputWS);
-    convertUnits->setProperty("Target", "MomentumTransfer");
-    convertUnits->setProperty("AlignBins", false);
-    convertUnits->execute();
-    MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
-    return IvsQ;
+    theta = getProperty("ThetaIn");
   }
+
+  auto refRoi = this->createChildAlgorithm("RefRoi");
+  refRoi->initialize();
+  refRoi->setProperty("InputWorkspace", inputWS);
+  refRoi->setProperty("NXPixel", 1);
+  refRoi->setProperty("NYPixel", 1);
+  refRoi->setProperty("ConvertToQ", true);
+  refRoi->setProperty("SumPixels", false);
+  refRoi->setProperty("ScatteringAngle", theta);
+  refRoi->execute();
+  MatrixWorkspace_sptr IvsQ = refRoi->getProperty("OutputWorkspace");
+  return IvsQ;
 }
 
 /**
