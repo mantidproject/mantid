@@ -8,9 +8,10 @@
 #
 #
 from mantid.kernel import ConfigService
+from mantid.plots.utility import get_colormap_names
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
 from workbench.widgets.settings.plots.view import PlotsSettingsView
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
 
 from qtpy.QtCore import Qt
 
@@ -34,6 +35,7 @@ class PlotSettings(object):
     AXES_SCALE = ['Linear', 'Log']
     LEGEND_LOCATION_LIST = ['best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left',
                             'center left', 'upper left', 'upper center']
+    COLORMAP = "plots.images.Colormap"
     SHOW_MINOR_TICKS = "plots.ShowMinorTicks"
     SHOW_MINOR_GRIDLINES = "plots.ShowMinorGridlines"
 
@@ -46,6 +48,7 @@ class PlotSettings(object):
         self.setup_marker_group()
         self.setup_error_bar_group()
         self.setup_legend_group()
+        self.setup_images_group()
         self.setup_signals()
 
     def load_general_setting_values(self):
@@ -116,6 +119,18 @@ class PlotSettings(object):
         legend_font_size = float(ConfigService.getString(self.LEGEND_FONT_SIZE))
         self.view.legend_font_size.setValue(legend_font_size)
 
+    def setup_images_group(self):
+        colormaps = get_colormap_names()
+        self.view.default_colormap_combo_box.addItems(colormaps)
+        colormap = ConfigService.getString(self.COLORMAP)
+        if colormap in colormaps:
+            self.view.default_colormap_combo_box.setCurrentIndex(
+                self.view.default_colormap_combo_box.findText(colormap))
+        elif colormap.endswith('_r') and colormap[:-2] in colormaps:
+            self.view.default_colormap_combo_box.setCurrentIndex(
+                self.view.default_colormap_combo_box.findText(colormap[:-2]))
+            self.view.reverse_colormap_check_box.setChecked(True)
+
     @staticmethod
     def _setup_style_combo_boxes(current_style, style_combo, combo_items):
         style_combo.addItems(combo_items)
@@ -142,6 +157,8 @@ class PlotSettings(object):
         self.view.error_every.valueChanged.connect(self.action_error_every_changed)
         self.view.legend_location.currentTextChanged.connect(self.action_legend_location_changed)
         self.view.legend_font_size.valueChanged.connect(self.action_legend_size_changed)
+        self.view.default_colormap_combo_box.currentTextChanged.connect(self.action_default_colormap_changed)
+        self.view.reverse_colormap_check_box.stateChanged.connect(self.action_default_colormap_changed)
 
     def action_normalization_changed(self, state):
         ConfigService.setString(self.NORMALIZATION, "On" if state == Qt.Checked else "Off")
@@ -197,3 +214,10 @@ class PlotSettings(object):
 
     def action_legend_size_changed(self, value):
         ConfigService.setString(self.LEGEND_FONT_SIZE, str(value))
+
+    def action_default_colormap_changed(self):
+        colormap = self.view.default_colormap_combo_box.currentText()
+        if self.view.reverse_colormap_check_box.isChecked():
+            colormap += '_r'
+
+        ConfigService.setString(self.COLORMAP, colormap)

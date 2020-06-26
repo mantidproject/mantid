@@ -8,11 +8,13 @@
 #
 #
 
+# 3rdparty imports
 from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_figure
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 
 from matplotlib.colors import LogNorm, Normalize
+from matplotlib.ticker import ScalarFormatter, LogFormatterSciNotation
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
@@ -95,6 +97,7 @@ class AxisEditorModel(object):
     max = None
     log = None
     grid = None
+    formatter = None
 
 
 class AxisEditor(PropertiesEditorBase):
@@ -115,7 +118,8 @@ class AxisEditor(PropertiesEditorBase):
         if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
-
+        self.ui.editor_format.addItem('Decimal Format')
+        self.ui.editor_format.addItem('Scientific Format')
         self.axes = axes
         self.axis_id = axis_id
         self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
@@ -136,6 +140,10 @@ class AxisEditor(PropertiesEditorBase):
         memento.min, memento.max = getattr(self.axes, 'get_{}lim'.format(self.axis_id))()
         memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
         memento.grid = self.axis._gridOnMajor
+        if type(self.axis.get_major_formatter()) is ScalarFormatter:
+            memento.formatter = 'Decimal Format'
+        elif type(self.axis.get_major_formatter()) is LogFormatterSciNotation:
+            memento.formatter = 'Scientific Format'
         self._fill(memento)
 
     def changes_accepted(self):
@@ -144,7 +152,6 @@ class AxisEditor(PropertiesEditorBase):
         axes = self.axes
 
         self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-
         if self.ui.logBox.isChecked():
             self.scale_setter('log', **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
             self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
@@ -152,7 +159,7 @@ class AxisEditor(PropertiesEditorBase):
             self.scale_setter('linear')
 
         self.lim_setter(self.limit_min, self.limit_max)
-
+        self._set_tick_format()
         which = 'both' if hasattr(axes, 'show_minor_gridlines') and axes.show_minor_gridlines else 'major'
         axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
 
@@ -168,6 +175,7 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.editor_max.setText(str(model.max))
         self.ui.logBox.setChecked(model.log)
         self.ui.gridBox.setChecked(model.grid)
+        self.ui.editor_format.setCurrentText(model.formatter)
 
     def _check_log_limits(self, editor_min, editor_max):
         # Check that the limits from the editor are sensible for a log graph
@@ -178,6 +186,15 @@ class AxisEditor(PropertiesEditorBase):
         if editor_max <= 0:
             editor_max = lim_max
         return editor_min, editor_max
+
+    def _set_tick_format(self):
+        formatter = self.ui.editor_format.currentText()
+        if formatter == 'Decimal Format':
+            fmt = ScalarFormatter(useOffset=True)
+        elif formatter == 'Scientific Format':
+            fmt = LogFormatterSciNotation()
+        getattr(self.axes, 'get_{}axis'.format(self.axis_id))().set_major_formatter(fmt)
+        return
 
 
 class XAxisEditor(AxisEditor):
@@ -222,6 +239,7 @@ class ColorbarAxisEditor(AxisEditor):
                     self.images.append(img)
 
         self.create_model()
+        self.ui.editor_format.setEnabled(False)
 
     def changes_accepted(self):
         self.ui.errors.hide()

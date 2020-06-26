@@ -156,6 +156,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="moreDetailsButton">
+       <property name="text">
+        <string>Show more details</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="0" column="0" colspan="2">

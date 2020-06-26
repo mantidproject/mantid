@@ -11,6 +11,10 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+New features
+^^^^^^^^^^^^
+- New ``D7`` instrument definition for ILL 
+
 Improvements
 ^^^^^^^^^^^^
 - Polaris.create_total_scattering_pdf output workspaces now have the run number in the names.

@@ -274,3 +274,6 @@ plots.legend.Location = best
 
 # Default legend size
 plots.legend.FontSize = 8
+
+# Default colormap for image plots
+plots.images.Colormap = viridis

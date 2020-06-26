@@ -12,6 +12,7 @@ New
 - There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
 - A default legend location can be set in the Workbench settings.
 - The Sample Transmission Calculator is now implemented in workbench.
+- The axis tick markers in a plot can be switched between Log and decimal formats indepentantly of the axes scale.
 
 Improvements
 ############
@@ -78,6 +79,7 @@ Improvements
 - Right-clicking a plot without dragging while using the zoom tool now resets the axes limits.
 - The Slice Viewer now starts with the zoom option selected by default.
 - Added an option in the settings to specify the default legend size.
+- Added an option to the settings window to set the default colormap for image plots.
 
 Bugfixes
 ########
