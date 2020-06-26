@@ -49,7 +49,8 @@ class PlotsSettingsTest(unittest.TestCase):
                                                        call(PlotProperties.CAP_THICKNESS.value),
                                                        call(PlotProperties.ERROR_EVERY.value),
                                                        call(PlotProperties.LEGEND_LOCATION.value),
-                                                       call(PlotProperties.LEGEND_FONT_SIZE.value)])
+                                                       call(PlotProperties.LEGEND_FONT_SIZE.value),
+                                                       call(PlotProperties.COLORMAP.value)])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_normalization_changed(self, mock_ConfigService):
@@ -274,6 +275,27 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_legend_size_changed(8)
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_FONT_SIZE.value, '8')
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_default_colormap_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        presenter.view.default_colormap_combo_box.setCurrentIndex(4)
+        colormap = presenter.view.default_colormap_combo_box.currentText()
+
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_default_colormap_changed()
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.COLORMAP.value, colormap)
+
+        presenter.view.default_colormap_combo_box.setCurrentIndex(5)
+        colormap = presenter.view.default_colormap_combo_box.currentText()
+        presenter.view.reverse_colormap_check_box.setChecked(True)
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_default_colormap_changed()
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.COLORMAP.value, colormap+"_r")
 
 
 if __name__ == "__main__":

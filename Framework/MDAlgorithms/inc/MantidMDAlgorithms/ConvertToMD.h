@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 

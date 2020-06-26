@@ -624,6 +624,13 @@ Load::getOutputWorkspace(const std::string &propName,
   } catch (std::runtime_error &) {
   }
 
+  // WorkspaceGroup?
+  try {
+    WorkspaceGroup_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
   // Just workspace?
   try {
     Workspace_sptr childWS = loader->getProperty(propName);

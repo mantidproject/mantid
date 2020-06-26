@@ -16,6 +16,7 @@ from copy import copy
 from functools import partial
 
 # third party imports
+from matplotlib.axes import Axes
 from matplotlib.container import ErrorbarContainer
 from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
@@ -233,10 +234,10 @@ class FigureInteraction(object):
                 move_and_show(XAxisEditor(canvas, ax))
             elif (ax.yaxis.contains(event)[0]
                   or any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
-                if ax == axes[0]:
-                    move_and_show(YAxisEditor(canvas, ax))
-                else:
+                if type(ax) == Axes:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
+                else:
+                    move_and_show(YAxisEditor(canvas, ax))
             elif hasattr(ax, 'zaxis'):
                 if ax.zaxis.label.contains(event)[0]:
                     move_and_show(LabelEditor(canvas, ax.zaxis.label))

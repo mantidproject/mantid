@@ -64,6 +64,7 @@ Plots
 - Marker: Choose a default marker for plots, such as 'point'.
 - Error Bars: Control the error bars, such as by setting Capsize > 0, or displaying the Error Every 5 data points.
 - Legend: Set the default location for legends in plots.
+- Images: Set the default colormap for image plots.
 
 For more information, see :ref:`06_formatting_plots`
 

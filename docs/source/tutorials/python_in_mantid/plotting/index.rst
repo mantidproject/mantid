@@ -14,19 +14,11 @@ Plotting with Python
    02_scripting_plots
    03_pim_ex_3
 
-..   03_instrument_view
-..   04_sliceviewer
-
-
-
 **Contents**
 
 * :ref:`01_basic_plot_scripting`
 * :ref:`02_scripting_plots`
 * :ref:`03_pim_ex_3`
-
-.. * :ref:`03_instrument_view`
-.. * :ref:`04_sliceviewer`
 
 .. figure:: /images/Mantid_artifact.png
    :alt: Mantid_artifact
