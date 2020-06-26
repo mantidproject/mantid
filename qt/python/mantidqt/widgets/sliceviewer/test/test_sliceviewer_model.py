@@ -9,7 +9,7 @@
 #
 from contextlib import contextmanager
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 import sys
 
 from mantid.api import (MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace,
@@ -77,19 +77,34 @@ def _create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, e
 def _create_mock_matrixworkspace(x_axis: tuple,
                                  y_axis: tuple,
                                  distribution: bool,
-                                 names: tuple,
-                                 units: tuple = None):
+                                 names: tuple = None,
+                                 units: tuple = None,
+                                 y_is_spectra=True):
     """
     :param x_axis: X axis values
     :param y_axis: Y axis values
     :param distribution: Value of distribution flag
     :param names: The name of each dimension
     :param units: Unit labels for each dimension
+    :param y_is_spectra: True if the Y axis is a spectra axis, else it's a Numeric
     """
     ws = MagicMock(MatrixWorkspace)
     ws.getNumDims.return_value = 2
     ws.getNumberHistograms.return_value = len(y_axis)
     ws.isDistribution.return_value = distribution
+    axes = [
+        MagicMock(),
+        MagicMock(isSpectra=lambda: y_is_spectra, isNumeric=lambda: not y_is_spectra)
+    ]
+    ws.getAxis.side_effect = lambda i: axes[i]
+    if y_is_spectra:
+        ws.getIndexFromSpectrumNumber.side_effect = lambda i: i + 1
+    else:
+        axes[1].extractValues.return_value = np.array(y_axis)
+
+    if names is None:
+        names = ('X', 'Y')
+
     extents = (x_axis[0], x_axis[-1], y_axis[0], y_axis[-1])
     nbins = (len(x_axis) - 1, len(y_axis) - 1)
     return _add_dimensions(ws, names, (False, False), extents, nbins, units)
@@ -220,6 +235,9 @@ class SliceViewerModelTest(unittest.TestCase):
                                                        names=('Wavelength', 'Energy transfer'),
                                                        units=('Angstrom', 'meV'))
         self.ws2d_histo.name.return_value = 'ws2d_histo'
+
+    def setUp(self):
+        self.ws2d_histo.reset_mock()
 
     def test_model_MDH(self):
         model = SliceViewerModel(self.ws_MD_3D)
@@ -582,30 +600,221 @@ class SliceViewerModelTest(unittest.TestCase):
     def test_get_dim_limits_raises_error_num_display_dims_ne_2(self):
         model = SliceViewerModel(self.ws_MDE_3D)
 
-        self.assertRaises(AssertionError,
-                          model.get_dim_limits,
-                          slicepoint=(0, 0, 0),
-                          transpose=False)
-        self.assertRaises(AssertionError,
+        self.assertRaises(ValueError, model.get_dim_limits, slicepoint=(0, 0, 0), transpose=False)
+        self.assertRaises(ValueError,
                           model.get_dim_limits,
                           slicepoint=(None, 0, 0),
                           transpose=False)
-        self.assertRaises(AssertionError,
-                          model.get_dim_limits,
-                          slicepoint=(None, None, None),
-                          transpose=False)
 
-    def test_get_dim_limits_raises_if_slicepoint_length_ne_ndims(self):
-        model = SliceViewerModel(self.ws_MDE_3D)
+    @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
+    def test_export_roi_for_matrixworkspace(self, mock_extract_spectra):
+        xmin, xmax, ymin, ymax = -1., 3., 2., 4.
 
-        self.assertRaises(AssertionError,
-                          model.get_dim_limits,
-                          slicepoint=(None, None),
-                          transpose=False)
-        self.assertRaises(AssertionError,
-                          model.get_dim_limits,
-                          slicepoint=(None, None, 0, 0),
-                          transpose=False)
+        def assert_call_as_expected(exp_xmin, exp_xmax, exp_start_index, exp_end_index, transpose,
+                                    is_spectra):
+            mock_ws = _create_mock_matrixworkspace(x_axis=[10, 20, 30],
+                                                   y_axis=[1, 2, 3, 4, 5],
+                                                   distribution=False,
+                                                   y_is_spectra=is_spectra)
+            mock_ws.name.return_value = 'mock_ws'
+            model = SliceViewerModel(mock_ws)
+            slicepoint, bin_params = MagicMock(), MagicMock()
+
+            help_msg = model.export_region(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)),
+                                           transpose, 'r')
+
+            self.assertEqual('ROI created: mock_ws_roi', help_msg)
+            if is_spectra:
+                self.assertEqual(2, mock_ws.getIndexFromSpectrumNumber.call_count)
+            else:
+                mock_ws.getIndexFromSpectrumNumber.assert_not_called()
+
+            mock_extract_spectra.assert_called_once_with(InputWorkspace=mock_ws,
+                                                         OutputWorkspace='mock_ws_roi',
+                                                         XMin=exp_xmin,
+                                                         XMax=exp_xmax,
+                                                         StartWorkspaceIndex=exp_start_index,
+                                                         EndWorkspaceIndex=exp_end_index,
+                                                         EnableLogging=False)
+            mock_extract_spectra.reset_mock()
+
+        assert_call_as_expected(xmin, xmax, 3, 5, transpose=False, is_spectra=True)
+        assert_call_as_expected(2., 4., 0, 4, transpose=True, is_spectra=True)
+        assert_call_as_expected(xmin, xmax, 1, 2, transpose=False, is_spectra=False)
+        assert_call_as_expected(ymin, ymax, 0, 1, transpose=True, is_spectra=False)
+
+    @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
+    @patch('mantidqt.widgets.sliceviewer.roi.Rebin')
+    @patch('mantidqt.widgets.sliceviewer.roi.SumSpectra')
+    @patch('mantidqt.widgets.sliceviewer.roi.Transpose')
+    def test_export_cuts_for_matrixworkspace(self, mock_transpose, mock_sum_spectra, mock_rebin,
+                                             mock_extract_spectra):
+        xmin, xmax, ymin, ymax = -4., 5., 6., 9.
+
+        def assert_call_as_expected(transpose, export_type, is_spectra):
+            mock_ws = _create_mock_matrixworkspace(x_axis=[10, 20, 30],
+                                                   y_axis=[1, 2, 3, 4, 5],
+                                                   distribution=False,
+                                                   y_is_spectra=is_spectra)
+            mock_ws.name.return_value = 'mock_ws'
+            model = SliceViewerModel(mock_ws)
+            slicepoint, bin_params = MagicMock(), MagicMock()
+
+            help_msg = model.export_region(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)),
+                                           transpose, export_type)
+
+            if export_type == 'c':
+                mock_extract_spectra.assert_called_once()
+                if is_spectra:
+                    mock_sum_spectra.assert_called_once()
+                else:
+                    self.assertEqual(2, mock_rebin.call_count)
+                    self.assertEqual(3, mock_transpose.call_count)
+                self.assertEqual('Cuts along X/Y created: mock_ws_cut_x & mock_ws_cut_y', help_msg)
+            elif export_type == 'x':
+                mock_extract_spectra.assert_called_once()
+                if is_spectra:
+                    mock_sum_spectra.assert_called_once()
+                else:
+                    self.assertEqual(1, mock_rebin.call_count)
+                    self.assertEqual(2, mock_transpose.call_count)
+                self.assertEqual('Cut along X created: mock_ws_cut_x', help_msg)
+            elif export_type == 'y':
+                if is_spectra:
+                    mock_extract_spectra.assert_called_once()
+                    self.assertEqual(1, mock_transpose.call_count)
+                    self.assertEqual(1, mock_rebin.call_count)
+                else:
+                    mock_extract_spectra.assert_not_called()
+                    self.assertEqual(1, mock_rebin.call_count)
+                    self.assertEqual(1, mock_transpose.call_count)
+
+                self.assertEqual('Cut along Y created: mock_ws_cut_y', help_msg)
+
+            mock_transpose.reset_mock()
+            mock_rebin.reset_mock()
+            mock_extract_spectra.reset_mock()
+            mock_sum_spectra.reset_mock()
+
+        for export_type in ('c', 'x', 'y'):
+            assert_call_as_expected(transpose=False, export_type=export_type, is_spectra=True)
+            assert_call_as_expected(transpose=False, export_type=export_type, is_spectra=False)
+
+    @patch('mantidqt.widgets.sliceviewer.model.TransposeMD')
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_export_region_for_mdworkspace(self, mock_binmd, mock_transposemd):
+        xmin, xmax, ymin, ymax = -1., 3., 2., 4.
+        slicepoint, bin_params = (None, None, 0.5), (100, 100, 0.1)
+        zmin, zmax = 0.45, 0.55  # 3rd dimension extents
+
+        def assert_call_as_expected(transpose, export_type):
+            model = SliceViewerModel(self.ws_MDE_3D)
+
+            help_msg = model.export_region(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)),
+                                           transpose, export_type)
+
+            common_call_params = dict(InputWorkspace=self.ws_MDE_3D,
+                                      AxisAligned=False,
+                                      BasisVector0='h,rlu,1.0,0.0,0.0',
+                                      BasisVector1='k,rlu,0.0,1.0,0.0',
+                                      BasisVector2='l,rlu,0.0,0.0,1.0',
+                                      OutputExtents=[xmin, xmax, ymin, ymax, zmin, zmax],
+                                      EnableLogging=False)
+            xcut_name, ycut_name = 'ws_MDE_3D_cut_x', 'ws_MDE_3D_cut_y'
+            if export_type == 'r':
+                expected_help_msg = 'ROI created: ws_MDE_3D_roi'
+                expected_calls = [
+                    call(**common_call_params,
+                         OutputBins=[100, 100, 1],
+                         OutputWorkspace='ws_MDE_3D_roi')
+                ]
+            elif export_type == 'x':
+                expected_help_msg = f'Cut along X created: {xcut_name}'
+                expected_bins = [1, 100, 1] if transpose else [100, 1, 1]
+                expected_calls = [
+                    call(**common_call_params, OutputBins=expected_bins, OutputWorkspace=xcut_name)
+                ]
+            elif export_type == 'y':
+                expected_help_msg = f'Cut along Y created: {ycut_name}'
+                expected_bins = [100, 1, 1] if transpose else [1, 100, 1]
+                expected_calls = [
+                    call(**common_call_params, OutputBins=expected_bins, OutputWorkspace=ycut_name)
+                ]
+            elif export_type == 'c':
+                expected_help_msg = f'Cuts along X/Y created: {xcut_name} & {ycut_name}'
+                expected_bins = [100, 1, 1] if transpose else [1, 100, 1]
+                expected_calls = [
+                    call(**common_call_params, OutputBins=expected_bins, OutputWorkspace=xcut_name),
+                    call(**common_call_params, OutputBins=expected_bins, OutputWorkspace=ycut_name)
+                ]
+
+            mock_binmd.assert_has_calls(expected_calls, any_order=True)
+            if export_type == 'r':
+                if transpose:
+                    mock_transposemd.assert_called_once()
+                else:
+                    mock_transposemd.assert_not_called()
+            else:
+                if export_type == 'x':
+                    index = 1 if transpose else 0
+                    expected_calls = [
+                        call(InputWorkspace=xcut_name,
+                             OutputWorkspace=xcut_name,
+                             Axes=[index],
+                             EnableLogging=False)
+                    ]
+                elif export_type == 'y':
+                    index = 0 if transpose else 1
+                    expected_calls = [
+                        call(InputWorkspace=ycut_name,
+                             OutputWorkspace=ycut_name,
+                             Axes=[index],
+                             EnableLogging=False)
+                    ]
+                elif export_type == 'c':
+                    xindex = 1 if transpose else 0
+                    yindex = 0 if transpose else 1
+                    expected_calls = [
+                        call(InputWorkspace=xcut_name,
+                             OutputWorkspace=xcut_name,
+                             Axes=[xindex],
+                             EnableLogging=False),
+                        call(InputWorkspace=ycut_name,
+                             OutputWorkspace=ycut_name,
+                             Axes=[yindex],
+                             EnableLogging=False)
+                    ]
+
+                mock_transposemd.assert_has_calls(expected_calls, any_order=True)
+
+            self.assertEqual(expected_help_msg, help_msg)
+            mock_binmd.reset_mock()
+            mock_transposemd.reset_mock()
+
+        for export_type in ('r', 'x', 'y', 'c'):
+            assert_call_as_expected(transpose=False, export_type=export_type)
+            assert_call_as_expected(transpose=True, export_type=export_type)
+
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
+    def test_export_region_returns_error_in_help_string_if_operation_failed(
+            self, mock_extract_spectra, mock_binmd):
+        def assert_error_returned_in_help(workspace, export_type, mock_alg, err_msg):
+            model = SliceViewerModel(workspace)
+            slicepoint, bin_params = MagicMock(), MagicMock()
+            mock_alg.side_effect = RuntimeError(err_msg)
+
+            help_msg = model.export_region(slicepoint, bin_params, ((1.0, 2.0), (-1, 2.0)), True,
+                                           export_type)
+            mock_alg.reset_mock()
+
+            self.assertTrue(err_msg in help_msg)
+
+        for export_type in ('r', 'c', 'x', 'y'):
+            assert_error_returned_in_help(self.ws2d_histo, export_type, mock_extract_spectra,
+                                          'ExtractSpectra failed')
+        for export_type in ('r', 'c', 'x', 'y'):
+            assert_error_returned_in_help(self.ws_MDE_3D, export_type, mock_binmd, 'BinMD failed')
 
     # private
     def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, coords,

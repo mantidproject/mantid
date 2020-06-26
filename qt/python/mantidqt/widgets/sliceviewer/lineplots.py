@@ -8,7 +8,7 @@
 # std imports
 from collections import namedtuple
 from functools import lru_cache
-from typing import Optional
+from typing import Callable, Optional, Tuple
 
 # 3rd party imports
 from matplotlib.artist import setp as set_artist_property
@@ -23,14 +23,16 @@ import numpy as np
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .cursortracker import CursorTracker
 
+# Limits for X/Y axes
+Limits = Tuple[Tuple[float, float], Tuple[float, float]]
+
 
 class LinePlots:
     """
     Provides facilities to add line cut plots to an existing
     image axes
     """
-    __slots__ = ("_axx", "_axy", "_canvas", "_colorbar", "_fig", "_im_ax", "_image", "_xfig",
-                 "_yfig")
+    __slots__ = ("_axx", "_axy", "_canvas", "_colorbar", "_fig", "_im_ax", "_xfig", "_yfig")
 
     def __init__(self, image_axes: Axes, colorbar: ColorbarWidget):
         """
@@ -43,7 +45,6 @@ class LinePlots:
         method must accept a LinePlotter instance as a parameter.
         """
         self._im_ax = image_axes
-        self._image = image_axes.images[0]
         self._fig = image_axes.figure
         self._canvas = self._fig.canvas
         self._colorbar = colorbar
@@ -52,7 +53,7 @@ class LinePlots:
 
     @property
     def image(self):
-        return self._image
+        return self._im_ax.images[0]
 
     @property
     def image_axes(self):
@@ -167,7 +168,6 @@ class LinePlots:
 
         self.update_line_plot_labels()
         self.update_line_plot_scales()
-        # self.mpl_toolbar.update()  # sync list of axes in navstack
         self._canvas.draw_idle()
 
     def _remove_line_plots(self):
@@ -198,11 +198,12 @@ class PixelLinePlot(CursorTracker):
     """
     Draws X/Y line plots from single rows/columns of an image into a given
     set of line plots.
+    :param plotter: A reference to the object holding the line plot axes.
     """
-    def __init__(self, plotter: LinePlots):
+    def __init__(self, plotter: LinePlots, _=None):
         """
-        :param plotter: The object responsible for drawing the curves.
-                        Must have plot_x_line & plot_y_line methods.
+        :param plotter: A reference to the view this is attached to
+        :param _: Unused parameter for compatability with RectangleSelectionLinePlot
         """
         super().__init__(image_axes=plotter.image_axes)
         self._plotter = plotter
@@ -210,6 +211,12 @@ class PixelLinePlot(CursorTracker):
     @property
     def plotter(self):
         return self._plotter
+
+    def status_message(self):
+        """
+        Returns an empty string for a status bar message
+        """
+        return ""
 
     # CursorTracker interface
     def on_cursor_at(self, xdata: float, ydata: float):
@@ -239,14 +246,19 @@ class RectangleSelectionLinePlot:
     Draws X/Y line plots from a rectangular selection by summing across
     the orthogonal direction.
     """
-    def __init__(self, plotter: LinePlots):
+
+    STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
+    SELECTION_KEYS = ('r', 'c', 'x', 'y')
+
+    def __init__(self, plotter: LinePlots, roi_export_cb: Callable[[Limits, str], None] = None):
         """
-        :param plotter: The object responsible for drawing the curves.
-                        Must have plot_x_line & plot_y_line methods.
+        :param plotter: A reference to the object holding the line plot axes.
+        :param roi_export_cb: An optional callback when an export of a selected region is requested
         """
+        ax = plotter.image_axes
         self._plotter = plotter
         self._selector = RectangleSelector(
-            plotter.image_axes,
+            ax,
             self._on_region_selected,
             drawtype='box',
             useblit=False,  # rectangle persists on button release
@@ -255,11 +267,21 @@ class RectangleSelectionLinePlot:
             minspany=5,
             spancoords='pixels',
             interactive=True)
+        if roi_export_cb:
+            self._roi_export_cb = roi_export_cb
+            self._key_cid = ax.figure.canvas.mpl_connect('key_release_event', self._on_key_released)
 
     def disconnect(self):
+        self._plotter.image_axes.figure.canvas.mpl_disconnect(self._key_cid)
         for artist in self._selector.artists:
             artist.remove()
         del self._selector
+
+    def status_message(self):
+        """
+        Return a status message to display when this tool is active
+        """
+        return self.STATUS_MESSAGE
 
     @property
     def plotter(self):
@@ -267,7 +289,7 @@ class RectangleSelectionLinePlot:
 
     # private api
     def _on_region_selected(self, eclick, erelease):
-        plotter = self._plotter
+        plotter = self.plotter
         cinfo_click = cursor_info(plotter.image, eclick.xdata, eclick.ydata)
         if cinfo_click is None:
             return
@@ -285,6 +307,18 @@ class RectangleSelectionLinePlot:
             np.sum(arr[imin:imax, jmin:jmax], axis=1))
         plotter.update_line_plot_limits()
         plotter.redraw()
+
+    def _on_key_released(self, event):
+        if not self._selector.artists[0].get_visible():
+            return
+
+        rect = self._selector.to_draw
+        key = event.key
+        if key in self.SELECTION_KEYS:
+            rect = self._selector.to_draw
+            ll_x, ll_y = rect.get_xy()
+            limits = ((ll_x, ll_x + rect.get_width()), (ll_y, ll_y + rect.get_height()))
+            self._roi_export_cb(limits, key)
 
 
 # Data type to store information related to a cursor over an image
