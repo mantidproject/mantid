@@ -17,6 +17,10 @@ import matplotlib.colors as mcolors
 import matplotlib.cbook as cbook
 from matplotlib.transforms import IdentityTransform, Affine2D
 
+from scipy.interpolate import interp1d
+
+from mantid.plots import datafunctions
+
 import numpy as np
 
 IDENTITY_TRANSFORM = IdentityTransform()
@@ -43,7 +47,14 @@ class ModestImage(mi.AxesImage):
 
     def __init__(self, *args, **kwargs):
         self._full_res = None
+        self.workspace = kwargs.pop('workspace', None)
+        try:
+            self.spectrum_info = workspace.spectrumInfo()
+        except:
+            self.spectrum_info = None
+        self.transpose = kwargs.pop('transpose', False)
         self._full_extent = kwargs.get('extent', None)
+        self.resample_required = kwargs.pop('resample_required', False)
         super(ModestImage, self).__init__(*args, **kwargs)
         self.invalidate_cache()
 
@@ -84,6 +95,22 @@ class ModestImage(mi.AxesImage):
     def get_array(self):
         """Override to return the full-resolution array"""
         return self._full_res
+
+    def _resample_array(self, xbins=None, ybins=None):
+        if self.resample_required and self.workspace:
+            extent = self.get_extent()
+            if not xbins and not ybins:
+                bbox = self.axes.get_window_extent().transformed(self.axes.get_figure().dpi_scale_trans.inverted())
+                dpi = self.axes.get_figure().dpi
+                xbins = int(np.ceil(bbox.width * dpi))
+                ybins = int(np.ceil(bbox.height * dpi))
+            if xbins > self._A.shape[0] or ybins > self._A.shape[1]:
+                x = np.linspace(extent[0], extent[1], int(xbins))
+                normalize = datafunctions.get_normalize_by_bin_width(self.workspace, self.axes)
+                data, _, _ = datafunctions.interpolate_y_data(self.workspace, x, xbins, ybins, normalize, self.spectrum_info)
+                if self.transpose:
+                    data = data.T
+                self.set_data(data)
 
     @property
     def _pixel2world(self):
@@ -126,6 +153,7 @@ class ModestImage(mi.AxesImage):
         Change self._A and _extent to render an image whose resolution is
         matched to the eventual rendering.
         """
+        self._resample_array()
 
         # Find out how we need to slice the array to make sure we match the
         # resolution of the display. We pass self._world2pixel which matters
@@ -207,10 +235,10 @@ def main():
     plt.show()
 
 
-def imshow(axes, X, cmap=None, norm=None, aspect=None,
+def imshow(axes, X, workspace=None, cmap=None, norm=None, aspect=None,
            interpolation=None, alpha=None, vmin=None, vmax=None,
            origin=None, extent=None, shape=None, filternorm=1,
-           filterrad=4.0, imlim=None, resample=None, url=None, **kwargs):
+           filterrad=4.0, imlim=None, resample=None, url=None, transpose=None, **kwargs):
     """Similar to matplotlib's imshow command, but produces a ModestImage
 
     Unlike matplotlib version, must explicitly specify axes
@@ -220,9 +248,9 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     if aspect is None:
         aspect = rcParams['image.aspect']
     axes.set_aspect(aspect)
-    im = ModestImage(axes, cmap=cmap, norm=norm, interpolation=interpolation,
+    im = ModestImage(axes, workspace=workspace, cmap=cmap, norm=norm, interpolation=interpolation,
                      origin=origin, extent=extent, filternorm=filternorm,
-                     filterrad=filterrad, resample=resample, **kwargs)
+                     filterrad=filterrad, resample=resample, transpose=transpose, **kwargs)
 
     im.set_data(X)
     im.set_alpha(alpha)
@@ -235,6 +263,11 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     # if norm is None and shape is None:
     #    im.set_clim(vmin, vmax)
     if vmin is not None or vmax is not None:
+        if norm is not None and isinstance(norm, mcolors.LogNorm):
+            if vmin <= 0:
+                vmin = 0.0001
+            if vmax <= 0:
+                vmax = 1
         im.set_clim(vmin, vmax)
     elif norm is None:
         im.autoscale_None()

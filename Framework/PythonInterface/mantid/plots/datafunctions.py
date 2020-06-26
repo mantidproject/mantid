@@ -457,8 +457,9 @@ def common_x(arr):
     return np.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False):
+def get_matrix_2d_ragged(workspace, normalize_by_bin_width, axes=None, histogram2D=False, transpose=False, xbins=None, ybins=None,**kwargs):
     num_hist = workspace.getNumberHistograms()
+    common_bins = workspace.isCommonBins()
     delta = np.finfo(np.float64).max
     min_value = np.finfo(np.float64).max
     max_value = np.finfo(np.float64).min
@@ -467,7 +468,19 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
     except:
         sp_info = None
 
-    for spectrum_index in range(num_hist):
+    if axes and not xbins and not ybins:
+        bbox = axes.get_window_extent().transformed(axes.get_figure().dpi_scale_trans.inverted())
+        dpi = axes.get_figure().dpi
+        xbins = int(np.ceil(bbox.width * dpi * 5))
+        ybins = int(np.ceil(bbox.height * dpi * 5))
+
+    resample_required = False
+    if ybins and ybins < num_hist:
+        resample_required = True
+    else:
+        ybins = num_hist
+
+    for spectrum_index in range(0, num_hist, int(np.ceil(num_hist/ybins))):
         if not(sp_info and sp_info.hasDetectors(spectrum_index) and sp_info.isMonitor(spectrum_index)):
             xtmp = workspace.readX(spectrum_index)
             if workspace.isHistogramData():
@@ -480,6 +493,9 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
             max_value = max(max_value, xtmp.max())
             diff = np.diff(xtmp)
             delta = min(delta, diff.min())
+	    if common_bins:
+                break
+
     xtmp = workspace.readX(0)
     if delta == np.finfo(np.float64).max:
         delta = np.diff(xtmp).min()
@@ -488,27 +504,53 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
     if max_value == np.finfo(np.float64).min:
         max_value = xtmp.max()
     num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
+    if resample_required and num_edges > xbins:
+        num_edges = xbins
     x_centers = np.linspace(min_value, max_value, num=num_edges)
     y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
-    counts = np.empty([num_hist, num_edges], dtype=np.float64)
+    counts, min_counts, max_counts = interpolate_y_data(workspace, x_centers, num_edges, ybins,
+                                                        normalize_by_bin_width, spectrum_info=sp_info)
 
-    for spectrum_index in range(num_hist):
-        centers, ztmp, _, _ = mantid.plots.datafunctions.get_spectrum(
-            workspace, spectrum_index, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
-        interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
-        if not (sp_info and sp_info.hasDetectors(spectrum_index) and sp_info.isMonitor(spectrum_index)):
-            counts[spectrum_index] = interpolation_function(x_centers)
-        else:
-            counts[spectrum_index, :] = np.nan
+    # Setting vmin and vmax will ensure the colour bar limits are correct
+    if "vmin" not in kwargs:
+        kwargs["vmin"] = min_counts
+    if "vmax" not in kwargs:
+        kwargs["vmax"] = max_counts
 
     if histogram2D:
         x = mantid.plots.datafunctions.boundaries_from_points(x_centers)
     else:
         x = x_centers
+
+    kwargs['resample_required'] = resample_required
+
     if transpose:
-        return y.T, x.T, counts.T
+        return y.T, x.T, counts.T, kwargs
     else:
-        return x, y, counts
+        return x, y, counts, kwargs
+
+
+def interpolate_y_data(workspace, x, xbins, ybins, normalize_by_bin_width, spectrum_info=None):
+    num_hist = workspace.getNumberHistograms()
+    counts = np.ma.empty([ybins, xbins], dtype=np.float64)
+    min_counts = np.finfo(np.float64).max
+    max_counts = np.finfo(np.float64).min
+    index = 0
+    step = int(np.ceil(num_hist / ybins))
+    for spectrum_index in range(0, num_hist, step):
+        if not (spectrum_info and spectrum_info.hasDetectors(spectrum_index) and spectrum_info.isMonitor(spectrum_index)):
+            centers, ztmp, _, _ = get_spectrum(workspace, spectrum_index, normalize_by_bin_width=normalize_by_bin_width,
+                                               withDy=False, withDx=False)
+            interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
+                                              fill_value=np.nan)
+            counts[index] = interpolation_function(x)
+            min_counts = min(min_counts, np.nanmin(counts[index]))
+            max_counts = max(max_counts, np.nanmax(counts[index]))
+        else:
+            counts[index, :] = np.nan
+        index += 1
+    counts = np.ma.masked_invalid(counts, copy=False)
+    return counts, min_counts, max_counts
 
 
 def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=False):
