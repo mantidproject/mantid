@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QStyle
+from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAbstractItemView
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
 
@@ -20,6 +20,7 @@ class DrillTableWidget(QTableWidget):
 
     def __init__(self, parent=None):
         super(DrillTableWidget, self).__init__(parent)
+        self._disabled = False
         header = DrillHeaderView(self)
         header.setSectionsClickable(True)
         header.setHighlightSections(True)
@@ -42,6 +43,8 @@ class DrillTableWidget(QTableWidget):
         Args:
             position (int): row index
         """
+        if self._disabled:
+            return
         n_rows = self.rowCount()
         if ((position < 0) or (position > n_rows)):
             return
@@ -54,6 +57,8 @@ class DrillTableWidget(QTableWidget):
         Args:
             position(int): row index
         """
+        if self._disabled:
+            return
         n_rows = self.rowCount()
         if ((position < 0) or (position >= n_rows)):
             return
@@ -66,6 +71,8 @@ class DrillTableWidget(QTableWidget):
         Args:
             position (int): row index
         """
+        if self._disabled:
+            return
         n_rows = self.rowCount()
         if ((position < 0) or (position >= n_rows)):
             return
@@ -81,6 +88,8 @@ class DrillTableWidget(QTableWidget):
             row (int): row index
             column (int): column index
         """
+        if self._disabled:
+            return
         n_rows = self.rowCount()
         n_cols = self.columnCount()
         if ((row < 0) or (row > n_rows) or (column < 0) or (column > n_cols)):
@@ -181,6 +190,8 @@ class DrillTableWidget(QTableWidget):
             column (int): column index
             contents (str): cell contents
         """
+        if self._disabled:
+            return
         n_rows = self.rowCount()
         n_columns = self.columnCount()
         if ((row < 0) or (row >= n_rows) \
@@ -212,6 +223,8 @@ class DrillTableWidget(QTableWidget):
             row (int): row index
             contents (list(str)): contents
         """
+        if self._disabled:
+            return
         n_rows = self.rowCount()
         if ((row < 0) or (row >= n_rows)):
             return
@@ -349,3 +362,29 @@ class DrillTableWidget(QTableWidget):
         for i in range(self.columnCount()):
             fold.append(header.isSectionFolded(i))
         return fold
+
+    def setDisabled(self, state):
+        """
+        Override QTableWidget::setDisabled. This methods disables only the table
+        cells and not the scrollbars or the headers.
+
+        Args:
+            state (bool): True to disable, False to enable
+        """
+        self._disabled = state
+        self.blockSignals(True)
+        if state:
+            self.__editTriggers = self.editTriggers()
+            self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        else:
+            self.setEditTriggers(self.__editTriggers)
+        flags = Qt.ItemIsEditable
+        for c in range(self.columnCount()):
+            for r in range(self.rowCount()):
+                item = self.item(r, c)
+                if item:
+                    if state:
+                        item.setFlags(item.flags() & ~flags)
+                    else:
+                        item.setFlags(item.flags() | flags)
+        self.blockSignals(False)

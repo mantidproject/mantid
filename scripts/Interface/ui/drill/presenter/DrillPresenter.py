@@ -75,13 +75,13 @@ class DrillPresenter:
         Args:
             rows (list(int)): list of rows to be processed
         """
+        self.view.set_disabled(True)
+        self.view.set_progress(0, 100)
         try:
             self.model.process(rows)
         except Exception as e:
+            self.view.set_disabled(False)
             self.view.processing_error(e.elements)
-        else:
-            self.view.set_disabled(True)
-            self.view.set_progress(0, 100)
 
     def stopProcessing(self):
         """
