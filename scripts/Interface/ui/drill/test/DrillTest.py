@@ -399,6 +399,56 @@ class DrillTest(unittest.TestCase):
         for (k, v) in self.model.samples[7].items():
             self.assertEqual(v, data[6][self.view.columns[0]])
 
+    def test_erase(self):
+        data = self.fillTable(5)
+
+        # no selection
+        QTest.mouseClick(self.view.erase, Qt.LeftButton)
+        self.assertEqual(self.model.samples, data)
+
+        # 1 row
+        self.selectRow(0, Qt.NoModifier)
+        QTest.mouseClick(self.view.erase, Qt.LeftButton)
+        data[0] = {}
+        self.assertEqual(self.model.samples, data)
+
+        # several rows
+        self.selectRow(0, Qt.NoModifier)
+        self.selectRow(2, Qt.ControlModifier)
+        QTest.mouseClick(self.view.erase, Qt.LeftButton)
+        data[2] = {}
+        self.assertEqual(self.model.samples, data)
+        self.selectRow(1, Qt.NoModifier)
+        self.selectRow(4, Qt.ShiftModifier)
+        QTest.mouseClick(self.view.erase, Qt.LeftButton)
+        data = [{}] * 5
+        self.assertEqual(self.model.samples, data)
+
+    def test_increment(self):
+        self.view.nrows.setValue(9)
+        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
+        self.assertEqual(self.model.samples, [{}] * 10)
+
+        # 0 increment
+        self.view.increment.setValue(0)
+        self.setCellContents(0, 0, "0")
+        self.selectColumn(0, Qt.NoModifier)
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        column = self.model.columns[0]
+        for i in range(10):
+            self.assertEqual(self.model.samples[i][column], "0")
+
+        # increment
+        self.view.increment.setValue(7)
+        self.setCellContents(0, 1, "0")
+        self.selectColumn(1, Qt.NoModifier)
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        column = self.model.columns[1]
+        value = 0
+        for i in range(10):
+            self.assertEqual(self.model.samples[i][column], str(value))
+            value += 7
+
 
 if __name__ == "__main__":
     unittest.main()
