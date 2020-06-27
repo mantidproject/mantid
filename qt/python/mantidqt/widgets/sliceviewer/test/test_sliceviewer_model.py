@@ -607,65 +607,6 @@ class SliceViewerModelTest(unittest.TestCase):
                           slicepoint=(None, None, 0, 0),
                           transpose=False)
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
-    def test_rebin_mdhistworkspace_calls_binmd(self, mock_binmd):
-        orig_ws = self.ws_MD_3D
-        model = SliceViewerModel(orig_ws)
-
-        model.rebin(slicepoint=(None, 0, None), limits=((-1, 1), (-2, 2)))
-
-        mock_binmd.assert_called_once_with(InputWorkspace=self.ws_MD_3D,
-                                           OutputWorkspace='ws_MD_3D_svrebinned',
-                                           AxisAligned=False,
-                                           EnableLogging=False,
-                                           BasisVector0='Dim1,MomentumTransfer,1.0,0.0,0.0',
-                                           BasisVector1='Dim2,EnergyTransfer,0.0,1.0,0.0',
-                                           BasisVector2='Dim3,Angstrom,0.0,0.0,1.0',
-                                           OutputExtents='-1,1,-10,10,-2,2',
-                                           OutputBins='5,5,4')
-
-        self.assertEqual(
-            mock_binmd.return_value,
-            model._get_ws(),
-            msg='Expected internal workspace reference to have been overwritten by result of BinMD')
-
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
-    def test_rebin_mdhistworkspace_twice_uses_same_output_wsname(self, mock_binmd):
-        orig_ws = self.ws_MD_3D
-        model = SliceViewerModel(orig_ws)
-        mock_rebinned_first = MagicMock(getNumDims=lambda: 3)
-        mock_binmd.return_value = mock_rebinned_first
-
-        model.rebin(slicepoint=(None, 0, None), limits=((-1, 1), (-2, 2)))
-        model.rebin(slicepoint=(None, 0, None), limits=((-0.5, 0.5), (-2, 2)))
-        self.assertEqual(2, mock_binmd.call_count)
-        self.assertEqual(self.ws_MD_3D.name() + '_svrebinned',
-                         mock_binmd.call_args[-1]['OutputWorkspace'])
-
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
-    def test_rebin_mdeventworkspace_does_nothing(self, mock_binmd):
-        orig_ws = self.ws_MDE_3D
-        model = SliceViewerModel(orig_ws)
-
-        model.rebin(slicepoint=(None, None, 0.),
-                    bin_params=[100, 100, 1],
-                    limits=(-1, 1, -2, 2, -3, 3))
-
-        mock_binmd.assert_not_called()
-        self.assertEqual(orig_ws, model._get_ws())
-
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
-    def test_rebin_matrixworkspace_does_nothing(self, mock_binmd):
-        orig_ws = self.ws2d_histo
-        model = SliceViewerModel(orig_ws)
-
-        model.rebin(slicepoint=(None, None, 0.),
-                    bin_params=[100, 100, 1],
-                    limits=(-1, 1, -2, 2, -3, 3))
-
-        mock_binmd.assert_not_called()
-        self.assertEqual(orig_ws, model._get_ws())
-
     # private
     def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, coords,
                                              has_oriented_lattice):

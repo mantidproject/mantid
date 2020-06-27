@@ -159,8 +159,7 @@ class SliceViewer(object):
         """Notify data limits on image axes have changed"""
         data_view = self.view.data_view
         if self.model.can_support_dynamic_rebinning():
-            self.model.rebin(slicepoint=self.get_slicepoint(), limits=data_view.get_axes_limits())
-            self.new_plot()
+            self.new_plot()  # automatically uses current display limits
             self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
         else:
             data_view.draw_plot()
