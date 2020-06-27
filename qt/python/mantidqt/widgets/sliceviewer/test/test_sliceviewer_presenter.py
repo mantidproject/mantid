@@ -218,7 +218,6 @@ class SliceViewerTest(unittest.TestCase):
         presenter.data_limits_changed()
 
         new_plot_mock.assert_called_once()
-        self.model.rebin.assert_called_once()
 
     def test_data_limits_changed_does_not_create_new_plot_if_dynamic_rebinning_not_supported(self):
         presenter = SliceViewer(None, model=self.model, view=self.view)
