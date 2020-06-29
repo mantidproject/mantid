@@ -195,6 +195,7 @@ class DrillTest(unittest.TestCase):
 
     def test_settingsWindow(self):
         self.view.showSettings = mock.Mock()
+        self.view.setup_header()
         QTest.mouseClick(self.view.settings, Qt.LeftButton)
         self.view.showSettings.emit.assert_called_once()
         self.view.showSettings.reset_mock()

@@ -125,9 +125,7 @@ class DrillView(QMainWindow):
         self.actionSaveAs.triggered.connect(self.saveRundexAs)
         self.actionSave.triggered.connect(self.saveRundex)
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
-        self.actionSettings.triggered.connect(
-                lambda : self.showSettings.emit()
-                )
+        self.actionSettings.triggered.connect(self.showSettings.emit)
         self.actionClose.triggered.connect(self.close)
         self.actionAddRow.triggered.connect(self.add_row_after)
         self.actionDelRow.triggered.connect(self.del_selected_rows)
@@ -137,9 +135,7 @@ class DrillView(QMainWindow):
         self.actionErase.triggered.connect(self.eraseSelectedCells)
         self.actionProcessRow.triggered.connect(self.process_selected_rows)
         self.actionProcessAll.triggered.connect(self.process_all_rows)
-        self.actionStopProcessing.triggered.connect(
-                lambda : self.processStopped.emit()
-                )
+        self.actionStopProcessing.triggered.connect(self.processStopped.emit)
 
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
         self.instrumentselector.setToolTip("Instrument")
@@ -157,9 +153,7 @@ class DrillView(QMainWindow):
         self.load.clicked.connect(self.load_rundex)
 
         self.settings.setIcon(icons.get_icon("mdi.settings"))
-        self.settings.clicked.connect(
-                lambda : self.showSettings.emit()
-                )
+        self.settings.clicked.connect(self.showSettings.emit)
 
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
         self.paste.clicked.connect(self.pasteCells)
@@ -195,9 +189,7 @@ class DrillView(QMainWindow):
         self.processAll.clicked.connect(self.process_all_rows)
 
         self.stop.setIcon(icons.get_icon("mdi.stop"))
-        self.stop.clicked.connect(
-                lambda : self.processStopped.emit()
-                )
+        self.stop.clicked.connect(self.processStopped.emit)
 
     def setup_table(self):
         """
