@@ -88,7 +88,7 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
  */
 std::shared_ptr<MultiDomainFunction>
 FunctionFactoryImpl::createInitializedMultiDomainFunction(
-    const std::string &input, size_t domainNumber) {
+    const std::string &input, size_t domainNumber) const {
   auto singleFunction = createInitialized(input);
   auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
 

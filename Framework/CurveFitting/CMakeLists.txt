@@ -5,6 +5,7 @@ set(SRC_FILES
     src/Algorithms/ConvolutionFit.cpp
     src/Algorithms/ConvolveWorkspaces.cpp
     src/Algorithms/CrystalFieldEnergies.cpp
+    src/Algorithms/DoublePulseFit.cpp
     src/Algorithms/EstimateFitParameters.cpp
     src/Algorithms/EstimatePeakErrors.cpp
     src/Algorithms/EvaluateFunction.cpp
@@ -171,6 +172,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Algorithms/ConvolutionFit.h
     inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
     inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
+    inc/MantidCurveFitting/Algorithms/DoublePulseFit.h
     inc/MantidCurveFitting/Algorithms/EstimateFitParameters.h
     inc/MantidCurveFitting/Algorithms/EstimatePeakErrors.h
     inc/MantidCurveFitting/Algorithms/EvaluateFunction.h
@@ -335,6 +337,7 @@ set(TEST_FILES
     Algorithms/ConvertToYSpaceTest.h
     Algorithms/ConvolutionFitSequentialTest.h
     Algorithms/ConvolveWorkspacesTest.h
+    Algorithms/DoublePulseFitTest.h
     Algorithms/EstimateFitParametersTest.h
     Algorithms/EstimatePeakErrorsTest.h
     Algorithms/EvaluateFunctionTest.h
