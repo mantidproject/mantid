@@ -35,12 +35,6 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.set_disabled.assert_called_once_with(True)
         self.view.set_progress.assert_called_once_with(0, 100)
 
-        e = Exception()
-        e.elements = mock.Mock()
-        self.model.process.side_effect = e
-        self.presenter.process(["test", "test"])
-        self.view.processing_error.assert_called_once_with(e.elements)
-
     def test_stopProcessing(self):
         self.presenter.stopProcessing()
         self.model.stopProcess.assert_called_once()

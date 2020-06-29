@@ -14,8 +14,8 @@ class DrillAlgorithmObserverSignals(QObject):
     """
     Signals that the observer could send.
     """
-    finished = Signal(int)    # return code (0: success - 1: error)
-    progress = Signal(float)  # progress value between 0.0 and 1.0
+    finished = Signal(int, str)  # return code (0: success - 1: error), error msg
+    progress = Signal(float)     # progress value between 0.0 and 1.0
 
 
 class DrillAlgorithmObserver(AlgorithmObserver):
@@ -27,21 +27,23 @@ class DrillAlgorithmObserver(AlgorithmObserver):
         super(DrillAlgorithmObserver, self).__init__()
         self.signals = DrillAlgorithmObserverSignals()
         self.error = False
+        self.errorMsg = None
 
     def finishHandle(self):
         """
         Called when the observed algo is finished.
         """
         if self.error:
-            self.signals.finished.emit(1)
+            self.signals.finished.emit(1, self.errorMsg)
         else:
-            self.signals.finished.emit(0)
+            self.signals.finished.emit(0, "")
 
     def errorHandle(self, msg):
         """
         Called when the observed algo encounter an error.
         """
         self.error = True
+        self.errorMsg = msg
 
     def progressHandle(self, p, msg):
         """

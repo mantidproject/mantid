@@ -77,11 +77,7 @@ class DrillPresenter:
         """
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
-        try:
-            self.model.process(rows)
-        except Exception as e:
-            self.view.set_disabled(False)
-            self.view.processing_error(e.elements)
+        self.model.process(rows)
 
     def stopProcessing(self):
         """

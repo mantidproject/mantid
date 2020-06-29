@@ -15,9 +15,9 @@ class DrillTaskSignals(QObject):
     """
     Signals that the DrillTask could send.
     """
-    started = Signal(int)         # task reference
-    finished = Signal(int, int)   # task reference, return value (0: success)
-    progress = Signal(int, float) # task reference and progress between 0.0 and 1.0
+    started = Signal(int)             # task reference
+    finished = Signal(int, int, str)  # task reference, return value (0: success), error msg
+    progress = Signal(int, float)     # task reference and progress between 0.0 and 1.0
 
 
 class DrillTask(QRunnable):
@@ -28,28 +28,9 @@ class DrillTask(QRunnable):
         super(DrillTask, self).__init__()
         self.ref = ref
         self.signals = DrillTaskSignals()
-        # setup the algo
-        self.alg = sapi.AlgorithmManager.create(alg)
-        # check every properties before throwing an exception
-        errors = list()
-        for (k, v) in kwargs.items():
-            try:
-                self.alg.setProperty(k, v)
-            except Exception as e:
-                errors.append(str(e))
-        if errors:
-            raise Exception("* " + "\n* ".join(errors))
-        # setup the observer
-        self.observer = DrillAlgorithmObserver()
-        self.observer.observeFinish(self.alg)
-        self.observer.observeError(self.alg)
-        self.observer.signals.finished.connect(
-                lambda ret : self.signals.finished.emit(self.ref, ret)
-                )
-        self.observer.observeProgress(self.alg)
-        self.observer.signals.progress.connect(
-                lambda p : self.signals.progress.emit(self.ref, p)
-                )
+        self.algName = alg
+        self.alg = None
+        self.properties = kwargs
 
     def run(self):
         """
@@ -57,12 +38,35 @@ class DrillTask(QRunnable):
         start in an other thread.
         """
         self.signals.started.emit(self.ref)
+        self.alg = sapi.AlgorithmManager.create(self.algName)
+        errors = list()
+        for (k, v) in self.properties.items():
+            try:
+                self.alg.setProperty(k, v)
+            except Exception as e:
+                errors.append(str(e))
+        if errors:
+            self.signals.finished.emit(self.ref, 1, " - ".join(errors))
+            return
+        # setup the observer
+        self.observer = DrillAlgorithmObserver()
+        self.observer.observeFinish(self.alg)
+        self.observer.observeError(self.alg)
+        self.observer.signals.finished.connect(
+                lambda ret, msg : self.signals.finished.emit(self.ref, ret, msg)
+                )
+        self.observer.observeProgress(self.alg)
+        self.observer.signals.progress.connect(
+                lambda p : self.signals.progress.emit(self.ref, p)
+                )
         try:
             ret = self.alg.execute()
             if not ret:
-                self.signals.finished.emit(self.ref, 1)
-        except:
-            self.signals.finished.emit(self.ref, 1)
+                self.signals.finished.emit(self.ref, 1, "")
+        except Exception as ex:
+            self.signals.finished.emit(self.ref, 1, str(ex))
+        except KeyboardInterrupt:
+            pass
 
     def cancel(self):
         """
@@ -70,7 +74,7 @@ class DrillTask(QRunnable):
         currently running. It avoids emitting error signal for cancelling non
         running ones.
         """
-        if self.alg.isRunning():
+        if self.alg and self.alg.isRunning():
             self.alg.cancel()
-            self.signals.finished.emit(self.ref, 1)
+            self.signals.finished.emit(self.ref, 1, "Processing cancelled")
 

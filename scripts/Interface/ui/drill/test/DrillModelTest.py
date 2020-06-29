@@ -11,7 +11,7 @@ import mock
 from mantid.kernel import *
 from mantid.api import *
 
-from Interface.ui.drill.model.DrillModel import DrillModel, DrillException
+from Interface.ui.drill.model.DrillModel import DrillModel
 
 
 class DrillModelTest(unittest.TestCase):
@@ -391,19 +391,6 @@ class DrillModelTest(unittest.TestCase):
         self.assertEqual(self.model.getProcessingParameters(0), params)
 
     def test_process(self):
-        self.model.samples = [{}]
-        try:
-            self.model.process([0])
-        except DrillException as e:
-            assert True
-            self.assertEqual(e.elements[0][0], 0)
-        else:
-            assert False
-        self.mDrillTask.assert_not_called()
-        self.model.tasksPool.addProcess.assert_not_called()
-        self.mDrillTask.reset_mock()
-        self.model.tasksPool.reset_mock()
-
         self.model.samples = [{"c1": "v1"}]
         self.model.process([0])
         self.mDrillTask.assert_called()
@@ -417,15 +404,6 @@ class DrillModelTest(unittest.TestCase):
         self.model.tasksPool.addProcess.assert_called()
         self.mDrillTask.reset_mock()
         self.model.tasksPool.reset_mock()
-
-        self.mDrillTask.side_effect = Exception()
-        self.model.samples = [{"c1": "v1"}, {"c1": "v1"}]
-        try:
-            self.model.process([0, 1])
-        except DrillException:
-            assert True
-        else:
-            assert False
 
     def test_stopProcess(self):
         self.model.stopProcess()

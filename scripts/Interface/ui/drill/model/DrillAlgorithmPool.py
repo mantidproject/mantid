@@ -14,7 +14,7 @@ class DrillAlgorithmPoolSignals(QObject):
     """
     taskStarted = Signal(int)     # task reference
     taskSuccess = Signal(int)     # task reference
-    taskError = Signal(int)       # task reference
+    taskError = Signal(int, str)  # task reference
     progressUpdate = Signal(int)  # progress in percent
     processingDone = Signal()
 
@@ -58,17 +58,18 @@ class DrillAlgorithmPool(QThreadPool):
         self.tasks.clear()
         self.tasksDone = 0
 
-    def onTaskFinished(self, ref, ret):
+    def onTaskFinished(self, ref, ret, msg):
         """
         Called each time a task in the pool is ending.
 
         Args:
             ref (int): task reference
             ret (int): return code. (0 for success)
+            msf (str): error msg if needed
         """
         self.tasksDone += 1
         if ret:
-            self.signals.taskError.emit(ref)
+            self.signals.taskError.emit(ref, msg)
         else:
             self.signals.taskSuccess.emit(ref)
         if (self.tasksDone == len(self.tasks)):

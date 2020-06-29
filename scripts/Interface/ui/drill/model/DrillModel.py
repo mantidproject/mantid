@@ -19,17 +19,6 @@ from .DrillTask import DrillTask
 from .ParameterController import Parameter, ParameterController
 
 
-class DrillException(Exception):
-    """
-    Custom exception that contains a list of invalid submitted elements.
-    Each element in the list is a tuple (element number, text message).
-    """
-
-    def __init__(self, elements):
-        super(DrillException, self).__init__()
-        self.elements = elements
-
-
 class DrillModel(QObject):
 
     algorithm = None
@@ -61,7 +50,7 @@ class DrillModel(QObject):
         # setup the thread pool
         self.tasksPool.signals.taskStarted.connect(self.process_started.emit)
         self.tasksPool.signals.taskSuccess.connect(self.process_done.emit)
-        self.tasksPool.signals.taskError.connect(self.process_error.emit)
+        self.tasksPool.signals.taskError.connect(self.onProcessError)
         self.tasksPool.signals.progressUpdate.connect(self.progress_update.emit)
         self.tasksPool.signals.processingDone.connect(self.processing_done.emit)
 
@@ -352,20 +341,23 @@ class DrillModel(QObject):
         errors = list()
         for e in elements:
             if (e >= len(self.samples)) or (not self.samples[e]):
-                errors.append((e, "Empty row"))
                 continue
             kwargs = self.getProcessingParameters(e)
-            try:
-                tasks.append(DrillTask(e, self.algorithm, **kwargs))
-            except Exception as ex:
-                logger.error("Error while processing sample {0}: {1}"
-                        .format(e, ex))
-                errors.append((e, str(ex)))
-        if errors:
-            raise DrillException(errors)
-        else:
-            for t in tasks:
-                self.tasksPool.addProcess(t)
+            tasks.append(DrillTask(e, self.algorithm, **kwargs))
+            self.tasksPool.addProcess(tasks[-1])
+
+    def onProcessError(self, ref, msg):
+        """
+        Called when a processing fails. This method logs a message and fires the
+        corresponding signal.
+
+        Args:
+            ref (int): sample index
+            msg (str): error msg
+        """
+        logger.error("Error while processing sample {0}: {1}"
+                     .format(ref + 1, msg))
+        self.process_error.emit(ref)
 
     def stopProcess(self):
         """
