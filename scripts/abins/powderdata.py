@@ -1,36 +1,43 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import numbers
+from typing import Any, Dict, Optional
 from abins.constants import ALL_KEYWORDS_POWDER_DATA, GAMMA_POINT
+
+PowderItems = Dict[str, Dict[str, Any]]
 
 
 class PowderData:
     """
-    Class for storing powder data.
-    """
-    def __init__(self, num_atoms=None):
-        super(PowderData, self).__init__()
+    Data container for tensors used in analytic powder-averaging model
 
-        if isinstance(num_atoms, int) and num_atoms > 0:
-            self._num_atoms = num_atoms
+    :param items: Tensor data (dict containing 'a_tensors', 'b_tensors', which
+        are dicts of data by k-point)
+    :param num_atoms: Expected number of atoms in tensor data. If provided,
+        this value is used for sanity-checking
+
+    """
+    def __init__(self, items: PowderItems,
+                 num_atoms: Optional[int] = None):
+
+        if isinstance(num_atoms, numbers.Integral) and num_atoms > 0:
+            self._num_atoms = int(num_atoms)  # type: int
         else:
             raise ValueError("Invalid value of atoms.")
 
-        self._data = None
+        self._check_items(items)
+        self._data = items  # type: PowderItems
 
-    def set(self, items=None):
-
-        self._check_items(items=items)
-        self._data = items
-
-    def extract(self):
-        self._check_items(items=self._data)
+    def extract(self) -> PowderItems:
+        """Get tensor data as dict"""
+        self._check_items(self._data)
         return self._data
 
-    def _check_items(self, items=None):
+    def _check_items(self, items: PowderItems) -> None:
 
         if not isinstance(items, dict):
             raise ValueError("Invalid value. Dictionary with the following entries : %s" %
@@ -51,5 +58,5 @@ class PowderData:
         if items["b_tensors"][GAMMA_POINT].shape[0] != self._num_atoms:
             raise ValueError("Invalid dimension of b_tensors.")
 
-    def __str__(self):
-        return "Powder data"
+    def __str__(self) -> str:
+        return "Tensor data for analytic powder averaging"

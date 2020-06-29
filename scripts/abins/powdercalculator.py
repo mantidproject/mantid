@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -22,7 +22,7 @@ class PowderCalculator(object):
     """
     Class for calculating powder data.
     """
-    def __init__(self, filename=None, abins_data=None):
+    def __init__(self, *, filename: str, abins_data: abins.AbinsData):
         """
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from input DFT file
@@ -43,8 +43,6 @@ class PowderCalculator(object):
         """
         Calculates powder data (a_tensors, b_tensors according to aCLIMAX manual).
         """
-        # define container for powder data
-        powder = abins.PowderData(num_atoms=self._num_atoms)
 
         k_indices = sorted(self._frequencies.keys())  # make sure dictionary keys are in the same order on each machine
         b_tensors = {}
@@ -61,9 +59,9 @@ class PowderCalculator(object):
             a_tensors[k] = tensors[indx][0]
             b_tensors[k] = tensors[indx][1]
 
-        # fill powder object with powder data
-        powder.set(dict(b_tensors=b_tensors, a_tensors=a_tensors))
-
+        powder = abins.PowderData(dict(b_tensors=b_tensors,
+                                       a_tensors=a_tensors),
+                                  num_atoms=self._num_atoms)
         return powder
 
     def _calculate_powder_k(self, k=None):
@@ -138,8 +136,8 @@ class PowderCalculator(object):
         :returns: object of type PowderData with mean square displacements.
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
-        powder_data = abins.PowderData(num_atoms=data["datasets"]["powder_data"]["b_tensors"][GAMMA_POINT].shape[0])
-        powder_data.set(data["datasets"]["powder_data"])
+        powder_data = abins.PowderData(data["datasets"]["powder_data"],
+                                       num_atoms=data["datasets"]["powder_data"]["b_tensors"][GAMMA_POINT].shape[0])
 
         return powder_data
 
