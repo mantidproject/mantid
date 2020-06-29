@@ -13,6 +13,8 @@ from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapp
 from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CalculateMuonAsymmetry,
                               CopyLogs, EvaluateFunction)
 from mantid.api import AnalysisDataService
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
+
 import mantid
 
 MUON_ANALYSIS_SUFFIX = ' MA'
@@ -486,7 +488,7 @@ class FittingTabModel(object):
         self.ws_fit_function_map = {}
 
     def freq_type(self):
-        if self.context._frequency_context is not None:
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
             freq = self.context._frequency_context.plot_type
         else:
             freq = 'None'

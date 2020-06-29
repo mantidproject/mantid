@@ -11,7 +11,7 @@ from distutils.version import LooseVersion
 from mantid.kernel import ConfigServiceImpl
 
 import Muon.GUI.Common.message_box as message_box
-from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
@@ -83,11 +83,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.frequency_context = FrequencyContext()
 
-        self.context = MuonContext(
+        self.context = FrequencyDomainAnalysisContext(
             muon_data_context=self.data_context, muon_gui_context=self.gui_context,
             muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
-            fitting_context=self.fitting_context,
-            workspace_suffix=' FD', frequency_context=self.frequency_context)
+            fitting_context=self.fitting_context, frequency_context=self.frequency_context)
 
         # create the dockable widget
         self.plot_widget = PlotWidget(self.context)
