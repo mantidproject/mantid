@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -297,43 +298,56 @@ public:
 /* Peformance testing */
 class ConvertToReflectometryQTestPerformance : public CxxTest::TestSuite {
 private:
-  WorkspaceGroup_sptr ws;
+  MatrixWorkspace_sptr m_workspace;
 
 public:
   void setUp() override {
+    FrameworkManager::Instance();
+
     // Load some data
-    auto loadalg = AlgorithmManager::Instance().create("Load");
-    loadalg->setRethrows(true);
+    auto loadalg = AlgorithmManager::Instance().createUnmanaged("Load");
+    loadalg->setChild(true);
     loadalg->initialize();
     loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
     loadalg->setPropertyValue("OutputWorkspace", "testws");
     loadalg->execute();
+    Workspace_sptr ws = loadalg->getProperty("OutputWorkspace");
+    TS_ASSERT(ws);
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    TS_ASSERT(group);
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // Convert units to wavelength
-    auto unitsalg = AlgorithmManager::Instance().create("ConvertUnits");
+    auto unitsalg =
+        AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+    unitsalg->setChild(true);
     unitsalg->initialize();
-    unitsalg->setPropertyValue("InputWorkspace", "testws");
+    unitsalg->setProperty("InputWorkspace", group->getItem(0));
     unitsalg->setPropertyValue("OutputWorkspace", "testws");
     unitsalg->setPropertyValue("Target", "Wavelength");
     unitsalg->execute();
+    TS_ASSERT(unitsalg->isExecuted());
+    m_workspace = unitsalg->getProperty("OutputWorkspace");
 
     // Convert the specturm axis ot signed_theta
     auto specaxisalg =
-        AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+        AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
+    specaxisalg->setChild(true);
     specaxisalg->initialize();
-    specaxisalg->setPropertyValue("InputWorkspace", "testws");
+    specaxisalg->setProperty("InputWorkspace", m_workspace);
     specaxisalg->setPropertyValue("OutputWorkspace", "testws");
     specaxisalg->setPropertyValue("Target", "signed_theta");
     specaxisalg->execute();
-
-    ws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testws");
+    TS_ASSERT(specaxisalg->isExecuted());
+    m_workspace = specaxisalg->getProperty("OutputWorkspace");
+    TS_ASSERT(m_workspace);
   }
 
   void testPerformance() {
     TS_ASSERT(true);
     ConvertToReflectometryQ alg;
     alg.initialize();
-    alg.setProperty("InputWorkspace", ws->getItem(0));
+    alg.setProperty("InputWorkspace", m_workspace);
     alg.setProperty("OutputDimensions", "Q (lab frame)");
     alg.setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
     alg.setPropertyValue("OutputVertexes", "vertexes");
@@ -341,9 +355,8 @@ public:
     alg.setProperty("IncidentTheta", 0.5);
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    IMDWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-            "OutputTransformedWorkspace");
+    auto out = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
+        "OutputTransformedWorkspace");
     TS_ASSERT(out != nullptr);
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
@@ -352,7 +365,7 @@ public:
     TS_ASSERT(true);
     ConvertToReflectometryQ alg;
     alg.initialize();
-    alg.setProperty("InputWorkspace", ws->getItem(0));
+    alg.setProperty("InputWorkspace", m_workspace);
     alg.setProperty("OutputDimensions", "Q (lab frame)");
     alg.setProperty("OutputAsMDWorkspace", false);
     alg.setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
@@ -362,9 +375,8 @@ public:
     alg.setProperty("Method", "NormalisedPolygon");
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    auto out = AnalysisDataService::Instance()
-                   .retrieveWS<Mantid::DataObjects::Workspace2D>(
-                       "OutputTransformedWorkspace");
+    auto out = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
+        "OutputTransformedWorkspace");
     TS_ASSERT(out != nullptr);
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
