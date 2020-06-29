@@ -27,12 +27,8 @@ class DrillPresenter:
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
         self.view.acquisitionModeChanged.connect(self.acquisitionModeChanged)
-        self.view.rowAdded.connect(
-                lambda position: self.model.add_row(position)
-                )
-        self.view.rowDeleted.connect(
-                lambda position: self.model.del_row(position)
-                )
+        self.view.rowAdded.connect(self.model.addSample)
+        self.view.rowDeleted.connect(self.model.deleteSample)
         self.view.dataChanged.connect(
                 lambda row, column, contents: self.model.changeParameter(
                     row, column, contents)
@@ -178,6 +174,7 @@ class DrillPresenter:
         columns, tooltips = self.model.getColumnHeaderData()
         self.view.set_table(columns, tooltips)
         self.view.fill_table(self.model.get_rows_contents())
+        self.model.setSampleNames(self.view.getRowNames())
         # set the visual settings if they exist
         vs = self.model.getVisualSettings()
         if vs:

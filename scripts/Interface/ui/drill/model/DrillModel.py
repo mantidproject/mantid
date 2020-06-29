@@ -82,6 +82,7 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self.samples = list()
+        self.sampleNames = list()
         self.settings = dict()
         self.controller = None
         self.rundexFile = None
@@ -397,7 +398,8 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        logger.information("Starting of sample {0} processing".format(ref + 1))
+        logger.information("Starting of sample {0} processing"
+                .format(self.sampleNames[ref]))
         self.processStarted.emit(ref)
 
     def _onTaskSuccess(self, ref):
@@ -408,7 +410,7 @@ class DrillModel(QObject):
             ref (int): sample index
         """
         logger.information("Processing of sample {0} finished with sucess"
-                           .format(ref + 1))
+                           .format(self.sampleNames[ref]))
         self.processSuccess.emit(ref)
 
     def _onTaskError(self, ref, msg):
@@ -580,11 +582,38 @@ class DrillModel(QObject):
 
         return self.columns, tooltips
 
-    def add_row(self, position):
-        self.samples.insert(position, dict())
+    def addSample(self, ref, name):
+        """
+        Add an empty sample. This method adds an empty space for a new sample
+        and register is name.
 
-    def del_row(self, position):
-        del self.samples[position]
+        Args:
+            ref (int): sample index
+            name (str): sample name used for the logging
+        """
+        self.samples.insert(ref, dict())
+        self.sampleNames.insert(ref, name)
+
+    def deleteSample(self, ref):
+        """
+        Remove a sample.
+
+        Args:
+            ref (int): sample index
+        """
+        del self.samples[ref]
+        del self.sampleNames[ref]
+
+    def setSampleNames(self, names):
+        """
+        Set the names of samples. These names are used for the logs.
+
+        Args:
+            list(str): list of sample names, same length as samples list
+        """
+        if (len(names) != len(self.samples)):
+            return
+        self.sampleNames = names
 
     def get_rows_contents(self):
         rows = list()
