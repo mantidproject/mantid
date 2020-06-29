@@ -28,7 +28,8 @@ class LoggerTest(unittest.TestCase):
     def test_unicode_logger(self):
         logger = Logger("LoggerTest")
         self.assertTrue(isinstance(logger, Logger))
-        for att in ['fatal', 'error', 'warning', 'notice', 'information', 'debug']:
+        for att in ['fatal', 'error', 'warning', 'notice', 'information', 'debug', 'flush', 'purge', 'accumulate',
+                    'flushDebug', 'flushInformation', 'flushNotice', 'flushWarning', 'flushError', 'flushFatal']:
             if not hasattr(logger, att):
                 self.fail("Logger object does not have the required attribute '%s'" % att)
 
@@ -55,7 +56,6 @@ class LoggerTest(unittest.TestCase):
         logger.accumulate('eight')
         logger.flushFatal()
         logger.purge()
-
 
 
 if __name__ == '__main__':
