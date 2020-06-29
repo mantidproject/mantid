@@ -21,14 +21,58 @@ from .ParameterController import Parameter, ParameterController
 
 class DrillModel(QObject):
 
-    algorithm = None
-    process_started = Signal(int)
-    process_done = Signal(int)
-    process_error = Signal(int)
-    processing_done = Signal()
-    progress_update = Signal(int)
-    param_ok = Signal(int, str)
-    param_error = Signal(int, str, str)
+    ###########################################################################
+    # signals                                                                 #
+    ###########################################################################
+
+    """
+    Raised when a process is started.
+    Args:
+        (int): sample index
+    """
+    processStarted = Signal(int)
+
+    """
+    Raised when a process finished with success.
+    Args:
+        (int): sample index
+    """
+    processSuccess = Signal(int)
+
+    """
+    Raised when a process failed.
+    Args:
+        (int): sample index
+    """
+    processError = Signal(int)
+
+    """
+    Raised when all the processing are done.
+    """
+    processingDone = Signal()
+
+    """
+    Raised each time the processing progress is updated.
+    Args:
+        (int): sample index
+    """
+    progressUpdate = Signal(int)
+
+    """
+    Raised when a new param is ok.
+    Args:
+        (int): sample index
+        (str): parameter name
+    """
+    paramOk = Signal(int, str)
+
+    """
+    Raised when a new parameter is wrong.
+    Args:
+        (int): sample index
+        (str): parameter name
+    """
+    paramError = Signal(int, str, str)
 
     def __init__(self):
         super(DrillModel, self).__init__()
@@ -48,11 +92,11 @@ class DrillModel(QObject):
 
         self.tasksPool = DrillAlgorithmPool()
         # setup the thread pool
-        self.tasksPool.signals.taskStarted.connect(self.process_started.emit)
-        self.tasksPool.signals.taskSuccess.connect(self.process_done.emit)
+        self.tasksPool.signals.taskStarted.connect(self.processStarted.emit)
+        self.tasksPool.signals.taskSuccess.connect(self.processSuccess.emit)
         self.tasksPool.signals.taskError.connect(self.onProcessError)
-        self.tasksPool.signals.progressUpdate.connect(self.progress_update.emit)
-        self.tasksPool.signals.processingDone.connect(self.processing_done.emit)
+        self.tasksPool.signals.progressUpdate.connect(self.progressUpdate.emit)
+        self.tasksPool.signals.processingDone.connect(self.processingDone.emit)
 
     def setInstrument(self, instrument):
         """
@@ -152,13 +196,13 @@ class DrillModel(QObject):
             return
         self.controller = ParameterController(self.algorithm)
         self.controller.signals.okParam.connect(
-                lambda p : self.param_ok.emit(
+                lambda p : self.paramOk.emit(
                     p.sample, p.name if p.name in self.columns
                     else RundexSettings.CUSTOM_OPT_JSON_KEY
                     )
                 )
         self.controller.signals.wrongParam.connect(
-                lambda p : self.param_error.emit(
+                lambda p : self.paramError.emit(
                     p.sample, p.name if p.name in self.columns
                     else RundexSettings.CUSTOM_OPT_JSON_KEY, p.errorMsg
                     )
@@ -259,7 +303,7 @@ class DrillModel(QObject):
         Change parameter value and update the model samples. The method is able
         to parse usual parameters (present in self.columns) and those coming
         from the custom options. It submits the new value to the parameters
-        controller to check it. In case of empty value, the param_ok signal is
+        controller to check it. In case of empty value, the paramOk signal is
         sent without any submission to the controller.
 
         Args:
@@ -268,7 +312,7 @@ class DrillModel(QObject):
             contents (str): new value
         """
         if (not contents):
-            self.param_ok.emit(row, self.columns[column])
+            self.paramOk.emit(row, self.columns[column])
             if (self.columns[column] in self.samples[row]):
                 del self.samples[row][self.columns[column]]
             return
@@ -277,7 +321,7 @@ class DrillModel(QObject):
             options = dict()
             for option in contents.split(';'):
                 if ('=' not in option):
-                    self.param_error.emit(row, self.columns[column],
+                    self.paramError.emit(row, self.columns[column],
                                           "Badly formatted custom options")
                     return
                 name = option.split("=")[0]
@@ -288,7 +332,7 @@ class DrillModel(QObject):
                 if value in ['false', 'False', 'FALSE']:
                     value = False
                 if (name not in RundexSettings.SETTINGS[self.acquisitionMode]):
-                    self.param_error.emit(row, self.columns[column],
+                    self.paramError.emit(row, self.columns[column],
                                           "Unknown option")
                     return
                 options[name] = value
@@ -357,7 +401,7 @@ class DrillModel(QObject):
         """
         logger.error("Error while processing sample {0}: {1}"
                      .format(ref + 1, msg))
-        self.process_error.emit(ref)
+        self.processError.emit(ref)
 
     def stopProcess(self):
         """

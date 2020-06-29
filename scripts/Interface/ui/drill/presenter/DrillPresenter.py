@@ -44,23 +44,23 @@ class DrillPresenter:
         self.view.showSettings.connect(self.settingsWindow)
 
         # model signals connection
-        self.model.process_started.connect(
+        self.model.processStarted.connect(
                 lambda row: self.view.set_row_processing(row)
                 )
-        self.model.process_done.connect(
+        self.model.processSuccess.connect(
                 lambda row: self.view.set_row_done(row)
                 )
-        self.model.process_error.connect(
+        self.model.processError.connect(
                 lambda row: self.view.set_row_error(row)
                 )
-        self.model.progress_update.connect(
+        self.model.progressUpdate.connect(
                 lambda progress: self.view.set_progress(progress, 100)
                 )
-        self.model.processing_done.connect(self.processingDone)
-        self.model.param_ok.connect(
+        self.model.processingDone.connect(self.processingDone)
+        self.model.paramOk.connect(
                 lambda row, param: self.view.set_cell_ok(row, param)
                 )
-        self.model.param_error.connect(
+        self.model.paramError.connect(
                 lambda row, param, msg: self.view.set_cell_error(
                     row, param, msg)
                 )
@@ -150,10 +150,10 @@ class DrillPresenter:
         types, values, doc = self.model.getSettingsTypes()
         sw.initWidgets(types, values, doc)
         sw.setSettings(self.model.getSettings())
-        self.model.param_ok.connect(
+        self.model.paramOk.connect(
                 lambda sample, param: sw.onSettingValidation(param, True)
                 )
-        self.model.param_error.connect(
+        self.model.paramError.connect(
                 lambda sample, param, msg: sw.onSettingValidation(param, False,
                                                                   msg)
                 )
