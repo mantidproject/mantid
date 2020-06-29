@@ -86,9 +86,12 @@ def extract_progress_kwargs(kwargs):
     return start, end, kwargs
 
 
-class LazySignature(inspect.Signature):
-
-    __slots__ = ('_alg_name', '__sig', 'args', 'kwargs')
+class LazyFunctionSignature(inspect.Signature):
+    """
+    Allows for lazy access to the signature of a function, only generating it when it is requested
+    to reduce the time spent initialising algorithms.
+    """
+    __slots__ = ('_alg_name', '__sig')
 
     def __init__(self, *args, **kwargs):
         if "alg_name" not in kwargs:
@@ -107,16 +110,20 @@ class LazySignature(inspect.Signature):
 
     def __getattr__(self, item):
         # Called for each attribute access.
-        if item in LazySignature.__slots__:
+        if item in LazyFunctionSignature.__slots__:
             return getattr(self, item)
         else:
             return getattr(self._signature, item)
 
     def _create_signature(self, alg_name):
+        from inspect import Signature
+        return Signature(self._create_parameters(alg_name))
+
+    def _create_parameters(self, alg_name):
         from mantid.api import AlgorithmManager
         alg_object = AlgorithmManager.Instance().createUnmanaged(alg_name)
         alg_object.initialize()
-        from inspect import Parameter, Signature
+        from inspect import Parameter
         pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
         parameters = []
         for name in alg_object.mandatoryProperties():
@@ -132,7 +139,24 @@ class LazySignature(inspect.Signature):
                 # None is not quite accurate here, but we are reproducing the
                 # behavior found in the C++ code for SimpleAPI.
                 parameters.append(Parameter(name, pos_or_keyword, default=None))
-        return Signature(parameters)
+        return parameters
+
+
+class LazyMethodSignature(LazyFunctionSignature):
+    """
+    Alternate LazyFunctionSignature intended for use in workspace methods. Replaces the input workspace
+    parameter with self.
+    """
+    def _create_parameters(self, alg_name):
+        from inspect import Parameter
+        parameters = super()._create_parameters(alg_name)
+        try:
+            parameters.pop(0)
+        except IndexError:
+            pass
+        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
+        return parameters
+
 
 def _show_dialog_fn_deprecation_warning(name):
     """Raise a deprecation warning for a *Dialog being used.
@@ -1160,7 +1184,7 @@ def _create_algorithm_function(name, version, algm_object):
     # enddef
     # Insert definition in to global dict
     algm_wrapper = _customise_func(algorithm_wrapper, name,
-                                   LazySignature(alg_name=name),
+                                   LazyFunctionSignature(alg_name=name),
                                    algm_object.docString())
     globals()[name] = algm_wrapper
     # Register aliases - split on whitespace
@@ -1464,7 +1488,7 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
     #     raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
     #                        "Algorithm::workspaceMethodInputProperty() has returned a property name that "
     #                        "does not exist on the algorithm." % algm_object.name())
-    _api._workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop,
+    _api._workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop, algm_object.name(),
                                              algm_object.workspaceMethodOn())
 
 

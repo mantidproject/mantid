@@ -71,7 +71,7 @@ def customise_func(func, name, signature, docstring):
     """
     func.__name__ = str(name)
     func.__doc__ = docstring
-    replace_signature(func, signature)
+    func.__signature__ = signature
     return func
 
 #-------------------------------------------------------------------------------
