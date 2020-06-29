@@ -7,6 +7,7 @@
 
 import numpy as np
 import re
+from typing import Dict
 
 from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceGroup
 from mantid.api import WorkspaceFactory, AnalysisDataService
@@ -19,13 +20,11 @@ from abins.abinsalgorithm import AbinsAlgorithm
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
-class Abins(PythonAlgorithm, AbinsAlgorithm):
+class Abins2D(PythonAlgorithm, AbinsAlgorithm):
     _ab_initio_program = None
     _vibrational_or_phonon_data_file = None
-    _experimental_file = None
     _temperature = None
     _bin_width = None
-    _scale = None
     _sample_form = None
     _instrument_name = None
     _atoms = None
@@ -36,49 +35,60 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
     _num_quantum_order_events = None
     _extracted_ab_initio_data = None
 
-    def category(self):
+    def category(self) -> str:
         return "Simulation"
 
-        # ----------------------------------------------------------------------------------------
+    def summary(self) -> str:
+        return "Calculates inelastic neutron scattering over 2D (q,ω) space."
 
-    def summary(self):
-        return "Calculates inelastic neutron scattering against 1-D ω axis."
-
-        # ----------------------------------------------------------------------------------------
-
-    def PyInit(self):
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
+    def PyInit(self) -> None:
+        from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
         # Declare properties for all Abins Algorithms
         self.declare_common_properties()
 
-        # Declare properties specific to 1D
-        self.declareProperty(FileProperty("ExperimentalFile", "",
-                                          action=FileAction.OptionalLoad,
-                                          direction=Direction.Input,
-                                          extensions=["raw", "dat"]),
-                             doc="File with the experimental inelastic spectrum to compare.")
-
-        self.declareProperty(name="Scale", defaultValue=1.0,
-                             doc='Scale the intensity by the given factor. Default is no scaling.')
-
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
-                             defaultValue="TOSCA",
-                             validator=StringListValidator(ONE_DIMENSIONAL_INSTRUMENTS),
+                             defaultValue="TwoDMap",
+                             validator=StringListValidator(TWO_DIMENSIONAL_INSTRUMENTS),
                              doc="Name of an instrument for which analysis should be performed.")
 
-    def validateInputs(self):
+        # Declare special properties for 2D instrument
+        self.declareProperty(name="Resolution",
+                             direction=Direction.Input,
+                             defaultValue=abins.parameters.instruments['TwoDMap']['resolution'],
+                             doc="Width of broadening function")
+
+        self.declareProperty(name="Angles",
+                             direction=Direction.Input,
+                             defaultValue="3.0, 140.0, 50")
+
+    # 'TwoDMap': {
+    #     'resolution': 0.1,  # Width of broadening function
+    #     'q_size': 200,  # Number of q slices
+    #     'e_init': [4100.0],  # Incident energies in cm-1
+    #     'angles': np.arange(3.0, 140.0, 1).tolist(), # All measurement angles for direct sweeps
+    #     },
+
+    def validateInputs(self) -> Dict[str,str]:
         """
         Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """
+
         issues = dict()
         issues = self.validate_common_inputs(issues)
 
-        scale = self.getProperty("Scale").value
-        if scale < 0:
-            issues["Scale"] = "Scale must be positive."
-
         self._check_advanced_parameter()
+
+        import numbers
+        if not isinstance(self.getProperty("Resolution").value, numbers.Real):
+            issues["Resolution"] = "Resolution must a real number"
+
+        try:
+            self._angle_string_to_list(self.getProperty("Angles").value)
+
+        except ValueError:
+            issues["Angles"] = ("Could not parse Angle input. Format should be "
+                                "\"min, max, steps\" or \"angle1, angle2, angle3, ...\"")
 
         return issues
 
@@ -103,12 +113,12 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         # 3) calculate S
         s_calculator = abins.SCalculatorFactory.init(filename=self._vibrational_or_phonon_data_file,
                                                      temperature=self._temperature,
-                                                     sample_form=self._sample_form, abins_data=ab_initio_data,
+                                                     sample_form=self._sample_form,
+                                                     abins_data=ab_initio_data,
                                                      instrument=self._instrument,
                                                      quantum_order_num=self._num_quantum_order_events,
                                                      bin_width=self._bin_width)
         s_data = s_calculator.get_formatted_data()
-
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
@@ -124,13 +134,12 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         else:  # case selected atoms
             # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
             # A regular expression match is used to make the underscore separator optional and check the index format
-            prefix = ATOM_PREFIX
-            atom_symbols = [item for item in self._atoms if item[:len(prefix)] != prefix]
+            atom_symbols = [item for item in self._atoms if item[:len(prefix)] != ATOM_PREFIX]
             if len(atom_symbols) != len(set(atom_symbols)):  # only different types
                 raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
                                  "Abins cannot create multiple workspaces with the same name.")
 
-            numbered_atom_test = re.compile('^' + prefix + r'_?(\d+)$')
+            numbered_atom_test = re.compile('^' + ATOM_PREFIX + r'_?(\d+)$')
             atom_numbers = [numbered_atom_test.findall(item) for item in self._atoms]  # Matches will be lists of str
             atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
 
@@ -146,7 +155,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
             for atom_number in atom_numbers:
                 if atom_number < 1 or atom_number > num_atoms:
                     raise ValueError("Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" %
-                                     (prefix, atom_number, 1, num_atoms))
+                                     (ATOM_PREFIX, atom_number, 1, num_atoms))
 
             # Final sanity check that everything in "atoms" field was understood
             if len(atom_symbols) + len(atom_numbers) < len(self._atoms):
@@ -173,11 +182,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
             total_workspace = self._create_total_workspace(partial_workspaces=total_atom_workspaces)
             workspaces.insert(0, total_workspace)
             prog_reporter.report("Workspace with total S has been constructed.")
-
-        # 7) add experimental data if available to the collection of workspaces
-        if self._experimental_file != "":
-            workspaces.insert(0, self._create_experimental_data_workspace().name())
-            prog_reporter.report("Workspace with the experimental data has been constructed.")
 
         GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
 
@@ -228,19 +232,21 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         :type iterable of int:
 
         :param s_data: dynamical factor data
-        :type abins.SData
+        :type abins.sdata.SData
 
         :returns: workspaces for list of atoms types, S for the particular type of atom
         """
-        from abins.constants import FLOAT_TYPE, MASS_EPS, ONLY_ONE_MASS
+        from abins.constants import MASS_EPS, ONLY_ONE_MASS
+
+        s_data_extracted = s_data.extract()
 
         # Create appropriately-shaped arrays to be used in-place by _atom_type_s - avoid repeated slow instantiation
         shape = [self._num_quantum_order_events]
-        shape.extend(list(s_data[0]["order_1"].shape))
-        s_atom_data = np.zeros(shape=tuple(shape), dtype=FLOAT_TYPE)
+        shape.extend(list(s_data_extracted["atom_0"]["s"]["order_1"].shape))
+        s_atom_data = np.zeros(shape=tuple(shape), dtype=abins.constants.FLOAT_TYPE)
         temp_s_atom_data = np.copy(s_atom_data)
 
-        num_atoms = len(s_data)
+        num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
         masses = self._get_masses_table(num_atoms)
 
         result = []
@@ -250,24 +256,25 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                 sub = (len(masses[symbol]) > ONLY_ONE_MASS
                        or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS)
                 for m in masses[symbol]:
-                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data=s_data,
+                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
                                                     element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
                                                     s_atom_data=s_atom_data, substitution=sub))
         if atom_numbers is not None:
             for atom_number in atom_numbers:
-                result.extend(self._atom_number_s(atom_number=atom_number, s_data=s_data,
+                result.extend(self._atom_number_s(atom_number=atom_number, s_data_extracted=s_data_extracted,
                                                   s_atom_data=s_atom_data))
         return result
 
-    def _atom_number_s(self, atom_number=None, s_data=None, s_atom_data=None):
+    def _atom_number_s(self, atom_number=None, s_data_extracted=None, s_atom_data=None):
         """
         Helper function for calculating S for the given atomic index
 
         :param atom_number: One-based index of atom in s_data e.g. 1 to select first element 'atom_1'
         :type atom_number: int
 
-        :param s_data: Precalculated S for all atoms and quantum orders
-        :type s_data: abins.SData
+        :param s_data_extracted: Collection of precalculated S for all atoms and quantum orders, obtained from extract()
+            method of abins.sdata.SData object.
+        :type s_data: dict
 
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays. First dimension is quantum
@@ -288,8 +295,10 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         symbol = self._extracted_ab_initio_data[internal_atom_label]["symbol"]
         z_number = Atom(symbol=symbol).z_number
 
-        for i, order in enumerate(range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX)):
-            s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
+        for i, order in enumerate(range(FUNDAMENTALS,
+                                        self._num_quantum_order_events + S_LAST_INDEX)):
+
+            s_atom_data[i] = s_data_extracted[internal_atom_label]["s"]["order_%s" % order]
 
         total_s_atom_data = np.sum(s_atom_data, axis=0)
 
@@ -302,14 +311,13 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                                                       protons_number=z_number))
         return atom_workspaces
 
-    def _atom_type_s(self, num_atoms=None, mass=None, s_data=None, element_symbol=None, temp_s_atom_data=None,
+    def _atom_type_s(self, num_atoms=None, mass=None, s_data_extracted=None, element_symbol=None, temp_s_atom_data=None,
                      s_atom_data=None, substitution=None):
         """
         Helper function for calculating S for the given type of atom
 
         :param num_atoms: number of atoms in the system
-        :param s_data: Precalculated S for all atoms and quantum orders
-        :type s_data: abins.SData
+        :param s_data_extracted: data with all S
         :param element_symbol: label for the type of atom
         :param temp_s_atom_data: helper array to accumulate S (inner loop over quantum order); does not transport
             information but is used in-place to save on time instantiating large arrays.
@@ -330,9 +338,10 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
                 temp_s_atom_data.fill(0.0)
 
-                for order in range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX):
+                for order in range(FUNDAMENTALS,
+                                   self._num_quantum_order_events + S_LAST_INDEX):
                     order_indx = order - PYTHON_INDEX_SHIFT
-                    temp_s_order = s_data[atom]["order_%s" % order]
+                    temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
                     temp_s_atom_data[order_indx] = temp_s_order
 
                 s_atom_data += temp_s_atom_data  # sum S over the atoms of the same type
@@ -374,11 +383,12 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         :type iterable of int:
 
         :param s_data: dynamical factor data
-        :type abins.SData
+        :type abins.sdata.SData
 
         :returns: workspaces for list of atoms types, each workspace contains  quantum order events of
                  S for the particular atom type
         """
+
         return self._create_workspaces(atoms_symbols=atoms_symbols, atom_numbers=atom_numbers, s_data=s_data)
 
     def _fill_s_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
@@ -390,35 +400,9 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         :param protons_number: number of protons in the given type fo atom
         :param nucleons_number: number of nucleons in the given type of atom
         """
-
-        from abins.constants import (FUNDAMENTALS,
-                                     ONE_DIMENSIONAL_INSTRUMENTS, ONE_DIMENSIONAL_SPECTRUM, TWO_DIMENSIONAL_INSTRUMENTS)
+        from abins.constants import FUNDAMENTALS, ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            # only FUNDAMENTALS [data is 2d with one row]
-            if s_points.shape[0] == FUNDAMENTALS:
-                self._fill_s_1d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
-                                          nucleons_number=nucleons_number)
-
-            # total workspaces [data is 1d vector]
-            elif len(s_points.shape) == ONE_DIMENSIONAL_SPECTRUM:
-                self._fill_s_1d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
-                                          nucleons_number=nucleons_number)
-
-            # quantum order events (fundamentals  or  overtones + combinations for the given order)
-            # [data is 2d table of S with a row for each quantum order]
-            else:
-                dim = s_points.shape[0]
-                partial_wrk_names = []
-
-                for n in range(dim):
-                    seed = "quantum_event_%s" % (n + 1)
-                    wrk_name = workspace + "_" + seed
-                    partial_wrk_names.append(wrk_name)
-
-                    self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
-                                              nucleons_number=nucleons_number)
-
-                GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
+            raise NotImplementedError()
 
         elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
 
@@ -447,37 +431,13 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
 
-    def _fill_s_1d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
-        """
-        Puts 1D S into workspace.
-        :param protons_number: number of protons in the given type of atom
-        :param nucleons_number: number of nucleons in the given type of atom
-        :param s_points: dynamical factor for the given atom
-        :param workspace: workspace to be filled with S
-        """
-        if protons_number is not None:
-            s_points = s_points * self._scale * self._get_cross_section(protons_number=protons_number,
-                                                                        nucleons_number=nucleons_number)
-
-        dim = 1
-        length = s_points.size
-        wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
-        for i in range(dim):
-            wrk.getSpectrum(i).setDetectorID(i + 1)
-        wrk.setX(0, self._bins)
-        wrk.setY(0, s_points)
-        AnalysisDataService.addOrReplace(workspace, wrk)
-
-        # Set correct units on workspace
-        self._set_workspace_units(wrk=workspace, layout="1D")
-
     def _fill_s_2d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
-        from mantid.api import NumericAxis
         from abins.constants import Q_BEGIN, Q_END
+        from mantid.api import NumericAxis
 
         if protons_number is not None:
-            s_points = s_points * self._scale * self._get_cross_section(protons_number=protons_number,
-                                                                        nucleons_number=nucleons_number)
+            s_points = s_points *  self._get_cross_section(protons_number=protons_number,
+                                                           nucleons_number=nucleons_number)
 
         n_q_bins, n_freq_bins = s_points.shape
 
@@ -485,7 +445,8 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         freq_axis = NumericAxis.create(n_freq_bins)
 
-        q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=abins.parameters.instruments[self._instrument.get_name()]['q_size'] + 1)
+        q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
+        q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=q_size + 1)
 
         freq_offset = (self._bins[1] - self._bins[0]) / 2
         for i, freq in enumerate(self._bins[1:]):
@@ -547,7 +508,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
             # initialize S
             if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
                 s_atoms = np.zeros_like(ws.dataY(0))
-
             if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
                 n_q = abins.parameters.instruments[self._instrument.get_name()]['q_size']
                 n_energy_bins = ws.getDimension(1).getNBins()
@@ -557,7 +517,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
             for partial_ws in local_partial_workspaces:
                 if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
                     s_atoms += mtd[partial_ws].dataY(0)
-
                 elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
                     for i in range(n_energy_bins):
                         s_atoms[:, i] += mtd[partial_ws].dataY(i)
@@ -591,16 +550,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                                nucleons_number=nucleons_number)
         return ws_name
 
-    def _create_experimental_data_workspace(self):
-        """
-        Loads experimental data into workspaces.
-        :returns: workspace with experimental data
-        """
-        experimental_wrk = Load(self._experimental_file)
-        self._set_workspace_units(wrk=experimental_wrk.name())
-
-        return experimental_wrk
-
     def _set_workspace_units(self, wrk=None, layout='1D'):
         """
         Sets x and y units for a workspace.
@@ -627,66 +576,42 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
     def _check_advanced_parameter(self):
         """
-        Checks if parameters from abins.parameters are valid. If any parameter is invalid then RuntimeError is thrown
-        with meaningful message.
+        Checks if parameters from abins.parameters are valid. If any parameter
+        is invalid then RuntimeError is thrown with meaningful message.
         """
 
-        message = " in abins.parameters. "
+        message = " in scripts/abins/parameters.py. "
 
         self._check_common_advanced_parameters(message)
-
-        self._check_tosca_parameters(message)
         self._check_2d_parameters(message)
-
-    def _check_tosca_parameters(self, message_end=None):
-        """
-        Checks TOSCA parameters.
-        :param message_end: closing part of the error message.
-        """
-
-        # TOSCA final energy in cm^-1
-        tosca_parameters = abins.parameters.instruments['TOSCA']
-        final_energy = tosca_parameters['final_neutron_energy']
-        if not (isinstance(final_energy, float) and final_energy > 0.0):
-            raise RuntimeError("Invalid value of final_neutron_energy for TOSCA" + message_end)
-
-        angle = tosca_parameters['cos_scattering_angle']
-        if not isinstance(angle, float):
-            raise RuntimeError("Invalid value of cosines scattering angle for TOSCA" + message_end)
-
-        resolution_const_a = tosca_parameters['a']
-        if not isinstance(resolution_const_a, float):
-            raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)"
-                               + message_end)
-
-        resolution_const_b = tosca_parameters['b']
-        if not isinstance(resolution_const_b, float):
-            raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)"
-                               + message_end)
-
-        resolution_const_c = tosca_parameters['c']
-        if not isinstance(resolution_const_c, float):
-            raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)"
-                               + message_end)
 
     def _check_2d_parameters(self, message_end=None):
         # check 2D resolution
         resolution_2d = abins.parameters.instruments['TwoDMap']['resolution']
         if not (isinstance(resolution_2d, float) and resolution_2d > 0):
-            raise RuntimeError("Invalid value of AbinsParameters"
+            raise RuntimeError("Invalid value of abins.parameters"
                                ".instruments['TwoDMap']['resolution']"
                                + message_end)
+
+    @staticmethod
+    def _angle_string_to_list(angle_string):
+        angle_string = angle_string.strip()
+        if angle_string[0] == '[' and angle_string[-1] == ']':
+            angles = list(map(float, angle_string[1:-1].split(',')))
+        else:
+            linspace_spec = list(map(float, angle_string.split(',')))
+            if len(linspace_spec) != 3:
+                raise ValueError()
+
+            angles = np.linspace(*linspace_spec).tolist()
+
+        return angles
 
     def _get_properties(self):
         """
         Loads all properties to object's attributes.
         """
-        from abins.constants import FLOAT_TYPE
-
         self._get_common_properties()
-
-        self._experimental_file = self.getProperty("ExperimentalFile").value
-        self._scale = self.getProperty("Scale").value
 
         # Sampling mesh is determined by
         # abins.parameters.sampling['min_wavenumber']
@@ -695,7 +620,12 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         step = self._bin_width
         start = abins.parameters.sampling['min_wavenumber']
         stop = abins.parameters.sampling['max_wavenumber'] + step
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
+        self._bins = np.arange(start=start, stop=stop, step=step, dtype=abins.constants.FLOAT_TYPE)
+
+        instrument_params = abins.parameters.instruments[self._instrument.get_name()]
+
+        instrument_params['resolution'] = self.getProperty("Resolution").value
+        instrument_params['angles'] = self._angle_string_to_list(self.getProperty("Angles").value)
 
 
-AlgorithmFactory.subscribe(Abins)
+AlgorithmFactory.subscribe(Abins2D)
