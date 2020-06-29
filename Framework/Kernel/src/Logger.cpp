@@ -268,31 +268,34 @@ void Logger::accumulate(const std::string &msg) {
 /**
  * Flushes the accumulated message to the current channel
  */
-void Logger::report() { log(m_logStream->flush(), Priority(getLevel())); }
+void Logger::flush() { log(m_logStream->flush(), Priority(getLevel())); }
 
 /**
  * Flushes the accumulated message to the given priority
  * @param priority the log level priority
  */
-void Logger::report(Priority priority) { log(m_logStream->flush(), priority); }
+void Logger::flush(Priority priority) { log(m_logStream->flush(), priority); }
 
-/// Reports the accumulated message with debug priority
-void Logger::reportDebug() { report(Poco::Message::PRIO_DEBUG); }
+/// flushes the accumulated message with debug priority
+void Logger::flushDebug() { flush(Poco::Message::PRIO_DEBUG); }
 
-/// Reports the accumulated message with information priority
-void Logger::reportInformation() { report(Poco::Message::PRIO_INFORMATION); }
+/// flushes the accumulated message with information priority
+void Logger::flushInformation() { flush(Poco::Message::PRIO_INFORMATION); }
 
-/// Reports the accumulated message with notice priority
-void Logger::reportNotice() { report(Poco::Message::PRIO_NOTICE); }
+/// flushes the accumulated message with notice priority
+void Logger::flushNotice() { flush(Poco::Message::PRIO_NOTICE); }
 
-/// Reports the accumulated message with warning priority
-void Logger::reportWarning() { report(Poco::Message::PRIO_WARNING); }
+/// flushes the accumulated message with warning priority
+void Logger::flushWarning() { flush(Poco::Message::PRIO_WARNING); }
 
-/// Reports the accumulated message with error priority
-void Logger::reportError() { report(Poco::Message::PRIO_ERROR); }
+/// flushes the accumulated message with error priority
+void Logger::flushError() { flush(Poco::Message::PRIO_ERROR); }
 
-/// Reports the accumulated message with fatal priority
-void Logger::reportFatal() { report(Poco::Message::PRIO_FATAL); }
+/// flushes the accumulated message with fatal priority
+void Logger::flushFatal() { flush(Poco::Message::PRIO_FATAL); }
+
+/// flushes the accumulated messages without logging them
+void Logger::purge() { m_logStream->flush(); }
 
 /** Shuts down the logging framework and releases all Loggers.
  * Static method.

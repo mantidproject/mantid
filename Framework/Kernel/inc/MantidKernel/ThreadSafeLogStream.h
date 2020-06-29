@@ -49,7 +49,7 @@ public:
   std::string flush();
 
 private:
-  /// Overridden fron base to write to the device in a thread-safe manner.
+  /// Overridden from base to write to the device in a thread-safe manner.
   int writeToDevice(char c) override;
 
 private:

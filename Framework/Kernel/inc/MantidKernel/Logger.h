@@ -75,16 +75,17 @@ public:
   void debug(const std::string &msg);
   /// accumulates a message
   void accumulate(const std::string &msg);
-  /// Reports accumulated messages
-  void report();
-  /// Reports accumulated messages to the given priority
-  void report(Priority);
-  void reportDebug();
-  void reportInformation();
-  void reportNotice();
-  void reportWarning();
-  void reportError();
-  void reportFatal();
+  /// flushes accumulated messages to the current level
+  void flush();
+  /// flushes accumulated messages to the given priority
+  void flush(Priority);
+  void flushDebug();
+  void flushInformation();
+  void flushNotice();
+  void flushWarning();
+  void flushError();
+  void flushFatal();
+  void purge();
 
   /// Logs at Fatal level
   std::ostream &fatal();

@@ -73,22 +73,24 @@ void export_Logger() {
       .def("accumulate", (LoggerMsgFunction)&Logger::accumulate,
            (arg("self"), arg("message")),
            "accumulate a message to report later")
-      .def("report", (LoggerFlushFunction)&Logger::report, (arg("self")),
+      .def("report", (LoggerFlushFunction)&Logger::flush, (arg("self")),
            "Flush the accumulated message to the current channel.")
-      .def("reportDebug", (LoggerFlushFunction)&Logger::reportDebug,
+      .def("reportDebug", (LoggerFlushFunction)&Logger::flushDebug,
            (arg("self")), "Flush the accumulated message to the debug channel.")
-      .def("reportInformation", (LoggerFlushFunction)&Logger::reportInformation,
+      .def("reportInformation", (LoggerFlushFunction)&Logger::flushInformation,
            (arg("self")), "Flush the accumulated message to the debug channel.")
-      .def("reportNotice", (LoggerFlushFunction)&Logger::reportNotice,
+      .def("reportNotice", (LoggerFlushFunction)&Logger::flushNotice,
            (arg("self")),
            "Flush the accumulated message to the notice channel.")
-      .def("reportWarning", (LoggerFlushFunction)&Logger::reportWarning,
+      .def("reportWarning", (LoggerFlushFunction)&Logger::flushWarning,
            (arg("self")),
            "Flush the accumulated message to the warning channel.")
-      .def("reportError", (LoggerFlushFunction)&Logger::reportError,
+      .def("reportError", (LoggerFlushFunction)&Logger::flushError,
            (arg("self")), "Flush the accumulated message to the error channel.")
-      .def("reportFatal", (LoggerFlushFunction)&Logger::reportFatal,
+      .def("reportFatal", (LoggerFlushFunction)&Logger::flushFatal,
            (arg("self")), "Flush the accumulated message to the fatal channel.")
+      .def("purge", (LoggerFlushFunction)&Logger::purge, (arg("self")),
+           "Clear the accumulated messages without logging.")
       // -- deprecated  --
       .def("get", &getLogger,
            "Creates the named logger. "
