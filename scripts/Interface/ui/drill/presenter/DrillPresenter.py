@@ -29,10 +29,7 @@ class DrillPresenter:
         self.view.acquisitionModeChanged.connect(self.acquisitionModeChanged)
         self.view.rowAdded.connect(self.model.addSample)
         self.view.rowDeleted.connect(self.model.deleteSample)
-        self.view.dataChanged.connect(
-                lambda row, column, contents: self.model.changeParameter(
-                    row, column, contents)
-                )
+        self.view.dataChanged.connect(self.model.changeParameter)
         self.view.process.connect(self.process)
         self.view.processStopped.connect(self.stopProcessing)
         self.view.rundexLoaded.connect(self.rundexLoaded)
@@ -40,26 +37,15 @@ class DrillPresenter:
         self.view.showSettings.connect(self.settingsWindow)
 
         # model signals connection
-        self.model.processStarted.connect(
-                lambda row: self.view.set_row_processing(row)
-                )
-        self.model.processSuccess.connect(
-                lambda row: self.view.set_row_done(row)
-                )
-        self.model.processError.connect(
-                lambda row: self.view.set_row_error(row)
-                )
+        self.model.processStarted.connect(self.view.set_row_processing)
+        self.model.processSuccess.connect(self.view.set_row_done)
+        self.model.processError.connect(self.view.set_row_error)
         self.model.progressUpdate.connect(
                 lambda progress: self.view.set_progress(progress, 100)
                 )
         self.model.processingDone.connect(self.processingDone)
-        self.model.paramOk.connect(
-                lambda row, param: self.view.set_cell_ok(row, param)
-                )
-        self.model.paramError.connect(
-                lambda row, param, msg: self.view.set_cell_error(
-                    row, param, msg)
-                )
+        self.model.paramOk.connect(self.view.set_cell_ok)
+        self.model.paramError.connect(self.view.set_cell_error)
 
         self.updateViewFromModel()
 
