@@ -92,11 +92,11 @@ class DrillModel(QObject):
 
         self.tasksPool = DrillAlgorithmPool()
         # setup the thread pool
-        self.tasksPool.signals.taskStarted.connect(self.processStarted.emit)
-        self.tasksPool.signals.taskSuccess.connect(self.processSuccess.emit)
-        self.tasksPool.signals.taskError.connect(self.onProcessError)
-        self.tasksPool.signals.progressUpdate.connect(self.progressUpdate.emit)
-        self.tasksPool.signals.processingDone.connect(self.processingDone.emit)
+        self.tasksPool.signals.taskStarted.connect(self._onTaskStarted)
+        self.tasksPool.signals.taskSuccess.connect(self._onTaskSuccess)
+        self.tasksPool.signals.taskError.connect(self._onTaskError)
+        self.tasksPool.signals.progressUpdate.connect(self._onProcessingProgress)
+        self.tasksPool.signals.processingDone.connect(self._onProcessingDone)
 
     def setInstrument(self, instrument):
         """
@@ -390,7 +390,28 @@ class DrillModel(QObject):
             tasks.append(DrillTask(e, self.algorithm, **kwargs))
             self.tasksPool.addProcess(tasks[-1])
 
-    def onProcessError(self, ref, msg):
+    def _onTaskStarted(self, ref):
+        """
+        Called each time a task starts.
+
+        Args:
+            ref (int): sample index
+        """
+        logger.information("Starting of sample {0} processing".format(ref + 1))
+        self.processStarted.emit(ref)
+
+    def _onTaskSuccess(self, ref):
+        """
+        Called when a task finished with success.
+
+        Args:
+            ref (int): sample index
+        """
+        logger.information("Processing of sample {0} finished with sucess"
+                           .format(ref + 1))
+        self.processSuccess.emit(ref)
+
+    def _onTaskError(self, ref, msg):
         """
         Called when a processing fails. This method logs a message and fires the
         corresponding signal.
@@ -402,6 +423,22 @@ class DrillModel(QObject):
         logger.error("Error while processing sample {0}: {1}"
                      .format(ref + 1, msg))
         self.processError.emit(ref)
+
+    def _onProcessingProgress(self, progress):
+        """
+        Called each time a processing updates its progress.
+
+        Args:
+            ref (int): sample index
+            progress (float): progress value (between 0.0 and 1.0)
+        """
+        self.progressUpdate.emit(progress)
+
+    def _onProcessingDone(self):
+        """
+        Called when the processing is done.
+        """
+        self.processingDone.emit()
 
     def stopProcess(self):
         """
