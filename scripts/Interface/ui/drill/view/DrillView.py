@@ -42,9 +42,8 @@ class DrillView(QMainWindow):
     Sent when a row is added to the table.
     Args:
         int: row index
-        str: row name
     """
-    rowAdded = Signal(int, str)
+    rowAdded = Signal(int)
 
     """
     Sent when a row is deleted from the table.
@@ -362,7 +361,7 @@ class DrillView(QMainWindow):
         n = self.nrows.value()
         for i in range(n):
             self.table.addRow(position + 1)
-            self.rowAdded.emit(position + 1, str(position + 2))
+            self.rowAdded.emit(position + 1)
             position += 1
             self.setWindowModified(True)
 
@@ -621,16 +620,7 @@ class DrillView(QMainWindow):
             self.blockSignals(False)
         else:
             self.table.addRow(0)
-            self.rowAdded.emit(0, str(1))
-
-    def getRowNames(self):
-        """
-        Get a list of sample names.
-
-        Returns:
-            list(str): list of names
-        """
-        return [i for i in range(1, self.table.rowCount() + 1)]
+            self.rowAdded.emit(0)
 
     def setRundexFile(self, filename):
         """

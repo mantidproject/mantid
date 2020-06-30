@@ -82,7 +82,6 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self.samples = list()
-        self.sampleNames = list()
         self.settings = dict()
         self.controller = None
         self.rundexFile = None
@@ -398,8 +397,9 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        name = str(ref + 1)
         logger.information("Starting of sample {0} processing"
-                .format(self.sampleNames[ref]))
+                .format(name))
         self.processStarted.emit(ref)
 
     def _onTaskSuccess(self, ref):
@@ -409,8 +409,9 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        name = str(ref + 1)
         logger.information("Processing of sample {0} finished with sucess"
-                           .format(self.sampleNames[ref]))
+                           .format(name))
         self.processSuccess.emit(ref)
 
     def _onTaskError(self, ref, msg):
@@ -422,8 +423,9 @@ class DrillModel(QObject):
             ref (int): sample index
             msg (str): error msg
         """
+        name = str(ref + 1)
         logger.error("Error while processing sample {0}: {1}"
-                     .format(ref + 1, msg))
+                     .format(name, msg))
         self.processError.emit(ref)
 
     def _onProcessingProgress(self, progress):
@@ -582,17 +584,14 @@ class DrillModel(QObject):
 
         return self.columns, tooltips
 
-    def addSample(self, ref, name):
+    def addSample(self, ref):
         """
-        Add an empty sample. This method adds an empty space for a new sample
-        and register is name.
+        Add an empty sample. This method adds an empty space for a new sample.
 
         Args:
             ref (int): sample index
-            name (str): sample name used for the logging
         """
         self.samples.insert(ref, dict())
-        self.sampleNames.insert(ref, name)
 
     def deleteSample(self, ref):
         """
@@ -602,18 +601,6 @@ class DrillModel(QObject):
             ref (int): sample index
         """
         del self.samples[ref]
-        del self.sampleNames[ref]
-
-    def setSampleNames(self, names):
-        """
-        Set the names of samples. These names are used for the logs.
-
-        Args:
-            list(str): list of sample names, same length as samples list
-        """
-        if (len(names) != len(self.samples)):
-            return
-        self.sampleNames = names
 
     def get_rows_contents(self):
         rows = list()
