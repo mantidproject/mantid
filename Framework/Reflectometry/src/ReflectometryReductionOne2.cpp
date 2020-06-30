@@ -42,6 +42,9 @@ namespace {
 std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
 std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
 
+static constexpr double degToRad = M_PI / 180.;
+static constexpr double radToDeg = 180. / M_PI;
+
 /** Get the twoTheta angle for the centre of the detector associated with the
  * given spectrum
  *
@@ -773,7 +776,7 @@ void ReflectometryReductionOne2::findTheta0() {
   g_log.debug("theta0: " + std::to_string(theta0()) + " degrees\n");
 
   // Convert to radians
-  m_theta0 *= M_PI / 180.0;
+  m_theta0 *= degToRad;
 }
 
 /**
@@ -1200,9 +1203,9 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
   // We cannot project pixels below the horizon angle
   if (twoTheta <= theta0()) {
     throw std::runtime_error(
-        "Cannot process twoTheta=" + std::to_string(twoTheta * 180.0 / M_PI) +
+        "Cannot process twoTheta=" + std::to_string(twoTheta * radToDeg) +
         " as it is below the horizon angle=" +
-        std::to_string(theta0() * 180.0 / M_PI));
+        std::to_string(theta0() * radToDeg));
   }
 
   // Get the angle from twoThetaR to this detector
@@ -1229,7 +1232,7 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
   } catch (std::exception &ex) {
     throw std::runtime_error(
         "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +
-        "," + std::to_string(twoTheta * 180.0 / M_PI) + ") onto twoThetaR = " +
+        "," + std::to_string(twoTheta * radToDeg) + ") onto twoThetaR = " +
         std::to_string(twoThetaRVal) + ": " + ex.what());
   }
 }
