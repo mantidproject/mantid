@@ -671,6 +671,7 @@ class DrillView(QMainWindow):
         self.help.setDisabled(state)
         self.processRows.setDisabled(state)
         self.processAll.setDisabled(state)
+        self.stop.setDisabled(not state)
         self.table.setDisabled(state)
         self.table.clearSelection()
 

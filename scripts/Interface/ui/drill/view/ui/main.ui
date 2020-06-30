@@ -370,6 +370,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="stop">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Stop processing</string>
         </property>
