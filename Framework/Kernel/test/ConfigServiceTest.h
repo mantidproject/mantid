@@ -350,34 +350,6 @@ public:
     TS_ASSERT_EQUALS(noseCountString, "");
   }
 
-  void testRelativeToAbsoluteForKeysWithCorrectIdentifier() {
-    auto &cfg = ConfigService::Instance();
-    cfg.setString("mantid.test.directory", "..");
-    cfg.setString("mantid.test.directories", "..");
-
-    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.directory")).isAbsolute());
-    TS_ASSERT(
-        Poco::Path(cfg.getString("mantid.test.directories")).isAbsolute());
-  }
-
-  void testNoRelativeToAbsoluteForKeysWithoutCorrectIdentifier() {
-    auto &cfg = ConfigService::Instance();
-    cfg.setString("mantid.test.direc", "..");
-
-    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.direc")).isRelative());
-  }
-
-  void testNoRelativeToAbsoluteForKeysOnRequest() {
-    auto &cfg = ConfigService::Instance();
-    cfg.setString("mantid.test.directory", "..");
-    cfg.setString("mantid.test.directories", "..");
-
-    TS_ASSERT(
-        Poco::Path(cfg.getString("mantid.test.directory", false)).isRelative());
-    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.directories", false))
-                  .isRelative());
-  }
-
   void testAppendProperties() {
 
     // This should clear out all old properties
