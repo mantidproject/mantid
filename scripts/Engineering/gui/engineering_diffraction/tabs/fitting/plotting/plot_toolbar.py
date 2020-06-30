@@ -33,7 +33,6 @@ class FittingPlotToolbar(NavigationToolbar2QT):
             if text is None:
                 self.addSeparator()
             else:
-                # action = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
                 if mdi_icon:
                     action = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
                 else:

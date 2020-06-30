@@ -13,7 +13,6 @@ from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
-import matplotlib.pyplot as plt
 from .interactive_tool import FitInteractiveTool
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
@@ -130,7 +129,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
-
+        import matplotlib.pyplot as plt
         """
         Override the base class method. Initialise the peak editing tool.
         """
@@ -167,6 +166,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.set_output_window_names()
 
     def set_output_window_names(self):
+        import matplotlib.pyplot as plt  # unfortunately need to import again
         """
         Change the output name if more than one plot of the same workspace
         """
@@ -369,7 +369,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                   other_names=self.registeredOthers())
         return menu
 
-    def do_plot(self, ws, plot_diff = False, **plot_kwargs):
+    def do_plot(self, ws, plot_diff=False, **plot_kwargs):
         ax = self.get_axes()
 
         self.clear_fit_result_lines()
@@ -525,7 +525,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 if prefix is None:
                     need_update_markers = True
                     break
-                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or\
+                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or \
                         self.getPeakFwhmOf(prefix) != w:
                     need_update_markers = True
                     break
@@ -549,5 +549,5 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 presenter = MatrixWorkspaceDisplay(ws, plot=plot)
                 presenter.show_view()
             elif isinstance(ws, ITableWorkspace):
-                presenter = TableWorkspaceDisplay(ws, plot=plt)
+                presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot)
                 presenter.show_view()

@@ -12,7 +12,6 @@ from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling import d
 
 dir_path = "Engineering.gui.engineering_diffraction.tabs.fitting.data_handling"
 
-
 class FittingDataPresenterTest(unittest.TestCase):
     def setUp(self):
         self.model = mock.create_autospec(data_model.FittingDataModel)
@@ -281,60 +280,54 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.assertEqual(0, self.presenter.plot_added_notifier.notify_subscribers.call_count)
         self.assertEqual(0, self.presenter.plot_removed_notifier.notify_subscribers.call_count)
 
-    @patch(dir_path + ".data_presenter.Plus")
-    @patch(dir_path + ".data_presenter.Minus")
-    def test_handle_background_subtracted(self, mock_minus, mock_plus):
+
+    def test_bgsub_first_time(self):
         # setup row
+        self._setup_bgsub_test()
+        # subtract background for first time
+        self.view.get_item_checked.return_value = True # determines is bgSubtract is checked or not
+        self.view.read_bg_params_from_table.return_value = [True, 40, 800, False]
+        self.model.get_background_workspaces.return_value = None
+        self.presenter._handle_table_cell_changed(1, 3)
+        self.model.do_background_subtraction.assert_called_with("name2", self.view.read_bg_params_from_table(0))
+        self.model.undo_background_subtraction.assert_not_called()
+
+    def test_bgparam_changed_when_bgsub_False(self):
+        # setup row
+        self._setup_bgsub_test()
+        # activate bg subtraction before background is made (nothing should happen)
+        self.view.get_item_checked.return_value = False
+        self.presenter._handle_table_cell_changed(1, 4)
+        self.model.do_background_subtraction.assert_not_called()
+        self.model.undo_background_subtraction.assert_not_called()
+
+    def test_bgparam_changed_when_bgsub_True(self):
+        # setup row
+        self._setup_bgsub_test()
+        self.view.get_item_checked.return_value = True
+        self.model.get_bg_params.return_value = {"name2": [True, 40, 800, False]}
+        self.view.read_bg_params_from_table.return_value = [True, 200, 800, False]
+        self.model.get_background_workspaces.return_value = self.model.get_loaded_workspaces()
+        self.presenter._handle_table_cell_changed(1, 4)
+        self.model.do_background_subtraction.assert_called_once_with("name2", self.view.read_bg_params_from_table(0))
+
+    def test_undo_bgsub(self):
+        self._setup_bgsub_test()
+        # untick background subtraction
+        self.view.get_item_checked.return_value = False
+        self.presenter._handle_table_cell_changed(1, 3)
+        self.model.do_background_subtraction.assert_not_called()
+        self.model.undo_background_subtraction.assert_called_once_with("name2")
+
+    def _setup_bgsub_test(self):
         mocked_table_item = mock.MagicMock()
         mocked_table_item.checkState.return_value = True
         self.view.get_table_item.return_value = mocked_table_item
         self.presenter.row_numbers = data_presenter.TwoWayRowDict()
         self.presenter.row_numbers["name1"] = 0
         self.presenter.row_numbers["name2"] = 1
-        model_dict = {"name1": self.ws1, "name2": self.ws2}
-        self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.get_loaded_workspaces.return_value = {"name1": self.ws1, "name2": self.ws2}
         self.model.estimate_background.return_value = self.ws2
-
-        # activate bg subtraction before background is made (nothing should happen)
-        self.view.get_item_checked.return_value = False  # determines is bgSubtract is checked or not
-        self.view.get_background_params.return_value = [False, 40, 800, False]
-        self.model.get_background_workspaces.return_value = {a: None for a, b in model_dict.items()}
-        self.presenter._handle_table_cell_changed(1, 3)
-        self.assertEqual(self.model.estimate_background.call_count, 0)
-        self.assertEqual(mock_plus.call_count, 0)
-        self.assertEqual(mock_minus.call_count, 0)
-
-        # subtract background for first time
-        self.view.get_item_checked.return_value = True
-        self.view.get_background_params.return_value = [True, 40, 800, False]
-        self.model.get_background_workspaces.return_value = {a: None for a, b in model_dict.items()}
-        self.presenter._handle_table_cell_changed(1, 3)
-        self.assertEqual(self.model.estimate_background.call_count, 1)
-        self.assertEqual(mock_plus.call_count, 0)
-        self.assertEqual(mock_minus.call_count, 1)
-
-        # change background while still checked
-        self.view.get_background_params.return_value = [True, 200, 800, False]
-        self.model.get_background_workspaces.return_value = {"name2": self.ws2}
-        self.presenter._handle_table_cell_changed(1, 4)
-        self.assertEqual(self.model.estimate_background.call_count, 2)
-        self.assertEqual(mock_plus.call_count, 1)
-        self.assertEqual(mock_minus.call_count, 2)
-
-        # undo background subtraction
-        self.view.get_item_checked.return_value = False
-        self.presenter._handle_table_cell_changed(1, 3)
-        self.assertEqual(self.model.estimate_background.call_count, 2)
-        self.assertEqual(mock_plus.call_count, 2)
-        self.assertEqual(mock_minus.call_count, 2)
-
-        # subtract existing background (don't re-evaluate)
-        self.view.get_item_checked.return_value = True
-        self.presenter._handle_table_cell_changed(1, 3)
-        self.assertEqual(self.model.estimate_background.call_count, 2)
-        self.assertEqual(mock_plus.call_count, 2)
-        self.assertEqual(mock_minus.call_count, 3)
-
 
 if __name__ == '__main__':
     unittest.main()

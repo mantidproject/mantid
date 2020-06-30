@@ -8,7 +8,6 @@ from Engineering.gui.engineering_diffraction.tabs.common import create_error_mes
 from mantid.simpleapi import logger, Plus, Minus
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
-from matplotlib.pyplot import subplots
 
 
 class FittingDataPresenter(object):
@@ -19,7 +18,6 @@ class FittingDataPresenter(object):
 
         self.row_numbers = TwoWayRowDict()  # {ws_name: table_row} and {table_row: ws_name}
         self.plotted = set()  # List of plotted workspace names
-        self.bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
 
         # Connect view signals to local methods
         self.view.set_on_load_clicked(self.on_load_clicked)
@@ -35,7 +33,7 @@ class FittingDataPresenter(object):
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
 
-    def _log_xunit_change(self,xunit):
+    def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))
 
     def on_load_clicked(self, xunit):
@@ -112,8 +110,8 @@ class FittingDataPresenter(object):
                 if bank == 0:
                     bank = "cropped"
                 checked = name in self.plotted
-                if name in self.bg_params:
-                    self._add_row_to_table(name, i, run_no, bank, checked, *self.bg_params[name])
+                if name in self.model.get_bg_params():
+                    self._add_row_to_table(name, i, run_no, bank, checked, *self.model.get_bg_params()[name])
                 else:
                     self._add_row_to_table(name, i, run_no, bank, checked)
             except RuntimeError:
@@ -133,19 +131,10 @@ class FittingDataPresenter(object):
         # make external figure
         row_numbers = self.view.get_selected_rows()
         for row in row_numbers:
-            # check bg exists - or make bg?
-            ws_name = ws_name = self.row_numbers[row]
-            ws = self.model.get_loaded_workspaces()[ws_name]
-            ws_bg = self.model.get_background_workspaces()[ws_name]
-            if ws_bg and self.view.get_item_checked(row, 3):
-                fig, ax = subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]},
-                                   subplot_kw={'projection': 'mantid'})
+            if self.view.get_item_checked(row, 3):
                 # background has been subtracted from workspace
-                tmp = Plus(LHSWorkspace=ws_name, RHSWorkspace=ws_bg, StoreInADS=False)
-                ax[0].plot(tmp, 'x')
-                ax[0].plot(ws_bg, '-r')
-                ax[1].plot(ws, 'x')
-                fig.show()
+                ws_name = self.row_numbers[row]
+                self.model.plot_background_figure(ws_name)
 
     def _remove_all_tracked_workspaces(self):
         self.clear_workspaces()
@@ -167,32 +156,16 @@ class FittingDataPresenter(object):
                 # subtract bg
                 if self.view.get_item_checked(row, col):
                     # subtract bg box checked
-                    self._do_background_subtraction(row)
+                    bg_params = self.view.read_bg_params_from_table(row)
+                    self.model.do_background_subtraction(ws_name, bg_params)
                 elif self.model.get_background_workspaces()[ws_name]:
                     # box unchecked and bg exists:
-                    self.bg_params[ws_name][0] = False
-                    Plus(LHSWorkspace=ws_name, RHSWorkspace=self.model.get_background_workspaces()[ws_name],
-                         OutputWorkspace=ws_name)
+                    self.model.undo_background_subtraction(ws_name)
             elif col > 3:
                 if self.view.get_item_checked(row, 3):
                     # bg params changed - revaluate background
-                    self._do_background_subtraction(row)
-
-    def _do_background_subtraction(self, row):
-        ws_name = self.row_numbers[row]
-        ws = self.model.get_loaded_workspaces()[ws_name]
-        ws_bg = self.model.get_background_workspaces()[ws_name]
-        bg_params = self.view.get_background_params(row)
-        bg_changed = False
-        if ws_bg and bg_params != self.bg_params[ws_name]:
-            # add bg back on to data
-            Plus(LHSWorkspace=ws, RHSWorkspace=ws_bg, OutputWorkspace=ws_name)
-            bg_changed = True
-        if bg_changed or not ws_bg:
-            # revaluate background (or evaluate for first time)
-            self.bg_params[ws_name] = bg_params
-            ws_bg = self.model.estimate_background(ws_name, *self.bg_params[ws_name][1:])
-        Minus(LHSWorkspace=ws, RHSWorkspace=ws_bg, OutputWorkspace=ws_name)
+                    bg_params = self.view.read_bg_params_from_table(row)
+                    self.model.do_background_subtraction(ws_name, bg_params)
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)

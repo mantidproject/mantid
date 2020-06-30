@@ -84,6 +84,60 @@ class TestFittingDataModel(unittest.TestCase):
         mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
         self.assertEqual(2, mock_logger.error.call_count)
 
+    @patch(file_path + ".EnggEstimateFocussedBackground")
+    @patch(file_path + ".Minus")
+    @patch(file_path + ".Plus")
+    def test_do_background_subtraction_first_time(self, mock_plus, mock_minus, mock_estimate_bg):
+        mock_ws = mock.MagicMock()
+        self.model._loaded_workspaces = {"name1": mock_ws}
+        self.model._background_workspaces = {"name1": None}
+        self.model._bg_params = dict()
+        mock_estimate_bg.return_value = mock_ws
+
+        bg_params = [True, 40, 800, False]
+        self.model.do_background_subtraction("name1", bg_params)
+
+        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        mock_minus.assert_called_once()
+        mock_estimate_bg.assert_called_once()
+        mock_plus.assert_not_called()
+
+    @patch(file_path + ".EnggEstimateFocussedBackground")
+    @patch(file_path + ".Minus")
+    @patch(file_path + ".Plus")
+    def test_do_background_subtraction_bgparams_changed(self, mock_plus, mock_minus, mock_estimate_bg):
+        mock_ws = mock.MagicMock()
+        self.model._loaded_workspaces = {"name1": mock_ws}
+        self.model._background_workspaces = {"name1": mock_ws}
+        self.model._bg_params = {"name1": [True, 80, 1000, False]}
+        mock_estimate_bg.return_value = mock_ws
+
+        bg_params = [True, 40, 800, False]
+        self.model.do_background_subtraction("name1", bg_params)
+
+        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        mock_minus.assert_called_once()
+        mock_estimate_bg.assert_called_once()
+        mock_plus.assert_called_once()
+
+    @patch(file_path + ".EnggEstimateFocussedBackground")
+    @patch(file_path + ".Minus")
+    @patch(file_path + ".Plus")
+    def test_do_background_subtraction_no_change(self, mock_plus, mock_minus, mock_estimate_bg):
+        mock_ws = mock.MagicMock()
+        self.model._loaded_workspaces = {"name1": mock_ws}
+        self.model._background_workspaces = {"name1": mock_ws}
+        bg_params = [True, 80, 1000, False]
+        self.model._bg_params = {"name1": bg_params}
+        mock_estimate_bg.return_value = mock_ws
+
+        self.model.do_background_subtraction("name1", bg_params)
+
+        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        mock_minus.assert_called_once()
+        mock_estimate_bg.assert_not_called()
+        mock_plus.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()

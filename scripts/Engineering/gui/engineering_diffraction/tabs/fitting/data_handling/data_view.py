@@ -25,14 +25,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         # xunit combo box
         self.setup_xunit_combobox()
 
-    # =================
-    # XUnit combo box
-    # =================
-    def setup_xunit_combobox(self):
-        self.combo_xunit.setEditable(False)
-        # make TOF default
-        index = self.combo_xunit.findText("TOF")
-        self.combo_xunit.setCurrentIndex(index)
 
     # =================
     # Slot Connectors
@@ -151,7 +143,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def get_item_checked(self, row, col):
         return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
 
-    def get_background_params(self, row):
+    def read_bg_params_from_table(self, row):
         isBGsub = self.get_item_checked(row, 3)
         niter = int(self.get_table_item(row, 4).text())
         xwindow = float(self.get_table_item(row, 5).text())
@@ -164,3 +156,13 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def is_searching(self):
         return self.finder_data.isSearching()
+
+    # =================
+    # Internal Setup
+    # =================
+
+    def setup_xunit_combobox(self):
+        self.combo_xunit.setEditable(False)
+        # make TOF default
+        index = self.combo_xunit.findText("TOF")
+        self.combo_xunit.setCurrentIndex(index)

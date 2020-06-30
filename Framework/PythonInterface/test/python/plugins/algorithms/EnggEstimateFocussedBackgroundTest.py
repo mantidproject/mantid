@@ -42,23 +42,23 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
     def tearDown(self):
         if self.ws is not None: DeleteWorkspace(self.ws)
 
-    def runTest(self):
+    def test_subtraction(self):
 
         # get bg and subtract
         ws_bg = EnggEstimateFocussedBackground(InputWorkspace='ws', NIterations=20, XWindow=3)
         ws_diff = self.ws - ws_bg
 
         # test residuals to ensure background is well approximated
-        self.assertAlmostEqual(np.mean(ws_diff.readY(0)[self.mask]), 0, 0.04)
-        self.assertAlmostEqual(np.median(ws_diff.readY(0)[self.mask]), 0, 0.02)
+        self.assertAlmostEqual(np.mean(ws_diff.readY(0)[self.mask]), 0, delta=0.04)
+        self.assertAlmostEqual(np.median(ws_diff.readY(0)[self.mask]), 0, delta=0.02)
 
+    def test_window_validation(self):
         # test too small a window
         with self.assertRaises(RuntimeError):
             EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', NIterations=20, XWindow=0.1)
         # test too large a window
         with self.assertRaises(RuntimeError):
             EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', NIterations=20, XWindow=200)
-
 
 if __name__ == '__main__':
     unittest.main()
