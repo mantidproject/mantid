@@ -379,8 +379,6 @@ class DrillModel(QObject):
         Args:
             elements (list(int)): list of sample indexes to be processed
         """
-        # to be sure that the pool is cleared
-        self.tasksPool.abortProcessing()
         tasks = list()
         errors = list()
         for e in elements:

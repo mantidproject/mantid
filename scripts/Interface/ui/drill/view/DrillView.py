@@ -112,6 +112,7 @@ class DrillView(QMainWindow):
         self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
         self.invalidCells = set()
         self.coloredRows = set()
+        self.errorRows = set()
         self.rundexFile = None
 
         self._presenter = DrillPresenter(self)
@@ -390,6 +391,7 @@ class DrillView(QMainWindow):
                     QMessageBox.warning(self, "Error", "Please check the " +
                                         "parameters value before processing")
                 return
+            self.errorRows = set()
             self.process.emit(rows)
 
     def process_all_rows(self):
@@ -404,6 +406,7 @@ class DrillView(QMainWindow):
                     QMessageBox.warning(self, "Error", "Please check the " +
                                         "parameters value before processing")
                     return
+            self.errorRows = set()
             self.process.emit(rows)
 
     def load_rundex(self):
@@ -702,6 +705,8 @@ class DrillView(QMainWindow):
         """
         if row not in self.coloredRows:
             self.coloredRows.add(row)
+        if row not in self.errorRows:
+            self.errorRows.add(row)
         self.table.setRowBackground(row, self.ERROR_COLOR)
 
     def set_cell_ok(self, row, columnTitle):
@@ -739,25 +744,6 @@ class DrillView(QMainWindow):
         self.table.setCellBackground(row, column, self.ERROR_COLOR)
         self.table.setCellToolTip(row, column, msg)
         self.invalidCells.add((row, column))
-
-    def processing_error(self, elements):
-        """
-        Display a popup window that represents errors repported by the row
-        processing.
-
-        Args:
-            elements (list(tuple(int, str))): list of error messages and the
-                                              corresponding row
-        """
-        text = str()
-        for e in elements:
-            text += ("Row " + str(int(e[0]) + 1) + ":\n")
-            text += e[1]
-            text += '\n\n'
-        w = QMessageBox(QMessageBox.Critical, "Processing error",
-                "Error while processing selected rows", QMessageBox.Ok, self)
-        w.setDetailedText(text)
-        w.exec()
 
     def setVisualSettings(self, visualSettings):
         """
@@ -799,3 +785,15 @@ class DrillView(QMainWindow):
         if details:
             w.setDetailedText(details)
         w.exec()
+
+    def displayProcessingReport(self):
+        """
+        Display a popup listing row(s) that have been pushed to the errorRows
+        set.
+        """
+        if self.errorRows:
+            names = [str(r + 1) for r in self.errorRows]
+            rows = ", ".join(names)
+            self.errorPopup("Processing error(s)",
+                            "Check logs for processing errors concerning rows: "
+                            + rows)

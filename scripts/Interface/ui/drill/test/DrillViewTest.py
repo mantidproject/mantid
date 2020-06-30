@@ -402,10 +402,6 @@ class DrillViewTest(unittest.TestCase):
         self.view.set_row_error(0)
         self.view.table.setRowBackground.assert_called_once()
 
-    def test_processingError(self):
-        self.view.processing_error([])
-        self.mMsgBox.assert_called_once()
-
 
 if __name__ == "__main__":
     unittest.main()

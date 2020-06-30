@@ -75,6 +75,7 @@ class DrillPresenter:
         """
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
+        self.view.displayProcessingReport()
 
     def instrumentChanged(self, instrument):
         """

@@ -29,6 +29,7 @@ class DrillAlgorithmPool(QThreadPool):
         self.signals = DrillAlgorithmPoolSignals()
         self.tasks = list()
         self.tasksDone = 0
+        self._running = False
         # for now, processing can not be shared amond different threads
         self.setMaxThreadCount(1)
 
@@ -39,6 +40,7 @@ class DrillAlgorithmPool(QThreadPool):
         Args:
             task (DrillTask): the task
         """
+        self._running = True
         task.signals.started.connect(
                 lambda ref : self.signals.taskStarted.emit(ref)
                 )
@@ -52,11 +54,13 @@ class DrillAlgorithmPool(QThreadPool):
         Abort the processing. This function stops the currently running
         process(es) and remove the pending one(s) from the queue.
         """
+        self._running = False
         self.clear()
         for t in self.tasks:
             t.cancel()
         self.tasks.clear()
         self.tasksDone = 0
+        self.signals.processingDone.emit()
 
     def onTaskFinished(self, ref, ret, msg):
         """
@@ -67,13 +71,19 @@ class DrillAlgorithmPool(QThreadPool):
             ret (int): return code. (0 for success)
             msf (str): error msg if needed
         """
-        self.tasksDone += 1
         if ret:
             self.signals.taskError.emit(ref, msg)
         else:
             self.signals.taskSuccess.emit(ref)
-        if (self.tasksDone == len(self.tasks)):
-            self.signals.processingDone.emit()
+
+        if self._running:
+            self.tasksDone += 1
+            if (self.tasksDone == len(self.tasks)):
+                self._running = False
+                self.clear()
+                self.tasks.clear()
+                self.tasksDone = 0
+                self.signals.processingDone.emit()
 
     def onProgress(self, ref, p):
         """
