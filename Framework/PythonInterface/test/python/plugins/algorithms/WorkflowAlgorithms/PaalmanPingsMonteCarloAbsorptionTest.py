@@ -65,6 +65,14 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._test_arguments['SampleOuterRadius'] = 1.8
         test_func('Annulus')
 
+    def _material_with_cross_section_test(self, test_func):
+        self._test_arguments['SampleWidth'] = 2.0
+        self._test_arguments['SampleThickness'] = 2.0
+        self._test_arguments['SampleChemicalFormula'] = ''
+        self._test_arguments['SampleIncoherentXSection'] = 5.7
+        self._test_arguments['SampleDensityType'] = 'Number Density'
+        test_func('FlatPlate')
+
     def _setup_flat_plate_container(self):
         self._test_arguments['ContainerFrontThickness'] = 1.5
         self._test_arguments['ContainerBackThickness'] = 1.5
@@ -147,6 +155,9 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_hist = 18
         self._expected_blocksize = 1
         self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(0), 'Degrees')
+
+    def test_material_with_cross_section(self):
+        self._material_with_cross_section_test(self._run_correction_and_test)
 
     def test_flat_plate_no_container(self):
         self._flat_plate_test(self._run_correction_and_test)
