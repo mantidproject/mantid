@@ -67,6 +67,8 @@ public:
                     const QString &parameterDescription);
   void setParameterValue(const QString &parameterName, double parameterValue,
                          double parameterError);
+  void setParameterValueQuietly(const QString &parameterName, double parameterValue,
+                         double parameterError);
   void setDataType(const QStringList &allowedFunctionsList);
   void setEnumValue(int enumIndex);
 

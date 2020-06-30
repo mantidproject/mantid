@@ -173,6 +173,14 @@ void SingleFunctionTemplateBrowser::setParameterValue(
   m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
 }
 
+void SingleFunctionTemplateBrowser::setParameterValueQuietly(
+    const QString &parameterName, double parameterValue,
+    double parameterError) {
+  ScopedFalse _(m_emitParameterValueChange);
+  m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
+  m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
+}
+
 void SingleFunctionTemplateBrowser::setCurrentDataset(int i) {
   m_presenter.setCurrentDataset(i);
 }
