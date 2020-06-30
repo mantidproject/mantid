@@ -29,6 +29,7 @@ Improvements
 - Update the Indirect, Corrections user interface to use the :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` algorithm
 - OutputCompositeMembers and ConvolveOutputs have been added as options in the ConvFit tab of Indirect Data Analysis.
 - Improved the responsiveness of the function browsers within the Indirect Data Analysis interface.
+- Added a lower bound (0.0 < height) to the Delta function defined in the ConvFit tab of the Indirect Data Analysis interface.
 
 Bug Fixes
 #########

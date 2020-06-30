@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
-#include <iostream>
+
 #include <utility>
 
 namespace {
@@ -154,6 +156,11 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
   if (hasDeltaFunction) {
     auto deltaFunction =
         FunctionFactory::Instance().createFunction("DeltaFunction");
+    auto lowerBound = std::unique_ptr<IConstraint>(
+        ConstraintFactory::Instance().createInitialized(deltaFunction.get(),
+                                                        "0.0 < Height", false));
+    deltaFunction->addConstraint(std::move(lowerBound));
+
     if (!hasTempCorrection) {
       innerFunction->addFunction(deltaFunction);
     } else {
