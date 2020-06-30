@@ -31,7 +31,7 @@ class ReflectometryReductionOne2Test(unittest.TestCase):
                 'OutputWorkspace': 'output'}
         output = self._assert_run_algorithm_succeeds(args)
         history = ['ExtractSpectra', 'ReflectometryBackgroundSubtraction', 'GroupDetectors',
-                   'ConvertUnits', 'CropWorkspace', 'ConvertUnits']
+                   'ConvertUnits', 'CropWorkspace', 'RefRoi']
         self._check_history(output, history)
         self._check_history_algorithm_properties(output, 1, 1,
                                                  {'ProcessingInstructions': '1-3',
