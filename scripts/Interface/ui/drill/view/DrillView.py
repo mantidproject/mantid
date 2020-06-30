@@ -674,6 +674,10 @@ class DrillView(QMainWindow):
         self.stop.setDisabled(not state)
         self.table.setDisabled(state)
         self.table.clearSelection()
+        if state:
+            self.table.setCursor(Qt.WaitCursor)
+        else:
+            self.table.setCursor(Qt.ArrowCursor)
 
     def set_row_processing(self, row):
         """
