@@ -203,8 +203,10 @@ ReflectometryReductionOne2::validateInputs() {
   results.insert(transmission.begin(), transmission.end());
 
   const std::string summationType = getProperty("SummationType");
-  if (summationType == "SumInLambda" && (*getProperty("ThetaIn")).isDefault())
-    results["ThetaIn"] = "ThetaIn must be specified when summing in lambda";
+  const std::string reductionType = getProperty("ReductionType");
+  if (summationType == "SumInQ" && reductionType == "DivergentBeam" &&
+      (*getProperty("ThetaIn")).isDefault())
+    results["ThetaIn"] = "ThetaIn must be specified for the DivergentBeam case";
 
   return results;
 }
@@ -645,6 +647,36 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
   return corrAlg->getProperty("OutputWorkspace");
 }
 
+/** Returns true if we should use the output workspace's detector position
+ * for the theta angle to use in the conversion to Q */
+bool ReflectometryReductionOne2::useDetectorAngleForQConversion(
+    const MatrixWorkspace_sptr &ws) const {
+  // If summing in Q, the output workspace is constructed such that the angle
+  // of the detector is correct for the conversion to Q
+  if (summingInQ())
+    return true;
+
+  // Otherwise we are summing in lambda. If ThetaIn was not specified then no
+  // correction was requested so assume the detector angle is correct
+  if ((*getProperty("ThetaIn")).isDefault())
+    return true;
+
+  // If there is only one detector (i.e. no summation was required) then we use
+  // the detector angle. This is because the correction is assumed to only be
+  // required when the region of interest is not centred on a pixel other than
+  // the specular pixel, but if we only have one pixel we assume it is the
+  // centre pixel. I'm not sure if we may want to change this in future to
+  // enable overriding it anyway.
+  // Note that when summing in lambda it is not allowed to pass ThetaIn with
+  // multiple groups, so we can assume we only have one group (i.e. one output
+  // spectrum) here.
+  bool const singleDetector = ws->getDetector(0)->nDets() <= 1;
+  if (singleDetector)
+    return true;
+
+  return false;
+}
+
 /** Convert a workspace to Q
  *
  * @param inputWS : The input workspace (in wavelength) to convert to Q
@@ -652,38 +684,45 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
  */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
-  // Get theta for the Q calculation.
-  double theta;
-  if (summingInQ()) {
-    // If summing in Q, this twoThetaR - theta0. In theory we support multiple
-    // groups, and they could each have a different reference angle, which
-    // would make the conversion here a bit more involved. In practice this is
-    // not used so for now just disallow this.
-    if (detectorGroups().size() != 1) {
+  MatrixWorkspace_sptr IvsQ;
+  if (useDetectorAngleForQConversion(inputWS)) {
+    // We can just use ConvertUnits, because the detectors are at the correct
+    // position
+    auto convertUnits = this->createChildAlgorithm("ConvertUnits");
+    convertUnits->initialize();
+    convertUnits->setProperty("InputWorkspace", inputWS);
+    convertUnits->setProperty("Target", "MomentumTransfer");
+    convertUnits->setProperty("AlignBins", false);
+    convertUnits->execute();
+    IvsQ = convertUnits->getProperty("OutputWorkspace");
+  } else {
+    // Use RefRoi with the given ThetaIn. This is currently only possible for a
+    // single region of interest (i.e. a single histogram in the summed
+    // workspace) because different regions of interest would be centred around
+    // different angles.
+    if (inputWS->getNumberHistograms() > 1) {
       throw std::invalid_argument(
-          "Expected a single group in "
-          "ProcessingInstructions to be able to "
-          "perform angle correction, found " +
+          "Angle correction using ThetaIn can only be done for a single group "
+          "in ProcessingInstructions, but the number of groups specified was " +
           std::to_string(inputWS->getNumberHistograms()));
     }
-    auto &detectors = detectorGroups()[0];
-    theta =
-        getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors)) *
-        (180.0 / M_PI) / 2.0;
-  } else {
-    theta = getProperty("ThetaIn");
+    double const theta = getProperty("ThetaIn");
+    auto refRoi = this->createChildAlgorithm("RefRoi");
+    refRoi->initialize();
+    refRoi->setProperty("InputWorkspace", inputWS);
+    refRoi->setProperty("NXPixel", 1);
+    refRoi->setProperty("NYPixel", 1);
+    refRoi->setProperty("ConvertToQ", true);
+    refRoi->setProperty("SumPixels", false);
+    refRoi->setProperty("ScatteringAngle", theta);
+    refRoi->execute();
+    IvsQ = refRoi->getProperty("OutputWorkspace");
+    // RefRoi outputs as distribution data but ConvertUnits outputs as
+    // counts. For now make this consistent with the original behaviour using
+    // ConvertUnits but we may wish to change this in future.
+    IvsQ->setYUnitLabel("Counts");
+    IvsQ->setDistribution(false);
   }
-
-  auto refRoi = this->createChildAlgorithm("RefRoi");
-  refRoi->initialize();
-  refRoi->setProperty("InputWorkspace", inputWS);
-  refRoi->setProperty("NXPixel", 1);
-  refRoi->setProperty("NYPixel", 1);
-  refRoi->setProperty("ConvertToQ", true);
-  refRoi->setProperty("SumPixels", false);
-  refRoi->setProperty("ScatteringAngle", theta);
-  refRoi->execute();
-  MatrixWorkspace_sptr IvsQ = refRoi->getProperty("OutputWorkspace");
   return IvsQ;
 }
 
@@ -693,7 +732,7 @@ ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
  *
  * @return : true if the reduction should sum in Q; false otherwise
  */
-bool ReflectometryReductionOne2::summingInQ() {
+bool ReflectometryReductionOne2::summingInQ() const {
   bool result = false;
   const std::string summationType = getProperty("SummationType");
 

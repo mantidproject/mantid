@@ -883,7 +883,7 @@ public:
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS,
                           {"ExtractSpectra", "GroupDetectors", "ConvertUnits",
-                           "CropWorkspace", "RefRoi"});
+                           "CropWorkspace", "ConvertUnits"});
   }
 
   void test_background_subtraction_with_default_properties() {
@@ -897,7 +897,7 @@ public:
     // used for the background subtraction
     checkWorkspaceHistory(outputWS, {"ReflectometryBackgroundSubtraction",
                                      "GroupDetectors", "ConvertUnits",
-                                     "CropWorkspace", "RefRoi"});
+                                     "CropWorkspace", "ConvertUnits"});
     checkHistoryAlgorithmProperties(
         outputWS, 1, 0,
         {{"ProcessingInstructions", ""},
@@ -916,7 +916,7 @@ public:
     checkWorkspaceHistory(outputWS, {"ExtractSpectra",
                                      "ReflectometryBackgroundSubtraction",
                                      "GroupDetectors", "ConvertUnits",
-                                     "CropWorkspace", "RefRoi"});
+                                     "CropWorkspace", "ConvertUnits"});
     checkHistoryAlgorithmProperties(
         outputWS, 1, 1,
         {{"ProcessingInstructions", "1-2,4-5"},
@@ -936,7 +936,7 @@ public:
     checkWorkspaceHistory(outputWS, {"ExtractSpectra",
                                      "ReflectometryBackgroundSubtraction",
                                      "GroupDetectors", "ConvertUnits",
-                                     "CropWorkspace", "RefRoi"});
+                                     "CropWorkspace", "ConvertUnits"});
     checkHistoryAlgorithmProperties(
         outputWS, 1, 1,
         {{"ProcessingInstructions", "1-4,6-8"},
