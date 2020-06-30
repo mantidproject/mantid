@@ -8,7 +8,7 @@
 import json
 import numpy as np
 
-from mantid.api import DataProcessorAlgorithm, AnalysisDataService
+from mantid.api import DataProcessorAlgorithm
 from mantid.simpleapi import \
     AlgorithmFactory, \
     CreateWorkspace, \
