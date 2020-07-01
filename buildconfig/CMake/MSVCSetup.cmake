@@ -179,8 +179,10 @@ set(MANTIDPYTHON_PREAMBLE
 # Launch script
 # Developer verison
 set(MANTIDLAUNCH_PREAMBLE
-    "$QT_PLUGIN_PATH=\"${THIRD_PARTY_DIR}\\lib\\qt5\\plugins\"\n$PYTHONHOME=\"${THIRD_PARTY_DIR}\\lib\\python3.8\"\n$ERROR_REPORTER_DIR=\"${PROJECT_SOURCE_DIR}\\scripts\\ErrorReporter\"\n
-    $LAUNCH_SCRIPT=\"workbench-script.pyw\""
+    "$QT_PLUGIN_PATH=\"${THIRD_PARTY_DIR}\\lib\\qt5\\plugins\"
+$PYTHONHOME=\"${THIRD_PARTY_DIR}\\lib\\python3.8\"
+$ERROR_REPORTER_DIR=\"${PROJECT_SOURCE_DIR}\\scripts\\ErrorReporter\"
+$LAUNCH_SCRIPT=\"$scriptRootDirectory\\workbench-script.pyw\""
 )
 configure_file ( ${PACKAGING_DIR}/launch_workbench.ps1.in
     ${PROJECT_BINARY_DIR}/launch_workbench.ps1.in @ONLY )
@@ -193,8 +195,10 @@ file(GENERATE
   )
 # Install version
 set(MANTIDLAUNCH_PREAMBLE
-    "$QT_PLUGIN_PATH=\"..\\plugins\\qt5\"\n$PYTHONHOME=\".\"\n$ERROR_REPORTER_DIR=\"..\\scripts\\ErrorReporter\"
-     $LAUNCH_SCRIPT=\"launch_workbench.pyw\""
+    "$QT_PLUGIN_PATH=\"$scriptRootDirectory\\..\\plugins\\qt5\"
+$PYTHONHOME=\"$scriptRootDirectory\"
+$ERROR_REPORTER_DIR=\"$scriptRootDirectory\\..\\scripts\\ErrorReporter\"
+$LAUNCH_SCRIPT=\"$scriptRootDirectory\\launch_workbench.pyw\""
 )
 configure_file(
   ${PACKAGING_DIR}/launch_workbench.ps1.in
