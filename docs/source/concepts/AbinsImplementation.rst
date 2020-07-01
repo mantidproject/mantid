@@ -120,9 +120,10 @@ code-specific tests e.g. *AbinsLoadGAUSSIANTest*.  To create a new
 reference data file with a specific build of Abins, instantiate a
 Loader and pass it to *save_ab_initio_test_data*. This takes two lines of Python, e.g.:
 
-:: python
+.. code-block:: python
+
    reader = abins.input.CRYSTALLoader(input_ab_initio_filename='my_calc.out')
-   reader.save_ab_initio_test_data(reader, 'my_new_test')
+   abins.input.Tester.save_ab_initio_test_data(reader, 'my_new_test')
 
 which will write the necessary *my_new_test_data.txt* file and
 *my_new_test_atomic_displacements_data_{k}.txt* files for each phonon wavevector.
