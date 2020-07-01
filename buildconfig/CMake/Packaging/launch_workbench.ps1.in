@@ -16,8 +16,6 @@ if ($help) {
   exit
 }
 
-## Setup some initial paths
-@MANTIDLAUNCH_PREAMBLE@
 
 # Getting script directory in PowerShell 2.0, sourced from PS2EXE `Get-ScriptPath.ps1` example
 if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript") {
@@ -35,6 +33,8 @@ if ($console) {
 else {
   $python_executable = "pythonw.exe"
 }
+## Setup some initial paths
+@MANTIDLAUNCH_PREAMBLE@
 
 # Set the Qt plugins path to point QT to the correct directory
 $env:QT_PLUGIN_PATH = Resolve-Path("$QT_PLUGIN_PATH")
@@ -49,7 +49,7 @@ $env:PYTHONWARNINGS = "default::DeprecationWarning:__main__,ignore::DeprecationW
 # Additionally that will correctly capture the output when run with just python.exe (console visible)
 # The -PassThru parameter tells PowerShell to return the process object
 
-$p = Start-Process -NoNewWindow -PassThru -FilePath "$env:PYTHONHOME/$python_executable" "./$LAUNCH_SCRIPT" 2>&1
+$p = Start-Process -NoNewWindow -PassThru -FilePath "$env:PYTHONHOME/$python_executable" "$LAUNCH_SCRIPT" 2>&1
 
 # Getting the process ExitCode, source from https://stackoverflow.com/a/23797762/2823526
 # It is important that we cache the handle here, otherwise when reading
