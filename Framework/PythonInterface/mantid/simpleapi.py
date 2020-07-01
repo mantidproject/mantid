@@ -139,6 +139,8 @@ class LazyFunctionSignature(inspect.Signature):
                 # None is not quite accurate here, but we are reproducing the
                 # behavior found in the C++ code for SimpleAPI.
                 parameters.append(Parameter(name, pos_or_keyword, default=None))
+        # Add a self parameter since these are called from a class.
+        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
         return parameters
 
 
@@ -1124,68 +1126,85 @@ def _create_algorithm_function(name, version, algm_object):
         :param algm_object: the created algorithm object.
     """
 
-    def algorithm_wrapper(*args, **kwargs):
+    def algorithm_wrapper():
         """
-        Note that if the Version parameter is passed, we will create
-        the proper version of the algorithm without failing.
-
-        If both startProgress and endProgress are supplied they will
-        be used.
+        Creates a wrapper object around the algorithm functions.
         """
-        _version = version
-        if "Version" in kwargs:
-            _version = kwargs["Version"]
-            del kwargs["Version"]
+        class Wrapper:
+            __slots__ = ["__name__", "__signature__"]
 
-        _startProgress, _endProgress = (None, None)
-        if 'startProgress' in kwargs:
-            _startProgress = kwargs['startProgress']
-            del kwargs['startProgress']
-        if 'endProgress' in kwargs:
-            _endProgress = kwargs['endProgress']
-            del kwargs['endProgress']
+            def __getattribute__(self, item):
+                obj = object.__getattribute__(self, item)
+                if item == "__class__" and obj.__doc__ is None:
+                    algm_object.initialize()
+                    setattr(obj, "__doc__", algm_object.docString())
+                return obj
 
-        algm = _create_algorithm_object(name, _version, _startProgress, _endProgress)
-        _set_logging_option(algm, kwargs)
-        _set_store_ads(algm, kwargs)
+            def __call__(self, *args, **kwargs):
+                """
+                Note that if the Version parameter is passed, we will create
+                the proper version of the algorithm without failing.
 
-        # Temporary removal of unneeded parameter from user's python scripts
-        if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
-            del kwargs["CoordinatesToUse"]
+                If both startProgress and endProgress are supplied they will
+                be used.
+                """
+                _version = version
+                if "Version" in kwargs:
+                    _version = kwargs["Version"]
+                    del kwargs["Version"]
 
-        # a change in parameters should get a better error message
-        if algm.name() in ['LoadEventNexus', 'LoadNexusMonitors']:
-            for propname in ['MonitorsAsEvents', 'LoadEventMonitors', 'LoadHistoMonitors']:
-                if propname in kwargs:
-                    suggest = 'LoadOnly'
-                    if algm.name() == 'LoadEventNexus':
-                        suggest = 'MonitorsLoadOnly'
-                    msg = 'Deprecated property "{}" in {}. Use "{}" instead'.format(propname,
-                                                                                    algm.name(), suggest)
-                    raise ValueError(msg)
+                _startProgress, _endProgress = (None, None)
+                if 'startProgress' in kwargs:
+                    _startProgress = kwargs['startProgress']
+                    del kwargs['startProgress']
+                if 'endProgress' in kwargs:
+                    _endProgress = kwargs['endProgress']
+                    del kwargs['endProgress']
 
-        frame = kwargs.pop("__LHS_FRAME_OBJECT__", None)
+                algm = _create_algorithm_object(name, _version, _startProgress, _endProgress)
+                _set_logging_option(algm, kwargs)
+                _set_store_ads(algm, kwargs)
 
-        lhs = _kernel.funcinspect.lhs_info(frame=frame)
-        lhs_args = _get_args_from_lhs(lhs, algm)
-        final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
-        set_properties(algm, *args, **final_keywords)
-        try:
-            algm.execute()
-        except RuntimeError as e:
-            if e.args[0] == 'Some invalid Properties found':
-                # Check for missing mandatory parameters
-                _check_mandatory_args(name, algm, e, *args, **kwargs)
-            else:
-                raise
+                # Temporary removal of unneeded parameter from user's python scripts
+                if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
+                    del kwargs["CoordinatesToUse"]
 
-        return _gather_returns(name, lhs, algm)
+                # a change in parameters should get a better error message
+                if algm.name() in ['LoadEventNexus', 'LoadNexusMonitors']:
+                    for propname in ['MonitorsAsEvents', 'LoadEventMonitors', 'LoadHistoMonitors']:
+                        if propname in kwargs:
+                            suggest = 'LoadOnly'
+                            if algm.name() == 'LoadEventNexus':
+                                suggest = 'MonitorsLoadOnly'
+                            msg = 'Deprecated property "{}" in {}. Use "{}" instead'.format(propname,
+                                                                                            algm.name(), suggest)
+                            raise ValueError(msg)
+
+                frame = kwargs.pop("__LHS_FRAME_OBJECT__", None)
+
+                lhs = _kernel.funcinspect.lhs_info(frame=frame)
+                lhs_args = _get_args_from_lhs(lhs, algm)
+                final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
+                set_properties(algm, *args, **final_keywords)
+                try:
+                    algm.execute()
+                except RuntimeError as e:
+                    if e.args[0] == 'Some invalid Properties found':
+                        # Check for missing mandatory parameters
+                        _check_mandatory_args(name, algm, e, *args, **kwargs)
+                    else:
+                        raise
+
+                return _gather_returns(name, lhs, algm)
+        # Set the signature of the callable to be one that is only generated on request.
+        Wrapper.__call__.__signature__ = LazyFunctionSignature(alg_name=name)
+        return Wrapper()
 
     # enddef
     # Insert definition in to global dict
-    algm_wrapper = _customise_func(algorithm_wrapper, name,
-                                   LazyFunctionSignature(alg_name=name),
-                                   algm_object.docString())
+    algm_wrapper = algorithm_wrapper()
+    algm_wrapper.__name__ = name
+
     globals()[name] = algm_wrapper
     # Register aliases - split on whitespace
     for alias in algm_object.alias().strip().split():
