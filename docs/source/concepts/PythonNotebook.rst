@@ -1,4 +1,4 @@
-.. _PythonNotebook:
+.. _JupyterNotebook:
 
 ==========================
 MantidPython and Notebook
@@ -6,7 +6,7 @@ MantidPython and Notebook
 
 MantidPython can be used to access all of the functionality of the Mantid Framework outside of the Workbench interface.
 
-The IPython Notebook is a web-based interactive computational environment where you can combine code execution, text, mathematics, plots and rich media into a single document.
+The Jupyter Notebook is a web-based interactive computational environment where you can combine code execution, text, mathematics, plots and rich media into a single document.
 
 Launching on different platforms
 ================================
@@ -23,7 +23,7 @@ Launch MantidPython:
 
    C:\MantidInstall\bin\mantidpython.bat --classic
 
-Launch iPython Notebook:
+Launch Jupyter Notebook:
 
 .. code-block:: python
 
@@ -42,7 +42,7 @@ Launch MantidPython:
 
    /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic
 
-Launch iPython Notebook:
+Launch Jupyter Notebook:
 
 .. code-block:: python
 
@@ -54,13 +54,14 @@ Ubuntu
 
 Open Terminal.
 
+
 Launch MantidPython:
 
 .. code-block:: python
 
    /opt/Mantid/bin/mantidpython --classic
 
-Launch iPython Notebook:
+Launch Jupyter Notebook:
 
 .. code-block:: python
 
@@ -70,7 +71,7 @@ Launch iPython Notebook:
 Accessing Algorithms
 ====================
 
-In MantidPython or an IPython Notebook, accessing the Mantid Framework should be as simple as:
+In MantidPython or an Jupyter Notebook, accessing the Mantid Framework should be as simple as:
 
 .. code-block:: python
 
@@ -86,7 +87,7 @@ If this doesn't work, the path to the Mantid Installation directory should be se
 Where the 'PATH' should be:
 
 * Windows: ``[INSTALL_PATH]\bin`` where ``INSTALL_PATH`` eg. ``'C:\MantidInstall\bin\'``
-* Linux: ``/opt/Mantid/bin`` for an official release and ``/opt/mantidnightly/bin`` for a nightly development build
+* Linux: ``/opt/Mantid/bin:/opt/Mantid/lib`` for an official release and ``/opt/mantidnightly/bin:/opt/mantidnightly/lib`` for a nightly development build
 * MacOS: ``/Applications/MantidWorkbench.app/Contents/MacOS``
 
 
