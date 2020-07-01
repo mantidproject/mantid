@@ -60,6 +60,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(MuonAnalysisGui, self).__init__(parent)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setObjectName("MuonAnalysis2")
         self.current_tab = ''
