@@ -124,8 +124,7 @@ class RundexSettings(object):
                 "AsymmetricWedges": False,
                 "MaxQxy": "0",
                 "DeltaQ": "0",
-                "IQxQyLogBinning": False,
-                "PanelOutputWorkspaces": ""
+                "IQxQyLogBinning": False
                 },
             OMEGA_SCAN : {
                 },
