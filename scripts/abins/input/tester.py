@@ -179,7 +179,7 @@ class Tester(object):
         """
         abins_type_data = ab_initio_reader.read_vibrational_or_phonon_data()
         data = {"datasets": abins_type_data.extract(),
-                "attributes": ab_initio_reader._clerk._attributes
+                "attributes": ab_initio_reader._clerk._attributes.copy()
                 }
         data["datasets"].update({"unit_cell": ab_initio_reader._clerk._data["unit_cell"]})
         return data
@@ -199,6 +199,9 @@ class Tester(object):
         """
 
         data = cls._get_reader_data(ab_initio_reader)
+
+        # Discard advanced_parameters cache as this is not relevant to loader tests
+        del data["attributes"]["advanced_parameters"]
 
         displacements = data["datasets"]["k_points_data"].pop("atomic_displacements")
         for i, eigenvector in displacements.items():
