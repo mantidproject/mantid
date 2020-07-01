@@ -654,71 +654,51 @@ class LRAutoReduction(PythonAlgorithm):
         # Write template before we start the computation
         self._write_template(data_set, run_number, first_run_of_set, sequence_number)
 
+        # input args for both reduction
+        kwargs = {
+            "InputWorkspace": self.event_data,
+            "NormalizationRunNumber": str(data_set.norm_file),
+            "SignalPeakPixelRange": data_set.DataPeakPixels,
+            "SubtractSignalBackground": data_set.DataBackgroundFlag,
+            "SignalBackgroundPixelRange": data_set.DataBackgroundRoi[:2],
+            "NormFlag": data_set.NormFlag,
+            "NormPeakPixelRange": data_set.NormPeakPixels,
+            "NormBackgroundPixelRange": data_set.NormBackgroundRoi,
+            "SubtractNormBackground": data_set.NormBackgroundFlag,
+            "LowResDataAxisPixelRangeFlag": data_set.data_x_range_flag,
+            "LowResDataAxisPixelRange": data_set.data_x_range,
+            "LowResNormAxisPixelRangeFlag": data_set.norm_x_range_flag,
+            "LowResNormAxisPixelRange": data_set.norm_x_range,
+            "TOFRange": data_set.DataTofRange,
+            "IncidentMediumSelected": incident_medium,
+            "GeometryCorrectionFlag": False,
+            "QMin": data_set.q_min,
+            "QStep": data_set.q_step,
+            "AngleOffset": data_set.angle_offset,
+            "AngleOffsetError": data_set.angle_offset_error,
+            "ScalingFactorFile": str(data_set.scaling_factor_file),
+            "SlitsWidthFlag": data_set.slits_width_flag,
+            "ApplyPrimaryFraction": True,
+            "SlitTolerance": slit_tolerance,
+            "PrimaryFractionRange": [data_set.clocking_from, data_set.clocking_to],
+            "OutputWorkspace": 'reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number)
+        }
+
         # Execute the reduction for the selected normalization type
-        # NOTE: Did have all key-word args as **kwargs so didn't have to repeat args twice
-        #       but raised error for pickling EventWorkspace in LRReductionWithReference.
-        out_wksp_name = 'reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number)
         norm_type = self.getProperty("NormalizationType").value
         if norm_type == "DirectBeam":
-            LiquidsReflectometryReduction(
-                InputWorkspace=self.event_data,
-                NormalizationRunNumber=str(data_set.norm_file),
-                SignalPeakPixelRange=data_set.DataPeakPixels,
-                SubtractSignalBackground=data_set.DataBackgroundFlag,
-                SignalBackgroundPixelRange=data_set.DataBackgroundRoi[:2],
-                NormFlag=data_set.NormFlag,
-                NormPeakPixelRange=data_set.NormPeakPixels,
-                NormBackgroundPixelRange=data_set.NormBackgroundRoi,
-                SubtractNormBackground=data_set.NormBackgroundFlag,
-                LowResDataAxisPixelRangeFlag=data_set.data_x_range_flag,
-                LowResDataAxisPixelRange=data_set.data_x_range,
-                LowResNormAxisPixelRangeFlag=data_set.norm_x_range_flag,
-                LowResNormAxisPixelRange=data_set.norm_x_range,
-                TOFRange=data_set.DataTofRange,
-                IncidentMediumSelected=incident_medium,
-                GeometryCorrectionFlag=False,
-                QMin=data_set.q_min,
-                QStep=data_set.q_step,
-                AngleOffset=data_set.angle_offset,
-                AngleOffsetError=data_set.angle_offset_error,
-                ScalingFactorFile=str(data_set.scaling_factor_file),
-                SlitsWidthFlag=data_set.slits_width_flag,
-                ApplyPrimaryFraction=True,
-                SlitTolerance=slit_tolerance,
-                PrimaryFractionRange=[data_set.clocking_from, data_set.clocking_to],
-                OutputWorkspace=out_wksp_name)
+            LiquidsReflectometryReduction(**kwargs)
 
         elif "WithReference":
+            # Get Refl1D parameters for theoretical model
             refl1d_parameters = self.getProperty("Refl1DModelParameters").value
+            kwargs['Refl1DModelParameters'] = refl1d_parameters
 
-            LRReductionWithReference(
-                InputWorkspace=self.event_data,
-                NormalizationRunNumber=str(data_set.norm_file),
-                SignalPeakPixelRange=data_set.DataPeakPixels,
-                SubtractSignalBackground=data_set.DataBackgroundFlag,
-                SignalBackgroundPixelRange=data_set.DataBackgroundRoi[:2],
-                NormFlag=data_set.NormFlag,
-                NormPeakPixelRange=data_set.NormPeakPixels,
-                NormBackgroundPixelRange=data_set.NormBackgroundRoi,
-                SubtractNormBackground=data_set.NormBackgroundFlag,
-                LowResDataAxisPixelRangeFlag=data_set.data_x_range_flag,
-                LowResDataAxisPixelRange=data_set.data_x_range,
-                LowResNormAxisPixelRangeFlag=data_set.norm_x_range_flag,
-                LowResNormAxisPixelRange=data_set.norm_x_range,
-                TOFRange=data_set.DataTofRange,
-                IncidentMediumSelected=incident_medium,
-                GeometryCorrectionFlag=False,
-                QMin=data_set.q_min,
-                QStep=data_set.q_step,
-                AngleOffset=data_set.angle_offset,
-                AngleOffsetError=data_set.angle_offset_error,
-                ScalingFactorFile=str(data_set.scaling_factor_file),
-                SlitsWidthFlag=data_set.slits_width_flag,
-                ApplyPrimaryFraction=True,
-                SlitTolerance=slit_tolerance,
-                PrimaryFractionRange=[data_set.clocking_from, data_set.clocking_to],
-                Refl1DModelParameters=refl1d_parameters,
-                OutputWorkspace=out_wksp_name)
+            # Modify output wksp name to match backwards compatibility for UI
+            _time = int(time.time())
+            kwargs["OutputWorkspace"] = kwargs["OutputWorkspace"] + '_#' + str(_time) + 'ts'
+
+            LRReductionWithReference(**kwargs)
 
         # Put the reflectivity curve together
         self._save_partial_output(data_set, first_run_of_set, sequence_number, run_number)
