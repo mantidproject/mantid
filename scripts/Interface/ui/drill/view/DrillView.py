@@ -390,7 +390,7 @@ class DrillView(QMainWindow):
                 if cell[0] in rows:
                     QMessageBox.warning(self, "Error", "Please check the " +
                                         "parameters value before processing")
-                return
+                    return
             self.errorRows = set()
             self.process.emit(rows)
 
