@@ -187,8 +187,8 @@ class SimpleAPITest(unittest.TestCase):
         if hasattr(inspect, 'signature'):
             method_parameters = list(MatrixWorkspace.rebin.__signature__.parameters)
             self.assertEqual("self", method_parameters[0])
-            self.assertEqual(method_parameters[1:],
-                             list(simpleapi.rebin.__signature__.parameters))
+            self.assertEqual(method_parameters,
+                             list(simpleapi.rebin.__call__.__signature__.parameters))
         else:
             freefunction_sig = inspect.getsource(simpleapi.rebin).co_varnames
             expected_method_sig = ['self']

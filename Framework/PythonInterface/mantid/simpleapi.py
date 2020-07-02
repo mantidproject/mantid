@@ -1135,7 +1135,12 @@ def _create_algorithm_function(name, version, algm_object):
 
             def __getattribute__(self, item):
                 obj = object.__getattribute__(self, item)
-                if item == "__class__" and obj.__doc__ is None:
+                if obj is None and item == "__doc__":  # Set doc if accessed directly
+                    obj = object.__getattribute__(self, "__class__")
+                    algm_object.initialize()
+                    setattr(obj, "__doc__", algm_object.docString())
+                    return obj.__doc__
+                if item == "__class__" and obj.__doc__ is None:  # Set doc if class is accessed.
                     algm_object.initialize()
                     setattr(obj, "__doc__", algm_object.docString())
                 return obj
