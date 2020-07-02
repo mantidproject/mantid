@@ -515,7 +515,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._emode = 'Elastic'
         else:
             self._emode = str(self._sample_ws.getEMode())
-        if self._emode == 'Indirect' or 'Direct':
+        if self._emode == 'Indirect' or self._emode == 'Direct':
             self._efixed = self._get_efixed()
 
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
@@ -579,6 +579,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._setup()
         except Exception as err:
             issues['SampleWorkspace'] = str(err)
+            return issues
 
         if self._shape == 'Annulus':
             if self._sample_inner_radius >= self._sample_outer_radius:
