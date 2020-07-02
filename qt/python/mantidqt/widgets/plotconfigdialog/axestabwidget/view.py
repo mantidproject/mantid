@@ -50,6 +50,18 @@ class AxesTabWidgetView(QWidget):
     def set_title(self, title):
         self.axes_title_line_edit.setText(title)
 
+    def get_show_minor_ticks(self):
+        return self.show_minor_ticks_check_box.isChecked()
+
+    def set_show_minor_ticks(self, check):
+        self.show_minor_ticks_check_box.setChecked(check)
+
+    def get_show_minor_gridlines(self):
+        return self.show_minor_gridlines_check_box.isChecked()
+
+    def set_show_minor_gridlines(self, check):
+        self.show_minor_gridlines_check_box.setChecked(check)
+
     def get_lower_limit(self):
         return float(self.lower_limit_line_edit.text())
 

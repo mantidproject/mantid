@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
+#include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -26,7 +27,11 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("IqtFit");
-}
+std::vector<std::string> IQTFIT_HIDDEN_PROPS = std::vector<std::string>(
+    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+     "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
+     "PeakRadius", "PlotParameter"});
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,20 +39,22 @@ namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
     : IndirectFitAnalysisTab(new IqtFitModel, parent),
-      m_uiForm(new Ui::IqtFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
   setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
-      m_iqtFittingModel, m_uiForm->fitDataView));
-  setPlotView(m_uiForm->pvFitPlotView);
+      m_iqtFittingModel, m_uiForm->dockArea->m_fitDataView));
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto templateBrowser = new IqtTemplateBrowser;
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
+      templateBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(
+      IQTFIT_HIDDEN_PROPS);
 
   setEditResultVisible(true);
-  setStartAndEndHidden(false);
 }
 
 void IqtFit::setupFitTab() {
@@ -99,10 +106,6 @@ void IqtFit::setRunIsRunning(bool running) {
 }
 
 void IqtFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
-
-void IqtFit::setStartAndEndHidden(bool hidden) {
-  m_uiForm->fitDataView->setStartAndEndHidden(hidden);
-}
 
 } // namespace IDA
 } // namespace CustomInterfaces

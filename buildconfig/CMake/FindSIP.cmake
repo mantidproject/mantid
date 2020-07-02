@@ -41,7 +41,7 @@ ELSE(SIP_VERSION)
     message(FATAL_ERROR "Failed to find FindSIP.py in \"${CMAKE_MODULE_PATH}\"")
   endif()
 
-  EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_sip_py} OUTPUT_VARIABLE sip_config)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} ${_find_sip_py} OUTPUT_VARIABLE sip_config)
   IF(sip_config)
     STRING(REGEX REPLACE "^sip_version:([^\n]+).*$" "\\1" SIP_VERSION ${sip_config})
     STRING(REGEX REPLACE ".*\nsip_version_str:([^\n]+).*$" "\\1" SIP_VERSION_STR ${sip_config})

@@ -4,7 +4,7 @@
 Mantid 5.1.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/MantidPlotSplashScreen-Deprecated.png
    :class: screenshot
    :width: 385px
    :align: right
@@ -15,6 +15,9 @@ Mantid 5.1.0 Release Notes
 .. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
 We are proud to announce version 5.1.0 of Mantid.
+
+**Workbench is replacing MantidPlot**, while MantidPlot is still fully functional for this release,
+**MantidPlot will not be included in future releases**.
 
 **TODO: Add paragraph summarizing big changes**
 
@@ -57,11 +60,11 @@ Changes
    *
 
 - :doc:`Framework <framework>`
-- :doc:`General UI & Usability <ui>`
+- General UI & Usability
 
   - :doc:`MantidPlot <mantidplot>`
 
-  - :doc:`MantidWorkbench <mantidworkbench>`
+  - :doc:`Workbench <mantidworkbench>`
 - :doc:`Diffraction <diffraction>`
 - :doc:`Muon Analysis <muon>`
 - Low Q

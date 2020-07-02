@@ -46,8 +46,7 @@ namespace IDA {
 IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent)
     : QDockWidget(parent), m_templateBrowser(nullptr),
       m_functionWidget(nullptr) {
-  setFeatures(QDockWidget::DockWidgetFloatable |
-              QDockWidget::DockWidgetMovable);
+  setFeatures(QDockWidget::DockWidgetFloatable);
   setWindowTitle("Fit Function");
 }
 
@@ -85,17 +84,14 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
       nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
   m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("CreateOutput"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("LogValue"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PassWSIndexToFunction"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("ConvolveMembers"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(
-      QString("OutputCompositeMembers"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("OutputWorkspace"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("IgnoreInvalidData"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("Output"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PeakRadius"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PlotParameter"));
+}
+
+void IndirectFitPropertyBrowser::setHiddenProperties(
+    std::vector<std::string> hiddenProperties) {
+  for (const auto &propertyName : hiddenProperties) {
+    m_fitOptionsBrowser->addPropertyToBlacklist(
+        QString::fromStdString(propertyName));
+  }
 }
 
 bool IndirectFitPropertyBrowser::isFullFunctionBrowserActive() const {
@@ -248,6 +244,11 @@ std::string IndirectFitPropertyBrowser::costFunction() const {
 bool IndirectFitPropertyBrowser::convolveMembers() const {
   return m_fitOptionsBrowser->getProperty("ConvolveMembers").toStdString() !=
          "0";
+}
+
+bool IndirectFitPropertyBrowser::outputCompositeMembers() const {
+  return m_fitOptionsBrowser->getProperty("OutputCompositeMembers")
+             .toStdString() != "0";
 }
 
 std::string IndirectFitPropertyBrowser::fitEvaluationType() const {

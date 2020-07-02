@@ -107,6 +107,16 @@ class TiledPlotsTest(TestCase):
 
         self.assertEqual(6, len(fig.axes))
 
+    def test_get_plot_fig_with_overplot_true_maintains_axes_scales(self):
+        ax = plt.gca()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+        fig, axes = get_plot_fig(overplot=True)
+
+        self.assertEqual(axes[0].get_xscale(), 'log')
+        self.assertEqual(axes[0].get_yscale(), 'log')
+
     def test_tiled_plot_from_multiple_workspaces_no_errors(self):
         workspaces = ['test_ws', 'test_ws_2']
 

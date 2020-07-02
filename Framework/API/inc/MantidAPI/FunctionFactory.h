@@ -57,7 +57,7 @@ public:
   /// domain has the same function.
   std::shared_ptr<MultiDomainFunction>
   createInitializedMultiDomainFunction(const std::string &input,
-                                       size_t domainNumber);
+                                       size_t domainNumber) const;
 
   /// Query available functions based on the template type
   template <typename FunctionType>

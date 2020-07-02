@@ -452,6 +452,15 @@ class FittingTabModelTest(unittest.TestCase):
                                   'UnNormalizedWorkspaceList': un_normalised_workspace_names}
                          )
 
+    def test_create_double_pulse_alg_initialses_algorithm_with_correct_values(self):
+        self.model.context.gui_context['DoublePulseTime'] = 2.0
+        
+        double_pulse_alg = self.model._create_double_pulse_alg()
+
+        self.assertEquals(double_pulse_alg.getProperty("PulseOffset").value, 2.0)
+        self.assertAlmostEquals(double_pulse_alg.getProperty("FirstPulseWeight").value, 0.287, places=3)
+        self.assertAlmostEquals(double_pulse_alg.getProperty("SecondPulseWeight").value, 0.713, places=3)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -71,8 +71,8 @@ void LoadInstrumentFromNexus::exec() {
   // The L2 and 2-theta values from nexus file assumed to be relative to sample
   // position
 
-  Geometry::ObjComponent *samplepos =
-      new Geometry::ObjComponent("Unknown", instrument.get());
+  Geometry::Component *samplepos =
+      new Geometry::Component("Unknown", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0, 0.0, 0.0);

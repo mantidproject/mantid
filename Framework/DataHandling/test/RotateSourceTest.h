@@ -47,7 +47,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 0));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -85,7 +85,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 0));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -123,7 +123,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 1));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -161,7 +161,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(1, 1, 1));
     instr->add(sample);
     instr->markAsSamplePos(sample);

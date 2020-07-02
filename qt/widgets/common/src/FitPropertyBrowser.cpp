@@ -106,7 +106,8 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),
       m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
-      m_shouldBeNormalised(false), m_oldWorkspaceIndex(-1) {
+      m_shouldBeNormalised(false), m_fitAlgParameters(""),
+      m_oldWorkspaceIndex(-1) {
   Mantid::API::FrameworkManager::Instance().loadPlugins();
 
   // If Gaussian does not exist then the plugins did not load.
@@ -1693,6 +1694,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     observeFinish(alg);
     alg->executeAsync();
+    m_fitAlgParameters = alg->toString();
 
   } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
@@ -3399,6 +3401,12 @@ QStringList FitPropertyBrowser::getParameterNames() const {
     out.append(QString::fromStdString(parName));
   }
   return out;
+}
+/**=================================================================================================
+ * Get Fit Algorithm parameters
+ */
+std::string FitPropertyBrowser::getFitAlgorithmParameters() const {
+  return m_fitAlgParameters;
 }
 
 /**=================================================================================================

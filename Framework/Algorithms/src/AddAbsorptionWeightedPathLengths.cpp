@@ -9,6 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -107,7 +108,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS->sample(),
                                 DeltaEMode::Elastic, nevents,
-                                maxScatterPtAttempts, true, g_log);
+                                maxScatterPtAttempts, true);
 
   const int seed = getProperty("SeedValue");
   MersenneTwister rng(seed);
@@ -119,8 +120,16 @@ void AddAbsorptionWeightedPathLengths::exec() {
     std::vector<double> lambdas{peakWavelength}, absFactors(NLAMBDA),
         absFactorErrors(NLAMBDA);
 
+    MCInteractionStatistics detStatistics(peak.getDetectorID(),
+                                          inputWS->sample());
+
     strategy.calculate(rng, peak.getDetectorPosition(), lambdas, peakWavelength,
-                       absFactors, absFactorErrors);
+                       absFactors, absFactorErrors, detStatistics);
+
+    if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug(detStatistics.generateScatterPointStats());
+    }
+
     double mu = inputWS->sample().getMaterial().attenuationCoefficient(
         peakWavelength);                                               // m-1
     double absWeightedPathLength = -log(absFactors[0]) / mu;           // metres

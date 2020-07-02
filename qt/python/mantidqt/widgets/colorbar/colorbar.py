@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
+from mantid.kernel import ConfigService
 from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
@@ -29,7 +30,7 @@ class ColorbarWidget(QWidget):
         super(ColorbarWidget, self).__init__(parent)
 
         self.setWindowTitle("Colorbar")
-        self.setMaximumWidth(200)
+        self.setMaximumWidth(100)
 
         self.cmap = QComboBox()
         self.cmap.addItems(sorted(cm.cmap_d.keys()))
@@ -84,10 +85,12 @@ class ColorbarWidget(QWidget):
         if parent:
             # Set facecolor to match parent
             self.canvas.figure.set_facecolor(parent.palette().window().color().getRgbF())
-        self.ax = self.canvas.figure.add_axes([0.4,0.05,0.2,0.9])
+        self.ax = self.canvas.figure.add_axes([0.0,0.02,0.2,0.97])
 
         # layout
         self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setSpacing(2)
         self.layout.addWidget(self.cmap)
         self.layout.addLayout(self.cmax_layout)
         self.layout.addWidget(self.canvas, stretch=1)
@@ -100,13 +103,11 @@ class ColorbarWidget(QWidget):
         When a new plot is created this method should be called with the new mappable
         """
         self.ax.clear()
-        try: # Use current cmap
+        try:  # Use current cmap
             cmap = get_current_cmap(self.colorbar)
         except AttributeError:
-            try: # else use viridis
-                cmap = cm.viridis
-            except AttributeError: # else default
-                cmap = None
+            # else use default
+            cmap = ConfigService.getString("plots.images.Colormap")
         self.colorbar = Colorbar(ax=self.ax, mappable=mappable)
         self.cmin_value, self.cmax_value = mappable.get_clim()
         self.update_clim_text()

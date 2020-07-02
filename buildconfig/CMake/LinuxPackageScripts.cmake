@@ -31,7 +31,7 @@ if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
 endif()
 
 # Tell rpm to use the appropriate python executable
-set(CPACK_RPM_SPEC_MORE_DEFINE "%define __python ${PYTHON_EXECUTABLE}")
+set(CPACK_RPM_SPEC_MORE_DEFINE "%define __python ${Python_EXECUTABLE}")
 
 # Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
 # Required for Fedora >= 18 and RHEL >= 7
@@ -65,7 +65,7 @@ install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
 # Find python site-packages dir and create mantid.pth
 ###########################################################################
 execute_process(
-  COMMAND "${PYTHON_EXECUTABLE}" -c "from distutils import sysconfig as sc
+  COMMAND "${Python_EXECUTABLE}" -c "from distutils import sysconfig as sc
 print(sc.get_python_lib(plat_specific=True))"
   OUTPUT_VARIABLE PYTHON_SITE
   OUTPUT_STRIP_TRAILING_WHITESPACE)

@@ -7,11 +7,11 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -22,7 +22,7 @@ namespace MDAlgorithms {
   @date 2012-03-08
 */
 class DLLExport ConvertToDetectorFaceMD
-    : public MDAlgorithms::BoxControllerSettingsAlgorithm {
+    : public API::BoxControllerSettingsAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -7,13 +7,16 @@
 #  This file is part of the mantid workbench.
 #
 #
-import matplotlib
-
-matplotlib.use('Agg')  # noqa: E402
+import sys
 import unittest
+from unittest import mock
+
+import matplotlib
+matplotlib.use('Agg')  # noqa: E402
+# Mock out simpleapi to import expensive import of something we don't use anyway
+sys.modules['mantid.simpleapi'] = mock.MagicMock()  # noqa: E402
 
 import mantid.api
-from unittest import mock
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.widgets.sliceviewer.view import SliceViewerView, SliceViewerDataView
@@ -44,6 +47,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view.plot_MDH = mock.Mock()
         data_view.dimensions = mock.Mock()
         data_view.norm_opts = mock.Mock()
+        data_view.image_info_widget = mock.Mock()
         dimensions = mock.Mock()
         dimensions.get_slicepoint.return_value = [None, None, 0.5]
         dimensions.transpose = False
@@ -55,6 +59,7 @@ class SliceViewerTest(unittest.TestCase):
         self.model = mock.Mock(spec=SliceViewerModel)
         self.model.get_ws = mock.Mock()
         self.model.get_data = mock.Mock()
+        self.model.rebin = mock.Mock()
 
     def test_sliceviewer_MDH(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
@@ -193,6 +198,38 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.enable_lineplots_button.assert_called_once()
         data_view_mock.enable_peaks_button.assert_called_once()
 
+    def test_request_to_show_all_data_sets_correct_limits_on_view(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
+
+        presenter.show_all_data_requested()
+
+        data_view = self.view.data_view
+        self.model.get_dim_limits.assert_called_once_with([None, None, 0.5],
+                                                          data_view.dimensions.transpose)
+        data_view.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
+
+    def test_data_limits_changed_creates_new_plot_if_dynamic_rebinning_supported(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.can_support_dynamic_rebinning.return_value = True
+        new_plot_mock = mock.MagicMock()
+        presenter.new_plot = new_plot_mock
+
+        presenter.data_limits_changed()
+
+        new_plot_mock.assert_called_once()
+        self.model.rebin.assert_called_once()
+
+    def test_data_limits_changed_does_not_create_new_plot_if_dynamic_rebinning_not_supported(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.can_support_dynamic_rebinning.return_value = False
+        new_plot_mock = mock.MagicMock()
+        presenter.new_plot = new_plot_mock
+
+        presenter.data_limits_changed()
+
+        new_plot_mock.assert_not_called()
+
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(
             self, mock_sliceinfo_cls):
@@ -260,6 +297,10 @@ class SliceViewerTest(unittest.TestCase):
         presenter.view.query_peaks_to_overlay.assert_called_once()
         mock_peaks_presenter.assert_called_once()
         mock_peaks_presenter.overlay_peaksworkspaces.asssert_called_once()
+
+    def test_gui_starts_with_zoom_selected(self):
+        SliceViewer(None, model=self.model, view=self.view)
+        self.assertEqual(1, self.view.data_view.select_zoom.call_count)
 
 
 if __name__ == '__main__':

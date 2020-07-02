@@ -105,8 +105,9 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                      Qt4::QtCore
                      Qt4::QtGui
                      Qt4::QtOpenGL
+		     Qt4::Qscintilla
                      Qwt5
-                     ${PYTHON_LIBRARIES}
+                     Python::Python
                    FOLDER Qt4
                    OSX_INSTALL_RPATH
                      @loader_path/../Contents/MacOS

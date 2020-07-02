@@ -36,7 +36,7 @@ public:
     source->setPos(0.0, 0.0, -10.0);
     instrument.add(source);
     instrument.markAsSource(source);
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     instrument.add(sample);
     instrument.markAsSamplePos(sample);
     det = new Detector("det1", 1, nullptr);
@@ -152,17 +152,20 @@ public:
   void testSamplePos() {
     Instrument i;
     TS_ASSERT(!i.getSample());
-    ObjComponent *s = new ObjComponent("");
+    Component *s = new Component("");
     // Cannot have an unnamed source
     TS_ASSERT_THROWS(i.markAsSamplePos(s),
                      const Exception::InstrumentDefinitionError &);
     s->setName("sample");
     TS_ASSERT_THROWS_NOTHING(i.markAsSamplePos(s));
     TS_ASSERT_EQUALS(i.getSample().get(), s);
-    ObjComponent *ss = new ObjComponent("sample2");
+    Component *ss = new Component("sample2");
     // Trying to add sample a second time does nothing
     TS_ASSERT_THROWS_NOTHING(i.markAsSamplePos(ss));
     TS_ASSERT_EQUALS(i.getSample().get(), s);
+    // Try adding a component that supports a shape
+    ObjComponent *sss = new ObjComponent("");
+    TS_ASSERT_THROWS(i.markAsSamplePos(sss), const std::runtime_error &);
     delete s;
     delete ss;
   }

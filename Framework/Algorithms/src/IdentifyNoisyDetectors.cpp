@@ -95,34 +95,23 @@ void IdentifyNoisyDetectors::exec() {
 
   MatrixWorkspace_sptr int2 = integ->getProperty("OutputWorkspace");
 
-  progress.report("Creating single valued workspace...");
-
-  IAlgorithm_sptr csvw = createChildAlgorithm("CreateSingleValuedWorkspace");
-  csvw->initialize();
-  csvw->setProperty<double>("DataValue", steps);
-  csvw->execute();
-
-  MatrixWorkspace_sptr stepsWs = csvw->getProperty("OutputWorkspace");
+  progress.report("Dividing...");
+  IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
+  algScale->initialize();
+  algScale->setProperty("InputWorkspace", int1);
+  algScale->setProperty("OutputWorkspace", int1);
+  algScale->setProperty("Factor", 1.0 / steps);
+  algScale->execute();
+  int1 = algScale->getProperty("OutputWorkspace");
 
   progress.report("Dividing...");
 
-  IAlgorithm_sptr divide = createChildAlgorithm("Divide");
-  divide->initialize();
-  divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", int1);
-  divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", stepsWs);
-  divide->execute();
-
-  int1 = divide->getProperty("OutputWorkspace");
-
-  progress.report("Dividing...");
-
-  divide = createChildAlgorithm("Divide");
-  divide->initialize();
-  divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", int2);
-  divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", stepsWs);
-  divide->execute();
-
-  int2 = divide->getProperty("OutputWorkspace");
+  algScale = createChildAlgorithm("Scale");
+  algScale->setProperty("InputWorkspace", int2);
+  algScale->setProperty("OutputWorkspace", int2);
+  algScale->setProperty("Factor", 1.0 / steps);
+  algScale->execute();
+  int2 = algScale->getProperty("OutputWorkspace");
 
   for (int i = 0; i < nHist; i++) {
     outputWs->setHistogram(i, Points{0.0}, Counts{1.0});

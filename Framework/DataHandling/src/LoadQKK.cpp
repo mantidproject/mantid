@@ -111,8 +111,8 @@ void LoadQKK::exec() {
   // Add dummy source and samplepos to instrument
 
   // Create an instrument component wich will represent the sample position.
-  Geometry::ObjComponent *samplepos =
-      new Geometry::ObjComponent("Sample", instrument.get());
+  Geometry::Component *samplepos =
+      new Geometry::Component("Sample", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   // Put the sample in the centre of the coordinate system

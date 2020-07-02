@@ -8,7 +8,7 @@
 
 from mantid.plots.datafunctions import update_colorbar_scale
 from mantidqt.utils.qt import block_signals
-from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig
+from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig, get_colorbars_from_fig
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.view import ImagesTabWidgetView, SCALES
 
@@ -34,13 +34,21 @@ class ImagesTabWidgetPresenter:
 
     def apply_properties(self):
         props = self.view.get_properties()
-        image = self.get_selected_image()
-        self.set_selected_image_label(props.label)
-        image.set_cmap(props.colormap)
-        if props.interpolation:
-            image.set_interpolation(props.interpolation)
+        # if only one colorbar apply settings to all images
+        if len(get_colorbars_from_fig(self.fig)) == 1:
+            images = self.image_names_dict.values()
+        else:
+            images = [self.get_selected_image()]
 
-        update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)
+        for image in images:
+            if image.colorbar:
+                image.colorbar.set_label(props.label)
+
+            image.set_cmap(props.colormap)
+            if props.interpolation:
+                image.set_interpolation(props.interpolation)
+
+            update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)
 
         if props.vmin > props.vmax:
             self.view.max_min_value_warning.setVisible(True)
@@ -63,15 +71,9 @@ class ImagesTabWidgetPresenter:
             self._populate_select_image_combo_box()
         self.update_view()
 
-    def set_selected_image_label(self, label):
-        image = self.image_names_dict.pop(self.view.get_selected_image_name())
-        image.set_label(label)
-        new_name = self.generate_image_name(image)
-        self.image_names_dict[new_name] = image
-        self.view.replace_selected_image_name(new_name)
-
     def update_view(self):
         img_props = ImageProperties.from_image(self.get_selected_image())
+        self.view.label_line_edit.setEnabled(bool(get_colorbars_from_fig(self.fig)))
         self.view.set_label(img_props.label)
         self.view.set_colormap(img_props.colormap)
         self.view.set_reverse_colormap(img_props.reverse_colormap)

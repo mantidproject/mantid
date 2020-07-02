@@ -279,6 +279,7 @@ void FunctionMultiDomainPresenter::viewRemovedFunction(
 void FunctionMultiDomainPresenter::viewChangedTie(const QString &paramName,
                                                   const QString &tie) {
   m_model->changeTie(paramName, tie);
+  emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::viewAddedConstraint(

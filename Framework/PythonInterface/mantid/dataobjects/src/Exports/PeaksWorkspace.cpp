@@ -8,7 +8,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/python/class.hpp>
 
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 
 using Mantid::API::IPeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace;

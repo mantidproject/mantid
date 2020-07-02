@@ -54,7 +54,7 @@ def _get_splash_image():
     height = QGuiApplication.primaryScreen().size().height()
 
     # the proportion of the whole window size for the splash screen
-    splash_screen_scaling = 0.2
+    splash_screen_scaling = 0.25
     return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(width * splash_screen_scaling,
                                                                 height * splash_screen_scaling,
                                                                 Qt.KeepAspectRatio,
@@ -663,7 +663,7 @@ class MainWindow(QMainWindow):
         screen = desktop.screenNumber(window_pos)
 
         # recalculate the window size
-        desktop_geom = desktop.screenGeometry(screen)
+        desktop_geom = desktop.availableGeometry(screen)
         w = min(desktop_geom.size().width(), window_size.width())
         h = min(desktop_geom.size().height(), window_size.height())
         window_size = QSize(w, h)
@@ -671,6 +671,10 @@ class MainWindow(QMainWindow):
         # and position it on the supplied desktop screen
         x = max(window_pos.x(), desktop_geom.left())
         y = max(window_pos.y(), desktop_geom.top())
+        if x + w > desktop_geom.right():
+            x = desktop_geom.right() - w
+        if y + h > desktop_geom.bottom():
+            y = desktop_geom.bottom() - h
         window_pos = QPoint(x, y)
 
         # set the geometry

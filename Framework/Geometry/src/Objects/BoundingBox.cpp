@@ -252,28 +252,29 @@ void BoundingBox::realign(std::vector<Kernel::V3D> const *const pCS) {
  * @param other :: The bounding box that should be encompassed
  */
 void BoundingBox::grow(const BoundingBox &other) {
-  m_null &= other.isNull();
+
   // If the current box is empty then we definitely need to grow
-  if (minPoint() == V3D() && maxPoint() == V3D()) {
+  if (m_null) {
     m_minPoint = other.minPoint();
     m_maxPoint = other.maxPoint();
-    return;
-  }
+  } else {
 
-  // Simply checks if an of the points in the given box are outside this one and
-  // changes the coordinate appropriately
-  V3D otherPoint = other.minPoint();
-  for (size_t i = 0; i < 3; ++i) {
-    if (otherPoint[i] < m_minPoint[i]) {
-      m_minPoint[i] = otherPoint[i];
+    // Simply checks if an of the points in the given box are outside this one
+    // and changes the coordinate appropriately
+    V3D otherPoint = other.minPoint();
+    for (size_t i = 0; i < 3; ++i) {
+      if (otherPoint[i] < m_minPoint[i]) {
+        m_minPoint[i] = otherPoint[i];
+      }
+    }
+    otherPoint = other.maxPoint();
+    for (size_t i = 0; i < 3; ++i) {
+      if (otherPoint[i] > m_maxPoint[i]) {
+        m_maxPoint[i] = otherPoint[i];
+      }
     }
   }
-  otherPoint = other.maxPoint();
-  for (size_t i = 0; i < 3; ++i) {
-    if (otherPoint[i] > m_maxPoint[i]) {
-      m_maxPoint[i] = otherPoint[i];
-    }
-  }
+  m_null &= other.isNull();
 }
 
 //--------------------------------------------------------------------------

@@ -6,6 +6,16 @@ Formatting Plots with the User Interface
 
 .. TO UPDATE find these images in a .pptx file at https://github.com/mantidproject/documents/blob/master/Images/Images_for_Docs/formatting_plots.pptx
 
+**Plot Type Specific Help**
+
+* :ref:`Basic_1D_Plots`
+* :ref:`Waterfall_Plots`
+* :ref:`Colorfill_Plots`
+* :ref:`3D_Plots`
+
+.. contents:: Table of contents
+    :local:
+
 |
 |
 
@@ -46,6 +56,8 @@ Click Menus
 |FigureOptionsGear.png| ptions Menu
 ===================================
 
+1D plots
+--------
 
 .. figure:: /images/PlotOptions.png
    :alt: Plot Options Axes Legend
@@ -60,6 +72,9 @@ Click Menus
 .. figure:: /images/PlotOptionsCurves.png
    :alt: Plot Options Axes Legend
    :align: center
+
+Image Plots
+-----------
 
 .. figure:: /images/PlotOptionsColorfill.png
    :alt: Plot Options Colorfill
@@ -85,7 +100,7 @@ File > Settings
 
 **Other Plotting Documentation**
 
-* :ref:`scripting_plots`
+* :ref:`02_scripting_plots`
 * :ref:`plotting`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 

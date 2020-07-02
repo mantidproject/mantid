@@ -508,11 +508,6 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 
-# For older gcc versions (<4.5) if we do not put stdc++ first then things crash
-# when an exceptions are thrown in Python.
-if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
-  target_link_libraries(Kernel LINK_PRIVATE stdc++)
-endif()
 target_link_libraries(Kernel
                       PUBLIC
                       ${NEXUS_LIBRARIES}
@@ -600,6 +595,7 @@ set(UPDATE_INSTRUMENT_DEFINTITIONS "0")
 set(CHECK_FOR_NEW_MANTID_VERSION "0")
 set(ENABLE_USAGE_REPORTS "0")
 set(PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins")
+set(PYTHONPLUGIN_MANIFEST "${CMAKE_BINARY_DIR}/Framework/PythonInterface/plugins/python-plugin-manifest.txt")
 set(
   DATADIRS
   ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
@@ -654,6 +650,7 @@ else()
 endif()
 set(FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins)
 set(PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python")
+set(PYTHONPLUGIN_MANIFEST "${PYTHONPLUGIN_DIRS}/python-plugin-manifest.txt")
 if(MAKE_VATES)
   if(APPLE)
     set(PARAVIEW_PYTHON_PATHS "../Libraries;../Python;")

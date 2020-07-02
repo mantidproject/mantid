@@ -378,6 +378,9 @@ void QENSFitSimultaneous::initConcrete() {
                   "If true members of any "
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
+  declareProperty("OutputCompositeMembers", false,
+                  "If true and CreateOutput is true then the value of each "
+                  "member of a Composite Function is also output.");
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
@@ -483,6 +486,7 @@ QENSFitSimultaneous::performFit(
     const std::string &output) {
   IFunction_sptr function = getProperty("Function");
   const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
   const bool calcErrors = getProperty("CalcErrors");
 
@@ -499,7 +503,7 @@ QENSFitSimultaneous::performFit(
   fit->setProperty("Minimizer", getPropertyValue("Minimizer"));
   fit->setProperty("CostFunction", getPropertyValue("CostFunction"));
   fit->setProperty("CalcErrors", calcErrors);
-  fit->setProperty("OutputCompositeMembers", true);
+  fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
   fit->setProperty("ConvolveMembers", convolveMembers);
   fit->setProperty("CreateOutput", true);
   fit->setProperty("Output", output);
