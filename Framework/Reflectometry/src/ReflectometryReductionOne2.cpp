@@ -1014,7 +1014,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
       detectorWS, numGroups, numBins, numBins - 1);
 
-  // Loop through each detector group in the input
+  // Loop through each detector group in the input and collate the related list
+  // of spectrum numbers for the output
+  std::vector<SpectrumNumber> spectrumNumbers;
   for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
     // Get the detectors in this group
     auto &detectors = detectorGroups()[groupIdx];
@@ -1028,12 +1030,12 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
     outSpec.clearDetectorIDs();
     outSpec.addDetectorID(twoThetaRDetID);
     // Set the spectrum number from the twoThetaR detector
-    SpectrumNumber specNum =
-        detectorWS->indexInfo().spectrumNumber(twoThetaRIdx);
-    auto indexInf = outputWS->indexInfo();
-    indexInf.setSpectrumNumbers(specNum, specNum);
-    outputWS->setIndexInfo(indexInf);
+    spectrumNumbers.emplace_back(
+        detectorWS->indexInfo().spectrumNumber(twoThetaRIdx));
   }
+  auto indexInf = outputWS->indexInfo();
+  indexInf.setSpectrumNumbers(std::move(spectrumNumbers));
+  outputWS->setIndexInfo(indexInf);
 
   return outputWS;
 }
