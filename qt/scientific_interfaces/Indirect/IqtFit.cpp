@@ -27,7 +27,11 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("IqtFit");
-}
+std::vector<std::string> IQTFIT_HIDDEN_PROPS = std::vector<std::string>(
+    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+     "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
+     "PeakRadius", "PlotParameter"});
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -47,6 +51,8 @@ IqtFit::IqtFit(QWidget *parent)
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
       templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(
+      IQTFIT_HIDDEN_PROPS);
 
   setEditResultVisible(true);
 }

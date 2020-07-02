@@ -30,6 +30,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+std::vector<std::string> FQFIT_HIDDEN_PROPS = std::vector<std::string>(
+    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+     "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
+     "PeakRadius", "PlotParameter"});
+
 JumpFit::JumpFit(QWidget *parent)
     : IndirectFitAnalysisTab(new JumpFitModel, parent),
       m_uiForm(new Ui::IndirectFitTab) {
@@ -51,6 +56,8 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
       templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(
+      FQFIT_HIDDEN_PROPS);
 
   setEditResultVisible(false);
 }
