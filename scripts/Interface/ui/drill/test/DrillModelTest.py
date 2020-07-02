@@ -394,14 +394,14 @@ class DrillModelTest(unittest.TestCase):
         self.model.samples = [{"c1": "v1"}]
         self.model.process([0])
         self.mDrillTask.assert_called()
-        self.model.tasksPool.addProcess.assert_called_once()
+        self.model.tasksPool.addProcesses.assert_called_once()
         self.mDrillTask.reset_mock()
         self.model.tasksPool.reset_mock()
 
         self.model.samples = [{"c1": "v1"}, {"c1": "v1"}]
         self.model.process([0, 1])
         self.mDrillTask.assert_called()
-        self.model.tasksPool.addProcess.assert_called()
+        self.model.tasksPool.addProcesses.assert_called()
         self.mDrillTask.reset_mock()
         self.model.tasksPool.reset_mock()
 

@@ -386,7 +386,7 @@ class DrillModel(QObject):
                 continue
             kwargs = self.getProcessingParameters(e)
             tasks.append(DrillTask(e, self.algorithm, **kwargs))
-            self.tasksPool.addProcess(tasks[-1])
+        self.tasksPool.addProcesses(tasks)
 
     def _onTaskStarted(self, ref):
         """
