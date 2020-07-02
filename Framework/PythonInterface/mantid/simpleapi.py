@@ -1466,7 +1466,6 @@ def _translate():
         try:
             # Create the algorithm object
             algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
-            # algm_object.initialize()
         except Exception as exc:
             logger.warning("Error initializing {0} on registration: '{1}'".format(name, str(exc)))
             continue
@@ -1508,10 +1507,6 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
                            "Algorithm::workspaceMethodInputProperty() has returned an empty string."
                            "This method is required to map the calling object to the correct property."
                            % algm_object.name())
-    # if input_prop not in algm_object:
-    #     raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
-    #                        "Algorithm::workspaceMethodInputProperty() has returned a property name that "
-    #                        "does not exist on the algorithm." % algm_object.name())
     _api._workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop, algm_object.name(),
                                              algm_object.workspaceMethodOn())
 
