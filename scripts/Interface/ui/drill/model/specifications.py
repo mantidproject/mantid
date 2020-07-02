@@ -60,6 +60,7 @@ class RundexSettings(object):
                 "MaskFiles",
                 "ReferenceFiles",
                 "OutputWorkspace",
+                "WedgeWorkspace",
                 "CustomOptions"
                 ],
             OMEGA_SCAN: [
