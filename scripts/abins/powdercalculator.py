@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
+from typing import Any, Dict, Tuple
 
 import abins
 from abins.constants import CONSTANT, GAMMA_POINT, NUM_ZERO
@@ -18,11 +19,11 @@ except ImportError:
 
 
 # noinspection PyMethodMayBeStatic
-class PowderCalculator(object):
+class PowderCalculator:
     """
     Class for calculating powder data.
     """
-    def __init__(self, *, filename: str, abins_data: abins.AbinsData):
+    def __init__(self, *, filename: str, abins_data: abins.AbinsData) -> None:
         """
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from input DFT file
@@ -30,16 +31,17 @@ class PowderCalculator(object):
         if not isinstance(abins_data, abins.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
 
-        k_data = abins_data.get_kpoints_data().extract()
-        self._frequencies = k_data["frequencies"]
-        self._displacements = k_data["atomic_displacements"]
+        k_data = abins_data.get_kpoints_data().extract()  # type: Dict[str, Dict[str, np.ndarray]]
+        self._frequencies = k_data["frequencies"]  # type: Dict[str, np.ndarray]
+        self._displacements = k_data["atomic_displacements"]  # type: Dict[str, np.ndarray]
+
         self._num_atoms = self._displacements[GAMMA_POINT].shape[0]
         self._atoms_data = abins_data.get_atoms_data().extract()
 
         self._clerk = abins.IO(input_filename=filename,
                                group_name=abins.parameters.hdf_groups['powder_data'])
 
-    def _calculate_powder(self):
+    def _calculate_powder(self) -> abins.PowderData:
         """
         Calculates powder data (a_tensors, b_tensors according to aCLIMAX manual).
         """
@@ -64,7 +66,7 @@ class PowderCalculator(object):
                                   num_atoms=self._num_atoms)
         return powder
 
-    def _calculate_powder_k(self, k=None):
+    def _calculate_powder_k(self, *, k: str) -> Tuple[np.ndarray, np.ndarray]:
         """
         :param k: k index
         """
@@ -80,7 +82,7 @@ class PowderCalculator(object):
                              for atom in range(self._num_atoms)])
 
         # disp[num_atoms, num_freq, dim]
-        disp = self._displacements[k]
+        disp = self._displacements[k]  # type np.ndarray
 
         # factor[num_atoms, num_freq]
         factor = np.einsum('ij,j->ij', 1.0 / masses, CONSTANT / self._frequencies[k])
@@ -89,6 +91,11 @@ class PowderCalculator(object):
         b_tensors = np.einsum('ijkl,ij->ijkl',
                               np.einsum('lki, lkj->lkij', disp, disp.conjugate()).real, factor)
 
+        # Replace tensor values close to zero with a small finite value.
+        # Not clear why this is done; we never divide by these values?
+        # Presumably this stabilises the division by b_trace in first order
+        # intensity calculation; but it could be handled more efficiently
+        # and elegantly at that stage.
         temp = np.fabs(b_tensors)
         indices = temp < NUM_ZERO
         b_tensors[indices] = NUM_ZERO
@@ -98,7 +105,7 @@ class PowderCalculator(object):
 
         return a_tensors, b_tensors
 
-    def get_formatted_data(self):
+    def get_formatted_data(self) -> abins.PowderData:
         """
         Method to obtain data.
         :returns: obtained data
@@ -116,7 +123,7 @@ class PowderCalculator(object):
 
         return data
 
-    def calculate_data(self):
+    def calculate_data(self) -> abins.PowderData:
         """
         Calculates mean square displacements.
         :returns: object of type PowderData with mean square displacements.
@@ -130,7 +137,7 @@ class PowderCalculator(object):
 
         return data
 
-    def load_formatted_data(self):
+    def load_formatted_data(self) -> abins.PowderData:
         """
         Loads mean square displacements.
         :returns: object of type PowderData with mean square displacements.
@@ -141,7 +148,7 @@ class PowderCalculator(object):
 
         return powder_data
 
-    def _report_progress(self, msg):
+    def _report_progress(self, msg: str) -> None:
         """
         :param msg:  message to print out
         """

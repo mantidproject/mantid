@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numbers
+import numpy as np
 from typing import Any, Dict, Optional
+
 from abins.constants import ALL_KEYWORDS_POWDER_DATA, GAMMA_POINT
 
 PowderItems = Dict[str, Dict[str, Any]]
@@ -31,6 +33,12 @@ class PowderData:
 
         self._check_items(items)
         self._data = items  # type: PowderItems
+
+    def get_a_tensors(self) -> Dict[str, np.ndarray]:
+        return self._data["a_tensors"]
+
+    def get_b_tensors(self) -> Dict[str, np.ndarray]:
+        return self._data["a_tensors"]
 
     def extract(self) -> PowderItems:
         """Get tensor data as dict"""
