@@ -368,5 +368,5 @@ install(
 install(
     FILES ${PACKAGE_FILE}
     DESTINATION ${PLUGINS_DIR}/python
-    RENAME "python-plugin-mantifest.txt"
+    RENAME "python-plugin-manifest.txt"
 )
