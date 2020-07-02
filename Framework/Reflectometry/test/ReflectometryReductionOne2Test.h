@@ -28,10 +28,22 @@ using namespace Mantid::HistogramData;
 using namespace Mantid::Reflectometry;
 using namespace WorkspaceCreationHelper;
 
+namespace {
+static constexpr double degToRad = M_PI / 180.;
+static constexpr double radToDeg = 180. / M_PI;
+} // namespace
+
 class ReflectometryReductionOne2Test : public CxxTest::TestSuite {
 private:
+  double m_detSize{0.1};
+  double m_detPosX{5.0};
+  double m_detPosY{5.0};
+  // Sample workspace with a monitor and a single detector
   MatrixWorkspace_sptr m_singleDetectorWS;
+  // Sample workspace with a monitor and 3 detectors. The detectors are of size
+  // m_detSize and the middle one is centred on m_detPosY
   MatrixWorkspace_sptr m_multiDetectorWS;
+  // Sample transmission workspace with same detectors as m_multiDetectorWS
   MatrixWorkspace_sptr m_transmissionWS;
 
 public:
@@ -50,12 +62,12 @@ public:
     m_singleDetectorWS = create2DWorkspaceWithReflectometryInstrument(0);
     // A multi detector ws
     m_multiDetectorWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, m_detSize);
     m_multiDetectorWS->mutableRun().addProperty<std::string>("run_number",
                                                              "1234");
     // A transmission ws with different spectrum numbers to the run
     m_transmissionWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, m_detSize);
     m_transmissionWS->mutableRun().addProperty<std::string>("run_number",
                                                             "4321");
     m_transmissionWS->getSpectrum(0).setSpectrumNo(2);
@@ -657,115 +669,164 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 8.306563, 1e-6);
   }
 
-  void test_angle_correction() {
-
+  void test_angle_correction_is_done_for_sum_in_lambda_when_theta_provided() {
     ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2+3");
 
+    double const thetaIn = 22.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
-    alg.setChild(true);
-    alg.initialize();
     alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "2+3");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-
-    double const theta = 22.0;
-    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("ThetaIn", thetaIn);
     alg.execute();
+
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
-
-    auto const &qX = outQ->x(0);
-    auto const &lamX = outLam->x(0);
-
-    std::vector<double> lamXinv(lamX.size() + 3);
-    std::reverse_copy(lamX.begin(), lamX.end(), lamXinv.begin());
-
-    auto factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
-    for (size_t i = 0; i < qX.size(); ++i) {
-      TS_ASSERT_DELTA(qX[i], factor / lamXinv[i], 1e-14);
-    }
-
-    auto const &lamY = outLam->y(0);
-    TS_ASSERT_DELTA(lamY[0], 19, 1e-2);
-    TS_ASSERT_DELTA(lamY[6], 49, 1e-2);
-    TS_ASSERT_DELTA(lamY[13], 84, 1e-2);
-
-    auto const &qY = outQ->y(0);
-    TS_ASSERT_DELTA(qY[0], 84, 1e-2);
-    TS_ASSERT_DELTA(qY[6], 54, 1e-2);
-    TS_ASSERT_DELTA(qY[13], 19, 1e-2);
+    checkAngleCorrection(outLam, outQ, thetaIn);
+    checkDetector2And3SummedInLambda(outLam, outQ);
   }
 
-  void test_no_angle_correction() {
-
+  void
+  test_angle_correction_is_not_done_for_sum_in_lambda_when_theta_not_provided() {
     ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2+3");
 
+    double const detectorTheta = twoThetaForDetector2And3() / 2.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
-    alg.setChild(true);
-    alg.initialize();
     alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "3");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-
-    alg.setProperty("ThetaIn", 22.0);
     alg.execute();
+
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
-
-    auto const &qX = outQ->x(0);
-    auto const &lamX = outLam->x(0);
-
-    std::vector<double> lamXinv(lamX.size() + 3);
-    std::reverse_copy(lamX.begin(), lamX.end(), lamXinv.begin());
-
-    auto factor = 4.0 * M_PI * sin(22.5 * M_PI / 180.0);
-    for (size_t i = 0; i < qX.size(); ++i) {
-      TS_ASSERT_DELTA(qX[i], factor / lamXinv[i], 1e-14);
-    }
-
-    auto const &lamY = outLam->y(0);
-    TS_ASSERT_DELTA(lamY[0], 11, 1e-2);
-    TS_ASSERT_DELTA(lamY[6], 29, 1e-2);
-    TS_ASSERT_DELTA(lamY[13], 50, 1e-2);
-
-    auto const &qY = outQ->y(0);
-    TS_ASSERT_DELTA(qY[0], 50, 1e-2);
-    TS_ASSERT_DELTA(qY[6], 32, 1e-2);
-    TS_ASSERT_DELTA(qY[13], 11, 1e-2);
+    checkAngleCorrection(outLam, outQ, detectorTheta);
+    checkDetector2And3SummedInLambda(outLam, outQ);
   }
 
-  void test_angle_correction_multi_group() {
+  void
+  test_angle_correction_not_done_for_single_detector_when_theta_provided() {
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "2+3, 4");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
+
+    double const detectorTheta = twoThetaForDetector3() / 2.0;
+    double const thetaIn = 22.0;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("ThetaIn", thetaIn);
+    alg.execute();
+
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    checkAngleCorrection(outLam, outQ, detectorTheta);
+    checkDetector3SummedInLambda(outLam, outQ);
+  }
+
+  void
+  test_angle_correction_not_done_for_single_detector_when_theta_not_provided() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3");
+
+    double const detectorTheta = twoThetaForDetector3() / 2.0;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.execute();
+
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    checkAngleCorrection(outLam, outQ, detectorTheta);
+    checkDetector3SummedInLambda(outLam, outQ);
+  }
+
+  void
+  test_requesting_angle_correction_for_sum_in_lambda_throws_for_multiple_groups() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2+3, 4");
     alg.setProperty("ThetaIn", 22.0);
     TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
-  void test_debug_false() {
+  void test_angle_correction_is_not_done_for_sum_in_q_for_single_detector() {
     ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3");
+
+    double const detectorTheta = twoThetaForDetector3() / 2.0;
+    double const thetaIn = 22.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
-    alg.initialize();
     alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("ThetaIn", thetaIn);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.execute();
+
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    checkAngleCorrection(outLam, outQ, detectorTheta);
+    checkDetector3SummedInQ(outLam, outQ);
+  }
+
+  void test_angle_correction_is_not_done_for_sum_in_q_for_multiple_detectors() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2+3");
+
+    // The reference angle when summing in Q is taken from the centre of the
+    // ROI. If we have an even number of pixels it clips the the lower value,
+    // i.e. detector 2 here
+    double const detectorTheta = twoThetaForDetector2() / 2.0;
+    double const thetaIn = 22.0;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("ThetaIn", thetaIn);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.execute();
+
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    checkAngleCorrection(outLam, outQ, detectorTheta);
+    checkDetector2And3SummedInQ(outLam, outQ);
+  }
+
+  void test_angle_correction_is_not_done_for_sum_in_q_for_multiple_groups() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2+3, 3");
+
+    double const detectorTheta = twoThetaForDetector2() / 2.0;
+    double const thetaIn = 22.0;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("ThetaIn", thetaIn);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.execute();
+
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    checkAngleCorrection(outLam, outQ, detectorTheta);
+
+    // The output workspace has two spectra, containing the results for each
+    // group. Note that the cropping in wavelength is done based on all groups
+    // so the results for detector 3 here are slightly different to other tests
+    // that process this detector in a solo group
+    checkDetector2And3SummedInQ(outLam, outQ);
+    checkDetector3SummedInQCroppedToDetector2And3(outLam, outQ, 1);
+  }
+
+  void test_outputs_when_debug_is_false_and_IvsLam_name_not_set() {
+    ReflectometryReductionOne2 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_multiDetectorWS);
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("Debug", false);
@@ -779,11 +840,11 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_debug_false_no_OutputWorkspace() {
+  void
+  test_outputs_with_default_names_when_debug_is_false_and_run_number_not_set() {
     ReflectometryReductionOne2 alg;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     inputWS->mutableRun().removeProperty("run_number");
-    setYValuesToWorkspace(*inputWS);
 
     alg.initialize();
     alg.setRethrows(true);
@@ -800,11 +861,11 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_debug_true_default_OutputWorkspace_no_run_number() {
+  void
+  test_outputs_with_default_names_when_debug_is_true_and_run_number_not_set() {
     ReflectometryReductionOne2 alg;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     inputWS->mutableRun().removeProperty("run_number");
-    setYValuesToWorkspace(*inputWS);
 
     alg.initialize();
     alg.setRethrows(true);
@@ -821,14 +882,12 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_debug_true_default_OutputWorkspace_with_run_number() {
+  void
+  test_outputs_with_default_names_when_debug_is_true_and_run_number_is_set() {
     ReflectometryReductionOne2 alg;
-    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    setYValuesToWorkspace(*inputWS);
-
     alg.initialize();
     alg.setRethrows(true);
-    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("InputWorkspace", m_multiDetectorWS);
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("Debug", true);
@@ -1107,6 +1166,26 @@ private:
     return ws;
   }
 
+  // Get twoTheta for detector 3 in m_multiDetectorWS, in degrees
+  double twoThetaForDetector3() {
+    // Detector 3 is the centre pixel at m_detPosY
+    return std::atan(m_detPosY / m_detPosX) * radToDeg;
+  }
+
+  // Get twoTheta for detector 2 in m_multiDetectorWS, in degrees
+  double twoThetaForDetector2() {
+    // One below the centre pixel
+    return std::atan((m_detPosY - m_detSize) / m_detPosX) * radToDeg;
+  }
+
+  // Get the average of the twoTheta's of detectors 2 and 3 for
+  // m_multiDetectorWS, in degrees. This is the same as the twoTheta that
+  // DetectorInfo will return if these detectors are grouped/summed into a
+  // single spectrum.
+  double twoThetaForDetector2And3() {
+    return (twoThetaForDetector3() + twoThetaForDetector2()) / 2.0;
+  }
+
   void checkWorkspaceHistory(const MatrixWorkspace_sptr &ws,
                              std::vector<std::string> const &expected,
                              bool const unroll = true) {
@@ -1141,5 +1220,99 @@ private:
     auto childHist = childHistories[childIdx];
     for (auto kvp : expected)
       TS_ASSERT_EQUALS(childHist->getPropertyValue(kvp.first), kvp.second);
+  }
+
+  void checkAngleCorrection(MatrixWorkspace_sptr outLam,
+                            MatrixWorkspace_sptr outQ, double const theta) {
+    auto const &qX = outQ->x(0);
+    auto const &lamX = outLam->x(0);
+
+    std::vector<double> lamXinv(lamX.size() + 3);
+    std::reverse_copy(lamX.begin(), lamX.end(), lamXinv.begin());
+
+    auto factor = 4.0 * M_PI * sin(theta * degToRad);
+    for (size_t i = 0; i < qX.size(); ++i) {
+      TS_ASSERT_DELTA(qX[i], factor / lamXinv[i], 1e-6);
+    }
+  }
+
+  void checkDetector2And3SummedInLambda(MatrixWorkspace_sptr outLam,
+                                        MatrixWorkspace_sptr outQ,
+                                        int const wsIdx = 0) {
+    auto const &lamY = outLam->y(wsIdx);
+    TS_ASSERT_EQUALS(lamY.size(), 14);
+    TS_ASSERT_DELTA(lamY[0], 19, 1e-2);
+    TS_ASSERT_DELTA(lamY[6], 49, 1e-2);
+    TS_ASSERT_DELTA(lamY[13], 84, 1e-2);
+
+    auto const &qY = outQ->y(wsIdx);
+    TS_ASSERT_EQUALS(qY.size(), 14);
+    TS_ASSERT_DELTA(qY[0], 84, 1e-2);
+    TS_ASSERT_DELTA(qY[6], 54, 1e-2);
+    TS_ASSERT_DELTA(qY[13], 19, 1e-2);
+  }
+
+  void checkDetector3SummedInLambda(MatrixWorkspace_sptr outLam,
+                                    MatrixWorkspace_sptr outQ,
+                                    int const wsIdx = 0) {
+    auto const &lamY = outLam->y(wsIdx);
+    TS_ASSERT_EQUALS(lamY.size(), 14);
+    TS_ASSERT_DELTA(lamY[0], 11, 1e-2);
+    TS_ASSERT_DELTA(lamY[6], 29, 1e-2);
+    TS_ASSERT_DELTA(lamY[13], 50, 1e-2);
+
+    auto const &qY = outQ->y(wsIdx);
+    TS_ASSERT_EQUALS(qY.size(), 14);
+    TS_ASSERT_DELTA(qY[0], 50, 1e-2);
+    TS_ASSERT_DELTA(qY[6], 32, 1e-2);
+    TS_ASSERT_DELTA(qY[13], 11, 1e-2);
+  }
+
+  void checkDetector3SummedInQ(MatrixWorkspace_sptr outLam,
+                               MatrixWorkspace_sptr outQ, int const wsIdx = 0) {
+    auto const &lamY = outLam->y(wsIdx);
+    TS_ASSERT_EQUALS(lamY.size(), 10);
+    TS_ASSERT_DELTA(lamY[0], 13.954514, 1e-6);
+    TS_ASSERT_DELTA(lamY[6], 60.379735, 1e-6);
+    TS_ASSERT_DELTA(lamY[9], 83.408536, 1e-6);
+
+    auto const &qY = outQ->y(wsIdx);
+    TS_ASSERT_EQUALS(qY.size(), 10);
+    TS_ASSERT_DELTA(qY[0], 83.408536, 1e-6);
+    TS_ASSERT_DELTA(qY[6], 37.016271, 1e-6);
+    TS_ASSERT_DELTA(qY[9], 13.954514, 1e-6);
+  }
+
+  void
+  checkDetector3SummedInQCroppedToDetector2And3(MatrixWorkspace_sptr outLam,
+                                                MatrixWorkspace_sptr outQ,
+                                                int const wsIdx = 0) {
+    auto const &lamY = outLam->y(wsIdx);
+    TS_ASSERT_EQUALS(lamY.size(), 10);
+    TS_ASSERT_DELTA(lamY[0], 13.906629, 1e-6);
+    TS_ASSERT_DELTA(lamY[6], 60.329214, 1e-6);
+    TS_ASSERT_DELTA(lamY[9], 83.364379, 1e-6);
+
+    auto const &qY = outQ->y(wsIdx);
+    TS_ASSERT_EQUALS(qY.size(), 10);
+    TS_ASSERT_DELTA(qY[0], 83.3643785180, 1e-6);
+    TS_ASSERT_DELTA(qY[6], 36.9686340548, 1e-6);
+    TS_ASSERT_DELTA(qY[9], 13.9066291140, 1e-6);
+  }
+
+  void checkDetector2And3SummedInQ(MatrixWorkspace_sptr outLam,
+                                   MatrixWorkspace_sptr outQ,
+                                   int const wsIdx = 0) {
+    auto const &lamY = outLam->y(wsIdx);
+    TS_ASSERT_EQUALS(lamY.size(), 10);
+    TS_ASSERT_DELTA(lamY[0], 24.275146, 1e-6);
+    TS_ASSERT_DELTA(lamY[6], 101.852986, 1e-6);
+    TS_ASSERT_DELTA(lamY[9], 140.267317, 1e-6);
+
+    auto const &qY = outQ->y(wsIdx);
+    TS_ASSERT_EQUALS(qY.size(), 10);
+    TS_ASSERT_DELTA(qY[0], 140.267317, 1e-6);
+    TS_ASSERT_DELTA(qY[6], 62.816137, 1e-6);
+    TS_ASSERT_DELTA(qY[9], 24.275146, 1e-6);
   }
 };
