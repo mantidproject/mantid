@@ -38,7 +38,7 @@ import mantid
 from mantid import __gui__, api as _api, kernel as _kernel, apiVersion
 from mantid.kernel import plugins as _plugin_helper
 from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_info as _lhs_info, \
-    replace_signature as _replace_signature
+    replace_signature as _replace_signature, LazyFunctionSignature
 
 # register matplotlib projection
 try:
@@ -84,81 +84,6 @@ def extract_progress_kwargs(kwargs):
     start = kwargs.pop('startProgress', None)
     end = kwargs.pop('endProgress', None)
     return start, end, kwargs
-
-
-class LazyFunctionSignature(inspect.Signature):
-    """
-    Allows for lazy access to the signature of a function, only generating it when it is requested
-    to reduce the time spent initialising algorithms.
-    """
-    __slots__ = ('_alg_name', '__sig')
-
-    def __init__(self, *args, **kwargs):
-        if "alg_name" not in kwargs:
-            super().__init__(*args, **kwargs)
-            self.__sig = self
-        else:
-            self._alg_name = kwargs.pop("alg_name")
-            self.__sig = None
-
-    @property
-    def _signature(self):
-        if self.__sig is None:
-            self.__sig = self._create_signature(self._alg_name)
-
-        return self.__sig
-
-    def __getattr__(self, item):
-        # Called for each attribute access.
-        if item in LazyFunctionSignature.__slots__:
-            return getattr(self, item)
-        else:
-            return getattr(self._signature, item)
-
-    def _create_signature(self, alg_name):
-        from inspect import Signature
-        return Signature(self._create_parameters(alg_name))
-
-    def _create_parameters(self, alg_name):
-        from mantid.api import AlgorithmManager
-        alg_object = AlgorithmManager.Instance().createUnmanaged(alg_name)
-        alg_object.initialize()
-        from inspect import Parameter
-        pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
-        parameters = []
-        for name in alg_object.mandatoryProperties():
-            prop = alg_object.getProperty(name)
-            # Mandatory parameters are those for which the default value is not valid
-            if isinstance(prop.isValid, str):
-                valid_str = prop.isValid
-            else:
-                valid_str = prop.isValid()
-            if len(valid_str) > 0:
-                parameters.append(Parameter(name, pos_or_keyword))
-            else:
-                # None is not quite accurate here, but we are reproducing the
-                # behavior found in the C++ code for SimpleAPI.
-                parameters.append(Parameter(name, pos_or_keyword, default=None))
-        # Add a self parameter since these are called from a class.
-        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
-        return parameters
-
-
-class LazyMethodSignature(LazyFunctionSignature):
-    """
-    Alternate LazyFunctionSignature intended for use in workspace methods. Replaces the input workspace
-    parameter with self.
-    """
-    def _create_parameters(self, alg_name):
-        from inspect import Parameter
-        parameters = super()._create_parameters(alg_name)
-        try:
-            parameters.pop(0)
-        except IndexError:
-            pass
-        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
-        return parameters
-
 
 def _show_dialog_fn_deprecation_warning(name):
     """Raise a deprecation warning for a *Dialog being used.

@@ -18,7 +18,7 @@ import sys
 from inspect import getsource
 
 from mantid.api import AnalysisDataServiceImpl, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
-from mantid.kernel.funcinspect import customise_func, lhs_info
+from mantid.kernel.funcinspect import customise_func, lhs_info, LazyMethodSignature
 
 
 # ------------------------------------------------------------------------------
@@ -246,7 +246,6 @@ def attach_func_as_method(name, func_obj, self_param_name, algm_name, workspace_
         return func_obj(*args, **kwargs)
 
     # ------------------------------------------------------------------
-    from mantid.simpleapi import LazyMethodSignature  # Import here to avoid circular depandancy.
     customise_func(_method_impl, func_obj.__name__,
                    LazyMethodSignature(alg_name=algm_name), func_obj.__doc__)
 
