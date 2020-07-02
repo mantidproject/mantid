@@ -9,6 +9,7 @@ from unittest.mock import MagicMock
 
 import abins
 from abins.abinsdata import AbinsData
+from abins.input import all_loaders
 
 
 class TestAbinsData(unittest.TestCase):
@@ -36,6 +37,26 @@ class TestAbinsData(unittest.TestCase):
         self.assertEqual(abins_data.extract(),
                          {'k_points_data': self.mock_kpd.extract(),
                           'atoms_data': self.mock_ad.extract()})
+
+
+class DummyLoader:
+    def __init__(self, *, input_ab_initio_filename):
+        self.filename = input_ab_initio_filename
+
+    def get_formatted_data(self):
+        return 'FORMATTED DATA'
+
+
+class TestAbinsDataFromCalculation(unittest.TestCase):
+    def setUp(self):
+        all_loaders['DUMMYLOADER'] = DummyLoader
+
+    def tearDown(self):
+        del all_loaders['DUMMYLOADER']
+
+    def test_with_dummy_loader(self):
+        data = AbinsData.from_calculation_data('dummy_file.ext', 'DummyLoader')
+        self.assertEqual(data, 'FORMATTED DATA')
 
 
 if __name__ == '__main__':
