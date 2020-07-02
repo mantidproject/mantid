@@ -83,6 +83,7 @@ void SingleFunctionTemplateBrowser::addParameter(
   m_parameterManager->setDescription(newParameter,
                                      parameterDescription.toStdString());
   m_parameterManager->setDecimals(newParameter, 6);
+
   m_fitType->addSubProperty(newParameter);
   m_parameterMap.insert(parameterName, newParameter);
   m_parameterNames.insert(newParameter, parameterName);

@@ -182,7 +182,7 @@ void SingleFunctionTemplatePresenter::setLocalParameterTie(
 void SingleFunctionTemplatePresenter::updateView() {
   if (m_model.getFitType() == "None")
     return;
-  for (auto parameterName : m_model.getParameterNames()) {
+  for (auto &parameterName : m_model.getParameterNames()) {
     m_view->setParameterValueQuietly(parameterName,
                                      m_model.getParameter(parameterName),
                                      m_model.getParameterError(parameterName));
