@@ -52,6 +52,13 @@ class AbinsPowderDataTest(unittest.TestCase):
             for k_point in self.good_items[key]:
                 self.assertEqual(True, np.allclose(self.good_items[key][k_point], extracted_data[key][k_point]))
 
+    def test_getters(self):
+        good_powderdata = PowderData(self.good_items, num_atoms=2)
+        for k_point in self.good_items["a_tensors"]:
+            self.assertTrue(np.allclose(self.good_items["a_tensors"][k_point],
+                                        good_powderdata.get_a_tensors()[k_point]))
+            self.assertTrue(np.allclose(self.good_items["b_tensors"][k_point],
+                                        good_powderdata.get_b_tensors()[k_point]))
 
 if __name__ == '__main__':
     unittest.main()
