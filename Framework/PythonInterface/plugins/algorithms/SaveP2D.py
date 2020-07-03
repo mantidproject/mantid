@@ -29,13 +29,13 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('Workspace', '', direction = Direction.Input), doc = 'Workspace that should be used.')
         # Output File
         self.declareProperty(FileProperty('OutputFile', '', action = FileAction.Save, direction = Direction.Input),
-            doc = 'Output File for ".p2d" Data.')
+                                            doc = 'Output File for ".p2d" Data.')
         # Manipulating Data ranges
         self.declareProperty('RemoveNaN', True, direction = Direction.Input, doc = 'Remove DataPoints with NaN as intensity value')
         self.declareProperty('RemoveNegatives', True, direction = Direction.Input,
-            doc = 'Remove data points with negative intensity values')
+                                doc = 'Remove data points with negative intensity values')
         self.declareProperty('CutData', False, direction = Direction.Input,
-            doc = 'Use the following inputs to limit data in Theta, lambda, d and dp')
+                                doc = 'Use the following inputs to limit data in Theta, lambda, d and dp')
         self.declareProperty('tthMin', 50, direction = Direction.Input, doc = 'Minimum  for tth values')
         self.declareProperty('tthMax', 120, direction = Direction.Input, doc = 'Maximum  for tth values')
         self.declareProperty('lambdaMin', 0.3, direction = Direction.Input, doc = 'Minimum  for lambda values')
@@ -47,10 +47,13 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
 
 # Create output file
     def PyExec(self):
+        def wo_real(x):
+            return np.real(lambertw(np.exp(x), 0))
+            
         # Workspace name
         Workspace = self.getPropertyValue('Workspace')
 
-        wo_real = lambda x: np.real(lambertw(np.exp(x), 0))
+        #wo_real = lambda x: np.real(lambertw(np.exp(x), 0))
 
         # Create Output File
         OutFile = self.getPropertyValue('OutputFile')+'.p2d'
@@ -59,7 +62,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         # output style
         form = '{:12.7f}'
         lform = '{:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}\n'
-        
+
         of = open(OutFile, 'w')
         if (of):
             print('Exporting: ' + OutFile + '\n')
@@ -81,7 +84,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
             for cdp in range(ndp):
                 dp = Data.getDimension(1).getX(cdp)
                 # skip if no new dPerpendicular cut
-                if (dp == last_dp): 
+                if (dp == last_dp):
                     continue
                 # create value of bin center from left and right border
                 dp_center = (dp + Data.getDimension(1).getX(cdp+1))/2.
