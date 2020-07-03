@@ -17,8 +17,9 @@ class SData:
     Class for storing S(Q, omega)
     """
 
-    def __init__(self, temperature=None, sample_form=None):
-        super(SData, self).__init__()
+    def __init__(self, *, temperature: float, sample_form: str,
+                 bin_width: float, data: dict) -> None:
+        super().__init__()
 
         if not isinstance(temperature, (float, int)) and temperature > 0:
             raise ValueError("Invalid value of temperature.")
@@ -29,33 +30,28 @@ class SData:
         else:
             raise ValueError("Invalid sample form %s" % sample_form)
 
-        self._data = None  # dictionary which stores dynamical structure factor for all atoms
-        self._bin_width = None
+        self._bin_width = bin_width
+        self._data = data
+        self._check_data()
 
-    def set_bin_width(self, width=None):
-        self._bin_width = width
-
-    def set(self, items=None):
-        """
-        Sets a new value for a collection of the data.
-        """
-        if not isinstance(items, dict):
+    def _check_data(self):
+        """Check data set is consistent and has correct types"""
+        if not isinstance(self._data, dict):
             raise ValueError("New value of S  should have a form of a dict.")
 
-        for item in items:
-            if ATOM_LABEL in item:
-
-                if not isinstance(items[item], dict):
+        for key, item in self._data.items():
+            if ATOM_LABEL in key:
+                if not isinstance(item, dict):
                     raise ValueError("New value of item from S data should have a form of dictionary.")
 
-                if sorted(items[item].keys()) != sorted(ALL_KEYWORDS_ATOMS_S_DATA):
+                if sorted(item.keys()) != sorted(ALL_KEYWORDS_ATOMS_S_DATA):
                     raise ValueError("Invalid structure of the dictionary.")
 
-                for order in items[item][S_LABEL]:
-                    if not isinstance(items[item][S_LABEL][order], np.ndarray):
+                for order in item[S_LABEL]:
+                    if not isinstance(item[S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
 
-            elif "frequencies" == item:
+            elif key == "frequencies":
                 step = self._bin_width
                 bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
                                  stop=abins.parameters.sampling['max_wavenumber'] + step,
@@ -63,13 +59,12 @@ class SData:
                                  dtype=FLOAT_TYPE)
 
                 freq_points = bins[:-1] + (step / 2)
-                if not np.array_equal(items[item], freq_points):
+                if not np.allclose(item, freq_points):
                     raise ValueError("Invalid frequencies, these should correspond to the mid points of the resampled bins.")
 
             else:
                 raise ValueError("Invalid keyword " + item)
 
-        self._data = items
 
     def extract(self):
         """

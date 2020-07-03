@@ -186,9 +186,7 @@ class SPowderSemiEmpiricalCalculator(object):
         data.update({"frequencies": self._frequencies})
 
         # put data to SData object
-        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set_bin_width(width=self._bin_width)
-        s_data.set(items=data)
+        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form, bin_width=self._bin_width, data=data)
 
         return s_data
 
@@ -565,9 +563,8 @@ class SPowderSemiEmpiricalCalculator(object):
             # reduce the data which is loaded to only this data which is required by the user
             data["datasets"]["data"] = temp_data
 
-        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set_bin_width(width=self._bin_width)
-        s_data.set(items=data["datasets"]["data"])
+        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form,
+                             bin_width=self._bin_width, data=data["datasets"]["data"])
 
         return s_data
 
