@@ -6,28 +6,42 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 import numbers
-from typing import Any, Dict, List, Optional, overload, Sequence
+from typing import Any, Dict, List, Optional, overload, Union
 import re
 import numpy as np
 import abins
 
 
 class AtomsData(collections.abc.Sequence):
-    def __init__(self, atoms_data: Sequence[Dict[str, Any]]) -> None:
+    def __init__(self, atoms_data: Dict[str, Dict[str, Any]]) -> None:
 
         # Make a map matching int indices to atoms_data keys
         test = re.compile(r'^atom_(\d+)$')
-        atom_keys = {int(test.match(key).groups()[0]): key for key in atoms_data if test.match(key)}
-        sorted_atom_keys = [atom_keys[index] for index in sorted(atom_keys)]
+        def _get_index_if_atom(label: str) -> Union[int, None]:
+            match = test.match(label)
+            if match is None:
+                return None
+            else:
+                return int(match.groups()[0])
+
+        all_labels = list(atoms_data.keys())
+        # Collect integer keys with corresponding string 'labels'
+        # i.e. {0: 'atom_0', 1: 'atom_1', ...}
+        atom_labels_by_index = {index: label
+                                for index, label in zip(map(_get_index_if_atom, all_labels),
+                                                        all_labels)
+                                if index is not None}
+
+        sorted_atom_keys = [atom_labels_by_index[index] for index in sorted(atom_labels_by_index)]
         n_atoms = len(sorted_atom_keys)
 
         # Check that indices run up from zero with no gaps
-        if set(atom_keys) != set(range(len(atom_keys))):
+        if set(atom_labels_by_index) != set(range(len(atom_labels_by_index))):
             raise ValueError('Missing some atom data. Only these entries were found: \n'
                              '{}. key format must be "atom_I" '
                              'where I is count starting from zero.'.format('\n'.join(sorted_atom_keys)))
 
-        # Store in a list. Indices should correspond to input keys if the above test passed.
+        # Now we can drop these string keys and store as a list with usual indices [{Atom0}, {Atom1}, ...]
         self._data = [self._check_item(atoms_data[key], n_atoms=n_atoms) for key in sorted_atom_keys]
 
     @staticmethod

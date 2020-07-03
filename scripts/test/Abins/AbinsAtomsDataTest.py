@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -22,6 +22,9 @@ class AtomsDataTest(unittest.TestCase):
         self.assertEqual([self._good_data["atom_0"],
                           self._good_data["atom_1"]],
                          self._tester[0:])
+
+    def test_len(self):
+        self.assertEqual(len(self._tester), len(self._good_data))
 
     def test_wrong_sort(self):
         # too large
@@ -113,7 +116,6 @@ class AtomsDataTest(unittest.TestCase):
             AtomsData(data)
 
     def test_good_extract(self):
-
         atoms_data = AtomsData(self._good_data)
         data = atoms_data.extract()
 
