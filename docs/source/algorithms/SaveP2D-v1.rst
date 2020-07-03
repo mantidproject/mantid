@@ -15,12 +15,12 @@ Input
 This algorithm can be used to create a powder pattern 2d (".p2d") output file as useable for 
 multidimensional Rietveld refinements. 
 The input for this algorithm needs to be a 2D workspace containing information about dSpacing and 
-dSpacingPerpendicular. A 2D workspace can be created using the :ref:`Bin2DPowderDiffraction 
-<Bin2DPowderDiffraction>` algorithm. 
-The input values removeNaN and removeNegatives control whether intensity values that are negative 
+dSpacingPerpendicular. A 2D workspace can be created using the :ref:`Bin2DPowderDiffraction
+<algm-Bin2DPowderDiffraction>` algorithm. 
+The input values ``removeNaN`` and ``removeNegatives`` control whether intensity values that are negative 
 or NaN, respectively, are automatically removed from the dataset. 
-RemoveNegatives also removes intensities equal to zero.
-Turning cutDdata on, allows to cut the measuring data to the specified ranges of 
+``RemoveNegatives`` also removes intensities equal to zero.
+Turning ``cutDdata`` on, allows to cut the measuring data to the specified ranges of 
 theta, lambda, dSpacing and dSpacingPerpendicular. 
 
 Output
