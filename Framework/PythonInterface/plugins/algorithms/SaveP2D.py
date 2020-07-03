@@ -1,36 +1,41 @@
 import numpy as np
-import os, sys, math
+import sys
+import math
 from scipy.special import lambertw
 from mantid.kernel import *
 from mantid.api import *
 
+
 class SaveP2D(DistributedDataProcessorAlgorithm):
-    
+
     def category(self):
         return 'Tools//Algorithms'
-    
+
     def summary(self):
         """
         summary of the algorithm
         :return:
         """
         return "The algorithm used to create a multidimensional '.p2d' file from a 2D workspace."
-        
+
     def name(self):
         return "SaveP2d"
-        
+
     def seeAlso(self):
         return [ "PowderReduceP2D", "Bin2DPowderDiffraction"]
-        
+
     def PyInit(self):
         # Input file
         self.declareProperty(WorkspaceProperty('Workspace', '', direction = Direction.Input), doc = 'Workspace that should be used.')
         # Output File
-        self.declareProperty(FileProperty('OutputFile', '', action = FileAction.Save, direction = Direction.Input), doc = 'Output File for ".p2d" Data.')
+        self.declareProperty(FileProperty('OutputFile', '', action = FileAction.Save, direction = Direction.Input),
+            doc = 'Output File for ".p2d" Data.')
         # Manipulating Data ranges
         self.declareProperty('RemoveNaN', True, direction = Direction.Input, doc = 'Remove DataPoints with NaN as intensity value')
-        self.declareProperty('RemoveNegatives', True, direction = Direction.Input, doc = 'Remove data points with negative intensity values')
-        self.declareProperty('CutData', False, direction = Direction.Input, doc = 'Use the following inputs to limit data in Theta, lambda, d and dp')
+        self.declareProperty('RemoveNegatives', True, direction = Direction.Input,
+            doc = 'Remove data points with negative intensity values')
+        self.declareProperty('CutData', False, direction = Direction.Input,
+            doc = 'Use the following inputs to limit data in Theta, lambda, d and dp')
         self.declareProperty('tthMin', 50, direction = Direction.Input, doc = 'Minimum  for tth values')
         self.declareProperty('tthMax', 120, direction = Direction.Input, doc = 'Maximum  for tth values')
         self.declareProperty('lambdaMin', 0.3, direction = Direction.Input, doc = 'Minimum  for lambda values')
@@ -40,13 +45,13 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         self.declareProperty('dpMin', 0.48, direction = Direction.Input, doc = 'Minimum  for dp values')
         self.declareProperty('dpMax', 1.76, direction = Direction.Input, doc = 'Maximum  for dp values')
 
-# Create output file 
+# Create output file
     def PyExec(self):
         # Workspace name
         Workspace = self.getPropertyValue('Workspace')
-        
+
         wo_real = lambda x: np.real(lambertw(np.exp(x), 0))
-        
+
         # Create Output File
         OutFile = self.getPropertyValue('OutputFile')+'.p2d'
         # Load Workspace data
@@ -61,7 +66,8 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
             # Create File header with additional information
             of.write('#Title: '+Data.getTitle()+"\n")
             of.write('#Inst: '+Data.getInstrument().getName()+".prm\n")
-            of.write('#Binning: ddperp'+form.format(Data.getDimension(0).getBinWidth())+' '+form.format(Data.getDimension(1).getBinWidth())+"\n")
+            binning = form.format(Data.getDimension(0).getBinWidth())+' '+form.format(Data.getDimension(1).getBinWidth())+"\n"
+            of.write('#Binning: ddperp'+binning)
             of.write('#Bank: 1\n')
             of.write('#2theta   lambda   d-value   dp-value   counts\n')
             # Get number of bins
@@ -70,12 +76,13 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
             pr = Progress(None, start=0.0,end=1.0, nreports=ndp)
             last_dp = -1
             last_d = -1
-            
+
             # iterate over all dPerpendicular cuts
             for cdp in range(ndp):
                 dp = Data.getDimension(1).getX(cdp)
                 # skip if no new dPerpendicular cut
-                if (dp == last_dp): continue
+                if (dp == last_dp): 
+                    continue
                 # create value of bin center from left and right border
                 dp_center = (dp + Data.getDimension(1).getX(cdp+1))/2.
                 last_dp = dp
@@ -85,15 +92,16 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                 for cd in range(Data.getDimension(0).getNBins()):
                     d = Data.dataX(cdp)[cd]
                     # skip if d is the same as before
-                    if (d == last_d): break
+                    if (d == last_d):
+                        break
                     last_d = d
                     Y = Data.dataY(cdp)[cd]
                     # skip NaN values for intensity if option is activated
-                    if self.getPropertyValue('RemoveNaN') == 1:
+                    if self.getPropertyValue('RemoveNaN') == '1':
                         if math.isnan(Y):
                             continue
                     # skip intensities <= 0 if option is selected
-                    if self.getPropertyValue('RemoveNegatives') == 1:
+                    if self.getPropertyValue('RemoveNegatives') == '1':
                         if Y <= 0:
                             continue
                     # calculate 2theta and lambda from d and dPerpendicular
@@ -121,5 +129,6 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                         of.write(lform.format(thkl, lhkl, d, dp_center, Y))
             of.close()
             print('\n\nExported: ' + OutFile + '\n')
-        
+
+
 AlgorithmFactory.subscribe(SaveP2D)
