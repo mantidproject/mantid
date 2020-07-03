@@ -56,7 +56,7 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c) {
  */
 void ThreadSafeLogStreamBuf::accumulate(const std::string &message) {
   std::lock_guard<std::mutex> lock(m_mutex);
-  m_accumulator += message;
+  m_accumulator[Poco::Thread::currentTid()] += message;
 }
 
 /**
@@ -64,9 +64,9 @@ void ThreadSafeLogStreamBuf::accumulate(const std::string &message) {
  * @returns The accumulated message
  */
 std::string ThreadSafeLogStreamBuf::flush() {
-  const std::string returnValue = m_accumulator;
+  const std::string returnValue = m_accumulator[Poco::Thread::currentTid()];
   std::lock_guard<std::mutex> lock(m_mutex);
-  m_accumulator = "";
+  m_accumulator[Poco::Thread::currentTid()] = "";
   return returnValue;
 }
 

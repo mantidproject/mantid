@@ -55,8 +55,8 @@ private:
 private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
-  /// Store a global accummulator of messages
-  std::string m_accumulator;
+  /// Store a map of thread indices to accummulators of messages
+  std::map<Poco::Thread::TID, std::string> m_accumulator;
   /// mutex protecting logstream
   std::mutex m_mutex;
 };
