@@ -45,7 +45,7 @@ class DrillAlgorithmObserver(AlgorithmObserver):
         self.error = True
         self.errorMsg = msg
 
-    def progressHandle(self, p, msg):
+    def progressHandle(self, p, msg, estimatedTime, progressPrecision):
         """
         Called when the observed algo reports its progress.
 
