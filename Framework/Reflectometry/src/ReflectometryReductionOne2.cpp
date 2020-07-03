@@ -885,7 +885,7 @@ void ReflectometryReductionOne2::findWavelengthMinMax(
       m_wavelengthMax = projectedMax;
       first = false;
     } else {
-      m_wavelengthMin = std::min(m_wavelengthMax, projectedMin);
+      m_wavelengthMin = std::min(m_wavelengthMin, projectedMin);
       m_wavelengthMax = std::max(m_wavelengthMax, projectedMax);
     }
   }
