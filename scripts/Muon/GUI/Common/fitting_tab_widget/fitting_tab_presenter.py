@@ -67,6 +67,8 @@ class FittingTabPresenter(object):
 
     @selected_data.setter
     def selected_data(self, selected_data):
+        # import pydevd
+        # pydevd.settrace('localhost', port=5555, stdoutToServer=True, stderrToServer=True)
         if self._selected_data == selected_data:
             return
 
@@ -93,6 +95,8 @@ class FittingTabPresenter(object):
             self.manual_selection_made = True
 
     def handle_new_data_loaded(self):
+        # import pydevd
+        # pydevd.settrace('localhost', port=5555, stdoutToServer=True, stderrToServer=True)
         self.manual_selection_made = False
         self.update_selected_workspace_list_for_fit()
 
@@ -415,6 +419,8 @@ class FittingTabPresenter(object):
         self.view.undo_fit_button.setEnabled(False)
 
     def update_selected_workspace_list_for_fit(self):
+        # import pydevd
+        # pydevd.settrace('localhost', port=5555, stdoutToServer=True, stderrToServer=True)
         if self.view.is_simul_fit():
             if self.manual_selection_made:
                 return  # if it is a manual selection then the data should not change
@@ -423,6 +429,8 @@ class FittingTabPresenter(object):
             self.selected_data = self.get_workspace_selected_list()
 
     def get_workspace_selected_list(self):
+        # import pydevd
+        # pydevd.settrace('localhost', port=5555, stdoutToServer=True, stderrToServer=True)
         if isinstance(self.context, FrequencyDomainAnalysisContext):
             freq = self.context._frequency_context.plot_type
         else:

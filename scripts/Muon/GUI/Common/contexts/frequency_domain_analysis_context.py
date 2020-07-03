@@ -32,8 +32,6 @@ class FrequencyDomainAnalysisContext(MuonContext):
 
     def get_names_of_frequency_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', phasequad=False, frequency_type="None"):
-        if self._frequency_context is None:
-            return []
         group, pair = self.get_group_and_pair(group_and_pair)
         run_list = self.get_runs(runs)
         names = self._frequency_context.get_frequency_workspace_names(
