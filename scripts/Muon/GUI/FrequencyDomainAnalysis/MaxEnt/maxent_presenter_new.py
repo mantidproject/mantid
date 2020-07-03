@@ -42,6 +42,7 @@ class MaxEntPresenter(object):
         self.phase_table_observer = GenericObserver(self.update_phase_table_options)
         self.calculation_finished_notifier = GenericObservable()
         self.calculation_started_notifier = GenericObservable()
+        self.update_phase_table_options()
 
     @property
     def widget(self):
@@ -52,7 +53,7 @@ class MaxEntPresenter(object):
 
     def clear(self):
         self.view.addItems([])
-        self.view.update_phase_table_combo([])
+        self.view.update_phase_table_combo(['Construct'])
 
     # functions
     def getWorkspaceNames(self):
