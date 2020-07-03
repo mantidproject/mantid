@@ -331,7 +331,6 @@ class SliceViewerDataView(QWidget):
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
 
-        self.canvas.setFocus()
         self.canvas.draw_idle()
 
     def export_region(self, limits, cut):
@@ -467,6 +466,7 @@ class SliceViewerDataView(QWidget):
     def mouse_release(self, event):
         if event.inaxes != self.ax:
             return
+        self.canvas.setFocus()
         if event.button == 1:
             self._image_info_tracker.on_cursor_at(event.xdata, event.ydata)
         if event.button == 3:
