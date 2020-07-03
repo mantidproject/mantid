@@ -181,13 +181,13 @@ class SPowderSemiEmpiricalCalculator(object):
 
         :returns: object of type SData with 1D dynamical structure factors for the powder case
         """
-        # calculate data
         data = self._calculate_s_powder_over_k()
-        data.update({"frequencies": self._frequencies})
 
-        # put data to SData object
-        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form, bin_width=self._bin_width, data=data)
-
+        s_data = abins.SData(temperature=self._temperature,
+                             sample_form=self._sample_form,
+                             bin_width=self._bin_width,
+                             frequencies=self._frequencies,
+                             data=data)
         return s_data
 
     def _calculate_s_powder_over_atoms(self, q_indx=None):
@@ -539,6 +539,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :returns: object of type SData.
         """
         data = self._clerk.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
+        frequencies = data["datasets"]["data"]["frequencies"]
+
         if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
             raise ValueError("User requested a larger number of quantum events to be included in the simulation "
                              "then in the previous calculations. S cannot be loaded from the hdf file.")
@@ -549,7 +551,8 @@ class SPowderSemiEmpiricalCalculator(object):
                          S Data from hdf file which corresponds only to requested quantum order events will be
                          loaded.""")
 
-            temp_data = {"frequencies": data["datasets"]["data"]["frequencies"]}
+            # temp_data = {"frequencies": data["datasets"]["data"]["frequencies"]}
+            atoms_s = {}
 
             # load atoms_data
             n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
@@ -561,10 +564,15 @@ class SPowderSemiEmpiricalCalculator(object):
                     temp_data["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
 
             # reduce the data which is loaded to only this data which is required by the user
-            data["datasets"]["data"] = temp_data
+
+            data["datasets"]["data"] = atoms_s
+            data["datasets"]["data"].update({"frequencies": frequencies})
+        else:
+            atoms_s = {key: value for key, value in data["datasets"]["data"].items()
+                       if key != "frequencies"}
 
         s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form,
-                             bin_width=self._bin_width, data=data["datasets"]["data"])
+                             bin_width=self._bin_width, data=atoms_s, frequencies=frequencies)
 
         return s_data
 
