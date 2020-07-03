@@ -11,11 +11,15 @@ from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model impor
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
 from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
 from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from mantid.dataobjects import Workspace2D
+
+MUON_ANALYSIS_DEFAULT_X_RANGE = [0.0, 15.0]
+FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE = [0.0, 1000.0]
 
 
 class PlotWidgetPresenterCommon(HomeTabSubWidget):
@@ -49,6 +53,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
         self.update_view_from_model()
 
+        self.data_plot_range = MUON_ANALYSIS_DEFAULT_X_RANGE
+        self.fitting_plot_range = FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE if isinstance(self.context, FrequencyDomainAnalysisContext) else MUON_ANALYSIS_DEFAULT_X_RANGE
+
     def update_view_from_model(self):
         """"Updates the view based on data in the model """
         plot_types = self._model.get_plot_types()
@@ -80,8 +87,6 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         """
         Handles the group and pairs calculation finishing by plotting the loaded groups and pairs.
         """
-        # import pydevd
-        # pydevd.settrace('localhost', port=5555, stdoutToServer=True, stderrToServer=True)
         if self._view.is_tiled_plot():
             tiled_by = self._view.tiled_by()
             keys = self._model.create_tiled_keys(tiled_by)
@@ -106,10 +111,15 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view.set_plot_mode(str(plot_mode))
         if plot_mode == PlotMode.Data:
             self._view.enable_plot_type_combo()
+            self.update_plot()
+            self.fitting_plot_range = self._figure_presenter.get_plot_x_range()
+            self._figure_presenter.set_plot_range(self.data_plot_range)
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
+            self.update_plot()
+            self.data_plot_range = self._figure_presenter.get_plot_x_range()
+            self._figure_presenter.set_plot_range(self.fitting_plot_range)
 
-        self.update_plot()
         self._figure_presenter.autoscale_y_axes()
 
     def handle_plot_mode_changed_by_user(self):
