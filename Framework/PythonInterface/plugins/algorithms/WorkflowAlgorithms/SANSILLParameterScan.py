@@ -32,13 +32,12 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
     observable = None
     pixel_y_min = None
     pixel_y_max = None
-    peak_order = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
 
     def summary(self):
-        return 'yfht'
+        return 'Integrate SANS scan data along a parameter'
 
     def seeAlso(self):
         return []
@@ -53,21 +52,28 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.sensitivity = self.getPropertyValue('SensitivityMaps')
         self.default_mask = self.getPropertyValue('DefaultMaskFile')
         self.mask = self.getPropertyValue('MaskFiles')
-        self.output = self.getPropertyValue('OutputWorkspace')
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
         self.output2D = self.getPropertyValue('Output2D')
         self.observable = self.getPropertyValue('Observable')
         self.pixel_y_min = self.getProperty('PixelYMin').value
         self.pixel_y_max = self.getProperty('PixelYMax').value
-        self.peak_order = self.getProperty('PeakOrder').value
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
-    def PyInit(self):
+    def cleanUp(self):
+        mtd["__joined"].delete()
+        mtd["masked"].delete()
+        mtd["sorted"].delete()
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
-                             doc='The output workspace containing reduced data.')
+    def checkPixelY(self, height):
+        if self.pixel_y_min > self.pixel_y_max:
+            self.pixel_y_min, self.pixel_y_max = self.pixel_y_max, self.pixel_y_min
+
+        if self.pixel_y_max > height:
+            self.pixel_y_max = height
+            logger.warning("PixelYMax value is too high. Reduced to {0}.".format(self.pixel_y_max))
+
+    def PyInit(self):
 
         self.declareProperty(WorkspaceProperty('Output2D', '', direction=Direction.Output),
                              doc="The output workspace containing the 2D reduced data.")
@@ -115,12 +121,13 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
                              doc='Sample thickness [cm]')
 
-        self.declareProperty('Observable', 'Omega.value', doc='Parameter from the sample logs along which the scan is made')
+        self.declareProperty('Observable', 'Omega.value',
+                             doc='Parameter from the sample logs along which the scan is made')
 
-        self.declareProperty('PixelYMin', 0, validator=IntBoundedValidator(lower=0), doc='Minimal y-index taken in the integration')
-        self.declareProperty('PixelYMax', 320, validator=IntBoundedValidator(lower=0), doc='Maximal y-index taken in the integration')
-        self.declareProperty('PeakOrder', 40, validator=IntBoundedValidator(lower=0),
-                             doc='Parameter of the argrelmax function, roughly equivalent to the minimum expected width of the peaks.')
+        self.declareProperty('PixelYMin', 0, validator=IntBoundedValidator(lower=0),
+                             doc='Minimal y-index taken in the integration')
+        self.declareProperty('PixelYMax', 320, validator=IntBoundedValidator(lower=0),
+                             doc='Maximal y-index taken in the integration')
 
         self.setPropertyGroup('SensitivityMaps', 'Options')
         self.setPropertyGroup('DefaultMaskFile', 'Options')
@@ -130,7 +137,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.setPropertyGroup('Observable', 'Options')
         self.setPropertyGroup('PixelYMin', 'Options')
         self.setPropertyGroup('PixelYMax', 'Options')
-        self.setPropertyGroup('PeakOrder', "Options")
 
     def PyExec(self):
 
@@ -140,7 +146,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         Load(Filename=self.sample, OutputWorkspace=load_ws_name)
         ConjoinXRuns(InputWorkspaces=load_ws_name, OutputWorkspace="__joined", SampleLogAsXAxis=self.observable)
 
-        sort_x_axis_output = 'sorted_ws'
+        sort_x_axis_output = 'sorted'
         SortXAxis(InputWorkspace="__joined", OutputWorkspace="__" + sort_x_axis_output)
 
         load_sensitivity, sens_input = needs_loading(self.sensitivity, 'Sensitivity')
@@ -176,15 +182,14 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              AbsorberInputWorkspace=absorber_name,
                              CacheSolidAngle=True,
                              NormaliseBy=self.normalise)
-
-        # nothing is provided for the sample name, so if it fails to find the already loaded and semi processed workspaces,
-        # it will not reduce
+        # even if the samples are provided as arguments, the SANSILLReduction won't use them and rather take the already
+        # processed ws
         SANSILLReduction(Run=self.sample,
                          AbsorberInputWorkspace=absorber_name,
                          ContainerInputWorkspace=container_name,
                          SampleThickness=self.thickness,
-                         # SensivityMaps=sens_input,
-                         # SensivityOutputWorkspace=self.output_sens,
+                         SensitivityInputWorkspace=sens_input,
+                         SensitivityOutputWorkspace=self.output_sens,
                          MaskedInputWorkspace=mask_input,
                          DefaultMaskedInputWorkspace=default_mask_input,
                          NormaliseBy=self.normalise,
@@ -199,39 +204,67 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             width, height = 100, 100
             logger.warning("Width or height not found for the instrument. {0}, {1} assumed.".format(width, height))
 
+        self.checkPixelY(height)
         grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)
-        GroupDetectors(InputWorkspace=sort_x_axis_output, OutputWorkspace="grouped", GroupingPattern=grouping)
-        ConvertSpectrumAxis(InputWorkspace="grouped", OutputWorkspace=self.output2D, Target="Theta")
+        GroupDetectors(InputWorkspace=sort_x_axis_output,
+                       OutputWorkspace=self.output2D,
+                       GroupingPattern=grouping,
+                       Behaviour="Average")
+        Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
 
-        integration_1d = '_integration_1d'
-        Transpose(InputWorkspace=self.output2D, OutputWorkspace=integration_1d)
-        GroupDetectors(InputWorkspace=integration_1d, OutputWorkspace=integration_1d, WorkspaceIndexList="0-260")
-        # TODO non absolute wkspindex list
+        if instrument.getName() == 'D16':
+            ws = mtd[self.output2D]
+            convert_spectrum_to_theta(ws, detector)
+        else:
+            ConvertSpectrumAxis(InputWorkspace=self.output2D,
+                                OutputWorkspace=self.output2D,
+                                Target="theta")
 
-        from scipy.signal import argrelmax
-        data = mtd[integration_1d].extractY()[0]
-
-        peaks = argrelmax(data, order=self.peak_order)[0]
-
-        Transpose(InputWorkspace=integration_1d, OutputWorkspace=integration_1d)
-        names = []
-        for index, peak in enumerate(peaks):
-            name = "peak_" + str(index)
-            names.append(name)
-            peak = int(peak)
-            selection_range_start = max(peak - self.peak_order // 2, 0)
-            selection_range_end = min(peak + self.peak_order // 2, 260)
-            CropWorkspace(InputWorkspace=integration_1d, OutputWorkspace=name, StartWorkspaceIndex=selection_range_start,
-                          EndWorkspaceIndex=selection_range_end)
-            Transpose(InputWorkspace=name, OutputWorkspace=name)
-
-        GroupWorkspaces(InputWorkspaces=names, OutputWorkspace=self.output)
-
-        self.setProperty('OutputWorkspace', mtd[self.output])
         self.setProperty('Output2D', mtd[self.output2D])
+        self.cleanUp()
+
+
+def convert_spectrum_to_theta(ws, detector):
+    """
+    Given a workspace with the X-axis in pixels, compute the 2 theta equivalent axis and set it as the new one,
+    in the case of a flat D16 detector
+
+    :param ws: the workspace to convert
+    :param detector: the detector object associated with the instrument
+    """
+    if "x-pixel-size" in detector.getParameterNames():
+        pixel_width = float(detector.getNumberParameter('x-pixel-size')[0])
+    else:
+        pixel_width = 1
+        logger.warning("Pixel width not found for the instrument. {0} assumed.".format(pixel_width))
+
+    run = ws.getRun()
+    if run.hasProperty("Gamma.value"):
+        theta_offset = run.getProperty("Gamma.value").value
+    else:
+        theta_offset = 0
+        logger.warning("Detector angle not found. {0} assumed.".format(theta_offset))
+
+    from numpy import arctan2, pi
+    l2 = run.getPropertyAsSingleValue("L2")
+    new_axis = [arctan2((i - 160) * pixel_width, 1000 * l2) * 180 / pi + theta_offset
+                for i in range(ws.extractY()[0].size)]
+
+    for i in range(ws.spectrumInfo().size()):
+        ws.setX(i, new_axis)
+
+    ws.getAxis(0).setUnit("degrees")
 
 
 def create_detector_grouping(y_min, y_max, detector_width, detector_height):
+    """
+    Create the pixel grouping for the detector. Shape is assumed to be D16's.
+    The pixel grouping consists of the vertical columns of pixels of the detector.
+    :param y_min: index of the first line to take on each column.
+    :param y_max: index of the last line to take on each column.
+    :param detector_width: the total number of column of pixel on the detector.
+    :param detector_height: the total number of lines of pixel on the detector.
+    """
     grouping = []
     for i in range(detector_width):
         grouping.append(str(i * detector_height + y_min) + "-" + str(i * detector_height + y_max - 1))
