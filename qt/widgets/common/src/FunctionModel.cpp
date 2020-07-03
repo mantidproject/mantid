@@ -140,7 +140,9 @@ void FunctionModel::setParameter(const QString &paramName, double value) {
   if (!fun) {
     throw std::logic_error("Function is undefined.");
   }
-  fun->setParameter(paramName.toStdString(), value);
+  if (fun->hasParameter(paramName.toStdString())) {
+    fun->setParameter(paramName.toStdString(), value);
+  }
 }
 
 void FunctionModel::setParameterError(const QString &paramName, double value) {
