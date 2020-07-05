@@ -6,6 +6,7 @@ PyYAML==5.3.1
 qtconsole==4.7.3
 qtpy==1.9.0
 mock==4.0.2
+notebook==6.0.3
 numpy==1.18.4
 requests==2.23.0
 scipy==1.4.1
