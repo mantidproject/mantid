@@ -90,6 +90,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
 # Create output file
 
     def PyExec(self):
+
         def wo_real(x):
             return np.real(lambertw(np.exp(x), 0))
 
@@ -154,9 +155,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                             continue
                     # calculate 2theta and lambda from d and dPerpendicular
                     dsq = d**2
-                    lhkl = np.sqrt(4. * dsq -
-                                   wo_real(4. * dsq - np.log(0.25 / dsq) -
-                                           dp_center**2))
+                    lhkl = np.sqrt(4. * dsq - wo_real(4. * dsq - np.log(0.25 / dsq) - dp_center**2))
                     thkl = 2. * np.arcsin(lhkl / 2. / d) / np.pi * 180.
                     # skip Values outside of specified data ranges if the option is activated
                     if self.getPropertyValue('CutData') == '1':
@@ -189,5 +188,6 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                         of.write(lform.format(thkl, lhkl, d, dp_center, Y))
             of.close()
             print('\n\nExported: ' + OutFile + '\n')
+
 
 AlgorithmFactory.subscribe(SaveP2D)
