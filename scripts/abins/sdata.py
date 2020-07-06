@@ -4,37 +4,40 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import copy
+from typing import Optional, Union
 import numpy as np
+from numbers import Real
 
 from mantid.kernel import logger as mantid_logger
-
 import abins
 from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
 
 
 class SData:
     """
-    Class for storing S(Q, omega)
+    Class for storing S(Q, omega) with relevant metadata
     """
 
-    def __init__(self, *, temperature: float, sample_form: str,
-                 bin_width: float, data: dict, frequencies: np.ndarray
+    def __init__(self, *,
+                 data: dict, frequencies: np.ndarray,
+                 temperature: Optional[float] = None,
+                 sample_form: str = '',
                  ) -> None:
         super().__init__()
 
-        if not isinstance(temperature, (float, int)) and temperature > 0:
-            raise ValueError("Invalid value of temperature.")
-        self._temperature = float(temperature)
+        if temperature is None:
+            self._temperature = None
+        elif isinstance(temperature, Real):
+            self._temperature = float(temperature)
+        else:
+            raise TypeError("Temperature must be a real number or None")
 
-        if sample_form in ALL_SAMPLE_FORMS:
+        if isinstance(sample_form, str):
             self._sample_form = sample_form
         else:
-            raise ValueError("Invalid sample form %s" % sample_form)
+            raise TypeError("Sample form must be a string. Use '' (default) if unspecified.")
 
-        self._bin_width = bin_width
-
-        self._frequencies = frequencies
+        self._frequencies = np.asarray(frequencies, dtype=FLOAT_TYPE)
         self._check_frequencies()
 
         self._data = data
@@ -43,19 +46,44 @@ class SData:
     def get_frequencies(self) -> np.ndarray:
         return self._frequencies.copy()
 
-    def get_bin_width(self) -> float:
-        return copy.copy(self._bin_width)
+    def get_temperature(self) -> Union[float, None]:
+        return self._temperature
+
+    def get_sample_form(self) -> str:
+        return self._sample_form
+
+    def get_bin_width(self) -> Union[float, None]:
+        """Check frequency series and return the bin size
+
+        If the frequency series does not have a consistent step size, return None
+        """
+
+        self._check_frequencies()
+        step_size = (self._frequencies[-1] - self._frequencies[0]) / (self._frequencies.size - 1)
+
+        if np.allclose(step_size, self._frequencies[1:] - self._frequencies[:-1]):
+            return step_size
+        else:
+            return None
+
+    def check_finite_temperature(self):
+        """Raise an error if Temperature is not greater than zero"""
+        temperature = self.get_temperature()
+        if not (isinstance(temperature, (float, int)) and temperature > 0):
+            raise ValueError("Invalid value of temperature.")
+
+    def check_known_sample_form(self):
+        """Raise an error if sample form is not known to Abins"""
+        sample_form = self.get_sample_form()
+        if sample_form not in ALL_SAMPLE_FORMS:
+            raise ValueError(
+                f"Invalid sample form {sample_form}: known sample forms are {ALL_SAMPLE_FORMS}")
 
     def _check_frequencies(self):
-        step = self.get_bin_width()
-        bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
-                         stop=abins.parameters.sampling['max_wavenumber'] + step,
-                         step=step,
-                         dtype=FLOAT_TYPE)
-
-        freq_points = bins[:-1] + (step / 2)
-        if not np.allclose(self.get_frequencies(), freq_points):
-            raise ValueError("Invalid frequencies, these should correspond to the mid points of the resampled bins.")
+        # Check frequencies are ordered low to high
+        if not np.allclose(np.sort(self._frequencies),
+                           self._frequencies):
+            raise ValueError("Frequencies not sorted low to high")
 
     def _check_data(self):
         """Check data set is consistent and has correct types"""

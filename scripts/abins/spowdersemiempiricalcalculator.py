@@ -93,7 +93,6 @@ class SPowderSemiEmpiricalCalculator(object):
                                  QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        self._bin_width = bin_width  # This is only here to store in s_data. Is that necessary/useful?
         self._bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
                                stop=abins.parameters.sampling['max_wavenumber'] + bin_width,
                                step=bin_width,
@@ -185,7 +184,6 @@ class SPowderSemiEmpiricalCalculator(object):
 
         s_data = abins.SData(temperature=self._temperature,
                              sample_form=self._sample_form,
-                             bin_width=self._bin_width,
                              frequencies=self._frequencies,
                              data=data)
         return s_data
@@ -388,7 +386,6 @@ class SPowderSemiEmpiricalCalculator(object):
             rebinned_broad_spectrum = np.zeros_like(self._frequencies)
 
         # multiply by k-point weight and scaling constant
-        # factor = self._weight / self._bin_width
         factor = self._weight
         rebinned_broad_spectrum = rebinned_broad_spectrum * factor
         return local_freq, local_coeff, rebinned_broad_spectrum
@@ -551,28 +548,30 @@ class SPowderSemiEmpiricalCalculator(object):
                          S Data from hdf file which corresponds only to requested quantum order events will be
                          loaded.""")
 
-            # temp_data = {"frequencies": data["datasets"]["data"]["frequencies"]}
             atoms_s = {}
 
             # load atoms_data
             n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
             for i in range(n_atom):
-                temp_data["atom_%s" % i] = {"s": dict()}
+                atoms_s["atom_%s" % i] = {"s": dict()}
                 for j in range(FUNDAMENTALS, self._quantum_order_num + S_LAST_INDEX):
 
                     temp_val = data["datasets"]["data"]["atom_%s" % i]["s"]["order_%s" % j]
-                    temp_data["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
+                    atoms_s["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
 
             # reduce the data which is loaded to only this data which is required by the user
 
             data["datasets"]["data"] = atoms_s
-            data["datasets"]["data"].update({"frequencies": frequencies})
+
         else:
             atoms_s = {key: value for key, value in data["datasets"]["data"].items()
                        if key != "frequencies"}
 
         s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form,
-                             bin_width=self._bin_width, data=atoms_s, frequencies=frequencies)
+                             data=atoms_s, frequencies=frequencies)
+
+        if s_data.get_bin_width is None:
+            raise Exception("Loaded data does not have consistent frequency spacing")
 
         return s_data
 
