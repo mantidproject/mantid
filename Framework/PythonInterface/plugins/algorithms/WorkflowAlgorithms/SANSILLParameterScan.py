@@ -62,7 +62,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
     def cleanUp(self):
         mtd["__joined"].delete()
-        mtd["masked"].delete()
         mtd["sorted"].delete()
 
     def checkPixelY(self, height):
