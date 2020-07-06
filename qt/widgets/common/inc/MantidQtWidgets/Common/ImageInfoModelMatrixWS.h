@@ -10,7 +10,9 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
+#include <tuple>
 
 namespace Mantid {
 namespace Geometry {
@@ -25,33 +27,38 @@ class SpectrumInfo;
 namespace MantidQt {
 namespace MantidWidgets {
 
+/**
+ * Model to support looking up information about a given point with a
+ * MatrixWorkspace
+ */
 class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMatrixWS
     : public ImageInfoModel {
 
 public:
-  ImageInfoModelMatrixWS();
+  /// Return the number of information items this model will produce
+  static constexpr int itemCount() noexcept { return 13; }
 
-  /** Creates a list with information about the coordinates in the workspace.
-  @param x: x data coordinate
-  @param specNum: the spectrum number of the coordinate
-  @param signal: the signal value at x, y
-  @return a vector containing pairs of strings
-  */
-  std::vector<QString> getInfoList(const double x, const double specNum,
-                                   const double signal) override;
+  ImageInfoModelMatrixWS(Mantid::API::MatrixWorkspace_sptr workspace);
 
-  void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
+  ImageInfoModel::ImageInfo info(const double x, const double y,
+                                 const double signal) const override;
 
 private:
-  void updateCachedWorkspaceInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
+  void setUnitsInfo(ImageInfoModel::ImageInfo *info, int infoIndex,
+                    const size_t wsIndex, const double x) const;
+  std::tuple<Mantid::Kernel::DeltaEMode::Type, double>
+  efixedAt(const size_t wsIndex) const;
+  void cacheWorkspaceInfo();
+  ImageInfoModel::ImageInfo::StringItems createItemNames() const;
 
+private:
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   const Mantid::API::SpectrumInfo *m_spectrumInfo;
   std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_source;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
-  double m_xMin;
-  double m_xMax;
+  double m_xMin, m_xMax;
+  QString m_xunit, m_yunit;
 };
 
 } // namespace MantidWidgets

@@ -18,17 +18,13 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMD : public ImageInfoModel {
 
 public:
   /** Creates a list with information about the coordinates in the workspace.
-  @param x: x data coordinate
-  @param y: y data coordinate
-  @param signal: the signal value at x, y
-  @return a vector containing pairs of strings
-  */
-  std::vector<QString> getInfoList(const double x, const double y,
-                                   const double signal) override;
-
-  void setWorkspace(const Mantid::API::Workspace_sptr &ws) override {
-    UNUSED_ARG(ws);
-  }
+   * @param x: x data coordinate
+   * @param y: y data coordinate
+   * @param signal: the signal value at x, y
+   * @return An ImageInfo object describing the point
+   */
+  ImageInfoModel::ImageInfo info(const double x, const double y,
+                                 const double signal) const override;
 };
 
 } // namespace MantidWidgets

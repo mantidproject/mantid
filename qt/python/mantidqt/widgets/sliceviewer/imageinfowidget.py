@@ -22,7 +22,7 @@ ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
 
 class ImageInfoTracker(CursorTracker):
-    def __init__(self, image: Union[AxesImage, QuadMesh], transpose_xy: False,
+    def __init__(self, image: Union[AxesImage, QuadMesh], transpose_xy: bool,
                  widget: ImageInfoWidget):
         """
         Update the image that the widget refers too.
@@ -42,7 +42,7 @@ class ImageInfoTracker(CursorTracker):
 
     def on_cursor_outside_axes(self):
         """Update the image table given the mouse has moved out of the image axes"""
-        self._widget.updateTable(DBLMAX, DBLMAX, DBLMAX)
+        self._widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
 
     # private api
 
@@ -62,7 +62,7 @@ class ImageInfoTracker(CursorTracker):
             if (0 <= i < arr.shape[0]) and (0 <= j < arr.shape[1]):
                 if self._transpose_xy:
                     ydata, xdata = xdata, ydata
-                self._widget.updateTable(xdata, ydata, arr[i, j])
+                self._widget.cursorAt(xdata, ydata, arr[i, j])
 
     def _on_cursor_at_mesh(self, xdata: float, ydata: float):
         """
@@ -75,4 +75,4 @@ class ImageInfoTracker(CursorTracker):
         """
         if self._image is None:
             return
-        self._widget.updateTable(xdata, ydata, DBLMAX)
+        self._widget.cursorAt(xdata, ydata, DBLMAX)

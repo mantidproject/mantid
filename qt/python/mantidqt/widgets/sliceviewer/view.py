@@ -70,7 +70,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setContentsMargins(0, 0, 0, 0)
         self.colorbar_layout.setSpacing(0)
 
-        self.image_info_widget = ImageInfoWidget(self.ws_type, self)
+        self.image_info_widget = ImageInfoWidget(self)
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
@@ -309,7 +309,7 @@ class SliceViewerDataView(QWidget):
         if self.image is not None:
             if self.line_plots_active:
                 self._line_plots.plotter.delete_line_plot_lines()
-            self.image_info_widget.updateTable(DBLMAX, DBLMAX, DBLMAX)
+            self.image_info_widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
             self.image.remove()
             self.image = None
 
