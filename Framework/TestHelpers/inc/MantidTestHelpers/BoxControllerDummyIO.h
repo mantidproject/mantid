@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -14,8 +14,7 @@
  *  than API (e.g. any algorithm or concrete workspace), even if via the
  *factory.
  *********************************************************************************/
-#ifndef MANTID_TESTHELPERS_BOXCONTROLLER_DUMMUY_IO_H
-#define MANTID_TESTHELPERS_BOXCONTROLLER_DUMMUY_IO_H
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IBoxControllerIO.h"
@@ -95,4 +94,3 @@ private:
   bool m_isOpened;
 };
 } // namespace MantidTestHelpers
-#endif

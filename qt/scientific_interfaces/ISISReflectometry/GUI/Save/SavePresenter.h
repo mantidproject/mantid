@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "IAsciiSaver.h"
@@ -41,6 +40,7 @@ public:
   void notifyAutoreductionResumed() override;
 
   // SaveViewSubscriber overrides
+  void notifySettingsChanged() override;
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
@@ -88,4 +88,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H */

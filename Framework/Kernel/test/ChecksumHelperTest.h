@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_CHECKSUMHELPERTEST_H_
-#define MANTID_KERNEL_CHECKSUMHELPERTEST_H_
+#pragma once
 
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/System.h"
@@ -75,7 +74,7 @@ public:
     Poco::File(filename).remove();
   }
 
-  void testGitSha1FromFileWithWindowsLineEndings() {
+  void testGitSha1FromFileWithWindowsLineEndingsFirstConvertsToLF() {
     const std::string filename(
         "ChecksumHelperTest_testGitSha1FromFileWithWindowsLineEndings.txt");
     const std::string data = "ChecksumHelperTest_"
@@ -89,6 +88,20 @@ public:
     Poco::File(filename).remove();
   }
 
+  void testGitSha1FromFileWithOldStyleMacLineEndingsDoesNotConvertToLF() {
+    const std::string filename(
+        "ChecksumHelperTest_testGitSha1FromFileWithOldStyleMacLineEndings.txt");
+    const std::string data = "ChecksumHelperTest_"
+                             "testGitSha1FromFileWithLinuxLineEndings\rTest "
+                             "this string out for size\r in a file";
+    createFile(filename, data);
+
+    std::string response = ChecksumHelper::gitSha1FromFile(filename);
+    TSM_ASSERT_EQUALS("The calculated git-hash is not as expected",
+                      "7b7e77332c1610df14fd26476d1601a22a34f11f", response);
+    Poco::File(filename).remove();
+  }
+
   void createFile(const std::string &fileName, const std::string &data) {
     // has to be saved as binary so it doesn't mess with line endings
     std::ofstream file(fileName.c_str(), std::ofstream::binary);
@@ -96,5 +109,3 @@ public:
     file.close();
   }
 };
-
-#endif /* MANTID_KERNEL_CHECKSUMHELPERTEST_H_ */

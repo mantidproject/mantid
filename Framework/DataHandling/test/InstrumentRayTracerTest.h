@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTRAYTRACERTEST_H_
-#define INSTRUMENTRAYTRACERTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -13,8 +12,8 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using Mantid::API::AnalysisDataService;
@@ -99,9 +98,9 @@ public:
   }
 
 private:
-  void showResults(Links &results, Instrument_const_sptr inst) {
+  void showResults(Links &results, const Instrument_const_sptr &inst) {
     Links::const_iterator resultItr = results.begin();
-    for (; resultItr != results.end(); resultItr++) {
+    for (; resultItr != results.end(); ++resultItr) {
       IComponent_const_sptr component =
           inst->getComponentByID(resultItr->componentID);
       std::cout << component->getName() << ", ";
@@ -109,5 +108,3 @@ private:
     std::cout << "\n";
   }
 };
-
-#endif // InstrumentRayTracerTEST_H_

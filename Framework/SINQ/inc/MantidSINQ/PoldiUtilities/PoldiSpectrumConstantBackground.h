@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUND_H_
-#define MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUND_H_
+#pragma once
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
@@ -38,7 +37,7 @@ public:
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
                        const size_t nData) override;
 
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
   size_t getTimeBinCount() const;
 
   void poldiFunction1D(const std::vector<int> &indices,
@@ -62,5 +61,3 @@ protected:
 
 } // namespace Poldi
 } // namespace Mantid
-
-#endif /* MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUND_H_ */

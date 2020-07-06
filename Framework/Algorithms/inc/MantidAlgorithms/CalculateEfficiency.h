@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CALCULATEEFFICIENCY_H_
-#define MANTID_ALGORITHMS_CALCULATEEFFICIENCY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -48,7 +48,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CalculateEfficiency : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateEfficiency : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateEfficiency"; }
@@ -70,22 +70,20 @@ private:
   void exec() override;
 
   /// Sum all detectors, excluding monitors and masked detectors
-  void sumUnmaskedDetectors(API::MatrixWorkspace_sptr rebinnedWS, double &sum,
-                            double &error, int &nPixels);
+  void sumUnmaskedDetectors(const API::MatrixWorkspace_sptr &rebinnedWS,
+                            double &sum, double &error, int &nPixels);
 
   /// Normalize all detectors to get the relative efficiency
-  void normalizeDetectors(API::MatrixWorkspace_sptr rebinnedWS,
-                          API::MatrixWorkspace_sptr outputWS, double sum,
+  void normalizeDetectors(const API::MatrixWorkspace_sptr &rebinnedWS,
+                          const API::MatrixWorkspace_sptr &outputWS, double sum,
                           double error, int nPixels, double min_eff,
                           double max_eff);
 
   void maskComponent(API::MatrixWorkspace &ws,
                      const std::string &componentName);
-  void maskEdges(API::MatrixWorkspace_sptr ws, int high, int low, int left,
-                 int right, const std::string &componentName);
+  void maskEdges(const API::MatrixWorkspace_sptr &ws, int high, int low,
+                 int left, int right, const std::string &componentName);
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_CALCULATEEFFICIENCY_H_*/

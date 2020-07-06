@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_IMUONASYMMETRYCALCULATORTEST_H_
-#define MANTID_WORKFLOWALGORITHMS_IMUONASYMMETRYCALCULATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -49,7 +48,7 @@ public:
   //------ Group Counts test section --------------
 
   void test_groupCounts_singlePeriod() {
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(createWorkspace());
 
     std::vector<int> summed{1};
@@ -82,7 +81,7 @@ public:
   void test_groupCounts_twoPeriods_plus() {
     MatrixWorkspace_sptr inWSFirst = createWorkspace();
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWSFirst);
     inputWSGroup->addWorkspace(inWSSecond);
 
@@ -116,7 +115,7 @@ public:
   void test_groupCounts_twoPeriod_minus() {
     MatrixWorkspace_sptr inWSFirst = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWSFirst);
     inputWSGroup->addWorkspace(inWSSecond);
 
@@ -154,7 +153,7 @@ public:
     MatrixWorkspace_sptr inWSFirst = createWorkspace();
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
     MatrixWorkspace_sptr inWSThird = createWorkspace();
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWSFirst);
     inputWSGroup->addWorkspace(inWSSecond);
     inputWSGroup->addWorkspace(inWSThird);
@@ -193,7 +192,7 @@ public:
     MatrixWorkspace_sptr inWSFirst = createWorkspace();
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
     MatrixWorkspace_sptr inWSThird = createWorkspace();
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWSFirst);
     inputWSGroup->addWorkspace(inWSSecond);
     inputWSGroup->addWorkspace(inWSThird);
@@ -230,7 +229,7 @@ public:
   void test_groupAsymmetry_singlePeriod() {
     MatrixWorkspace_sptr inWS = createWorkspace();
     inWS->mutableRun().addProperty("goodfrm", 10);
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
 
     std::vector<int> summed{1};
@@ -265,7 +264,7 @@ public:
     inWS->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
     inWSSecond->mutableRun().addProperty("goodfrm", 10);
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
 
@@ -301,7 +300,7 @@ public:
     inWS->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
     inWSSecond->mutableRun().addProperty("goodfrm", 10);
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
 
@@ -342,7 +341,7 @@ public:
     periodTwo->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodThree = createWorkspace(1);
     periodThree->mutableRun().addProperty("goodfrm", 10);
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(periodOne);
     inputWSGroup->addWorkspace(periodTwo);
     inputWSGroup->addWorkspace(periodThree);
@@ -384,7 +383,7 @@ public:
     periodTwo->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodThree = createWorkspace(1);
     periodThree->mutableRun().addProperty("goodfrm", 10);
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(periodOne);
     inputWSGroup->addWorkspace(periodTwo);
     inputWSGroup->addWorkspace(periodThree);
@@ -420,7 +419,7 @@ public:
 
   void test_pairAsymmetry_singlePeriod() {
     MatrixWorkspace_sptr inWS = createWorkspace();
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
 
     std::vector<int> summed{1};
@@ -454,7 +453,7 @@ public:
   void test_pairAsymmetry_twoPeriods_minus() {
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
 
@@ -488,7 +487,7 @@ public:
   void test_pairAsymmetry_twoPeriods_plus() {
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
 
@@ -523,7 +522,7 @@ public:
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
     MatrixWorkspace_sptr inWSThird = createWorkspace(2);
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
     inputWSGroup->addWorkspace(inWSThird);
@@ -559,7 +558,7 @@ public:
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
     MatrixWorkspace_sptr inWSThird = createWorkspace(2);
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
     inputWSGroup->addWorkspace(inWSThird);
@@ -595,7 +594,7 @@ public:
   /// WorkspaceGroup as input.
   void test_throws_emptyGroup() {
 
-    auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    auto inputWSGroup = std::make_shared<WorkspaceGroup>();
 
     std::vector<int> summed{1, 2};
     std::vector<int> subtracted{};
@@ -641,5 +640,3 @@ private:
     return ws;
   }
 };
-
-#endif /* MANTID_WORKFLOWALGORITHMS_IMUONASYMMETRYCALCULATORTEST_H_ */

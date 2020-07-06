@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REMOTEJOBMANAGER_H
-#define REMOTEJOBMANAGER_H
+#pragma once
 
 #include <iosfwd>
 #include <map>
@@ -71,11 +70,13 @@ public:
 private:
   // Wraps up some of the boilerplate code needed to execute HTTP GET and POST
   // requests
-  void initGetRequest(Poco::Net::HTTPRequest &req, std::string extraPath,
-                      std::string queryString);
-  void initPostRequest(Poco::Net::HTTPRequest &req, std::string extraPath);
+  void initGetRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath,
+                      const std::string &queryString);
+  void initPostRequest(Poco::Net::HTTPRequest &req,
+                       const std::string &extraPath);
   void initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method,
-                       std::string extraPath, std::string queryString = "");
+                       const std::string &extraPath,
+                       const std::string &queryString = "");
 
   std::string m_displayName;
   std::string
@@ -112,5 +113,3 @@ private:
 
 } // end namespace Kernel
 } // end namespace Mantid
-
-#endif // REMOTEJOBMANAGER_H

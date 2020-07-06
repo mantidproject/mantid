@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
@@ -273,7 +273,7 @@ Group_const_sptr operator*(const Group_const_sptr &lhs,
     throw std::invalid_argument("One of the operands is null. Aborting.");
   }
 
-  return boost::make_shared<const Group>((*lhs) * (*rhs));
+  return std::make_shared<const Group>((*lhs) * (*rhs));
 }
 
 /// Convenience operator* for getting a vector of V3D using shared pointers.

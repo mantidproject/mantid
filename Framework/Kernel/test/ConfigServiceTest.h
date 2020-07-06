@@ -1,31 +1,25 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CONFIGSERVICETEST_H_
-#define MANTID_CONFIGSERVICETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TestChannel.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <fstream>
+#include <memory>
 #include <string>
 
-#include <Poco/Environment.h>
-#include <Poco/File.h>
-#include <Poco/Logger.h>
 #include <Poco/NObserver.h>
-#include <Poco/SplitterChannel.h>
 
 using namespace Mantid::Kernel;
 using Mantid::TestChannel;
@@ -231,7 +225,7 @@ public:
                      "OSIRIS");
   }
 
-  void TestSystemValues() {
+  void testSystemValues() {
     // we cannot test the return values here as they will differ based on the
     // environment.
     // therfore we will just check they return a non empty string.
@@ -275,7 +269,7 @@ public:
 #endif
   }
 
-  void TestInstrumentDirectory() {
+  void testInstrumentDirectory() {
 
     auto directories = ConfigService::Instance().getInstrumentDirectories();
     TS_ASSERT_LESS_THAN(1, directories.size());
@@ -308,7 +302,7 @@ public:
     }
   }
 
-  void TestSetInstrumentDirectory() {
+  void testSetInstrumentDirectory() {
 
     auto originalDirectories =
         ConfigService::Instance().getInstrumentDirectories();
@@ -328,26 +322,26 @@ public:
     TS_ASSERT_EQUALS(readDirectories[0], originalDirectories[0]);
   }
 
-  void TestCustomProperty() {
+  void testCustomProperty() {
     std::string countString =
-        ConfigService::Instance().getString("algorithms.retained");
-    TS_ASSERT_EQUALS(countString, "50");
+        ConfigService::Instance().getString("projectRecovery.secondsBetween");
+    TS_ASSERT_EQUALS(countString, "60");
   }
 
-  void TestCustomPropertyAsValue() {
+  void testCustomPropertyAsValue() {
     // Mantid.legs is defined in the properties script as 6
     int value = ConfigService::Instance()
-                    .getValue<int>("algorithms.retained")
+                    .getValue<int>("projectRecovery.secondsBetween")
                     .get_value_or(0);
     double dblValue = ConfigService::Instance()
-                          .getValue<double>("algorithms.retained")
+                          .getValue<double>("projectRecovery.secondsBetween")
                           .get_value_or(0);
 
-    TS_ASSERT_EQUALS(value, 50);
-    TS_ASSERT_EQUALS(dblValue, 50.0);
+    TS_ASSERT_EQUALS(value, 60);
+    TS_ASSERT_EQUALS(dblValue, 60.0);
   }
 
-  void TestMissingProperty() {
+  void testMissingProperty() {
     // Mantid.noses is not defined in the properties script
     std::string noseCountString =
         ConfigService::Instance().getString("mantid.noses");
@@ -356,13 +350,35 @@ public:
     TS_ASSERT_EQUALS(noseCountString, "");
   }
 
-  void TestRelativeToAbsolute() {
-    // std::string path =
-    // ConfigService::Instance().getString("defaultsave.directory");
-    // TS_ASSERT( Poco::Path(path).isAbsolute() );
+  void testRelativeToAbsoluteForKeysWithCorrectIdentifier() {
+    auto &cfg = ConfigService::Instance();
+    cfg.setString("mantid.test.directory", "..");
+    cfg.setString("mantid.test.directories", "..");
+
+    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.directory")).isAbsolute());
+    TS_ASSERT(
+        Poco::Path(cfg.getString("mantid.test.directories")).isAbsolute());
   }
 
-  void TestAppendProperties() {
+  void testNoRelativeToAbsoluteForKeysWithoutCorrectIdentifier() {
+    auto &cfg = ConfigService::Instance();
+    cfg.setString("mantid.test.direc", "..");
+
+    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.direc")).isRelative());
+  }
+
+  void testNoRelativeToAbsoluteForKeysOnRequest() {
+    auto &cfg = ConfigService::Instance();
+    cfg.setString("mantid.test.directory", "..");
+    cfg.setString("mantid.test.directories", "..");
+
+    TS_ASSERT(
+        Poco::Path(cfg.getString("mantid.test.directory", false)).isRelative());
+    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.directories", false))
+                  .isRelative());
+  }
+
+  void testAppendProperties() {
 
     // This should clear out all old properties
     const std::string propfilePath =
@@ -652,8 +668,6 @@ public:
 
     // Returns all *root* keys, i.e. unique keys left of the first period
     std::vector<std::string> keyVector = ConfigService::Instance().getKeys("");
-    // The 4 unique in the file and the ConfigService always sets a
-    // datasearch.directories key on creation
     TS_ASSERT_EQUALS(keyVector.size(), 5);
   }
 
@@ -738,5 +752,3 @@ private:
                        std::istreambuf_iterator<char>());
   }
 };
-
-#endif /*MANTID_CONFIGSERVICETEST_H_*/

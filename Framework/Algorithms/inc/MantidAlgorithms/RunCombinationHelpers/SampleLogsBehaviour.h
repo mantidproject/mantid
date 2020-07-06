@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MERGERUNS_SAMPLELOGSBEHAVIOUR_H_
-#define MANTID_ALGORITHMS_MERGERUNS_SAMPLELOGSBEHAVIOUR_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
@@ -70,17 +69,18 @@ public:
     std::string sampleLogsFailTolerances;
   };
 
-  SampleLogsBehaviour(API::MatrixWorkspace_sptr ws, Kernel::Logger &logger,
+  SampleLogsBehaviour(const API::MatrixWorkspace_sptr &ws,
+                      Kernel::Logger &logger,
                       const SampleLogNames &logEntries = {},
                       const ParameterName &parName = {});
 
   /// Create and update sample logs according to instrument parameters
-  void mergeSampleLogs(API::MatrixWorkspace_sptr addeeWS,
-                       API::MatrixWorkspace_sptr outWS);
-  void setUpdatedSampleLogs(API::MatrixWorkspace_sptr outWS);
-  void removeSampleLogsFromWorkspace(API::MatrixWorkspace_sptr addeeWS);
-  void readdSampleLogToWorkspace(API::MatrixWorkspace_sptr addeeWS);
-  void resetSampleLogs(API::MatrixWorkspace_sptr ws);
+  void mergeSampleLogs(const API::MatrixWorkspace_sptr &addeeWS,
+                       const API::MatrixWorkspace_sptr &outWS);
+  void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &outWS);
+  void removeSampleLogsFromWorkspace(const API::MatrixWorkspace_sptr &addeeWS);
+  void readdSampleLogToWorkspace(const API::MatrixWorkspace_sptr &addeeWS);
+  void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
 
 private:
   Kernel::Logger &m_logger;
@@ -137,5 +137,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_MERGERUNS_SAMPLELOGSBEHAVIOUR_H_ */

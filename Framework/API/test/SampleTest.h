@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TESTSAMPLE_H_
-#define TESTSAMPLE_H_
+#pragma once
 
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
@@ -63,8 +62,8 @@ public:
     Sample sample;
     const std::string envName("TestKit");
     auto kit = std::make_unique<SampleEnvironment>(
-        envName, boost::make_shared<const Container>(""));
-    kit->add(boost::make_shared<const CSGObject>());
+        envName, std::make_shared<const Container>(""));
+    kit->add(std::make_shared<const CSGObject>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(std::move(kit)));
 
@@ -288,7 +287,7 @@ public:
   void test_Multiple_Samples() {
     Sample sample;
     sample.setName("test name for test_Multiple_Sample");
-    auto sample2 = boost::make_shared<Sample>();
+    auto sample2 = std::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
 
     TS_ASSERT_EQUALS(sample.size(), 1);
@@ -317,7 +316,7 @@ public:
     sample.setWidth(1.234);
     sample.setOrientedLattice(
         std::make_unique<OrientedLattice>(4, 5, 6, 90, 91, 92));
-    auto sample2 = boost::make_shared<Sample>();
+    auto sample2 = std::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
     sample.addSample(sample2);
     TS_ASSERT(
@@ -360,6 +359,126 @@ public:
 
     TS_ASSERT(loaded.getName().empty());
   }
-};
 
-#endif /*TESTSAMPLE_H_*/
+  void test_equal_when_sample_identical() {
+    Sample a;
+    Sample b;
+    TS_ASSERT_EQUALS(a, b);
+  }
+
+  void test_not_equal_when_sample_differs_in_extents() {
+    Sample a;
+    auto b = a;
+    a.setHeight(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+    b = a;
+    a.setWidth(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+    b = a;
+    a.setThickness(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_sample_differs_in_geom_id() {
+    Sample a;
+    auto b = a;
+    TS_ASSERT_EQUALS(a, b);
+    a.setGeometryFlag(1);
+    b.setGeometryFlag(2);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+  void test_not_equal_when_sample_differs_in_name() {
+    Sample a;
+    auto b = a;
+    b.setName("something");
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_sample_differs_in_environment() {
+    auto kit1 = std::make_unique<SampleEnvironment>(
+        "Env", std::make_shared<const Container>(""));
+
+    auto kit2 = std::make_unique<SampleEnvironment>(
+        "Env2", std::make_shared<const Container>(""));
+
+    // same as kit1
+    auto kit3 = std::make_unique<SampleEnvironment>(
+        kit1->name(), std::make_shared<const Container>(""));
+
+    Sample a;
+    auto b = a;
+    b.setEnvironment(std::move(kit1));
+    // A has no environment
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // A has valid but different same environment
+    a.setEnvironment(std::move(kit2));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // A has valid but different same environment
+    a.setEnvironment(std::move(kit3));
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equal_when_sample_differs_in_shape() {
+    IObject_sptr shape1 = ComponentCreationHelper::createCappedCylinder(
+        0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+
+    IObject_sptr shape2 = ComponentCreationHelper::createCappedCylinder(
+        0.0137, 1.0, V3D(), V3D(0.0, 0.0, 0.0), "cyl");
+
+    Sample a;
+    auto b = a;
+    a.setShape(shape1);
+    // b has no shape
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has different shape
+    b.setShape(shape2);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has same shape
+    b.setShape(IObject_sptr(shape1->clone()));
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equal_when_sample_differs_in_space_group() {
+    CrystalStructure structure1("3 4 5 90 90 90", "C m m m",
+                                "Fe 0.12 0.23 0.121");
+    // Same as above
+    CrystalStructure structure2("3 4 5 90 90 90", "C m m m",
+                                "Fe 0.12 0.23 0.121");
+    // Different
+    CrystalStructure structure3("5.431 5.431 5.431", "F d -3 m",
+                                "Si 0 0 0 1.0 0.02");
+
+    Sample a;
+    auto b = a;
+    // b has no structure
+    a.setCrystalStructure(structure1);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has different structure
+    b.setCrystalStructure(structure3);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has same structure
+    b = Sample{};
+    b.setCrystalStructure(structure2);
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+};

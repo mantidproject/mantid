@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODER_H_
-#define MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODER_H_
+#pragma once
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -43,9 +42,11 @@ public:
       const std::string &runInfoTopic, const std::string &spDetTopic,
       const std::string &sampleEnvTopic, const std::string &chopperTopic,
       const std::string &monitorTopic, const std::size_t bufferThreshold);
-  ~KafkaEventStreamDecoder();
+  ~KafkaEventStreamDecoder() override;
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
   KafkaEventStreamDecoder &operator=(const KafkaEventStreamDecoder &) = delete;
+
+  KafkaEventStreamDecoder(KafkaEventStreamDecoder &&) noexcept;
 
 public:
   ///@name Querying
@@ -63,8 +64,7 @@ private:
   void flushIntermediateBuffer();
 
   /// Create the cache workspaces, LoadLiveData extracts data from these
-  void initLocalCaches(const std::string &rawMsgBuffer,
-                       const RunStartStruct &runStartData) override;
+  void initLocalCaches(const RunStartStruct &runStartData) override;
 
   void sampleDataFromMessage(const std::string &buffer) override;
 
@@ -90,5 +90,3 @@ DLLExport std::vector<size_t> computeGroupBoundaries(
 
 } // namespace LiveData
 } // namespace Mantid
-
-#endif /* MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODER_H_ */

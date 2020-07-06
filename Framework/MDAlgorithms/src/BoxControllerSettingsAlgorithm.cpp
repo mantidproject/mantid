@@ -1,15 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
+#include <utility>
+
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -26,9 +28,9 @@ namespace MDAlgorithms {
  */
 void BoxControllerSettingsAlgorithm::initBoxControllerProps(
     const std::string &SplitInto, int SplitThreshold, int MaxRecursionDepth) {
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  auto mustBeMoreThen1 = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeMoreThen1 = std::make_shared<BoundedValidator<int>>();
   mustBeMoreThen1->setLower(1);
 
   // Split up comma-separated properties
@@ -75,7 +77,8 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
  * @param ndims : Number of dimensions in output workspace.
  */
 void BoxControllerSettingsAlgorithm::takeDefaultsFromInstrument(
-    Mantid::Geometry::Instrument_const_sptr instrument, const size_t ndims) {
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
+    const size_t ndims) {
   const std::string splitThresholdName = "SplitThreshold";
   const std::string splitIntoName = "SplitInto";
   const std::string maxRecursionDepthName = "MaxRecursionDepth";
@@ -117,10 +120,11 @@ void BoxControllerSettingsAlgorithm::takeDefaultsFromInstrument(
  * @param instrument :: instrument to read parameters from.
  */
 void BoxControllerSettingsAlgorithm::setBoxController(
-    BoxController_sptr bc, Mantid::Geometry::Instrument_const_sptr instrument) {
+    const BoxController_sptr &bc,
+    const Mantid::Geometry::Instrument_const_sptr &instrument) {
   size_t nd = bc->getNDims();
 
-  takeDefaultsFromInstrument(instrument, nd);
+  takeDefaultsFromInstrument(std::move(instrument), nd);
 
   setBoxController(bc);
 }
@@ -131,7 +135,8 @@ void BoxControllerSettingsAlgorithm::setBoxController(
  *
  * @param bc :: box controller to modify
  */
-void BoxControllerSettingsAlgorithm::setBoxController(BoxController_sptr bc) {
+void BoxControllerSettingsAlgorithm::setBoxController(
+    const BoxController_sptr &bc) {
   size_t nd = bc->getNDims();
 
   int val;

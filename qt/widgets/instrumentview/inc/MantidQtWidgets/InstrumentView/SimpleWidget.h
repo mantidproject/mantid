@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SIMPLEWIDGET_H
-#define SIMPLEWIDGET_H
+#pragma once
 
 #include <QWidget>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -25,9 +24,9 @@ public:
   explicit SimpleWidget(QWidget *parent);
   ~SimpleWidget() override;
   /// Assign a surface to draw on
-  void setSurface(boost::shared_ptr<ProjectionSurface> surface);
+  void setSurface(std::shared_ptr<ProjectionSurface> surface);
   /// Return the surface
-  boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
+  std::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
   /// Redraw the view
   void updateView(bool picking = true);
   /// Update the detector information (count values) and redraw
@@ -46,9 +45,7 @@ protected:
   void enterEvent(QEvent * /*event*/) override;
   void leaveEvent(QEvent * /*event*/) override;
   ///< The projection surface
-  boost::shared_ptr<ProjectionSurface> m_surface;
+  std::shared_ptr<ProjectionSurface> m_surface;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // SIMPLEWIDGET_H

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDEVENTFACTORY_H_
-#define MANTID_DATAOBJECTS_MDEVENTFACTORY_H_
+#pragma once
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 
@@ -15,7 +14,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace DataObjects {
@@ -155,93 +154,84 @@ private:
 #define CALL_MDEVENT_FUNCTION(funcname, workspace)                             \
   {                                                                            \
     MDEventWorkspace<MDLeanEvent<1>, 1>::sptr MDEW_MDLEANEVENT_1 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<1>, 1>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<1>, 1>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_1)                                                    \
       funcname<MDLeanEvent<1>, 1>(MDEW_MDLEANEVENT_1);                         \
     MDEventWorkspace<MDLeanEvent<2>, 2>::sptr MDEW_MDLEANEVENT_2 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<2>, 2>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<2>, 2>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_2)                                                    \
       funcname<MDLeanEvent<2>, 2>(MDEW_MDLEANEVENT_2);                         \
     MDEventWorkspace<MDLeanEvent<3>, 3>::sptr MDEW_MDLEANEVENT_3 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>, 3>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>, 3>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_3)                                                    \
       funcname<MDLeanEvent<3>, 3>(MDEW_MDLEANEVENT_3);                         \
     MDEventWorkspace<MDLeanEvent<4>, 4>::sptr MDEW_MDLEANEVENT_4 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<4>, 4>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<4>, 4>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_4)                                                    \
       funcname<MDLeanEvent<4>, 4>(MDEW_MDLEANEVENT_4);                         \
     MDEventWorkspace<MDLeanEvent<5>, 5>::sptr MDEW_MDLEANEVENT_5 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<5>, 5>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<5>, 5>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_5)                                                    \
       funcname<MDLeanEvent<5>, 5>(MDEW_MDLEANEVENT_5);                         \
     MDEventWorkspace<MDLeanEvent<6>, 6>::sptr MDEW_MDLEANEVENT_6 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<6>, 6>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<6>, 6>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_6)                                                    \
       funcname<MDLeanEvent<6>, 6>(MDEW_MDLEANEVENT_6);                         \
     MDEventWorkspace<MDLeanEvent<7>, 7>::sptr MDEW_MDLEANEVENT_7 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<7>, 7>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<7>, 7>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_7)                                                    \
       funcname<MDLeanEvent<7>, 7>(MDEW_MDLEANEVENT_7);                         \
     MDEventWorkspace<MDLeanEvent<8>, 8>::sptr MDEW_MDLEANEVENT_8 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<8>, 8>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<8>, 8>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_8)                                                    \
       funcname<MDLeanEvent<8>, 8>(MDEW_MDLEANEVENT_8);                         \
     MDEventWorkspace<MDLeanEvent<9>, 9>::sptr MDEW_MDLEANEVENT_9 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<9>, 9>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<9>, 9>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_9)                                                    \
       funcname<MDLeanEvent<9>, 9>(MDEW_MDLEANEVENT_9);                         \
     MDEventWorkspace<MDEvent<1>, 1>::sptr MDEW_MDEVENT_1 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<1>, 1>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<1>, 1>>(workspace); \
     if (MDEW_MDEVENT_1)                                                        \
       funcname<MDEvent<1>, 1>(MDEW_MDEVENT_1);                                 \
     MDEventWorkspace<MDEvent<2>, 2>::sptr MDEW_MDEVENT_2 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<2>, 2>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<2>, 2>>(workspace); \
     if (MDEW_MDEVENT_2)                                                        \
       funcname<MDEvent<2>, 2>(MDEW_MDEVENT_2);                                 \
     MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(workspace); \
     if (MDEW_MDEVENT_3)                                                        \
       funcname<MDEvent<3>, 3>(MDEW_MDEVENT_3);                                 \
     MDEventWorkspace<MDEvent<4>, 4>::sptr MDEW_MDEVENT_4 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(workspace); \
     if (MDEW_MDEVENT_4)                                                        \
       funcname<MDEvent<4>, 4>(MDEW_MDEVENT_4);                                 \
     MDEventWorkspace<MDEvent<5>, 5>::sptr MDEW_MDEVENT_5 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<5>, 5>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<5>, 5>>(workspace); \
     if (MDEW_MDEVENT_5)                                                        \
       funcname<MDEvent<5>, 5>(MDEW_MDEVENT_5);                                 \
     MDEventWorkspace<MDEvent<6>, 6>::sptr MDEW_MDEVENT_6 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<6>, 6>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<6>, 6>>(workspace); \
     if (MDEW_MDEVENT_6)                                                        \
       funcname<MDEvent<6>, 6>(MDEW_MDEVENT_6);                                 \
     MDEventWorkspace<MDEvent<7>, 7>::sptr MDEW_MDEVENT_7 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<7>, 7>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<7>, 7>>(workspace); \
     if (MDEW_MDEVENT_7)                                                        \
       funcname<MDEvent<7>, 7>(MDEW_MDEVENT_7);                                 \
     MDEventWorkspace<MDEvent<8>, 8>::sptr MDEW_MDEVENT_8 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<8>, 8>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<8>, 8>>(workspace); \
     if (MDEW_MDEVENT_8)                                                        \
       funcname<MDEvent<8>, 8>(MDEW_MDEVENT_8);                                 \
     MDEventWorkspace<MDEvent<9>, 9>::sptr MDEW_MDEVENT_9 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<9>, 9>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<9>, 9>>(workspace); \
     if (MDEW_MDEVENT_9)                                                        \
       funcname<MDEvent<9>, 9>(MDEW_MDEVENT_9);                                 \
   }
@@ -256,73 +246,66 @@ private:
 #define CALL_MDEVENT_FUNCTION3(funcname, workspace)                            \
   {                                                                            \
     MDEventWorkspace<MDLeanEvent<3>, 3>::sptr MDEW_MDLEANEVENT_3 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>, 3>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>, 3>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_3)                                                    \
       funcname<MDLeanEvent<3>, 3>(MDEW_MDLEANEVENT_3);                         \
     MDEventWorkspace<MDLeanEvent<4>, 4>::sptr MDEW_MDLEANEVENT_4 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<4>, 4>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<4>, 4>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_4)                                                    \
       funcname<MDLeanEvent<4>, 4>(MDEW_MDLEANEVENT_4);                         \
     MDEventWorkspace<MDLeanEvent<5>, 5>::sptr MDEW_MDLEANEVENT_5 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<5>, 5>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<5>, 5>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_5)                                                    \
       funcname<MDLeanEvent<5>, 5>(MDEW_MDLEANEVENT_5);                         \
     MDEventWorkspace<MDLeanEvent<6>, 6>::sptr MDEW_MDLEANEVENT_6 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<6>, 6>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<6>, 6>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_6)                                                    \
       funcname<MDLeanEvent<6>, 6>(MDEW_MDLEANEVENT_6);                         \
     MDEventWorkspace<MDLeanEvent<7>, 7>::sptr MDEW_MDLEANEVENT_7 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<7>, 7>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<7>, 7>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_7)                                                    \
       funcname<MDLeanEvent<7>, 7>(MDEW_MDLEANEVENT_7);                         \
     MDEventWorkspace<MDLeanEvent<8>, 8>::sptr MDEW_MDLEANEVENT_8 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<8>, 8>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<8>, 8>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_8)                                                    \
       funcname<MDLeanEvent<8>, 8>(MDEW_MDLEANEVENT_8);                         \
     MDEventWorkspace<MDLeanEvent<9>, 9>::sptr MDEW_MDLEANEVENT_9 =             \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<9>, 9>>(      \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<9>, 9>>(        \
             workspace);                                                        \
     if (MDEW_MDLEANEVENT_9)                                                    \
       funcname<MDLeanEvent<9>, 9>(MDEW_MDLEANEVENT_9);                         \
     MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(workspace); \
     if (MDEW_MDEVENT_3)                                                        \
       funcname<MDEvent<3>, 3>(MDEW_MDEVENT_3);                                 \
     MDEventWorkspace<MDEvent<4>, 4>::sptr MDEW_MDEVENT_4 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(workspace); \
     if (MDEW_MDEVENT_4)                                                        \
       funcname<MDEvent<4>, 4>(MDEW_MDEVENT_4);                                 \
     MDEventWorkspace<MDEvent<5>, 5>::sptr MDEW_MDEVENT_5 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<5>, 5>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<5>, 5>>(workspace); \
     if (MDEW_MDEVENT_5)                                                        \
       funcname<MDEvent<5>, 5>(MDEW_MDEVENT_5);                                 \
     MDEventWorkspace<MDEvent<6>, 6>::sptr MDEW_MDEVENT_6 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<6>, 6>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<6>, 6>>(workspace); \
     if (MDEW_MDEVENT_6)                                                        \
       funcname<MDEvent<6>, 6>(MDEW_MDEVENT_6);                                 \
     MDEventWorkspace<MDEvent<7>, 7>::sptr MDEW_MDEVENT_7 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<7>, 7>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<7>, 7>>(workspace); \
     if (MDEW_MDEVENT_7)                                                        \
       funcname<MDEvent<7>, 7>(MDEW_MDEVENT_7);                                 \
     MDEventWorkspace<MDEvent<8>, 8>::sptr MDEW_MDEVENT_8 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<8>, 8>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<8>, 8>>(workspace); \
     if (MDEW_MDEVENT_8)                                                        \
       funcname<MDEvent<8>, 8>(MDEW_MDEVENT_8);                                 \
     MDEventWorkspace<MDEvent<9>, 9>::sptr MDEW_MDEVENT_9 =                     \
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<9>, 9>>(          \
-            workspace);                                                        \
+        std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<9>, 9>>(workspace); \
     if (MDEW_MDEVENT_9)                                                        \
       funcname<MDEvent<9>, 9>(MDEW_MDEVENT_9);                                 \
   }
@@ -337,92 +320,92 @@ private:
 #define CONST_CALL_MDEVENT_FUNCTION(funcname, workspace)                       \
   {                                                                            \
     const MDEventWorkspace<MDLeanEvent<1>, 1>::sptr CONST_MDEW_MDLEANEVENT_1 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<1>, 1>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<1>, 1>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_1)                                              \
       funcname<MDLeanEvent<1>, 1>(CONST_MDEW_MDLEANEVENT_1);                   \
     const MDEventWorkspace<MDLeanEvent<2>, 2>::sptr CONST_MDEW_MDLEANEVENT_2 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<2>, 2>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<2>, 2>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_2)                                              \
       funcname<MDLeanEvent<2>, 2>(CONST_MDEW_MDLEANEVENT_2);                   \
     const MDEventWorkspace<MDLeanEvent<3>, 3>::sptr CONST_MDEW_MDLEANEVENT_3 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<3>, 3>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<3>, 3>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_3)                                              \
       funcname<MDLeanEvent<3>, 3>(CONST_MDEW_MDLEANEVENT_3);                   \
     const MDEventWorkspace<MDLeanEvent<4>, 4>::sptr CONST_MDEW_MDLEANEVENT_4 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<4>, 4>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<4>, 4>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_4)                                              \
       funcname<MDLeanEvent<4>, 4>(CONST_MDEW_MDLEANEVENT_4);                   \
     const MDEventWorkspace<MDLeanEvent<5>, 5>::sptr CONST_MDEW_MDLEANEVENT_5 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<5>, 5>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<5>, 5>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_5)                                              \
       funcname<MDLeanEvent<5>, 5>(CONST_MDEW_MDLEANEVENT_5);                   \
     const MDEventWorkspace<MDLeanEvent<6>, 6>::sptr CONST_MDEW_MDLEANEVENT_6 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<6>, 6>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<6>, 6>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_6)                                              \
       funcname<MDLeanEvent<6>, 6>(CONST_MDEW_MDLEANEVENT_6);                   \
     const MDEventWorkspace<MDLeanEvent<7>, 7>::sptr CONST_MDEW_MDLEANEVENT_7 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<7>, 7>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<7>, 7>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_7)                                              \
       funcname<MDLeanEvent<7>, 7>(CONST_MDEW_MDLEANEVENT_7);                   \
     const MDEventWorkspace<MDLeanEvent<8>, 8>::sptr CONST_MDEW_MDLEANEVENT_8 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<8>, 8>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<8>, 8>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_8)                                              \
       funcname<MDLeanEvent<8>, 8>(CONST_MDEW_MDLEANEVENT_8);                   \
     const MDEventWorkspace<MDLeanEvent<9>, 9>::sptr CONST_MDEW_MDLEANEVENT_9 = \
-        boost::dynamic_pointer_cast<                                           \
-            const MDEventWorkspace<MDLeanEvent<9>, 9>>(workspace);             \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDLeanEvent<9>, 9>>(  \
+            workspace);                                                        \
     if (CONST_MDEW_MDLEANEVENT_9)                                              \
       funcname<MDLeanEvent<9>, 9>(CONST_MDEW_MDLEANEVENT_9);                   \
     const MDEventWorkspace<MDEvent<1>, 1>::sptr CONST_MDEW_MDEVENT_1 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<1>, 1>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<1>, 1>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_1)                                                  \
       funcname<MDEvent<1>, 1>(CONST_MDEW_MDEVENT_1);                           \
     const MDEventWorkspace<MDEvent<2>, 2>::sptr CONST_MDEW_MDEVENT_2 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<2>, 2>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<2>, 2>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_2)                                                  \
       funcname<MDEvent<2>, 2>(CONST_MDEW_MDEVENT_2);                           \
     const MDEventWorkspace<MDEvent<3>, 3>::sptr CONST_MDEW_MDEVENT_3 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<3>, 3>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<3>, 3>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_3)                                                  \
       funcname<MDEvent<3>, 3>(CONST_MDEW_MDEVENT_3);                           \
     const MDEventWorkspace<MDEvent<4>, 4>::sptr CONST_MDEW_MDEVENT_4 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<4>, 4>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<4>, 4>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_4)                                                  \
       funcname<MDEvent<4>, 4>(CONST_MDEW_MDEVENT_4);                           \
     const MDEventWorkspace<MDEvent<5>, 5>::sptr CONST_MDEW_MDEVENT_5 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<5>, 5>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<5>, 5>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_5)                                                  \
       funcname<MDEvent<5>, 5>(CONST_MDEW_MDEVENT_5);                           \
     const MDEventWorkspace<MDEvent<6>, 6>::sptr CONST_MDEW_MDEVENT_6 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<6>, 6>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<6>, 6>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_6)                                                  \
       funcname<MDEvent<6>, 6>(CONST_MDEW_MDEVENT_6);                           \
     const MDEventWorkspace<MDEvent<7>, 7>::sptr CONST_MDEW_MDEVENT_7 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<7>, 7>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<7>, 7>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_7)                                                  \
       funcname<MDEvent<7>, 7>(CONST_MDEW_MDEVENT_7);                           \
     const MDEventWorkspace<MDEvent<8>, 8>::sptr CONST_MDEW_MDEVENT_8 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<8>, 8>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<8>, 8>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_8)                                                  \
       funcname<MDEvent<8>, 8>(CONST_MDEW_MDEVENT_8);                           \
     const MDEventWorkspace<MDEvent<9>, 9>::sptr CONST_MDEW_MDEVENT_9 =         \
-        boost::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<9>, 9>>(    \
+        std::dynamic_pointer_cast<const MDEventWorkspace<MDEvent<9>, 9>>(      \
             workspace);                                                        \
     if (CONST_MDEW_MDEVENT_9)                                                  \
       funcname<MDEvent<9>, 9>(CONST_MDEW_MDEVENT_9);                           \
@@ -631,5 +614,3 @@ using MDBin9 = MDBin<MDEvent<9>, 9>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_MDEVENTFACTORY_H_ */

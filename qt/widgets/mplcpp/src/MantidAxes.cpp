@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
 
@@ -34,8 +34,8 @@ MantidAxes::MantidAxes(Python::Object pyObj) : Axes{std::move(pyObj)} {}
  */
 Line2D
 MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                 const size_t wkspIndex, const QString lineColour,
-                 const QString label,
+                 const size_t wkspIndex, const QString &lineColour,
+                 const QString &label,
                  const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
@@ -61,7 +61,7 @@ MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
  */
 ErrorbarContainer MantidAxes::errorbar(
     const Mantid::API::MatrixWorkspace_sptr &workspace, const size_t wkspIndex,
-    const QString lineColour, const QString label,
+    const QString &lineColour, const QString &label,
     const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
@@ -96,25 +96,27 @@ void MantidAxes::pcolormesh(
  * @param ws A reference to a workspace whose name is used to
  * lookup any artists for removal
  */
-void MantidAxes::removeWorkspaceArtists(
+bool MantidAxes::removeWorkspaceArtists(
     const Mantid::API::MatrixWorkspace_sptr &ws) {
   GlobalInterpreterLock lock;
+  bool removed = false;
   try {
-    pyobj().attr("remove_workspace_artists")(
+    removed = pyobj().attr("remove_workspace_artists")(
         Python::NewRef(MatrixWorkpaceToPython()(ws)));
   } catch (Python::ErrorAlreadySet &) {
     throw Mantid::PythonInterface::PythonException();
   }
+  return removed;
 }
 
 /**
  * Replace the artists on this axes instance that are based off this workspace
  * @param newWS A reference to the new workspace containing the data
  */
-void MantidAxes::replaceWorkspaceArtists(
+bool MantidAxes::replaceWorkspaceArtists(
     const Mantid::API::MatrixWorkspace_sptr &newWS) {
   GlobalInterpreterLock lock;
-  pyobj().attr("replace_workspace_artists")(
+  return pyobj().attr("replace_workspace_artists")(
       Python::NewRef(MatrixWorkpaceToPython()(newWS)));
 }
 

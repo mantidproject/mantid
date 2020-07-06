@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDAGORITHMS_INTEGRATEPEAKSCWSDTEST_H_
-#define MANTID_MDAGORITHMS_INTEGRATEPEAKSCWSDTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -89,7 +88,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
 
   // Creates a new instance of the MDEventInserter to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Go though each spectrum to conver to MDEvent
@@ -112,7 +111,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
   }
 
   // Set up run information
-  ExperimentInfo_sptr exp_info = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr exp_info = std::make_shared<ExperimentInfo>();
   exp_info->mutableRun().addProperty("run_number", 121);
   exp_info->mutableRun().addProperty("monitor", 3021);
 
@@ -123,7 +122,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
   exp_info->setInstrument(inst1);
   mdws->addExperimentInfo(exp_info);
 
-  ExperimentInfo_sptr exp_info2 = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr exp_info2 = std::make_shared<ExperimentInfo>();
   exp_info2->mutableRun().addProperty("run_number", 144);
   exp_info2->mutableRun().addProperty("monitor", 1022);
   // add instrument
@@ -337,7 +336,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     // check result
-    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws)
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 1)
@@ -396,7 +395,7 @@ public:
     TS_ASSERT(alg.isExecuted())
 
     // check
-    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws)
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 2)
@@ -445,7 +444,7 @@ public:
     bool doesexit =
         AnalysisDataService::Instance().doesExist("IntegratedPeakWS");
     TS_ASSERT(doesexit);
-    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws);
 
@@ -519,5 +518,3 @@ private:
   std::vector<int> vec_runnumbers;
   std::vector<int> runnumberlist;
 };
-
-#endif /* MANTID_MDEVENTS_INTEGRATEPEAKSCWSDTEST_H_ */

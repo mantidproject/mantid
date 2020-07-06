@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPALPHA_H_
-#define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPALPHA_H_
+#pragma once
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -19,8 +19,9 @@ namespace Functions {
   Exponential function from
   Thermal Neutron Function's Alph0, Alph1, Alph0t, Alph1t, Dtt1, and etc.
 */
-class DLLExport ThermalNeutronBk2BkExpAlpha : virtual public API::IFunction1D,
-                                              public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpAlpha
+    : virtual public API::IFunction1D,
+      public API::ParamFunction {
 public:
   /// Override
   void function1D(double *out, const double *xValues,
@@ -51,10 +52,8 @@ private:
 };
 
 using ThermalNeutronBk2BkExpAlpha_sptr =
-    boost::shared_ptr<ThermalNeutronBk2BkExpAlpha>;
+    std::shared_ptr<ThermalNeutronBk2BkExpAlpha>;
 
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPALPHA_H_ */

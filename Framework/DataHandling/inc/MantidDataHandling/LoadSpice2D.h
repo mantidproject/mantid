@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LoadSpice2D_H
-#define MANTID_DATAHANDLING_LoadSpice2D_H
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/XmlHandler.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <map>
 #include <string>
 #include <utility>
@@ -93,7 +93,7 @@ private:
                       const std::string &fileName);
   /// Run LoadInstrument Child Algorithm
   void runLoadInstrument(const std::string &inst_name,
-                         DataObjects::Workspace2D_sptr localWorkspace);
+                         const DataObjects::Workspace2D_sptr &localWorkspace);
 
   void setInputPropertiesAsMemberProperties();
 
@@ -133,5 +133,3 @@ private:
 };
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif

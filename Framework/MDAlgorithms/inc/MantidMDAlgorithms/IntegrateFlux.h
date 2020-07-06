@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_INTEGRATEFLUX_H_
-#define MANTID_MDALGORITHMS_INTEGRATEFLUX_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -41,7 +40,7 @@ private:
   void init() override;
   void exec() override;
 
-  boost::shared_ptr<API::MatrixWorkspace>
+  std::shared_ptr<API::MatrixWorkspace>
   createOutputWorkspace(const API::MatrixWorkspace &inputWS, size_t nX) const;
   void integrateSpectra(const API::MatrixWorkspace &inputWS,
                         API::MatrixWorkspace &integrWS) const;
@@ -60,5 +59,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_INTEGRATEFLUX_H_ */

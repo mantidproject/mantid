@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MASKBINSTEST_H_
-#define MASKBINSTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -57,7 +56,7 @@ public:
     TS_ASSERT(masker.isExecuted());
 
     MatrixWorkspace_const_sptr outputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             ads.retrieve(resultWorkspaceName));
 
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
@@ -203,7 +202,7 @@ public:
     TS_ASSERT(masker2.isExecuted());
 
     // Get output workspace and compare
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(opWSName));
     TS_ASSERT(outWS);
     if (!outWS)
@@ -245,7 +244,7 @@ public:
     TS_ASSERT(masker2.isExecuted());
 
     EventWorkspace_const_sptr constWS =
-        boost::dynamic_pointer_cast<const EventWorkspace>(WS);
+        std::dynamic_pointer_cast<const EventWorkspace>(WS);
     for (int wi = 1; wi <= 3; wi++)
       for (int bin = 3; bin < 6; bin++) {
         TS_ASSERT_EQUALS(constWS->y(wi)[bin], 0.0);
@@ -280,7 +279,7 @@ public:
     TS_ASSERT(masker2.isExecuted());
 
     EventWorkspace_const_sptr constWS =
-        boost::dynamic_pointer_cast<const EventWorkspace>(
+        std::dynamic_pointer_cast<const EventWorkspace>(
             AnalysisDataService::Instance().retrieve(opWSName));
 
     for (size_t wi = 0; wi < 5; ++wi) {
@@ -321,7 +320,7 @@ public:
     TS_ASSERT(masker2.isExecuted());
 
     EventWorkspace_const_sptr constWS =
-        boost::dynamic_pointer_cast<const EventWorkspace>(WS);
+        std::dynamic_pointer_cast<const EventWorkspace>(WS);
     std::size_t events_after = constWS->getNumberEvents();
 
     for (int wi = 0; wi < numHist; wi++)
@@ -374,5 +373,3 @@ public:
 private:
   Mantid::Algorithms::MaskBins masker;
 };
-
-#endif /*MASKBINSTEST_H_*/

@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MESHOBJECT2D_H_
-#define MANTID_GEOMETRY_MESHOBJECT2D_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -83,7 +82,7 @@ public:
   virtual void setMaterial(const Kernel::Material &material) override;
   const std::string &id() const override;
   void setID(const std::string &id) override { m_id = id; };
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
+  std::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Id as static
   static const std::string Id;
   size_t numberOfVertices() const;
@@ -115,10 +114,8 @@ private:
   /// Bounding box
   mutable BoundingBox m_boundingBox;
   /// Geometry Handle for rendering
-  boost::shared_ptr<GeometryHandler> m_handler;
+  std::shared_ptr<GeometryHandler> m_handler;
 };
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_MESHOBJECT2D_H_ */

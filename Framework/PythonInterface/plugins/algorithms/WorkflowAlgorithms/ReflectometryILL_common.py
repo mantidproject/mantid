@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import UnitConversion, DeltaEModeType
 from mantid.simpleapi import *
@@ -43,7 +40,7 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
 def chopperPairDistance(sampleLogs, instrumentName):
     """Return the gap between the two choppers."""
     if instrumentName == 'D17':
-        return sampleLogs.getProperty('Distance.ChopperGap').value * 1e-2
+        return sampleLogs.getProperty('Distance.ChopperGap').value # in [m]
     else:
         return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
 

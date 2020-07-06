@@ -1,21 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_WEAKPTR_H_
-#define MANTID_PYTHONINTERFACE_WEAKPTR_H_
+#pragma once
 /*
 
   This file declares the get_pointer template function to allow
   boost python to understand weak_pointers. It must be add to the
   boost namespace
 */
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
-namespace boost {
+namespace std {
 /**
  * Boost.Python doesn't understand weak_ptrs out of the box. This acts an
  * intermediary
@@ -28,14 +27,12 @@ namespace boost {
  * @return A bare pointer to the HeldType
  */
 template <typename HeldType>
-inline HeldType *get_pointer(const boost::weak_ptr<HeldType> &dataItem) {
-  if (boost::shared_ptr<HeldType> lockedItem = dataItem.lock()) {
+inline HeldType *get_pointer(const std::weak_ptr<HeldType> &dataItem) {
+  if (std::shared_ptr<HeldType> lockedItem = dataItem.lock()) {
     return lockedItem
         .get(); // Safe as we can guarantee that another reference exists
   } else {
     throw std::runtime_error("Variable invalidated, data has been deleted.");
   }
 }
-} // namespace boost
-
-#endif /* MANTID_PYTHONINTERFACE_WEAKPTR_H_ */
+} // namespace std

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef QXYTEST_H_
-#define QXYTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -67,7 +66,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
@@ -94,14 +93,14 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr sumOfCounts;
     TS_ASSERT_THROWS_NOTHING(
-        sumOfCounts = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWS + "_sumOfCounts")))
 
     Mantid::API::MatrixWorkspace_sptr sumOfNormFactors;
     TS_ASSERT_THROWS_NOTHING(
         sumOfNormFactors =
-            boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                 Mantid::API::AnalysisDataService::Instance().retrieve(
                     outputWS + "_sumOfNormFactors")))
 
@@ -138,7 +137,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
     TS_ASSERT_EQUALS(result->blocksize(), 100)
@@ -202,5 +201,3 @@ public:
     qxy.execute();
   }
 };
-
-#endif /*QXYTEST_H_*/

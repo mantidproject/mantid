@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
-#define MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -43,7 +42,7 @@ namespace Algorithms {
   instrument
   parameters. Its output will be used by RefinePowderInstrumentParameters().
 */
-class DLLExport FitPowderDiffPeaks : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL FitPowderDiffPeaks : public API::Algorithm {
 public:
   FitPowderDiffPeaks();
 
@@ -73,7 +72,7 @@ private:
   void processInputProperties();
 
   /// Generate peaks from input table workspace
-  void genPeaksFromTable(DataObjects::TableWorkspace_sptr peakparamws);
+  void genPeaksFromTable(const DataObjects::TableWorkspace_sptr &peakparamws);
 
   /// Generate a peak
   Functions::BackToBackExponential_sptr
@@ -87,11 +86,11 @@ private:
 
   /// Import instrument parameters from (input) table workspace
   void importInstrumentParameterFromTable(
-      DataObjects::TableWorkspace_sptr parameterWS);
+      const DataObjects::TableWorkspace_sptr &parameterWS);
 
   /// Import Bragg peak table workspace
   void
-  parseBraggPeakTable(DataObjects::TableWorkspace_sptr peakws,
+  parseBraggPeakTable(const DataObjects::TableWorkspace_sptr &peakws,
                       std::vector<std::map<std::string, double>> &parammaps,
                       std::vector<std::map<std::string, int>> &hklmaps);
 
@@ -109,27 +108,26 @@ private:
   //---------------------------------------------------------------------------
 
   /// Fit single peak in robust mode (no hint)
-  bool
-  fitSinglePeakRobust(Functions::BackToBackExponential_sptr peak,
-                      Functions::BackgroundFunction_sptr backgroundfunction,
-                      double peakleftbound, double peakrightbound,
-                      std::map<std::string, double> rightpeakparammap,
-                      double &finalchi2);
+  bool fitSinglePeakRobust(
+      const Functions::BackToBackExponential_sptr &peak,
+      const Functions::BackgroundFunction_sptr &backgroundfunction,
+      double peakleftbound, double peakrightbound,
+      const std::map<std::string, double> &rightpeakparammap,
+      double &finalchi2);
 
   /// Fit signle peak by Monte Carlo/simulated annealing
-  bool
-  fitSinglePeakSimulatedAnnealing(Functions::BackToBackExponential_sptr peak,
-                                  std::vector<std::string> paramtodomc);
+  bool fitSinglePeakSimulatedAnnealing(
+      const Functions::BackToBackExponential_sptr &peak,
+      const std::vector<std::string> &paramtodomc);
 
   /// Fit peak with confidence of the centre
   bool fitSinglePeakConfidentX(Functions::BackToBackExponential_sptr peak);
 
   /// Fit peak with trustful peak parameters
-  bool
-  fitSinglePeakConfident(Functions::BackToBackExponential_sptr peak,
-                         Functions::BackgroundFunction_sptr backgroundfunction,
-                         double leftbound, double rightbound, double &chi2,
-                         bool &annhilatedpeak);
+  bool fitSinglePeakConfident(
+      const Functions::BackToBackExponential_sptr &peak,
+      const Functions::BackgroundFunction_sptr &backgroundfunction,
+      double leftbound, double rightbound, double &chi2, bool &annhilatedpeak);
 
   /// Fit peak with confident parameters
   bool fitSinglePeakConfidentY(DataObjects::Workspace2D_sptr dataws,
@@ -137,33 +135,32 @@ private:
                                double dampingfactor);
 
   /// Fit peaks with confidence in fwhm and etc.
-  bool
-  fitOverlappedPeaks(std::vector<Functions::BackToBackExponential_sptr> peaks,
-                     Functions::BackgroundFunction_sptr backgroundfunction,
-                     double gfwhm);
+  bool fitOverlappedPeaks(
+      std::vector<Functions::BackToBackExponential_sptr> peaks,
+      const Functions::BackgroundFunction_sptr &backgroundfunction,
+      double gfwhm);
 
   /// Fit multiple (overlapped) peaks
   bool doFitMultiplePeaks(
-      DataObjects::Workspace2D_sptr dataws, size_t wsindex,
-      API::CompositeFunction_sptr peaksfunc,
+      const DataObjects::Workspace2D_sptr &dataws, size_t wsindex,
+      const API::CompositeFunction_sptr &peaksfunc,
       std::vector<Functions::BackToBackExponential_sptr> peakfuncs,
       std::vector<bool> &vecfitgood, std::vector<double> &vecchi2s);
 
   /// Use Le Bail method to estimate and set the peak heights
   void estimatePeakHeightsLeBail(
-      DataObjects::Workspace2D_sptr dataws, size_t wsindex,
+      const DataObjects::Workspace2D_sptr &dataws, size_t wsindex,
       std::vector<Functions::BackToBackExponential_sptr> peaks);
 
   /// Set constraints on a group of overlapped peaks for fitting
   void setOverlappedPeaksConstraints(
-      std::vector<Functions::BackToBackExponential_sptr> peaks);
+      const std::vector<Functions::BackToBackExponential_sptr> &peaks);
 
   /// Fit 1 peak by 1 minimizer of 1 call of minimzer (simple version)
-  bool doFit1PeakSimple(DataObjects::Workspace2D_sptr dataws,
-                        size_t workspaceindex,
-                        Functions::BackToBackExponential_sptr peakfunction,
-                        std::string minimzername, size_t maxiteration,
-                        double &chi2);
+  bool doFit1PeakSimple(
+      const DataObjects::Workspace2D_sptr &dataws, size_t workspaceindex,
+      const Functions::BackToBackExponential_sptr &peakfunction,
+      const std::string &minimzername, size_t maxiteration, double &chi2);
 
   /// Fit 1 peak and background
   // bool doFit1PeakBackgroundSimple(DataObjects::Workspace2D_sptr dataws,
@@ -173,33 +170,32 @@ private:
   // string minimzername, size_t maxiteration, double &chi2);
 
   /// Fit single peak with background to raw data
-  bool
-  doFit1PeakBackground(DataObjects::Workspace2D_sptr dataws, size_t wsindex,
-                       Functions::BackToBackExponential_sptr peak,
-                       Functions::BackgroundFunction_sptr backgroundfunction,
-                       double &chi2);
+  bool doFit1PeakBackground(
+      const DataObjects::Workspace2D_sptr &dataws, size_t wsindex,
+      const Functions::BackToBackExponential_sptr &peak,
+      const Functions::BackgroundFunction_sptr &backgroundfunction,
+      double &chi2);
 
   /// Fit 1 peak by using a sequential of minimizer
-  bool doFit1PeakSequential(DataObjects::Workspace2D_sptr dataws,
-                            size_t workspaceindex,
-                            Functions::BackToBackExponential_sptr peakfunction,
-                            std::vector<std::string> minimzernames,
-                            std::vector<size_t> maxiterations,
-                            std::vector<double> dampfactors, double &chi2);
+  bool doFit1PeakSequential(
+      const DataObjects::Workspace2D_sptr &dataws, size_t workspaceindex,
+      const Functions::BackToBackExponential_sptr &peakfunction,
+      std::vector<std::string> minimzernames, std::vector<size_t> maxiterations,
+      const std::vector<double> &dampfactors, double &chi2);
 
   /// Fit N overlapped peaks in a simple manner
   bool doFitNPeaksSimple(
-      DataObjects::Workspace2D_sptr dataws, size_t wsindex,
-      API::CompositeFunction_sptr peaksfunc,
-      std::vector<Functions::BackToBackExponential_sptr> peakfuncs,
-      std::string minimizername, size_t maxiteration, double &chi2);
+      const DataObjects::Workspace2D_sptr &dataws, size_t wsindex,
+      const API::CompositeFunction_sptr &peaksfunc,
+      const std::vector<Functions::BackToBackExponential_sptr> &peakfuncs,
+      const std::string &minimizername, size_t maxiteration, double &chi2);
 
   /// Store the function's parameter values to a map
-  void storeFunctionParameters(API::IFunction_sptr function,
+  void storeFunctionParameters(const API::IFunction_sptr &function,
                                std::map<std::string, double> &parammaps);
 
   /// Restore the function's parameter values from a map
-  void restoreFunctionParameters(API::IFunction_sptr function,
+  void restoreFunctionParameters(const API::IFunction_sptr &function,
                                  std::map<std::string, double> parammap);
 
   /// Calculate the range to fit peak/peaks group
@@ -226,7 +222,8 @@ private:
   void cropWorkspace(double tofmin, double tofmax);
 
   /// Parse Fit() output parameter workspace
-  std::string parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws);
+  std::string
+  parseFitParameterWorkspace(const API::ITableWorkspace_sptr &paramws);
 
   /// Build a partial workspace from source
   // DataObjects::Workspace2D_sptr
@@ -241,8 +238,8 @@ private:
                                double &chi2);
 
   /// Observe peak range with hint from right peak's properties
-  void observePeakRange(Functions::BackToBackExponential_sptr thispeak,
-                        Functions::BackToBackExponential_sptr rightpeak,
+  void observePeakRange(const Functions::BackToBackExponential_sptr &thispeak,
+                        const Functions::BackToBackExponential_sptr &rightpeak,
                         double refpeakshift, double &peakleftbound,
                         double &peakrightbound);
 
@@ -269,12 +266,12 @@ private:
                 bool calchi2);
 
   std::pair<bool, double>
-  doFitPeak(DataObjects::Workspace2D_sptr dataws,
-            Functions::BackToBackExponential_sptr peakfunction,
+  doFitPeak(const DataObjects::Workspace2D_sptr &dataws,
+            const Functions::BackToBackExponential_sptr &peakfunction,
             double guessedfwhm);
 
   /// Fit background-removed peak by Gaussian
-  bool doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
+  bool doFitGaussianPeak(const DataObjects::Workspace2D_sptr &dataws,
                          size_t workspaceindex, double in_center,
                          double leftfwhm, double rightfwhm, double &center,
                          double &sigma, double &height);
@@ -289,28 +286,28 @@ private:
                            Functions::BackgroundFunction_sptr background);
 
   /// Parse the fitting result
-  std::string parseFitResult(API::IAlgorithm_sptr fitalg, double &chi2,
+  std::string parseFitResult(const API::IAlgorithm_sptr &fitalg, double &chi2,
                              bool &fitsuccess);
 
   /// Calculate a Bragg peak's centre in TOF from its Miller indices
   double calculatePeakCentreTOF(int h, int k, int l);
 
   /// Get parameter value from m_instrumentParameters
-  double getParameter(std::string parname);
+  double getParameter(const std::string &parname);
 
   /// Fit peaks in the same group (i.e., single peak or overlapped peaks)
   void fitPeaksGroup(std::vector<size_t> peakindexes);
 
   /// Build partial workspace for fitting
   DataObjects::Workspace2D_sptr
-  buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
+  buildPartialWorkspace(const API::MatrixWorkspace_sptr &sourcews,
                         size_t workspaceindex, double leftbound,
                         double rightbound);
 
   /// Plot a single peak to output vector
-  void plotFunction(API::IFunction_sptr peakfunction,
-                    Functions::BackgroundFunction_sptr background,
-                    API::FunctionDomain1DVector domain);
+  void plotFunction(const API::IFunction_sptr &peakfunction,
+                    const Functions::BackgroundFunction_sptr &background,
+                    const API::FunctionDomain1DVector &domain);
 
   //-----------------------------------------------------------------------------------------------
 
@@ -412,28 +409,26 @@ inline double linearInterpolateY(double x0, double xf, double y0, double yf,
 }
 
 /// Estimate background for a pattern in a coarse mode
-void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
-                              Functions::BackgroundFunction_sptr background,
-                              size_t wsindexraw, size_t wsindexbkgd,
-                              size_t wsindexpeak);
+void estimateBackgroundCoarse(
+    const DataObjects::Workspace2D_sptr &dataws,
+    const Functions::BackgroundFunction_sptr &background, size_t wsindexraw,
+    size_t wsindexbkgd, size_t wsindexpeak);
 
 /// Estimate peak parameters;
-bool observePeakParameters(DataObjects::Workspace2D_sptr dataws, size_t wsindex,
-                           double &centre, double &height, double &fwhm,
-                           std::string &errmsg);
+bool observePeakParameters(const DataObjects::Workspace2D_sptr &dataws,
+                           size_t wsindex, double &centre, double &height,
+                           double &fwhm, std::string &errmsg);
 
 /// Find maximum value
 size_t findMaxValue(const std::vector<double> &Y);
 
 /// Find maximum value
-size_t findMaxValue(API::MatrixWorkspace_sptr dataws, size_t wsindex,
+size_t findMaxValue(const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
                     double leftbound, double rightbound);
 
 /// Get function parameter name, value and etc information in string
-std::string getFunctionInfo(API::IFunction_sptr function);
+std::string getFunctionInfo(const API::IFunction_sptr &function);
 
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_ */

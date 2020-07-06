@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -84,7 +83,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -142,7 +141,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -191,7 +190,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -236,7 +235,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -295,7 +294,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -328,7 +327,7 @@ public:
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
-    auto deadTimes = boost::make_shared<TableWorkspace>();
+    auto deadTimes = std::make_shared<TableWorkspace>();
     deadTimes->addColumn("int", "spectrum");
     deadTimes->addColumn("double", "dead-time");
 
@@ -361,7 +360,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -438,7 +437,7 @@ public:
 
     MuonProcess alg;
     alg.setRethrows(true);
-    Workspace_sptr badWS = boost::make_shared<TableWorkspace>();
+    Workspace_sptr badWS = std::make_shared<TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", badWS));
@@ -572,7 +571,7 @@ public:
     }
 
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (!ws)
@@ -588,7 +587,7 @@ public:
 private:
   TableWorkspace_sptr createGroupingTable(const std::vector<int> &group1,
                                           const std::vector<int> &group2) {
-    auto t = boost::make_shared<TableWorkspace>();
+    auto t = std::make_shared<TableWorkspace>();
 
     t->addColumn("vector_int", "Detectors");
 
@@ -635,5 +634,3 @@ private:
     return loadData("MUSR00015189.nxs");
   }
 };
-
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_ */

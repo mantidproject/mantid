@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PATTERNBOX_H
-#define PATTERNBOX_H
+#pragma once
 
 #include <QComboBox>
 
@@ -57,5 +56,3 @@ private:
   static size_t numberOfPatterns();
   static const Qt::BrushStyle patterns[];
 };
-
-#endif

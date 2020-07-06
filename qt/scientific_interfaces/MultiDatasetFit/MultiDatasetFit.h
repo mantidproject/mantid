@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIDATASETFIT_H_
-#define MULTIDATASETFIT_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidKernel/Statistics.h"
@@ -80,7 +79,7 @@ public:
   /// Get the tie for a local parameter.
   QString getLocalParameterTie(const QString &parName, int i) const;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString &parName, int i, QString tie);
+  void setLocalParameterTie(const QString &parName, int i, const QString &tie);
   /// Log a warning
   static void logWarning(const std::string &msg);
 
@@ -110,7 +109,7 @@ protected:
 
 private:
   void createPlotToolbar();
-  boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
+  std::shared_ptr<Mantid::API::IFunction> createFunction() const;
   void updateParameters(const Mantid::API::IFunction &fun);
   void showInfo(const QString &text);
   bool eventFilter(QObject *widget, QEvent *evn) override;
@@ -140,7 +139,7 @@ private:
   /// Name of the output workspace
   QString m_outputWorkspaceName;
   /// Fit algorithm runner
-  boost::shared_ptr<API::AlgorithmRunner> m_fitRunner;
+  std::shared_ptr<API::AlgorithmRunner> m_fitRunner;
   /// Remembers setting for just current session
   int m_fitAllSettings;
   /// Fit output status
@@ -149,5 +148,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*MULTIDATASETFITDIALOG_H_*/

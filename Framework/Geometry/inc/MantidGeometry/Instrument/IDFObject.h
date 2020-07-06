@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_IDFOBJECT_H_
-#define MANTID_GEOMETRY_IDFOBJECT_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -97,10 +96,8 @@ public:
   bool exists() const override { return false; }
 };
 
-using IDFObject_sptr = boost::shared_ptr<AbstractIDFObject>;
-using IDFObject_const_sptr = boost::shared_ptr<const AbstractIDFObject>;
+using IDFObject_sptr = std::shared_ptr<AbstractIDFObject>;
+using IDFObject_const_sptr = std::shared_ptr<const AbstractIDFObject>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_IDFOBJECT_H_ */

@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef THREADSCHEDULER_H_
-#define THREADSCHEDULER_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Task.h"
 #include <deque>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -292,5 +292,3 @@ protected:
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* THREADSCHEDULER_H_ */

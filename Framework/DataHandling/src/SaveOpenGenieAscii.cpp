@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
 
@@ -51,7 +51,7 @@ void SaveOpenGenieAscii::init() {
                   "Whether to include the header lines (default: true)");
   std::vector<std::string> header{"ENGIN-X Format"};
   declareProperty("OpenGenieFormat", "ENGIN-X Format",
-                  boost::make_shared<Kernel::StringListValidator>(header),
+                  std::make_shared<Kernel::StringListValidator>(header),
                   "The format required to successfully load the file to "
                   "OpenGenie: ENGIN-X Format (default)");
 }

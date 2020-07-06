@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_MUONGROUPINGASYMMETRY_H_
-#define MANTID_MUON_MUONGROUPINGASYMMETRY_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -45,12 +44,10 @@ private:
 
   std::map<std::string, std::string> validateInputs() override;
 
-  WorkspaceGroup_sptr createGroupWorkspace(WorkspaceGroup_sptr inputWS);
+  WorkspaceGroup_sptr createGroupWorkspace(const WorkspaceGroup_sptr &inputWS);
 
-  void addGroupingAsymmetrySampleLogs(MatrixWorkspace_sptr workspace);
+  void addGroupingAsymmetrySampleLogs(const MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Muon
 } // namespace Mantid
-
-#endif /* MANTID_MUON_MUONGROUPINGASYMMETRY_H_ */

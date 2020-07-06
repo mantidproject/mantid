@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -297,7 +297,7 @@ void PanelsSurface::addFlatBankOfDetectors(
     const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors) {
   int index = m_flatBanks.size();
   // save bank info
-  FlatBankInfo *info = new FlatBankInfo(this);
+  auto *info = new FlatBankInfo(this);
   m_flatBanks << info;
   // record the first detector index of the bank
   info->startDetectorIndex = detectors.front();
@@ -332,7 +332,7 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   auto corners = retrievePanelCorners(componentInfo, rootIndex);
   auto normal = calculatePanelNormal(corners);
   // save bank info
-  FlatBankInfo *info = new FlatBankInfo(this);
+  auto *info = new FlatBankInfo(this);
   m_flatBanks << info;
   auto ref = corners[0];
   // find the rotation to put the bank on the plane
@@ -431,7 +431,7 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
 
   // save bank info
   auto index = m_flatBanks.size();
-  FlatBankInfo *info = new FlatBankInfo(this);
+  auto *info = new FlatBankInfo(this);
   m_flatBanks << info;
   // record the first detector index of the bank
   info->startDetectorIndex = componentInfo.children(tubes.front()).front();

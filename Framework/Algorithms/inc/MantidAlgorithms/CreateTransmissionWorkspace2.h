@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE2_H_
-#define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE2_H_
+#pragma once
 
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 
 namespace Mantid {
@@ -15,7 +15,7 @@ namespace Algorithms {
 /** CreateTransmissionWorkspace2 : Create a transmission run workspace in
  Wavelength given one or more TOF workspaces. Version 2 of the algorithm.
  */
-class DLLExport CreateTransmissionWorkspace2
+class MANTID_ALGORITHMS_DLL CreateTransmissionWorkspace2
     : public ReflectometryWorkflowBase2 {
 public:
   const std::string name() const override;
@@ -36,15 +36,15 @@ private:
 
   /// Normalize by monitors
   API::MatrixWorkspace_sptr
-  normalizeDetectorsByMonitors(API::MatrixWorkspace_sptr IvsTOF);
+  normalizeDetectorsByMonitors(const API::MatrixWorkspace_sptr &IvsTOF);
   /// Get the run numbers of the input workspaces
   void getRunNumbers();
   /// Get the run number of a given workspace
   std::string getRunNumber(std::string const &propertyName);
   /// Store a transition run in ADS
-  void setOutputTransmissionRun(int which, API::MatrixWorkspace_sptr ws);
+  void setOutputTransmissionRun(int which, const API::MatrixWorkspace_sptr &ws);
   /// Store the stitched transition workspace run in ADS
-  void setOutputWorkspace(API::MatrixWorkspace_sptr ws);
+  void setOutputWorkspace(const API::MatrixWorkspace_sptr &ws);
 
   /// Run numbers for the first/second transmission run
   std::string m_firstTransmissionRunNumber;
@@ -56,5 +56,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE2_H_ */

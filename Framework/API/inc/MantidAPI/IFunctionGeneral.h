@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IFUNCTIONGENERAL_H_
-#define MANTID_API_IFUNCTIONGENERAL_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 
@@ -24,7 +23,7 @@ namespace API {
     The domain and the values object can have different sizes.
     In particular the domain can be empty.
   */
-class DLLExport IFunctionGeneral : public virtual IFunction {
+class MANTID_API_DLL IFunctionGeneral : public virtual IFunction {
 public:
   void function(const FunctionDomain &domain,
                 FunctionValues &values) const override;
@@ -58,5 +57,3 @@ protected:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_IFUNCTIONGENERAL_H_ */

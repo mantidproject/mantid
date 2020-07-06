@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAXENTTEST_H_
-#define MANTID_ALGORITHMS_MAXENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -928,7 +927,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+    auto label = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         Mantid::Kernel::UnitFactory::Instance().create("Label"));
 
     // 1. From (Time, s) to (Frequency, Hz)
@@ -986,13 +985,13 @@ public:
    * We have to use the ADS to test WorkspaceGroups
    */
   void testValidateInputsWithWSGroup() {
-    auto ws1 = boost::static_pointer_cast<Workspace>(
+    auto ws1 = std::static_pointer_cast<Workspace>(
         WorkspaceCreationHelper::create2DWorkspace(5, 10));
-    auto ws2 = boost::static_pointer_cast<Workspace>(
+    auto ws2 = std::static_pointer_cast<Workspace>(
         WorkspaceCreationHelper::create2DWorkspace(5, 10));
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().add("group", group);
     group->add("workspace1");
     group->add("workspace2");
@@ -1063,7 +1062,7 @@ public:
 
   void test_histogram_workspace() {
     const size_t size = 10;
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size + 1, size));
     // We don't care about values, except to check they are transferred
     // to data after one iteration.
@@ -1102,7 +1101,7 @@ public:
 
   void test_pointdata_workspace() {
     const size_t size = 10;
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
     // We don't care about values, except to check they are transferred
     // to data after one iteration.
@@ -1247,7 +1246,7 @@ public:
 
     const size_t size = 51;
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
 
     // x = 2 * pi * i / N
@@ -1374,5 +1373,3 @@ private:
   MatrixWorkspace_sptr input;
   IAlgorithm_sptr alg;
 };
-
-#endif /* MANTID_ALGORITHMS_MAXENTTEST_H_ */

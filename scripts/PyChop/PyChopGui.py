@@ -2,8 +2,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, invalid-name, unused-argument, unused-import, multiple-statements
 # pylint: disable=attribute-defined-outside-init, protected-access, super-on-old-class, redefined-outer-name
@@ -14,8 +14,6 @@
 This module contains a class to create a graphical user interface for PyChop.
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six import string_types
 import sys
 import re
 import numpy as np
@@ -162,7 +160,7 @@ class PyChopGui(QMainWindow):
             freq_in = [freq_in, freqpr]
         if not self.widgets['Chopper2Phase']['Label'].isHidden():
             chop2phase = self.widgets['Chopper2Phase']['Edit'].text()
-            if isinstance(self.engine.chopper_system.defaultPhase[0], string_types):
+            if isinstance(self.engine.chopper_system.defaultPhase[0], str):
                 chop2phase = str(chop2phase)
             else:
                 chop2phase = float(chop2phase) % (1e6 / self.engine.moderator.source_rep)
@@ -300,7 +298,7 @@ class PyChopGui(QMainWindow):
         line, = self.qeaxes.plot(np.hstack(q2), np.concatenate((np.flipud(en), en)).tolist() * len(self.engine.detector.tthlims))
         line.set_label(label_text)
         self.qeaxes.set_xlim([0, self.qeaxes_xlim])
-        legend_set_draggable(self.qesaxes.legend(), True)
+        legend_set_draggable(self.qeaxes.legend(), True)
         self.qeaxes.set_xlabel(r'$|Q| (\mathrm{\AA}^{-1})$')
         self.qeaxes.set_ylabel('Energy Transfer (meV)')
         self.qecanvas.draw()

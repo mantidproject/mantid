@@ -43,6 +43,7 @@ set(TEST_PY_FILES
     MolDynTest.py
     MSDFitTest.py
     OSIRISDiffractionReductionTest.py
+    PaalmanPingsMonteCarloAbsorptionTest.py
     PowderILLDetectorScanTest.py
     PowderILLParameterScanTest.py
     ReflectometryILLAutoProcessTest.py

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_WARNINGSUPPRESSIONS_H_
-#define MANTID_KERNEL_WARNINGSUPPRESSIONS_H_
+#pragma once
 
 /*  A system-wide file to contain, e.g., useful system-dependent macros
     for suppressing compiler warnings.
@@ -109,5 +108,3 @@
 #else
 #define GNU_UNUSED_FUNCTION
 #endif
-
-#endif /*MANTID_KERNEL_WARNINGSUPPRESSIONS_H_*/

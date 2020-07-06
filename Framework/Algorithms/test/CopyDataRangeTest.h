@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_COPYDATARANGETEST_H_
-#define MANTID_COPYDATARANGETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -38,8 +37,8 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
-IAlgorithm_sptr setUpAlgorithm(MatrixWorkspace_sptr inputWorkspace,
-                               MatrixWorkspace_sptr destWorkspace,
+IAlgorithm_sptr setUpAlgorithm(const MatrixWorkspace_sptr &inputWorkspace,
+                               const MatrixWorkspace_sptr &destWorkspace,
                                int const &specMin, int const &specMax,
                                double const &xMin, double const &xMax,
                                int const &yInsertionIndex,
@@ -69,7 +68,7 @@ IAlgorithm_sptr setUpAlgorithm(std::string const &inputName,
                         xMax, yInsertionIndex, xInsertionIndex, outputName);
 }
 
-void populateSpectrum(MatrixWorkspace_sptr workspace,
+void populateSpectrum(const MatrixWorkspace_sptr &workspace,
                       std::size_t const &spectrum,
                       std::vector<double> const &yData,
                       std::vector<double> const &xData,
@@ -79,7 +78,7 @@ void populateSpectrum(MatrixWorkspace_sptr workspace,
   workspace->mutableE(spectrum) = HistogramE(eData);
 }
 
-void populateWorkspace(MatrixWorkspace_sptr workspace,
+void populateWorkspace(const MatrixWorkspace_sptr &workspace,
                        std::vector<double> const &yData,
                        std::vector<double> const &xData,
                        std::vector<double> const &eData) {
@@ -95,7 +94,7 @@ constructHistogramData(Mantid::MantidVec::const_iterator fromIterator,
   return histogram;
 }
 
-void populateOutputWorkspace(MatrixWorkspace_sptr workspace,
+void populateOutputWorkspace(const MatrixWorkspace_sptr &workspace,
                              std::vector<double> const &yData,
                              std::vector<double> const &eData) {
   std::vector<double> const xData = {2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
@@ -112,8 +111,8 @@ void populateOutputWorkspace(MatrixWorkspace_sptr workspace,
   }
 }
 
-ITableWorkspace_sptr compareWorkspaces(MatrixWorkspace_sptr workspace1,
-                                       MatrixWorkspace_sptr workspace2,
+ITableWorkspace_sptr compareWorkspaces(const MatrixWorkspace_sptr &workspace1,
+                                       const MatrixWorkspace_sptr &workspace2,
                                        double tolerance = 0.000001) {
   auto compareAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
   compareAlg->setProperty("Workspace1", workspace1);
@@ -275,5 +274,3 @@ private:
     AnalysisDataService::Instance().addOrReplace(destName, destWorkspace);
   }
 };
-
-#endif /* MANTID_COPYDATARANGETEST_H_ */

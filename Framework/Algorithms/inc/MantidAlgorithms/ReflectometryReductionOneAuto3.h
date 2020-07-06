@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO3_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO3_H_
+#pragma once
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "ReflectometryWorkflowBase2.h"
 
 #include <boost/optional.hpp>
@@ -18,7 +18,7 @@ namespace Algorithms {
 /** ReflectometryReductionOneAuto3 : Algorithm to run ReflectometryReductionOne,
 attempting to pick instrument parameters for missing properties. Version 3.
 */
-class DLLExport ReflectometryReductionOneAuto3
+class MANTID_ALGORITHMS_DLL ReflectometryReductionOneAuto3
     : public ReflectometryWorkflowBase2 {
 public:
   const std::string name() const override;
@@ -58,35 +58,37 @@ private:
   void init() override;
   void exec() override;
   std::string
-  getRunNumberForWorkspaceGroup(WorkspaceGroup_const_sptr workspace);
+  getRunNumberForWorkspaceGroup(const WorkspaceGroup_const_sptr &workspace);
   WorkspaceNames getOutputWorkspaceNames();
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
-  getDetectorNames(Mantid::API::MatrixWorkspace_sptr inputWS);
+  getDetectorNames(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   /// Correct detector positions vertically
   Mantid::API::MatrixWorkspace_sptr
   correctDetectorPositions(Mantid::API::MatrixWorkspace_sptr inputWS,
                            const double twoTheta);
   /// Calculate theta
-  double calculateTheta(Mantid::API::MatrixWorkspace_sptr inputWS);
+  double calculateTheta(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   /// Find cropping and binning parameters
-  RebinParams getRebinParams(MatrixWorkspace_sptr inputWS, const double theta);
-  boost::optional<double> getQStep(MatrixWorkspace_sptr inputWS,
+  RebinParams getRebinParams(const MatrixWorkspace_sptr &inputWS,
+                             const double theta);
+  boost::optional<double> getQStep(const MatrixWorkspace_sptr &inputWS,
                                    const double theta);
   // Optionally scale a workspace
   Mantid::API::MatrixWorkspace_sptr
   scale(Mantid::API::MatrixWorkspace_sptr inputWS);
   /// Rebin a workspace in Q
   Mantid::API::MatrixWorkspace_sptr
-  rebin(Mantid::API::MatrixWorkspace_sptr inputWS, const RebinParams &params);
+  rebin(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+        const RebinParams &params);
   /// Optionally crop a workspace in Q
   MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS,
                              const RebinParams &params);
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(
-      Mantid::API::IAlgorithm_sptr alg,
-      Mantid::Geometry::Instrument_const_sptr instrument);
+      const Mantid::API::IAlgorithm_sptr &alg,
+      const Mantid::Geometry::Instrument_const_sptr &instrument);
   /// Get a polarization efficiencies workspace.
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
   getPolarizationEfficiencies();
@@ -111,5 +113,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO3_H_ */

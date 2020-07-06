@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECTFITPROPERTYBROWSER_H_
-#define INDIRECTFITPROPERTYBROWSER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -61,12 +60,13 @@ public:
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveMembers);
   void setFitEnabled(bool enable);
-  void setCurrentDataset(TableRowIndex i);
-  TableRowIndex currentDataset() const;
-  void updateFunctionBrowserData(TableRowIndex nData,
-                                 const QStringList &datasetNames,
-                                 const std::vector<double> &qValues);
-  void updatePlotGuess(MatrixWorkspace_const_sptr sampleWorkspace);
+  void setCurrentDataset(FitDomainIndex i);
+  FitDomainIndex currentDataset() const;
+  void updateFunctionBrowserData(
+      int nData, const QStringList &datasetNames,
+      const std::vector<double> &qValues,
+      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
+  void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
@@ -78,7 +78,7 @@ public slots:
   void setModelResolution(std::string const &name,
                           TableDatasetIndex const &index);
   void setModelResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions);
+      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
 
 protected slots:
   void clear();
@@ -116,5 +116,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECTFITPROPERTYBROWSER_H_*/

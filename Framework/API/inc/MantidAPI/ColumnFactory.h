@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_COLUMNFACTORY_H_
-#define MANTID_API_COLUMNFACTORY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -38,7 +37,7 @@ public:
   ColumnFactoryImpl(const ColumnFactoryImpl &) = delete;
   ColumnFactoryImpl &operator=(const ColumnFactoryImpl &) = delete;
   /// Creates an instance of a column
-  boost::shared_ptr<Column> create(const std::string &type) const override;
+  std::shared_ptr<Column> create(const std::string &type) const override;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ColumnFactoryImpl>;
@@ -60,5 +59,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::ColumnFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif /*MANTID_API_COLUMNFACTORY_H_*/

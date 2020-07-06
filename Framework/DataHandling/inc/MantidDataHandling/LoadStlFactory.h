@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADSTLFACTORY_H_
-#define MANTID_DATAHANDLING_LOADSTLFACTORY_H_
+#pragma once
 
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
@@ -16,7 +15,7 @@ namespace DataHandling {
 
 class MANTID_DATAHANDLING_DLL LoadStlFactory {
 public:
-  static std::unique_ptr<LoadStl> createReader(std::string filename,
+  static std::unique_ptr<LoadStl> createReader(const std::string &filename,
                                                ScaleUnits scaleType) {
     std::unique_ptr<LoadStl> reader = nullptr;
     if (LoadBinaryStl::isBinarySTL(filename)) {
@@ -33,4 +32,3 @@ public:
 
 } // namespace DataHandling
 } // namespace Mantid
-#endif

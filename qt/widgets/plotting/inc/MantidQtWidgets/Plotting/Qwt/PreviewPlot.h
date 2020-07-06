@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_QWT_PREVIEWPLOT_H_
-#define MANTIDQTMANTIDWIDGETS_QWT_PREVIEWPLOT_H_
+#pragma once
 
 #include "ui_PreviewPlot.h"
 
@@ -74,7 +73,7 @@ public:
   getAxisRange(AxisID axisID = AxisID::XBottom) const;
 
   QPair<double, double>
-  getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws);
+  getCurveRange(const Mantid::API::MatrixWorkspace_sptr &ws);
   QPair<double, double> getCurveRange(const QString &curveName);
 
   void addSpectrum(
@@ -86,7 +85,7 @@ public:
       const QColor &curveColour = QColor(),
       const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
 
-  void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr ws);
+  void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws);
   void removeSpectrum(const QString &curveName);
 
   bool hasCurve(const QString &curveName);
@@ -111,6 +110,7 @@ public:
   QString getAxisType(int axisID);
 
   void disableYAxisMenu();
+  void disableContextMenu();
 
 signals:
   /// Signals that the plot should be refreshed
@@ -157,16 +157,19 @@ private:
                 const QColor &curveColour, const QString &curveName = "");
   void removeCurve(QwtPlotItem *curve);
 
-  QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group,
-                                     QStringList items, QString defaultItem);
+  QList<QAction *> addOptionsToMenus(const QString &menuName,
+                                     QActionGroup *group,
+                                     const QStringList &items,
+                                     const QString &defaultItem);
 
-  QStringList getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr ws);
+  QStringList
+  getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
 
 private slots:
   void showContextMenu(QPoint position);
   void handleViewToolSelect();
   void handleAxisTypeSelect();
-  void removeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  void removeWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
 
 private:
   Ui::PreviewPlot m_uiForm;
@@ -226,5 +229,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQTMANTIDWIDGETS_QWT_PREVIEWPLOT_H_

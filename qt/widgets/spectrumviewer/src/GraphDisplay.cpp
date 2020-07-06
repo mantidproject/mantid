@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
 
@@ -13,6 +13,8 @@
 #include <QString>
 #include <QVector>
 #include <boost/algorithm/clamp.hpp>
+#include <utility>
+
 #include <qwt_scale_engine.h>
 
 namespace MantidQt {
@@ -56,7 +58,7 @@ GraphDisplay::~GraphDisplay() { clearCurves(); }
  *                   the table.
  */
 void GraphDisplay::setDataSource(SpectrumDataSource_sptr dataSource) {
-  m_dataSource = dataSource;
+  m_dataSource = std::move(dataSource);
 }
 
 /**
@@ -103,10 +105,10 @@ void GraphDisplay::setData(const QVector<double> &xData,
 
     if (m_isLogX) // only set log scale for x if NOT vertical
     {
-      QwtLog10ScaleEngine *log_engine = new QwtLog10ScaleEngine();
+      auto *log_engine = new QwtLog10ScaleEngine();
       m_graphPlot->setAxisScaleEngine(QwtPlot::xBottom, log_engine);
     } else {
-      QwtLinearScaleEngine *linear_engine = new QwtLinearScaleEngine();
+      auto *linear_engine = new QwtLinearScaleEngine();
       m_graphPlot->setAxisScaleEngine(QwtPlot::xBottom, linear_engine);
     }
   }

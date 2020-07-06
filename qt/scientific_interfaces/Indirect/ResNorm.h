@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_RESNORM_H_
-#define MANTIDQTCUSTOMINTERFACES_RESNORM_H_
+#pragma once
 
 #include "IndirectBayesTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -52,15 +51,17 @@ private:
   void setFileExtensionsByName(bool filter) override;
 
   void processLogs();
-  void addAdditionalLogs(Mantid::API::WorkspaceGroup_sptr resultGroup) const;
-  void addAdditionalLogs(Mantid::API::Workspace_sptr resultWorkspace) const;
+  void
+  addAdditionalLogs(const Mantid::API::WorkspaceGroup_sptr &resultGroup) const;
+  void
+  addAdditionalLogs(const Mantid::API::Workspace_sptr &resultWorkspace) const;
   std::map<std::string, std::string> getAdditionalLogStrings() const;
   std::map<std::string, std::string> getAdditionalLogNumbers() const;
   double getDoubleManagerProperty(QString const &propName) const;
-  void copyLogs(Mantid::API::MatrixWorkspace_sptr resultWorkspace,
-                Mantid::API::WorkspaceGroup_sptr resultGroup) const;
-  void copyLogs(Mantid::API::MatrixWorkspace_sptr resultWorkspace,
-                Mantid::API::Workspace_sptr workspace) const;
+  void copyLogs(const Mantid::API::MatrixWorkspace_sptr &resultWorkspace,
+                const Mantid::API::WorkspaceGroup_sptr &resultGroup) const;
+  void copyLogs(const Mantid::API::MatrixWorkspace_sptr &resultWorkspace,
+                const Mantid::API::Workspace_sptr &workspace) const;
 
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
@@ -76,5 +77,3 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

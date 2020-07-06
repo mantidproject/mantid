@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SAVEHKLTEST_H_
-#define MANTID_CRYSTAL_SAVEHKLTEST_H_
+#pragma once
 
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -48,7 +47,7 @@ public:
     auto ws = createTestPeaksWorkspace(4, 4, 2);
     const double smu{0.357}, amu{0.011};
     NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
-    auto sampleShape = boost::make_shared<CSGObject>();
+    auto sampleShape = std::make_shared<CSGObject>();
     sampleShape->setMaterial(Material("SetInSaveHKLTest", neutron, 1.0));
     ws->mutableSample().setShape(sampleShape);
     API::Run &mrun = ws->mutableRun();
@@ -93,7 +92,7 @@ private:
                                                size_t numPeaksPerBank) {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
-    auto ws = boost::make_shared<PeaksWorkspace>();
+    auto ws = std::make_shared<PeaksWorkspace>();
     ws->setInstrument(inst);
 
     for (int run = 1000; run < numRuns + 1000; run++) {
@@ -173,5 +172,3 @@ private:
       Poco::File(filepath).remove();
   }
 };
-
-#endif /* MANTID_CRYSTAL_SAVEHKLTEST_H_ */

@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-from __future__ import absolute_import
-
 # std imports
 import math
 import numpy as np
-import collections
+from collections.abc import Sequence
 
 # 3rd party imports
 from matplotlib.gridspec import GridSpec
@@ -20,7 +18,6 @@ from matplotlib.legend import Legend
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
-from mantid.py3compat import is_text_string, string_types
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -43,6 +40,8 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
 # -----------------------------------------------------------------------------
 # Decorators
 # -----------------------------------------------------------------------------
+
+
 def manage_workspace_names(func):
     """
     A decorator to go around plotting functions.
@@ -75,7 +74,7 @@ def figure_title(workspaces, fig_num):
     def wsname(w):
         return w.name() if hasattr(w, 'name') else w
 
-    if is_text_string(workspaces) or not isinstance(workspaces, collections.Sequence):
+    if isinstance(workspaces, str) or not isinstance(workspaces, Sequence):
         # assume a single workspace
         first = workspaces
     else:
@@ -84,10 +83,11 @@ def figure_title(workspaces, fig_num):
 
     return wsname(first) + '-' + str(fig_num)
 
+
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False, waterfall=False):
+         window_title=None, tiled=False, waterfall=False, log_name=None, log_values=None):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -105,6 +105,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param window_title: A string denoting name of the GUI window which holds the graph
     :param tiled: An optional flag controlling whether to do a tiled or overlayed plot
     :param waterfall: An optional flag controlling whether or not to do a waterfall plot
+    :param log_name: The optional log being plotted against.
+    :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
     if plot_kwargs is None:
@@ -141,7 +143,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
         ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
         ax.axis('on')
-        _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs)
+        _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
 
     # Can't have a waterfall plot with only one line.
     if len(nums)*len(workspaces) == 1 and waterfall:
@@ -241,12 +243,7 @@ def raise_if_not_sequence(value, seq_name, element_type=None):
     if element_type is not None:
         def raise_if_not_type(x):
             if not isinstance(x, element_type):
-                if element_type == MatrixWorkspace:
-                    # If the workspace is the wrong type, log the error and remove it from the list so that the other
-                    # workspaces can still be plotted.
-                    LOGGER.warning("{} has unexpected type '{}'".format(x, x.__class__.__name__))
-                else:
-                    raise ValueError("Unexpected type: '{}'".format(x.__class__.__name__))
+                raise ValueError(f"{x} has unexpected type: '{x.__class__.__name__}'")
 
         # Map in Python3 is an iterator, so ValueError will not be raised unless the values are yielded.
         # converting to a list forces yielding
@@ -282,7 +279,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     else:
         fig, _, _, _ = create_subplots(axes_num)
 
-    if not ax_properties:
+    if not ax_properties and not overplot:
         ax_properties = {}
         if ConfigService.getString("plots.xAxesScale").lower() == 'log':
             ax_properties['xscale'] = 'log'
@@ -326,6 +323,8 @@ def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, 
 def _add_default_plot_kwargs_from_settings(plot_kwargs, errors):
     if 'linestyle' not in plot_kwargs:
         plot_kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
+    if 'drawstyle' not in plot_kwargs:
+        plot_kwargs['drawstyle'] = ConfigService.getString("plots.line.DrawStyle")
     if 'linewidth' not in plot_kwargs:
         plot_kwargs['linewidth'] = float(ConfigService.getString("plots.line.Width"))
     if 'marker' not in plot_kwargs:
@@ -352,23 +351,40 @@ def _validate_workspace_names(workspaces):
     :return: A list of workspaces
     """
     try:
-        raise_if_not_sequence(workspaces, 'workspaces', string_types)
+        raise_if_not_sequence(workspaces, 'workspaces', str)
     except ValueError:
         return workspaces
     else:
         return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
 
 
-def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
+def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, log_name=None, log_values=None):
     # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot
+
+    counter = 0
     for ws in workspaces:
         for num in nums:
+            if log_values:
+                label = log_values[counter]
+                if len(nums) > 1:
+                    label = f"spec {num}: {label}"
+
+                plot_kwargs['label'] = label
+
+                counter += 1
+
             plot_kwargs[kw] = num
             plot_fn(ws, **plot_kwargs)
     ax.make_legend()
     if set_title:
-        title = workspaces[0].name()
+        workspace_names = [ws.name() for ws in workspaces]
+        title = ", ".join(workspace_names)
+
+        if len(title) > 50:
+            title = f"{workspace_names[0]} - {workspace_names[-1]}"
+
+        if log_name:
+            title += f" ({log_name})"
+
         ax.set_title(title)
-
-

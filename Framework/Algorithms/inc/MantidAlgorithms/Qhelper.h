@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_QHELPER_H_
-#define MANTID_ALGORITHMS_QHELPER_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,22 +19,23 @@ namespace Algorithms {
 */
 class Qhelper {
 public:
-  void examineInput(API::MatrixWorkspace_const_sptr dataWS,
-                    API::MatrixWorkspace_const_sptr binAdj,
-                    API::MatrixWorkspace_const_sptr detectAdj,
-                    API::MatrixWorkspace_const_sptr qResolution);
+  void examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
+                    const API::MatrixWorkspace_const_sptr &binAdj,
+                    const API::MatrixWorkspace_const_sptr &detectAdj,
+                    const API::MatrixWorkspace_const_sptr &qResolution);
 
-  void examineInput(API::MatrixWorkspace_const_sptr dataWS,
-                    API::MatrixWorkspace_const_sptr binAdj,
-                    API::MatrixWorkspace_const_sptr detectAdj);
+  void examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
+                    const API::MatrixWorkspace_const_sptr &binAdj,
+                    const API::MatrixWorkspace_const_sptr &detectAdj);
 
-  size_t waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
+  size_t waveLengthCutOff(const API::MatrixWorkspace_const_sptr &dataWS,
                           const API::SpectrumInfo &spectrumInfo,
                           const double RCut, const double WCut,
                           const size_t wsInd) const;
 
-  void outputParts(API::Algorithm *alg, API::MatrixWorkspace_sptr sumOfCounts,
-                   API::MatrixWorkspace_sptr sumOfNormFactors);
+  void outputParts(API::Algorithm *alg,
+                   const API::MatrixWorkspace_sptr &sumOfCounts,
+                   const API::MatrixWorkspace_sptr &sumOfNormFactors);
 
 private:
   /// the experimental workspace with counts across the detector
@@ -42,5 +43,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_Q1D2_H_*/

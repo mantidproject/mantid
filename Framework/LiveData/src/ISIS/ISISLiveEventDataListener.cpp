@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/ISIS/ISISLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
@@ -160,7 +160,7 @@ void ISISLiveEventDataListener::start(Types::Core::DateAndTime startTime) {
 }
 
 // return a workspace with collected events
-boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
+std::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
   if (m_eventBuffer.empty() || !m_eventBuffer[0]) {
     // extractData() is called too early
     throw LiveData::Exception::NotYet(
@@ -181,7 +181,7 @@ boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
 
     // Make a brand new EventWorkspace
     DataObjects::EventWorkspace_sptr temp =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             API::WorkspaceFactory::Instance().create(
                 "EventWorkspace", m_eventBuffer[i]->getNumberHistograms(), 2,
                 1));
@@ -296,7 +296,7 @@ void ISISLiveEventDataListener::run() {
                   << e.what() << '\n';
     m_isConnected = false;
 
-    m_backgroundException = boost::make_shared<std::runtime_error>(e);
+    m_backgroundException = std::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &e) {
     // TimeSeriesProperty (and possibly some other things) can
@@ -308,13 +308,13 @@ void ISISLiveEventDataListener::run() {
     std::string newMsg("Invalid argument exception thrown from "
                        "the background thread: ");
     newMsg += e.what();
-    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
+    m_backgroundException = std::make_shared<std::runtime_error>(newMsg);
 
   } catch (...) {
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "
                      "read thread.\n";
     m_isConnected = false;
-    m_backgroundException = boost::shared_ptr<std::runtime_error>(
+    m_backgroundException = std::shared_ptr<std::runtime_error>(
         new std::runtime_error("Unknown error in backgound thread"));
   }
 }
@@ -333,7 +333,7 @@ void ISISLiveEventDataListener::initEventBuffer(
 
   // save this workspace as the event buffer
   m_eventBuffer[0] =
-      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(workspace);
+      std::dynamic_pointer_cast<DataObjects::EventWorkspace>(workspace);
   if (!m_eventBuffer[0]) {
     throw std::runtime_error("Failed to create an event workspace");
   }
@@ -363,11 +363,9 @@ void ISISLiveEventDataListener::initEventBuffer(
   if (m_numberOfPeriods > 1) {
     for (size_t i = 1; i < static_cast<size_t>(m_numberOfPeriods); ++i) {
       // create an event workspace for each period
-      m_eventBuffer[i] =
-          boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-              API::WorkspaceFactory::Instance().create(
-                  "EventWorkspace", m_eventBuffer[0]->getNumberHistograms(), 2,
-                  1));
+      m_eventBuffer[i] = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+          API::WorkspaceFactory::Instance().create(
+              "EventWorkspace", m_eventBuffer[0]->getNumberHistograms(), 2, 1));
 
       // Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(

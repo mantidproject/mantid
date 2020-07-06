@@ -99,7 +99,7 @@ QT_BEGIN_NAMESPACE
 
 QToolButton *
 QtButtonPropertyBrowserPrivate::createButton(QWidget *parent) const {
-  QToolButton *button = new QToolButton(parent);
+  auto *button = new QToolButton(parent);
   button->setCheckable(true);
   button->setSizePolicy(
       QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
@@ -242,7 +242,7 @@ void QtButtonPropertyBrowserPrivate::propertyInserted(
   WidgetItem *afterItem = m_indexToItem.value(afterIndex);
   WidgetItem *parentItem = m_indexToItem.value(index->parent());
 
-  WidgetItem *newItem = new WidgetItem();
+  auto *newItem = new WidgetItem();
   newItem->parent = parentItem;
 
   QGridLayout *layout = nullptr;
@@ -277,7 +277,7 @@ void QtButtonPropertyBrowserPrivate::propertyInserted(
       } else {
         l = m_mainLayout;
       }
-      QFrame *container = new QFrame();
+      auto *container = new QFrame();
       container->setFrameShape(QFrame::Panel);
       container->setFrameShadow(QFrame::Raised);
       parentItem->container = container;

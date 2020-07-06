@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_
-#define MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_
+#pragma once
 
 #include "MantidCrystal/SortPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -26,7 +25,8 @@ private:
    * @param inWS : Input workspace to sort
    * @param columnName : Column name to sort by
    */
-  void doExecute(IPeaksWorkspace_sptr inWS, const std::string &columnName,
+  void doExecute(const IPeaksWorkspace_sptr &inWS,
+                 const std::string &columnName,
                  const bool sortAscending = true) {
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 
@@ -207,5 +207,3 @@ public:
                       outWS, inWS);
   }
 };
-
-#endif /* MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_ */

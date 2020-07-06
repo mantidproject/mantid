@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDLING_LOAD_SHAPE_H_
-#define DATAHANDLING_LOAD_SHAPE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidDataHandling/MeshFileIO.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
@@ -52,8 +52,7 @@ private:
   void exec() override;
 };
 void DLLExport rotate(Geometry::MeshObject &sampleMesh,
-                      API::MatrixWorkspace_const_sptr inputWS);
+                      const API::ExperimentInfo_const_sptr &inputWS);
 
 } // namespace DataHandling
 } // namespace Mantid
-#endif /* DATAHANDLING_LOAD_SHAPE_H_ */

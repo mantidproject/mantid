@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_COMPAREMDWORKSPACES_H_
-#define MANTID_MDALGORITHMS_COMPAREMDWORKSPACES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -35,10 +34,11 @@ private:
   void init() override;
   void exec() override;
   void doComparison();
-  void compareMDGeometry(Mantid::API::IMDWorkspace_sptr ws1,
-                         Mantid::API::IMDWorkspace_sptr ws2);
-  void compareMDHistoWorkspaces(Mantid::DataObjects::MDHistoWorkspace_sptr ws1,
-                                Mantid::DataObjects::MDHistoWorkspace_sptr ws2);
+  void compareMDGeometry(const Mantid::API::IMDWorkspace_sptr &ws1,
+                         const Mantid::API::IMDWorkspace_sptr &ws2);
+  void compareMDHistoWorkspaces(
+      const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
+      const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2);
 
   template <typename MDE, size_t nd>
   void compareMDWorkspaces(
@@ -65,5 +65,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_COMPAREMDWORKSPACES_H_ */

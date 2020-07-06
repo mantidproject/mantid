@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h"
 
@@ -25,8 +25,8 @@ namespace WorkflowAlgorithms {
  * from summed periods
  */
 IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(
-    const WorkspaceGroup_sptr inputWS, const std::vector<int> summedPeriods,
-    const std::vector<int> subtractedPeriods)
+    const WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods)
     : m_inputWS(inputWS), m_summedPeriods(summedPeriods),
       m_subtractedPeriods(subtractedPeriods) {}
 
@@ -40,7 +40,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(
   MatrixWorkspace_sptr outWS;
   if (!periodsToSum.empty()) {
     auto LHSWorkspace = m_inputWS->getItem(periodsToSum[0] - 1);
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
+    outWS = std::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
     if (outWS != nullptr && periodsToSum.size() > 1) {
       auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {

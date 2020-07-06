@@ -95,10 +95,6 @@ paraview.ignore = @IGNORE_PARAVIEW@
 # Root of html documentation (kept as unix-style path)
 docs.html.root = @HTML_ROOT@
 
-# A semi-colon(;) separated list of directories to use to search for files other than data
-# Use forward slash / for all paths
-usersearch.directories =
-
 # Setting this to On enables searching the facilitie's archive automatically
 datasearch.searcharchive = Off
 
@@ -110,9 +106,6 @@ defaultsave.directory =
 icatDownload.directory =
 # ICat mount point. Directory where archive is mounted. See Facility.xml filelocation.
 icatDownload.mountPoint =
-
-# The Number of algorithms properties to retain im memory for refence in scripts.
-algorithms.retained = 50
 
 # Defines the maximum number of cores to use for OpenMP
 # For machine default set to 0
@@ -245,6 +238,9 @@ plots.yAxesScale = Linear
 
 # Default Line style on 1d plots. Options are solid, dashed, dotted, dashdot
 plots.line.Style = solid
+
+# Default Draw style on 1d plots. Options are default, steps, steps-pre, steps-mid, steps-post
+plots.line.DrawStyle = default
 
 # Default Line width on 1d plots
 plots.line.Width = 1.5

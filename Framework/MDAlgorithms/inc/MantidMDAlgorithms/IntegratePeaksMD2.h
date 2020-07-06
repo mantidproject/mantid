@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
-#define MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -59,22 +58,36 @@ private:
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
+  // find the eigenvectors and eigenvalues that diagonalise the covariance
+  // matrix that defines an ellipsoid.
+  template <typename MDE, size_t nd>
+  void findEllipsoid(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
+                     const Mantid::API::CoordTransform &getRadiusSq,
+                     const Mantid::Kernel::V3D &pos,
+                     const coord_t &radiusSquared, const bool &qAxisBool,
+                     const double &bgDensity,
+                     std::vector<Mantid::Kernel::V3D> &eigenvects,
+                     std::vector<double> &eigenvals);
+
+  // get matrix to transform from Qlab to plane perp to Q
+  void getPinv(const Mantid::Kernel::V3D &q,
+               Mantid::Kernel::Matrix<double> &Pinv);
+
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
   double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
-  void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
-                        std::string property, std::string values);
+  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+                        const std::string &property, const std::string &values);
 
   /// save for all detector pixels
   std::vector<Kernel::V3D> E1Vec;
 
   /// Check if peaks overlap
-  void checkOverlap(int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
+  void checkOverlap(int i,
+                    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
                     Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse,
                     double radius);
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_ */

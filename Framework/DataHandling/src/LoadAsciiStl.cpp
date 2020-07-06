@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -11,7 +11,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadAsciiStl::isAsciiSTL(std::string filename) {
+bool LoadAsciiStl::isAsciiSTL(const std::string &filename) {
   std::ifstream file(filename.c_str());
   if (!file) {
     // if the file cannot be read then it is not a valid asciiStl File

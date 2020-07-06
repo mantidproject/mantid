@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SAMPLESHAPEVALIDATORTEST_H_
-#define MANTID_API_SAMPLESHAPEVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -29,22 +28,20 @@ public:
   static void destroySuite(SampleShapeValidatorTest *suite) { delete suite; }
 
   void test_validator_passes_for_workspace_with_defined_sample_shape() {
-    auto fakeWS = boost::make_shared<WorkspaceTester>();
+    auto fakeWS = std::make_shared<WorkspaceTester>();
     // Add a sample shape
     auto sphere = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
     fakeWS->mutableSample().setShape(sphere);
 
-    auto sampleValidator = boost::make_shared<SampleShapeValidator>();
+    auto sampleValidator = std::make_shared<SampleShapeValidator>();
     TS_ASSERT_EQUALS(sampleValidator->isValid(fakeWS), "");
   }
 
   void test_validator_throws_error_for_workspace_without_shape() {
-    auto fakeWS = boost::make_shared<WorkspaceTester>();
+    auto fakeWS = std::make_shared<WorkspaceTester>();
 
-    auto sampleValidator = boost::make_shared<SampleShapeValidator>();
+    auto sampleValidator = std::make_shared<SampleShapeValidator>();
     TS_ASSERT_EQUALS(sampleValidator->isValid(fakeWS),
                      "Invalid or no shape defined for sample");
   }
 };
-
-#endif /* MANTID_API_SAMPLESHAPEVALIDATORTEST_H_ */

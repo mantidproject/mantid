@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COMPTONPEAKPROFILE_H_
-#define MANTID_CURVEFITTING_COMPTONPEAKPROFILE_H_
+#pragma once
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -42,7 +41,7 @@ private:
   /// Ensure the object is ready to be fitted
   void setUpForFit() override;
   /// Cache a copy of the workspace pointer and pull out the parameters
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
   ///@}
 
   void declareParameters() override;
@@ -57,9 +56,9 @@ private:
   double m_voigtCutOff;
 
   /// Gaussian function for lower-energy peaks
-  boost::shared_ptr<API::IPeakFunction> m_gauss;
+  std::shared_ptr<API::IPeakFunction> m_gauss;
   /// Voigt function for higher-energy peaks
-  boost::shared_ptr<API::IPeakFunction> m_voigt;
+  std::shared_ptr<API::IPeakFunction> m_voigt;
 
   /// Final energy of analyser
   double m_efixed;
@@ -70,5 +69,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_COMPTONPEAKPROFILE_H_ */

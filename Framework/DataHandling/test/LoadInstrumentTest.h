@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADINSTRUMENTTEST_H_
-#define LOADINSTRUMENTTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -180,13 +179,13 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i =
+    std::shared_ptr<const Instrument> i =
         output->getInstrument()->baseInstrument();
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
 
-    boost::shared_ptr<const IComponent> samplepos = i->getSample();
+    std::shared_ptr<const IComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
@@ -228,13 +227,13 @@ public:
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+        std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584
     TS_ASSERT_EQUALS(output2DInst->getNumberHistograms(), histogramNumber);
 
     // Check running algorithm for same XML file leads to same instrument object
     // being attached
-    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
     output->setInstrument(instr);
     TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), instr);
     LoadInstrument loadAgain;
@@ -277,13 +276,13 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loaderSLS.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Z(), -11.016, 0.01);
 
-    boost::shared_ptr<const IObjComponent> samplepos =
-        boost::dynamic_pointer_cast<const IObjComponent>(i->getSample());
+    std::shared_ptr<const IComponent> samplepos =
+        std::dynamic_pointer_cast<const IComponent>(i->getSample());
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
@@ -299,10 +298,6 @@ public:
         ptrDetShape.isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape.getPos()));
     TS_ASSERT(
         ptrDetShape.isValid(V3D(0.005, 0.1, 0.000002) + ptrDetShape.getPos()));
-
-    // test of sample shape
-    TS_ASSERT(samplepos->isValid(V3D(0.0, 0.0, 0.005) + samplepos->getPos()));
-    TS_ASSERT(!samplepos->isValid(V3D(0.0, 0.0, 0.05) + samplepos->getPos()));
   }
 
   void testExecNIMROD() {
@@ -419,7 +414,7 @@ public:
   }
 
   /// Common initialisation for Nexus loading tests
-  MatrixWorkspace_sptr doLoadNexus(const std::string filename) {
+  MatrixWorkspace_sptr doLoadNexus(const std::string &filename) {
     LoadInstrument nexusLoader;
     nexusLoader.initialize();
     nexusLoader.setChild(true);
@@ -861,9 +856,9 @@ private:
   // @param paramFilename Expected parameter file to be loaded as part of
   // LoadInstrument
   // @param par A specific parameter to check if have been loaded
-  void doTestParameterFileSelection(std::string filename,
-                                    std::string paramFilename,
-                                    std::string par) {
+  void doTestParameterFileSelection(const std::string &filename,
+                                    const std::string &paramFilename,
+                                    const std::string &par) {
     InstrumentDataService::Instance().clear();
 
     LoadInstrument loader;
@@ -884,10 +879,10 @@ private:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
 
     // test if a dummy parameter has been read in
-    boost::shared_ptr<const IComponent> comp =
+    std::shared_ptr<const IComponent> comp =
         i->getComponentByName("bank_90degnew");
     TS_ASSERT_EQUALS(comp->getName(), "bank_90degnew");
 
@@ -915,7 +910,7 @@ public:
     ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
   }
 
-  void doTest(std::string filename, size_t numTimes = 1) {
+  void doTest(const std::string &filename, size_t numTimes = 1) {
     for (size_t i = 0; i < numTimes; ++i) {
       // Remove any existing instruments, so each time they are loaded.
       InstrumentDataService::Instance().clear();
@@ -948,5 +943,3 @@ public:
 
   void test_SNAP() { doTest("SNAP_Definition.xml", 1); }
 };
-
-#endif /*LOADINSTRUMENTTEST_H_*/

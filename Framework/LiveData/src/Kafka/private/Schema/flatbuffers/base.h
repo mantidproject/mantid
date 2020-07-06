@@ -1,5 +1,10 @@
-#ifndef FLATBUFFERS_BASE_H_
-#define FLATBUFFERS_BASE_H_
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
 
 // clang-format off
 #if defined(FLATBUFFERS_MEMORY_LEAK_TRACKING) && \
@@ -278,4 +283,3 @@ inline size_t PaddingBytes(size_t buf_size, size_t scalar_size) {
 }
 
 }  // namespace flatbuffers
-#endif  // FLATBUFFERS_BASE_H_

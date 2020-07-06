@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_COMMUNICATOR_H_
-#define MANTID_PARALLEL_COMMUNICATOR_H_
+#pragma once
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
@@ -60,13 +59,13 @@ public:
   detail::ThreadingBackend &backend() const;
 
 private:
-  Communicator(boost::shared_ptr<detail::ThreadingBackend> backend,
+  Communicator(std::shared_ptr<detail::ThreadingBackend> backend,
                const int rank);
 
 #ifdef MPI_EXPERIMENTAL
   boost::mpi::communicator m_communicator;
 #endif
-  boost::shared_ptr<detail::ThreadingBackend> m_backend;
+  std::shared_ptr<detail::ThreadingBackend> m_backend;
   int m_rank{0};
 
   // For accessing constructor with threading backend.
@@ -107,5 +106,3 @@ template <typename... T> Request Communicator::irecv(T &&... args) const {
 
 } // namespace Parallel
 } // namespace Mantid
-
-#endif /* MANTID_PARALLEL_COMMUNICATOR_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_
+#pragma once
 
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 
@@ -27,7 +26,8 @@ namespace Algorithms {
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF
  workspace to an IvsQ workspace. Version 2 of the algorithm.
  */
-class DLLExport ReflectometryReductionOne2 : public ReflectometryWorkflowBase2 {
+class MANTID_ALGORITHMS_DLL ReflectometryReductionOne2
+    : public ReflectometryWorkflowBase2 {
 public:
   /// Algorithm's name for identification
   const std::string name() const override {
@@ -66,30 +66,30 @@ private:
   directBeamCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
   // Performs transmission or algorithm correction
   Mantid::API::MatrixWorkspace_sptr
-  transOrAlgCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS,
+  transOrAlgCorrection(const Mantid::API::MatrixWorkspace_sptr &detectorWS,
                        const bool detectorWSReduced);
   // Performs background subtraction
   Mantid::API::MatrixWorkspace_sptr
   backgroundSubtraction(Mantid::API::MatrixWorkspace_sptr detectorWS);
   // Performs transmission corrections
   Mantid::API::MatrixWorkspace_sptr
-  transmissionCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS,
+  transmissionCorrection(const Mantid::API::MatrixWorkspace_sptr &detectorWS,
                          const bool detectorWSReduced);
   // Performs transmission corrections using alternative correction algorithms
   Mantid::API::MatrixWorkspace_sptr
-  algorithmicCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
+  algorithmicCorrection(const Mantid::API::MatrixWorkspace_sptr &detectorWS);
   // Performs monitor corrections
   Mantid::API::MatrixWorkspace_sptr
   monitorCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
   // convert to momentum transfer
   Mantid::API::MatrixWorkspace_sptr
-  convertToQ(Mantid::API::MatrixWorkspace_sptr inputWS);
+  convertToQ(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   // Get the twoTheta width of a given detector
   double getDetectorTwoThetaRange(const size_t spectrumIdx);
   // Utility function to create name for diagnostic workspaces
   std::string createDebugWorkspaceName(const std::string &inputName);
   // Utility function to output a diagnostic workspace to the ADS
-  void outputDebugWorkspace(API::MatrixWorkspace_sptr ws,
+  void outputDebugWorkspace(const API::MatrixWorkspace_sptr &ws,
                             const std::string &wsName,
                             const std::string &wsSuffix, const bool debug,
                             int &step);
@@ -97,7 +97,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr makeIvsLam();
   // Do the reduction by summation in Q
   Mantid::API::MatrixWorkspace_sptr
-  sumInQ(API::MatrixWorkspace_sptr detectorWS);
+  sumInQ(const API::MatrixWorkspace_sptr &detectorWS);
   // Do the summation in Q for a single input value
   void sumInQProcessValue(const int inputIdx, const double twoTheta,
                           const double bTwoTheta,
@@ -106,23 +106,23 @@ private:
                           const HistogramData::HistogramE &inputE,
                           const std::vector<size_t> &detectors,
                           const size_t outSpecIdx,
-                          API::MatrixWorkspace_sptr IvsLam,
+                          const API::MatrixWorkspace_sptr &IvsLam,
                           std::vector<double> &outputE);
   // Share counts to a projected value for summation in Q
   void sumInQShareCounts(const double inputCounts, const double inputErr,
                          const double bLambda, const double lambdaMin,
                          const double lambdaMax, const size_t outSpecIdx,
-                         API::MatrixWorkspace_sptr IvsLam,
+                         const API::MatrixWorkspace_sptr &IvsLam,
                          std::vector<double> &outputE);
-  void findWavelengthMinMax(API::MatrixWorkspace_sptr inputWS);
+  void findWavelengthMinMax(const API::MatrixWorkspace_sptr &inputWS);
   // Construct the output workspace
-  void findIvsLamRange(API::MatrixWorkspace_sptr detectorWS,
+  void findIvsLamRange(const API::MatrixWorkspace_sptr &detectorWS,
                        const std::vector<size_t> &detectors,
                        const double lambdaMin, const double lambdaMax,
                        double &projectedMin, double &projectedMax);
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
-  constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);
+  constructIvsLamWS(const API::MatrixWorkspace_sptr &detectorWS);
   // Whether summation should be done in Q or the default lambda
   bool summingInQ();
   // Get projected coordinates onto twoThetaR
@@ -132,8 +132,8 @@ private:
                                double &lambdaTop, double &lambdaBot,
                                const bool outerCorners = true);
   // Check whether two spectrum maps match
-  void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
-                          API::MatrixWorkspace_const_sptr ws2);
+  void verifySpectrumMaps(const API::MatrixWorkspace_const_sptr &ws1,
+                          const API::MatrixWorkspace_const_sptr &ws2);
 
   // Find and cache constants
   void findDetectorGroups();
@@ -149,16 +149,16 @@ private:
   double wavelengthMax() { return m_wavelengthMax; };
   size_t findIvsLamRangeMinDetector(const std::vector<size_t> &detectors);
   size_t findIvsLamRangeMaxDetector(const std::vector<size_t> &detectors);
-  double findIvsLamRangeMin(Mantid::API::MatrixWorkspace_sptr detectorWS,
+  double findIvsLamRangeMin(const Mantid::API::MatrixWorkspace_sptr &detectorWS,
                             const std::vector<size_t> &detectors,
                             const double lambda);
-  double findIvsLamRangeMax(Mantid::API::MatrixWorkspace_sptr detectorWS,
+  double findIvsLamRangeMax(const Mantid::API::MatrixWorkspace_sptr &detectorWS,
                             const std::vector<size_t> &detectors,
                             const double lambda);
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
-  boost::shared_ptr<const Mantid::Geometry::ReferenceFrame> m_refFrame;
+  std::shared_ptr<const Mantid::Geometry::ReferenceFrame> m_refFrame;
   bool m_convertUnits;          // convert the input workspace to lambda
   bool m_normaliseMonitors;     // normalise by monitors and direct beam
   bool m_normaliseTransmission; // transmission or algorithmic correction
@@ -177,5 +177,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_ */

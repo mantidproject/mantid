@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -105,9 +105,9 @@ SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
         loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->setPropertyValue("OutputWorkspace", finderWSName);
       loadAlg->execute();
-      boost::shared_ptr<Workspace> wks =
+      std::shared_ptr<Workspace> wks =
           AnalysisDataService::Instance().retrieve(finderWSName);
-      finderWS = boost::dynamic_pointer_cast<MatrixWorkspace>(wks);
+      finderWS = std::dynamic_pointer_cast<MatrixWorkspace>(wks);
 
       m_output_message += "   |Loaded " + beamCenterFile + "\n";
       if (loadAlg->existsProperty("OutputMessage")) {
@@ -130,7 +130,7 @@ void SANSBeamFinder::exec() {
     m_reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
-    m_reductionManager = boost::make_shared<PropertyManager>();
+    m_reductionManager = std::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                         m_reductionManager);
   }
@@ -246,19 +246,17 @@ void SANSBeamFinder::exec() {
  * 2016/05/06 : this only works for RectangularDetector
  *
  */
-void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
-                               int low, int left, int right,
+void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS,
+                               int high, int low, int left, int right,
                                const std::string &componentName) {
 
   auto instrument = beamCenterWS->getInstrument();
 
-  boost::shared_ptr<Mantid::Geometry::RectangularDetector> component;
+  std::shared_ptr<Mantid::Geometry::RectangularDetector> component;
   try {
-    component =
-        boost::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
-            boost::dynamic_pointer_cast<
-                const Mantid::Geometry::RectangularDetector>(
-                instrument->getComponentByName(componentName)));
+    component = std::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
+        std::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(
+            instrument->getComponentByName(componentName)));
   } catch (std::exception &) {
     g_log.warning("Expecting the component " + componentName +
                   " to be a RectangularDetector. maskEdges not executed.");

@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef IMPORTFILESDIALOG_H
-#define IMPORTFILESDIALOG_H
+#pragma once
 
 #include "ExtensibleFileDialog.h"
 
@@ -118,8 +117,8 @@ public:
    */
   ImportASCIIDialog(bool new_windows_only, QWidget *parent = nullptr,
                     bool extended = true,
-                    Qt::WFlags flags = Qt::WindowCloseButtonHint |
-                                       Qt::WindowType::WindowTitleHint);
+                    const Qt::WFlags &flags = Qt::WindowCloseButtonHint |
+                                              Qt::WindowType::WindowTitleHint);
 
   //! Return the selected import mode
   /**
@@ -204,5 +203,3 @@ private:
   QStackedWidget *d_preview_stack;
   QString d_current_path;
 };
-
-#endif

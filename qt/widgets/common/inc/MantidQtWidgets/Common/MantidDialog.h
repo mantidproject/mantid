@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_MANTIDDIALOG_H_
-#define MANTIDQT_API_MANTIDDIALOG_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -13,7 +12,7 @@
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include <QDialog>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //----------------------------------
 // Qt Forward declarations
@@ -59,8 +58,8 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidDialog : public QDialog {
 public:
   /// DefaultConstructor
   MantidDialog(QWidget *parent = nullptr,
-               Qt::WindowFlags flags = Qt::WindowCloseButtonHint |
-                                       Qt::WindowType::WindowTitleHint);
+               const Qt::WindowFlags &flags = Qt::WindowCloseButtonHint |
+                                              Qt::WindowType::WindowTitleHint);
   /// Destructor
   ~MantidDialog() override;
 
@@ -85,5 +84,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif // MANTIDQT_API_MANTIDDIALOG_H_

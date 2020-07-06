@@ -19,6 +19,21 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
   endif()
 endif()
 
+find_package(CxxTest)
+if(CXXTEST_FOUND)
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+  make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)
+  message(STATUS "Added target ('check') for unit tests")
+else()
+  message(STATUS "Could NOT find CxxTest - unit testing not available")
+endif()
+
+# Avoid the linker failing by including GTest before marking all libs as shared
+# and before we set our warning flags in GNUSetup
+include(GoogleTest)
+include(PyUnitTest)
+enable_testing()
+
 # We want shared libraries everywhere
 set(BUILD_SHARED_LIBS On)
 
@@ -96,7 +111,7 @@ if(CMAKE_HOST_WIN32)
     COMPONENTS CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
-  set (HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
 else()
   find_package(ZLIB REQUIRED)
   find_package(
@@ -272,7 +287,6 @@ if(OpenMP_CXX_FOUND)
   link_libraries(OpenMP::OpenMP_CXX)
 endif()
 
-
 # ##############################################################################
 # Add linux-specific things
 # ##############################################################################
@@ -370,34 +384,6 @@ include(PylintSetup)
 # ##############################################################################
 # Set up the unit tests target
 # ##############################################################################
-
-find_package(CxxTest)
-if(CXXTEST_FOUND)
-  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
-  make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)
-  message(STATUS "Added target ('check') for unit tests")
-else()
-  message(STATUS "Could NOT find CxxTest - unit testing not available")
-endif()
-
-include(GoogleTest)
-include(PyUnitTest)
-enable_testing()
-
-# GUI testing via Squish
-find_package(Squish)
-if(SQUISH_FOUND)
-  # CMAKE_MODULE_PATH gets polluted when ParaView is present
-  set(MANTID_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
-  include(SquishAddTestSuite)
-  enable_testing()
-  message(STATUS "Found Squish for GUI testing")
-else()
-  message(
-    STATUS
-      "Could not find Squish - GUI testing not available. Try specifying your SQUISH_INSTALL_DIR cmake variable."
-  )
-endif()
 
 # ##############################################################################
 # External Data for testing

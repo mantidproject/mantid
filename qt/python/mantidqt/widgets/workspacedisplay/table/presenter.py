@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of mantidqt package.
-from __future__ import absolute_import, division, print_function
-
 from functools import partial
 
 from qtpy.QtCore import Qt
@@ -24,7 +22,61 @@ from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayVi
 from mantidqt.widgets.workspacedisplay.table.workbench_table_widget_item import WorkbenchTableWidgetItem
 
 
-class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
+class TableWorkspaceDataPresenter(object):
+    """Presenter to handle just displaying data from a table-like object.
+    Useful for other widgets wishing to embed just the table display"""
+    __slots__ = ("model", "view")
+
+    def __init__(self, model=None, view=None):
+        """
+        :param model: A reference to the model holding the table information
+        :param view: A reference to the view that is displayed to the user
+        """
+        self.model = model
+        self.view = view
+
+    def refresh(self):
+        """Fully refresh the display. Updates column headers and reloads the data"""
+        self.update_column_headers()
+        self.load_data(self.view)
+
+    def update_column_headers(self):
+        """
+        :param extra_labels: Extra labels to be appended to the column headers.
+                             Expected format: [(id, label), (2, "X"),...]
+        :type extra_labels: List[Tuple[int, str]]
+        :return:
+        """
+        # deep copy the original headers so that they are not changed by the appending of the label
+        column_headers = self.model.original_column_headers()
+        num_headers = len(column_headers)
+        self.view.setColumnCount(num_headers)
+
+        extra_labels = self.model.build_current_labels()
+        if len(extra_labels) > 0:
+            for index, label in extra_labels:
+                column_headers[index] += str(label)
+
+        self.view.setHorizontalHeaderLabels(column_headers)
+
+    def load_data(self, table):
+        num_rows = self.model.get_number_of_rows()
+        table.setRowCount(num_rows)
+
+        num_cols = self.model.get_number_of_columns()
+        table.setColumnCount(num_cols)
+
+        # the table should be editable if the ws is not PeaksWS
+        editable = not self.model.is_peaks_workspace()
+
+        for col in range(num_cols):
+            column_data = self.model.get_column(col)
+            for row in range(num_rows):
+                item = WorkbenchTableWidgetItem(column_data[row], editable=editable)
+                table.setItem(row, col, item)
+
+
+class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
     TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
@@ -57,9 +109,11 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         :param ads_observer: ADS observer to be used by the presenter. If not provided the default
                              one is used. Mainly intended for testing.
         """
-        self.model = model if model else TableWorkspaceDisplayModel(ws)
+        model = model if model is not None else TableWorkspaceDisplayModel(ws)
+        view = view if view else TableWorkspaceDisplayView(self, parent)
+        TableWorkspaceDataPresenter.__init__(self, model, view)
+
         self.name = name if name else self.model.get_name()
-        self.view = view if view else TableWorkspaceDisplayView(self, parent)
         self.container = container if container else StatusBarView(parent, self.view, self.name,
                                                                    window_width=window_width,
                                                                    window_height=window_height,
@@ -73,8 +127,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
 
-        self.update_column_headers()
-        self.load_data(self.view)
+        self.refresh()
 
         # connect to cellChanged signal after the data has been loaded
         self.view.itemChanged.connect(self.handleItemChanged)
@@ -115,41 +168,6 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
         finally:
             item.reset()
-
-    def update_column_headers(self):
-        """
-        :param extra_labels: Extra labels to be appended to the column headers.
-                             Expected format: [(id, label), (2, "X"),...]
-        :type extra_labels: List[Tuple[int, str]]
-        :return:
-        """
-        # deep copy the original headers so that they are not changed by the appending of the label
-        column_headers = self.model.original_column_headers()
-        num_headers = len(column_headers)
-        self.view.setColumnCount(num_headers)
-
-        extra_labels = self.model.build_current_labels()
-        if len(extra_labels) > 0:
-            for index, label in extra_labels:
-                column_headers[index] += str(label)
-
-        self.view.setHorizontalHeaderLabels(column_headers)
-
-    def load_data(self, table):
-        num_rows = self.model.get_number_of_rows()
-        table.setRowCount(num_rows)
-
-        num_cols = self.model.get_number_of_columns()
-        table.setColumnCount(num_cols)
-
-        # the table should be editable if the ws is not PeaksWS
-        editable = not self.model.is_peaks_workspace()
-
-        for col in range(num_cols):
-            column_data = self.model.get_column(col)
-            for row in range(num_rows):
-                item = WorkbenchTableWidgetItem(column_data[row], editable=editable)
-                table.setItem(row, col, item)
 
     def action_copy_cells(self):
         self.copy_cells(self.view)
@@ -237,7 +255,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     def action_set_as_y(self):
         self._action_set_as(self.model.marked_columns.add_y, 2)
 
-    def action_set_as_y_err(self, related_y_column, label_index):
+    def action_set_as_y_err(self, related_y_column):
         """
 
         :param related_y_column: The real index of the column for which the error is being marked
@@ -250,13 +268,18 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         try:
-            err_column = ErrorColumn(selected_column, related_y_column, label_index)
+            err_column = ErrorColumn(selected_column, related_y_column)
         except ValueError as e:
             self.view.show_warning(str(e))
             return
 
-        self.model.marked_columns.add_y_err(err_column)
-        self.model.set_column_type(selected_column, 5)
+        removed_items = self.model.marked_columns.add_y_err(err_column)
+        # if a column other than the one the user has just picked as a y err column has been affected,
+        # reset it's type to None
+        for col in removed_items:
+            if col != selected_column:
+                self.model.set_column_type(int(col),0)
+        self.model.set_column_type(selected_column, 5, related_y_column)
         self.update_column_headers()
 
     def action_set_as_none(self):

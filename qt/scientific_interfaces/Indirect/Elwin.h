@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
+#pragma once
 
 #include "IndirectDataAnalysisTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -41,9 +40,9 @@ private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
   void setBrowserWorkspace() override{};
-  void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
+  void setDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws,
                             const QPair<double, double> &range);
-  void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
+  void setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
   void checkForELTWorkspace();
 
@@ -61,5 +60,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_ */

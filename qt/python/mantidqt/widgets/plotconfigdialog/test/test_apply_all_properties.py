@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -10,15 +10,17 @@ import unittest
 
 import matplotlib
 from matplotlib import use as mpl_use
+
 mpl_use('Agg')  # noqa
 from matplotlib.colors import LogNorm
 from matplotlib.patches import BoxStyle
 from matplotlib.pyplot import figure
 
 from mantid.plots.legend import LegendProperties
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
+from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
@@ -27,9 +29,8 @@ AX_VIEW = 'mantidqt.widgets.plotconfigdialog.axestabwidget.presenter.AxesTabWidg
 CURVE_VIEW = 'mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter.CurvesTabWidgetView'
 IMAGE_VIEW = 'mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter.ImagesTabWidgetView'
 LEGEND_VIEW = 'mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter.LegendTabWidgetView'
-
-
 new_ax_view_props = {
+
     'title': 'New Title',
     'xlim': [0.1, 10],
     'xlabel': 'New X Label',
@@ -88,39 +89,56 @@ new_legend_props = {
     'marker_label_padding': 1.0}
 
 
+def mock_axes_tab_presenter_update_view(presenter):
+    presenter.current_view_props = new_ax_view_props
+
+
 def _run_apply_properties_on_figure_with_curve():
     fig = figure()
     ax = fig.add_subplot(111)
     ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.2], label='old label')
-    presenter = PlotConfigDialogPresenter(fig, view=Mock())
+
+    with patch.object(AxesTabWidgetPresenter, 'update_view', mock_axes_tab_presenter_update_view):
+        presenter = PlotConfigDialogPresenter(fig, view=Mock())
     presenter.tab_widget_views[1][0].select_curve_combo_box.currentIndex.return_value = 0
     with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
-        presenter.apply_properties()
+        with patch.object(presenter.tab_widget_presenters[1], 'axis_changed',
+                          lambda: None):
+            presenter.apply_properties()
     return ax
 
 
 def _run_apply_properties_on_figure_with_image():
     img_fig = figure()
     img_ax = img_fig.add_subplot(111)
-    img_ax.imshow([[0, 1], [0, 1]], label='old label')
-    presenter = PlotConfigDialogPresenter(img_fig, view=Mock())
+    image = img_ax.imshow([[0, 1], [0, 1]])
+    cb = img_fig.colorbar(image)
+    cb.set_label('old label')
+
+    with patch.object(AxesTabWidgetPresenter, 'update_view', mock_axes_tab_presenter_update_view):
+        presenter = PlotConfigDialogPresenter(img_fig, view=Mock())
     with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
-        presenter.apply_properties()
+        with patch.object(presenter.tab_widget_presenters[1], 'axis_changed',
+                          lambda: None):
+            presenter.apply_properties()
     return img_ax
 
 
 def _run_apply_properties_on_figure_with_legend():
     fig = figure()
     ax = fig.add_subplot(111)
-    ax.plot([1,2,3], label='old label')
+    ax.plot([1, 2, 3], label='old label')
     legend = ax.legend()
     legend.get_frame().set_alpha(0.5)
-    presenter = PlotConfigDialogPresenter(fig, view=Mock())
+    with patch.object(AxesTabWidgetPresenter, 'update_view', mock_axes_tab_presenter_update_view):
+        presenter = PlotConfigDialogPresenter(fig, view=Mock())
     with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
-        presenter.apply_properties()
+        with patch.object(presenter.tab_widget_presenters[1], 'axis_changed',
+                          lambda: None):
+            presenter.apply_properties()
     return ax
 
 
@@ -148,7 +166,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
 
         # Mock images tab view
         cls.img_view_mock = Mock(
-            get_selected_image_name=lambda: '(0, 0) - old label',
+            get_selected_image_name=lambda: '(0, 0) - _image0',
             get_properties=lambda: ImageProperties(new_image_props))
         cls.img_view_patch = patch(IMAGE_VIEW, lambda x: cls.img_view_mock)
         cls.img_view_patch.start()
@@ -173,7 +191,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.legend_view_patch.stop()
 
     def test_apply_properties_on_figure_with_image_sets_label(self):
-        self.assertEqual(new_image_props['label'], self.new_img.get_label())
+        self.assertEqual(new_image_props['label'], self.new_img.colorbar._label)
 
     def test_apply_properties_on_figure_with_image_sets_colormap(self):
         self.assertEqual(new_image_props['colormap'], self.new_img.cmap.name)
@@ -255,14 +273,9 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                                   for err_sets in self.new_curve[1:]
                                   for err_set in err_sets]))
 
-    def test_apply_properties_on_figure_with_curve_sets_error_every(self):
-        self.assertEqual(1, len(self.new_curve[2][0].get_segments()))
-        self.assertEqual(new_curve_view_props['errorevery'],
-                         self.new_curve.errorevery)
-
     def test_apply_properties_on_figure_with_curve_sets_cap_size(self):
         self.assertEqual(new_curve_view_props['capsize'],
-                         self.new_curve[1][0].get_markersize()/2)
+                         self.new_curve[1][0].get_markersize() / 2)
 
     def test_apply_properties_on_figure_with_curve_sets_cap_thickness(self):
         self.assertEqual(new_curve_view_props['capthick'],

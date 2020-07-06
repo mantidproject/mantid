@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -68,8 +68,9 @@ RebinnedSourcesManager::~RebinnedSourcesManager() {}
  * @param workspaceName Name of the workspace.
  * @param workspace A pointer to the added workspace.
  */
-void RebinnedSourcesManager::addHandle(const std::string &workspaceName,
-                                       Mantid::API::Workspace_sptr workspace) {
+void RebinnedSourcesManager::addHandle(
+    const std::string &workspaceName,
+    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   // Check if the workspace which has experienced a change is being tracked in
   // our buffer
   if (m_newWorkspacePairBuffer.empty()) {
@@ -81,9 +82,9 @@ void RebinnedSourcesManager::addHandle(const std::string &workspaceName,
   if (outputWorkspace == workspaceName) {
     std::string sourceType;
     Mantid::API::IMDEventWorkspace_sptr eventWorkspace =
-        boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
+        std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
     Mantid::API::IMDHistoWorkspace_sptr histoWorkspace =
-        boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
+        std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
 
     if (eventWorkspace) {
       sourceType = "MDEW Source";
@@ -103,7 +104,7 @@ void RebinnedSourcesManager::addHandle(const std::string &workspaceName,
  */
 void RebinnedSourcesManager::preDeleteHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace>) {
+    const std::shared_ptr<Mantid::API::Workspace> &) {
   // Check if the workspace which is to be deleted is a tracked rebinned
   // workspace
   std::vector<pqPipelineSource *> sources =
@@ -126,7 +127,7 @@ void RebinnedSourcesManager::preDeleteHandle(
  */
 void RebinnedSourcesManager::afterReplaceHandle(
     const std::string &workspaceName,
-    const boost::shared_ptr<Mantid::API::Workspace> workspace) {
+    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   addHandle(workspaceName, workspace);
 }
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -43,7 +43,7 @@ void SaveAscii::init() {
                                                  FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
   declareProperty("WorkspaceIndexMin", 0, mustBeNonNegative,
                   "The starting workspace index.");
@@ -73,7 +73,7 @@ void SaveAscii::init() {
   }
 
   declareProperty("Separator", "CSV",
-                  boost::make_shared<StringListValidator>(sepOptions),
+                  std::make_shared<StringListValidator>(sepOptions),
                   "Character(s) to put as separator between X, Y, E values.");
 
   declareProperty(

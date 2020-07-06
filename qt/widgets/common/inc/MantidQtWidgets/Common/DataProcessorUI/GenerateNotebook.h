@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H
+#pragma once
 
 /** @class GenerateNotebook
 
@@ -51,7 +50,7 @@ QString DLLExport plotsString(const GroupData &groupData,
                               const ProcessingAlgorithm &processor);
 
 QString DLLExport
-reduceRowString(const RowData_sptr data, const QString &instrument,
+reduceRowString(const RowData_sptr &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
@@ -78,9 +77,10 @@ QString DLLExport completeOutputProperties(const QString &algName,
 class DLLExport GenerateNotebook {
 
 public:
-  GenerateNotebook(QString name, QString instrument, WhiteList whitelist,
+  GenerateNotebook(const QString &name, const QString &instrument,
+                   WhiteList whitelist,
                    std::map<QString, PreprocessingAlgorithm> preprocessMap,
-                   ProcessingAlgorithm processor,
+                   const ProcessingAlgorithm &processor,
                    boost::optional<PostprocessingStep> postprocessingStep,
                    ColumnOptionsMap preprocessingInstructionsMap);
   virtual ~GenerateNotebook() = default;
@@ -111,4 +111,3 @@ private:
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H

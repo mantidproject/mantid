@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MergeLogs.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -24,13 +24,13 @@ void MergeLogs::init() {
                       "Workspace", "Anonymous", Direction::InOut),
                   "Workspace to have logs merged");
   declareProperty("LogName1", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the first log to be merged.");
   declareProperty("LogName2", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the second log to be merged.");
   declareProperty("MergedLogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the new log as the result "
                   "of log 1 being merged with log 2.");
   declareProperty("ResetLogValue", false,

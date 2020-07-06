@@ -1,20 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_REFLECTOMETRYTRANSFORTEST_H_
-#define MANTID_DATAOBJECTS_REFLECTOMETRYTRANSFORTEST_H_
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -36,9 +34,9 @@ public:
 
     // Get the existing instrument
     Instrument_sptr inst =
-        boost::const_pointer_cast<Instrument>(reflWS->getInstrument());
+        std::const_pointer_cast<Instrument>(reflWS->getInstrument());
     // Replace the reference frame
-    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(
         Y /*up*/, X /*along beam*/, Left, "0,0,0"));
     // Reset the instrument on the ws
     reflWS->setInstrument(inst);
@@ -67,9 +65,9 @@ public:
 
     // Get the existing instrument
     Instrument_sptr inst =
-        boost::const_pointer_cast<Instrument>(reflWS->getInstrument());
+        std::const_pointer_cast<Instrument>(reflWS->getInstrument());
     // Replace the reference frame
-    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(
         X /*up*/, Y /*along beam*/, Left, "0,0,0"));
     // Reset the instrument on the ws
     reflWS->setInstrument(inst);
@@ -87,9 +85,9 @@ public:
 
     // Get the existing instrument
     Instrument_sptr inst =
-        boost::const_pointer_cast<Instrument>(reflWS->getInstrument());
+        std::const_pointer_cast<Instrument>(reflWS->getInstrument());
     // Replace the reference frame
-    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(
         Z /*up*/, X /*along beam*/, Left, "0,0,0"));
     // Reset the instrument on the ws
     reflWS->setInstrument(inst);
@@ -99,5 +97,3 @@ public:
     TS_ASSERT_DELTA(0.06, cache.detectorHeights[0], 1e6);
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_REFLECTOMETRYTRANSFORTEST_H_ */

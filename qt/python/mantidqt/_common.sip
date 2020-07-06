@@ -9,6 +9,7 @@ using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
 %End
 
+%Include ../common_sip/exceptions.sip
 %Include ../common_sip/string.sip
 %Include ../common_sip/vector.sip
 
@@ -18,23 +19,7 @@ qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
 %End
 
-// ----------------------------------------------------------------------------
-// Exceptions
-// ----------------------------------------------------------------------------
 
-%Exception std::invalid_argument(SIP_Exception) /PyName=ValueError/
-{
-%TypeHeaderCode
-#include <stdexcept>
-%End
-%RaiseCode
-    const char *detail = sipExceptionRef.what();
-
-    SIP_BLOCK_THREADS
-    PyErr_SetString(PyExc_ValueError, detail);
-    SIP_UNBLOCK_THREADS
-%End
-};
 // ----------------------------------------------------------------------------
 // Classes
 // ----------------------------------------------------------------------------
@@ -209,7 +194,7 @@ using MantidQt::Widgets::Common::Python::CodeExecution;
 
 public:
   CodeExecution(ScriptEditor*);
-  SIP_PYOBJECT execute(const QString &, const QString &, int, SIP_PYOBJECT);
+  SIP_PYOBJECT execute(const QString &, const QString &, int, SIP_PYOBJECT, int);
 private:
   CodeExecution(const CodeExecution&);
 };
@@ -476,6 +461,7 @@ public:
     void addFitResultWorkspacesToTableWidget();
     void setWorkspaceName(const QString &wsName);
     void postDeleteHandle(const std::string &wsName);
+    std::string getFitAlgorithmParameters() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -899,15 +885,15 @@ public:
 };
 
 // ---------------------------------
-// MWRunFiles
+// FileFinderWidget
 // ---------------------------------
-class MWRunFiles : QWidget
+class FileFinderWidget : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 %End
 public:
-    MWRunFiles(QWidget *parent = nullptr);
+    FileFinderWidget(QWidget *parent = nullptr) /KeywordArgs="All"/;
 
     QString getText();
     QString getFirstFilename() const;
@@ -935,4 +921,53 @@ signals:
     void liveButtonPressed(bool);
     void findingFiles();
     void filesFound();
+};
+
+// ---------------------------------
+// ImageInformationWidget
+// ---------------------------------
+class ImageInfoWidget : public QTableWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ImageInfoWidget.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
+%End
+public:
+    ImageInfoWidget(std::string workspace_type, QWidget *parent = nullptr);
+    void updateTable(const double x, const double y, const double z);
+    void setWorkspace(SIP_PYOBJECT);
+    %MethodCode
+    try {
+      auto extractor = Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(boost::python::object(boost::python::handle<>(a0)));
+      sipCpp->setWorkspace(extractor());
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
+};
+
+// ---------------------------------
+// DataSelector
+// ---------------------------------
+class DataSelector : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/DataSelector.h"
+%End
+public:
+    DataSelector(QWidget *parent = nullptr) /KeywordArgs="All"/;
+};
+
+// ---------------------------------
+// WorkspaceSelector
+// ---------------------------------
+class WorkspaceSelector : QComboBox
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
+%End
+public:
+    WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
 };

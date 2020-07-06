@@ -1,10 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "OptionDefaults.h"
+
+#include <utility>
+
 #include "MantidAPI/AlgorithmManager.h"
 
 namespace MantidQt {
@@ -13,7 +16,7 @@ namespace ISISReflectometry {
 
 OptionDefaults::OptionDefaults(
     Mantid::Geometry::Instrument_const_sptr instrument)
-    : m_instrument(instrument) {
+    : m_instrument(std::move(instrument)) {
   // Get the algorithm for which we'll take defaults if available
   m_algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "ReflectometryReductionOneAuto");

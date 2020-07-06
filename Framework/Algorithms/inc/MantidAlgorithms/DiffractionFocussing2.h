@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_DIFFRACTIONFOCUSSING2_H_
-#define MANTID_ALGORITHMS_DIFFRACTIONFOCUSSING2_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidIndexing/SpectrumNumber.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,7 +62,7 @@ namespace Algorithms {
  @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
  @date 08/03/2009
  */
-class DLLExport DiffractionFocussing2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DiffractionFocussing2 : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "DiffractionFocussing"; }
@@ -111,7 +110,7 @@ private:
 
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
-  using group2vectormap = std::map<int, boost::shared_ptr<MantidVec>>;
+  using group2vectormap = std::map<int, std::shared_ptr<MantidVec>>;
   /// Map from udet to group
   std::vector<int> udet2group;
   /// The list of group numbers
@@ -134,5 +133,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_DIFFRACTIONFOCUSSING2_H_*/

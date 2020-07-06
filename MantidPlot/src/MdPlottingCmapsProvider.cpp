@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <QDir>
 #include <QStringList>
@@ -90,7 +90,7 @@ void MdPlottingCmapsProvider::getColorMapsForVSI(QStringList &colorMapNames) {
 
 void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
     QStringList &colorMapNames, QStringList &colorMapFiles,
-    QString colorMapDirectory, QString fileType) {
+    const QString &colorMapDirectory, const QString &fileType) {
   QDir directory(colorMapDirectory);
 
   QStringList filter(QString("*.%1").arg(fileType));
@@ -105,7 +105,7 @@ void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
 
 std::vector<int>
 MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(
-    QStringList colorMapNamesSliceViewer, QStringList colorMapNamesVsi) {
+    QStringList colorMapNamesSliceViewer, const QStringList &colorMapNamesVsi) {
   int index = 0;
 
   std::vector<int> indexVector;

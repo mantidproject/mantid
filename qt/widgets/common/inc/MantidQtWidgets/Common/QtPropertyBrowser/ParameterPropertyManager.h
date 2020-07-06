@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARAMETERPROPERTYMANAGER_H
-#define PARAMETERPROPERTYMANAGER_H
+#pragma once
 
 #include "qtpropertymanager.h"
 
@@ -85,5 +84,3 @@ private:
   bool m_hasGlobalOption;
   QSet<QtProperty *> m_globals;
 };
-
-#endif // PARAMETERPROPERTYMANAGER_H

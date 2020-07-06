@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/ConcretePeaksPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -21,6 +21,7 @@
 #include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
 #include "MantidQtWidgets/SliceViewer/ZoomableOnDemand.h"
 #include <boost/regex.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -78,9 +79,8 @@ void ConcretePeaksPresenter::produceViews() {
  * @param mdWS : MDWorkspace currently plotted.
  */
 void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
-    boost::shared_ptr<Mantid::API::MDGeometry> mdWS) {
-  if (auto imdWS =
-          boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(mdWS)) {
+    const std::shared_ptr<Mantid::API::MDGeometry> &mdWS) {
+  if (auto imdWS = std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(mdWS)) {
     const SpecialCoordinateSystem coordSystMD =
         imdWS->getSpecialCoordinateSystem();
     const SpecialCoordinateSystem coordSystDim =
@@ -135,10 +135,11 @@ void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
  interpreting the MODEL.
  */
 ConcretePeaksPresenter::ConcretePeaksPresenter(
-    PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
-    boost::shared_ptr<MDGeometry> mdWS,
-    Mantid::Geometry::PeakTransformFactory_sptr transformFactory)
-    : m_viewFactory(viewFactory), m_peaksWS(peaksWS),
+    PeakOverlayViewFactory_sptr viewFactory,
+    const IPeaksWorkspace_sptr &peaksWS,
+    const std::shared_ptr<MDGeometry> &mdWS,
+    const Mantid::Geometry::PeakTransformFactory_sptr &transformFactory)
+    : m_viewFactory(std::move(viewFactory)), m_peaksWS(peaksWS),
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
       m_owningPresenter(nullptr), m_isHidden(false),
@@ -159,7 +160,7 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
   m_axisData.fromHklToXyz[8] = 1.0;
 
   // Check that the workspaces appear to be compatible. Log if otherwise.
-  checkWorkspaceCompatibilities(mdWS);
+  checkWorkspaceCompatibilities(std::move(mdWS));
   this->initialize();
 }
 
@@ -526,8 +527,7 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
   if (!deletionIndexList.empty()) {
 
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
-            this->m_peaksWS);
+        std::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
     // Sort the Peaks in-place.
     Mantid::API::IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("DeleteTableRows");
@@ -558,7 +558,7 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
   V3D position = m_transform->transformBack(plotCoordsPoint);
 
   Mantid::API::IPeaksWorkspace_sptr peaksWS =
-      boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
+      std::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
   const auto frame = m_transform->getCoordinateSystem();
   try {
@@ -591,8 +591,7 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
             ->getRadius(); // Effective radius of each peak representation.
 
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
-            this->m_peaksWS);
+        std::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
     PeakBoundingBox transformedViewableRegion = box.makeSliceBox(radius);
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SAVELauenormTEST_H_
-#define MANTID_CRYSTAL_SAVELauenormTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
@@ -144,7 +143,7 @@ public:
     loadPeaks.setPropertyValue("FileName", "Peaks5637.integrate");
     loadPeaks.setPropertyValue("OutputWorkspace", "abc");
     loadPeaks.execute();
-    PeaksWorkspace_sptr ows = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr ows = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("abc"));
     SaveLauenorm alg4;
     TS_ASSERT_THROWS_NOTHING(alg4.initialize())
@@ -177,5 +176,3 @@ public:
   /// Test with a few peaks
   void test_exec() { do_test(2, 4, 4); }
 };
-
-#endif /* MANTID_CRYSTAL_SAVELauenormTEST_H_ */

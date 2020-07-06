@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_QENSFITSIMULTANEOUSTEST_H_
-#define MANTID_ALGORITHMS_QENSFITSIMULTANEOUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -85,8 +86,8 @@ public:
   }
 
 private:
-  std::string runConvolutionFit(MatrixWorkspace_sptr inputWorkspace,
-                                MatrixWorkspace_sptr resolution) {
+  std::string runConvolutionFit(const MatrixWorkspace_sptr &inputWorkspace,
+                                const MatrixWorkspace_sptr &resolution) {
     QENSFitSimultaneous alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
@@ -108,12 +109,12 @@ private:
 
   std::string runMultiDatasetFit(
       const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
-      IFunction_sptr function) {
+      const IFunction_sptr &function) {
     QENSFitSimultaneous alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    alg.setProperty("Function",
-                    createMultiDomainFunction(function, workspaces.size()));
+    alg.setProperty("Function", createMultiDomainFunction(std::move(function),
+                                                          workspaces.size()));
     setMultipleInput(alg, workspaces, 0.0, 10.0);
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
@@ -198,7 +199,7 @@ private:
     return resolution;
   }
 
-  void addBinsAndCountsToWorkspace(Workspace2D_sptr workspace,
+  void addBinsAndCountsToWorkspace(const Workspace2D_sptr &workspace,
                                    std::size_t totalBinEdges,
                                    std::size_t totalCounts, double binValue,
                                    double countValue) const {
@@ -233,9 +234,9 @@ private:
     }
   }
 
-  IFunction_sptr createMultiDomainFunction(IFunction_sptr function,
+  IFunction_sptr createMultiDomainFunction(const IFunction_sptr &function,
                                            std::size_t numberOfDomains) {
-    auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+    auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
 
     for (auto i = 0u; i < numberOfDomains; ++i) {
       multiDomainFunction->addFunction(function);
@@ -244,5 +245,3 @@ private:
     return multiDomainFunction;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_ */

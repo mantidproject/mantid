@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -26,7 +26,7 @@ using namespace HistogramData;
 DECLARE_ALGORITHM(ChopData)
 
 void ChopData::init() {
-  auto wsVal = boost::make_shared<CompositeValidator>();
+  auto wsVal = std::make_shared<CompositeValidator>();
   wsVal->add<WorkspaceUnitValidator>("TOF");
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
@@ -175,7 +175,7 @@ void ChopData::exec() {
   }
 
   // Create workspace group that holds output workspaces
-  auto wsgroup = boost::make_shared<WorkspaceGroup>();
+  auto wsgroup = std::make_shared<WorkspaceGroup>();
 
   for (auto &workspace : workspaces) {
     wsgroup->addWorkspace(workspace);

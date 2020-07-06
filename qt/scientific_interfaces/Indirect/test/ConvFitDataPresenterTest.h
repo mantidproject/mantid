@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CONVFITDATAPRESENTERTEST_H_
-#define MANTIDQT_CONVFITDATAPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -51,7 +50,6 @@ public:
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
   MOCK_METHOD1(setResolutionHidden, void(bool hide));
-  MOCK_METHOD1(setStartAndEndHidden, void(bool hidden));
   MOCK_METHOD0(disableMultipleDataTab, void());
 
   MOCK_CONST_METHOD0(getSelectedSample, std::string());
@@ -154,4 +152,3 @@ private:
   std::unique_ptr<MockConvFitModel> m_model;
   std::unique_ptr<ConvFitDataPresenter> m_presenter;
 };
-#endif

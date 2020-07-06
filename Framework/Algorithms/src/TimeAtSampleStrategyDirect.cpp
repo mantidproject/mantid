@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -27,7 +27,7 @@ namespace Algorithms {
 /** Constructor
  */
 TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
-    MatrixWorkspace_const_sptr ws, double ei)
+    const MatrixWorkspace_const_sptr &ws, double ei)
     : m_constShift(0) {
 
   // A constant among all spectra

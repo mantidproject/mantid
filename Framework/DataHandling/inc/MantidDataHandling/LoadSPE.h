@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADSPE_H_
-#define MANTID_DATAHANDLING_LOADSPE_H_
+#pragma once
 
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -53,7 +53,7 @@ private:
   // Execution code
   void exec() override;
 
-  void readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
+  void readHistogram(FILE *speFile, const API::MatrixWorkspace_sptr &workspace,
                      size_t index);
   void reportFormatError(const std::string &what);
 
@@ -62,5 +62,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LoadSPE_H_*/

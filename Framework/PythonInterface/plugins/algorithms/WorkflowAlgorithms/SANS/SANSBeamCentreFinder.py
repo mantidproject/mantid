@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """ Finds the beam centre for SANS"""
-
-from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 
@@ -215,7 +213,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         avg_lr_residual = lr_results.total_residual / lr_results.num_points_considered
         avg_tb_residual = tb_results.total_residual / tb_results.num_points_considered
 
-        iter_details = "Itr {:02d}: ({:7.3f}, {:7.3f})  SX={:<8.4f}\tSY={:<8.4f}\t Points: {:3d} (Unaligned: {:2d})" \
+        iter_details = "Itr {:02d}: ({:7.3f}, {:7.3f})  SX={:.3e}  SY={:.3e}  Points: {:3d} (Unaligned: {:2d})" \
             .format(iteration, scaled_lr, scaled_tb,
                     avg_lr_residual, avg_tb_residual,
                     lr_results.num_points_considered, lr_results.mismatched_points)
@@ -360,8 +358,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         return state
 
-    @staticmethod
-    def _calculate_residuals(quartile1, quartile2):
+    def _calculate_residuals(self, quartile1, quartile2):
         yvalsAX = quartile1.readY(0)
         yvalsBX = quartile2.readY(0)
         qvalsAX = quartile1.readX(0)
@@ -385,6 +382,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         for key in A_vals_dict and B_vals_dict:
             residue += pow(A_vals_dict[key] - B_vals_dict[key], 2)
+
+        self.logger.information("Beam Centre Diff: {0}".format(residue))
 
         return _ResidualsDetails(mismatched_points=mismatched_points, num_points_considered=len(A_vals_dict),
                                  total_residual=residue)

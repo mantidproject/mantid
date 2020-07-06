@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENER_H_
-#define MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -39,7 +38,7 @@ public:
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(const Types::Core::DateAndTime startTime =
                  Types::Core::DateAndTime()) override;
-  boost::shared_ptr<API::Workspace> extractData() override;
+  std::shared_ptr<API::Workspace> extractData() override;
 
   ILiveListener::RunStatus runStatus() override;
   // Note: runStatus() might actually update the value of m_status, so
@@ -160,7 +159,7 @@ private:
 
   // Holds on to any exceptions that were thrown in the background thread so
   // that we can re-throw them in the forground thread
-  boost::shared_ptr<std::runtime_error> m_backgroundException;
+  std::shared_ptr<std::runtime_error> m_backgroundException;
 
   // --- Data structures necessary for handling all the process variable info
   // ---
@@ -184,7 +183,7 @@ private:
   // Maps the device ID / variable ID pair to the actual packet.  Using a map
   // means we will only keep one packet (the most recent one) for each variable
   using VariableMapType = std::map<std::pair<unsigned int, unsigned int>,
-                                   boost::shared_ptr<ADARA::Packet>>;
+                                   std::shared_ptr<ADARA::Packet>>;
   VariableMapType m_variableMap;
 
   // Process all the variable value packets stored in m_variableMap
@@ -208,10 +207,8 @@ private:
   // foreground thread has called extractData() and retrieved the last data
   // from the previous state (which was probably NO_RUN).
   // This holds a copy of the RunStatusPkt until we can call setRunDetails().
-  boost::shared_ptr<ADARA::RunStatusPkt> m_deferredRunDetailsPkt;
+  std::shared_ptr<ADARA::RunStatusPkt> m_deferredRunDetailsPkt;
 };
 
 } // namespace LiveData
 } // namespace Mantid
-
-#endif /* MANTID_LIVEDATA_FAKEEVENTDATALISTENER_H_ */

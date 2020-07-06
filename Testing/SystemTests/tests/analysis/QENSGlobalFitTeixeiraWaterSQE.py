@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 """
     Extract or compute the Q values from reduced QENS data
 """
-from __future__ import (absolute_import, division, print_function)
 from systemtesting import MantidSystemTest
 import mantid
 import mantid.simpleapi as sm
@@ -40,7 +39,7 @@ class GlobalFitTest(MantidSystemTest):
          name=TeixeiraWaterSQE,Height=1.0,Tau=1.0,DiffCoeff=1.0,Centre=0;
          ties=(f1.Centre=f0.Centre)));
         name=LinearBackground,A0=0,A1=0"""
-        single_model = re.sub('[\s+]', '', single_model)
+        single_model = re.sub(r'[\s+]', '', single_model)
 
         # Include all spectra for the fit
         selected_wi = range(data.getNumberHistograms())

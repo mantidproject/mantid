@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_DATASERVICETEST_H_
-#define MANTID_KERNEL_DATASERVICETEST_H_
+#pragma once
 
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <Poco/NObserver.h>
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 #include <mutex>
 #include <sstream>
@@ -59,7 +58,7 @@ public:
     svc.notificationCenter.addObserver(observer);
 
     TS_ASSERT_EQUALS(svc.size(), 0);
-    auto one = boost::make_shared<int>(1);
+    auto one = std::make_shared<int>(1);
 
     // Add and check that it is in there
     TS_ASSERT_THROWS_NOTHING(svc.add("one", one););
@@ -76,10 +75,10 @@ public:
     // Can't add blank name
     TS_ASSERT_THROWS(svc.add("", one), const std::runtime_error &);
     // Can't add empty pointer
-    TS_ASSERT_THROWS(svc.add("Null", boost::shared_ptr<int>()),
+    TS_ASSERT_THROWS(svc.add("Null", std::shared_ptr<int>()),
                      const std::runtime_error &);
 
-    svc.add("__hidden", boost::make_shared<int>(99));
+    svc.add("__hidden", std::make_shared<int>(99));
     TS_ASSERT_EQUALS(notificationFlag, 3)
     svc.notificationCenter.removeObserver(observer);
   }
@@ -106,7 +105,7 @@ public:
     Poco::NObserver<DataServiceTest, FakeDataService::PreDeleteNotification>
         postobserver(*this, &DataServiceTest::handlePreDeleteNotification);
     svc.notificationCenter.addObserver(postobserver);
-    TS_ASSERT_THROWS_NOTHING(svc.add("one", boost::make_shared<int>(1)););
+    TS_ASSERT_THROWS_NOTHING(svc.add("one", std::make_shared<int>(1)););
     TS_ASSERT_EQUALS(svc.size(), 1);
     TS_ASSERT_THROWS_NOTHING(
         svc.remove("two")); // Nothing happens if the workspace isn't there
@@ -119,11 +118,11 @@ public:
 
   void test_addOrReplace() {
     TS_ASSERT_EQUALS(svc.size(), 0);
-    TS_ASSERT_THROWS_NOTHING(svc.add("one", boost::make_shared<int>(1)););
+    TS_ASSERT_THROWS_NOTHING(svc.add("one", std::make_shared<int>(1)););
     TS_ASSERT_EQUALS(svc.size(), 1);
 
     // Does it replace?
-    boost::shared_ptr<int> two = boost::make_shared<int>(2);
+    std::shared_ptr<int> two = std::make_shared<int>(2);
     TS_ASSERT_THROWS_NOTHING(svc.addOrReplace("one", two););
     TS_ASSERT_EQUALS(svc.size(), 1);
     TS_ASSERT(svc.doesExist("one"));
@@ -135,7 +134,7 @@ public:
     // Can't add blank names
     TS_ASSERT_THROWS(svc.addOrReplace("", two), const std::runtime_error &);
     // Can't add empty pointer
-    TS_ASSERT_THROWS(svc.addOrReplace("one", boost::shared_ptr<int>()),
+    TS_ASSERT_THROWS(svc.addOrReplace("one", std::shared_ptr<int>()),
                      const std::runtime_error &);
   }
 
@@ -157,8 +156,8 @@ public:
         observer2(*this, &DataServiceTest::handleRenameNotification);
     svc.notificationCenter.addObserver(observer2);
 
-    auto one = boost::make_shared<int>(1);
-    auto two = boost::make_shared<int>(2);
+    auto one = std::make_shared<int>(1);
+    auto two = std::make_shared<int>(2);
     svc.add("One", one);
     svc.add("Two", two);
     TS_ASSERT_EQUALS(svc.size(), 2);
@@ -208,7 +207,7 @@ public:
   }
 
   void test_clear() {
-    svc.add("something", boost::make_shared<int>(10));
+    svc.add("something", std::make_shared<int>(10));
     TSM_ASSERT_LESS_THAN("Size should be 1", 0, svc.size());
     svc.clear();
     TSM_ASSERT_EQUALS("DataService should be empty", svc.size(), 0);
@@ -217,7 +216,7 @@ public:
     Poco::NObserver<DataServiceTest, FakeDataService::ClearNotification>
         observer(*this, &DataServiceTest::handleClearNotification);
     svc.notificationCenter.addObserver(observer);
-    svc.add("something", boost::make_shared<int>(10));
+    svc.add("something", std::make_shared<int>(10));
     svc.clear();
     TSM_ASSERT_EQUALS("DataService should be empty", svc.size(), 0);
     TSM_ASSERT("handleClearNotification should have been called",
@@ -226,7 +225,7 @@ public:
   }
 
   void test_retrieve_and_doesExist() {
-    auto one = boost::make_shared<int>(1);
+    auto one = std::make_shared<int>(1);
     svc.add("one", one);
 
     TS_ASSERT_EQUALS(svc.retrieve("one"), one);
@@ -240,8 +239,8 @@ public:
   }
 
   void test_does_all_exist() {
-    auto one = boost::make_shared<int>(1);
-    auto two = boost::make_shared<int>(2);
+    auto one = std::make_shared<int>(1);
+    auto two = std::make_shared<int>(2);
 
     const std::string oneName = "one";
     const std::string twoName = "two";
@@ -255,7 +254,7 @@ public:
   }
 
   void test_does_all_exist_partial() {
-    auto one = boost::make_shared<int>(1);
+    auto one = std::make_shared<int>(1);
 
     const std::string oneName = "one";
 
@@ -267,8 +266,8 @@ public:
   }
 
   void test_does_all_exist_missing_ws() {
-    auto one = boost::make_shared<int>(1);
-    auto two = boost::make_shared<int>(2);
+    auto one = std::make_shared<int>(1);
+    auto two = std::make_shared<int>(2);
 
     const std::string oneName = "one";
     const std::string twoName = "two";
@@ -284,9 +283,9 @@ public:
 
   void test_size() {
     TS_ASSERT_EQUALS(svc.size(), 0);
-    svc.add("something", boost::make_shared<int>(-1));
+    svc.add("something", std::make_shared<int>(-1));
     TS_ASSERT_EQUALS(svc.size(), 1);
-    svc.add("__hidden", boost::make_shared<int>(1));
+    svc.add("__hidden", std::make_shared<int>(1));
     TSM_ASSERT_EQUALS("Hidden workspaces should not be counted", svc.size(), 1);
 
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
@@ -295,9 +294,9 @@ public:
   }
 
   void test_getObjectNames_and_getObjects() {
-    auto one = boost::make_shared<int>(1);
-    auto two = boost::make_shared<int>(2);
-    auto three = boost::make_shared<int>(3);
+    auto one = std::make_shared<int>(1);
+    auto two = std::make_shared<int>(2);
+    auto three = std::make_shared<int>(3);
     svc.add("One", one);
     svc.add("Two", two);
     svc.add("TwoAgain",
@@ -342,9 +341,9 @@ public:
 
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
                                         "0");
-    auto one = boost::make_shared<int>(1);
-    auto two = boost::make_shared<int>(2);
-    auto three = boost::make_shared<int>(3);
+    auto one = std::make_shared<int>(1);
+    auto two = std::make_shared<int>(2);
+    auto three = std::make_shared<int>(3);
     svc.add("One", one);
     svc.add("Two", two);
     svc.add("TwoAgain",
@@ -378,9 +377,9 @@ public:
 
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
                                         "1");
-    auto one = boost::make_shared<int>(1);
-    auto two = boost::make_shared<int>(2);
-    auto three = boost::make_shared<int>(3);
+    auto one = std::make_shared<int>(1);
+    auto two = std::make_shared<int>(2);
+    auto three = std::make_shared<int>(3);
     svc.add("One", one);
     svc.add("Two", two);
     svc.add("__Three", three);
@@ -401,9 +400,9 @@ public:
 
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
                                         "0");
-    auto one = boost::make_shared<int>(1);
-    auto two = boost::make_shared<int>(2);
-    auto three = boost::make_shared<int>(3);
+    auto one = std::make_shared<int>(1);
+    auto two = std::make_shared<int>(2);
+    auto three = std::make_shared<int>(3);
     svc.add("One", one);
     svc.add("Two", two);
     svc.add("__Three", three);
@@ -421,10 +420,10 @@ public:
   }
 
   void test_sortedAndHiddenGetNames() {
-    auto one = boost::make_shared<int>(1);
-    auto two = boost::make_shared<int>(2);
-    auto three = boost::make_shared<int>(3);
-    auto four = boost::make_shared<int>(4);
+    auto one = std::make_shared<int>(1);
+    auto two = std::make_shared<int>(2);
+    auto three = std::make_shared<int>(3);
+    auto four = std::make_shared<int>(4);
     // This time add them in a random order
     svc.add("One", one);
     svc.add("__Three", three);
@@ -461,12 +460,12 @@ public:
     svc.notificationCenter.addObserver(observer);
     vector.clear();
 
-    svc.add("object1", boost::make_shared<int>(12345));
+    svc.add("object1", std::make_shared<int>(12345));
 
     int num = 5000;
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < num; i++) {
-      boost::shared_ptr<int> object = boost::make_shared<int>(i);
+      std::shared_ptr<int> object = std::make_shared<int>(i);
       std::ostringstream mess;
       mess << "item" << i;
 
@@ -474,12 +473,12 @@ public:
       svc.addOrReplace(mess.str(), object);
 
       // And retrieving some at the same time
-      boost::shared_ptr<int> retrieved = svc.retrieve("object1");
+      std::shared_ptr<int> retrieved = svc.retrieve("object1");
       TS_ASSERT_EQUALS(*retrieved, 12345);
 
       // Also add then remove another object
       std::string otherName = "other_" + mess.str();
-      boost::shared_ptr<int> other = boost::make_shared<int>(i);
+      std::shared_ptr<int> other = std::make_shared<int>(i);
       svc.add(otherName, other);
       svc.remove(otherName);
     }
@@ -527,5 +526,3 @@ public:
     TS_ASSERT(!FakeDataService::showingHiddenObjects());
   }
 };
-
-#endif /* MANTID_KERNEL_DATASERVICETEST_H_ */

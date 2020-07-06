@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSERTEST_H_
-#define MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSERTEST_H_
+#pragma once
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
@@ -477,5 +476,3 @@ public:
 private:
   std::string instrument;
 };
-
-#endif /* MANTID_GEOMETRY_JSONGEOMETRYPARSERTEST_H_ */

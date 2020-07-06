@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILETEST_H_
-#define MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILETEST_H_
+#pragma once
 
 #include "MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h"
 #include <cxxtest/TestSuite.h>
@@ -34,12 +33,12 @@ public:
   void test_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
     Mantid::API::IFunction_sptr profile = createFunction();
     static const size_t nparams(5);
-    const char *expectedParams[nparams] = {"Mass", "Intensity", "SigmaX",
-                                           "SigmaY", "SigmaZ"};
     auto currentNames = profile->getParameterNames();
     const size_t nnames = currentNames.size();
     TS_ASSERT_EQUALS(nparams, nnames);
     if (nnames == nparams) {
+      const char *expectedParams[nparams] = {"Mass", "Intensity", "SigmaX",
+                                             "SigmaY", "SigmaZ"};
       for (size_t i = 0; i < nnames; ++i) {
         TS_ASSERT_EQUALS(expectedParams[i], currentNames[i]);
       }
@@ -49,12 +48,12 @@ public:
   void test_Initialized_Function_Has_Expected_Attributes() {
     Mantid::API::IFunction_sptr profile = createFunction();
     static const size_t nattrs(1);
-    const char *expectedAttrs[nattrs] = {"IntegrationSteps"};
 
     TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
 
     // Test names as they are used in scripts
     if (profile->nAttributes() > 0) {
+      const char *expectedAttrs[nattrs] = {"IntegrationSteps"};
       std::set<std::string> expectedAttrSet(expectedAttrs,
                                             expectedAttrs + nattrs);
       std::vector<std::string> actualNames = profile->getAttributeNames();
@@ -110,7 +109,7 @@ public:
   }
 
 private:
-  boost::shared_ptr<MultivariateGaussianComptonProfile>
+  std::shared_ptr<MultivariateGaussianComptonProfile>
   createFunctionWithParamsSet() {
     auto func = createFunction();
     func->setAttributeValue("IntegrationSteps", 34);
@@ -123,11 +122,9 @@ private:
     return func;
   }
 
-  boost::shared_ptr<MultivariateGaussianComptonProfile> createFunction() {
-    auto profile = boost::make_shared<MultivariateGaussianComptonProfile>();
+  std::shared_ptr<MultivariateGaussianComptonProfile> createFunction() {
+    auto profile = std::make_shared<MultivariateGaussianComptonProfile>();
     profile->initialize();
     return profile;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILETEST_H_ */

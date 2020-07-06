@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
-#define MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -56,7 +55,7 @@ public:
   /** Run the IntegratePeaksMDHKL with the given peak radius integration param
    */
   static void
-  doRun(std::string OutputWorkspace = "IntegratePeaksMDHKLTest_peaks") {
+  doRun(const std::string &OutputWorkspace = "IntegratePeaksMDHKLTest_peaks") {
     IntegratePeaksMDHKL alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -206,5 +205,3 @@ public:
                      peakWS->getPeak(0).getSigmaIntensity(), 5.2814, 0.1);
   }
 };
-
-#endif /* MANTID_MDEVENTS_INTEGRATEPEAKSMDHKLTEST_H_ */

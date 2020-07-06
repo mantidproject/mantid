@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMPOSITEFUNCTIONTEST_H_
-#define COMPOSITEFUNCTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -1223,7 +1222,7 @@ public:
 
   void test_local_name() {
     std::string funStr = "name=Linear;(name=Linear;(name=Linear;name=Linear))";
-    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto fun = std::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createInitialized(funStr));
     TS_ASSERT_EQUALS(fun->parameterLocalIndex(0), 0);
     TS_ASSERT_EQUALS(fun->parameterLocalIndex(2), 0);
@@ -1246,5 +1245,3 @@ public:
     TS_ASSERT_EQUALS(fun->parameterLocalName(6, true), "a");
   }
 };
-
-#endif /*COMPOSITEFUNCTIONTEST_H_*/

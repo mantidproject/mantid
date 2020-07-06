@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_INDEXTYPE_H_
-#define MANTID_INDEXING_INDEXTYPE_H_
+#pragma once
 
+#include <string>
 #include <type_traits>
 
 namespace Mantid {
@@ -48,6 +48,7 @@ public:
   template <class T> bool operator<=(const T &other) const noexcept {
     return m_data <= IndexType(other).m_data;
   }
+  std::string str() const { return std::to_string(m_data); }
 
 private:
   Int m_data;
@@ -56,5 +57,3 @@ private:
 } // namespace detail
 } // namespace Indexing
 } // namespace Mantid
-
-#endif /* MANTID_INDEXING_INDEXTYPE_H_ */

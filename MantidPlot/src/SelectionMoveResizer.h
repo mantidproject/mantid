@@ -27,8 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SELECTION_MOVE_RESIZER_H
-#define SELECTION_MOVE_RESIZER_H
+#pragma once
 
 #include <QList>
 #include <QRect>
@@ -250,5 +249,3 @@ private slots:
   void removeWidget(QObject *w);
   void removeLegend(QObject *w);
 };
-
-#endif // ifndef SELECTION_MOVE_RESIZER_H

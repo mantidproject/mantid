@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Simple Reducer example
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction import Reducer
 from reduction.instruments.example.ExampleRedStep import ExampleRedStep
 # Validate_step is a decorator that allows both Python algorithms and ReductionStep objects to be passed to the Reducer.

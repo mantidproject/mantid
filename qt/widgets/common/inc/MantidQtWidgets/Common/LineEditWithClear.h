@@ -7,8 +7,7 @@
 **
 ****************************************************************************/
 
-#ifndef LINEEDITWITHCLEAR_H
-#define LINEEDITWITHCLEAR_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
@@ -36,5 +35,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // LINEEDITWITHCLEAR_H

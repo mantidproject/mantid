@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_PRIMITIVES_H
-#define MANTID_SLICEVIEWER_PEAK_PRIMITIVES_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidKernel/V3D.h"
@@ -86,5 +85,3 @@ struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesEllipse
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif

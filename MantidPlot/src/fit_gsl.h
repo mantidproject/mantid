@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FIT_GSL_H
-#define FIT_GSL_H
+#pragma once
 
 #include <cstddef>
 #include <gsl/gsl_matrix.h>
@@ -72,5 +71,3 @@ int user_f(const gsl_vector *x, void *params, gsl_vector *f);
 double user_d(const gsl_vector *x, void *params);
 int user_df(const gsl_vector *x, void *params, gsl_matrix *J);
 int user_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J);
-
-#endif

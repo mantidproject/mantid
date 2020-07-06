@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
-#define MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
+#pragma once
 
 #include "ExperimentInfoTest.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
@@ -38,7 +37,7 @@ public:
       throw std::runtime_error("Cannot find test file HRP38692a.nxs");
     }
 
-    m_inMemoryExptInfo = boost::make_shared<ExperimentInfo>();
+    m_inMemoryExptInfo = std::make_shared<ExperimentInfo>();
     ::NeXus::File nxFile(m_filename, NXACC_READ);
     nxFile.openGroup("mantid_workspace_1", "NXentry");
     std::string paramString;
@@ -164,12 +163,10 @@ private:
   Mantid::API::ExperimentInfo_sptr createTestObject() {
     // Create the file backed experiment info, shouldn't be loaded yet.
     // Manipulate it through the interface
-    return boost::make_shared<FileBackedExperimentInfo>(m_filename,
-                                                        "/mantid_workspace_1");
+    return std::make_shared<FileBackedExperimentInfo>(m_filename,
+                                                      "/mantid_workspace_1");
   }
 
   Mantid::API::ExperimentInfo_sptr m_inMemoryExptInfo;
   std::string m_filename;
 };
-
-#endif /* MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAlgorithms/SaveMDWorkspaceToVTK.h"
 #include "MantidAPI/FileProperty.h"
@@ -60,11 +60,11 @@ void SaveMDWorkspaceToVTK::init() {
   auto normalizations = saver->getAllowedNormalizationsInStringRepresentation();
   declareProperty(
       "Normalization", "AutoSelect",
-      boost::make_shared<Mantid::Kernel::StringListValidator>(normalizations),
+      std::make_shared<Mantid::Kernel::StringListValidator>(normalizations),
       "The visual normalization option. The automatic default will choose a "
       "normalization based on your data type and instrument.");
 
-  boost::shared_ptr<Mantid::Kernel::BoundedValidator<int>> mustBePositive(
+  std::shared_ptr<Mantid::Kernel::BoundedValidator<int>> mustBePositive(
       new Mantid::Kernel::BoundedValidator<int>());
   mustBePositive->setLower(1);
   declareProperty("RecursionDepth", 5, mustBePositive,
@@ -72,7 +72,7 @@ void SaveMDWorkspaceToVTK::init() {
                   "and determines to which level data should be displayed.");
 
   declareProperty("CompressorType", "NONE",
-                  boost::make_shared<Mantid::Kernel::StringListValidator>(
+                  std::make_shared<Mantid::Kernel::StringListValidator>(
                       std::vector<std::string>{"NONE", "ZLIB"}),
                   "Select which compression library to use");
 }
@@ -101,8 +101,8 @@ std::map<std::string, std::string> SaveMDWorkspaceToVTK::validateInputs() {
 
   // Check for input workspace type
   Mantid::API::IMDWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (!boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS) &&
-      !boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(inputWS)) {
+  if (!std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(inputWS) &&
+      !std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(inputWS)) {
     errorMessage.emplace("InputWorkspace",
                          "Only MDHisto or MDEvent workspaces can be saved.");
   }

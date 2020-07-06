@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILETEST_H_
-#define MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -41,7 +40,7 @@ public:
     // Load a (local) table workspace
     loadProfileTable("PG3ProfileTable");
     TableWorkspace_sptr profiletablews =
-        boost::dynamic_pointer_cast<TableWorkspace>(
+        std::dynamic_pointer_cast<TableWorkspace>(
             AnalysisDataService::Instance().retrieve("PG3ProfileTable"));
     TS_ASSERT(profiletablews);
 
@@ -187,10 +186,10 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Load table workspace containing instrument parameters
    */
-  void loadProfileTable(string wsname) {
+  void loadProfileTable(const string &wsname) {
     // The data befow is from Bank1 in pg60_2011B.irf
 
-    auto tablews = boost::make_shared<TableWorkspace>();
+    auto tablews = std::make_shared<TableWorkspace>();
     tablews->addColumn("str", "Name");
     tablews->addColumn("double", "Value_1");
 
@@ -267,7 +266,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a 3 bank .irf file
    */
-  void generate3BankIrfFile(string filename) {
+  void generate3BankIrfFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 
@@ -458,7 +457,8 @@ public:
   }
 
   // Compare 2 files
-  bool compare2Files(std::string filename1, std::string filename2) {
+  bool compare2Files(const std::string &filename1,
+                     const std::string &filename2) {
     ifstream file1(filename1.c_str(), std::ifstream::in);
     ifstream file2(filename2.c_str(), std::ifstream::in);
 
@@ -497,7 +497,6 @@ public:
 
     while (!file2.eof()) {
       getline(file2, str);
-      c2++;
     }
 
     // Reset file stream pointer
@@ -531,5 +530,3 @@ public:
     return true;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILETEST_H_ */

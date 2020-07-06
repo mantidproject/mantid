@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAGFORMFACTORCORRECTION_H_
-#define MANTID_ALGORITHMS_MAGFORMFACTORCORRECTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -29,7 +29,7 @@ namespace Algorithms {
     @author Manh Duc Le, STFC
     @date 08/09/2016
 */
-class DLLExport MagFormFactorCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MagFormFactorCorrection : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MagFormFactorCorrection"; }
@@ -54,5 +54,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_MAGFORMFACTORCORRECTION_H_*/

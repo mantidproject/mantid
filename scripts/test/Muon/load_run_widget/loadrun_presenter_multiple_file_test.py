@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
-import six
-
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
@@ -54,10 +52,6 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.load_utils_patcher = patcher.start()
         self.load_utils_patcher.exception_message_for_failed_files.return_value = ''
 
-        file_finder_patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_presenter.FileFinder')
-        self.addCleanup(file_finder_patcher.stop)
-        file_finder_patcher.start()
-
     def tearDown(self):
         self.obj = None
 
@@ -77,6 +71,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
     def assert_view_empty(self):
         self.assertEqual(self.view.get_run_edit_text(), "")
 
+    @staticmethod
     def load_failure(self):
         raise ValueError("Error text")
 
@@ -117,9 +112,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["file1.nxs", "file2.nxs", "file3.nxs", "file4.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [[1], [2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [[1], [2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_filenames, ["file1.nxs", "file2.nxs", "file3.nxs", "file4.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [[1], [2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_runs, [[1], [2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), "1")
 
@@ -131,9 +126,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs", "file5.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4], [5]])
-        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4], [5]])
+        self.assertCountEqual(self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs", "file5.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [[2], [3], [4], [5]])
+        self.assertCountEqual(self.model.loaded_runs, [[2], [3], [4], [5]])
 
         self.assertEqual(self.view.get_run_edit_text(), "5")
 
@@ -146,9 +141,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [[2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_runs, [[2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), '2-4')
 
@@ -161,9 +156,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [[2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_runs, [[2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), '2-4')
 

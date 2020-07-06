@@ -1,16 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
-#define MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
+#pragma once
 
 #include "MantidCrystal/DisjointElement.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using Mantid::Crystal::DisjointElement;
 
@@ -145,13 +143,13 @@ public:
   }
 
   void test_complex() {
-    using DisjointElement_sptr = boost::shared_ptr<DisjointElement>;
+    using DisjointElement_sptr = std::shared_ptr<DisjointElement>;
     using VecDisjointElement = std::vector<DisjointElement_sptr>;
 
     // Create elements from 0-9
     VecDisjointElement vecElements;
     for (int i = 0; i < 10; ++i) {
-      vecElements.emplace_back(boost::make_shared<DisjointElement>(i));
+      vecElements.emplace_back(std::make_shared<DisjointElement>(i));
     }
 
     // Merge selected sets.
@@ -184,5 +182,3 @@ public:
     TS_ASSERT_EQUALS(9, vecElements[9]->getRoot());
   }
 };
-
-#endif /* MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_ */

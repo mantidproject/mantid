@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
-#define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
+#pragma once
 #include "../Runs/IRunsPresenter.h"
 #include "Common/Clipboard.h"
 #include "Common/DllConfig.h"
@@ -39,6 +37,8 @@ public:
   RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void setTablePrecision(int &precision) override;
+  void resetTablePrecision() override;
   void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides
@@ -156,6 +156,8 @@ private:
                             Item const &item);
   void updateProgressBar();
 
+  void notifyTableChanged();
+
   bool isProcessing() const;
   bool isAutoreducing() const;
   bool isAnyBatchProcessing() const;
@@ -177,4 +179,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_

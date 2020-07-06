@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_MATRIX_H_
-#define MANTID_KERNEL_MATRIX_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <cfloat>
@@ -87,7 +86,7 @@ public:
   const T *operator[](const size_t row) const { return m_rawData[row]; }
 
   /// Array accessor. Use, e.g. Matrix[row][col]
-  T *operator[](const size_t row) { return m_rawData[row]; };
+  T *operator[](const size_t row) { return m_rawData[row]; }
 
   Matrix<T> &operator+=(const Matrix<T> &);     ///< Basic addition operator
   Matrix<T> operator+(const Matrix<T> &) const; ///< Basic addition operator
@@ -233,4 +232,3 @@ template <typename T>
 void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
 } // namespace Kernel
 } // namespace Mantid
-#endif // MANTID_KERNEL_MATRIX_H_

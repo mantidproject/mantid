@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEPDFGUITEST_H_
-#define MANTID_DATAHANDLING_SAVEPDFGUITEST_H_
+#pragma once
 
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
@@ -60,7 +59,7 @@ public:
     return n;
   }
 
-  bool loadWorkspace(const std::string &filename, const std::string wsName) {
+  bool loadWorkspace(const std::string &filename, const std::string &wsName) {
     LoadNexusProcessed load;
     load.initialize();
     load.setProperty("Filename", filename);
@@ -113,9 +112,6 @@ public:
     grpAlg->setPropertyValue("OutputWorkspace", groupName);
     grpAlg->execute();
 
-    // name of the output file
-    const std::string outFilename("SavePDFGUIGroup.gr");
-
     // run the algorithm with a group
     SavePDFGui alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -129,5 +125,3 @@ public:
     AnalysisDataService::Instance().deepRemoveGroup(groupName);
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVEPDFGUITEST_H_ */

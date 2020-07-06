@@ -12,6 +12,12 @@ add_python_package(workbench
   INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
 )
 
+set_target_properties(workbench PROPERTIES
+                      VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
+                      VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
+                      VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>
+                      )
+
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
 if (WIN32)
@@ -68,15 +74,19 @@ set(TEST_FILES
     workbench/config/test/test_user.py
     workbench/test/test_import.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfitting.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgenerator.py
     workbench/plotting/test/test_figureerrorsmanager.py
     workbench/plotting/test/test_figureinteraction.py
     workbench/plotting/test/test_figuremanager.py
     workbench/plotting/test/test_figurewindow.py
     workbench/plotting/test/test_globalfiguremanager.py
+    workbench/plotting/test/test_propertiesdialog.py
+    workbench/plotting/test/test_plothelppages.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py
@@ -88,6 +98,9 @@ set(TEST_FILES
     workbench/widgets/settings/test/test_settings_presenter.py
     workbench/widgets/settings/test/test_settings_view.py
     workbench/widgets/settings/general/test/test_general_settings.py
+    workbench/widgets/settings/plots/test/test_plot_settings.py
+    workbench/widgets/settings/categories/test/test_categories_settings.py
+    workbench/widgets/settings/fitting/test/test_fitting_settings.py
     workbench/projectrecovery/test/test_projectrecovery.py
     workbench/projectrecovery/test/test_projectrecoveryloader.py
     workbench/projectrecovery/test/test_projectrecoverysaver.py
@@ -115,7 +128,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
 install (CODE "
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${PYTHON_EXECUTABLE} ${ParaView_DIR}
+                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${Python_EXECUTABLE} ${ParaView_DIR}
                     RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
     if(NOT install_name_tool_result EQUAL 0)
       message(\"\${_out}\")

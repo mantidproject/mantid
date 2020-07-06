@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/OrientedLatticeValidator.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/IValidator.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::Kernel::IValidator_sptr;
 
@@ -19,7 +19,7 @@ namespace API {
  * Clone the current state
  */
 Kernel::IValidator_sptr OrientedLatticeValidator::clone() const {
-  return boost::make_shared<OrientedLatticeValidator>(*this);
+  return std::make_shared<OrientedLatticeValidator>(*this);
 }
 
 /** Checks that workspace has an oriented lattice.

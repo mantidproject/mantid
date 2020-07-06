@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyWithValue.h"
 
@@ -16,7 +16,7 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #endif
 
 #include <json/value.h>
@@ -42,7 +42,8 @@ namespace Kernel {
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
+                                           TYPE defaultValue,
                                            IValidator_sptr validator,
                                            unsigned int direction)
     : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
@@ -56,11 +57,12 @@ PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
+                                           TYPE defaultValue,
                                            unsigned int direction)
     : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
       m_initialValue(std::move(defaultValue)),
-      m_validator(boost::make_shared<NullValidator>()) {}
+      m_validator(std::make_shared<NullValidator>()) {}
 
 /*
   Constructor to handle vector value assignments to m_initialValue
@@ -77,7 +79,8 @@ PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
+                                           TYPE defaultValue,
                                            const std::string &defaultValueStr,
                                            IValidator_sptr validator,
                                            unsigned int direction)
@@ -246,12 +249,12 @@ PropertyWithValue<TYPE>::setValueFromJson(const Json::Value &value) {
  */
 template <typename TYPE>
 std::string
-PropertyWithValue<TYPE>::setDataItem(const boost::shared_ptr<DataItem> data) {
+PropertyWithValue<TYPE>::setDataItem(const std::shared_ptr<DataItem> &data) {
   // Pass of the helper function that is able to distinguish whether
   // the TYPE of the PropertyWithValue can be converted to a
   // shared_ptr<DataItem>
-  return setTypedValue(
-      data, std::is_convertible<TYPE, boost::shared_ptr<DataItem>>());
+  return setTypedValue(data,
+                       std::is_convertible<TYPE, std::shared_ptr<DataItem>>());
 }
 
 /// Copy assignment operator assigns only the value and the validator not the
@@ -412,14 +415,14 @@ PropertyWithValue<TYPE>::setValueFromProperty(const Property &right) {
  * Helper function for setValue(DataItem_sptr). Uses boost type traits to
  * ensure
  * it is only used if U is a type that is convertible to
- * boost::shared_ptr<DataItem>
- * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
+ * std::shared_ptr<DataItem>
+ * @param value :: A object of type convertible to std::shared_ptr<DataItem>
  */
 template <typename TYPE>
 template <typename U>
 std::string PropertyWithValue<TYPE>::setTypedValue(const U &value,
                                                    const std::true_type &) {
-  TYPE data = boost::dynamic_pointer_cast<typename TYPE::element_type>(value);
+  TYPE data = std::dynamic_pointer_cast<typename TYPE::element_type>(value);
   std::string msg;
   if (data) {
     try {
@@ -440,8 +443,8 @@ std::string PropertyWithValue<TYPE>::setTypedValue(const U &value,
  * Helper function for setValue(DataItem_sptr). Uses boost type traits to
  * ensure
  * it is only used if U is NOT a type that is convertible to
- * boost::shared_ptr<DataItem>
- * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
+ * std::shared_ptr<DataItem>
+ * @param value :: A object of type convertible to std::shared_ptr<DataItem>
  */
 template <typename TYPE>
 template <typename U>

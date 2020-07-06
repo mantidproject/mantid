@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 #include "MantidGeometry/Instrument.h"
@@ -29,6 +29,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <Poco/Path.h>
+
+#include <memory>
 
 #include <QFileDialog>
 #include <QKeyEvent>
@@ -86,8 +88,8 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly,
 
   m_tree->setDragEnabled(true);
 
-  auto presenter = boost::make_shared<WorkspacePresenter>(this);
-  m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
+  auto presenter = std::make_shared<WorkspacePresenter>(this);
+  m_presenter = std::dynamic_pointer_cast<ViewNotifiable>(presenter);
   presenter->init();
 
   if (m_viewOnly)
@@ -106,7 +108,7 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_tree = new MantidTreeWidget(m_mantidDisplayModel, this);
   m_tree->setHeaderLabel("Workspaces");
 
-  FlowLayout *buttonLayout = new FlowLayout();
+  auto *buttonLayout = new FlowLayout();
   m_loadButton = new QPushButton("Load");
   m_saveButton = new QPushButton("Save");
   m_deleteButton = new QPushButton("Delete");
@@ -128,7 +130,7 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_workspaceFilter->setPlaceholderText("Filter Workspaces");
   m_workspaceFilter->setToolTip("Type here to filter the workspaces");
 
-  QVBoxLayout *layout = new QVBoxLayout();
+  auto *layout = new QVBoxLayout();
   layout->setSpacing(0);
   layout->setMargin(0);
   layout->addLayout(buttonLayout);
@@ -170,7 +172,7 @@ void WorkspaceTreeWidget::setupConnections() {
   connect(this, SIGNAL(signalClearView()), this, SLOT(handleClearView()),
           Qt::QueuedConnection);
   connect(m_tree, SIGNAL(itemSelectionChanged()), this,
-          SLOT(treeSelectionChanged()));
+          SLOT(onTreeSelectionChanged()));
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem *)), this,
           SLOT(populateChildData(QTreeWidgetItem *)));
 }
@@ -188,7 +190,7 @@ void WorkspaceTreeWidget::setTreeUpdating(const bool state) {
 void WorkspaceTreeWidget::incrementUpdateCount() { m_updateCount.ref(); }
 
 WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
-  return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
+  return std::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
 }
 
 /** Returns the names of the selected workspaces
@@ -240,8 +242,7 @@ void WorkspaceTreeWidget::showCriticalUserMessage(
 
 void WorkspaceTreeWidget::onLoadAccept() {
   QObject *sender = QObject::sender();
-  MantidQt::API::AlgorithmDialog *dlg =
-      reinterpret_cast<MantidQt::API::AlgorithmDialog *>(sender);
+  auto *dlg = reinterpret_cast<MantidQt::API::AlgorithmDialog *>(sender);
   if (!dlg)
     return; // should never happen
 
@@ -520,7 +521,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
           if (item->text(0).contains(filterRegEx)) {
             // my name does match the filter
             if (auto group =
-                    boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+                    std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
               // I am a group, I will want my children to be visible
               // but I cannot do that until this iterator has finished
               // store this pointer in a list for processing later
@@ -774,7 +775,7 @@ void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
 
   Workspace_sptr workspace = userData.value<Workspace_sptr>();
 
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
     auto members = group->getAllItems();
     for (const auto &ws : members) {
       auto *node = addTreeEntry(std::make_pair(ws->getName(), ws), item);
@@ -867,8 +868,7 @@ MantidTreeWidgetItem *WorkspaceTreeWidget::addTreeEntry(
   // A a child ID item so that it becomes expandable. Using the correct ID is
   // needed when plotting from non-expanded groups.
   const std::string wsID = item.second->id();
-  MantidTreeWidgetItem *idNode =
-      new MantidTreeWidgetItem(QStringList(wsID.c_str()), m_tree);
+  auto *idNode = new MantidTreeWidgetItem(QStringList(wsID.c_str()), m_tree);
   idNode->setFlags(Qt::NoItemFlags);
   node->addChild(idNode);
   setItemIcon(node, wsID);
@@ -885,7 +885,7 @@ MantidTreeWidgetItem *WorkspaceTreeWidget::addTreeEntry(
  * Check if a workspace should be selected after dock update.
  * @param name :: Name of a workspace to check.
  */
-bool WorkspaceTreeWidget::shouldBeSelected(QString name) const {
+bool WorkspaceTreeWidget::shouldBeSelected(const QString &name) const {
   QMutexLocker lock(&m_mutex);
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
@@ -900,7 +900,7 @@ bool WorkspaceTreeWidget::shouldBeSelected(QString name) const {
   return false;
 }
 
-void WorkspaceTreeWidget::treeSelectionChanged() {
+void WorkspaceTreeWidget::onTreeSelectionChanged() {
   // get selected workspaces
   auto items = m_tree->selectedItems();
 
@@ -909,7 +909,7 @@ void WorkspaceTreeWidget::treeSelectionChanged() {
       // check it's group
       auto wsSptr =
           items.first()->data(0, Qt::UserRole).value<Workspace_sptr>();
-      auto grpSptr = boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+      auto grpSptr = std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
       if (grpSptr) {
         m_groupButton->setText("Ungroup");
         m_groupButton->setEnabled(true);
@@ -1102,7 +1102,7 @@ void WorkspaceTreeWidget::addClearMenuItems(QMenu *menu,
 bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
   bool hasUB = false;
   Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-  IMDWorkspace_sptr wsIMD = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+  IMDWorkspace_sptr wsIMD = std::dynamic_pointer_cast<IMDWorkspace>(ws);
   if (ws && wsIMD) {
     hasUB = wsIMD->hasOrientedLattice();
   }
@@ -1116,7 +1116,7 @@ bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
  * ALGO_NAME
  * @param menuEntryName Text to be shown in menu
  */
-void WorkspaceTreeWidget::addSaveMenuOption(QString algorithmString,
+void WorkspaceTreeWidget::addSaveMenuOption(const QString &algorithmString,
                                             QString menuEntryName) {
   // Default to algo string if no entry name given
   if (menuEntryName.isEmpty())
@@ -1274,22 +1274,20 @@ void WorkspaceTreeWidget::popupContextMenu() {
 
     // Add the items that are appropriate for the type
     if (auto matrixWS =
-            boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-                ws)) {
+            std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws)) {
       addMatrixWorkspaceMenuItems(menu, matrixWS);
     } else if (auto mdeventWS =
-                   boost::dynamic_pointer_cast<const IMDEventWorkspace>(ws)) {
+                   std::dynamic_pointer_cast<const IMDEventWorkspace>(ws)) {
       addMDEventWorkspaceMenuItems(menu, mdeventWS);
-    } else if (auto mdWS =
-                   boost::dynamic_pointer_cast<const IMDWorkspace>(ws)) {
+    } else if (auto mdWS = std::dynamic_pointer_cast<const IMDWorkspace>(ws)) {
       addMDHistoWorkspaceMenuItems(menu, mdWS);
     } else if (auto peaksWS =
-                   boost::dynamic_pointer_cast<const IPeaksWorkspace>(ws)) {
+                   std::dynamic_pointer_cast<const IPeaksWorkspace>(ws)) {
       addPeaksWorkspaceMenuItems(menu, peaksWS);
     } else if (auto groupWS =
-                   boost::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
+                   std::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
       addWorkspaceGroupMenuItems(menu);
-    } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
+    } else if (std::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
                    ws)) {
       addTableWorkspaceMenuItems(menu);
     } else {
@@ -1424,7 +1422,7 @@ void WorkspaceTreeWidget::saveToProgram() {
 
         // Get the file extention based on the workspace
         Property *prop = alg->getProperty("Filename");
-        FileProperty *fileProp = dynamic_cast<FileProperty *>(prop);
+        auto *fileProp = dynamic_cast<FileProperty *>(prop);
         std::string ext;
         if (fileProp) {
           ext = fileProp->getDefaultExt();
@@ -1594,7 +1592,7 @@ void WorkspaceTreeWidget::showColourFillPlot() {
   for (auto &item : items) {
     auto ws = item->data(0, Qt::UserRole).value<Workspace_sptr>();
 
-    if (auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    if (auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (auto &name : wsGroup->getNames())
         allWsNames.append(QString::fromStdString(name));
     } else

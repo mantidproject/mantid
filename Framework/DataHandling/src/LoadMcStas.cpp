@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMcStas.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -538,7 +538,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     Axis *axis1 = ws->getAxis(0);
     axis1->title() = axis1Name;
     // Set caption
-    auto lblUnit = boost::make_shared<Units::Label>();
+    auto lblUnit = std::make_shared<Units::Label>();
     lblUnit->setLabel(axis1Name, "");
     axis1->unit() = lblUnit;
 
@@ -546,7 +546,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     auto axis2Raw = axis2.get();
     axis2->title() = axis2Name;
     // Set caption
-    lblUnit = boost::make_shared<Units::Label>();
+    lblUnit = std::make_shared<Units::Label>();
     lblUnit->setLabel(axis2Name, "");
     axis2->unit() = lblUnit;
 

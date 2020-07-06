@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_PROPERTYHELPER_H_
-#define MANTID_KERNEL_PROPERTYHELPER_H_
+#pragma once
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #endif
 
 #include "MantidKernel/OptionalBool.h"
@@ -30,7 +29,7 @@ template <typename T> std::string toString(const T &value) {
 }
 
 /// Throw an exception if a shared pointer is converted to a string.
-template <typename T> std::string toString(const boost::shared_ptr<T> &value) {
+template <typename T> std::string toString(const std::shared_ptr<T> &value) {
   UNUSED_ARG(value);
   throw boost::bad_lexical_cast();
 }
@@ -81,7 +80,7 @@ std::string toPrettyString(const T &value, size_t maxLength = 0,
 
 /// Throw an exception if a shared pointer is converted to a pretty string.
 template <typename T>
-std::string toPrettyString(const boost::shared_ptr<T> &value,
+std::string toPrettyString(const std::shared_ptr<T> &value,
                            size_t maxLength = 0, bool collapseLists = true) {
   UNUSED_ARG(value);
   UNUSED_ARG(maxLength);
@@ -225,8 +224,7 @@ template <typename T> void toValue(const std::string &strvalue, T &value) {
   value = boost::lexical_cast<T>(strvalue);
 }
 
-template <typename T>
-void toValue(const std::string &, boost::shared_ptr<T> &) {
+template <typename T> void toValue(const std::string &, std::shared_ptr<T> &) {
   throw boost::bad_lexical_cast();
 }
 
@@ -350,10 +348,9 @@ template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
 }
 
 template <typename T>
-inline void addingOperator(boost::shared_ptr<T> &,
-                           const boost::shared_ptr<T> &) {
+inline void addingOperator(std::shared_ptr<T> &, const std::shared_ptr<T> &) {
   throw Exception::NotImplementedError(
-      "PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
+      "PropertyWithValue.h: += operator not implemented for std::shared_ptr");
 }
 
 template <typename T>
@@ -378,5 +375,3 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_PROPERTYHELPER_H_ */

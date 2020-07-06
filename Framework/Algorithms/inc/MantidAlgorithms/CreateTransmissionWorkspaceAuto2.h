@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2_H_
-#define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2_H_
+#pragma once
 
-#include "ReflectometryWorkflowBase2.h"
+#include "MantidAlgorithms/DllConfig.h"
+#include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -15,7 +15,7 @@ namespace Algorithms {
 /** CreateTransmissionWorkspaceAuto2 : Creates a transmission run workspace in
 Wavelength from input TOF workspaces. Version 2.
 */
-class DLLExport CreateTransmissionWorkspaceAuto2
+class MANTID_ALGORITHMS_DLL CreateTransmissionWorkspaceAuto2
     : public ReflectometryWorkflowBase2 {
 public:
   //----------------------------------------------------------------------------------------------
@@ -40,5 +40,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2_H_ */

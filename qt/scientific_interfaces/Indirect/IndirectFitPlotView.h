@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEW_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEW_H_
+#pragma once
 
 #include "ui_IndirectFitPreviewPlot.h"
 
@@ -20,6 +19,7 @@
 #include <QSplitterHandle>
 #endif
 #include <QSplitter>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,7 +31,7 @@ class SplitterHandle : public QSplitterHandle {
 public:
   SplitterHandle(QIcon icon, Qt::Orientation orientation,
                  QSplitter *parent = nullptr)
-      : QSplitterHandle(orientation, parent), m_icon(icon) {}
+      : QSplitterHandle(orientation, parent), m_icon(std::move(icon)) {}
 
   void paintEvent(QPaintEvent *e) override {
     QSplitterHandle::paintEvent(e);
@@ -48,7 +48,7 @@ private:
 class Splitter : public QSplitter {
 public:
   Splitter(QIcon icon, QWidget *parent = nullptr)
-      : QSplitter(parent), m_icon(icon) {}
+      : QSplitter(parent), m_icon(std::move(icon)) {}
 
   QSplitterHandle *createHandle() override {
     return new SplitterHandle(m_icon, Qt::Vertical, this);
@@ -69,7 +69,7 @@ public:
   void watchADS(bool watch) override;
 
   WorkspaceIndex getSelectedSpectrum() const override;
-  TableRowIndex getSelectedSpectrumIndex() const override;
+  FitDomainIndex getSelectedSpectrumIndex() const override;
   TableDatasetIndex getSelectedDataIndex() const override;
   TableDatasetIndex dataSelectionSize() const override;
   bool isPlotGuessChecked() const override;
@@ -167,5 +167,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

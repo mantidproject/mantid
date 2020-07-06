@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 import ILL_utilities as utils
@@ -60,22 +57,28 @@ def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
 
 def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCalibrationMon, wsNames, log, algorithmLogging):
     """Return the calibrated incident energy."""
-    instrument = detWorkspace.getInstrument().getName()
+    instrument = detWorkspace.getInstrument()
+    instrument_name = instrument.getName()
     eiWorkspace = None
-    if instrument in ['IN4', 'IN6']:
-        if instrument == 'IN4':
-            run = detWorkspace.run()
-            fermiChopperSpeed = run.getProperty('FC.setpoint_rotation_speed').value
-            backgroundChopperSpeed = run.getProperty('BC1.setpoint_rotation_speed').value
-            if abs(fermiChopperSpeed / 4. - backgroundChopperSpeed) > 10.:
-                log.warning('Fermi speed not four times the background chopper speed. Omitting incident energy calibration.')
-                return None
-            eiCalibrationDets = '0-299'
+    if instrument_name in ['IN4', 'IN6', 'PANTHER']:
+        run = detWorkspace.run()
+        eiCalibrationDets = instrument.getStringParameter('Ei_calibration_detectors')[0]
+        maximumEnergy = 10.
+        timeFrame = None
+        if instrument_name in ['IN4', 'PANTHER']:
             maximumEnergy = 1000.
-        else:
-            # IN6
-            eiCalibrationDets = '0-336'
-            maximumEnergy = 10.
+            # This could be changed in real rotation speed...
+            fermiChopperSpeed = run.getProperty('FC.rotation_speed').value
+            backgroundChopperSpeed = run.getProperty('BC1.rotation_speed').value
+            # timeFrame should be calculated according to BC1 to avoid pb in higher order mode
+            timeFrame = 60.e6 / backgroundChopperSpeed / 8
+            if abs(fermiChopperSpeed / 4. - backgroundChopperSpeed) > 10.:
+                log.warning(
+                    'Fermi speed not four times the background chopper speed. Omitting incident energy calibration.')
+                return None
+        elif instrument_name == 'IN6':
+            suppressorChopperSpeed = run.getProperty('Suppressor.rotation_speed').value
+            timeFrame = 60.e6 / suppressorChopperSpeed / 2
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorWorkspaceIndexType='WorkspaceIndex',
                              DetectorWorkspaceIndexSet=eiCalibrationDets,
@@ -83,14 +86,15 @@ def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCal
                              MonitorEPPTable=monEPPWorkspace,
                              MonitorIndex=eiCalibrationMon,
                              MaximumEnergy=maximumEnergy,
-                             EnableLogging=algorithmLogging)
+                             EnableLogging=algorithmLogging,
+                             PulseInterval=timeFrame)
         eiWSName = wsNames.withSuffix('incident_energy')
         eiWorkspace = CreateSingleValuedWorkspace(OutputWorkspace=eiWSName,
                                                   DataValue=energy,
                                                   EnableLogging=algorithmLogging)
         return eiWorkspace
     else:
-        log.error('Instrument ' + instrument + ' not supported for incident energy calibration')
+        log.error('Instrument ' + instrument_name + ' not supported for incident energy calibration')
         return None
 
 
@@ -372,8 +376,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.SUBALG_LOGGING_OFF,
                                  common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
-                             doc='Enable or disable subalgorithms to ' +
-                                 'print in the logs.')
+                             doc='Enable or disable subalgorithms to ' + 'print in the logs.')
         self.declareProperty(name=common.PROP_EPP_METHOD,
                              defaultValue=common.EPP_METHOD_AUTO,
                              validator=StringListValidator([
@@ -386,9 +389,9 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Nominal sigma for the EPP table when ' + common.PROP_EPP_METHOD +
-                                 ' is set to ' + common.EPP_METHOD_CALCULATE +
-                                 ' (default: 10 times the first bin width).')
+                             doc='Nominal sigma for the EPP table when ' + common.PROP_EPP_METHOD
+                                 + ' is set to ' + common.EPP_METHOD_CALCULATE
+                                 + ' (default: 10 times the first bin width).')
         self.declareProperty(name=common.PROP_ELASTIC_CHANNEL_MODE,
                              defaultValue=common.ELASTIC_CHANNEL_AUTO,
                              validator=StringListValidator([
@@ -423,8 +426,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='A single-valued workspace holding a previously determined ' +
-                'incident energy.')
+            doc='A single-valued workspace holding a previously determined ' + 'incident energy.')
         self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(name=common.PROP_FLAT_BKG,
                              defaultValue=common.BKG_AUTO,
@@ -467,8 +469,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue=3.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc="Width of the monitor peak in multiples " +
-                                 " of 'Sigma' in monitor's EPP table.")
+                             doc="Width of the monitor peak in multiples " + " of 'Sigma' in monitor's EPP table.")
         self.setPropertyGroup(common.PROP_MON_PEAK_SIGMA_MULTIPLIER, PROPGROUP_MON_NORMALISATION)
         # Rest of the output properties.
         self.declareProperty(WorkspaceProperty(
@@ -610,8 +611,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             mode = self._chooseElasticChannelMode(mainWS)
             if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
                 if not mainWS.run().hasProperty('Detector.elasticpeak'):
-                    self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL_WS +
-                                       ' given. TOF axis will not be adjusted.')
+                    self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL_WS + ' given. TOF axis will not be adjusted.')
                     return mainWS
                 index = mainWS.run().getLogData('Detector.elasticpeak').value
             else:
@@ -734,7 +734,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
             mainWS = LoadAndMerge(Filename=inputFiles, OutputWorkspace=mergedWSName,
-                                  LoaderName='LoadILLTOF', EnableLogging=self._subalgLogging)
+                                  LoaderName='LoadILLTOF', LoaderOptions={"ConvertToTOF": True}, EnableLogging=self._subalgLogging)
         else:
             mainWS = self.getProperty(common.PROP_INPUT_WS).value
             self._cleanup.protect(mainWS)
@@ -745,8 +745,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_MON_INDEX).isDefault:
             NON_RECURSIVE = False  # Prevent recursive calls in the following.
             if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
-                raise RuntimeError('default-incident-monitor-spectrum missing in instrument parameters; ' +
-                                   common.PROP_MON_INDEX + ' must be specified.')
+                raise RuntimeError('default-incident-monitor-spectrum missing in instrument parameters; '
+                                   + common.PROP_MON_INDEX + ' must be specified.')
             monIndex = monWS.getInstrument().getIntParameter('default-incident-monitor-spectrum', NON_RECURSIVE)[0]
             monIndex = common.convertToWorkspaceIndex(monIndex, monWS, common.INDEX_TYPE_SPECTRUM_NUMBER)
         else:
@@ -770,8 +770,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 monIndex = self._monitorIndex(monWS)
                 eppRow = monEPPWS.row(monIndex)
                 if eppRow['FitStatus'] != 'success':
-                    self.log().warning('Fitting to monitor data failed. Integrating the intensity over ' +
-                                       'the entire TOF range for normalisation.')
+                    self.log().warning('Fitting to monitor data failed. Integrating the intensity over '
+                                       + 'the entire TOF range for normalisation.')
                     begin = monWS.dataX(monIndex)[0]
                     end = monWS.dataX(monIndex)[-1]
                 else:

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2TEST_H_
-#define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2TEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -69,7 +68,7 @@ public:
     lAlg->setPropertyValue("OutputWorkspace", "demo_ws");
     lAlg->execute();
     Workspace_sptr temp = lAlg->getProperty("OutputWorkspace");
-    m_dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    m_dataWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
   }
 
   ~CreateTransmissionWorkspaceAuto2Test() override {}
@@ -155,5 +154,3 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2TEST_H_ */

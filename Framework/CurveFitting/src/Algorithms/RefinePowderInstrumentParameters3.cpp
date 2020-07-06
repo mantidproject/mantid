@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h"
 
@@ -13,6 +13,7 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <iomanip>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -73,7 +74,7 @@ void RefinePowderInstrumentParameters3::init() {
 
   // Refinement algorithm
   vector<string> algoptions{"OneStepFit", "MonteCarlo"};
-  auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
+  auto validator = std::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
 
@@ -88,7 +89,7 @@ void RefinePowderInstrumentParameters3::init() {
   // Method to calcualte the standard error of peaks
   vector<string> stdoptions{"ConstantValue", "UseInputValue"};
   auto listvalidator =
-      boost::make_shared<Kernel::StringListValidator>(stdoptions);
+      std::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(
       "StandardError", "ConstantValue", listvalidator,
       "Algorithm to calculate the standard error of peak positions.");
@@ -121,7 +122,7 @@ void RefinePowderInstrumentParameters3::exec() {
   parseTableWorkspaces();
 
   // 3. Set up main function for peak positions
-  m_positionFunc = boost::make_shared<ThermalNeutronDtoTOFFunction>();
+  m_positionFunc = std::make_shared<ThermalNeutronDtoTOFFunction>();
   m_positionFunc->initialize();
 
   // 3. Fit
@@ -231,7 +232,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspaces() {
 /** Parse table workspace to a map of Parameters
  */
 void RefinePowderInstrumentParameters3::parseTableWorkspace(
-    TableWorkspace_sptr tablews, map<string, Parameter> &parammap) {
+    const TableWorkspace_sptr &tablews, map<string, Parameter> &parammap) {
   // 1. Process Table column names
   std::vector<std::string> colnames = tablews->getColumnNames();
   map<string, size_t> colnamedict;
@@ -505,7 +506,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
  * @param newparammap: parameters map containing new/proposed value
  */
 void RefinePowderInstrumentParameters3::proposeNewValues(
-    vector<string> mcgroup, map<string, Parameter> &curparammap,
+    const vector<string> &mcgroup, map<string, Parameter> &curparammap,
     map<string, Parameter> &newparammap, double currchisq) {
   for (const auto &paramname : mcgroup) {
     // random number between -1 and 1
@@ -652,7 +653,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
   // 2. Record for the best parameters
   if (bestparammap.empty()) {
     // No record yet
-    duplicateParameters(parammap, bestparammap);
+    duplicateParameters(std::move(parammap), bestparammap);
   } else if (recordparameter) {
     // Replace the record
   }
@@ -752,7 +753,7 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
  * @param parammap :: parammap
  */
 void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
-    vector<string> &parnamesforMC, string parname,
+    vector<string> &parnamesforMC, const string &parname,
     map<string, Parameter> parammap) {
   map<string, Parameter>::iterator pariter;
   pariter = parammap.find(parname);
@@ -776,7 +777,7 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
  * Return: chi^2
  */
 double RefinePowderInstrumentParameters3::calculateFunction(
-    map<string, Parameter> parammap, vector<double> &vecY) {
+    const map<string, Parameter> &parammap, vector<double> &vecY) {
   // 1. Implement parameter values to m_positionFunc
   if (!parammap.empty())
     setFunctionParameterValues(m_positionFunc, parammap);
@@ -823,7 +824,8 @@ double calculateFunctionChiSquare(const vector<double> &modelY,
 /** Calculate Chi^2 of the a function with all parameters are fixed
  */
 double RefinePowderInstrumentParameters3::calculateFunctionError(
-    IFunction_sptr function, Workspace2D_sptr dataws, int wsindex) {
+    const IFunction_sptr &function, const Workspace2D_sptr &dataws,
+    int wsindex) {
   // 1. Record the fitting information
   vector<string> parnames = function->getParameterNames();
   vector<bool> vecFix(parnames.size(), false);
@@ -839,8 +841,8 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(
   double chi2;
   string fitstatus;
   const std::string minimizer = "Levenberg-MarquardtMD";
-  bool fitOK =
-      doFitFunction(function, dataws, wsindex, minimizer, 0, chi2, fitstatus);
+  bool fitOK = doFitFunction(function, std::move(dataws), wsindex, minimizer, 0,
+                             chi2, fitstatus);
 
   if (!fitOK) {
     g_log.warning() << "Fit by " << minimizer
@@ -868,10 +870,10 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(
  * Return: double chi2 of the final (best) solution.  If fitting fails, chi2
  *wil be maximum double
  */
-double RefinePowderInstrumentParameters3::fitFunction(IFunction_sptr function,
-                                                      Workspace2D_sptr dataws,
-                                                      int wsindex,
-                                                      bool powerfit) {
+double
+RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function,
+                                               const Workspace2D_sptr &dataws,
+                                               int wsindex, bool powerfit) {
   // 1. Store original
   map<string, pair<double, double>> start_paramvaluemap, paramvaluemap1,
       paramvaluemap2, paramvaluemap3;
@@ -972,8 +974,8 @@ double RefinePowderInstrumentParameters3::fitFunction(IFunction_sptr function,
  * Minimizer: "Levenberg-MarquardtMD"/"Simplex"
  */
 bool RefinePowderInstrumentParameters3::doFitFunction(
-    IFunction_sptr function, Workspace2D_sptr dataws, int wsindex,
-    string minimizer, int numiters, double &chi2, string &fitstatus) {
+    const IFunction_sptr &function, const Workspace2D_sptr &dataws, int wsindex,
+    const string &minimizer, int numiters, double &chi2, string &fitstatus) {
   // 0. Debug output
   stringstream outss;
   outss << "Fit function: " << m_positionFunc->asString()
@@ -1032,7 +1034,7 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
 TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
     map<string, Parameter> parameters, double startchi2, double finalchi2) {
   // 1. Create TableWorkspace
-  auto tablews = boost::make_shared<TableWorkspace>();
+  auto tablews = std::make_shared<TableWorkspace>();
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");
@@ -1074,7 +1076,8 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
  * @param parvalue:    double, parameter value
  */
 void RefinePowderInstrumentParameters3::addOrReplace(
-    map<string, Parameter> &parameters, string parname, double parvalue) {
+    map<string, Parameter> &parameters, const string &parname,
+    double parvalue) {
   auto pariter = parameters.find(parname);
   if (pariter != parameters.end()) {
     parameters[parname].curvalue = parvalue;
@@ -1090,12 +1093,12 @@ void RefinePowderInstrumentParameters3::addOrReplace(
 /** Construct output
  */
 Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
-    FunctionDomain1DVector domain, FunctionValues rawvalues) {
+    const FunctionDomain1DVector &domain, const FunctionValues &rawvalues) {
   // 1. Create and set up output workspace
   size_t lenx = m_dataWS->x(m_wsIndex).size();
   size_t leny = m_dataWS->y(m_wsIndex).size();
 
-  Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 6, lenx, leny));
 
   outws->getAxis(0)->setUnit("dSpacing");
@@ -1138,7 +1141,7 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
 /** Set parameter values to function from Parameter map
  */
 void RefinePowderInstrumentParameters3::setFunctionParameterValues(
-    IFunction_sptr function, map<string, Parameter> params) {
+    const IFunction_sptr &function, map<string, Parameter> params) {
   // 1. Prepare
   vector<string> funparamnames = function->getParameterNames();
 
@@ -1210,7 +1213,7 @@ Parameter>& params)
  * Parameter map
  */
 void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
-    IFunction_sptr function, map<string, Parameter> params) {
+    const IFunction_sptr &function, map<string, Parameter> params) {
   // 1. Prepare
   vector<string> funparamnames = m_positionFunc->getParameterNames();
 
@@ -1315,7 +1318,7 @@ void convertToDict(vector<string> strvec, map<string, size_t> &lookupdict) {
 //----------------------------------------------------------------------------------------------
 /** Get the index from lookup dictionary (map)
  */
-int getStringIndex(map<string, size_t> lookupdict, string key) {
+int getStringIndex(map<string, size_t> lookupdict, const string &key) {
   map<string, size_t>::iterator fiter;
   fiter = lookupdict.find(key);
 
@@ -1336,7 +1339,8 @@ int getStringIndex(map<string, size_t> lookupdict, string key) {
 /** Store function parameter values to a map
  */
 void storeFunctionParameterValue(
-    IFunction_sptr function, map<string, pair<double, double>> &parvaluemap) {
+    const IFunction_sptr &function,
+    map<string, pair<double, double>> &parvaluemap) {
   parvaluemap.clear();
 
   vector<string> parnames = function->getParameterNames();
@@ -1354,8 +1358,8 @@ void storeFunctionParameterValue(
  * and a (string, Parameter) map
  */
 void restoreFunctionParameterValue(
-    map<string, pair<double, double>> parvaluemap, IFunction_sptr function,
-    map<string, Parameter> &parammap) {
+    map<string, pair<double, double>> parvaluemap,
+    const IFunction_sptr &function, map<string, Parameter> &parammap) {
   vector<string> parnames = function->getParameterNames();
 
   for (auto &parname : parnames) {

@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 from enum import Enum
 
-import six
 
 from sans.state.JsonSerializable import JsonSerializable
 
@@ -53,7 +52,7 @@ class SerializerImpl(json.JSONEncoder):
     @staticmethod
     def obj_hook(o):
         for type_tag, internal_dict in o.items():
-            assert isinstance(type_tag, six.string_types)
+            assert isinstance(type_tag, str)
 
             cls_type = JsonSerializable.class_type_from_tag(type_tag)
             if cls_type:

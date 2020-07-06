@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -112,7 +112,11 @@ void UserFunction::function1D(double *out, const double *xValues,
                               const size_t nData) const {
   for (size_t i = 0; i < nData; i++) {
     m_x = xValues[i];
-    out[i] = m_parser->Eval();
+    try {
+      out[i] = m_parser->Eval();
+    } catch (mu::Parser::exception_type &e) {
+      throw std::invalid_argument("Error evaluating function: " + e.GetMsg());
+    }
   }
 }
 

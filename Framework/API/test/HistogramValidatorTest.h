@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_HISTOGRAMVALIDATORTEST_H_
-#define MANTID_API_HISTOGRAMVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -24,19 +23,17 @@ public:
   static void destroySuite(HistogramValidatorTest *suite) { delete suite; }
 
   void test_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 11, 10);
     HistogramValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void test_fail() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 10, 10);
     HistogramValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws),
                      "The workspace must contain histogram data");
   }
 };
-
-#endif /* MANTID_API_HISTOGRAMVALIDATORTEST_H_ */

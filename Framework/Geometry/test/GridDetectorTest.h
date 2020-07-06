@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GRID_DETECTOR_TEST_H
-#define GRID_DETECTOR_TEST_H
+#pragma once
 
 #include "MantidGeometry/Instrument/GridDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -159,7 +158,7 @@ private:
     // Name
     TS_ASSERT_EQUALS(det.getAtXYZ(1, 2, 0)->getName(), "MyGrid(1,2,0)");
     TS_ASSERT_EQUALS(det.getChild(1)->getName(), "MyGrid(z=1)");
-    auto layer = boost::dynamic_pointer_cast<ICompAssembly>(det.getChild(2));
+    auto layer = std::dynamic_pointer_cast<ICompAssembly>(det.getChild(2));
     TS_ASSERT_EQUALS(layer->getChild(1)->getName(), "MyGrid(z=2,x=1)");
 
     // Bounding box takes into account size of cuboid centered around zero.
@@ -251,5 +250,3 @@ private:
     TS_ASSERT_EQUALS(pos, V3D(-0.5, 1.5, 0.5));
   }
 };
-
-#endif

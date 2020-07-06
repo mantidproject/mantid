@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
-#define MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
+#pragma once
 
 // boost::multiprecision is not used here because the
 // with of the number is one WORD bigger, than actual
@@ -94,4 +93,3 @@ template <size_t ND, typename FP> struct IndexTypes {
 };
 
 } // namespace morton_index
-#endif // MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_

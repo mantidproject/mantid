@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_MASKDETECTORS_H_
-#define MANTID_DATAHANDLING_MASKDETECTORS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -79,41 +78,42 @@ private:
 
   /// Choose how to mask given that we have a mask workspace
   void
-  handleMaskByMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr maskWs,
-                            const API::MatrixWorkspace_const_sptr WS,
+  handleMaskByMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr &maskWs,
+                            const API::MatrixWorkspace_const_sptr &WS,
                             std::vector<detid_t> &detectorList,
                             std::vector<size_t> &indexList,
                             const RangeInfo &rangeInfo);
 
   /// Choose how to mask given that we have a matrix workspace
-  void handleMaskByMatrixWorkspace(const API::MatrixWorkspace_const_sptr maskWs,
-                                   const API::MatrixWorkspace_const_sptr WS,
-                                   std::vector<detid_t> &detectorList,
-                                   std::vector<size_t> &indexList,
-                                   const RangeInfo &rangeInfo);
+  void
+  handleMaskByMatrixWorkspace(const API::MatrixWorkspace_const_sptr &maskWs,
+                              const API::MatrixWorkspace_const_sptr &WS,
+                              std::vector<detid_t> &detectorList,
+                              std::vector<size_t> &indexList,
+                              const RangeInfo &rangeInfo);
 
-  void execPeaks(DataObjects::PeaksWorkspace_sptr WS);
+  void execPeaks(const DataObjects::PeaksWorkspace_sptr &WS);
   void
   fillIndexListFromSpectra(std::vector<size_t> &indexList,
                            std::vector<Indexing::SpectrumNumber> spectraList,
-                           const API::MatrixWorkspace_sptr WS,
+                           const API::MatrixWorkspace_sptr &WS,
                            const RangeInfo &range_info);
   void appendToDetectorListFromComponentList(
       std::vector<detid_t> &detectorList,
       const std::vector<std::string> &componentList,
-      const API::MatrixWorkspace_const_sptr WS);
-  void
-  appendToIndexListFromWS(std::vector<size_t> &indexList,
-                          const API::MatrixWorkspace_const_sptr maskedWorkspace,
-                          const RangeInfo &range_info);
+      const API::MatrixWorkspace_const_sptr &WS);
+  void appendToIndexListFromWS(
+      std::vector<size_t> &indexList,
+      const API::MatrixWorkspace_const_sptr &maskedWorkspace,
+      const RangeInfo &range_info);
   void appendToDetectorListFromWS(
       std::vector<detid_t> &detectorList,
-      const API::MatrixWorkspace_const_sptr inputWs,
-      const API::MatrixWorkspace_const_sptr maskWs,
+      const API::MatrixWorkspace_const_sptr &inputWs,
+      const API::MatrixWorkspace_const_sptr &maskWs,
       const std::tuple<size_t, size_t, bool> &range_info);
   void appendToIndexListFromMaskWS(
       std::vector<size_t> &indexList,
-      const DataObjects::MaskWorkspace_const_sptr maskedWorkspace,
+      const DataObjects::MaskWorkspace_const_sptr &maskedWorkspace,
       const std::tuple<size_t, size_t, bool> &range_info);
   void
   extractMaskedWSDetIDs(std::vector<detid_t> &detectorList,
@@ -126,5 +126,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_MASKDETECTORS_H_*/

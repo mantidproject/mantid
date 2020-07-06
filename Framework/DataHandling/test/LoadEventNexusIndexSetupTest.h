@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_
-#define MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
@@ -36,7 +35,7 @@ public:
   }
 
   LoadEventNexusIndexSetupTest() {
-    auto instrument = boost::make_shared<Instrument>();
+    auto instrument = std::make_shared<Instrument>();
     // Create instrument with gap in detector ID range
     for (auto detID : {1, 2, 11, 12}) {
       auto *det = new Detector("det-" + std::to_string(detID), detID, nullptr);
@@ -367,5 +366,3 @@ public:
 private:
   MatrixWorkspace_sptr m_ws;
 };
-
-#endif /* MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_ */

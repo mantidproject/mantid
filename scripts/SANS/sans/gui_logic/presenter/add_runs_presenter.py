@@ -1,13 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
 from mantid.kernel import ConfigService
-from mantid.py3compat import Enum
+from enum import Enum
 from sans.common.enums import BinningType
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import SANSGuiPropertiesHandler

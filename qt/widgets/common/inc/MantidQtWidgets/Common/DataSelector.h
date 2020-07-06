@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATASELECTOR_H_
-#define MANTIDQTMANTIDWIDGETS_DATASELECTOR_H_
+#pragma once
 
 #include "DllOption.h"
 #include "ui_DataSelector.h"
@@ -18,13 +17,13 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-using ButtonOpts = API::MWRunFiles::ButtonOpts;
-using LiveButtonOpts = API::MWRunFiles::LiveButtonOpts;
+using ButtonOpts = API::FileFinderWidget::ButtonOpts;
+using LiveButtonOpts = API::FileFinderWidget::LiveButtonOpts;
 
 /**
 This class defines a widget for selecting a workspace of file path by using a
 combination
-of two child MantidWidgets: MWRunFiles and WorkspaceSelector. This widget
+of two child MantidWidgets: FileFinderWidget and WorkspaceSelector. This widget
 combines the two to
 produce a single composite widget that emits signals when the user has chosen
 appropriate input.
@@ -78,7 +77,7 @@ public:
   DataSelector(QWidget *parent = nullptr);
   ~DataSelector() override;
 
-  /// Get the current file path in the MWRunFiles widget
+  /// Get the current file path in the FileFinderWidget widget
   QString getFullFilePath() const;
   /// Get the workspace name from the list of files
   QString getWsNameFromFiles() const;
@@ -119,7 +118,7 @@ public:
   /// Sets the load button text
   void setLoadBtnText(const QString & /*text*/);
 
-  // These are accessors/modifiers of the child MWRunFiles
+  // These are accessors/modifiers of the child FileFinderWidget
   /**
    * Return whether this widget allows multiple files to be specified within the
    * edit box
@@ -440,4 +439,3 @@ private:
 
 } /* namespace MantidWidgets */
 } /* namespace MantidQt */
-#endif /* DATASELECTOR_H_ */

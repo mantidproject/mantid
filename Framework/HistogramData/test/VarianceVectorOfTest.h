@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_VARIANCEVECTOROFTEST_H_
-#define MANTID_HISTOGRAMDATA_VARIANCEVECTOROFTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -71,7 +70,6 @@ public:
     SigmasTester sigmas{1.0, 2.0};
     auto old_ptr = &sigmas[0];
     VarianceVectorOfTester variances(std::move(sigmas));
-    TS_ASSERT(!sigmas);
     TS_ASSERT_EQUALS(&variances[0], old_ptr);
     TS_ASSERT_EQUALS(variances[0], 1.0);
     TS_ASSERT_EQUALS(variances[1], 4.0);
@@ -90,11 +88,8 @@ public:
     auto old_ptr = &sigmas[0];
     VarianceVectorOfTester variances{};
     variances = std::move(sigmas);
-    TS_ASSERT(!sigmas);
     TS_ASSERT_EQUALS(&variances[0], old_ptr);
     TS_ASSERT_EQUALS(variances[0], 1.0);
     TS_ASSERT_EQUALS(variances[1], 4.0);
   }
 };
-
-#endif /* MANTID_HISTOGRAMDATA_VARIANCEVECTOROFTEST_H_ */

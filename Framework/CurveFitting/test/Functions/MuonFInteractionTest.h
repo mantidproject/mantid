@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MUONFINTERACTIONTEST_H_
-#define MUONFINTERACTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -66,7 +65,7 @@ public:
     int timechannels = 21;
     Workspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, timechannels, timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
     for (int i = 0; i < 21; i++)
       ws2D->dataX(0)[i] = i;
     Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
@@ -114,5 +113,3 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 };
-
-#endif /*MUONFINTERACTONTEST_H_*/

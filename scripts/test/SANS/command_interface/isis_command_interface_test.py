@@ -1,21 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import tempfile
 import unittest
 import uuid
 
-import six
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.command_interface.ISISCommandInterface import MaskFile
-
-if six.PY2:
-    FileNotFoundError = IOError
 
 
 class ISISCommandInterfaceTest(unittest.TestCase):

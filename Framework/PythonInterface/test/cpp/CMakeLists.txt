@@ -24,6 +24,8 @@ if(CXXTEST_FOUND)
     set_target_properties(${_pythoninterface_test_target_name}
                           PROPERTIES COMPILE_FLAGS "/w44244")
   endif()
+
+  target_include_directories(${_pythoninterface_test_target_name} PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
   target_link_libraries(${_pythoninterface_test_target_name}
                         LINK_PRIVATE
                         ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -34,8 +36,8 @@ if(CXXTEST_FOUND)
                         PythonKernelModule
                         PythonAPIModule
                         ${Boost_LIBRARIES}
-                        ${POCO_LIBRARIES}
-                        ${PYTHON_LIBRARIES})
+                        ${POCO_LIBRARIES})
+
   add_dependencies(FrameworkTests ${_pythoninterface_test_target_name})
   # Add to the 'UnitTests' group in VS
   set_property(TARGET ${_pythoninterface_test_target_name} PROPERTY FOLDER "UnitTests")

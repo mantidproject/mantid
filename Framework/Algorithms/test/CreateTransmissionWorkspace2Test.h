@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_
-#define ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -618,7 +617,7 @@ private:
     }
   }
 
-  void check_lambda_workspace(MatrixWorkspace_sptr ws) {
+  void check_lambda_workspace(const MatrixWorkspace_sptr &ws) {
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -634,5 +633,3 @@ private:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(name));
   }
 };
-
-#endif /* ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_ */

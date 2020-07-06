@@ -29,8 +29,7 @@
 
 /* Origin 7.5 column value display : see FORMAT */
 
-#ifndef OPJFILE_H
-#define OPJFILE_H
+#pragma once
 
 /* version 0.0 2007-09-26 */
 #define LIBORIGIN_VERSION 0x00070926
@@ -38,6 +37,8 @@
 
 #include "tree.hh"
 #include <string>
+#include <utility>
+
 #include <vector>
 
 struct rect {
@@ -68,8 +69,8 @@ struct originWindow {
 
   originWindow(std::string _name = "", std::string _label = "",
                bool _bHidden = false)
-      : name(_name), label(_label), objectID(0), bHidden(_bHidden),
-        state(Normal), title(Both), creation_date(0.0),
+      : name(std::move(_name)), label(std::move(_label)), objectID(0),
+        bHidden(_bHidden), state(Normal), title(Both), creation_date(0.0),
         modification_date(0.0){};
 };
 struct originData {
@@ -98,9 +99,10 @@ struct spreadColumn {
   int index;
   std::vector<originData> odata;
   spreadColumn(std::string _name = "", int _index = 0)
-      : name(_name), type(NONE), value_type(0), value_type_specification(0),
-        significant_digits(6), decimal_places(6), numeric_display_type(0),
-        command(""), comment(""), width(8), index(_index){};
+      : name(std::move(_name)), type(NONE), value_type(0),
+        value_type_specification(0), significant_digits(6), decimal_places(6),
+        numeric_display_type(0), command(""), comment(""), width(8),
+        index(_index){};
 };
 
 struct spreadSheet : public originWindow {
@@ -109,8 +111,8 @@ struct spreadSheet : public originWindow {
   bool bMultisheet;
   std::vector<spreadColumn> column;
   spreadSheet(std::string _name = "")
-      : originWindow(_name), maxRows(0), bLoose(true), bMultisheet(false),
-        column(){};
+      : originWindow(std::move(_name)), maxRows(0), bLoose(true),
+        bMultisheet(false), column(){};
 };
 
 struct excel : public originWindow {
@@ -119,8 +121,8 @@ struct excel : public originWindow {
   std::vector<spreadSheet> sheet;
   excel(std::string _name = "", std::string _label = "", int _maxRows = 0,
         bool _bHidden = false, bool _bLoose = true)
-      : originWindow(_name, _label, _bHidden), maxRows(_maxRows),
-        bLoose(_bLoose){};
+      : originWindow(std::move(_name), std::move(_label), _bHidden),
+        maxRows(_maxRows), bLoose(_bLoose){};
 };
 
 struct matrix : public originWindow {
@@ -140,7 +142,7 @@ struct matrix : public originWindow {
   HeaderViewType header;
   std::vector<double> data;
   matrix(std::string _name = "", int _index = 0)
-      : originWindow(_name), nr_rows(0), nr_cols(0),
+      : originWindow(std::move(_name)), nr_rows(0), nr_cols(0),
         value_type_specification(0), significant_digits(6), decimal_places(6),
         numeric_display_type(0), command(""), width(8), index(_index),
         view(DataView), header(ColumnRow){};
@@ -155,8 +157,8 @@ struct function {
   int points;
   int index;
   function(std::string _name = "", int _index = 0)
-      : name(_name), type(0), formula(""), begin(0.0), end(0.0), points(0),
-        index(_index){};
+      : name(std::move(_name)), type(0), formula(""), begin(0.0), end(0.0),
+        points(0), index(_index){};
 };
 
 struct text {
@@ -415,12 +417,13 @@ struct graph : public originWindow {
   unsigned short width;
   unsigned short height;
 
-  graph(std::string _name = "") : originWindow(_name), width(0), height(0){};
+  graph(std::string _name = "")
+      : originWindow(std::move(_name)), width(0), height(0){};
 };
 
 struct note : public originWindow {
   std::string text;
-  note(std::string _name = "") : originWindow(_name){};
+  note(std::string _name = "") : originWindow(std::move(_name)){};
 };
 
 struct projectNode {
@@ -431,7 +434,7 @@ struct projectNode {
 
   projectNode(std::string _name = "", int _type = 0,
               double _creation_date = 0.0, double _modification_date = 0.0)
-      : type(_type), name(_name), creation_date(_creation_date),
+      : type(_type), name(std::move(_name)), creation_date(_creation_date),
         modification_date(_modification_date){};
 };
 
@@ -1037,5 +1040,3 @@ private:
   std::vector<note> NOTE;
   tree<projectNode> projectTree;
 };
-
-#endif // OPJFILE_H

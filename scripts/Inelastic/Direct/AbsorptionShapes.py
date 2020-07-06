@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-from six import string_types
 from mantid.kernel import funcinspect
 from mantid.simpleapi import *
 
@@ -108,7 +106,7 @@ class anAbsorptionShape(object):
         if value is None:
             self._Material = {}
             return
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             value = [value]
         if isinstance(value,(list,tuple)):
             if len(value) == 2:
@@ -131,7 +129,7 @@ class anAbsorptionShape(object):
         #
         Mater_properties = self._Material
         if 'ChemicalFormula' in Mater_properties:
-            if not isinstance(Mater_properties['ChemicalFormula'], string_types):
+            if not isinstance(Mater_properties['ChemicalFormula'], str):
                 raise TypeError('*** The chemical formula for the material must be described by a string')
         # Test if the material property are recognized by SetSampleMaterial
         # algorithm.
@@ -248,7 +246,7 @@ class anAbsorptionShape(object):
                 {'Cylinder':     Cylinder(),      'FlatPlate':FlatPlate(),
                 'HollowCylinder':HollowCylinder(),'Sphere':   Sphere()}  # noqa: E127
 
-        if not isinstance(str_val, string_types):
+        if not isinstance(str_val, str):
             raise ValueError(
                 'The input of the "from_str" function should be a string representing a diary.'
                 ' Actually it is: {0}'.format(type(str_val)))

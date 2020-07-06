@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_
+#pragma once
 
 #include "IndirectPlotOptionsPresenter.h"
 #include "IndirectTab.h"
@@ -85,12 +84,12 @@ public:
 
 protected:
   /// Check the binning between two workspaces match
-  bool
-  checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
-                               Mantid::API::MatrixWorkspace_const_sptr right);
+  bool checkWorkspaceBinningMatches(
+      const Mantid::API::MatrixWorkspace_const_sptr &left,
+      const Mantid::API::MatrixWorkspace_const_sptr &right);
   /// Adds a unit conversion step to the algorithm queue
   boost::optional<std::string>
-  addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws,
+  addConvertUnitsStep(const Mantid::API::MatrixWorkspace_sptr &ws,
                       const std::string &unitID,
                       const std::string &suffix = "UNIT",
                       std::string eMode = "", double eFixed = 0.0);
@@ -119,5 +118,3 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_ */

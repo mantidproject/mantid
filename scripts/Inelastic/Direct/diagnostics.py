@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylind: disable=too-many-instance-attributes
 #pylint: disable=too-many-branches
@@ -17,14 +17,11 @@ The output of each function is a workspace containing a single bin where:
 This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-from six import string_types
 from mantid.simpleapi import *
 from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
 from Direct.PropertyManager import PropertyManager
-from six import iteritems
 # Reference to reducer used if necessary for working with run descriptors (in diagnostics)
 __Reducer__ = None
 
@@ -457,7 +454,7 @@ def get_failed_spectra_list(diag_workspace):
 
      diag_workspace  -  A workspace containing masking
     """
-    if isinstance(diag_workspace, string_types):
+    if isinstance(diag_workspace, str):
         diag_workspace = mtd[diag_workspace]
 
     failed_spectra = []
@@ -477,5 +474,5 @@ class ArgumentParser(object):
     def __init__(self, keywords):
         self.start_index = None # Make this more general for anything that is missing!
         self.end_index = None
-        for key, value in iteritems(keywords):
+        for key, value in keywords.items():
             setattr(self, key, value)

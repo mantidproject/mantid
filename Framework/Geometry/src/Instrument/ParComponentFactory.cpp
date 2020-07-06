@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -14,7 +14,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -27,12 +27,12 @@ namespace Geometry {
  * @param map A pointer to the ParameterMap
  * @returns A pointer to a parameterized component
  */
-boost::shared_ptr<IDetector>
+std::shared_ptr<IDetector>
 ParComponentFactory::createDetector(const IDetector *base,
                                     const ParameterMap *map) {
   // Clone may be a Detector or GridDetectorPixel instance (or nullptr)
   auto clone = base->cloneParameterized(map);
-  return boost::shared_ptr<IDetector>(clone);
+  return std::shared_ptr<IDetector>(clone);
 }
 
 /**
@@ -43,10 +43,10 @@ ParComponentFactory::createDetector(const IDetector *base,
  * @param map A pointer to the ParameterMap
  * @returns A pointer to a parameterized component
  */
-boost::shared_ptr<Instrument>
-ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
-                                      boost::shared_ptr<ParameterMap> map) {
-  return boost::make_shared<Instrument>(base, map);
+std::shared_ptr<Instrument>
+ParComponentFactory::createInstrument(std::shared_ptr<const Instrument> base,
+                                      std::shared_ptr<ParameterMap> map) {
+  return std::make_shared<Instrument>(base, map);
 }
 
 /**
@@ -58,23 +58,23 @@ ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
  * @returns A pointer to a parameterized component
  */
 IComponent_sptr
-ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
+ParComponentFactory::create(const std::shared_ptr<const IComponent> &base,
                             const ParameterMap *map) {
-  boost::shared_ptr<const IDetector> det_sptr =
-      boost::dynamic_pointer_cast<const IDetector>(base);
+  std::shared_ptr<const IDetector> det_sptr =
+      std::dynamic_pointer_cast<const IDetector>(base);
   if (det_sptr) {
     return createDetector(det_sptr.get(), map);
   }
 
-  boost::shared_ptr<const Instrument> inst_sptr =
-      boost::dynamic_pointer_cast<const Instrument>(base);
+  std::shared_ptr<const Instrument> inst_sptr =
+      std::dynamic_pointer_cast<const Instrument>(base);
   // @todo One of the review tasks is to take a look at the parameterized mess
   // and
   // short out this problem with different classes carrying different types of
   // pointers around
   if (inst_sptr) {
-    return createInstrument(boost::const_pointer_cast<Instrument>(inst_sptr),
-                            boost::shared_ptr<ParameterMap>(
+    return createInstrument(std::const_pointer_cast<Instrument>(inst_sptr),
+                            std::shared_ptr<ParameterMap>(
                                 const_cast<ParameterMap *>(map), NoDeleting()));
   }
 
@@ -83,30 +83,30 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   // maybe?
   const auto *sd = dynamic_cast<const StructuredDetector *>(base.get());
   if (sd)
-    return boost::make_shared<StructuredDetector>(sd, map);
+    return std::make_shared<StructuredDetector>(sd, map);
 
   const auto *rd = dynamic_cast<const RectangularDetector *>(base.get());
   if (rd)
-    return boost::make_shared<RectangularDetector>(rd, map);
+    return std::make_shared<RectangularDetector>(rd, map);
 
   const auto *gd = dynamic_cast<const GridDetector *>(base.get());
   if (gd)
-    return boost::make_shared<GridDetector>(gd, map);
+    return std::make_shared<GridDetector>(gd, map);
 
   const auto *ac = dynamic_cast<const CompAssembly *>(base.get());
   if (ac)
-    return boost::make_shared<CompAssembly>(ac, map);
+    return std::make_shared<CompAssembly>(ac, map);
   const auto *oac = dynamic_cast<const ObjCompAssembly *>(base.get());
   if (oac)
-    return boost::make_shared<ObjCompAssembly>(oac, map);
+    return std::make_shared<ObjCompAssembly>(oac, map);
 
   const auto *oc = dynamic_cast<const ObjComponent *>(base.get());
   if (oc)
-    return boost::make_shared<ObjComponent>(oc, map);
+    return std::make_shared<ObjComponent>(oc, map);
   // Must be a component
   const auto *cc = dynamic_cast<const IComponent *>(base.get());
   if (cc)
-    return boost::make_shared<Component>(cc, map);
+    return std::make_shared<Component>(cc, map);
 
   return IComponent_sptr();
 }

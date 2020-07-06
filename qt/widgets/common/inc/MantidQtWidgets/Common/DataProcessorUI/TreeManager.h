@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H
+#pragma once
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -107,7 +106,7 @@ public:
   /// Return member variables
 
   /// Return the model
-  virtual boost::shared_ptr<AbstractTreeModel> getModel() = 0;
+  virtual std::shared_ptr<AbstractTreeModel> getModel() = 0;
   /// Return the table ws
   virtual Mantid::API::ITableWorkspace_sptr getTableWorkspace() = 0;
 
@@ -121,4 +120,3 @@ protected:
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif /* MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H */

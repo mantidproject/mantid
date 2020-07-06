@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IPEAKFUNCTION_H_
-#define MANTID_API_IPEAKFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -88,10 +87,8 @@ private:
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
 };
 
-using IPeakFunction_sptr = boost::shared_ptr<IPeakFunction>;
-using IPeakFunction_const_sptr = boost::shared_ptr<const IPeakFunction>;
+using IPeakFunction_sptr = std::shared_ptr<IPeakFunction>;
+using IPeakFunction_const_sptr = std::shared_ptr<const IPeakFunction>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_IPEAKFUNCTION_H_*/

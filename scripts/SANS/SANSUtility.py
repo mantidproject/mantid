@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
@@ -10,7 +10,6 @@
 # This module contains utility functions common to the
 # SANS data reduction scripts
 ########################################################
-from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
 from mantid.kernel import DateAndTime
@@ -18,7 +17,7 @@ import inspect
 import math
 import os
 import re
-from six import types, iteritems, PY3
+import types
 import numpy as np
 import h5py as h5
 
@@ -675,7 +674,7 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
 
 def get_new_workspace_name(appendix, old_workspace_name, ws_group_name):
     new_workspace_name = ws_group_name
-    final_number = re.search('_(\d+)$', old_workspace_name)
+    final_number = re.search(r'_(\d+)$', old_workspace_name)
     if final_number is not None:
         new_workspace_name += final_number.group(0)
 
@@ -736,14 +735,9 @@ def check_if_is_event_data(file_name):
         is_event_mode = False
         for value in list(first_entry.values()):
             if "NX_class" in value.attrs:
-                if PY3:
-                    if "NXevent_data" == value.attrs["NX_class"].decode() :
-                        is_event_mode = True
-                        break
-                else:
-                    if "NXevent_data" == value.attrs["NX_class"]:
-                        is_event_mode = True
-                        break
+                if "NXevent_data" == value.attrs["NX_class"].decode() :
+                    is_event_mode = True
+                    break
 
     return is_event_mode
 
@@ -1238,8 +1232,8 @@ def transfer_special_sample_logs(from_ws, to_ws):
 
     # Populate the time series
     for time_series_name in time_series_names:
-        if (run_from.hasProperty(time_series_name) and
-                run_to.hasProperty(time_series_name)):
+        if (run_from.hasProperty(time_series_name)
+                and run_to.hasProperty(time_series_name)):
 
             times = run_from.getProperty(time_series_name).times
             values = run_from.getProperty(time_series_name).value
@@ -1253,8 +1247,8 @@ def transfer_special_sample_logs(from_ws, to_ws):
     alg_log.initialize()
     alg_log.setChild(True)
     for single_valued_name in single_valued_names:
-        if (run_from.hasProperty(single_valued_name) and
-                run_to.hasProperty(single_valued_name)):
+        if (run_from.hasProperty(single_valued_name)
+                and run_to.hasProperty(single_valued_name)):
             value = run_from.getProperty(single_valued_name).value
             alg_log.setProperty("Workspace", to_ws)
             alg_log.setProperty("LogName", single_valued_name)
@@ -1300,8 +1294,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         run_rhs = rhs.getRun()
         # Get the cumulative time s
         for element in self._time_series:
-            if (run_lhs.hasProperty(element) and
-                    run_rhs.hasProperty(element)):
+            if (run_lhs.hasProperty(element)
+                    and run_rhs.hasProperty(element)):
                 # Get values for lhs
                 property_lhs = run_lhs.getProperty(element)
                 self._original_times_lhs[element] = property_lhs.times
@@ -1313,8 +1307,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 self._original_values_rhs[element] = property_rhs.value
 
         for element in self._single_valued:
-            if (run_lhs.hasProperty(element) and
-                    run_rhs.hasProperty(element)):
+            if (run_lhs.hasProperty(element)
+                    and run_rhs.hasProperty(element)):
                 # Get the values for lhs
                 property_lhs = run_lhs.getProperty(element)
                 self._original_single_valued_lhs[element] = property_lhs.value
@@ -1324,8 +1318,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 self._original_single_valued_rhs[element] = property_rhs.value
 
         log_name_start_time = "start_time"
-        if (run_lhs.hasProperty(log_name_start_time) and
-                run_rhs.hasProperty(log_name_start_time)):
+        if (run_lhs.hasProperty(log_name_start_time)
+                and run_rhs.hasProperty(log_name_start_time)):
             def convert_to_date(val):
                 return DateAndTime(val) if isinstance(val, str) else val
             self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
@@ -1337,8 +1331,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         :param workspace: the workspace which requires correction.
         """
         for element in self._time_series:
-            if (element in self._original_times_rhs and
-                    element in self._original_values_rhs):
+            if (element in self._original_times_rhs
+                    and element in self._original_values_rhs):
                 run = workspace.getRun()
                 prop = run.getProperty(element)
                 prop.clear()
@@ -1362,8 +1356,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         for element in self._single_valued:
             if run.hasProperty(element):
                 type_converter = self._type_map[element]
-                new_value = type_converter(self._original_single_valued_lhs[element] +
-                                           self._original_single_valued_rhs[element])
+                new_value = type_converter(self._original_single_valued_lhs[element]
+                                           + self._original_single_valued_rhs[element])
                 alg_log.setProperty("Workspace", workspace)
                 alg_log.setProperty("LogName", element)
                 alg_log.setProperty("LogText", str(new_value))
@@ -1781,7 +1775,7 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
         return q_res_buffer
 
     def multiply_q_resolution_by_counts(q_res, counts):
-         # We are dividing DX by Y.
+        # We are dividing DX by Y.
         q_res_buffer = np.multiply(q_res,counts)
         return q_res_buffer
 
@@ -1798,8 +1792,8 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     counts_rear = count_ws_rear.readY(0)
 
     # We need to make sure that the workspaces match in length
-    if ((len(q_resolution_front) != len(q_resolution_rear)) or
-            (len(counts_front) != len(counts_rear))):
+    if ((len(q_resolution_front) != len(q_resolution_rear))
+            or (len(counts_front) != len(counts_rear))):
         return
 
     # Get everything for the FRONT detector
@@ -1971,7 +1965,7 @@ def createUnmanagedAlgorithm(name, **kwargs):
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in iteritems(kwargs):
+    for key, value in kwargs.items():
         alg.setProperty(key, value)
     return alg
 

@@ -113,7 +113,8 @@ void LayerButton::mouseDoubleClickEvent(QMouseEvent *) {
 }
 
 MultiLayer::MultiLayer(QWidget *parent, int layers, int rows, int cols,
-                       const QString &label, const char *name, Qt::WFlags f)
+                       const QString &label, const char *name,
+                       const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f), active_graph(nullptr), d_cols(cols),
       d_rows(rows), graph_width(500), graph_height(400), colsSpace(5),
       rowsSpace(5), left_margin(5), right_margin(5), top_margin(5),
@@ -1328,7 +1329,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
     // Capability query the candidate workspaces
     Workspace_sptr ws =
         AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString());
-    IMDWorkspace_sptr imdWS = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+    IMDWorkspace_sptr imdWS = std::dynamic_pointer_cast<IMDWorkspace>(ws);
     // Only process IMDWorkspaces
     if (imdWS) {
       QString currentName(imdWS->getName().c_str());

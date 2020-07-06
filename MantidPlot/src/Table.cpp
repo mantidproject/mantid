@@ -73,7 +73,7 @@ using namespace Mantid;
 using namespace MantidQt::API;
 
 Table::Table(ScriptingEnv *env, int rows, int cols, const QString &label,
-             QWidget *parent, const QString &name, Qt::WFlags f)
+             QWidget *parent, const QString &name, const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f), Scripted(env) {
   selectedCol = -1;
   d_saved_cells = nullptr;
@@ -2002,7 +2002,7 @@ void Table::loadHeader(QStringList header) {
   setHeaderColType();
 }
 
-void Table::setHeader(QStringList header) {
+void Table::setHeader(const QStringList &header) {
   col_label = header;
   setHeaderColType();
 }
@@ -3267,7 +3267,7 @@ void Table::recordSelection() {
  * @param alignment :: [input] Alignment flags to give the cell
  */
 void Table::setTextAlignment(int row, int col,
-                             QFlags<Qt::AlignmentFlag> alignment) {
+                             const QFlags<Qt::AlignmentFlag> &alignment) {
   auto *cell = d_table->item(row, col);
   if (cell) {
     cell->setTextAlignment(alignment);

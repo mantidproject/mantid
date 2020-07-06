@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <qwt_plot_canvas.h>
 
@@ -235,7 +235,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event) {
   UNUSED_ARG(object);
 
   if (event->type() == QEvent::Wheel) {
-    QWheelEvent *wheelEvent = dynamic_cast<QWheelEvent *>(event);
+    auto *wheelEvent = dynamic_cast<QWheelEvent *>(event);
     if (wheelEvent) {
       if (wheelEvent->orientation() == Qt::Orientation::Vertical) {
         return m_svUI->imageVerticalScrollBar->event(wheelEvent);
@@ -255,7 +255,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event) {
     int newX = m_pickerX;
     double lastY = m_currentSpectrumDisplay->getPointedAtY();
 
-    QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
+    auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
     if (!keyEvent)
       return false;
     int key = keyEvent->key();
@@ -362,9 +362,9 @@ void SVConnections::imageHorizontalRangeChanged() {
 }
 
 void SVConnections::graphRangeChanged() {
-  double value = (double)m_svUI->graph_max_slider->value();
-  double min = (double)m_svUI->graph_max_slider->minimum();
-  double max = (double)m_svUI->graph_max_slider->maximum();
+  auto value = (double)m_svUI->graph_max_slider->value();
+  auto min = (double)m_svUI->graph_max_slider->minimum();
+  auto max = (double)m_svUI->graph_max_slider->maximum();
 
   double range_scale = (value - min) / (max - min);
   if (range_scale < 0.01)
@@ -447,9 +447,9 @@ void SVConnections::vGraphPickerMoved(const QPoint &point) {
  * Slot to handle the intensity slider being moved.
  */
 void SVConnections::intensitySliderMoved() {
-  double value = (double)m_svUI->intensity_slider->value();
-  double min = (double)m_svUI->intensity_slider->minimum();
-  double max = (double)m_svUI->intensity_slider->maximum();
+  auto value = (double)m_svUI->intensity_slider->value();
+  auto min = (double)m_svUI->intensity_slider->minimum();
+  auto max = (double)m_svUI->intensity_slider->maximum();
 
   double scaled_value = 100.0 * (value - min) / (max - min);
   for (auto &spectrumDisplay : m_spectrumDisplays) {
@@ -537,7 +537,7 @@ void SVConnections::loadColorMap(const QString &file_name) {
   if (m_colorMapFileName.isEmpty())
     m_colorMapFileName = MantidColorMap::chooseColorMap("", m_svMainWindow);
 
-  MantidColorMap *mantid_color_map =
+  auto *mantid_color_map =
       new MantidColorMap(file_name, MantidColorMap::ScaleType::Linear);
 
   QwtDoubleInterval interval(0.0, 255.0);

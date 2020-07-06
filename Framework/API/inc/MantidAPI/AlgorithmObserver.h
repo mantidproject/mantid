@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ALGORITHMOBSERVER_H_
-#define MANTID_API_ALGORITHMOBSERVER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -24,22 +23,24 @@ Hides Poco::Notification API from the user.
 class MANTID_API_DLL AlgorithmObserver {
 public:
   AlgorithmObserver();
-  AlgorithmObserver(IAlgorithm_const_sptr alg);
+  AlgorithmObserver(const IAlgorithm_const_sptr &alg);
   virtual ~AlgorithmObserver();
 
-  void observeAll(IAlgorithm_const_sptr alg);
-  void observeProgress(IAlgorithm_const_sptr alg);
+  void observeAll(const IAlgorithm_const_sptr &alg);
+  void observeProgress(const IAlgorithm_const_sptr &alg);
   void observeStarting();
-  void observeStart(IAlgorithm_const_sptr alg);
-  void observeFinish(IAlgorithm_const_sptr alg);
-  void observeError(IAlgorithm_const_sptr alg);
+  void observeStart(const IAlgorithm_const_sptr &alg);
+  void observeFinish(const IAlgorithm_const_sptr &alg);
+  void observeError(const IAlgorithm_const_sptr &alg);
 
-  void stopObserving(IAlgorithm_const_sptr alg);
+  void stopObserving(const IAlgorithm_const_sptr &alg);
   void stopObserving(const Mantid::API::IAlgorithm *alg);
   void stopObservingManager();
 
   virtual void progressHandle(const IAlgorithm *alg, double p,
-                              const std::string &msg);
+                              const std::string &msg,
+                              const double estimatedTime,
+                              const int progressPrecision);
   virtual void startingHandle(IAlgorithm_sptr alg);
   virtual void startHandle(const IAlgorithm *alg);
   virtual void finishHandle(const IAlgorithm *alg);
@@ -75,5 +76,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_ALGORITHMOBSERVER_H_*/

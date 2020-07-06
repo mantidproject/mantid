@@ -29,8 +29,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MULTILAYER_H
-#define MULTILAYER_H
+#pragma once
 
 #include "Graph.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
@@ -83,7 +82,7 @@ class MultiLayer : public MdiSubWindow {
 public:
   MultiLayer(QWidget *parent, int layers = 1, int rows = 1, int cols = 1,
              const QString &label = "", const char *name = nullptr,
-             Qt::WFlags f = nullptr);
+             const Qt::WFlags &f = nullptr);
   ~MultiLayer() override;
 
   /// Get the window type as a string
@@ -314,5 +313,3 @@ private:
   QRadioButton *m_lineRadioButton;
   ColorButton *m_colourBox;
 };
-
-#endif

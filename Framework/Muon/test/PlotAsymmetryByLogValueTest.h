@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PLOTASYMMETRYBYLOGVALUTEST_H_
-#define PLOTASYMMETRYBYLOGVALUTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -135,7 +134,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -171,7 +170,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -196,7 +195,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -216,7 +215,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -279,7 +278,7 @@ public:
     if (!alg.isExecuted())
       return;
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
@@ -312,7 +311,7 @@ public:
     if (!alg.isExecuted())
       return;
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
@@ -346,7 +345,7 @@ public:
     if (!alg.isExecuted())
       return;
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -387,7 +386,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
@@ -419,7 +418,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
@@ -466,7 +465,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWS);
@@ -491,7 +490,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -518,7 +517,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -546,7 +545,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
     TS_ASSERT(outWS);
@@ -624,5 +623,3 @@ private:
   PlotAsymmetryByLogValue alg;
   std::string firstRun, lastRun;
 };
-
-#endif /*PLOTASYMMETRYBYLOGVALUTEST_H_*/

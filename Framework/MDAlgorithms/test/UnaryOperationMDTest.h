@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_
-#define MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_
+#pragma once
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -61,8 +60,8 @@ public:
   }
 
   /// Run the mock algorithm
-  void doTest(MockUnaryOperationMD &alg, std::string inName,
-              std::string outName, bool succeeds = true) {
+  void doTest(MockUnaryOperationMD &alg, const std::string &inName,
+              const std::string &outName, bool succeeds = true) {
     out.reset();
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -73,7 +72,7 @@ public:
       TS_ASSERT(alg.isExecuted());
       TSM_ASSERT("Algorithm methods were called as expected",
                  testing::Mock::VerifyAndClearExpectations(&alg));
-      out = boost::dynamic_pointer_cast<IMDWorkspace>(
+      out = std::dynamic_pointer_cast<IMDWorkspace>(
           AnalysisDataService::Instance().retrieve(outName));
       TS_ASSERT(out);
     } else {
@@ -150,5 +149,3 @@ public:
     TSM_ASSERT("Operation performed in place.", out == event);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_ */

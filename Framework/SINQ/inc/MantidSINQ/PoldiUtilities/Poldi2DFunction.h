@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDI2DFUNCTION_H_
-#define MANTID_SINQ_POLDI2DFUNCTION_H_
+#pragma once
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
@@ -49,9 +48,7 @@ private:
   size_t m_iteration;
 };
 
-using Poldi2DFunction_sptr = boost::shared_ptr<Poldi2DFunction>;
+using Poldi2DFunction_sptr = std::shared_ptr<Poldi2DFunction>;
 
 } // namespace Poldi
 } // namespace Mantid
-
-#endif /* MANTID_SINQ_POLDI2DFUNCTION_H_ */

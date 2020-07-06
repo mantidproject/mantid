@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
-#define MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
+#pragma once
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -77,7 +75,7 @@ public:
       m_function = FunctionFactory::Instance().createInitialized(
           fun + funStr.toStdString());
     } else {
-      auto parentFun = boost::dynamic_pointer_cast<CompositeFunction>(
+      auto parentFun = std::dynamic_pointer_cast<CompositeFunction>(
           getFunctionWithPrefix(prefix, m_function));
       parentFun->addFunction(
           FunctionFactory::Instance().createInitialized(funStr.toStdString()));
@@ -94,7 +92,7 @@ public:
     QString parentPrefix;
     int i;
     std::tie(parentPrefix, i) = splitFunctionPrefix(prefix);
-    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto fun = std::dynamic_pointer_cast<CompositeFunction>(
         getFunctionWithPrefix(parentPrefix, m_function));
     if (i >= 0)
       fun->removeFunction(i);
@@ -516,5 +514,3 @@ public:
     TS_ASSERT_EQUALS(locals[0], "A1");
   }
 };
-
-#endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_

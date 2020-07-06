@@ -1,11 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_IPROPERTYMANAGER_H_
-#define MANTID_KERNEL_IPROPERTYMANAGER_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator.h"
@@ -13,7 +13,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/make_shared.hpp>
+#include <memory>
 #endif
 
 #include <memory>
@@ -79,11 +79,11 @@ public:
    *  @throw std::invalid_argument  if the name argument is empty
    */
   template <typename T>
-  void declareProperty(
-      const std::string &name, T value,
-      IValidator_sptr validator = boost::make_shared<NullValidator>(),
-      const std::string &doc = "",
-      const unsigned int direction = Direction::Input) {
+  void
+  declareProperty(const std::string &name, T value,
+                  IValidator_sptr validator = std::make_shared<NullValidator>(),
+                  const std::string &doc = "",
+                  const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
         std::make_unique<PropertyWithValue<T>>(name, value, validator,
                                                direction);
@@ -105,7 +105,7 @@ public:
                        const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
         std::make_unique<PropertyWithValue<T>>(
-            name, value, boost::make_shared<NullValidator>(), direction);
+            name, value, std::make_shared<NullValidator>(), direction);
     declareProperty(std::move(p), doc);
   }
 
@@ -122,7 +122,7 @@ public:
                        const unsigned int direction) {
     std::unique_ptr<PropertyWithValue<T>> p =
         std::make_unique<PropertyWithValue<T>>(
-            name, value, boost::make_shared<NullValidator>(), direction);
+            name, value, std::make_shared<NullValidator>(), direction);
     declareProperty(std::move(p));
   }
 
@@ -143,11 +143,11 @@ public:
    * exists
    *  @throw std::invalid_argument  if the name argument is empty
    */
-  void declareProperty(
-      const std::string &name, const char *value,
-      IValidator_sptr validator = boost::make_shared<NullValidator>(),
-      const std::string &doc = std::string(),
-      const unsigned int direction = Direction::Input) {
+  void
+  declareProperty(const std::string &name, const char *value,
+                  IValidator_sptr validator = std::make_shared<NullValidator>(),
+                  const std::string &doc = std::string(),
+                  const unsigned int direction = Direction::Input) {
     // Simply call templated method, converting character array to a string
     declareProperty(name, std::string(value), std::move(validator), doc,
                     direction);
@@ -170,10 +170,11 @@ public:
    * exists
    *  @throw std::invalid_argument  if the name argument is empty
    */
-  void declareProperty(
-      const std::string &name, const char *value, const std::string &doc,
-      IValidator_sptr validator = boost::make_shared<NullValidator>(),
-      const unsigned int direction = Direction::Input) {
+  void
+  declareProperty(const std::string &name, const char *value,
+                  const std::string &doc,
+                  IValidator_sptr validator = std::make_shared<NullValidator>(),
+                  const unsigned int direction = Direction::Input) {
     // Simply call templated method, converting character array to a string
     declareProperty(name, std::string(value), std::move(validator), doc,
                     direction);
@@ -189,8 +190,8 @@ public:
    */
   void declareProperty(const std::string &name, const char *value,
                        const unsigned int direction) {
-    declareProperty(name, std::string(value),
-                    boost::make_shared<NullValidator>(), "", direction);
+    declareProperty(name, std::string(value), std::make_shared<NullValidator>(),
+                    "", direction);
   }
 
   /// Removes the property from management
@@ -290,7 +291,7 @@ public:
                                 std::unique_ptr<T> value) {
     setTypedProperty(
         name, std::move(value),
-        std::is_convertible<std::unique_ptr<T>, boost::shared_ptr<DataItem>>());
+        std::is_convertible<std::unique_ptr<T>, std::shared_ptr<DataItem>>());
     this->afterPropertySet(name);
     return this;
   }
@@ -349,7 +350,10 @@ public:
   virtual void
   splitByTime(std::vector<SplittingInterval> & /*splitter*/,
               std::vector<PropertyManager *> /* outputs*/) const = 0;
-  virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) = 0;
+
+  virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/,
+                                const std::vector<std::string> &
+                                /* excludedFromFiltering */) = 0;
 
 protected:
   /// Get a property by an index
@@ -423,13 +427,13 @@ protected:
     template <typename T> operator std::vector<std::vector<T>>() {
       return pm.getValue<std::vector<std::vector<T>>>(prop);
     }
-    /// explicit specialization for boost::shared_ptr
-    template <typename T> operator boost::shared_ptr<T>() {
-      return pm.getValue<boost::shared_ptr<T>>(prop);
+    /// explicit specialization for std::shared_ptr
+    template <typename T> operator std::shared_ptr<T>() {
+      return pm.getValue<std::shared_ptr<T>>(prop);
     }
-    /// explicit specialization for boost::shared_ptr to const T
-    template <typename T> operator boost::shared_ptr<const T>() {
-      return pm.getValue<boost::shared_ptr<T>>(prop);
+    /// explicit specialization for std::shared_ptr to const T
+    template <typename T> operator std::shared_ptr<const T>() {
+      return pm.getValue<std::shared_ptr<T>>(prop);
     }
     /// explicit version for Matrices
     template <typename T> operator Matrix<T>() {
@@ -454,7 +458,7 @@ private:
   template <typename T>
   IPropertyManager *doSetProperty(const std::string &name, const T &value) {
     setTypedProperty(name, value,
-                     std::is_convertible<T, boost::shared_ptr<DataItem>>());
+                     std::is_convertible<T, std::shared_ptr<DataItem>>());
     this->afterPropertySet(name);
     return this;
   }
@@ -470,7 +474,7 @@ private:
    */
   template <typename T>
   IPropertyManager *doSetProperty(const std::string &name,
-                                  const boost::shared_ptr<T> &value) {
+                                  const std::shared_ptr<T> &value) {
     // CAREFUL: is_convertible has undefined behavior for incomplete types. If T
     // is forward-declared in the calling code, e.g., an algorithm that calls
     // setProperty, compilation and linking do work. However, the BEHAVIOR IS
@@ -516,8 +520,7 @@ private:
   IPropertyManager *setTypedProperty(const std::string &name, const T &value,
                                      const std::true_type &) {
     // T is convertible to DataItem_sptr
-    boost::shared_ptr<DataItem> data =
-        boost::static_pointer_cast<DataItem>(value);
+    std::shared_ptr<DataItem> data = std::static_pointer_cast<DataItem>(value);
     std::string error = getPointerToProperty(name)->setDataItem(data);
     if (!error.empty()) {
       throw std::invalid_argument(error);
@@ -539,7 +542,7 @@ private:
                                      std::unique_ptr<T> value,
                                      const std::true_type &) {
     // T is convertible to DataItem_sptr
-    boost::shared_ptr<DataItem> data(std::move(value));
+    std::shared_ptr<DataItem> data(std::move(value));
     std::string error = getPointerToProperty(name)->setDataItem(data);
     if (!error.empty()) {
       throw std::invalid_argument(error);
@@ -572,5 +575,3 @@ private:
   }                                                                            \
   }                                                                            \
   }
-
-#endif /*MANTID_KERNEL_IPROPERTYMANAGER_H_*/

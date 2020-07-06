@@ -74,20 +74,22 @@ if(LIBRDKAFKA_FOUND)
       src/Kafka/private/Schema/flatbuffers/flatbuffers.h
       src/Kafka/private/Schema/flatbuffers/base.h
       src/Kafka/private/Schema/flatbuffers/stl_emulation.h
+      src/Kafka/private/Schema/6s4t_run_stop_generated.h
       src/Kafka/private/Schema/df12_det_spec_map_generated.h
       src/Kafka/private/Schema/dtdb_adc_pulse_debug_generated.h
       src/Kafka/private/Schema/ev42_events_generated.h
       src/Kafka/private/Schema/f142_logdata_generated.h
       src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
       src/Kafka/private/Schema/is84_isis_events_generated.h
-      src/Kafka/private/Schema/y2gw_run_info_generated.h
+      src/Kafka/private/Schema/pl72_run_start_generated.h
       src/Kafka/private/Schema/tdct_timestamps_generated.h
       src/Kafka/private/Schema/hs00_event_histogram_generated.h)
   set(TEST_FILES
       ${TEST_FILES}
       KafkaEventStreamDecoderTest.h
       KafkaHistoStreamDecoderTest.h
-      KafkaTopicSubscriberTest.h)
+      KafkaTopicSubscriberTest.h
+      )
 endif()
 
 if(COVERALLS)
@@ -143,7 +145,7 @@ add_subdirectory(test)
 
 # Auto-generate exports header
 target_include_directories(LiveData PUBLIC ${CMAKE_BINARY_DIR}/Framework/LiveData)
-generate_mantid_export_header(LiveData)
+generate_mantid_export_header(LiveData FALSE)
 
 # Installation settings
 mtd_install_targets(TARGETS

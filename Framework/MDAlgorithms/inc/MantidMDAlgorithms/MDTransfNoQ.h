@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_NOQ_TRANSF_H
-#define MANTID_MDALGORITHMS_NOQ_TRANSF_H
+#pragma once
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
@@ -97,11 +96,9 @@ private:
 private:
   // internal helper function which extract one or two axis from input matrix
   // workspace;
-  static void getAxes(API::MatrixWorkspace_const_sptr inWS,
+  static void getAxes(const API::MatrixWorkspace_const_sptr &inWS,
                       API::NumericAxis *&pXAxis, API::NumericAxis *&pYAxis);
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

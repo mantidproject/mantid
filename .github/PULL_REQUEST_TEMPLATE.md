@@ -28,6 +28,7 @@ Please comment on the following ([full description](http://developer.mantidproje
 - Is the code of an acceptable quality?
 - Does the code conform to the [coding standards](http://developer.mantidproject.org/Standards/)?
 - Are the unit tests small and test the class in isolation?
+- If there is GUI work does it follow the [GUI standards](http://developer.mantidproject.org/Standards/GUIStandards.html)?
 - If there are changes in the release notes then do they describe the changes appropriately?
 
 ##### Functional Tests #####

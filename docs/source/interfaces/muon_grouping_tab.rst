@@ -5,20 +5,22 @@ Grouping Tab
 
 .. image::  ../images/muon_interface_tab_grouping.png
    :align: right
-   :height: 500px
+   :height: 400px
 
-**Load** Allows a grouping and pairing table xml file to be selected to load
+**Load** Allows a grouping and pairing table xml file to be selected to load.
 
-**Save** Saves the current grouping and pairing tables to an xml file
+**Save** Saves the current grouping and pairing tables to an xml file.
 
-**Clear** Clears all groups and pairs from the current tables
+**Clear** Clears all groups and pairs from the current tables.
 
-**Default** Loads in the default groups and pairs for the instrument
+**Default** Loads in the default groups and pairs for the instrument.
 
 Grouping Table
 ^^^^^^^^^^^^^^
 
-**Plus and Minus** Add or remove groups
+**Analyse (plot/fit)** Whether the selected group is included in the plot and fitting.
+
+**Plus and Minus** Add or remove groups.
 
 **Context Menu Pair Selection** Right clicking over the grouping table, when two groups are selected, allows a pair to be created with a specified name.
 
@@ -29,12 +31,20 @@ but may be overridden here if required.
 Pairing Table
 ^^^^^^^^^^^^^
 
-**Plus and Minus** Add or remove pairs
+**Analyse (plot/fit)** Whether the selected pair is included in the plot and fitting.
+
+**Plus and Minus** Add or remove pairs.
 
 **Guess Alpha** Estimates the alpha for the current pair and recalculates.
+
+Multi-Period Data
+^^^^^^^^^^^^^^^^^^^
+
+For multi period data, the summed and subratcted periods are specfied at the bottom of the tab. These periods will be used for all 
+the groups and pairs.
 
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis 2 <MuonAnalysis_2-ref>`,
+:ref:`Muon Analysis <MuonAnalysis_2-ref>`,
 :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`

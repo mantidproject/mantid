@@ -1,17 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
 from mantid.simpleapi import logger
-import AbinsModules
 
+from abins import KpointsData
+from abins.constants import ACOUSTIC_PHONON_THRESHOLD
 
-class AbinsKpointsDataTest(unittest.TestCase):
+class KpointsDataTest(unittest.TestCase):
 
     _good_data_1 = {"k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
                     "weights": np.asarray([0.3, 0.2, 0.5]),
@@ -76,7 +76,7 @@ class AbinsKpointsDataTest(unittest.TestCase):
                     }
 
     def setUp(self):
-        self.tester = AbinsModules.KpointsData(num_k=3, num_atoms=2)
+        self.tester = KpointsData(num_k=3, num_atoms=2)
 
     # tests for append method
     def test_no_dict(self):
@@ -187,7 +187,7 @@ class AbinsKpointsDataTest(unittest.TestCase):
         collected_data = self.tester.extract()
 
         for k in range(data["frequencies"].shape[0]):
-            indices = data["frequencies"][k] > AbinsModules.AbinsConstants.ACOUSTIC_PHONON_THRESHOLD
+            indices = data["frequencies"][k] > ACOUSTIC_PHONON_THRESHOLD
             temp_f = data["frequencies"][k]
             self.assertEqual(True, np.allclose(temp_f[indices],
                                                collected_data["frequencies"][str(k)]))
@@ -206,11 +206,11 @@ class AbinsKpointsDataTest(unittest.TestCase):
     def test_constructor_assertions(self):
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            poor_tester = AbinsModules.KpointsData(num_k=0.1, num_atoms=2)
+            poor_tester = KpointsData(num_k=0.1, num_atoms=2)
 
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            poor_tester = AbinsModules.KpointsData(num_k=1, num_atoms=-2)
+            poor_tester = KpointsData(num_k=1, num_atoms=-2)
 
 
 if __name__ == "__main__":

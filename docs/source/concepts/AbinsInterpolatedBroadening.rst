@@ -5,7 +5,7 @@ Abins: Fast approximate broadening with "interpolate"
 
 .. contents::
 
-The "interpolate" scheme in ``AbinsModules.Instruments.Broadening``
+The "interpolate" scheme in ``abins.instruments.broadening``
 estimates broadened spectra using a limited number of kernel
 evaluations or convolution steps in order to reduce the computation
 time. The method appears to be novel, so some explanation is needed.
@@ -293,7 +293,7 @@ We can build on this by performing convolution of the full spectrum with each of
 
    import matplotlib.pyplot as plt
    import numpy as np
-   from AbinsModules.Instruments import Broadening
+   from abins.instruments import broadening
 
    bins = np.linspace(0, 100, 1001, dtype=np.float64)
    frequencies = (bins[:-1] + bins [1:]) / 2
@@ -315,26 +315,26 @@ We can build on this by performing convolution of the full spectrum with each of
    ax1.plot(frequencies, intensities, 'k-', label='Unbroadened spectrum')
 
    # Narrow limit
-   freq_points, spectrum = Broadening.broaden_spectrum(
+   freq_points, spectrum = broadening.broaden_spectrum(
        frequencies, bins, intensities,
        (peak1_sigma * np.ones_like(frequencies)),
        scheme='gaussian')
    ax2.plot(freq_points, spectrum, label='Convolve with min(sigma)')
 
    # Broad limit
-   freq_points, spectrum = Broadening.broaden_spectrum(
+   freq_points, spectrum = broadening.broaden_spectrum(
        frequencies, bins, intensities,
        (peak2_sigma * np.ones_like(frequencies)),
        scheme='gaussian')
    ax2.plot(freq_points, spectrum, label='Convolve with max(sigma)')
 
    # Reference method: sum individually
-   freq_points, spectrum = Broadening.broaden_spectrum(
+   freq_points, spectrum = broadening.broaden_spectrum(
        frequencies, bins, intensities, sigma, scheme='gaussian')
    ax3.plot(freq_points, spectrum, 'k-', label='Sum individual peaks')
 
    # Interpolated
-   freq_points, spectrum = Broadening.broaden_spectrum(
+   freq_points, spectrum = broadening.broaden_spectrum(
        frequencies, bins, intensities, sigma, scheme='interpolate')
    ax2.plot(freq_points, spectrum, c='C2', linestyle='--', label='Interpolated', zorder=0.5)
    ax3.plot(freq_points, spectrum, c='C2', linestyle='--', label='Interpolated', zorder=0.5)

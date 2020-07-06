@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
+#pragma once
 
 #include "IndirectFittingModel.h"
 
@@ -22,10 +21,10 @@ struct JumpFitParameters {
 
 class DLLExport JumpFitModel : public IndirectFittingModel {
 public:
+  JumpFitModel();
   using IndirectFittingModel::addWorkspace;
 
-  void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra & /*spectra*/) override;
+  void addWorkspace(const std::string &workspaceName) override;
   void removeWorkspace(TableDatasetIndex index) override;
   void setFitType(const std::string &fitType);
 
@@ -33,8 +32,6 @@ public:
   bool zeroEISF(TableDatasetIndex dataIndex) const;
 
   bool isMultiFit() const override;
-
-  std::vector<std::string> getSpectrumDependentAttributes() const override;
 
   std::string getFitParameterName(TableDatasetIndex dataIndex,
                                   WorkspaceIndex spectrum) const;
@@ -47,14 +44,9 @@ public:
   void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex);
   void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex);
 
-  std::string sequentialFitOutputName() const override;
-  std::string simultaneousFitOutputName() const override;
-  std::string singleFitOutputName(TableDatasetIndex index,
-                                  WorkspaceIndex spectrum) const override;
-
 private:
-  std::string constructOutputName() const;
-  bool allWorkspacesEqual(Mantid::API::MatrixWorkspace_sptr workspace) const;
+  bool
+  allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   JumpFitParameters &
   addJumpFitParameters(Mantid::API::MatrixWorkspace *workspace,
                        const std::string &hwhmName);
@@ -62,13 +54,9 @@ private:
   findJumpFitParameters(TableDatasetIndex dataIndex) const;
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
-
-  std::string m_fitType;
   std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;
 };
 
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

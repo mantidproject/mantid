@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/Viewport.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
@@ -212,8 +212,8 @@ void Viewport::applyProjection() const {
 void Viewport::projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const {
   // z initiaised to zero if out of the sphere
   double z = 0;
-  double x = static_cast<double>((2.0 * a - m_width) / m_width);
-  double y = static_cast<double>((m_height - 2.0 * b) / m_height);
+  auto x = static_cast<double>((2.0 * a - m_width) / m_width);
+  auto y = static_cast<double>((m_height - 2.0 * b) / m_height);
   double norm = x * x + y * y;
   if (norm > 1.0) // The point is inside the sphere
   {
@@ -343,8 +343,8 @@ void Viewport::initZoomFrom(int a, int b) {
   if (a >= m_width || b >= m_height)
     return;
   double z = 0;
-  double x = static_cast<double>(m_width - a);
-  double y = static_cast<double>(b - m_height);
+  auto x = static_cast<double>(m_width - a);
+  auto y = static_cast<double>(b - m_height);
   m_lastpoint(x, y, z);
 }
 
@@ -357,7 +357,7 @@ void Viewport::initZoomFrom(int a, int b) {
 void Viewport::generateZoomTo(int a, int b) {
   if (a >= m_width || b >= m_height || a <= 0 || b <= 0)
     return;
-  double y = static_cast<double>(b - m_height);
+  auto y = static_cast<double>(b - m_height);
   if (y == 0)
     y = m_lastpoint[1];
   double diff = m_lastpoint[1] / y;

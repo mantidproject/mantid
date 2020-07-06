@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATE_H_
-#define MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATE_H_
+#pragma once
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
@@ -20,7 +19,8 @@ namespace Functions {
   ComptonProfile functions
   that give the Neutron count rate.
 */
-class DLLExport ComptonScatteringCountRate : public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL ComptonScatteringCountRate
+    : public API::CompositeFunction {
 public:
   /// Constructor
   ComptonScatteringCountRate();
@@ -41,12 +41,12 @@ private:
   void updateCMatrixValues() const;
 
   /// Cache reference to workspace for use in setupForFit
-  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> matrix,
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> matrix,
                           size_t wsIndex, double startX, double endX) override;
   /// Cache ptrs to the individual profiles and their parameters
   void cacheFunctions();
   /// Cache ptr to the individual profile and its parameters
-  void cacheComptonProfile(const boost::shared_ptr<ComptonProfile> &profile,
+  void cacheComptonProfile(const std::shared_ptr<ComptonProfile> &profile,
                            const size_t paramsOffset);
   /// Cache parameters positions for background function
   void cacheBackground(const API::IFunction1D_sptr &function1D,
@@ -71,7 +71,7 @@ private:
   /// The order of the background
   int m_bkgdPolyN;
   /// The histogram of the matrix workspace being cached for use
-  boost::shared_ptr<HistogramData::Histogram> m_hist;
+  std::shared_ptr<HistogramData::Histogram> m_hist;
   /// The workspace index being worked on
   size_t wsIndex;
   /// Ratio of data & errors
@@ -81,5 +81,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATE_H_ */

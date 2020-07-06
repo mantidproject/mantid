@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <QLineEdit>
 #include <qwt_plot_canvas.h>
@@ -386,9 +386,9 @@ void RefIVConnections::vGraphPickerMoved() {
 }
 
 void RefIVConnections::intensitySliderMoved() {
-  double value = (double)m_ivUI->intensity_slider->value();
-  double min = (double)m_ivUI->intensity_slider->minimum();
-  double max = (double)m_ivUI->intensity_slider->maximum();
+  auto value = (double)m_ivUI->intensity_slider->value();
+  auto min = (double)m_ivUI->intensity_slider->minimum();
+  auto max = (double)m_ivUI->intensity_slider->maximum();
 
   double scaledValue = 100.0 * (value - min) / (max - min);
   m_imageDisplay->setIntensity(scaledValue);

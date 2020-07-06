@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 MantidPlot module with functions specific to the traditional,
@@ -11,8 +11,7 @@ qti-based MantidPlot Python plotting interface
 As with other MantidPlot modules, this has to run from within MantidPlot
 
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 # Require MantidPlot
 try:
@@ -25,6 +24,8 @@ from PyQt4 import QtCore
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
+
+
 def plot(source, *args, **kwargs):
     """Create a new plot given a workspace, table or matrix.
 

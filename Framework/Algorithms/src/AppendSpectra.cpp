@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
@@ -36,11 +36,11 @@ int AppendSpectra::version() const { return 1; }
 void AppendSpectra::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace1", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
+                      std::make_shared<CommonBinsValidator>()),
                   "The name of the first input workspace");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace2", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
+                      std::make_shared<CommonBinsValidator>()),
                   "The name of the second input workspace");
 
   declareProperty(
@@ -48,7 +48,7 @@ void AppendSpectra::init() {
       "Perform a set of checks that the two input workspaces are compatible.");
 
   declareProperty("Number", 1,
-                  boost::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
+                  std::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
                   "Append the spectra from InputWorkspace2 multiple times.");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -66,9 +66,9 @@ void AppendSpectra::exec() {
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
   DataObjects::EventWorkspace_const_sptr eventWs1 =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws1);
   DataObjects::EventWorkspace_const_sptr eventWs2 =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces
@@ -98,7 +98,7 @@ void AppendSpectra::exec() {
     for (int i = 1; i < number; i++) {
       eOutput = this->execEvent(*eOutput, *eventWs2);
     }
-    output = boost::static_pointer_cast<MatrixWorkspace>(eOutput);
+    output = std::static_pointer_cast<MatrixWorkspace>(eOutput);
   } else { // So it is a workspace 2D.
     // The only restriction, even with ValidateInputs=false
     if (ws1->blocksize() != ws2->blocksize())
@@ -116,7 +116,7 @@ void AppendSpectra::exec() {
 
   // Set the output workspace
   setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(output));
+              std::dynamic_pointer_cast<MatrixWorkspace>(output));
 }
 
 /** If there is an overlap in spectrum numbers between ws1 and ws2,

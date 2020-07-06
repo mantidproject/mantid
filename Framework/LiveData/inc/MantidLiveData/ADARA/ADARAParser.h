@@ -1,5 +1,4 @@
-#ifndef __ADARA_PARSER_H
-#define __ADARA_PARSER_H
+#pragma once
 
 #include <cstdint>
 #include <map>
@@ -196,5 +195,3 @@ private:
 };
 
 } // namespace ADARA
-
-#endif /* __ADARA_PARSER_H */

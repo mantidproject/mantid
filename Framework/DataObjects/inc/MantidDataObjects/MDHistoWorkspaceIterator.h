@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATOR_H_
-#define MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATOR_H_
+#pragma once
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -39,7 +38,8 @@ using VecMDExtents = std::vector<MDExtentPair>;
 class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator {
 public:
   MDHistoWorkspaceIterator(
-      MDHistoWorkspace_const_sptr workspace, SkippingPolicy *skippingPolicy,
+      const MDHistoWorkspace_const_sptr &workspace,
+      SkippingPolicy *skippingPolicy,
       Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
@@ -47,7 +47,7 @@ public:
       Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
-      MDHistoWorkspace_const_sptr workspace,
+      const MDHistoWorkspace_const_sptr &workspace,
       Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
@@ -179,5 +179,3 @@ protected:
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATOR_H_ */

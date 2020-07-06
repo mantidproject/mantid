@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ADDSAMPLELOGTEST_H_
-#define ADDSAMPLELOGTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -171,11 +170,12 @@ public:
   }
 
   template <typename T>
-  void
-  ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string LogName,
-                   std::string LogType, std::string LogText, T expectedValue,
-                   bool fails = false, std::string LogUnit = "",
-                   std::string NumberType = "AutoDetect", bool throws = false) {
+  void ExecuteAlgorithm(const MatrixWorkspace_sptr &testWS,
+                        const std::string &LogName, const std::string &LogType,
+                        const std::string &LogText, T expectedValue,
+                        bool fails = false, const std::string &LogUnit = "",
+                        const std::string &NumberType = "AutoDetect",
+                        bool throws = false) {
     // add the workspace to the ADS
     AnalysisDataService::Instance().addOrReplace("AddSampleLogTest_Temporary",
                                                  testWS);
@@ -235,5 +235,3 @@ public:
     AnalysisDataService::Instance().remove(output->getName());
   }
 };
-
-#endif /*ADDSAMPLELOGTEST_H_*/

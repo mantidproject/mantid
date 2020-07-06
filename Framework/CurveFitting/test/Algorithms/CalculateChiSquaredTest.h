@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CALCULATECHISQUAREDTEST_H_
-#define MANTID_CURVEFITTING_CALCULATECHISQUAREDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -459,7 +458,7 @@ private:
       xValues = xBins;
       set1DSpectrumEmpty();
       auto space =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
       space->dataY(0).assign(yarray, yarray + ndata);
       space->dataE(0).assign(ndata, 1.0);
       outputName = "out";
@@ -518,5 +517,3 @@ private:
     }
   };
 };
-
-#endif /* MANTID_CURVEFITTING_CALCULATECHISQUAREDTEST_H_ */

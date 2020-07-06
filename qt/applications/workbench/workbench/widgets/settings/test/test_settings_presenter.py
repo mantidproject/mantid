@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-from __future__ import absolute_import, unicode_literals
-
 from unittest import TestCase
 
-from mantid.py3compat.mock import call, Mock
+from unittest.mock import call, Mock
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictPropertyMock
 from workbench.widgets.settings.presenter import SettingsPresenter

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
-#define MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
+#pragma once
 
 #include "FunctionAdapterTestCommon.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
@@ -150,5 +149,3 @@ private:
   TestDataType m_xdata;
   TestDataType m_result;
 };
-
-#endif // MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H

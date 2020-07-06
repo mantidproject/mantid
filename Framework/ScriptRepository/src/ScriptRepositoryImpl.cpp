@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // from mantid
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
@@ -82,7 +82,7 @@ const char *emptyURL =
 /**
 Write json object to file
 */
-void writeJsonFile(const std::string &filename, Json::Value json,
+void writeJsonFile(const std::string &filename, const Json::Value &json,
                    const std::string &error) {
   Poco::FileOutputStream filestream(filename);
   if (!filestream.good()) {

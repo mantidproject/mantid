@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MAGFORMFACTORCORRECTION_H_
-#define MAGFORMFACTORCORRECTION_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -72,15 +71,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieve(outputWSname));
     MatrixWorkspace_sptr result =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieve(formFactorWSname));
     MatrixWorkspace_sptr ffout =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieve(inputWSname));
     MatrixWorkspace_sptr input =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_LESS_THAN(checkWorkspaces(input, result, ffout), 1.e-8);
   }
 
@@ -92,7 +91,7 @@ private:
   std::string formFactorWSname;
 
   // Creates a fake workspace
-  void createWorkspaceMag(bool isHistogram, std::string wsname) {
+  void createWorkspaceMag(bool isHistogram, const std::string &wsname) {
     const int nspecs(10);
     const int nbins(50);
     const double invfourPiSqr = 1. / (16. * M_PI * M_PI);
@@ -117,8 +116,9 @@ private:
   }
 
   // Checks that all the workspaces are consistent (in = out*ff)
-  double checkWorkspaces(MatrixWorkspace_sptr in, MatrixWorkspace_sptr out,
-                         MatrixWorkspace_sptr ff) {
+  double checkWorkspaces(const MatrixWorkspace_sptr &in,
+                         const MatrixWorkspace_sptr &out,
+                         const MatrixWorkspace_sptr &ff) {
     const int64_t nbins = in->blocksize();
     const int64_t nspecs = in->getNumberHistograms();
     double df2 = 0., df;
@@ -137,5 +137,3 @@ private:
     return sqrt(df2);
   }
 };
-
-#endif /*MAGFORMFACTORCORRECTION_H_*/

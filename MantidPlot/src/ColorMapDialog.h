@@ -25,8 +25,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef COLORMAPDIALOG_H
-#define COLORMAPDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -38,7 +37,7 @@ class ColorMapDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ColorMapDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  ColorMapDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
   void setMatrix(Matrix *m);
 
 protected slots:
@@ -49,5 +48,3 @@ private:
   ColorMapEditor *editor;
   Matrix *d_matrix;
 };
-
-#endif

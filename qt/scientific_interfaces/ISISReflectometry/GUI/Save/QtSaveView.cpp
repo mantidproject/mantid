@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtSaveView.h"
 #include "MantidKernel/UsageService.h"
@@ -35,7 +35,6 @@ Initialize the Interface
 */
 void QtSaveView::initLayout() {
   m_ui.setupUi(this);
-
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
           SLOT(populateListOfWorkspaces()));
   connect(m_ui.saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
@@ -49,6 +48,40 @@ void QtSaveView::initLayout() {
           SLOT(onSavePathChanged()));
   connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this,
           SLOT(browseToSaveDirectory()));
+}
+
+void QtSaveView::connectSettingsChange(QLineEdit &edit) {
+  connect(&edit, SIGNAL(textChanged(QString const &)), this,
+          SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QComboBox &edit) {
+  connect(&edit, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QCheckBox &edit) {
+  connect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QRadioButton &edit) {
+  connect(&edit, SIGNAL(clicked()), this, SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
+
+void QtSaveView::connectSaveSettingsWidgets() {
+  connectSettingsChange(*m_ui.savePathEdit);
+  connectSettingsChange(*m_ui.prefixEdit);
+  connectSettingsChange(*m_ui.filterEdit);
+  connectSettingsChange(*m_ui.regexCheckBox);
+  connectSettingsChange(*m_ui.saveReductionResultsCheckBox);
+  connectSettingsChange(*m_ui.titleCheckBox);
+  connectSettingsChange(*m_ui.qResolutionCheckBox);
+  connectSettingsChange(*m_ui.commaRadioButton);
+  connectSettingsChange(*m_ui.spaceRadioButton);
+  connectSettingsChange(*m_ui.tabRadioButton);
+  connectSettingsChange(*m_ui.fileFormatComboBox);
 }
 
 void QtSaveView::browseToSaveDirectory() {

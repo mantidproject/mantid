@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADTOFRAWNEXUS_H_
-#define MANTID_DATAHANDLING_LOADTOFRAWNEXUS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -15,6 +14,7 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 #include <mutex>
@@ -79,7 +79,8 @@ protected:
                       Mantid::NeXus::NXEntry &entry);
 
   void loadBank(const std::string &nexusfilename, const std::string &entry_name,
-                const std::string &bankName, API::MatrixWorkspace_sptr WS,
+                const std::string &bankName,
+                const API::MatrixWorkspace_sptr &WS,
                 const detid2index_map &id_to_wi);
 
   /// List of the absolute time of each pulse
@@ -109,5 +110,3 @@ protected:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLINGLOADTOFRAWNEXUS_H_ */

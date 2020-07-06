@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PRODUCTQUADRATICEXPTEST_H_
-#define MANTID_CURVEFITTING_PRODUCTQUADRATICEXPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -18,8 +17,7 @@
 #include "MantidCurveFitting/Functions/Quadratic.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -66,12 +64,12 @@ to check that the results are equal.
     func.setParameter("Lifetime", Lifetime);
 
     // Create the equivalent Product Function
-    IFunction_sptr quadraticFunction = boost::make_shared<Quadratic>();
+    IFunction_sptr quadraticFunction = std::make_shared<Quadratic>();
     quadraticFunction->initialize();
     quadraticFunction->setParameter("A0", A0);
     quadraticFunction->setParameter("A1", A1);
     quadraticFunction->setParameter("A2", A2);
-    IFunction_sptr expFunction = boost::make_shared<ExpDecay>();
+    IFunction_sptr expFunction = std::make_shared<ExpDecay>();
     expFunction->initialize();
     expFunction->setParameter("Height", Height);
     expFunction->setParameter("Lifetime", Lifetime);
@@ -129,8 +127,7 @@ public:
         FunctionFactory::Instance().createFunction("ProductQuadraticExp");
     TS_ASSERT(func != nullptr);
     TS_ASSERT_EQUALS(func->name(), "ProductQuadraticExp");
-    TS_ASSERT(boost::dynamic_pointer_cast<ProductQuadraticExp>(func) !=
-              nullptr);
+    TS_ASSERT(std::dynamic_pointer_cast<ProductQuadraticExp>(func) != nullptr);
   }
 
   void test_set_parameters() {
@@ -234,5 +231,3 @@ public:
     do_test_function_calculation(A0, A1, A2, Height, Lifetime);
   }
 };
-
-#endif /* MANTID_CURVEFITTING_PRODUCTQUADRATICEXPTEST_H_ */

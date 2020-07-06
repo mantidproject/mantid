@@ -1,26 +1,22 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """State describing the adjustment workspace creation of the SANS reduction."""
 
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 import json
-
-from six import with_metaclass
 
 from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 
 
-class StateAdjustment(with_metaclass(JsonSerializable)):
+class StateAdjustment(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateAdjustment, self).__init__()

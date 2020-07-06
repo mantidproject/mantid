@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SETSPECIALCOORDINATESTEST_H_
-#define MANTID_CRYSTAL_SETSPECIALCOORDINATESTEST_H_
+#pragma once
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -36,7 +35,7 @@ public:
 
   void test_CannotUseAnyWorkspaceType() {
     Workspace_sptr tableWS =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>(1);
+        std::make_shared<Mantid::DataObjects::TableWorkspace>(1);
 
     SetSpecialCoordinates alg;
     alg.setRethrows(true);
@@ -143,5 +142,3 @@ public:
     AnalysisDataService::Instance().remove("inWS");
   }
 };
-
-#endif /* MANTID_CRYSTAL_SETSPECIALCOORDINATESTEST_H_ */

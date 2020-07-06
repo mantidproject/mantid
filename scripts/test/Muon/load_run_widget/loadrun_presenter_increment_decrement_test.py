@@ -1,13 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
 
@@ -51,10 +51,6 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.load_utils_patcher = patcher.start()
         self.load_utils_patcher.exception_message_for_failed_files.return_value = ''
 
-        file_finder_patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_presenter.FileFinder')
-        self.addCleanup(file_finder_patcher.stop)
-        file_finder_patcher.start()
-
         self.load_single_run()
 
     def tearDown(self):
@@ -79,6 +75,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def assert_view_has_not_changed(self):
         self.assertEqual(self.view.get_run_edit_text(), str(self._loaded_run))
 
+    @staticmethod
     def load_failure(self):
         raise ValueError("Error text")
 

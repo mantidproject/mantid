@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CALMUONDETECTORPHASES_H_
-#define MANTID_ALGORITHMS_CALMUONDETECTORPHASES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -58,7 +57,8 @@ private:
   removeExpDecay(const API::MatrixWorkspace_sptr &wsInput);
   /// Fit the workspace
   void fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq,
-                    std::string groupName, API::ITableWorkspace_sptr resTab,
+                    const std::string &groupName,
+                    const API::ITableWorkspace_sptr &resTab,
                     API::WorkspaceGroup_sptr &resGroup);
   /// Create the fitting function as string
   std::string createFittingFunction(double freq, bool fixFreq);
@@ -96,5 +96,3 @@ private:
 };
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CALMUONDETECTORPHASES_H_ */

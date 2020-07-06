@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidNexusGeometry/JSONInstrumentBuilder.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -12,8 +11,8 @@
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
-#include <boost/make_shared.hpp>
 #include <json/json.h>
+#include <memory>
 
 namespace {
 using namespace Mantid::Geometry;

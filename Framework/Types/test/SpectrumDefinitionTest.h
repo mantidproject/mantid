@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_
-#define MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -107,5 +106,3 @@ public:
     TS_ASSERT_EQUALS(*(def.cbegin()), (std::pair<size_t, size_t>(1, 0)));
   }
 };
-
-#endif /* MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_ */

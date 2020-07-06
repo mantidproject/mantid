@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SETSAMPLE_H_
-#define MANTID_DATAHANDLING_SETSAMPLE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/PropertyManager_fwd.h"
 
 namespace Mantid {
@@ -40,27 +40,46 @@ private:
   void exec() override final;
 
   const Geometry::SampleEnvironment *
-  setSampleEnvironment(API::ExperimentInfo &experiment,
-                       const Kernel::PropertyManager_const_sptr &args);
+  setSampleEnvironmentFromFile(API::ExperimentInfo &experiment,
+                               const Kernel::PropertyManager_const_sptr &args);
+  const Geometry::SampleEnvironment *setSampleEnvironmentFromXML(
+      API::ExperimentInfo &experiment,
+      const Kernel::PropertyManager_const_sptr &canGeometryArgs,
+      const Kernel::PropertyManager_const_sptr &canMaterialArgs);
   void setSampleShape(API::ExperimentInfo &experiment,
                       const Kernel::PropertyManager_const_sptr &args,
                       const Geometry::SampleEnvironment *sampleEnv);
   std::string
   tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
                            const Geometry::ReferenceFrame &refFrame);
+  std::string createFlatPlateXML(const Kernel::PropertyManager &args,
+                                 const Geometry::ReferenceFrame &refFrame,
+                                 const std::string &id = "sample-shape") const;
   std::string
-  createFlatPlateXML(const Kernel::PropertyManager &args,
-                     const Geometry::ReferenceFrame &refFrame) const;
-  std::string createCylinderLikeXML(const Kernel::PropertyManager &args,
-                                    const Geometry::ReferenceFrame &refFrame,
-                                    bool hollow) const;
-
-  void runChildAlgorithm(const std::string &name,
-                         API::Workspace_sptr &workspace,
-                         const Kernel::PropertyManager &args);
+  createFlatPlateHolderXML(const Kernel::PropertyManager &args,
+                           const Geometry::ReferenceFrame &refFrame) const;
+  std::string
+  createHollowCylinderHolderXML(const Kernel::PropertyManager &args,
+                                const Geometry::ReferenceFrame &refFrame) const;
+  std::string
+  createCylinderLikeXML(const Kernel::PropertyManager &args,
+                        const Geometry::ReferenceFrame &refFrame, bool hollow,
+                        const std::string &id = "sample-shape") const;
+  void validateGeometry(std::map<std::string, std::string> &errors,
+                        const Kernel::PropertyManager &args,
+                        const std::string &flavour);
+  void validateMaterial(std::map<std::string, std::string> &errors,
+                        const Kernel::PropertyManager &inputArgs,
+                        const std::string &flavour);
+  void assertNonNegative(std::map<std::string, std::string> &errors,
+                         const Kernel::PropertyManager &args,
+                         const std::string &flavour,
+                         const std::vector<const std::string *> &keys);
+  void setMaterial(ReadMaterial::MaterialParameters &materialParams,
+                   const Kernel::PropertyManager &materialArgs);
+  Kernel::PropertyManager materialSettingsEnsureLegacyCompatibility(
+      const Kernel::PropertyManager &materialArgs);
 };
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_SETSAMPLE_H_ */

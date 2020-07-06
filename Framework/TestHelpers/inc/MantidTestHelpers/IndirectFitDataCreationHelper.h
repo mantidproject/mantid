@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDIRECTFITDATACREATIONHELPER_H_
-#define MANTID_INDIRECTFITDATACREATIONHELPER_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -93,7 +92,7 @@ struct SetUpADSWithWorkspace {
 
   Mantid::API::MatrixWorkspace_sptr
   retrieveWorkspace(std::string const &workspaceName) {
-    return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName));
   }
 };
@@ -113,5 +112,3 @@ struct AreSpectraEqual : public boost::static_visitor<bool> {
 
 } // namespace IndirectFitDataCreationHelper
 } // namespace Mantid
-
-#endif // MANTID_INDIRECTFITDATACREATIONHELPER_H

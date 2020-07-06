@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/JoinISISPolarizationEfficiencies.h"
 
@@ -196,7 +196,7 @@ JoinISISPolarizationEfficiencies::interpolateWorkspaces(
 
 MatrixWorkspace_sptr
 JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(
-    MatrixWorkspace_sptr ws, size_t const maxSize) {
+    const MatrixWorkspace_sptr &ws, size_t const maxSize) {
   auto const &x = ws->x(0);
   auto const startX = x.front();
   auto const endX = x.back();
@@ -205,7 +205,7 @@ JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(
   Points xVals(maxSize, LinearGenerator(startX, dX));
   auto newHisto = Histogram(xVals, yVals);
   interpolateLinearInplace(ws->histogram(0), newHisto);
-  auto interpolatedWS = boost::make_shared<Workspace2D>();
+  auto interpolatedWS = std::make_shared<Workspace2D>();
   interpolatedWS->initialize(1, newHisto);
   assert(interpolatedWS->y(0).size() == maxSize);
   return interpolatedWS;
@@ -213,7 +213,7 @@ JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(
 
 MatrixWorkspace_sptr
 JoinISISPolarizationEfficiencies::interpolateHistogramWorkspace(
-    MatrixWorkspace_sptr ws, size_t const maxSize) {
+    const MatrixWorkspace_sptr &ws, size_t const maxSize) {
   ws->setDistribution(true);
   auto const &x = ws->x(0);
   auto const dX = (x.back() - x.front()) / double(maxSize);

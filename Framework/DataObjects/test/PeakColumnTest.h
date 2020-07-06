@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_
-#define MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_
+#pragma once
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
@@ -14,8 +13,8 @@
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <boost/make_shared.hpp>
 #include <locale>
+#include <memory>
 
 using namespace Mantid::DataObjects;
 
@@ -179,5 +178,3 @@ private:
   Mantid::Geometry::Instrument_sptr m_inst;
   std::vector<Peak> m_peaks;
 };
-
-#endif /* MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_ */

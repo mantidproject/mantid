@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import collections
 from directtools import _validate
 from mantid import logger, mtd
@@ -403,11 +401,11 @@ def defaultrcparams():
 
 
 def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEpsilon=1e-6):
-    """Convert :math:`S(Q,E)` to susceptibility :math:`\chi''(Q,E)`.
+    """Convert :math:`S(Q,E)` to susceptibility :math:`\\chi''(Q,E)`.
 
     #. If the X units are not in DeltaE, the workspace is transposed
-    #. The Y data in *workspace* is multiplied by :math:`1 - e^{\Delta E / (kT)}`
-    #. Y data in the bin closest to 0 meV and within -*zeroEnergyEpsilon* < :math:`\Delta E` < *zeroEnergyEpsilon* is set to 0
+    #. The Y data in *workspace* is multiplied by :math:`1 - e^{\\Delta E / (kT)}`
+    #. Y data in the bin closest to 0 meV and within -*zeroEnergyEpsilon* < :math:`\\Delta E` < *zeroEnergyEpsilon* is set to 0
     #. If the input was transposed, transpose the output as well
 
     :param workspace: a :math:`S(Q,E)` workspace to convert
@@ -418,7 +416,7 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     :type outputName: str or None
     :param zeroEnergyEpsilon: if a bin center is within this value from 0, the bin's value is set to zero.
     :type zeroEnergyEpsilon: float
-    :returns: a :class:`mantid.api.MatrixWorkspace` containing :math:`\chi''(Q,E)`
+    :returns: a :class:`mantid.api.MatrixWorkspace` containing :math:`\\chi''(Q,E)`
     """
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):

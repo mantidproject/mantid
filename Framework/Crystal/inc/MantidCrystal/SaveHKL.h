@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SAVEHKL_H_
-#define MANTID_CRYSTAL_SAVEHKL_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -20,7 +20,7 @@ namespace Crystal {
  * @date 2011-09-28
  */
 
-class DLLExport SaveHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SaveHKL : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveHKL"; }
@@ -49,7 +49,7 @@ private:
   double spectrumCalc(double TOF, int iSpec,
                       std::vector<std::vector<double>> time,
                       std::vector<std::vector<double>> spectra, size_t id);
-  void sizeBanks(std::string bankName, int &nCols, int &nRows);
+  void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
 
   DataObjects::PeaksWorkspace_sptr m_ws;
   double m_smu = 0.0; // in 1/cm
@@ -59,5 +59,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_SAVEHKL_H_ */

@@ -1,18 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import re
 import mantid
 from mantid.simpleapi import *
-from six.moves import range
-from six import iteritems
-
 MAX_ALG_LEN = 40 # TODO convention says 20 is the maximum
 
 SPECIAL = ["InputWorkspace", "OutputWorkspace", "Workspace",
@@ -34,6 +30,7 @@ ALG_BAD_PARAMS = {
     "MuscatFunc(v1)":("dQ", "dW"),
     "OptimizeCrystalPlacement(v1)":("nPeaks", "nParams", "nIndexed"),
     "PDFFourierTransform(v1)":("rho0"),
+    "PDFFourierTransform(v2)":("rho0"),
     "PoldiAutoCorrelation(v5)":("wlenmin", "wlenmax"),
     "PoldiLoadChopperSlits(v1)":("nbLoadedSlits"),
     "PoldiLoadSpectra(v1)":("nbSpectraLoaded"),
@@ -140,7 +137,7 @@ class Algorithms(systemtesting.MantidSystemTest):
     def runTest(self):
         algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-        for (name, versions) in iteritems(algs):
+        for (name, versions) in algs.items():
             if not self.verifyAlgName(name):
                 self.__ranOk += 1
                 continue

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 
@@ -55,7 +55,7 @@ FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
   createBrowser();
   createProperties();
 
-  QVBoxLayout *layout = new QVBoxLayout(this);
+  auto *layout = new QVBoxLayout(this);
   layout->addWidget(m_browser);
   layout->setContentsMargins(0, 0, 0, 0);
 }
@@ -74,11 +74,11 @@ void FitOptionsBrowser::createBrowser() {
   m_groupManager = new QtGroupPropertyManager(this);
 
   // create editor factories
-  QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
-  QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
-  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
-  QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(this);
+  auto *spinBoxFactory = new QtSpinBoxFactory(this);
+  auto *doubleEditorFactory = new DoubleEditorFactory(this);
+  auto *lineEditFactory = new QtLineEditFactory(this);
+  auto *checkBoxFactory = new QtCheckBoxFactory(this);
+  auto *comboBoxFactory = new QtEnumEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser(nullptr, QStringList(), false);
   // assign factories to property managers
@@ -838,7 +838,7 @@ void FitOptionsBrowser::displayProperty(const QString &propertyName,
 /**
  * Adds the property with the given name to a blacklist of properties to hide
  */
-bool FitOptionsBrowser::addPropertyToBlacklist(QString name) {
+bool FitOptionsBrowser::addPropertyToBlacklist(const QString &name) {
   if (!m_propertyNameMap.contains(name)) {
     return false;
   }

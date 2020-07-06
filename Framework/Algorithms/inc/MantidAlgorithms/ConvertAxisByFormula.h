@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CONVERTAXISBYFORMULA_H_
-#define MANTID_ALGORITHMS_CONVERTAXISBYFORMULA_H_
+#pragma once
 
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 // forward declaration
 namespace mu {
@@ -26,7 +25,7 @@ namespace Algorithms {
 /** ConvertAxisByFormula : Performs a unit conversion based on a supplied
   formula
 */
-class DLLExport ConvertAxisByFormula : public ConvertUnits {
+class MANTID_ALGORITHMS_DLL ConvertAxisByFormula : public ConvertUnits {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -60,7 +59,7 @@ private:
     double value;
     bool isGeometric;
   };
-  using Variable_ptr = boost::shared_ptr<Variable>;
+  using Variable_ptr = std::shared_ptr<Variable>;
 
   void setAxisValue(const double &value, std::vector<Variable_ptr> &variables);
   void calculateValues(mu::Parser &p, std::vector<double> &vec,
@@ -72,5 +71,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CONVERTAXISBYFORMULA_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_WORKSPACEFACTORY_H_
-#define MANTID_KERNEL_WORKSPACEFACTORY_H_
+#pragma once
 
 /* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -26,7 +25,7 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -62,11 +61,11 @@ public:
                             const bool differentSize) const;
 
   /// Create a ITableWorkspace
-  boost::shared_ptr<ITableWorkspace>
+  std::shared_ptr<ITableWorkspace>
   createTable(const std::string &className = "TableWorkspace") const;
 
   /// Create a IPeaksWorkspace
-  boost::shared_ptr<IPeaksWorkspace>
+  std::shared_ptr<IPeaksWorkspace>
   createPeaks(const std::string &className = "PeaksWorkspace") const;
 
 private:
@@ -83,8 +82,8 @@ private:
 using WorkspaceFactory = Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
 
 template <class T, class... InitArgs>
-boost::shared_ptr<T> createWorkspace(InitArgs... args) {
-  auto ws = boost::make_shared<T>();
+std::shared_ptr<T> createWorkspace(InitArgs... args) {
+  auto ws = std::make_shared<T>();
   ws->initialize(args...);
   return ws;
 }
@@ -98,5 +97,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_WORKSPACEFACTORY_H_*/

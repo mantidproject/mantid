@@ -1,61 +1,108 @@
 .. _06_formatting_plots:
 
-================
-Formatting Plots 
-================
-
-Floating and Docking a Window
-=============================
-
-By default on Windows a plot window will be floating, meaning it can be
-dragged outside the main MantidPlot work area. For Linux versions,
-windows do not float by default as they have a tendency to get lost
-behind the main application window. The state of the selected window can
-be controlled using the "Windows Menu".
-
-#. Use "Windows->Change to docked". This will dock this plot window
-   within MantidPlot.
-#. Use "Windows->Change to floating" to float it again.
-
-The Plot Toolbar
-================
-
-This toolbar is only active when a plot window is selected.
-
-.. figure:: /images/PlotToolbar.png
-   :alt: centre
-
-Adjusting the Properties of Plot Windows
+========================================
+Formatting Plots with the User Interface
 ========================================
 
-Many aspects of these graphs can be adjusted to fit how you want to
-display the data. Just double-click on the item you want to change. For
-example, the following are editable:
+.. TO UPDATE find these images in a .pptx file at https://github.com/mantidproject/documents/blob/master/Images/Images_for_Docs/formatting_plots.pptx
 
--  The graph title.
--  The legend text. You may also move the legend by selecting and
-   dragging it.
--  The axes labels.
--  The axes themselves. You can change the range, scaling and gridlines,
-   or even introduce axis breaks.
--  A curve allows you to set the line colour and styles.
--  Double-clicking the "1" in the corner allows you to remove curves or
-   add them from other graphs.
+**Plot Type Specific Help**
 
-.. figure:: /images/300px-LoglinearAxes.png
-   :alt: 300px-LoglinearAxes.png
-   :width: 300px
+* :ref:`Basic_1D_Plots`
+* :ref:`Waterfall_Plots`
+* :ref:`Colorfill_Plots`
+* :ref:`3D_Plots`
 
-Quickly changing to Log axes
-----------------------------
+.. contents:: Table of contents
+    :local:
 
-We have a fast way to change the axes between log an linear as this is
-such a common operation.
+|
+|
 
-#. Right-click within the plot.
-#. Select "Axes" to quickly switch the X and Y axes.
-#. Select "Color Bar" to quickly switch the colour bar scaling.
+Plot Toolbar
+============
 
-.. raw:: mediawiki
+.. figure:: /images/PlotToolbar.png
+   :alt: Plot Toolbar
+   :align: center
 
-   {{SlideNavigationLinks|MBC_Displaying_data_in_multiple_workspaces|Mantid_Basic_Course|MBC_Exercise_Loading_And_Displaying_Data}}
+|
+| We will cover use of the Fitting Tab later...
+|
+|
+
+Plots Toolbox
+=============
+
+.. figure:: /images/PlotsWindow.png
+   :alt: Plot Toolbox
+   :align: center
+   :width: 800px
+
+|
+|
+
+Click Menus
+===========
+
+.. figure:: /images/PlotClickMenus.png
+   :alt: Click Menus
+   :align: center
+   :width: 1500px
+
+|
+|
+
+|FigureOptionsGear.png| ptions Menu
+===================================
+
+1D plots
+--------
+
+.. figure:: /images/PlotOptions.png
+   :alt: Plot Options Axes Legend
+   :align: center
+
+
+| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
+  Then on the Legend tab there are Color and Font options.
+|
+|
+
+.. figure:: /images/PlotOptionsCurves.png
+   :alt: Plot Options Axes Legend
+   :align: center
+
+Image Plots
+-----------
+
+.. figure:: /images/PlotOptionsColorfill.png
+   :alt: Plot Options Colorfill
+   :align: center
+   :width: 750px
+
+|
+|
+
+File > Settings
+===============
+
+|
+|
+
+.. figure:: /images/PlotSettings.png
+   :alt: Plot Settings
+   :align: center
+   :width: 850px
+
+|
+|
+
+**Other Plotting Documentation**
+
+* :ref:`02_scripting_plots`
+* :ref:`plotting`
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
+
+.. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
+   :width: 150px

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FINDDEADDETECTORSTEST_H_
-#define FINDDEADDETECTORSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -134,7 +133,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     // retrieve the output workspace
     TS_ASSERT_THROWS_NOTHING(
-        work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        work_out = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("testdead_out")))
     // Check the dead detectors found agrees with what was setup above
     for (int i = 0; i < sizey; i++) {
@@ -153,7 +152,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     // retrieve the output workspace
     TS_ASSERT_THROWS_NOTHING(
-        work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        work_out = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("testdead_out")))
     // Check the dead detectors found agrees with what was setup above
     for (int i = 0; i < sizey; i++) {
@@ -169,5 +168,3 @@ public:
     AnalysisDataService::Instance().remove("testdead_out");
   }
 };
-
-#endif /*FINDDEADDETECTORSTEST_H_*/

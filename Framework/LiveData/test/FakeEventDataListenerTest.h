@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_FAKEEVENTDATALISTENERTEST_H_
-#define MANTID_LIVEDATA_FAKEEVENTDATALISTENERTEST_H_
+#pragma once
 
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -57,7 +56,7 @@ public:
     TS_ASSERT_EQUALS(buffer.use_count(), 1)
     // Check it's an event workspace
     EventWorkspace_const_sptr evbuf =
-        boost::dynamic_pointer_cast<const EventWorkspace>(buffer);
+        std::dynamic_pointer_cast<const EventWorkspace>(buffer);
     TS_ASSERT(evbuf)
     // Check the workspace has the correct dimension
     TS_ASSERT_EQUALS(evbuf->getNumberHistograms(), 2)
@@ -73,7 +72,7 @@ public:
     // Check it's a different workspace to last time
     TS_ASSERT_DIFFERS(buffer.get(), evbuf.get())
     // Check it's an event workspace
-    evbuf = boost::dynamic_pointer_cast<const EventWorkspace>(buffer);
+    evbuf = std::dynamic_pointer_cast<const EventWorkspace>(buffer);
     TS_ASSERT(evbuf)
     // Check the workspace has the correct dimension
     TS_ASSERT_EQUALS(evbuf->getNumberHistograms(), 2)
@@ -101,7 +100,5 @@ public:
   }
 
 private:
-  boost::shared_ptr<ILiveListener> fakel;
+  std::shared_ptr<ILiveListener> fakel;
 };
-
-#endif /* MANTID_LIVEDATA_FAKEEVENTDATALISTENERTEST_H_ */

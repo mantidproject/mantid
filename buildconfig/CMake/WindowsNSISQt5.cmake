@@ -20,6 +20,7 @@ set ( QT5_DIST_DLLS
     Qt5WebEngine.dll
     Qt5WebEngineCore.dll
     Qt5WebEngineWidgets.dll
+    libEGL.dll
 )
 
 set ( QT5_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt5 )

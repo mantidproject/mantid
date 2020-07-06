@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IWorkspaceProperty.h"
@@ -17,7 +16,6 @@
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -26,8 +24,6 @@
 #include "MantidKernel/UsageService.h"
 
 #include "MantidParallel/Communicator.h"
-
-#include <boost/weak_ptr.hpp>
 
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/ActiveMethod.h>
@@ -39,6 +35,8 @@
 #include <json/json.h>
 
 #include <map>
+#include <memory>
+#include <utility>
 
 // Index property handling template definitions
 #include "MantidAPI/Algorithm.tcc"
@@ -50,6 +48,10 @@ namespace API {
 namespace {
 /// Separator for workspace types in workspaceMethodOnTypes member
 const std::string WORKSPACE_TYPES_SEPARATOR = ";";
+
+/// The minimum number of seconds after execution that the algorithm should be
+/// kept alive before garbage collection
+const size_t DELAY_BEFORE_GC = 5;
 
 class WorkspacePropertyValueIs {
 public:
@@ -65,6 +67,16 @@ public:
 private:
   const std::string &m_value;
 };
+
+template <typename T> struct RunOnFinish {
+
+  RunOnFinish(T &&task) : m_onfinsh(std::move(task)) {}
+  ~RunOnFinish() { m_onfinsh(); }
+
+private:
+  T m_onfinsh;
+};
+
 } // namespace
 
 // Doxygen can't handle member specialization at the moment:
@@ -98,9 +110,10 @@ Algorithm::Algorithm()
     : PropertyManagerOwner(), m_cancel(false), m_parallelException(false),
       m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
       m_notificationCenter(nullptr), m_progressObserver(nullptr),
-      m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
+      m_executionState(ExecutionState::Uninitialized),
+      m_resultState(ResultState::NotFinished), m_isChildAlgorithm(false),
       m_recordHistoryForChild(false), m_alwaysStoreInADS(true),
-      m_runningAsync(false), m_running(false), m_rethrow(false),
+      m_runningAsync(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
       m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
@@ -114,24 +127,37 @@ Algorithm::~Algorithm() {}
 //===================================
 //=============================================================================================
 
+/// Gets the current execution state
+ExecutionState Algorithm::executionState() const { return m_executionState; }
+
+/// Sets the current execution state
+void Algorithm::setExecutionState(const ExecutionState state) {
+  m_executionState = state;
+}
+
+/// Gets the current result State
+ResultState Algorithm::resultState() const { return m_resultState; }
+
+/// Sets the result execution state
+/// if set to Success or Failed will also set the execution state to finished
+void Algorithm::setResultState(const ResultState state) {
+  if (state != ResultState::NotFinished) {
+    setExecutionState(ExecutionState::Finished);
+  }
+  m_resultState = state;
+}
+
 //---------------------------------------------------------------------------------------------
 /// Has the Algorithm already been initialized
-bool Algorithm::isInitialized() const { return m_isInitialized; }
+bool Algorithm::isInitialized() const {
+  return (m_executionState != ExecutionState::Uninitialized);
+}
 
-/// Has the Algorithm already been executed
-bool Algorithm::isExecuted() const { return m_isExecuted; }
-
-//---------------------------------------------------------------------------------------------
-/// Set the Algorithm initialized state
-void Algorithm::setInitialized() { m_isInitialized = true; }
-
-/** Set the executed flag to the specified state
-// Public in Gaudi - don't know why and will leave here unless we find a reason
-otherwise
-//     Also don't know reason for different return type and argument.
-@param state :: New executed state
-*/
-void Algorithm::setExecuted(bool state) { m_isExecuted = state; }
+/// Has the Algorithm already been executed successfully
+bool Algorithm::isExecuted() const {
+  return ((executionState() == ExecutionState::Finished) &&
+          (resultState() == ResultState::Success));
+}
 
 //---------------------------------------------------------------------------------------------
 /** To query whether algorithm is a child.
@@ -178,7 +204,18 @@ bool Algorithm::getAlwaysStoreInADS() const { return m_alwaysStoreInADS; }
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
-bool Algorithm::isRunning() const { return m_running; }
+bool Algorithm::isRunning() const {
+  return (executionState() == ExecutionState::Running);
+}
+
+/// True if the algorithm is ready for garbage collection.
+bool Algorithm::isReadyForGarbageCollection() const {
+  if ((executionState() == ExecutionState::Finished) &&
+      (Mantid::Types::Core::DateAndTime::getCurrentTime() > m_gcTime)) {
+    return true;
+  }
+  return false;
+}
 
 //---------------------------------------------------------------------------------------------
 /**  Add an observer to a notification
@@ -262,7 +299,7 @@ const std::string Algorithm::workspaceMethodInputProperty() const { return ""; }
  */
 void Algorithm::initialize() {
   // Bypass the initialization if the algorithm has already been initialized.
-  if (m_isInitialized)
+  if (isInitialized())
     return;
 
   g_log.setName(this->name());
@@ -277,7 +314,7 @@ void Algorithm::initialize() {
 
     // Indicate that this Algorithm has been initialized to prevent duplicate
     // attempts.
-    setInitialized();
+    setExecutionState(ExecutionState::Initialized);
   } catch (std::runtime_error &) {
     throw;
   }
@@ -484,18 +521,37 @@ void Algorithm::unlockWorkspaces() {
   m_writeLockedWorkspaces.clear();
 }
 
+/**
+ * Clear any internal workspace handles so that workspaces will be deleted
+ * promptly after a managed algorithm finishes
+ */
+void Algorithm::clearWorkspaceCaches() {
+  m_groupWorkspaces.clear();
+  m_inputWorkspaceHistories.clear();
+  m_inputWorkspaceProps.clear();
+  m_outputWorkspaceProps.clear();
+  m_pureOutputWorkspaceProps.clear();
+  m_unrolledInputWorkspaces.clear();
+}
+
 //---------------------------------------------------------------------------------------------
 /** Invoced internally in execute()
  */
 
 bool Algorithm::executeInternal() {
   Timer timer;
+  bool algIsExecuted = false;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
     auto *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
+
+  // Register clean up tasks that should happen regardless of the route
+  // out of the algorithm. These tasks will get run after this method
+  // finishes.
+  RunOnFinish onFinish([this]() { this->clearWorkspaceCaches(); });
 
   notificationCenter().postNotification(new StartedNotification(this));
   Mantid::Types::Core::DateAndTime startTime;
@@ -548,7 +604,7 @@ bool Algorithm::executeInternal() {
                         << ex.what() << "\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
-    m_running = false;
+    setResultState(ResultState::Failed);
     if (m_isChildAlgorithm || m_runningAsync || m_rethrow) {
       m_runningAsync = false;
       throw;
@@ -601,7 +657,7 @@ bool Algorithm::executeInternal() {
     // populate history record before execution so we can record child
     // algorithms in it
     AlgorithmHistory algHist;
-    m_history = boost::make_shared<AlgorithmHistory>(algHist);
+    m_history = std::make_shared<AlgorithmHistory>(algHist);
   }
 
   // ----- Process groups -------------
@@ -618,10 +674,7 @@ bool Algorithm::executeInternal() {
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
-      setExecuted(false);
-      if (!isChild()) {
-        m_running = true;
-      }
+      setExecutionState(ExecutionState::Running);
 
       startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
       // Call the concrete algorithm's exec method
@@ -646,7 +699,9 @@ bool Algorithm::executeInternal() {
       if (m_alwaysStoreInADS)
         this->store();
 
-      setExecuted(true);
+      // just cache the value internally, it is set at the very end of this
+      // method
+      algIsExecuted = true;
 
       // Log that execution has completed.
       getLogger().debug(
@@ -659,6 +714,11 @@ bool Algorithm::executeInternal() {
           " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
+      m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+          (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+      setResultState(ResultState::Failed);
+      notificationCenter().postNotification(
+          new ErrorNotification(this, ex.what()));
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
@@ -667,10 +727,13 @@ bool Algorithm::executeInternal() {
             << "Error in execution of algorithm " << this->name() << '\n'
             << ex.what() << '\n';
       }
+
+    } catch (std::logic_error &ex) {
+      m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+          (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
-      m_running = false;
-    } catch (std::logic_error &ex) {
+      setResultState(ResultState::Failed);
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
@@ -679,54 +742,62 @@ bool Algorithm::executeInternal() {
             << "Logic Error in execution of algorithm " << this->name() << '\n'
             << ex.what() << '\n';
       }
-      notificationCenter().postNotification(
-          new ErrorNotification(this, ex.what()));
-      m_running = false;
     }
   } catch (CancelException &ex) {
     m_runningAsync = false;
-    m_running = false;
     getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
+
     throw;
   }
   // Gaudi also specifically catches GaudiException & std:exception.
   catch (std::exception &ex) {
-    setExecuted(false);
     m_runningAsync = false;
-    m_running = false;
-
-    notificationCenter().postNotification(
-        new ErrorNotification(this, ex.what()));
     getLogger().error() << "Error in execution of algorithm " << this->name()
                         << ":\n"
                         << ex.what() << "\n";
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
+    notificationCenter().postNotification(
+        new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
+
     throw;
   }
 
   catch (...) {
-    // Execution failed
-    setExecuted(false);
+    // Execution failed with an unknown exception object
     m_runningAsync = false;
-    m_running = false;
 
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
     notificationCenter().postNotification(
         new ErrorNotification(this, "UNKNOWN Exception is caught in exec()"));
     getLogger().error() << this->name()
                         << ": UNKNOWN Exception is caught in exec()\n";
     this->unlockWorkspaces();
+
     throw;
   }
 
-  // Unlock the locked workspaces
   this->unlockWorkspaces();
 
+  m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+      (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+  if (algIsExecuted) {
+    setResultState(ResultState::Success);
+  }
+  // Only gets to here if algorithm ended normally
   notificationCenter().postNotification(
       new FinishedNotification(this, isExecuted()));
-  // Only gets to here if algorithm ended normally
+
   return isExecuted();
 }
 
@@ -765,7 +836,7 @@ void Algorithm::store() {
       // check if the workspace is a group, if so remember where it is and add
       // it later
       auto group =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace());
+          std::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace());
       if (!group) {
         try {
           wsProp->store();
@@ -828,7 +899,7 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
  * Can also be used manually for algorithms created otherwise. This allows
  * running algorithms that are not declared into the factory as child
  * algorithms. */
-void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
+void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg,
                                       const double startProgress,
                                       const double endProgress,
                                       const bool enableLogging) {
@@ -868,7 +939,7 @@ void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
   // It will be used this to pass on cancellation requests
   // It must be protected by a critical block so that Child Algorithms can run
   // in parallel safely.
-  boost::weak_ptr<IAlgorithm> weakPtr(alg);
+  std::weak_ptr<IAlgorithm> weakPtr(alg);
   PARALLEL_CRITICAL(Algorithm_StoreWeakPtr) {
     m_ChildAlgorithms.emplace_back(weakPtr);
   }
@@ -978,21 +1049,6 @@ IAlgorithm_sptr Algorithm::fromJson(const Json::Value &serialized) {
   return alg;
 }
 
-//-------------------------------------------------------------------------
-/** Initialize using proxy algorithm.
- * Call the main initialize method and then copy in the property values.
- * @param proxy :: Initialising proxy algorithm  */
-void Algorithm::initializeFromProxy(const AlgorithmProxy &proxy) {
-  initialize();
-  copyPropertiesFrom(proxy);
-  m_algorithmID = proxy.getAlgorithmID();
-  setLogging(proxy.isLogging());
-  setLoggingOffset(proxy.getLoggingOffset());
-  setAlgStartupLogging(proxy.getAlgStartupLogging());
-  setChild(proxy.isChild());
-  setAlwaysStoreInADS(proxy.getAlwaysStoreInADS());
-}
-
 /** Fills History, Algorithm History and Algorithm Parameters
  */
 void Algorithm::fillHistory() {
@@ -1058,9 +1114,9 @@ void Algorithm::linkHistoryWithLastChild() {
  *  @param parentHist :: the parent algorithm history object the history in.
  */
 void Algorithm::trackAlgorithmHistory(
-    boost::shared_ptr<AlgorithmHistory> parentHist) {
+    std::shared_ptr<AlgorithmHistory> parentHist) {
   enableHistoryRecordingForChild(true);
-  m_parentHistory = parentHist;
+  m_parentHistory = std::move(parentHist);
 }
 
 /** Check if we are tracking history for this algorithm
@@ -1173,7 +1229,7 @@ bool Algorithm::checkGroups() {
     auto prop = dynamic_cast<Property *>(inputWorkspaceProp);
     auto wsGroupProp = dynamic_cast<WorkspaceProperty<WorkspaceGroup> *>(prop);
     auto ws = inputWorkspaceProp->getWorkspace();
-    auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
 
     // Workspace groups are NOT returned by IWP->getWorkspace() most of the
     // time because WorkspaceProperty is templated by <MatrixWorkspace> and
@@ -1275,16 +1331,14 @@ bool Algorithm::doCallProcessGroups(
     // but we also need to update flags in the parent algorithm and
     // send an ErrorNotification (because the child isn't registered with the
     // AlgorithmMonitor).
-    setExecuted(false);
+    setResultState(ResultState::Failed);
     m_runningAsync = false;
-    m_running = false;
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     throw;
   } catch (...) {
-    setExecuted(false);
+    setResultState(ResultState::Failed);
     m_runningAsync = false;
-    m_running = false;
     notificationCenter().postNotification(new ErrorNotification(
         this, "UNKNOWN Exception caught from processGroups"));
     throw;
@@ -1297,8 +1351,8 @@ bool Algorithm::doCallProcessGroups(
     // Get how long this algorithm took to run
     const float duration = timer.elapsed();
 
-    m_history = boost::make_shared<AlgorithmHistory>(this, startTime, duration,
-                                                     ++g_execCount);
+    m_history = std::make_shared<AlgorithmHistory>(this, startTime, duration,
+                                                   ++g_execCount);
     if (trackingHistory() && m_history) {
       // find any further outputs created by the execution
       WorkspaceVector outputWorkspaces;
@@ -1313,9 +1367,11 @@ bool Algorithm::doCallProcessGroups(
 
     // Log that execution has completed.
     reportCompleted(duration, true /* this is for group processing*/);
+    setResultState(ResultState::Success);
+  } else {
+    setResultState(ResultState::Failed);
   }
 
-  setExecuted(completed);
   notificationCenter().postNotification(
       new FinishedNotification(this, isExecuted()));
 
@@ -1341,7 +1397,7 @@ void Algorithm::fillHistory(
     };
 
     for (auto &outWS : outputWorkspaces) {
-      auto outWSGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+      auto outWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
       // Copy the history from the cached input workspaces to the output ones
       for (const auto &inputWS : m_inputWorkspaceHistories) {
         if (outWSGroup) {
@@ -1389,7 +1445,7 @@ bool Algorithm::processGroups() {
   for (auto &pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
     auto *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
     if (prop && !prop->value().empty()) {
-      auto outWSGrp = boost::make_shared<WorkspaceGroup>();
+      auto outWSGrp = std::make_shared<WorkspaceGroup>();
       outGroups.emplace_back(outWSGrp);
       // Put the GROUP in the ADS
       AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp);
@@ -1552,6 +1608,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   const auto &props = this->getProperties();
   for (const auto &prop : props) {
     if (prop) {
+
       auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
       if (!wsProp)
@@ -1763,7 +1820,7 @@ void Algorithm::reportCompleted(const double &duration,
     getLogger().debug() << name() << " finished with isChild = " << isChild()
                         << '\n';
   }
-  m_running = false;
+  setExecutionState(ExecutionState::Finished);
 }
 
 /** Registers the usage of the algorithm with the UsageService

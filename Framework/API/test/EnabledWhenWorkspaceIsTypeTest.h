@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ENABLEDWHENWORKSPACEISTYPETEST_H_
-#define MANTID_API_ENABLEDWHENWORKSPACEISTYPETEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -38,10 +37,9 @@ public:
   };
 
   void test_enable_disable() {
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
-    boost::shared_ptr<WorkspaceTesterSubClass> ws2 =
-        boost::make_shared<WorkspaceTesterSubClass>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTesterSubClass> ws2 =
+        std::make_shared<WorkspaceTesterSubClass>();
     AnalysisDataService::Instance().addOrReplace("tester", ws1);
     AnalysisDataService::Instance().addOrReplace("testersub", ws2);
 
@@ -90,5 +88,3 @@ public:
                prop2->getSettings()->isEnabled(&alg));
   }
 };
-
-#endif /* MANTID_API_ENABLEDWHENWORKSPACEISTYPETEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAMPLEENVIRONMENTSPECPARSER_H_
-#define MANTID_DATAHANDLING_SAMPLEENVIRONMENTSPECPARSER_H_
+#pragma once
 
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/SampleEnvironmentSpec.h"
@@ -47,19 +46,22 @@ private:
   void parseMaterials(Poco::XML::Element *element);
   void parseAndAddComponents(SampleEnvironmentSpec *spec,
                              Poco::XML::Element *element) const;
+  void loadFullSpecification(SampleEnvironmentSpec *spec,
+                             Poco::XML::Element *element);
   void parseAndAddContainers(SampleEnvironmentSpec *spec,
                              Poco::XML::Element *element) const;
   Geometry::Container_const_sptr
   parseContainer(Poco::XML::Element *element) const;
-  boost::shared_ptr<Geometry::IObject>
+  std::shared_ptr<Geometry::IObject>
   parseComponent(Poco::XML::Element *element) const;
-  boost::shared_ptr<Geometry::MeshObject>
-  loadMeshFromSTL(Poco::XML::Element *stlfile) const;
+  std::shared_ptr<Geometry::MeshObject>
+  loadMeshFromSTL(Poco::XML::Element *stlFileElement) const;
   void LoadOptionalDoubleFromXML(Poco::XML::Element *componentElement,
-                                 std::string elementName,
+                                 const std::string &elementName,
                                  double &targetVariable) const;
   std::vector<double>
-  parseTranslationVector(std::string translationVectorStr) const;
+  parseTranslationVector(const std::string &translationVectorStr) const;
+  std::string findFile(std::string filename) const;
   // Members
   MaterialsIndex m_materials;
   std::string m_filepath;
@@ -67,5 +69,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_SAMPLEENVIRONMENTSPECPARSER_H_ */

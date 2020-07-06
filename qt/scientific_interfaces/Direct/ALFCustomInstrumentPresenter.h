@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALFCUSTOMINSTRUMENTPRESENTER_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALFCUSTOMINSTRUMENTPRESENTER_H_
+#pragma once
 
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
@@ -26,35 +25,30 @@ class MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter
 
 public:
   ALFCustomInstrumentPresenter(
-      ALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
-      MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane);
+      IALFCustomInstrumentView *view, IALFCustomInstrumentModel *model,
+      MantidWidgets::IPlotFitAnalysisPanePresenter *analysisPane);
   ~ALFCustomInstrumentPresenter() {
     delete m_extractSingleTubeObserver;
     delete m_averageTubeObserver;
-    delete m_analysisPane;
-    delete m_model;
+    m_analysisPane->destructor();
   };
 
   void addInstrument() override;
 
-protected:
   void loadSideEffects() override;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
-
-private:
   void setUpInstrumentAnalysisSplitter() override;
 
   void extractSingleTube();
   void averageTube();
 
-  ALFCustomInstrumentView *m_view;
-  ALFCustomInstrumentModel *m_model;
-  MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPane;
+private:
+  IALFCustomInstrumentView *m_view;
+  IALFCustomInstrumentModel *m_model;
+  MantidWidgets::IPlotFitAnalysisPanePresenter *m_analysisPane;
   VoidObserver *m_extractSingleTubeObserver;
   VoidObserver *m_averageTubeObserver;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_ALFCUSTOMINSTRUMENTPRESENTER_H_ */

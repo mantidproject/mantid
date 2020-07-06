@@ -1,14 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_
+#pragma once
 
 #include "ISaveView.h"
 #include "ui_SaveWidget.h"
+#include <QCheckBox>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QRadioButton>
 #include <memory>
 
 namespace MantidQt {
@@ -98,9 +101,18 @@ public slots:
   void onSavePathChanged();
   void onAutosaveChanged(int state);
 
+private slots:
+  void onSettingsChanged();
+
 private:
   /// Initialize the interface
   void initLayout();
+
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QComboBox &edit);
+  void connectSettingsChange(QCheckBox &edit);
+  void connectSettingsChange(QRadioButton &edit);
+  void connectSaveSettingsWidgets() override;
 
   /// The widget
   Ui::SaveWidget m_ui;
@@ -114,5 +126,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_ */

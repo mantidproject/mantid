@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CLUSTERREGISTER_H_
-#define MANTID_CRYSTAL_CLUSTERREGISTER_H_
+#pragma once
 
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -22,16 +22,16 @@ class ImplClusterRegister;
 /** ClusterRegister : A fly-weight ICluster regeister. Handles the logic of
   merging clusters.
 */
-class DLLExport ClusterRegister {
+class MANTID_CRYSTAL_DLL ClusterRegister {
 public:
   /// Cluster map
-  using MapCluster = std::map<size_t, boost::shared_ptr<ICluster>>;
+  using MapCluster = std::map<size_t, std::shared_ptr<ICluster>>;
 
   /// Constructor
   ClusterRegister();
 
   /// Add clusters
-  void add(const size_t &label, const boost::shared_ptr<ICluster> &cluster);
+  void add(const size_t &label, const std::shared_ptr<ICluster> &cluster);
 
   /// Merge clusters on the basis of known pairs of disjoint elements
   void merge(const DisjointElement &a, const DisjointElement &b) const;
@@ -52,5 +52,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_CLUSTERREGISTER_H_ */

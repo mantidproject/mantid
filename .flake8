@@ -25,5 +25,9 @@ exclude =
     Testing/SystemTests/scripts,
     Testing/SystemTests/tests/analysis/reference,
     Testing/Tools,
+
+    scripts/ErrorReporter/ui_errorreport.py,
+    scripts/Interface/ui/dataprocessorinterface,
+
 max-complexity = 20
 max-line-length = 140

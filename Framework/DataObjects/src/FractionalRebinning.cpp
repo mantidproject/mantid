@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/FractionalRebinning.h"
 
@@ -495,8 +495,9 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
  * @param inputWS The input workspace used for testing distribution state
  * @param progress An optional progress object. Reported to once per bin.
  */
-void normaliseOutput(MatrixWorkspace_sptr outputWS,
-                     MatrixWorkspace_const_sptr inputWS, Progress *progress) {
+void normaliseOutput(const MatrixWorkspace_sptr &outputWS,
+                     const MatrixWorkspace_const_sptr &inputWS,
+                     Progress *progress) {
   const bool removeBinWidth(inputWS->isDistribution() &&
                             outputWS->id() != "RebinnedOutput");
   for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
@@ -516,6 +517,9 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
     }
   }
   outputWS->setDistribution(inputWS->isDistribution());
+  auto rebinnedWS = std::dynamic_pointer_cast<RebinnedOutput>(outputWS);
+  if (rebinnedWS)
+    rebinnedWS->setSqrdErrors(false);
 }
 
 /**
@@ -608,7 +612,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              RebinnedOutput &outputWS,
                              const std::vector<double> &verticalAxis,
                              const RebinnedOutput_const_sptr &inputRB) {
-  const auto &inX = inputWS->x(i);
+  const auto &inX = inputWS->binEdges(i);
   const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
   double signal = inY[j];
@@ -668,7 +672,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     }
   }
 
-  const double variance = error * error;
+  auto sqrdError = (inputRB && inputRB->hasSqrdErrors());
+  const double variance = (sqrdError ? error : error * error);
   for (const auto &ai : areaInfos) {
     if (ai.weight == 0.) {
       continue;
@@ -687,12 +692,14 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
 /**
  * Called at the completion of the fractional rebinning loop
- * to the set the finalize flag in the output workspace.
+ * to the set the finalize and hasSqrdError flags in the output workspace.
  * @param outputWS Reference to the rebinned output workspace
  */
 void finalizeFractionalRebin(RebinnedOutput &outputWS) {
   // rebinToFractionalOutput() leaves the data in an unfinalized state
+  // with squared errors
   outputWS.setFinalized(false);
+  outputWS.setSqrdErrors(true);
 }
 
 } // namespace FractionalRebinning

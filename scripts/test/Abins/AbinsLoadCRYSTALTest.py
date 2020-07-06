@@ -1,18 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
-import AbinsModules
+import abins.test_helpers
+import abins.input
+from abins.input import CRYSTALLoader
 
-
-class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
+class AbinsLoadCRYSTALTest(unittest.TestCase, abins.input.Tester):
 
     def tearDown(self):
-        AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadCRYSTAL"])
+        abins.test_helpers.remove_output_files(list_of_names=["LoadCRYSTAL"])
 
     # *************************** USE CASES *********************************************
     # ===================================================================================
@@ -38,18 +38,18 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTe
     _phonon_dispersion_v2 = "MgO-222-DISP_LoadCRYSTAL"
 
     def test_gamma_crystal(self):
-        self.check(name=self._gamma_crystal, loader=AbinsModules.LoadCRYSTAL)
-        self.check(name=self._set_crystal, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._gamma_crystal, loader=CRYSTALLoader)
+        self.check(name=self._set_crystal, loader=CRYSTALLoader)
 
     def test_molecule(self):
-        self.check(name=self._molecule, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._molecule, loader=CRYSTALLoader)
 
     def test_molecule17(self):
-        self.check(name=self._molecule17, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._molecule17, loader=CRYSTALLoader)
 
     def test_phonon_dispersion_crystal(self):
-        self.check(name=self._phonon_dispersion_v1, loader=AbinsModules.LoadCRYSTAL)
-        self.check(name=self._phonon_dispersion_v2, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._phonon_dispersion_v1, loader=CRYSTALLoader)
+        self.check(name=self._phonon_dispersion_v2, loader=CRYSTALLoader)
 
 
 if __name__ == '__main__':

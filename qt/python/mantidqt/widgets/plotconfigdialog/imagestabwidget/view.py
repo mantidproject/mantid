@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 import numpy as np
 from matplotlib.colors import LogNorm, Normalize
@@ -42,12 +40,18 @@ class ImagesTabWidgetView(QWidget):
         self._populate_interpolation_combo_box()
         self._populate_scale_combo_box()
 
+        self.set_min_max_ranges(self.get_scale())
+
+        self.max_min_value_warning.setVisible(False)
+
+    def set_min_max_ranges(self, scale):
         # Set maximum and minimum for the min/max spin boxes
         for bound in ['min', 'max']:
             spin_box = getattr(self, '%s_value_spin_box' % bound)
-            spin_box.setRange(0, np.finfo(np.float32).max)
-
-        self.max_min_value_warning.setVisible(False)
+            if scale == "Linear":
+                spin_box.setRange(np.finfo(np.float32).min, np.finfo(np.float32).max)
+            else:
+                spin_box.setRange(0.0001, np.finfo(np.float32).max)
 
     def _populate_colormap_combo_box(self):
         for cmap_name in get_colormap_names():
@@ -111,7 +115,11 @@ class ImagesTabWidgetView(QWidget):
         return self.interpolation_combo_box.currentText()
 
     def set_interpolation(self, interpolation):
-        self.interpolation_combo_box.setCurrentText(interpolation)
+        index = self.interpolation_combo_box.findText(interpolation, flags=Qt.MatchFixedString)
+        if index >= 0:  # -1 indicates the value was not found.
+            self.interpolation_combo_box.setCurrentIndex(index)
+        else:
+            self.interpolation_combo_box.setCurrentIndex(0)
 
     def get_scale(self):
         return self.scale_combo_box.currentText()

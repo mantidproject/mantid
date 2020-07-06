@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //=============================
 // MantidApplciation definitions
@@ -39,8 +39,8 @@ MantidApplication::MantidApplication(int &argc, char **argv)
 }
 
 void MantidApplication::errorHandling(bool continueWork, int share,
-                                      QString name, QString email,
-                                      QString textbox) {
+                                      const QString &name, const QString &email,
+                                      const QString &textbox) {
   if (share == 0) {
     Mantid::Kernel::ErrorReporter errorReporter(
         "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",

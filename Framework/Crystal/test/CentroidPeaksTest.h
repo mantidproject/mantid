@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CentroidPeaksTEST_H_
-#define MANTID_CRYSTAL_CentroidPeaksTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
@@ -53,7 +52,7 @@ public:
     std::mt19937 rng(1);
     std::uniform_real_distribution<double> flat(-1.0, 1.0);
 
-    boost::shared_ptr<EventWorkspace> retVal = create<EventWorkspace>(
+    std::shared_ptr<EventWorkspace> retVal = create<EventWorkspace>(
         numPixels, BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // --------- Load the instrument -----------
@@ -111,7 +110,7 @@ public:
     int numEventsPer = 100;
     MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
     EventWorkspace_sptr in_ws =
-        boost::dynamic_pointer_cast<EventWorkspace>(inputW);
+        std::dynamic_pointer_cast<EventWorkspace>(inputW);
     inputW->getAxis(0)->setUnit("TOF");
     // Register the workspace in the data service
 
@@ -131,7 +130,7 @@ public:
 
     inputW->mutableRun().addProperty("run_number", 3007);
 
-    boost::shared_ptr<Mantid::API::Algorithm> algu =
+    std::shared_ptr<Mantid::API::Algorithm> algu =
         Mantid::API::AlgorithmFactory::Instance().create(
             std::string("LoadIsawUB"), 1);
     algu->initialize();
@@ -140,7 +139,7 @@ public:
     algu->execute();
 
     if (ev) {
-      boost::shared_ptr<Mantid::API::Algorithm> algb =
+      std::shared_ptr<Mantid::API::Algorithm> algb =
           Mantid::API::AlgorithmFactory::Instance().create(std::string("Rebin"),
                                                            1);
       algb->initialize();
@@ -190,5 +189,3 @@ public:
     do_test_MINITOPAZ(false);
   }
 };
-
-#endif /* MANTID_CRYSTAL_CentroidPeaksTEST_H_ */

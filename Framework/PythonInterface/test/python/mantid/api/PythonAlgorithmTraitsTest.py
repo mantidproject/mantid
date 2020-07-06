@@ -1,21 +1,20 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """Defines tests for the traits within Python algorithms
 such as name, version etc.
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 
-from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm,
+from mantid.api import (PythonAlgorithm, Algorithm, IAlgorithm,
                         AlgorithmManager, AlgorithmFactory)
 
 ########################### Test classes #####################################
+
 
 class TestPyAlgDefaultAttrs(PythonAlgorithm):
     def PyInit(self):
@@ -23,6 +22,7 @@ class TestPyAlgDefaultAttrs(PythonAlgorithm):
 
     def PyExec(self):
         pass
+
 
 class TestPyAlgOverriddenAttrs(PythonAlgorithm):
 
@@ -44,6 +44,7 @@ class TestPyAlgOverriddenAttrs(PythonAlgorithm):
     def PyExec(self):
         pass
 
+
 class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
 
     def isRunning(self):
@@ -54,6 +55,7 @@ class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
 
     def PyExec(self):
         pass
+
 
 class CancellableAlg(PythonAlgorithm):
 
@@ -73,6 +75,7 @@ class CancellableAlg(PythonAlgorithm):
 
 ###############################################################################
 
+
 class PythonAlgorithmTest(unittest.TestCase):
 
     _registered = None
@@ -85,9 +88,8 @@ class PythonAlgorithmTest(unittest.TestCase):
             AlgorithmFactory.subscribe(TestPyAlgIsRunningReturnsNonBool)
             AlgorithmFactory.subscribe(CancellableAlg)
 
-    def test_managed_alg_is_descendent_of_AlgorithmProxy(self):
+    def test_managed_alg_is_descendent_of_IAlgorithm(self):
         alg = AlgorithmManager.create("TestPyAlgDefaultAttrs")
-        self.assertTrue(isinstance(alg, AlgorithmProxy))
         self.assertTrue(isinstance(alg, IAlgorithm))
 
     def test_unmanaged_alg_is_descendent_of_PythonAlgorithm(self):

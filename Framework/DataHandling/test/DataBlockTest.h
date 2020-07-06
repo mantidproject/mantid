@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_DATABLOCKTEST_H_
-#define MANTID_DATAHANDLING_DATABLOCKTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
 
+using Mantid::specnum_t;
 using Mantid::DataHandling::DataBlock;
 
 class DataBlockTest : public CxxTest::TestSuite {
@@ -23,8 +23,8 @@ public:
 
   void test_that_data_block_produces_generator_which_generates_range() {
     // Arrange
-    int64_t min = 2;
-    int64_t max = 8;
+    specnum_t min = 2;
+    specnum_t max = 8;
     DataBlock dataBlock;
     // Act
     dataBlock.setMinSpectrumID(min);
@@ -32,7 +32,7 @@ public:
     auto generator = dataBlock.getGenerator();
 
     // Assert
-    std::vector<int64_t> expected = {2, 3, 4, 5, 6, 7, 8};
+    std::vector<specnum_t> expected = {2, 3, 4, 5, 6, 7, 8};
     size_t index = 0;
     for (; !generator->isDone(); generator->next(), ++index) {
       TSM_ASSERT_EQUALS("Should take elements out of the DataBlock interval",
@@ -67,5 +67,3 @@ public:
     TSM_ASSERT("Should not be equal", !(block1 == block2));
   }
 };
-
-#endif /* MANTID_DATAHANDLING_DATABLOCKTEST_H_ */

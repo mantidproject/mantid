@@ -1,25 +1,20 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """ Main view for the ISIS SANS reduction interface.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 
-from qtpy import PYQT4
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
 from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
-from six import with_metaclass
-
 from mantid.kernel import (Logger, UsageService, FeatureType)
-from mantid.py3compat import Enum
+from enum import Enum
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
@@ -37,16 +32,6 @@ from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 from ui.sans_isis.work_handler import WorkHandler
-
-if PYQT4:
-    IN_MANTIDPLOT = False
-    try:
-        from pymantidplot import proxies
-
-        IN_MANTIDPLOT = True
-    except ImportError:
-        # We are not in MantidPlot e.g. testing
-        pass
 
 Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
@@ -68,7 +53,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     MULTI_PERIOD_COLUMNS = ["SSP", "STP", "SDP", "CSP", "CTP", "CDP"]
 
-    class RunTabListener(with_metaclass(ABCMeta, object)):
+    class RunTabListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to in this View
         """
@@ -531,11 +516,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     @staticmethod
     def _on_help_button_clicked():
-        if PYQT4:
-            proxies.showCustomInterfaceHelp('ISIS SANS v2')
-        else:
-            InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
-                                            'interfaces/ISIS%20SANS%20v2.html')
+        InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
+                                        'interfaces/isis_sans/ISIS%20SANS.html')
 
     def _on_output_mode_clicked(self):
         """This method is called when an output mode is clicked on the gui"""
@@ -768,7 +750,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.q_1d_max_line_edit.setEnabled(not is_variable)
         self.q_1d_step_line_edit.setEnabled(not is_variable)
         if is_variable:
-            comma_separated_floats_regex_string = "^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
+            comma_separated_floats_regex_string = r"^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
             reg_ex = QRegExp(comma_separated_floats_regex_string)
             validator = QRegExpValidator(reg_ex)
             self.q_1d_min_line_edit.setValidator(validator)

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_INTEGRATEPEAKSHYBRIDTEST_H_
-#define MANTID_CRYSTAL_INTEGRATEPEAKSHYBRIDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -90,7 +89,7 @@ public:
   }
 
   void test_peaks_workspace_mandatory() {
-    IMDEventWorkspace_sptr mdws = boost::static_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr mdws = std::static_pointer_cast<IMDEventWorkspace>(
         MDEventsTestHelper::makeMDEW<3>(10, 0, 10));
 
     IntegratePeaksHybrid alg;
@@ -121,7 +120,7 @@ public:
   void test_outer_radius_mandatory() {
     auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
-    IMDEventWorkspace_sptr mdws = boost::static_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr mdws = std::static_pointer_cast<IMDEventWorkspace>(
         MDEventsTestHelper::makeMDEW<3>(10, 0, 10));
 
     IntegratePeaksHybrid alg;
@@ -137,7 +136,7 @@ public:
 
   void test_throw_if_special_coordinates_unknown() {
     auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
-    IMDEventWorkspace_sptr mdws = boost::static_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr mdws = std::static_pointer_cast<IMDEventWorkspace>(
         MDEventsTestHelper::makeMDEW<3>(10, 0, 10));
 
     IntegratePeaksHybrid alg;
@@ -173,7 +172,7 @@ public:
                       outClustersWorkspaces->size());
 
     IMDHistoWorkspace_sptr outClustersWS =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(
             outClustersWorkspaces->getItem(0));
 
     // ------- Check the results.
@@ -260,11 +259,11 @@ public:
                       outClustersWorkspaces->size());
 
     IMDHistoWorkspace_sptr outClustersWS1 =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(
             outClustersWorkspaces->getItem(0));
 
     IMDHistoWorkspace_sptr outClustersWS2 =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(
             outClustersWorkspaces->getItem(1));
 
     // ------- Check the results.
@@ -337,11 +336,11 @@ public:
                       outClustersWorkspaces->size());
 
     IMDHistoWorkspace_sptr outClustersWS1 =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(
             outClustersWorkspaces->getItem(0));
 
     IMDHistoWorkspace_sptr outClustersWS2 =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(
             outClustersWorkspaces->getItem(1));
 
     // ------- Check the results.
@@ -424,5 +423,3 @@ public:
     execute_integration(m_inputWorkspaces, m_backgroundOuterRadius, m_nBins);
   }
 };
-
-#endif /* MANTID_CRYSTAL_INTEGRATEPEAKSHYBRIDTEST_H_ */

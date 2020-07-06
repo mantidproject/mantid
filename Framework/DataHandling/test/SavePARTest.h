@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVEPARTEST_H_
-#define SAVEPARTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -93,7 +92,7 @@ public:
     API::Workspace_sptr sample =
         API::AnalysisDataService::Instance().retrieve(TestOutputParTableWSName);
     DataObjects::TableWorkspace_sptr spTW =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(sample);
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(sample);
     TSM_ASSERT(
         "should be able to retrieve sample workspace from the dataservice",
         spTW);
@@ -176,5 +175,3 @@ private:
     return inputWS;
   }
 };
-
-#endif /*SAVEPARTEST_H_*/

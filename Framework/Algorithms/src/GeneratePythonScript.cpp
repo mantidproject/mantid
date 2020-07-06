@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GeneratePythonScript.h"
 #include "MantidAPI/AlgorithmHistory.h"
@@ -68,7 +68,7 @@ void GeneratePythonScript::init() {
                                         "Specify None"};
   declareProperty(
       "SpecifyAlgorithmVersions", "Specify Old",
-      boost::make_shared<StringListValidator>(saveVersions),
+      std::make_shared<StringListValidator>(saveVersions),
       "When to specify which algorithm version was used by Mantid.");
 
   declareProperty("IgnoreTheseAlgs", std::vector<std::string>(),

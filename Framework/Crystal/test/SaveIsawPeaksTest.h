@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SAVEISAWPEAKSTEST_H_
-#define MANTID_CRYSTAL_SAVEISAWPEAKSTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
@@ -122,7 +121,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("peaks")));
     TS_ASSERT(ws)
     if (!ws)
@@ -145,7 +144,7 @@ public:
 
     PeaksWorkspace_sptr ws2;
     TS_ASSERT_THROWS_NOTHING(
-        ws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws2 = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("peaks2")))
     TS_ASSERT(ws2)
     if (!ws2)
@@ -174,5 +173,3 @@ public:
     TS_ASSERT_DELTA(p.getDSpacing(), p2.getDSpacing(), 0.001)
   }
 };
-
-#endif /* MANTID_CRYSTAL_SAVEISAWPEAKSTEST_H_ */

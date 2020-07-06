@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from itertools import ifilterfalse
@@ -45,6 +45,7 @@ _translations = {
     'Doucet, Mathieu'         : 'Doucet, Mathieu',
     'Nick Draper'             : 'Draper, Nick',
     'NickDraper'              : 'Draper, Nick',
+    'Nicholas Draper'         : 'Draper, Nick',
     'Ronald Fowler'           : 'Fowler, Ronald',
     'Martyn Gigg'             : 'Gigg, Martyn A.',
     'Samuel Jackson'          : 'Jackson, Samuel',
@@ -222,16 +223,23 @@ _translations = {
     'Wu'                      : 'Wu, Hank',
     'PhilColebrooke'          : 'Colebrooke, Phil',
     'Phil'                    : 'Colebrooke, Phil',
+    'Phil Colebrooke'         : 'Colebrooke, Phil',
     'DanielMurphy22'          : 'Murphy, Daniel',
     'RichardWaiteSTFC'        : 'Waite, Richard',
     'Richard Waite'           : 'Waite, Richard',
     'Ciara Nightingale'       : 'Nightingale, Ciara',
     'ciaranightingale'        : 'Nightingale, Ciara',
     'Danny Hindson'           : 'Hindson, Danny',
+    'DannyHindson'            : 'Hindson, Dannny',
     'Fahima-Islam'            : 'Islam, Fahima',
     'giovannidisiena'         : 'Di Siena, Giovanni',
     'Giovanni Di Siena'       : 'Di Siena, Giovanni',
-    'Takudzwa Makoni'         : 'Makoni, Takudzwa'
+    'Takudzwa Makoni'         : 'Makoni, Takudzwa',
+    'Daniel Murphy'           : 'Murphy, Daniel',
+    'William F Godoy'         : 'Godoy, William F',
+    'Islam, Fahima F'         : 'Islam, Fahima',
+    'Mathieu Tillet'          : 'Tillet, Mathieu',
+    'StephenSmith'            : 'Smith, Stephen'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -310,9 +318,9 @@ def _clean_up_author_list(author_list):
     untranslated = set(ifilterfalse(_translations.keys().__contains__, result))
     if untranslated:
         raise Exception(
-            'No translation exists for the following Git author(s): \n' +
-            '\n'.join(untranslated) + '\n' +
-            'Please edit the translations table accordingly.')
+            'No translation exists for the following Git author(s): \n'
+            + '\n'.join(untranslated) + '\n'
+            + 'Please edit the translations table accordingly.')
 
     # Translate all remaining names.
     result = [_translations[a] for a in result]

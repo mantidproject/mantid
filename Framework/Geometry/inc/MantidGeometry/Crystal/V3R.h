@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_V3R_H_
-#define MANTID_GEOMETRY_V3R_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 
@@ -136,5 +135,3 @@ V3R operator*(const Kernel::Matrix<T> &lhs, const V3R &rhs) {
 }
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_V3R_H_ */

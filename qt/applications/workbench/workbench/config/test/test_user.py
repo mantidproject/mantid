@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import
-
 import os
 from unittest import TestCase, main
 
@@ -42,7 +40,11 @@ class ConfigUserManager(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
-            os.remove(self.cfg.filename)
+            filename = self.cfg.filename
+            # Force QSettings destructor to run before
+            # deleting the file as it will just recreate it
+            del self.cfg
+            os.remove(filename)
         except:
             # File does not exist so it has been deleted already
             # This seems to happen when the whole module is ran in PyCharm
@@ -67,8 +69,11 @@ class ConfigUserTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            os.remove(cls.cfg.filename)
+            filename = cls.cfg.filename
+            # Force QSettings destructor to run before
+            # deleting the file as it will just recreate it
             del cls.cfg
+            os.remove(filename)
         except OSError:
             pass
 
@@ -134,6 +139,12 @@ class ConfigUserTest(TestCase):
 
     def test_get_raises_error_with_invalid_option_type(self):
         self.assertRaises(TypeError, self.cfg.get, 'section', 1)
+
+    def test_get_raises_error_with_missing_key_when_type_provided(self):
+        self.assertRaises(KeyError, self.cfg.get, 'not_a_key', type=bool)
+
+    def test_get_raises_error_with_existing_kkey_but_wrong_type(self):
+        self.assertRaises(TypeError, self.cfg.get, 'main', 'bool_option', type='QStringList')
 
     def test_get_raises_keyerror_with_no_saved_setting_or_default(self):
         self.assertRaises(KeyError, self.cfg.get, 'main', 'missing-key')

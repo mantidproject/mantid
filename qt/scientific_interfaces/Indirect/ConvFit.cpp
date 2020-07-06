@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFit.h"
 #include "ConvFitDataPresenter.h"
+#include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/ConvTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -36,17 +37,17 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent),
-      m_uiForm(new Ui::ConvFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
-  setPlotView(m_uiForm->pvFitPlotView);
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
       new ConvTemplateBrowser);
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   auto dataPresenter = std::make_unique<ConvFitDataPresenter>(
-      m_convFittingModel, m_uiForm->fitDataView);
+      m_convFittingModel, m_uiForm->dockArea->m_fitDataView);
   connect(
       dataPresenter.get(),
       SIGNAL(
@@ -56,22 +57,19 @@ ConvFit::ConvFit(QWidget *parent)
   setFitDataPresenter(std::move(dataPresenter));
 
   setEditResultVisible(true);
-  setStartAndEndHidden(false);
 }
 
 void ConvFit::setupFitTab() {
   setConvolveMembers(true);
 
   // Initialise fitTypeStrings
-  m_fitStrings["None"] = "";
-  m_fitStrings["One Lorentzian"] = "1L";
-  m_fitStrings["Two Lorentzians"] = "2L";
+  m_fitStrings["Lorentzian"] = "L";
   m_fitStrings["InelasticDiffSphere"] = "IDS";
   m_fitStrings["InelasticDiffRotDiscreteCircle"] = "IDC";
   m_fitStrings["ElasticDiffSphere"] = "EDS";
   m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
   m_fitStrings["StretchedExpFT"] = "SFT";
-  m_fitStrings["Teixeira Water"] = "TxWater";
+  m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
 
   auto &functionFactory = FunctionFactory::Instance();
   auto lorentzian = functionFactory.createFunction("Lorentzian");
@@ -116,17 +114,10 @@ void ConvFit::setModelResolution(const std::string &resolutionName) {
 
 void ConvFit::setModelResolution(const std::string &resolutionName,
                                  TableDatasetIndex index) {
-  const auto resolution =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          resolutionName);
-  m_convFittingModel->setResolution(resolution, index);
+  m_convFittingModel->setResolution(resolutionName, index);
   auto fitResolutions = m_convFittingModel->getResolutionsForFit();
-  m_uiForm->fitPropertyBrowser->setModelResolution(fitResolutions);
+  m_fitPropertyBrowser->setModelResolution(fitResolutions);
   setModelFitFunction();
-}
-
-void ConvFit::setStartAndEndHidden(bool hidden) {
-  m_uiForm->fitDataView->setStartAndEndHidden(hidden);
 }
 
 void ConvFit::fitFunctionChanged() {
@@ -140,15 +131,20 @@ void ConvFit::fitFunctionChanged() {
  * Assertions used to guard against any future changes that don't take
  * workspace naming into account.
  *
- * @returns the generated QString.
+ * @returns the generated string.
  */
 std::string ConvFit::fitTypeString() const {
   std::string fitType;
+  for (auto fitFunctionName : m_fitStrings) {
+    auto occurances = numberOfCustomFunctions(fitFunctionName.first);
+    if (occurances > 0) {
+      fitType += std::to_string(occurances) + fitFunctionName.second;
+    }
+  }
 
-  if (numberOfCustomFunctions("DeltaFunction") > 0)
+  if (numberOfCustomFunctions("DeltaFunction") > 0) {
     fitType += "Delta";
-
-  fitType += m_fitStrings[selectedFitType()];
+  }
 
   return fitType;
 }

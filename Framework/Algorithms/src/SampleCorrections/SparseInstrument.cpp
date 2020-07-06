@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 
@@ -197,15 +197,15 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
                const size_t wavelengthPoints) {
   // Build a quite standard and somewhat complete instrument.
   auto instrument =
-      boost::make_shared<Geometry::Instrument>("MC_simulation_instrument");
+      std::make_shared<Geometry::Instrument>("MC_simulation_instrument");
   const auto refFrame = modelWS.getInstrument()->getReferenceFrame();
 
   instrument->setReferenceFrame(
-      boost::make_shared<Geometry::ReferenceFrame>(*refFrame));
+      std::make_shared<Geometry::ReferenceFrame>(*refFrame));
   // The sparse instrument is build around origin.
   constexpr Kernel::V3D samplePos{0.0, 0.0, 0.0};
-  auto sample = std::make_unique<Geometry::ObjComponent>("sample", nullptr,
-                                                         instrument.get());
+  auto sample =
+      std::make_unique<Geometry::Component>("sample", instrument.get());
   sample->setPos(samplePos);
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADSTL_H_
-#define MANTID_DATAHANDLING_LOADSTL_H_
+#pragma once
 #include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidDataHandling/MeshFileIO.h"
 #include "MantidDataHandling/ReadMaterial.h"
@@ -15,6 +14,10 @@
 #include <boost/functional/hash.hpp>
 #include <functional>
 #include <unordered_set>
+#include <utility>
+
+#include <utility>
+
 namespace {
 Mantid::Kernel::Logger g_logstl("LoadStl");
 }
@@ -46,11 +49,12 @@ struct V3DTrueComparator {
 class DLLExport LoadStl : public MeshFileIO {
 public:
   LoadStl(std::string filename, ScaleUnits scaleType)
-      : MeshFileIO(scaleType), m_filename(filename), m_setMaterial(false) {}
+      : MeshFileIO(scaleType), m_filename(std::move(std::move(filename))),
+        m_setMaterial(false) {}
   LoadStl(std::string filename, ScaleUnits scaleType,
           ReadMaterial::MaterialParameters params)
-      : MeshFileIO(scaleType), m_filename(filename), m_setMaterial(true),
-        m_params(params) {}
+      : MeshFileIO(scaleType), m_filename(std::move(std::move(filename))),
+        m_setMaterial(true), m_params(std::move(std::move(params))) {}
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
   virtual ~LoadStl() = default;
 
@@ -67,4 +71,3 @@ protected:
 
 } // namespace DataHandling
 } // namespace Mantid
-#endif /* MANTID_DATAHANDLING_LOADSTL_H_ */

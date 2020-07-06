@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REMOVEERRORSDIALOG_H
-#define REMOVEERRORSDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -33,5 +32,3 @@ protected slots:
 private:
   Ui::RemoveErrorsDialog *ui;
 };
-
-#endif // REMOVEERRORSDIALOG_H

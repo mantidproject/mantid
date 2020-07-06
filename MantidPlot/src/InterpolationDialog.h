@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef INTERPOLATIONDIALOG_H
-#define INTERPOLATIONDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -44,7 +43,8 @@ class InterpolationDialog : public QDialog {
   Q_OBJECT
 
 public:
-  InterpolationDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  InterpolationDialog(QWidget *parent = nullptr,
+                      const Qt::WFlags &fl = nullptr);
 
 public slots:
   void activateCurve(const QString &curveName);
@@ -63,5 +63,3 @@ private:
   QLineEdit *boxEnd;
   ColorBox *boxColor;
 };
-
-#endif

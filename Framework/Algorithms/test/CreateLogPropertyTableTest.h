@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATELOGPROPERTYTABLETEST_H_
-#define MANTID_ALGORITHMS_CREATELOGPROPERTYTABLETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -111,7 +110,7 @@ public:
 
 private:
   void createSampleWorkspace(
-      std::string wsName = "__CreateLogPropertyTable__TestWorkspace",
+      const std::string &wsName = "__CreateLogPropertyTable__TestWorkspace",
       int runNumber = 12345, int64_t runStart = 3000000000) {
     using namespace WorkspaceCreationHelper;
 
@@ -146,5 +145,3 @@ private:
     AnalysisDataService::Instance().addOrReplace(wsName, eventws);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CREATELOGPROPERTYTABLETEST_H_ */

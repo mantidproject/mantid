@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -16,8 +16,8 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 #include <ostream>
 #include <stdexcept>
 
@@ -98,8 +98,8 @@ IComponent *StructuredDetector::clone() const {
  * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of
  *range
  */
-boost::shared_ptr<Detector> StructuredDetector::getAtXY(const size_t x,
-                                                        const size_t y) const {
+std::shared_ptr<Detector> StructuredDetector::getAtXY(const size_t x,
+                                                      const size_t y) const {
   if (x >= xPixels())
     throw std::runtime_error(
         "StructuredDetector::getAtXY: X specified is out of range.");
@@ -108,12 +108,12 @@ boost::shared_ptr<Detector> StructuredDetector::getAtXY(const size_t x,
         "StructuredDetector::getAtXY: Y specified is out of range.");
 
   // Get to column
-  ICompAssembly_sptr xCol = boost::dynamic_pointer_cast<ICompAssembly>(
+  ICompAssembly_sptr xCol = std::dynamic_pointer_cast<ICompAssembly>(
       this->getChild(static_cast<int>(x)));
   if (!xCol)
     throw std::runtime_error(
         "StructuredDetector::getAtXY: X specified is out of range.");
-  return boost::dynamic_pointer_cast<Detector>(
+  return std::dynamic_pointer_cast<Detector>(
       xCol->getChild(static_cast<int>(y)));
 }
 
@@ -417,7 +417,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   yrb -= ypos;
   ylb -= ypos;
 
-  boost::shared_ptr<Mantid::Geometry::IObject> shape =
+  std::shared_ptr<Mantid::Geometry::IObject> shape =
       ShapeFactory{}.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf,
                                            yrb);
 
@@ -451,12 +451,12 @@ int StructuredDetector::maxDetectorID() {
   return m_maxDetId;
 }
 
-boost::shared_ptr<const IComponent>
+std::shared_ptr<const IComponent>
 StructuredDetector::getComponentByName(const std::string &cname,
                                        int nlevels) const {
   // exact matches
   if (cname == this->getName())
-    return boost::shared_ptr<const IComponent>(this);
+    return std::shared_ptr<const IComponent>(this);
 
   // cache the detector's name as all the other names are longer
   // The extra ( is because all children of this have that as the next character
@@ -466,7 +466,7 @@ StructuredDetector::getComponentByName(const std::string &cname,
   // check that the searched for name starts with the detector's
   // name as they are generated
   if (cname.substr(0, MEMBER_NAME.length()) != MEMBER_NAME) {
-    return boost::shared_ptr<const IComponent>();
+    return std::shared_ptr<const IComponent>();
   } else {
     return CompAssembly::getComponentByName(cname, nlevels);
   }
@@ -525,7 +525,7 @@ void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
     // Get all the corners
     BoundingBox compBox;
 
-    boost::shared_ptr<Detector> det = getAtXY(0, 0);
+    std::shared_ptr<Detector> det = getAtXY(0, 0);
     det->getBoundingBox(compBox);
     m_cachedBoundingBox->grow(compBox);
     det = getAtXY(this->xPixels() - 1, 0);
@@ -570,7 +570,7 @@ void StructuredDetector::initDraw() const {
 }
 
 /// Returns the shape of the Object
-const boost::shared_ptr<const IObject> StructuredDetector::shape() const {
+const std::shared_ptr<const IObject> StructuredDetector::shape() const {
   // --- Create a hexahedral shape for your pixels ----
   auto w = this->xPixels() + 1;
   auto xlb = m_xvalues[0];

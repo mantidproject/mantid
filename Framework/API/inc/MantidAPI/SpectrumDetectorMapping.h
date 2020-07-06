@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SPECTRUMDETECTORMAPPING_H_
-#define MANTID_API_SPECTRUMDETECTORMAPPING_H_
+#pragma once
 
 #include <set>
 #include <vector>
@@ -32,7 +31,7 @@ class MANTID_API_DLL SpectrumDetectorMapping {
   using sdmap = std::unordered_map<specnum_t, std::set<detid_t>>;
 
 public:
-  explicit SpectrumDetectorMapping(MatrixWorkspace_const_sptr workspace,
+  explicit SpectrumDetectorMapping(const MatrixWorkspace_const_sptr &workspace,
                                    const bool useSpecNoIndex = true);
   SpectrumDetectorMapping(
       const std::vector<specnum_t> &spectrumNumbers,
@@ -67,5 +66,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_SPECTRUMDETECTORMAPPING_H_ */

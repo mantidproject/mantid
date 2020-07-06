@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYBACKGROUNDSUBTRACTION_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYBACKGROUNDSUBTRACTION_H_
+#pragma once
 
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
 /** ReflectometryBackgroundSubtraction : This is an algorithm that computes the
  * background of a given workspace and removes it from the input workspace.
  */
-class DLLExport ReflectometryBackgroundSubtraction
+class MANTID_ALGORITHMS_DLL ReflectometryBackgroundSubtraction
     : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
@@ -27,13 +27,13 @@ public:
 
 private:
   void
-  calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS,
+  calculateAverageSpectrumBackground(const API::MatrixWorkspace_sptr &inputWS,
                                      const std::vector<specnum_t> &spectraList);
   void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
                                      const std::vector<double> &spectrumRanges);
   std::vector<double>
   findSpectrumRanges(const std::vector<specnum_t> &spectraList);
-  void calculatePixelBackground(API::MatrixWorkspace_sptr inputWS,
+  void calculatePixelBackground(const API::MatrixWorkspace_sptr &inputWS,
                                 const std::vector<double> &indexRanges);
 
   /** Overridden Algorithm methods **/
@@ -48,5 +48,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYBACKGROUNDSUBTRACTION_H_ */

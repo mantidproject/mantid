@@ -85,8 +85,7 @@
 **
 ****************************************************************************/
 
-#ifndef QTPROPERTYBROWSER_H
-#define QTPROPERTYBROWSER_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QMap>
@@ -423,5 +422,3 @@ public:
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
 #endif
-
-#endif // QTPROPERTYBROWSER_H

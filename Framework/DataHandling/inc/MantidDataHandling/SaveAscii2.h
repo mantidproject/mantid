@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SaveAscii2_H_
-#define MANTID_DATAHANDLING_SaveAscii2_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -72,7 +71,7 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  void writeTableWorkspace(API::ITableWorkspace_const_sptr tws,
+  void writeTableWorkspace(const API::ITableWorkspace_const_sptr &tws,
                            const std::string &filename, bool appendToFile,
                            bool writeHeader, int prec, bool scientific,
                            const std::string &comment);
@@ -103,5 +102,3 @@ private:
 };
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*  MANTID_DATAHANDLING_SaveAscii2_H_  */

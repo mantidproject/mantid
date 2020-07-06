@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -107,13 +107,13 @@ void CalculateCoverageDGS::cacheDimensionXValues() {
 void CalculateCoverageDGS::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Mantid::Kernel::Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "An input workspace.");
 
   // clang-format off
-  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
+  auto mustBe3D = std::make_shared<ArrayLengthValidator<double> >(3);
   // clang-format on
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   std::vector<double> Q1(3, 0.), Q2(3, 0), Q3(3, 0);
@@ -144,7 +144,7 @@ void CalculateCoverageDGS::init() {
     std::string dim("Dimension");
     dim += boost::lexical_cast<std::string>(i);
     declareProperty(dim, options[i - 1],
-                    boost::make_shared<StringListValidator>(options),
+                    std::make_shared<StringListValidator>(options),
                     "Dimension to bin or integrate");
     declareProperty(
         dim + "Min", EMPTY_DBL(),
@@ -385,16 +385,16 @@ void CalculateCoverageDGS::exec() {
   Mantid::Geometry::GeneralFrame frame2("Q2", "");
   Mantid::Geometry::GeneralFrame frame3("Q3", "");
   Mantid::Geometry::GeneralFrame frame4("meV", "");
-  auto out1 = boost::make_shared<MDHistoDimension>(
+  auto out1 = std::make_shared<MDHistoDimension>(
       "Q1", "Q1", frame1, static_cast<coord_t>(q1min),
       static_cast<coord_t>(q1max), q1NumBins);
-  auto out2 = boost::make_shared<MDHistoDimension>(
+  auto out2 = std::make_shared<MDHistoDimension>(
       "Q2", "Q2", frame2, static_cast<coord_t>(q2min),
       static_cast<coord_t>(q2max), q2NumBins);
-  auto out3 = boost::make_shared<MDHistoDimension>(
+  auto out3 = std::make_shared<MDHistoDimension>(
       "Q3", "Q3", frame3, static_cast<coord_t>(q3min),
       static_cast<coord_t>(q3max), q3NumBins);
-  auto out4 = boost::make_shared<MDHistoDimension>(
+  auto out4 = std::make_shared<MDHistoDimension>(
       "DeltaE", "DeltaE", frame4, static_cast<coord_t>(m_dEmin),
       static_cast<coord_t>(m_dEmax), dENumBins);
 
@@ -413,10 +413,10 @@ void CalculateCoverageDGS::exec() {
     }
   }
 
-  m_normWS = boost::make_shared<MDHistoWorkspace>(binDimensions);
+  m_normWS = std::make_shared<MDHistoWorkspace>(binDimensions);
   m_normWS->setTo(0., 0., 0.);
   setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<Workspace>(m_normWS));
+              std::dynamic_pointer_cast<Workspace>(m_normWS));
 
   cacheDimensionXValues();
 

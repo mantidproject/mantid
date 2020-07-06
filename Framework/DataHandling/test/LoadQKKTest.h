@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADQKKTEST_H_
-#define LOADQKKTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -54,7 +53,7 @@ public:
     Workspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieve(wsName));
-    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(ws);
     TS_ASSERT(data);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 192 * 192);
     const auto &spectrumInfo = data->spectrumInfo();
@@ -74,5 +73,3 @@ public:
     }
   }
 };
-
-#endif // LOADQKKTEST_H_

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_REBINNEDOUTPUT_H_
-#define MANTID_DATAOBJECTS_REBINNEDOUTPUT_H_
+#pragma once
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -98,11 +97,9 @@ private:
 };
 
 /// shared pointer to the RebinnedOutput class
-using RebinnedOutput_sptr = boost::shared_ptr<RebinnedOutput>;
+using RebinnedOutput_sptr = std::shared_ptr<RebinnedOutput>;
 /// shared pointer to a const RebinnedOutput
-using RebinnedOutput_const_sptr = boost::shared_ptr<const RebinnedOutput>;
+using RebinnedOutput_const_sptr = std::shared_ptr<const RebinnedOutput>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_REBINNEDOUTPUT_H_ */

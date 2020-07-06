@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
@@ -95,7 +95,7 @@ void PointGroupFactoryImpl::subscribePointGroup(
         "Point group with this symbol is already registered.");
   }
 
-  PointGroupGenerator_sptr generator = boost::make_shared<PointGroupGenerator>(
+  PointGroupGenerator_sptr generator = std::make_shared<PointGroupGenerator>(
       hmSymbol, generatorString, description);
 
   subscribe(generator);
@@ -160,7 +160,7 @@ void PointGroupFactoryImpl::subscribe(
 
 PointGroup_sptr PointGroupFactoryImpl::constructFromPrototype(
     const PointGroup_sptr &prototype) const {
-  return boost::make_shared<PointGroup>(*prototype);
+  return std::make_shared<PointGroup>(*prototype);
 }
 
 /// Private default constructor.
@@ -195,8 +195,8 @@ PointGroup_sptr PointGroupGenerator::generatePrototype() {
         "Could not create group from supplied symmetry operations.");
   }
 
-  return boost::make_shared<PointGroup>(m_hmSymbol, *generatingGroup,
-                                        m_description);
+  return std::make_shared<PointGroup>(m_hmSymbol, *generatingGroup,
+                                      m_description);
 }
 
 DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")

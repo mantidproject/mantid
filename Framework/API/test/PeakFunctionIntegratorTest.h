@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PEAKFUNCTIONINTEGRATORTEST_H
-#define PEAKFUNCTIONINTEGRATORTEST_H
+#pragma once
 
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include <cxxtest/TestSuite.h>
 
 #include "gsl/gsl_errno.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -75,7 +74,7 @@ public:
 class PeakFunctionIntegratorTest : public CxxTest::TestSuite {
 private:
   IPeakFunction_sptr getGaussian(double center, double fwhm, double height) {
-    IPeakFunction_sptr gaussian = boost::make_shared<LocalGaussian>();
+    IPeakFunction_sptr gaussian = std::make_shared<LocalGaussian>();
     gaussian->initialize();
 
     gaussian->setCentre(center);
@@ -85,7 +84,8 @@ private:
     return gaussian;
   }
 
-  double getGaussianAnalyticalInfiniteIntegral(IPeakFunction_sptr gaussian) {
+  double
+  getGaussianAnalyticalInfiniteIntegral(const IPeakFunction_sptr &gaussian) {
     return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(M_LN2)) *
            sqrt(M_PI);
   }
@@ -194,5 +194,3 @@ public:
                     integrator.requiredRelativePrecision());
   }
 };
-
-#endif // PEAKFUNCTIONINTEGRATORTEST_H

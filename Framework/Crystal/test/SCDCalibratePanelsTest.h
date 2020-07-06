@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * SCDCalibratePanelsTest.h
@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef SCDCALIBRATEPANELSTEST_H_
-#define SCDCALIBRATEPANELSTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
@@ -31,7 +30,7 @@ class SCDCalibratePanelsTest : public CxxTest::TestSuite {
 public:
   void test_TOPAZ_5637() {
     // load a peaks file
-    boost::shared_ptr<Algorithm> alg =
+    std::shared_ptr<Algorithm> alg =
         AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
     alg->initialize();
     alg->setPropertyValue("Filename", "Peaks5637.integrate");
@@ -89,5 +88,3 @@ public:
     remove(detCalTempPath.string().c_str());
   }
 };
-
-#endif /* SCDCALIBRATEPANELSTEST_H_ */

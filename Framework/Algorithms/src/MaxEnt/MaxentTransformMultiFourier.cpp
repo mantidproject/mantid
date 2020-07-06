@@ -1,21 +1,23 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
 #include <gsl/gsl_fft_complex.h>
+
+#include <utility>
 
 namespace Mantid {
 namespace Algorithms {
 
 /** Constructor */
 MaxentTransformMultiFourier::MaxentTransformMultiFourier(
-    MaxentSpaceComplex_sptr dataSpace, MaxentSpace_sptr imageSpace,
+    const MaxentSpaceComplex_sptr &dataSpace, MaxentSpace_sptr imageSpace,
     size_t numSpec)
-    : MaxentTransformFourier(dataSpace, imageSpace), m_numSpec(numSpec),
-      m_linearAdjustments(), m_constAdjustments() {}
+    : MaxentTransformFourier(dataSpace, std::move(imageSpace)),
+      m_numSpec(numSpec), m_linearAdjustments(), m_constAdjustments() {}
 
 /**
  * Transforms a 1D signal from image space to data space, performing an
@@ -40,9 +42,7 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
   std::vector<double> data;
   data.reserve(m_numSpec * dataOneSpec.size());
   for (size_t s = 0; s < m_numSpec; s++) {
-    for (const double &data_item : dataOneSpec) {
-      data.emplace_back(data_item);
-    }
+    std::copy(dataOneSpec.begin(), dataOneSpec.end(), std::back_inserter(data));
   }
 
   // Apply adjustments (we assume there are sufficient adjustments supplied)

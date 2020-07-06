@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_
-#define MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_
+#pragma once
 
 #include "IEnggDiffMultiRunFittingWidgetPresenter.h"
 #include "IEnggDiffractionUserMsg.h"
@@ -14,7 +13,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qwt_data.h>
 #include <vector>
 
@@ -33,11 +32,11 @@ public:
 
   /// Plot a Qwt curve representing a fitted peaks workspace to the canvas
   virtual void
-  plotFittedPeaks(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;
+  plotFittedPeaks(const std::vector<std::shared_ptr<QwtData>> &curve) = 0;
 
   /// Plot a Qwt curve representing a focused run to the canvas
   virtual void
-  plotFocusedRun(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;
+  plotFocusedRun(const std::vector<std::shared_ptr<QwtData>> &curve) = 0;
 
   /// Plot focused run and fitted peaks to a separate window
   /// Pass fittedPeaksName an empty optional to not plot it
@@ -71,12 +70,12 @@ public:
   /// Connect a message provider to the view.  Used to remove circular
   /// dependency between view and presenter
   virtual void setMessageProvider(
-      boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) = 0;
+      std::shared_ptr<IEnggDiffractionUserMsg> messageProvider) = 0;
 
   /// Connect a presenter to the view. Used to remove circular dependency
   /// between view and presenter
   virtual void setPresenter(
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) = 0;
+      std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) = 0;
 
   /// Get whether the user has selected to overplot fit results
   virtual bool showFitResultsSelected() const = 0;
@@ -87,5 +86,3 @@ public:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_

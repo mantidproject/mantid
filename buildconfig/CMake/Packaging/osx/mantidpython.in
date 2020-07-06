@@ -31,15 +31,21 @@ fi
 LOCAL_PYTHONPATH=${SCRIPT_PATH}
 LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}@PARAVIEW_PYTHON_PATHS@
 if [ -n "${PYTHONPATH}" ]; then
-	LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
+  LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
+fi
+
+# Find private sip module for PyQt4 or qtpy fails to import
+if [ "$QT_API" = "pyqt" ] || [ "$QT_API" = "pyqt4" ]; then
+  SIP_SO=`${PYTHONEXE} -c"import PyQt4.sip as sip;print(sip.__file__)"`
+  LOCAL_PYTHONPATH=`dirname ${SIP_SO}`:${LOCAL_PYTHONPATH}  
 fi
 
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
-    shift
-    set -- ${PYTHONEXE} $*
+  shift
+  set -- ${PYTHONEXE} $*
 else
-    IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
-    set -- ${PYTHONEXE} -c "${IPYTHON_STARTUP}" $*
+  IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
+  set -- ${PYTHONEXE} -c "${IPYTHON_STARTUP}" $*
 fi
 
 PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \

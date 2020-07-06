@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -178,8 +178,9 @@ HistogramData::Histogram MuonRemoveExpDecay::removeDecay(
  * @param wsIndex :: workspace index
  * @return normalisation constant
  */
-double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
-                                                 int wsIndex) {
+double
+MuonRemoveExpDecay::calNormalisationConst(const API::MatrixWorkspace_sptr &ws,
+                                          int wsIndex) {
   double retVal = 1.0;
 
   API::IAlgorithm_sptr fit;

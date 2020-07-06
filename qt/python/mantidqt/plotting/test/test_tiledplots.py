@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import
-
 # std imports
 from unittest import TestCase, main
 
@@ -22,7 +20,7 @@ from matplotlib import _pylab_helpers
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantid.plots.plotfunctions import manage_workspace_names, get_plot_fig
 from mantidqt.plotting.functions import plot_from_names
@@ -108,6 +106,16 @@ class TiledPlotsTest(TestCase):
         fig, axes = get_plot_fig(overplot=False, axes_num=5)
 
         self.assertEqual(6, len(fig.axes))
+
+    def test_get_plot_fig_with_overplot_true_maintains_axes_scales(self):
+        ax = plt.gca()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+        fig, axes = get_plot_fig(overplot=True)
+
+        self.assertEqual(axes[0].get_xscale(), 'log')
+        self.assertEqual(axes[0].get_yscale(), 'log')
 
     def test_tiled_plot_from_multiple_workspaces_no_errors(self):
         workspaces = ['test_ws', 'test_ws_2']

@@ -1,16 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_DATABLOCKGENERATOR_H_
-#define MANTID_DATAHANDLING_DATABLOCKGENERATOR_H_
+#pragma once
 
-#include "MantidDataHandling/DllConfig.h"
+#include "MantidDataHandling/DataBlock.h"
 #include <boost/optional.hpp>
-#include <memory>
-#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,22 +20,20 @@ class DataBlock;
 */
 class DLLExport DataBlockGenerator {
 public:
-  DataBlockGenerator(const std::vector<std::pair<int64_t, int64_t>> &intervals);
+  DataBlockGenerator(const std::vector<SpectrumPair> &intervals);
   class DataBlock;
   DataBlockGenerator &operator++();
   DataBlockGenerator operator++(int);
   bool isDone();
-  int64_t getValue();
+  specnum_t getValue();
   void next();
 
 public:
-  std::vector<std::pair<int64_t, int64_t>> m_intervals;
-  int64_t m_currentSpectrum;
+  std::vector<SpectrumPair> m_intervals;
+  specnum_t m_currentSpectrum;
 
   boost::optional<size_t> m_currentIntervalIndex;
 };
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif

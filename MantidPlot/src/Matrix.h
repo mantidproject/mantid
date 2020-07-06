@@ -30,8 +30,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MATRIX_H
-#define MATRIX_H
+#pragma once
 
 #include <QHeaderView>
 #include <QMessageBox>
@@ -66,7 +65,7 @@ class Matrix : public MdiSubWindow, public Scripted {
 
 protected:
   Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
-         const QString &name = QString(), Qt::WFlags f = nullptr);
+         const QString &name = QString(), const Qt::WFlags &f = nullptr);
 
 public:
   /**
@@ -82,10 +81,10 @@ public:
    * @param f :: window flags
    */
   Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
-         const QString &name = QString(), Qt::WFlags f = nullptr);
+         const QString &name = QString(), const Qt::WFlags &f = nullptr);
   Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
          QWidget *parent, const QString &name = QString(),
-         Qt::WFlags f = nullptr);
+         const Qt::WFlags &f = nullptr);
   ~Matrix() override;
 
   enum Operation {
@@ -380,5 +379,3 @@ protected:
   //! Pointer to a data buffer used for matrix operations.
   double *d_workspace;
 };
-
-#endif

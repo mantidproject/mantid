@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TiledWindow_H
-#define TiledWindow_H
+#pragma once
 
 #include "MdiSubWindow.h"
 
@@ -31,7 +30,7 @@ class TiledWindow : public MdiSubWindow {
 public:
   TiledWindow(QWidget *parent, const QString &label,
               const QString &name = QString(), int nrows = 1, int ncols = 1,
-              Qt::WFlags f = nullptr);
+              const Qt::WFlags &f = nullptr);
 
   /// Populate a menu with actions
   void populateMenu(QMenu *menu);
@@ -215,5 +214,3 @@ private:
   /// Accepts drops flag
   bool m_acceptDrop;
 };
-
-#endif // TiledWindow_H

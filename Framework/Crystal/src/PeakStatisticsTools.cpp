@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeakStatisticsTools.h"
 
@@ -11,7 +11,7 @@
 
 #include "MantidKernel/Statistics.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
@@ -123,10 +123,9 @@ UniqueReflectionCollection::UniqueReflectionCollection(
     const ReflectionCondition_sptr &centering)
     : m_reflections(), m_pointgroup(pointGroup) {
   HKLGenerator generator(cell, dLimits.first);
-  auto dFilter = boost::make_shared<const HKLFilterDRange>(cell, dLimits.first,
-                                                           dLimits.second);
-  auto centeringFilter =
-      boost::make_shared<const HKLFilterCentering>(centering);
+  auto dFilter = std::make_shared<const HKLFilterDRange>(cell, dLimits.first,
+                                                         dLimits.second);
+  auto centeringFilter = std::make_shared<const HKLFilterCentering>(centering);
   auto filter = dFilter & centeringFilter;
 
   // Generate map of UniqueReflection-objects with reflection family as key.

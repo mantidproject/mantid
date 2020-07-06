@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 #include "MantidAPI/Run.h"
@@ -14,12 +14,15 @@
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 
 GNU_DIAG_OFF("conversion")
+#include "private/Schema/6s4t_run_stop_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
-#include "private/Schema/y2gw_run_info_generated.h"
+#include "private/Schema/pl72_run_start_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <json/json.h>
+
+#include <utility>
 
 using namespace Mantid::Types;
 
@@ -28,7 +31,8 @@ namespace {
 Mantid::Kernel::Logger g_log("IKafkaStreamDecoder");
 
 // File identifiers from flatbuffers schema
-const std::string RUN_MESSAGE_ID = "y2gw";
+const std::string RUN_START_MESSAGE_ID = "pl72";
+const std::string RUN_STOP_MESSAGE_ID = "6s4t";
 
 const std::chrono::seconds MAX_LATENCY(1);
 } // namespace
@@ -54,12 +58,28 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                                          const std::string &sampleEnvTopic,
                                          const std::string &chopperTopic,
                                          const std::string &monitorTopic)
-    : m_broker(broker), m_streamTopic(streamTopic),
+    : m_broker(std::move(broker)), m_streamTopic(streamTopic),
       m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
       m_sampleEnvTopic(sampleEnvTopic), m_chopperTopic(chopperTopic),
       m_monitorTopic(monitorTopic), m_interrupt(false), m_specToIdx(),
       m_runStart(), m_runId(""), m_thread(), m_capturing(false), m_exception(),
       m_extractWaiting(false), m_cbIterationEnd([] {}), m_cbError([] {}) {}
+
+IKafkaStreamDecoder::IKafkaStreamDecoder(IKafkaStreamDecoder &&o) noexcept
+    : m_broker(std::move(o.m_broker)), m_streamTopic(o.m_streamTopic),
+      m_runInfoTopic(o.m_runInfoTopic), m_spDetTopic(std::move(o.m_spDetTopic)),
+      m_sampleEnvTopic(o.m_sampleEnvTopic), m_chopperTopic(o.m_chopperTopic),
+      m_monitorTopic(o.m_monitorTopic), m_interrupt(o.m_interrupt.load()),
+      m_specToIdx(std::move(o.m_specToIdx)),
+      m_runStart(std::move(o.m_runStart)), m_runId(std::move(o.m_runId)),
+      m_thread(std::move(o.m_thread)), m_capturing(o.m_capturing.load()),
+      m_exception(std::move(o.m_exception)),
+      m_cbIterationEnd(std::move(o.m_cbIterationEnd)),
+      m_cbError(std::move(o.m_cbError)) {
+  std::scoped_lock lck(m_runStatusMutex, m_waitMutex, m_mutex);
+  m_runStatusSeen = o.m_runStatusSeen;
+  m_extractWaiting = o.m_extractWaiting.load();
+}
 
 /**
  * Destructor.
@@ -68,11 +88,10 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
 IKafkaStreamDecoder::~IKafkaStreamDecoder() { stopCapture(); }
 
 /**
- * Start capturing from the stream on a separate thread. This is a non-blocking
- * call and will return after the thread has started
+ * Start capturing from the stream on a separate thread. This is a
+ * non-blocking call and will return after the thread has started
  */
 void IKafkaStreamDecoder::startCapture(bool startNow) {
-
   // If we are not starting now, then we want to start at the start of the run
   if (!startNow) {
     // Get last two messages in run topic to ensure we get a runStart message
@@ -101,13 +120,6 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
   // Get last two messages in run topic to ensure we get a runStart message
   m_runStream =
       m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
-  try {
-    m_spDetStream =
-        m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
-  } catch (const std::runtime_error &) {
-    g_log.debug()
-        << "No detector-spectrum map message found, will assume a 1:1 mapping.";
-  }
 
   m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
@@ -136,7 +148,7 @@ void IKafkaStreamDecoder::joinStreamAtTime(
 }
 
 int64_t
-IKafkaStreamDecoder::nanosecondsToMilliseconds(uint64_t timeNanoseconds) const {
+IKafkaStreamDecoder::nanosecondsToMilliseconds(uint64_t timeNanoseconds) {
   return static_cast<int64_t>(timeNanoseconds / 1000000);
 }
 
@@ -151,7 +163,7 @@ void IKafkaStreamDecoder::stopCapture() noexcept {
   // will exit automatically
   while (m_capturing) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  };
+  }
 }
 
 /**
@@ -185,13 +197,19 @@ API::Workspace_sptr IKafkaStreamDecoder::extractData() {
     throw std::runtime_error(*m_exception);
   }
 
-  m_extractWaiting = true;
-  m_cv.notify_one();
+  {
+    std::lock_guard lck(m_waitMutex);
+    m_extractWaiting = true;
+    m_cv.notify_one();
+  }
 
   auto workspace_ptr = extractDataImpl();
 
-  m_extractWaiting = false;
-  m_cv.notify_one();
+  {
+    std::lock_guard lck(m_waitMutex);
+    m_extractWaiting = false;
+    m_cv.notify_one();
+  }
 
   return workspace_ptr;
 }
@@ -207,10 +225,10 @@ void IKafkaStreamDecoder::captureImpl() noexcept {
     captureImplExcept();
   } catch (std::exception &exc) {
     m_cbError();
-    m_exception = boost::make_shared<std::runtime_error>(exc.what());
+    m_exception = std::make_shared<std::runtime_error>(exc.what());
   } catch (...) {
     m_cbError();
-    m_exception = boost::make_shared<std::runtime_error>(
+    m_exception = std::make_shared<std::runtime_error>(
         "IKafkaStreamDecoder: Unknown exception type caught.");
   }
   m_capturing = false;
@@ -225,9 +243,8 @@ void IKafkaStreamDecoder::captureImpl() noexcept {
 void IKafkaStreamDecoder::checkIfAllStopOffsetsReached(
     const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
     bool &checkOffsets) {
-
   if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
-                  [](std::pair<std::string, std::vector<bool>> kv) {
+                  [](const std::pair<std::string, std::vector<bool>> &kv) {
                     return std::all_of(
                         kv.second.cbegin(), kv.second.cend(),
                         [](bool partitionEnd) { return partitionEnd; });
@@ -239,7 +256,10 @@ void IKafkaStreamDecoder::checkIfAllStopOffsetsReached(
     // Otherwise we can end up with data from two different runs in the
     // same buffer workspace which is problematic if the user wanted the
     // "Stop" or "Rename" run transition option.
-    m_extractedEndRunData = false;
+    {
+      std::lock_guard lck(m_waitMutex);
+      m_extractedEndRunData = false;
+    }
     checkOffsets = false;
     g_log.notice("Reached end of run in data streams.");
   }
@@ -296,18 +316,23 @@ IKafkaStreamDecoder::getStopOffsets(
  * then we wait for it to finish
  */
 void IKafkaStreamDecoder::waitForDataExtraction() {
-  {
-    std::unique_lock<std::mutex> readyLock(m_waitMutex);
+  std::unique_lock<std::mutex> readyLock(m_waitMutex);
+  if (m_extractWaiting) { // Might have extracted whilst we were grabbing
+                          // mutex
     m_cv.wait(readyLock, [&] { return !m_extractWaiting; });
   }
 }
 
 void IKafkaStreamDecoder::waitForRunEndObservation() {
-  m_extractWaiting = true;
+  {
+    std::lock_guard lck(m_waitMutex);
+    m_extractWaiting = true;
+  }
   // Mark extractedEndRunData true before waiting on the extraction to ensure
   // an immediate request for run status after extracting the data will return
   // the correct value - avoids race condition in MonitorLiveData and tests
   m_extractedEndRunData = true;
+  m_cbIterationEnd();
   waitForDataExtraction();
 
   // Wait until MonitorLiveData has seen that end of run was
@@ -337,36 +362,7 @@ void IKafkaStreamDecoder::waitForRunEndObservation() {
 
   // Rejoin event stream at start of new run
   joinStreamAtTime(runStartStruct);
-  std::string detSpecMapMsgBuffer = getDetSpecMapForRun(runStartStruct);
-  initLocalCaches(detSpecMapMsgBuffer, runStartStruct);
-}
-
-/**
- * Try to find a detector-spectrum map message published after the
- * current run start time
- *
- * @param runStartStruct details of the current run
- * @return received detector-spectrum map message buffer, empty string if a
- *         mapping was not streamed
- */
-std::string IKafkaStreamDecoder::getDetSpecMapForRun(
-    const IKafkaStreamDecoder::RunStartStruct &runStartStruct) {
-  std::string rawMsgBuffer;
-  try {
-    m_spDetStream = m_broker->subscribe(
-        {m_spDetTopic}, nanosecondsToMilliseconds(runStartStruct.startTime),
-        SubscribeAtOption::TIME);
-    int64_t offset;
-    int32_t partition;
-    std::string topicName;
-    m_spDetStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
-  } catch (const std::runtime_error &) {
-  }
-  if (rawMsgBuffer.empty()) {
-    g_log.debug() << "No detector-spectrum map message found for run "
-                  << runStartStruct.runId << ", will assume a 1:1 mapping.";
-  }
-  return rawMsgBuffer;
+  initLocalCaches(runStartStruct);
 }
 
 /**
@@ -380,33 +376,22 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     RunStartStruct &runStartStructOutput) {
   while (!m_interrupt) {
     std::string runMsgBuffer;
-
     int64_t offset;
     int32_t partition;
     std::string topicName;
     m_runStream->consumeMessage(&runMsgBuffer, offset, partition, topicName);
-    if (runMsgBuffer.empty()) {
-      continue; // no message available, try again
+    if (runMsgBuffer.empty() ||
+        !flatbuffers::BufferHasIdentifier(
+            reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()),
+            RUN_START_MESSAGE_ID.c_str())) {
+      continue; // no start message available, try again
     } else {
-      auto runMsg =
-          GetRunInfo(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
-      if (runMsg->info_type_type() == InfoTypes::RunStart) {
-        // We got a run start message, deserialise it
-        auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
-        IKafkaStreamDecoder::RunStartStruct runStartStruct = {
-            runStartData->instrument_name()->str(),
-            runStartData->run_id()->str(),
-            runStartData->start_time(),
-            static_cast<size_t>(runStartData->n_periods()),
-            runStartData->nexus_structure()->str(),
-            offset};
-        if (runStartStruct.runId != m_runId) {
-          runStartStructOutput = runStartStruct;
-          m_runId = runStartStruct.runId;
-          return false; // not interrupted
-        }
-      } else {
-        continue; // received message wasn't a RunStart message, try again
+      auto runStartStruct =
+          extractRunStartDataFromMessage(runMsgBuffer, offset);
+      if (runStartStruct.runId != m_runId) {
+        runStartStructOutput = runStartStruct;
+        m_runId = runStartStruct.runId;
+        return false; // not interrupted
       }
     }
   }
@@ -414,30 +399,67 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
 }
 
 IKafkaStreamDecoder::RunStartStruct
+IKafkaStreamDecoder::extractRunStartDataFromMessage(
+    const std::string &messageBuffer, const int64_t offset) {
+  auto runStartData =
+      GetRunStart(reinterpret_cast<const uint8_t *>(messageBuffer.c_str()));
+  bool detSpecMapSpecified = false;
+  size_t numberOfSpectra = 0;
+  std::vector<int32_t> spectrumNumbers;
+  std::vector<int32_t> detectorIDs;
+  if (runStartData->detector_spectrum_map() != nullptr &&
+      runStartData->detector_spectrum_map()->n_spectra() != 0) {
+    detSpecMapSpecified = true;
+    auto spDetMsg = runStartData->detector_spectrum_map();
+    numberOfSpectra = static_cast<size_t>(spDetMsg->n_spectra());
+    auto numberOfDetectors = spDetMsg->detector_id()->size();
+    if (numberOfDetectors != numberOfSpectra) {
+      std::ostringstream os;
+      os << "IKafkaStreamDecoder::waitForNewRunStartMessage() - Invalid "
+            "spectra/detector mapping. Expected matched length arrays but "
+            "found numberOfSpectra="
+         << numberOfSpectra << ", numberOfDetectors=" << numberOfDetectors;
+      throw std::runtime_error(os.str());
+    }
+    spectrumNumbers.assign(spDetMsg->spectrum()->data(),
+                           spDetMsg->spectrum()->data() +
+                               spDetMsg->spectrum()->size());
+    detectorIDs.assign(spDetMsg->detector_id()->data(),
+                       spDetMsg->detector_id()->data() +
+                           spDetMsg->detector_id()->size());
+  }
+  return {runStartData->instrument_name()->str(),
+          runStartData->run_name()->str(),
+          runStartData->start_time(),
+          static_cast<size_t>(runStartData->n_periods()),
+          runStartData->nexus_structure()->str(),
+          offset,
+          detSpecMapSpecified,
+          numberOfSpectra,
+          spectrumNumbers,
+          detectorIDs};
+}
+
+IKafkaStreamDecoder::RunStartStruct
 IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   auto offset = getRunInfoMessage(rawMsgBuffer);
-  auto runMsg =
-      GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  if (runMsg->info_type_type() != InfoTypes::RunStart) {
-    // We want a runStart message, try the next one
+  // If the first message is not a run start message then get another message
+  if (!flatbuffers::BufferHasIdentifier(
+          reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+          RUN_START_MESSAGE_ID.c_str())) {
     offset = getRunInfoMessage(rawMsgBuffer);
-    runMsg =
-        GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    if (runMsg->info_type_type() != InfoTypes::RunStart) {
-      throw std::runtime_error("IKafkaStreamDecoder::initLocalCaches() - "
-                               "Could not find a run start message "
-                               "in the run info topic. Unable to continue");
+
+    // If the second message is not a run start then give up
+    if (!flatbuffers::BufferHasIdentifier(
+            reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+            RUN_START_MESSAGE_ID.c_str())) {
+      throw std::runtime_error(
+          "IKafkaStreamDecoder::getRunStartMessage() - "
+          "Didn't find a run start message in the run info "
+          "topic. Unable to continue");
     }
   }
-  auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
-  IKafkaStreamDecoder::RunStartStruct runStart = {
-      runStartData->instrument_name()->str(),
-      runStartData->run_id()->str(),
-      runStartData->start_time(),
-      static_cast<size_t>(runStartData->n_periods()),
-      runStartData->nexus_structure()->str(),
-      offset};
-  return runStart;
+  return extractRunStartDataFromMessage(rawMsgBuffer, offset);
 }
 
 /**
@@ -456,7 +478,12 @@ int64_t IKafkaStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
   }
   if (!flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
-          RUN_MESSAGE_ID.c_str())) {
+          RUN_START_MESSAGE_ID.c_str()) &&
+      !flatbuffers::BufferHasIdentifier(
+          reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+          RUN_STOP_MESSAGE_ID.c_str())) {
+    g_log.error() << "Message with flatbuffer ID of "
+                  << rawMsgBuffer.substr(4, 8) << " in run info topic.\n";
     throw std::runtime_error("IKafkaStreamDecoder::getRunInfoMessage() - "
                              "Received unexpected message type from run info "
                              "topic. Unable to continue");
@@ -490,10 +517,10 @@ void IKafkaStreamDecoder::checkRunMessage(
     std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
   if (flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(buffer.c_str()),
-          RUN_MESSAGE_ID.c_str())) {
-    auto runMsg = GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
-    if (!checkOffsets && runMsg->info_type_type() == InfoTypes::RunStop) {
-      auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
+          RUN_STOP_MESSAGE_ID.c_str())) {
+    auto runStopMsg =
+        GetRunStop(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+    if (!checkOffsets) {
       auto stopTime = runStopMsg->stop_time();
       g_log.debug() << "Received an end-of-run message with stop time = "
                     << stopTime << std::endl;
@@ -527,7 +554,7 @@ void IKafkaStreamDecoder::checkRunEnd(
 }
 
 int IKafkaStreamDecoder::runNumber() const noexcept {
-  /* If the run ID is empty or if any non-digit char was found in the string */
+  // If the run ID is empty or if any non-digit char was found in the string
   if (m_runId.empty() ||
       (std::find_if_not(m_runId.cbegin(), m_runId.cend(), [](const char c) {
          return std::isdigit(c);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/FakeEventDataListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
@@ -78,7 +78,7 @@ void FakeEventDataListener::start(
   // 2 spectra event workspace for now. Will make larger later.
   // No instrument, meta-data etc - will need to figure out who's responsible
   // for that
-  m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+  m_buffer = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
   // Set a sample tof range
   m_rand->setRange(40000, 60000);
@@ -101,7 +101,7 @@ void FakeEventDataListener::start(
   m_nextEndRunTime = DateAndTime::getCurrentTime() + m_endRunEvery;
 }
 
-boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
+std::shared_ptr<Workspace> FakeEventDataListener::extractData() {
   // This is here to test the LoadLiveData side of the 'NotYet' exception
   // Note the post-increment of the call count in the comparison
   if (m_numExtractDataCalls++ < m_notyettimes)
@@ -117,7 +117,7 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 
   // Create a new, empty workspace of the same dimensions and assign to the
   // buffer variable
-  EventWorkspace_sptr temp = boost::dynamic_pointer_cast<EventWorkspace>(
+  EventWorkspace_sptr temp = std::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
   // Will need an 'initializeFromParent' here later on....
 

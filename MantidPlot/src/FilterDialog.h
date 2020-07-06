@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FILTERDIALOG_H
-#define FILTERDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -44,7 +43,8 @@ class FilterDialog : public QDialog {
   Q_OBJECT
 
 public:
-  FilterDialog(int type, QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  FilterDialog(int type, QWidget *parent = nullptr,
+               const Qt::WFlags &fl = nullptr);
 
 public slots:
   void setGraph(Graph *g);
@@ -62,5 +62,3 @@ private:
   QLineEdit *boxEnd;
   ColorBox *boxColor;
 };
-
-#endif

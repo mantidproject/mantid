@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MOCKRNG_H_
-#define MANTID_GEOMETRY_MOCKRNG_H_
+#pragma once
 
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -29,5 +28,3 @@ public:
   MOCK_CONST_METHOD0(max, double());
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
-
-#endif /* MANTID_GEOMETRY_MOCKRNG_H_ */

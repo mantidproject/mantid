@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -27,6 +26,12 @@ namespace MantidWidgets {
 BaseCustomInstrumentModel::BaseCustomInstrumentModel()
     : m_currentRun(0), m_tmpName("tmp"), m_instrumentName("MUSR"),
       m_wsName("testData") {}
+
+BaseCustomInstrumentModel::BaseCustomInstrumentModel(
+    const std::string &tmpName, const std::string instrumentName,
+    const std::string wsName)
+    : m_currentRun(0), m_tmpName(tmpName), m_instrumentName(instrumentName),
+      m_wsName(wsName) {}
 
 void BaseCustomInstrumentModel::loadEmptyInstrument() {
   auto alg =

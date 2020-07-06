@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_WORKSPACESELECTOR_H_
-#define MANTIDQTMANTIDWIDGETS_WORKSPACESELECTOR_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -95,9 +94,9 @@ private:
   handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
   bool checkEligibility(const QString &name,
-                        Mantid::API::Workspace_sptr object) const;
+                        const Mantid::API::Workspace_sptr &object) const;
   bool hasValidSuffix(const QString &name) const;
-  bool hasValidNumberOfBins(Mantid::API::Workspace_sptr object) const;
+  bool hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const;
 
 protected:
   // Method for handling drop events
@@ -137,9 +136,7 @@ private:
   QString m_algPropName;
 
   // Algorithm to validate against
-  boost::shared_ptr<Mantid::API::Algorithm> m_algorithm;
+  std::shared_ptr<Mantid::API::Algorithm> m_algorithm;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQTMANTIDWIDGETS_INSTRUMENTSELECTOR_H_

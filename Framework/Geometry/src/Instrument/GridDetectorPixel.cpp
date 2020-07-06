@@ -1,11 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/Instrument/GridDetectorPixel.h"
+#include <utility>
+
 #include "MantidGeometry/Instrument/GridDetector.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
@@ -36,12 +38,12 @@ GridDetectorPixel::GridDetectorPixel(const GridDetectorPixel *base,
  * @param layer :: layer of the pixel in the panel
  */
 GridDetectorPixel::GridDetectorPixel(const std::string &name, int id,
-                                     boost::shared_ptr<IObject> shape,
+                                     const std::shared_ptr<IObject> &shape,
                                      IComponent *parent,
                                      const GridDetector *panel, size_t col,
                                      size_t row, size_t layer)
-    : Detector(name, id, shape, parent), m_panel(panel), m_col(col), m_row(row),
-      m_layer(layer) {
+    : Detector(name, id, std::move(shape), parent), m_panel(panel), m_col(col),
+      m_row(row), m_layer(layer) {
   if (!m_panel)
     throw std::runtime_error("GridDetectorPixel::ctor(): pixel " + name +
                              " has no valid GridDetector parent.");

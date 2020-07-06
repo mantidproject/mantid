@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOAD_SHAPETEST_H_
-#define LOAD_SHAPETEST_H_
+#pragma once
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
@@ -25,7 +24,7 @@ public:
   void testTranslate() {
     LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
 
-    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::shared_ptr<MeshObject> environmentMesh = loadCube();
     loader.translate(environmentMesh, {5, 5, 15});
     auto translatedVertices = environmentMesh->getVertices();
 
@@ -37,7 +36,7 @@ public:
 
   void testTranslateFailWrongSize() {
     LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::shared_ptr<MeshObject> environmentMesh = loadCube();
     TS_ASSERT_THROWS(
         loader.translate(environmentMesh, {-1, 0, 1, 0, 0, 0, 0, 1}),
         const std::invalid_argument &);
@@ -75,7 +74,7 @@ public:
 
   void testXRotation() {
     LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::shared_ptr<MeshObject> environmentMesh = loadCube();
     loader.rotate(environmentMesh, 45 * M_PI / 180, 0, 0);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {
@@ -89,7 +88,7 @@ public:
   }
   void testYRotation() {
     LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::shared_ptr<MeshObject> environmentMesh = loadCube();
     loader.rotate(environmentMesh, 0, 90 * M_PI / 180, 0);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {-15, -5,  5,  -15, 5,  -5, -15, -5,
@@ -102,7 +101,7 @@ public:
 
   void testZRotation() {
     LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::shared_ptr<MeshObject> environmentMesh = loadCube();
     loader.rotate(environmentMesh, 0, 0, 180 * M_PI / 180);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {5,   5,  -15, -5,  -5, -15, -5, 5,
@@ -115,7 +114,7 @@ public:
 
   void testMultiRotation() {
     LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::shared_ptr<MeshObject> environmentMesh = loadCube();
     loader.rotate(environmentMesh, 70 * M_PI / 180, 20 * M_PI / 180,
                   35 * M_PI / 180);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
@@ -131,7 +130,7 @@ public:
 
   void testTranslateAndRotate() {
     LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::shared_ptr<MeshObject> environmentMesh = loadCube();
     loader.rotate(environmentMesh, 0, 90 * M_PI / 180, 0);
     loader.translate(environmentMesh, {0, 0, 15});
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
@@ -161,5 +160,3 @@ private:
     }
   }
 };
-
-#endif

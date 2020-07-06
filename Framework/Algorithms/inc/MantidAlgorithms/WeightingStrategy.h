@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_WEIGHTINGSTRATEGY_H_
-#define MANTID_ALGORITHMS_WEIGHTINGSTRATEGY_H_
+#pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -21,7 +20,7 @@ namespace Algorithms {
 
   @date 2011-11-30
 */
-class DLLExport WeightingStrategy {
+class MANTID_ALGORITHMS_DLL WeightingStrategy {
 public:
   /// Constructor
   WeightingStrategy(const double cutOff);
@@ -55,7 +54,7 @@ protected:
 /*
 Flat (no weighting) strategy. Concrete WeightingStrategy
 */
-class DLLExport FlatWeighting : public WeightingStrategy {
+class MANTID_ALGORITHMS_DLL FlatWeighting : public WeightingStrategy {
 public:
   double weightAt(const double &, const double &, const double &,
                   const double &) override;
@@ -65,7 +64,7 @@ public:
 /*
 Linear weighting strategy.
 */
-class DLLExport LinearWeighting : public WeightingStrategy {
+class MANTID_ALGORITHMS_DLL LinearWeighting : public WeightingStrategy {
 public:
   LinearWeighting(const double cutOff);
   double weightAt(const Mantid::Kernel::V3D &) override;
@@ -76,7 +75,7 @@ public:
 /*
 Parabolic weighting strategy.
 */
-class DLLExport ParabolicWeighting : public WeightingStrategy {
+class MANTID_ALGORITHMS_DLL ParabolicWeighting : public WeightingStrategy {
 public:
   ParabolicWeighting(const double cutOff);
   double weightAt(const Mantid::Kernel::V3D &) override;
@@ -87,7 +86,7 @@ public:
 /*
 Null weighting strategy.
 */
-class DLLExport NullWeighting : public WeightingStrategy {
+class MANTID_ALGORITHMS_DLL NullWeighting : public WeightingStrategy {
 public:
   double weightAt(const Mantid::Kernel::V3D &) override;
   double weightAt(const double &, const double &, const double &,
@@ -99,7 +98,7 @@ Gaussian nD Strategy.
 
 y = exp(-0.5*((r./p(1)).^2) where p = sqtr(2)*sigma
 */
-class DLLExport GaussianWeightingnD : public WeightingStrategy {
+class MANTID_ALGORITHMS_DLL GaussianWeightingnD : public WeightingStrategy {
 public:
   GaussianWeightingnD(double cutOff, double sigma);
   double weightAt(const Mantid::Kernel::V3D &) override;
@@ -113,5 +112,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_WEIGHTINGSTRATEGY_H_ */

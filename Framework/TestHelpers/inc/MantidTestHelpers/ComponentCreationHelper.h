@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -13,8 +13,7 @@
  *a
  *  package higher than Geometry (e.g. API, DataObjects, ...)
  *********************************************************************************/
-#ifndef COMPONENTCREATIONHELPER_H_
-#define COMPONENTCREATIONHELPER_H_
+#pragma once
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -46,7 +45,7 @@ tests.
 
 //----------------------------------------------------------------------------------------------
 
-/// Add a spherical sample at samplePos to given instrument.
+/// Add a sample at samplePos to given instrument.
 void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
                            const Mantid::Kernel::V3D &samplePos);
 
@@ -66,7 +65,7 @@ std::string cappedCylinderXML(double radius, double height,
 /**
  * Create a capped cylinder object
  */
-boost::shared_ptr<Mantid::Geometry::CSGObject>
+std::shared_ptr<Mantid::Geometry::CSGObject>
 createCappedCylinder(double radius, double height,
                      const Mantid::Kernel::V3D &baseCentre,
                      const Mantid::Kernel::V3D &axis, const std::string &id);
@@ -81,7 +80,7 @@ std::string hollowCylinderXML(double innerRadius, double outerRadius,
 /**
  * Create a hollow cylinder object
  */
-boost::shared_ptr<Mantid::Geometry::CSGObject>
+std::shared_ptr<Mantid::Geometry::CSGObject>
 createHollowCylinder(double innerRadius, double outerRadius, double height,
                      const Mantid::Kernel::V3D &baseCentre,
                      const Mantid::Kernel::V3D &axis, const std::string &id);
@@ -93,42 +92,42 @@ std::string sphereXML(double radius, const Mantid::Kernel::V3D &centre,
 /**
  * Create a sphere object
  */
-boost::shared_ptr<Mantid::Geometry::CSGObject>
+std::shared_ptr<Mantid::Geometry::CSGObject>
 createSphere(double radius,
              const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D(),
              const std::string &id = "sp-1");
 /** Create a cuboid shape for your pixels */
-boost::shared_ptr<Mantid::Geometry::CSGObject>
+std::shared_ptr<Mantid::Geometry::CSGObject>
 createCuboid(double x_side_length, double y_side_length = -1.0,
              double z_side_length = -1.0);
 /**
  * Create a rotated cuboid shape
  */
-boost::shared_ptr<Mantid::Geometry::CSGObject> createCuboid(double xHalfLength,
-                                                            double yHalfLength,
-                                                            double zHalfLength,
-                                                            double angle);
+std::shared_ptr<Mantid::Geometry::CSGObject> createCuboid(double xHalfLength,
+                                                          double yHalfLength,
+                                                          double zHalfLength,
+                                                          double angle);
 /**
  * Create a component assembly at the origin made up of 4 cylindrical detectors
  */
-boost::shared_ptr<Mantid::Geometry::CompAssembly>
+std::shared_ptr<Mantid::Geometry::CompAssembly>
 createTestAssemblyOfFourCylinders();
 /**
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
-boost::shared_ptr<Mantid::Geometry::CSGObject>
+std::shared_ptr<Mantid::Geometry::CSGObject>
 createHollowShell(double innerRadius, double outerRadius,
                   const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D());
 /**
  * Create a detector group containing 5 detectors
  */
-boost::shared_ptr<Mantid::Geometry::DetectorGroup>
+std::shared_ptr<Mantid::Geometry::DetectorGroup>
 createDetectorGroupWith5CylindricalDetectors();
 /**
  * Create a detector group containing n detectors with gaps
  */
-boost::shared_ptr<Mantid::Geometry::DetectorGroup>
+std::shared_ptr<Mantid::Geometry::DetectorGroup>
 createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4,
                                                      double gap = 0.01);
 /**
@@ -138,7 +137,7 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4,
  * z     -- axial z-coordinate of the detectors position;
   The detectors are the cylinders with 1.5cm height and 0.5 cm radius
  */
-boost::shared_ptr<Mantid::Geometry::DetectorGroup>
+std::shared_ptr<Mantid::Geometry::DetectorGroup>
 createRingOfCylindricalDetectors(const double R_min = 4.5,
                                  const double R_max = 5,
                                  const double z000000000000000 = 4);
@@ -181,7 +180,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
                                            const std::vector<double> &azim);
 /**
  * Create an test instrument with n panels of 9 cylindrical detectors, a source
- * and spherical sample shape.
+ * and a sample position.
  * Detectors have IDs assigned as follows:
  * 7 8 9
  * 4 5 6
@@ -201,7 +200,7 @@ Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
 
 void addRectangularBank(Mantid::Geometry::Instrument &testInstrument,
                         int idStart, int pixels, double pixelSpacing,
-                        std::string bankName,
+                        const std::string &bankName,
                         const Mantid::Kernel::V3D &bankPos,
                         const Mantid::Kernel::Quat &bankRot);
 
@@ -258,5 +257,3 @@ createInstrumentWithPSDTubes(const size_t nTubes = 3,
                              const size_t nPixelsPerTube = 50,
                              const bool mirrorTubes = false);
 } // namespace ComponentCreationHelper
-
-#endif // COMPONENTCREATIONHELPERS_H_

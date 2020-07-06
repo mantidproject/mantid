@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_MUONANALYSISRESULTTABLETAB_H_
-#define MANTIDQTCUSTOMINTERFACES_MUONANALYSISRESULTTABLETAB_H_
+#pragma once
 
 //----------------------
 // Includes
@@ -78,7 +77,7 @@ private:
    * @return Retrieved workspace
    */
   template <typename T>
-  static boost::shared_ptr<T> retrieveWSChecked(const std::string &wsName) {
+  static std::shared_ptr<T> retrieveWSChecked(const std::string &wsName) {
     auto ws =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(wsName);
 
@@ -99,7 +98,8 @@ private:
   void populateLogsAndValues(const QStringList &fittedWsList);
   void populateFittings(
       const QStringList &names,
-      std::function<Mantid::API::Workspace_sptr(const QString &)> wsFromName);
+      const std::function<Mantid::API::Workspace_sptr(const QString &)>
+          &wsFromName);
 
   /// Creates the results table
   void createTable(bool multipleFits);
@@ -135,5 +135,3 @@ private:
 } // namespace Muon
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSISRESULTTABLETAB_H_

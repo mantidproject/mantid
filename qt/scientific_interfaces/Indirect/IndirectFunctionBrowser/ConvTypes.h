@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECT_CONVTYPES_H_
-#define MANTIDQT_INDIRECT_CONVTYPES_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -60,6 +59,7 @@ enum class ParamID {
   TW_TAU,
   TW_CENTRE,
   DELTA_HEIGHT,
+  DELTA_CENTER,
   TEMPERATURE,
   SE_HEIGHT,
   SE_TAU,
@@ -92,7 +92,7 @@ inline ParamID &operator++(ParamID &id) {
 }
 
 inline void applyToParamIDRange(ParamID from, ParamID to,
-                                std::function<void(ParamID)> fun) {
+                                const std::function<void(ParamID)> &fun) {
   if (from == ParamID::NONE || to == ParamID::NONE)
     return;
   for (auto i = from; i <= to; ++i)
@@ -213,5 +213,3 @@ void applyToTemp(TempCorrectionType tempCorrectionType,
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_INDIRECT_CONVTYPES_H_ */

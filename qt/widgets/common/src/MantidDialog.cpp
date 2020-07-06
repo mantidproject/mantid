@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
@@ -19,7 +19,7 @@ using namespace MantidQt::API;
 /**
  * Default Constructor
  */
-MantidDialog::MantidDialog(QWidget *parent, Qt::WindowFlags flags)
+MantidDialog::MantidDialog(QWidget *parent, const Qt::WindowFlags &flags)
     : QDialog(parent, flags), m_pyRunner() {
   // re-emit the run Python code from m_pyRunner, to work this signal must reach
   // the slot in QtiPlot

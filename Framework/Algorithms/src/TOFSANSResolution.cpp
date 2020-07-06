@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/TOFSANSResolution.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -36,20 +36,20 @@ void TOFSANSResolution::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::InOut,
-          boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
+          std::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "ReducedWorkspace", "", Direction::Input, wsValidator),
                   "I(Q) workspace");
   declareProperty(std::make_unique<ArrayProperty<double>>(
-      "OutputBinning", boost::make_shared<RebinParamsValidator>()));
+      "OutputBinning", std::make_shared<RebinParamsValidator>()));
 
   declareProperty("MinWavelength", EMPTY_DBL(), "Minimum wavelength to use.");
   declareProperty("MaxWavelength", EMPTY_DBL(), "Maximum wavelength to use.");
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("PixelSizeX", 5.15, positiveDouble,
                   "Pixel size in the X direction (mm).");
@@ -90,7 +90,7 @@ void TOFSANSResolution::exec() {
   MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr reducedWS = getProperty("ReducedWorkspace");
   EventWorkspace_sptr reducedEventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(reducedWS);
+      std::dynamic_pointer_cast<EventWorkspace>(reducedWS);
   const double min_wl = getProperty("MinWavelength");
   const double max_wl = getProperty("MaxWavelength");
   double pixel_size_x = getEffectiveXPixelSize();

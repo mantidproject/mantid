@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INTEGRATE_3D_EVENTS_H
-#define INTEGRATE_3D_EVENTS_H
+#pragma once
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <tuple>
 #include <unordered_map>
@@ -80,31 +79,28 @@ public:
                  bool hkl_integ);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  boost::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(
-      std::vector<Kernel::V3D> E1Vec, Mantid::Kernel::V3D const &peak_q,
+  std::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(
+      const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
       bool specify_size, double peak_radius, double back_inner_radius,
       double back_outer_radius, std::vector<double> &axes_radii, double &inti,
       double &sigi);
 
   /// Find the net integrated intensity of a modulated peak, using ellipsoidal
   /// volumes
-  boost::shared_ptr<const Mantid::Geometry::PeakShape>
-  ellipseIntegrateModEvents(std::vector<Kernel::V3D> E1Vec,
-                            Mantid::Kernel::V3D const &peak_q,
-                            Mantid::Kernel::V3D const &hkl,
-                            Mantid::Kernel::V3D const &mnp, bool specify_size,
-                            double peak_radius, double back_inner_radius,
-                            double back_outer_radius,
-                            std::vector<double> &axes_radii, double &inti,
-                            double &sigi);
+  std::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateModEvents(
+      const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
+      Mantid::Kernel::V3D const &hkl, Mantid::Kernel::V3D const &mnp,
+      bool specify_size, double peak_radius, double back_inner_radius,
+      double back_outer_radius, std::vector<double> &axes_radii, double &inti,
+      double &sigi);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>,
+  std::pair<std::shared_ptr<const Mantid::Geometry::PeakShape>,
             std::tuple<double, double, double>>
   integrateStrongPeak(const IntegrationParameters &params,
                       const Kernel::V3D &peak_q, double &inti, double &sigi);
 
-  boost::shared_ptr<const Geometry::PeakShape>
+  std::shared_ptr<const Geometry::PeakShape>
   integrateWeakPeak(const IntegrationParameters &params,
                     Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
                     const std::tuple<double, double, double> &libPeak,
@@ -175,9 +171,9 @@ private:
               bool hkl_integ);
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
-  boost::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
+  std::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
   ellipseIntegrateEvents(
-      std::vector<Kernel::V3D> E1Vec, Kernel::V3D const &peak_q,
+      const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
       std::vector<std::pair<std::pair<double, double>,
                             Mantid::Kernel::V3D>> const &ev_list,
       std::vector<Mantid::Kernel::V3D> const &directions,
@@ -186,7 +182,7 @@ private:
       std::vector<double> &axes_radii, double &inti, double &sigi);
 
   /// Compute if a particular Q falls on the edge of a detector
-  double detectorQ(std::vector<Kernel::V3D> E1Vec,
+  double detectorQ(const std::vector<Kernel::V3D> &E1Vec,
                    const Mantid::Kernel::V3D QLabFrame,
                    const std::vector<double> &r);
 
@@ -211,5 +207,3 @@ private:
 } // namespace MDAlgorithms
 
 } // namespace Mantid
-
-#endif // INTEGRATE_3D_EVENTS_H

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 This module defines a function-style API for running Mantid
@@ -26,16 +26,11 @@ and assign it to the rebinned variable.
 
 Importing this module starts the FrameworkManager instance.
 """
-from __future__ import (absolute_import, division, print_function)
-
 # std libs
 from collections import OrderedDict, namedtuple
 import inspect
 import os
 import sys
-
-import six
-from six import iteritems
 
 import mantid
 # This is a simple API so give access to the aliases by default as well
@@ -106,64 +101,33 @@ def _create_generic_signature(algm_object):
     #       taking care of giving no default values to mandatory parameters
     #   2 - All output properties will be removed from the function
     #       argument list
-    if hasattr(inspect, 'Signature'):
-        from inspect import Parameter, Signature
-        pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
-        parameters = []
-        for name in algm_object.mandatoryProperties():
-            prop = algm_object.getProperty(name)
-            # Mandatory parameters are those for which the default value is not valid
-            if isinstance(prop.isValid, str):
-                valid_str = prop.isValid
-            else:
-                valid_str = prop.isValid()
-            if len(valid_str) > 0:
-                parameters.append(Parameter(name, pos_or_keyword))
-            else:
-                # None is not quite accurate here, but we are reproducing the
-                # behavior found in the C++ code for SimpleAPI.
-                parameters.append(Parameter(name, pos_or_keyword, default=None))
-        return Signature(parameters)
-    else:
-        return _create_generic_signature_legacy(algm_object)
-
-
-# Drop this when dropping Python 2
-def _create_generic_signature_legacy(algm_object):
-    """
-    Create a function signature appropriate for the given algorithm.
-    :param algm_object: An algorithm instance
-    :return: A 2-tuple suitable to replace func_code.co_varnames
-    """
-    # Dark magic to get the correct function signature
-    # Calling help(...) on the wrapper function will produce a function
-    # signature along the lines of AlgorithmName(*args, **kwargs).
-    # We will replace the name "args" by the list of properties, and
-    # the name "kwargs" by "Version=X".
-    #   1 - Get the algorithm properties and build a string to list them,
-    #       taking care of giving no default values to mandatory parameters
-    #   2 - All output properties will be removed from the function
-    #       argument list
-    arg_list = []
-    for p in algm_object.mandatoryProperties():
-        prop = algm_object.getProperty(p)
+    from inspect import Parameter, Signature
+    pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
+    parameters = []
+    for name in algm_object.mandatoryProperties():
+        prop = algm_object.getProperty(name)
         # Mandatory parameters are those for which the default value is not valid
         if isinstance(prop.isValid, str):
             valid_str = prop.isValid
         else:
             valid_str = prop.isValid()
         if len(valid_str) > 0:
-            arg_list.append(p)
+            parameters.append(Parameter(name, pos_or_keyword))
         else:
             # None is not quite accurate here, but we are reproducing the
             # behavior found in the C++ code for SimpleAPI.
-            arg_list.append("%s=None" % p)
+            parameters.append(Parameter(name, pos_or_keyword, default=None))
+    return Signature(parameters)
 
-    # Build the function argument string from the tokens we found
-    arg_str = ','.join(arg_list)
-    # Calling help(...) will put a * in front of the first parameter name,
-    # so we use \b to delete it
-    return "\b%s" % arg_str, "\b\bVersion=%d" % algm_object.version()
+
+def _show_dialog_fn_deprecation_warning(name):
+    """Raise a deprecation warning for a *Dialog being used.
+    """
+    import warnings
+    help_msg = "{} has been deprecated. " \
+               "All Dialog functions will be removed in a future release.".format(name)
+    warnings.warn(help_msg, UserWarning)
+    logger.warning(help_msg)
 
 
 def Load(*args, **kwargs):
@@ -261,6 +225,8 @@ def LoadDialog(*args, **kwargs):
       - Disable :: A CSV list of properties to disable in the dialog
       - Message :: An optional message string
     """
+    _show_dialog_fn_deprecation_warning("LoadDialog")
+
     arguments = {}
     filename = None
     wkspace = None
@@ -735,10 +701,7 @@ def _get_function_spec(func):
     """
     import inspect
     try:
-        if six.PY2:
-            argspec = inspect.getargspec(func)
-        else:
-            argspec = inspect.getfullargspec(func)
+        argspec = inspect.getfullargspec(func)
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args
@@ -1097,7 +1060,7 @@ def set_properties(alg_object, *args, **kwargs):
         mandatory_props = []
 
     postponed = []
-    for (key, value) in iteritems(kwargs):
+    for (key, value) in kwargs.items():
         if key in mandatory_props:
             mandatory_props.remove(key)
         if "IndexSet" in key:
@@ -1315,7 +1278,7 @@ def set_properties_dialog(algm_object, *args, **kwargs):
 
     # finally run the configured dialog
     import mantidplot
-    dialog_accepted = mantidplot.createScriptInputDialog(algm_object.name(), presets, message,
+    dialog_accepted = mantidplot.createScriptInputDialog(algm_object, presets, message,
                                                          enabled_list, disabled_list)
     if not dialog_accepted:
         raise RuntimeError('Algorithm input cancelled')
@@ -1333,6 +1296,8 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
     """
 
     def algorithm_wrapper(*args, **kwargs):
+        _show_dialog_fn_deprecation_warning("{}Dialog".format(algorithm))
+
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]
@@ -1433,7 +1398,7 @@ def _translate():
 
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
-    for name, versions in iteritems(algs):
+    for name, versions in algs.items():
         if specialization_exists(name):
             continue
         try:

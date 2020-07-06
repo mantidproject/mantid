@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RECTF_H
-#define RECTF_H
+#pragma once
 
 #include <QPoint>
 #include <QRectF>
@@ -208,5 +207,3 @@ inline std::ostream &operator<<(std::ostream &ostr, const QPointF &p) {
 }
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // RECTF_H

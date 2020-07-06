@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATORTEST_H_
-#define MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -464,8 +463,9 @@ private:
     return ws2;
   }
 
-  MatrixWorkspace_sptr createFitWorkspace(const size_t ny,
-                                          std::function<double(double)> fun) {
+  MatrixWorkspace_sptr
+  createFitWorkspace(const size_t ny,
+                     const std::function<double(double)> &fun) {
     MatrixWorkspace_sptr ws(new WorkspaceTester);
     size_t nx = ny + 1;
     double x0 = -1.0;
@@ -523,5 +523,3 @@ private:
     return createFitWorkspace(ny, cumulFun);
   }
 };
-
-#endif /* MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATORTEST_H_ */

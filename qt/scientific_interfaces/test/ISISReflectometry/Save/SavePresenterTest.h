@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
-#define MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
+#pragma once
 
 #include "../ReflMockObjects.h"
 #include "GUI/Save/IAsciiSaver.h"
@@ -332,6 +331,13 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyMainPresenterSettingsChanged() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, setBatchUnsaved(true));
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
 private:
   SavePresenter makePresenter() {
     auto asciiSaver = std::make_unique<NiceMock<MockAsciiSaver>>();
@@ -348,13 +354,13 @@ private:
     AnalysisDataService::Instance().clear();
   }
 
-  Workspace2D_sptr createWorkspace(std::string name) {
+  Workspace2D_sptr createWorkspace(const std::string &name) {
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(name, ws);
     return ws;
   }
 
-  void createTableWorkspace(std::string name) {
+  void createTableWorkspace(const std::string &name) {
     ITableWorkspace_sptr ws =
         WorkspaceFactory::Instance().createTable("TableWorkspace");
     AnalysisDataService::Instance().addOrReplace(name, ws);
@@ -368,10 +374,10 @@ private:
     return workspaceNames;
   }
 
-  void createWorkspaceGroup(std::string groupName,
-                            std::vector<std::string> workspaceNames) {
+  void createWorkspaceGroup(const std::string &groupName,
+                            const std::vector<std::string> &workspaceNames) {
     AnalysisDataService::Instance().add(groupName,
-                                        boost::make_shared<WorkspaceGroup>());
+                                        std::make_shared<WorkspaceGroup>());
     createWorkspaces(workspaceNames);
     for (auto name : workspaceNames)
       AnalysisDataService::Instance().addToGroup(groupName, name);
@@ -437,8 +443,8 @@ private:
   }
 
   void expectSaveWorkspaces(
-      std::vector<std::string> workspaceNames,
-      std::vector<std::string> logs = std::vector<std::string>{}) {
+      const std::vector<std::string> &workspaceNames,
+      const std::vector<std::string> &logs = std::vector<std::string>{}) {
     EXPECT_CALL(m_view, getSelectedParameters())
         .Times(1)
         .WillOnce(Return(logs));
@@ -484,4 +490,3 @@ private:
   std::string m_separator;
   bool m_includeQResolution;
 };
-#endif // MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_

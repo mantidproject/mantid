@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CompositeCluster.h"
 
@@ -18,8 +18,8 @@ private:
 
 public:
   explicit Comparitor(const size_t &label) : m_label(label) {}
-  bool operator()(
-      const boost::shared_ptr<Mantid::Crystal::ICluster> &pCluster) const {
+  bool
+  operator()(const std::shared_ptr<Mantid::Crystal::ICluster> &pCluster) const {
     return pCluster->containsLabel(m_label);
   }
 };
@@ -34,7 +34,7 @@ namespace Crystal {
  * @return Integrated signal and error sq values.
  */
 ICluster::ClusterIntegratedValues CompositeCluster::integrate(
-    boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const {
+    std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const {
 
   double errorIntSQ = 0;
   double sigInt = 0;
@@ -52,7 +52,7 @@ ICluster::ClusterIntegratedValues CompositeCluster::integrate(
  * @param ws
  */
 void CompositeCluster::writeTo(
-    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const {
+    std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const {
   for (const auto &ownedCluster : m_ownedClusters) {
     ownedCluster->writeTo(ws);
   }
@@ -158,7 +158,7 @@ void CompositeCluster::setRootCluster(ICluster const *root) {
  * Add other IClusters to own.
  * @param toOwn : Item to own
  */
-void CompositeCluster::add(boost::shared_ptr<ICluster> &toOwn) {
+void CompositeCluster::add(std::shared_ptr<ICluster> &toOwn) {
   if (toOwn->size() > 0) // Do not add empty clusters.
   {
     m_ownedClusters.emplace_back(toOwn);

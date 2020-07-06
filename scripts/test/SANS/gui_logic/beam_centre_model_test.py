@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.enums import FindDirectionEnum, SANSInstrument, DetectorType
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 
@@ -66,13 +64,16 @@ class BeamCentreModelTest(unittest.TestCase):
     def test_that_find_beam_centre_calls_centre_finder_once_when_COM_is_False(self):
         state = mock.MagicMock()
 
+        starting_lab_positions = {"pos1": self.beam_centre_model.lab_pos_1,
+                                  "pos2": self.beam_centre_model.lab_pos_2}
+
         self.beam_centre_model.find_beam_centre(state)
 
         self.SANSCentreFinder.return_value.assert_called_once_with(state, r_min=self.beam_centre_model.r_min,
                                                                    r_max=self.beam_centre_model.r_max,
                                                                    max_iter=self.beam_centre_model.max_iterations,
-                                                                   x_start=self.beam_centre_model.lab_pos_1,
-                                                                   y_start=self.beam_centre_model.lab_pos_2,
+                                                                   x_start=starting_lab_positions["pos1"],
+                                                                   y_start=starting_lab_positions["pos2"],
                                                                    tolerance=self.beam_centre_model.tolerance,
                                                                    find_direction=FindDirectionEnum.ALL,
                                                                    reduction_method=True,
@@ -81,6 +82,9 @@ class BeamCentreModelTest(unittest.TestCase):
     def test_that_find_beam_centre_calls_centre_finder_twice_when_COM_is_TRUE(self):
         state = mock.MagicMock()
         self.beam_centre_model.COM = True
+
+        starting_lab_positions = {"pos1": self.beam_centre_model.lab_pos_1,
+                                  "pos2": self.beam_centre_model.lab_pos_2}
 
         self.beam_centre_model.find_beam_centre(state)
 
@@ -99,8 +103,8 @@ class BeamCentreModelTest(unittest.TestCase):
         self.SANSCentreFinder.return_value.assert_any_call(state, r_min=self.beam_centre_model.r_min,
                                                            r_max=self.beam_centre_model.r_max,
                                                            max_iter=self.beam_centre_model.max_iterations,
-                                                           x_start=self.beam_centre_model.lab_pos_1,
-                                                           y_start=self.beam_centre_model.lab_pos_2,
+                                                           x_start=starting_lab_positions["pos1"],
+                                                           y_start=starting_lab_positions["pos2"],
                                                            tolerance=self.beam_centre_model.tolerance,
                                                            find_direction=FindDirectionEnum.ALL,
                                                            reduction_method=False, component=DetectorType.LAB)

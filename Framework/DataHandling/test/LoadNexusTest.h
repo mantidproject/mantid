@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADNEXUSTEST_H_
-#define LOADNEXUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -68,7 +67,7 @@ public:
     // AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1"));
 
     MatrixWorkspace_sptr output2D =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     // Should be 32 for file inputFile =
     // "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -117,9 +116,9 @@ public:
          outputSpace + "_4"));
 
     MatrixWorkspace_sptr output2D =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output1);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output1);
     MatrixWorkspace_sptr output2D2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output2);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output2);
     // Should be 32 for file inputFile =
     // "../../../../Test/Nexus/emu00006475.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -143,5 +142,3 @@ private:
   std::string inputFile;
   std::string outputSpace;
 };
-
-#endif /*LOADNEXUSTEST_H_*/

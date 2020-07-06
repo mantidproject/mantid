@@ -1,14 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
 from assert_called import assert_called
 from fake_signal import FakeSignal
-from mantid.py3compat import mock
+from unittest import mock
 from sans.gui_logic.models.RunSelectionModel import RunSelectionModel
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_finder import SummableRunFinder

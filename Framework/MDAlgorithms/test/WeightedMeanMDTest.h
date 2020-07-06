@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
-#define MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
+#pragma once
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/WeightedMeanMD.h"
@@ -30,8 +29,7 @@ private:
                                                const std::string &name) {
     // Create and run the algorithm
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    IAlgorithm *alg =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
     alg->initialize();
     alg->setProperty("NSpec", 1);
     alg->setProperty("DataY", s);
@@ -41,28 +39,28 @@ private:
     alg->setProperty("OutputWorkspace", name);
     alg->execute();
     // Return the generated MDHistoWorkspace
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(name));
+    return std::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(name));
   }
 
   /// Helper method to run the WeightedMean algorithm on two matrix workspaces
   /// and return the result.
-  MatrixWorkspace_sptr run_matrix_weighed_mean(MatrixWorkspace_sptr a,
-                                               MatrixWorkspace_sptr b,
+  MatrixWorkspace_sptr run_matrix_weighed_mean(const MatrixWorkspace_sptr &a,
+                                               const MatrixWorkspace_sptr &b,
                                                const std::string &name) {
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    IAlgorithm *alg =
-        FrameworkManager::Instance().createAlgorithm("WeightedMean");
+    auto alg = AlgorithmManager::Instance().create("WeightedMean");
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty("InputWorkspace1", a);
     alg->setProperty("InputWorkspace2", b);
     alg->setProperty("OutputWorkspace", name);
     alg->execute();
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(name));
+    return std::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(name));
   }
 
   /// Helper method to run input type validation checks.
-  void do_test_workspace_input_types(IMDWorkspace_sptr a, IMDWorkspace_sptr b) {
+  void do_test_workspace_input_types(const IMDWorkspace_sptr &a,
+                                     const IMDWorkspace_sptr &b) {
     WeightedMeanMD alg;
     alg.initialize();
 
@@ -138,7 +136,7 @@ public:
 
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
     MDHistoWorkspace_sptr c =
-        boost::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(outName));
+        std::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(outName));
 
     TS_ASSERT(c != nullptr);
     // Since A and B are equivalent, the mean Signal in C should be the same as
@@ -183,8 +181,7 @@ public:
 
     // Create and run the algorithm
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    IAlgorithm *alg =
-        FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
+    auto alg = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
     alg->initialize();
     alg->setProperty("Dimensionality", 1);
     alg->setProperty("SignalInput", s);
@@ -196,7 +193,7 @@ public:
     alg->setProperty("OutputWorkspace", name);
     alg->execute();
     // Return the generated MDHistoWorkspace
-    return boost::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(name));
+    return std::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(name));
   }
 
   /// Compare the outputs from this algorithm to the equivalent for
@@ -242,7 +239,7 @@ public:
 
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
     MDHistoWorkspace_sptr weighted_mean_md =
-        boost::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(outName));
+        std::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(outName));
 
     // Check the outputs between both weighted mean algorithms.
     for (size_t j = 0; j < s1.size(); ++j) {
@@ -261,5 +258,3 @@ public:
     ADS.remove("weighted_mean_matrix");
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FLATBACKGROUNDTEST_H_
-#define FLATBACKGROUNDTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -434,7 +433,7 @@ public:
 
     back.setProperty(
         "InputWorkspace",
-        boost::static_pointer_cast<Mantid::API::MatrixWorkspace>(WS));
+        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(WS));
     back.setPropertyValue("OutputWorkspace",
                           "calculateflatbackgroundtest_third");
     back.setPropertyValue("WorkspaceIndexList", "");
@@ -681,9 +680,9 @@ private:
     WS->getAxis(0)->setUnit("TOF");
     WS->setYUnit("Counts");
 
-    boost::shared_ptr<Geometry::Instrument> testInst(
+    std::shared_ptr<Geometry::Instrument> testInst(
         new Geometry::Instrument("testInst"));
-    // testInst->setReferenceFrame(boost::shared_ptr<Geometry::ReferenceFrame>(new
+    // testInst->setReferenceFrame(std::shared_ptr<Geometry::ReferenceFrame>(new
     // Geometry::ReferenceFrame(Geometry::PointingAlong::Y,Geometry::X,Geometry::Left,"")));
 
     const double pixelRadius(0.05);
@@ -764,6 +763,7 @@ private:
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
               "Removed1");
       for (size_t j = 0; j < spectraCount; ++j) {
+        // cppcheck-suppress unreadVariable
         const double expected =
             (movingAverageSpecialY(j) + (static_cast<double>(windowWidth) - 1) *
                                             movingAverageStandardY(j)) /
@@ -840,7 +840,8 @@ private:
   }
 
   void compareSubtractedAndBackgroundWorkspaces(
-      MatrixWorkspace_sptr originalWS, const std::string &subtractedWSName,
+      const MatrixWorkspace_sptr &originalWS,
+      const std::string &subtractedWSName,
       const std::string &backgroundWSName) {
     const std::string minusWSName("minused");
     MatrixWorkspace_sptr backgroundWS =
@@ -870,5 +871,3 @@ private:
     AnalysisDataService::Instance().remove(minusWSName);
   }
 };
-
-#endif /*FlatBackgroundTest_H_*/

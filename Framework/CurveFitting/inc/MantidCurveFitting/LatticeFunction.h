@@ -1,15 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LATTICEFUNCTION_H_
-#define MANTID_CURVEFITTING_LATTICEFUNCTION_H_
+#pragma once
 
 #include "MantidAPI/ILatticeFunction.h"
-#include "MantidKernel/System.h"
-
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 
 namespace Mantid {
@@ -27,7 +25,7 @@ namespace CurveFitting {
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 15/04/2015
 */
-class DLLExport LatticeFunction : public API::ILatticeFunction {
+class MANTID_CURVEFITTING_DLL LatticeFunction : public API::ILatticeFunction {
 public:
   LatticeFunction();
 
@@ -49,9 +47,7 @@ private:
   Functions::PawleyParameterFunction_sptr m_cellParameters;
 };
 
-using LatticeFunction_sptr = boost::shared_ptr<LatticeFunction>;
+using LatticeFunction_sptr = std::shared_ptr<LatticeFunction>;
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_LATTICEFUNCTION_H_ */

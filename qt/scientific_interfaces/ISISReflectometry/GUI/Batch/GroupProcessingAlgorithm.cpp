@@ -1,11 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "GroupProcessingAlgorithm.h"
+
+#include <utility>
+
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/Group.h"
 #include "AlgorithmProperties.h"
@@ -59,9 +61,10 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);
 }
 
-void updateGroupFromOutputProperties(IAlgorithm_sptr algorithm, Item &group) {
-  auto const stitched =
-      AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
+void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm,
+                                     Item &group) {
+  auto const stitched = AlgorithmProperties::getOutputWorkspace(
+      std::move(algorithm), "OutputWorkspace");
   group.setOutputNames(std::vector<std::string>{stitched});
 }
 
@@ -128,7 +131,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   auto properties = createAlgorithmRuntimeProps(model, group);
 
   // Return the configured algorithm
-  auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
+  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(
       alg, properties, updateGroupFromOutputProperties, &group);
   return jobAlgorithm;
 }

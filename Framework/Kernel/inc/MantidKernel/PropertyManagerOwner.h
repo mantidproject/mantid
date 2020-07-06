@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_PROPERTYMANAGEROWNER_H_
-#define MANTID_KERNEL_PROPERTYMANAGEROWNER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -112,7 +111,10 @@ public:
                    std::vector<PropertyManager *> /* outputs*/) const override {
     throw(std::runtime_error("Not yet implmented"));
   }
-  void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) override {
+
+  void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/,
+                        const std::vector<std::string> &
+                        /* excludedFromFiltering */) override {
     throw(std::runtime_error("Not yet implmented"));
   }
 
@@ -122,10 +124,8 @@ public:
 
 private:
   /// Shared pointer to the 'real' property manager
-  boost::shared_ptr<PropertyManager> m_properties;
+  std::shared_ptr<PropertyManager> m_properties;
 };
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_PROPERTYMANAGEROWNER_H_*/

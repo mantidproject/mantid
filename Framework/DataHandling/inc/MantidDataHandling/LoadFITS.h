@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADFITS_H_
-#define MANTID_DATAHANDLING_LOADFITS_H_
+#pragma once
 
 //---------------------------------------------------
 // Includes
@@ -17,6 +16,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -91,15 +91,16 @@ private:
   DataObjects::Workspace2D_sptr makeWorkspace(
       const FITSInfo &fileInfo, size_t &newFileNumber,
       std::vector<char> &buffer, API::MantidImage &imageY,
-      API::MantidImage &imageE, const DataObjects::Workspace2D_sptr parent,
+      API::MantidImage &imageE, const DataObjects::Workspace2D_sptr &parent,
       bool loadAsRectImg = false, int binSize = 1, double noiseThresh = false);
 
-  void addAxesInfoAndLogs(DataObjects::Workspace2D_sptr ws, bool loadAsRectImg,
-                          const FITSInfo &fileInfo, int binSize, double cmpp);
+  void addAxesInfoAndLogs(const DataObjects::Workspace2D_sptr &ws,
+                          bool loadAsRectImg, const FITSInfo &fileInfo,
+                          int binSize, double cmpp);
 
   // Reads the data from a single FITS file into a workspace (directly, fast)
   void readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
-                           DataObjects::Workspace2D_sptr ws,
+                           const DataObjects::Workspace2D_sptr &ws,
                            std::vector<char> &buffer);
 
   // Reads the data from a single FITS file into image objects (Y and E) that
@@ -181,5 +182,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif // MANTID_DATAHANDLING_LOADFITS_H_

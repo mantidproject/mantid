@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MULTIPERIODGROUPWORKERTEST_H_
-#define MANTID_API_MULTIPERIODGROUPWORKERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -67,7 +66,7 @@ public:
 
     MultiPeriodGroupWorker worker("MyInputWorkspaces");
 
-    auto alg = boost::make_shared<TestAlgorithm>();
+    auto alg = std::make_shared<TestAlgorithm>();
     alg->initialize();
     alg->setPropertyValue("MyInputWorkspaces", "a, b");
 
@@ -81,7 +80,7 @@ public:
 
     MultiPeriodGroupWorker worker("MyInputWorkspaces");
 
-    auto alg = boost::make_shared<TestAlgorithm>();
+    auto alg = std::make_shared<TestAlgorithm>();
     alg->initialize();
     alg->setPropertyValue("MyInputWorkspaces", "a");
     alg->setPropertyValue("OutputWorkspace", "out_ws");
@@ -98,5 +97,3 @@ public:
     AnalysisDataService::Instance().remove("out_ws");
   }
 };
-
-#endif /* MANTID_API_MULTIPERIODGROUPWORKERTEST_H_ */

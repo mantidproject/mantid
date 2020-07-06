@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidAPI/Axis.h"
@@ -142,7 +142,7 @@ void LoadCanSAS1D::exec() {
     outputWork = WS;
     break;
   default:
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     for (unsigned int i = 0; i < numEntries; ++i) {
       std::string run;
       MatrixWorkspace_sptr newWork = loadEntry(entryList->item(i), run);
@@ -297,9 +297,9 @@ void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
  * @param[out] container the data will be added to this group
  * @throw ExistsError if a workspace with this name had already been added
  */
-void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
-                                      const std::string &newWorkName,
-                                      API::WorkspaceGroup_sptr container) {
+void LoadCanSAS1D::appendDataToOutput(
+    const API::MatrixWorkspace_sptr &newWork, const std::string &newWorkName,
+    const API::WorkspaceGroup_sptr &container) {
   // the name of the property, like the workspace name must be different for
   // each workspace. Add "_run" at the end to stop problems with names like
   // "outputworkspace"
@@ -317,8 +317,9 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
  */
-void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
-                                     API::MatrixWorkspace_sptr localWorkspace) {
+void LoadCanSAS1D::runLoadInstrument(
+    const std::string &inst_name,
+    const API::MatrixWorkspace_sptr &localWorkspace) {
 
   API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
@@ -342,7 +343,7 @@ void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
  *  @param[in] wSpace the log will be created in this workspace
  */
 void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
-                              API::MatrixWorkspace_sptr wSpace) const {
+                              const API::MatrixWorkspace_sptr &wSpace) const {
   API::Run &run = wSpace->mutableRun();
   Element *runText = sasEntry->getChildElement("Run");
   check(runText, "Run");
@@ -369,7 +370,7 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
 
 void LoadCanSAS1D::createSampleInformation(
     const Poco::XML::Element *const sasEntry,
-    Mantid::API::MatrixWorkspace_sptr wSpace) const {
+    const Mantid::API::MatrixWorkspace_sptr &wSpace) const {
   auto &sample = wSpace->mutableSample();
 
   // Get the thickness information

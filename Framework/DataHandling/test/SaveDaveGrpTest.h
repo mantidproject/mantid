@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEDAVEGRPTEST_H_
-#define MANTID_DATAHANDLING_SAVEDAVEGRPTEST_H_
+#pragma once
 
 #include "MantidDataHandling/SaveDaveGrp.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidDataHandling/LoadEventNexus.h"
@@ -35,7 +34,7 @@ public:
   static void destroySuite(SaveDaveGrpTest *suite) { delete suite; }
 
   SaveDaveGrpTest() {
-    saver = FrameworkManager::Instance().createAlgorithm("SaveDaveGrp");
+    saver = AlgorithmManager::Instance().create("SaveDaveGrp");
   }
 
   ~SaveDaveGrpTest() override {}
@@ -203,7 +202,6 @@ public:
   }
 
   void test_exec_event() {
-    Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     ld.initialize();
     std::string outws("CNCS");
@@ -268,7 +266,7 @@ public:
   }
 
 private:
-  IAlgorithm *saver;
+  IAlgorithm_sptr saver;
 
   MatrixWorkspace_sptr makeWorkspace(const std::string &input) {
     // all the Y values in this new workspace are set to DEFAU_Y, which
@@ -281,5 +279,3 @@ private:
     return inputWS;
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVEDAVEGRPTEST_H_ */

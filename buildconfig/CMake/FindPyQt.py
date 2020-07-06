@@ -4,8 +4,6 @@
 
 There is a commandline argument to select the version of PyQt.
 """
-from __future__ import print_function
-
 import argparse
 import os
 import pprint
@@ -13,6 +11,7 @@ import re
 import sys
 
 QT_TAG_RE = re.compile(r'Qt_\d+_\d+_\d+')
+
 
 class PyQtConfig(object):
 
@@ -97,6 +96,7 @@ def main():
 
     print(PyQtConfig('PyQt%d' % args.version))
     return 0
+
 
 def get_options():
     parser = argparse.ArgumentParser(description='Extract PyQt config information')

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_REFLECTIONGENERATOR_H_
-#define MANTID_GEOMETRY_REFLECTIONGENERATOR_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/HKLFilter.h"
@@ -106,12 +105,12 @@ public:
   std::vector<Kernel::V3D> getHKLs(double dMin, double dMax) const;
   std::vector<Kernel::V3D>
   getHKLs(double dMin, double dMax,
-          HKLFilter_const_sptr reflectionConditionFilter) const;
+          const HKLFilter_const_sptr &reflectionConditionFilter) const;
 
   std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax) const;
   std::vector<Kernel::V3D>
   getUniqueHKLs(double dMin, double dMax,
-                HKLFilter_const_sptr reflectionConditionFilter) const;
+                const HKLFilter_const_sptr &reflectionConditionFilter) const;
 
   std::vector<double> getDValues(const std::vector<Kernel::V3D> &hkls) const;
   std::vector<double> getFsSquared(const std::vector<Kernel::V3D> &hkls) const;
@@ -124,5 +123,3 @@ private:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_REFLECTIONGENERATOR_H_ */

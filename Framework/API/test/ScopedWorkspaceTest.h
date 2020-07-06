@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SCOPEDWORKSPACETEST_H_
-#define MANTID_API_SCOPEDWORKSPACETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -32,7 +31,7 @@ private:
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
-using MockWorkspace_sptr = boost::shared_ptr<MockWorkspace>;
+using MockWorkspace_sptr = std::shared_ptr<MockWorkspace>;
 
 class ScopedWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -219,5 +218,3 @@ public:
 private:
   AnalysisDataServiceImpl &m_ads;
 };
-
-#endif /* MANTID_API_SCOPEDWORKSPACETEST_H_ */

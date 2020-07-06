@@ -1,16 +1,10 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function
-)
 from mantid.api import (
     AlgorithmFactory,
     DataProcessorAlgorithm,
@@ -86,12 +80,16 @@ class PropertyNames(object):
 
     # all these array properties must have either single value, or
     # as many, as there are reflected beams (i.e. angle configurations)
-    PROPETIES_TO_SIZE_MATCH = [DB, ANGLE_OPTION, THETA,
-                               SUM_TYPE, HIGH_FRG_HALF_WIDTH, HIGH_FRG_HALF_WIDTH_DIRECT,
-                               HIGH_BKG_OFFSET, HIGH_BKG_OFFSET_DIRECT, HIGH_BKG_WIDTH, HIGH_BKG_WIDTH_DIRECT,
-                               LOW_FRG_HALF_WIDTH, LOW_FRG_HALF_WIDTH_DIRECT, LOW_BKG_OFFSET, LOW_BKG_OFFSET_DIRECT,
-                               LOW_BKG_WIDTH, LOW_BKG_WIDTH_DIRECT, START_WS_INDEX, END_WS_INDEX, START_WS_INDEX_DIRECT,
-                               END_WS_INDEX_DIRECT]
+    PROPETIES_TO_SIZE_MATCH = [DB, ANGLE_OPTION, THETA, SUM_TYPE, GROUPING_FRACTION,
+                               HIGH_FRG_HALF_WIDTH, HIGH_FRG_HALF_WIDTH_DIRECT,
+                               HIGH_BKG_OFFSET, HIGH_BKG_OFFSET_DIRECT,
+                               HIGH_BKG_WIDTH, HIGH_BKG_WIDTH_DIRECT,
+                               LOW_FRG_HALF_WIDTH, LOW_FRG_HALF_WIDTH_DIRECT,
+                               LOW_BKG_OFFSET, LOW_BKG_OFFSET_DIRECT,
+                               LOW_BKG_WIDTH, LOW_BKG_WIDTH_DIRECT,
+                               START_WS_INDEX, END_WS_INDEX,
+                               START_WS_INDEX_DIRECT, END_WS_INDEX_DIRECT,
+                               WAVELENGTH_LOWER, WAVELENGTH_UPPER]
 
     DAN = 'DetectorAngle'
     SAN = 'SampleAngle'
@@ -370,8 +368,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[7],
                 validator=nonnegativeInts,
             ),
-            doc='Distance of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels'
+            doc='Distance of flat background region towards smaller detector angles from the '
+                + 'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.LOW_BKG_OFFSET_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -380,8 +378,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[5],
                 validator=nonnegativeInts,
             ),
-            doc='Width of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels'
+            doc='Width of flat background region towards smaller detector angles from the '
+                + 'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.LOW_BKG_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -399,8 +397,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[7],
                 validator=nonnegativeInts,
             ),
-            doc='Distance of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels'
+            doc='Distance of flat background region towards larger detector angles from the '
+                + 'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.HIGH_BKG_OFFSET_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -409,8 +407,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[5],
                 validator=nonnegativeInts,
             ),
-            doc='Width of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels'
+            doc='Width of flat background region towards larger detector angles from the '
+                + 'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.HIGH_BKG_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -462,8 +460,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[7],
                 validator=nonnegativeInts,
             ),
-            doc='Distance of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels.'
+            doc='Distance of flat background region towards smaller detector angles from the '
+                + 'foreground centre, in pixels.'
         )
         self.setPropertyGroup(PropertyNames.LOW_BKG_OFFSET, preProcessReflected)
         self.declareProperty(
@@ -472,8 +470,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[5],
                 validator=nonnegativeInts,
             ),
-            doc='Width of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels'
+            doc='Width of flat background region towards smaller detector angles from the '
+                + 'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.LOW_BKG_WIDTH, preProcessReflected)
         self.declareProperty(
@@ -491,8 +489,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[7],
                 validator=nonnegativeInts,
             ),
-            doc='Distance of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels'
+            doc='Distance of flat background region towards larger detector angles from the '
+                + 'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.HIGH_BKG_OFFSET, preProcessReflected)
         self.declareProperty(
@@ -501,8 +499,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[5],
                 validator=nonnegativeInts,
             ),
-            doc='Width of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels.'
+            doc='Width of flat background region towards larger detector angles from the '
+                + 'foreground centre, in pixels.'
         )
         self.setPropertyGroup(PropertyNames.HIGH_BKG_WIDTH, preProcessReflected)
         self.declareProperty(
@@ -548,7 +546,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         for property_name in PropertyNames.PROPETIES_TO_SIZE_MATCH:
             value = self.getProperty(property_name).value
             if len(value) != dimensionality and len(value) != 1:
-                issues[property_name] = 'Must have a single value or as many as there are reflected beams: given {0}, ' \
+                issues[property_name] = 'Must have a single value or as many as there are reflected beams: given {0}, '\
                                         'but there are {1} reflected beams'.format(len(value), dimensionality)
         if self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value:
             manual_scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
@@ -820,5 +818,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=self._outWS)
         self.setProperty(Prop.OUTPUT_WS, self._outWS)
         self._autoCleanup.finalCleanup()
+
 
 AlgorithmFactory.subscribe(ReflectometryILLAutoProcess)

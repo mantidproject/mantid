@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOAD_SHAPETEST_H_
-#define LOAD_SHAPETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
@@ -14,6 +13,7 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadSampleShape.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/OptionalBool.h"
@@ -98,6 +98,22 @@ public:
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
     TS_ASSERT_DELTA(cube->volume(), 0.000001, 0.000001);
+  }
+
+  void test_peak_workspace() {
+    LoadSampleShape alg;
+    alg.initialize();
+    const int npeaks(10);
+    PeaksWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::createPeaksWorkspace(npeaks);
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", "__dummy_unused");
+    alg.setProperty("OutputWorkspace", inputWS);
+    alg.setPropertyValue("Filename", "cube.stl");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    getMeshObject(alg);
   }
 
   void test_fail_off_invalid_first_line() {
@@ -218,7 +234,7 @@ private:
 
   const MeshObject *loadMeshObject(LoadSampleShape &alg,
                                    bool outputWsSameAsInputWs,
-                                   const std::string filename) {
+                                   const std::string &filename) {
     alg.initialize();
     alg.setPropertyValue("Filename", filename);
     prepareWorkspaces(alg, outputWsSameAsInputWs);
@@ -227,7 +243,7 @@ private:
     return getMeshObject(alg);
   }
 
-  void loadFailureTest(LoadSampleShape &alg, const std::string filename) {
+  void loadFailureTest(LoadSampleShape &alg, const std::string &filename) {
     alg.initialize();
     alg.setPropertyValue("Filename", filename);
     prepareWorkspaces(alg, true);
@@ -236,8 +252,11 @@ private:
   }
 
   const MeshObject *getMeshObject(LoadSampleShape &alg) {
-    MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
-    const auto &s(ws->sample());
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto ei = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+    if (!ei)
+      throw std::invalid_argument("Wrong type of input workspace");
+    const auto &s(ei->sample());
     auto &obj = s.getShape();
     auto mObj = dynamic_cast<const MeshObject *>(&obj);
     TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
@@ -277,7 +296,7 @@ private:
   std::unique_ptr<LoadSampleShape> alg;
   const int numberOfIterations = 5;
 
-  std::unique_ptr<LoadSampleShape> setupAlg(Workspace2D_sptr inputWS) {
+  std::unique_ptr<LoadSampleShape> setupAlg(const Workspace2D_sptr &inputWS) {
     auto loadAlg = std::make_unique<LoadSampleShape>();
     loadAlg->initialize();
     loadAlg->setChild(true);
@@ -289,4 +308,3 @@ private:
     return loadAlg;
   }
 };
-#endif /* LOAD_SHAPETEST_H_ */

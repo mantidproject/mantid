@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_BEAMLINE_SPECTRUMINFO_H_
-#define MANTID_BEAMLINE_SPECTRUMINFO_H_
+#pragma once
 
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
@@ -47,6 +46,7 @@ public:
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinition);
 
   size_t size() const;
+  size_t detectorCount() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
   void setSpectrumDefinition(const size_t index, SpectrumDefinition def);
@@ -59,5 +59,3 @@ private:
 
 } // namespace Beamline
 } // namespace Mantid
-
-#endif /* MANTID_BEAMLINE_SPECTRUMINFO_H_ */

@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SPECTRUMINFO_H_
-#define MANTID_API_SPECTRUMINFO_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <vector>
 
@@ -57,6 +56,7 @@ public:
   ~SpectrumInfo();
 
   size_t size() const;
+  size_t detectorCount() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
@@ -100,7 +100,7 @@ private:
   const ExperimentInfo &m_experimentInfo;
   Geometry::DetectorInfo &m_detectorInfo;
   const Beamline::SpectrumInfo &m_spectrumInfo;
-  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
+  mutable std::vector<std::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
@@ -110,5 +110,3 @@ using SpectrumInfoConstIt = SpectrumInfoIterator<const SpectrumInfo>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_SPECTRUMINFO_H_ */

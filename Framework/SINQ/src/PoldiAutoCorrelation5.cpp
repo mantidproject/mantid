@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -17,7 +17,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Poldi {
@@ -54,11 +54,9 @@ void PoldiAutoCorrelation5::init() {
    * slightly different variants of the algorithm as they are implemented
    * in the original fortran analysis software.
    */
-  m_core = boost::shared_ptr<PoldiAutoCorrelationCore>(
+  m_core = std::shared_ptr<PoldiAutoCorrelationCore>(
       new PoldiAutoCorrelationCore(g_log));
 }
-
-/** ***************************************************************** */
 
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
@@ -88,7 +86,7 @@ void PoldiAutoCorrelation5::exec() {
   PoldiAbstractChopper_sptr chopper = instrumentAdapter.chopper();
 
   PoldiAbstractDetector_sptr detector = instrumentAdapter.detector();
-  boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector(
+  std::shared_ptr<PoldiDeadWireDecorator> cleanDetector(
       new PoldiDeadWireDecorator(localWorkspace->detectorInfo(), detector));
 
   // log configuration information
@@ -103,7 +101,7 @@ void PoldiAutoCorrelation5::exec() {
         m_core->calculate(localWorkspace);
 
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(outputws));
+                std::dynamic_pointer_cast<Workspace>(outputws));
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when saving the PoldiIPP Results data to "
@@ -115,8 +113,8 @@ void PoldiAutoCorrelation5::exec() {
 }
 
 void PoldiAutoCorrelation5::logConfigurationInformation(
-    boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector,
-    PoldiAbstractChopper_sptr chopper) {
+    const std::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
+    const PoldiAbstractChopper_sptr &chopper) {
   if (cleanDetector && chopper) {
     g_log.information()
         << "____________________________________________________ \n";

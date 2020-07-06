@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SPACEGROUPFACTORY_H_
-#define MANTID_GEOMETRY_SPACEGROUPFACTORY_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/DllConfig.h"
@@ -68,7 +67,7 @@ private:
 };
 
 using AbstractSpaceGroupGenerator_sptr =
-    boost::shared_ptr<AbstractSpaceGroupGenerator>;
+    std::shared_ptr<AbstractSpaceGroupGenerator>;
 
 /// Concrete space group generator that uses space group generators as given in
 /// ITA.
@@ -173,7 +172,7 @@ public:
     }
 
     AbstractSpaceGroupGenerator_sptr generator =
-        boost::make_shared<T>(number, hmSymbol, generatorString);
+        std::make_shared<T>(number, hmSymbol, generatorString);
 
     subscribe(generator);
   }
@@ -237,7 +236,7 @@ protected:
   SpaceGroup_const_sptr getPrototype(const std::string &hmSymbol);
   void subscribe(const AbstractSpaceGroupGenerator_sptr &generator);
   SpaceGroup_const_sptr
-  constructFromPrototype(const SpaceGroup_const_sptr prototype) const;
+  constructFromPrototype(const SpaceGroup_const_sptr &prototype) const;
 
   void fillPointGroupMap();
 
@@ -328,5 +327,3 @@ EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
                                                    generators)),               \
        0));                                                                    \
   }
-
-#endif /* MANTID_GEOMETRY_SPACEGROUPFACTORY_H_ */

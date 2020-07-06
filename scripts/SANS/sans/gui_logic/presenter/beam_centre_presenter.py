@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 
 from mantid.kernel import Logger
@@ -27,8 +25,8 @@ class BeamCentrePresenter(object):
             super(BeamCentrePresenter.CentreFinderListener, self).__init__()
             self._presenter = presenter
 
-        def on_processing_finished(self, result):
-            self._presenter.on_processing_finished_centre_finder(result)
+        def on_processing_finished(self, _):
+            self._presenter.on_processing_finished_centre_finder()
 
         def on_processing_error(self, error):
             self._presenter.on_processing_error_centre_finder(error)
@@ -65,20 +63,14 @@ class BeamCentrePresenter(object):
     def on_update_rows(self):
         self._beam_centre_model.reset_inst_defaults(self._parent_presenter.instrument)
 
-    def on_processing_finished_centre_finder(self, result):
+    def on_processing_finished_centre_finder(self):
         # Enable button
         self._view.set_run_button_to_normal()
         # Update Centre Positions in model and GUI
-        if self._beam_centre_model.update_lab:
-            self._beam_centre_model.lab_pos_1 = result['pos1']
-            self._beam_centre_model.lab_pos_2 = result['pos2']
-            self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
-            self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
-        if self._beam_centre_model.update_hab:
-            self._beam_centre_model.hab_pos_1 = result['pos1']
-            self._beam_centre_model.hab_pos_2 = result['pos2']
-            self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
-            self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
+        self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
+        self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
+        self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
+        self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTTODISTRIBUTIONTEST_H_
-#define CONVERTTODISTRIBUTIONTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -55,7 +54,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conv.setProperty("Workspace", dist));
     TS_ASSERT_THROWS_NOTHING(conv.execute());
     TS_ASSERT(conv.isExecuted());
-    auto output = boost::dynamic_pointer_cast<MatrixWorkspace>(dist);
+    auto output = std::dynamic_pointer_cast<MatrixWorkspace>(dist);
     const Mantid::MantidVec &X = output->dataX(0);
     const Mantid::MantidVec &Y = output->dataY(0);
     const Mantid::MantidVec &E = output->dataE(0);
@@ -77,7 +76,7 @@ public:
     auto ws2 = createTestWorkspace();
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().add("group", group);
     group->add("workspace1");
     group->add("workspace2");
@@ -94,5 +93,3 @@ private:
     return WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
   }
 };
-
-#endif /*CONVERTTODISTRIBUTIONTEST_H_*/

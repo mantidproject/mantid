@@ -429,7 +429,7 @@ A typical example could look as follows:
     // to avoid clashes, since the threading backend in ParallelRunner shares the
     // ADS for all 'ranks'.
     auto alg = ParallelTestHelpers::create<Mantid::Algorithms::MyAlg>(comm);
-    alg->setProperty("InputWorkspace", boost::make_shared<WorkspaceTester>());
+    alg->setProperty("InputWorkspace", std::make_shared<WorkspaceTester>());
     alg->execute();
     Workspace_const_sptr ws = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);

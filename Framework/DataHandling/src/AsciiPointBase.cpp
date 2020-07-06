@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
 AsciiPointBase is an abstract class holding the functionality for the
@@ -16,10 +16,10 @@ GUI
 #include "MantidKernel/ListValidator.h"
 
 #include <Poco/File.h>
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <iomanip>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 
 namespace Mantid {
@@ -131,7 +131,7 @@ void AsciiPointBase::appendSeparatorProperty() {
   propOptions.emplace_back("space");
   propOptions.emplace_back("tab");
   declareProperty("Separator", "tab",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The separator used for splitting data columns.");
 }
 } // namespace DataHandling

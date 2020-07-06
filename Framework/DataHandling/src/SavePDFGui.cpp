@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SavePDFGui.h"
 
@@ -92,7 +92,7 @@ void SavePDFGui::exec() {
 }
 
 void SavePDFGui::writeMetaData(std::ofstream &out,
-                               API::MatrixWorkspace_const_sptr inputWS) {
+                               const API::MatrixWorkspace_const_sptr &inputWS) {
   out << "#Comment: neutron";
   auto run = inputWS->run();
   if (run.hasProperty("Qmin")) {
@@ -120,7 +120,7 @@ void SavePDFGui::writeMetaData(std::ofstream &out,
 }
 
 void SavePDFGui::writeWSData(std::ofstream &out,
-                             API::MatrixWorkspace_const_sptr inputWS) {
+                             const API::MatrixWorkspace_const_sptr &inputWS) {
   const auto &x = inputWS->points(0);
   const auto &y = inputWS->y(0);
   const auto &dy = inputWS->e(0);

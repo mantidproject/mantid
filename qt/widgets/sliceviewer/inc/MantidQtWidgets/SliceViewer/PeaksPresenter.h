@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAKSPRESENTER_H_
-#define MANTID_SLICEVIEWER_PEAKSPRESENTER_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include "MantidQtWidgets/SliceViewer/PeakEditMode.h"
 #include "MantidQtWidgets/SliceViewer/PeakPalette.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QObject>
 #include <array>
@@ -43,7 +42,7 @@ class UpdateableOnDemand;
 
 // Alias
 using SetPeaksWorkspaces =
-    std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace>>;
+    std::set<std::shared_ptr<const Mantid::API::IPeaksWorkspace>>;
 
 /*---------------------------------------------------------
 Abstract PeaksPresenter.
@@ -80,16 +79,14 @@ public:
   virtual bool isHidden() const = 0;
   virtual bool contentsDifferent(PeaksPresenter const *other) const = 0;
   virtual void
-  reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) = 0;
+  reInitialize(std::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) = 0;
   virtual void peakEditMode(EditMode mode) = 0;
   virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox) = 0;
   virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) = 0;
   ~PeaksPresenter() override{};
 };
 
-using PeaksPresenter_sptr = boost::shared_ptr<PeaksPresenter>;
-using PeaksPresenter_const_sptr = boost::shared_ptr<const PeaksPresenter>;
+using PeaksPresenter_sptr = std::shared_ptr<PeaksPresenter>;
+using PeaksPresenter_const_sptr = std::shared_ptr<const PeaksPresenter>;
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* MANTID_SLICEVIEWER_PEAKSPRESENTER_H_ */

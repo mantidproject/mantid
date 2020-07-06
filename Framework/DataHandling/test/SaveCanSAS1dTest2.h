@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVECANSAS1D2TEST_H
-#define SAVECANSAS1D2TEST_H
+#pragma once
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
@@ -57,7 +56,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Change the unit to Q
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(m_workspace1));
     ws->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
@@ -74,7 +73,7 @@ public:
       TS_ASSERT(loader.isExecuted());
 
       // Change the unit to Wavelength
-      ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      ws = std::dynamic_pointer_cast<MatrixWorkspace>(
           AnalysisDataService::Instance().retrieve(m_workspace3));
       ws->getAxis(0)->unit() =
           Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
@@ -95,7 +94,7 @@ public:
     TS_ASSERT(load.isExecuted());
 
     // Change the unit to Q
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(m_workspace2));
     ws->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
@@ -274,7 +273,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(lAlg.execute());
     TS_ASSERT(lAlg.isExecuted());
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve("newgroup");
-    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
 
     // we have the data now the tests begin
     TS_ASSERT(group);
@@ -291,7 +290,7 @@ public:
     // check the second workspace in more detail
     ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
     Mantid::DataObjects::Workspace2D_sptr ws2d =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     TS_ASSERT(ws2d);
 
     Run run = ws2d->run();
@@ -367,7 +366,7 @@ private:
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve(
         "test_worksapce_can_sas_1d_reloaded");
     Mantid::API::MatrixWorkspace_sptr loaded =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
     // Check that elements are set correctly
     TS_ASSERT(loaded->sample().getGeometryFlag() == expectedGeometry);
@@ -388,5 +387,3 @@ private:
   std::string m_runNum;
   MatrixWorkspace_sptr ws;
 };
-
-#endif

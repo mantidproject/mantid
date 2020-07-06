@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONPAIRASYMMETRYCALCULATOR_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONPAIRASYMMETRYCALCULATOR_H_
+#pragma once
 
 #include "MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h"
 
@@ -17,9 +16,9 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport MuonPairAsymmetryCalculator : public IMuonAsymmetryCalculator {
 public:
-  MuonPairAsymmetryCalculator(const API::WorkspaceGroup_sptr inputWS,
-                              const std::vector<int> summedPeriods,
-                              const std::vector<int> subtractedPeriods,
+  MuonPairAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS,
+                              const std::vector<int> &summedPeriods,
+                              const std::vector<int> &subtractedPeriods,
                               const int firstPairIndex,
                               const int secondPairIndex,
                               const double alpha = 1);
@@ -44,5 +43,3 @@ private:
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONPAIRASYMMETRYCALCULATOR_H_ */

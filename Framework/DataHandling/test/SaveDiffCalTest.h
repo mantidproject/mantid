@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEDIFFCALTEST_H_
-#define MANTID_DATAHANDLING_SAVEDIFFCALTEST_H_
+#pragma once
 
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
@@ -48,8 +47,7 @@ public:
 
   GroupingWorkspace_sptr createGrouping(Instrument_sptr instr,
                                         bool single = true) {
-    GroupingWorkspace_sptr groupWS =
-        boost::make_shared<GroupingWorkspace>(instr);
+    GroupingWorkspace_sptr groupWS = std::make_shared<GroupingWorkspace>(instr);
     if (single) {
       // set all of the groups to one
       size_t numHist = groupWS->getNumberHistograms();
@@ -66,14 +64,14 @@ public:
   }
 
   MaskWorkspace_sptr createMasking(Instrument_sptr instr) {
-    MaskWorkspace_sptr maskWS = boost::make_shared<MaskWorkspace>(instr);
+    MaskWorkspace_sptr maskWS = std::make_shared<MaskWorkspace>(instr);
     maskWS->getSpectrum(0).clearData();
     maskWS->mutableSpectrumInfo().setMasked(0, true);
     return maskWS;
   }
 
   TableWorkspace_sptr createCalibration(const size_t numRows) {
-    TableWorkspace_sptr wksp = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr wksp = std::make_shared<TableWorkspace>();
     wksp->addColumn("int", "detid");
     wksp->addColumn("double", "difc");
     wksp->addColumn("double", "difa");
@@ -200,5 +198,3 @@ public:
       Poco::File(filename).remove();
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVEDIFFCALTEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
@@ -47,7 +47,7 @@ QString MdSettings::getUserSettingColorMap() {
   return userSettingColorMap;
 }
 
-void MdSettings::setUserSettingColorMap(QString colorMap) {
+void MdSettings::setUserSettingColorMap(const QString &colorMap) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
@@ -66,7 +66,7 @@ QString MdSettings::getLastSessionColorMap() {
   return colormap;
 }
 
-void MdSettings::setLastSessionColorMap(QString colorMap) {
+void MdSettings::setLastSessionColorMap(const QString &colorMap) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
@@ -78,16 +78,16 @@ QColor MdSettings::getUserSettingBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor = settings
-                               .value(m_lblUserSettingBackgroundColor,
-                                      m_mdConstants.getDefaultBackgroundColor())
-                               .value<QColor>();
+  auto backgroundColor = settings
+                             .value(m_lblUserSettingBackgroundColor,
+                                    m_mdConstants.getDefaultBackgroundColor())
+                             .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
 }
 
-void MdSettings::setUserSettingBackgroundColor(QColor backgroundColor) {
+void MdSettings::setUserSettingBackgroundColor(const QColor &backgroundColor) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
@@ -99,10 +99,10 @@ QColor MdSettings::getLastSessionBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor = settings
-                               .value(m_lblLastSessionBackgroundColor,
-                                      m_mdConstants.getDefaultBackgroundColor())
-                               .value<QColor>();
+  auto backgroundColor = settings
+                             .value(m_lblLastSessionBackgroundColor,
+                                    m_mdConstants.getDefaultBackgroundColor())
+                             .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
@@ -112,7 +112,7 @@ QColor MdSettings::getDefaultBackgroundColor() {
   return m_mdConstants.getDefaultBackgroundColor();
 }
 
-void MdSettings::setLastSessionBackgroundColor(QColor backgroundColor) {
+void MdSettings::setLastSessionBackgroundColor(const QColor &backgroundColor) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
@@ -120,8 +120,8 @@ void MdSettings::setLastSessionBackgroundColor(QColor backgroundColor) {
   settings.endGroup();
 }
 
-void MdSettings::setGeneralMdColorMap(QString colorMapName,
-                                      QString colorMapFile) {
+void MdSettings::setGeneralMdColorMap(const QString &colorMapName,
+                                      const QString &colorMapFile) {
   QSettings settings;
 
   settings.beginGroup(m_generalMdGroup);
@@ -221,7 +221,7 @@ bool MdSettings::getLastSessionLogScale() {
   return logScale;
 }
 
-void MdSettings::setUserSettingIntialView(QString initialView) {
+void MdSettings::setUserSettingIntialView(const QString &initialView) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);

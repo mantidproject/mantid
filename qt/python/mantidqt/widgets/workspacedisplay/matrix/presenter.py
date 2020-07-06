@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import, division, print_function
-
 from mantid.plots.utility import MantidAxType
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
@@ -17,6 +15,7 @@ from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
+from mantid.simpleapi import CreateEmptyTableWorkspace
 
 
 class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
@@ -56,10 +55,13 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.view.set_context_menu_actions(self.view.table_x)
         self.view.set_context_menu_actions(self.view.table_e)
 
+        # connect to replace_signal signal to handle replacement of the workspace
+        self.container.replace_signal.connect(self.action_replace_workspace)
+
     def show_view(self):
         self.container.show()
 
-    def replace_workspace(self, workspace_name, workspace):
+    def action_replace_workspace(self, workspace_name, workspace):
         if self.model.workspace_equals(workspace_name):
             self.model = MatrixWorkspaceDisplayModel(workspace)
             self.setup_tables()
@@ -85,6 +87,62 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         ws_read = self._get_ws_read_from_type(table.model().type)
         num_rows = self.model._ws.getNumberHistograms()
         self.copy_bin_values(table, ws_read, num_rows)
+
+    def action_copy_spectrum_to_table(self, table):
+        selected_rows = [i.row() for i in table.selectionModel().selectedRows()]
+        if not selected_rows:
+            self.notify_no_selection_to_copy()
+            return
+        ws = table.model().ws
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.name() + "_spectra")
+        num_rows = ws.blocksize()
+        table_ws.setRowCount(num_rows)
+        for i, row in enumerate(selected_rows):
+            table_ws.addColumn("double", "XS" + str(row))
+            table_ws.addColumn("double", "YS" + str(row))
+            table_ws.addColumn("double", "ES" + str(row))
+
+            col_x = 3 * i
+            col_y = 3 * i + 1
+            col_e = 3 * i + 2
+
+            data_y = ws.readY(row)
+            data_x = ws.readX(row)
+            data_e = ws.readE(row)
+
+            for j in range(num_rows):
+                table_ws.setCell(j, col_x, data_x[j])
+                table_ws.setCell(j, col_y, data_y[j])
+                table_ws.setCell(j, col_e, data_e[j])
+
+    def action_copy_bin_to_table(self, table):
+        selected_cols = [i.column() for i in table.selectionModel().selectedColumns()]
+        if not selected_cols:
+            self.notify_no_selection_to_copy()
+            return
+        ws = table.model().ws
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.name() + "_bins")
+        num_rows = ws.getNumberHistograms()
+        table_ws.setRowCount(num_rows)
+        table_ws.addColumn("double", "X")
+        for i, col in enumerate(selected_cols):
+            table_ws.addColumn("double", "YB" + str(col))
+            table_ws.addColumn("double", "YE" + str(col))
+
+            col_y = 2 * i + 1
+            col_e = 2 * i + 2
+
+            for j in range(num_rows):
+                data_y = ws.readY(j)
+                data_e = ws.readE(j)
+
+                if i == 0:
+                    if ws.axes() > 1:
+                        table_ws.setCell(j, 0, ws.getAxis(1).getValue(j))
+                    else:
+                        table_ws.setCell(j, 0, j)
+                table_ws.setCell(j, col_y, data_y[col])
+                table_ws.setCell(j, col_e, data_e[col])
 
     def action_copy_cells(self, table):
         self.copy_cells(table)

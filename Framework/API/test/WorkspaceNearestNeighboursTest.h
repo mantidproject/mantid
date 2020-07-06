@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
-#define MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
@@ -30,9 +29,9 @@ using Mantid::Kernel::V3D;
  */
 
 namespace {
-boost::shared_ptr<MatrixWorkspace> makeWorkspace(const specnum_t start,
-                                                 const specnum_t end) {
-  auto ws = boost::make_shared<WorkspaceTester>();
+std::shared_ptr<MatrixWorkspace> makeWorkspace(const specnum_t start,
+                                               const specnum_t end) {
+  auto ws = std::make_shared<WorkspaceTester>();
   ws->initialize(end - start + 1, 2, 1);
   for (specnum_t i = start; i <= end; ++i) {
     ws->getSpectrum(i - start).setSpectrumNo(i);
@@ -60,7 +59,7 @@ private:
       : public Mantid::API::WorkspaceNearestNeighbours {
   public:
     ExposedNearestNeighbours(const SpectrumInfo &spectrumInfo,
-                             const std::vector<specnum_t> spectrumNumbers,
+                             const std::vector<specnum_t> &spectrumNumbers,
                              bool ignoreMasked = false)
         : WorkspaceNearestNeighbours(8, spectrumInfo, spectrumNumbers,
                                      ignoreMasked) {}
@@ -104,8 +103,8 @@ public:
 
     // Need scaling vector since changes to NN ( 22/12/10 )
     Mantid::Geometry::BoundingBox bbox = Mantid::Geometry::BoundingBox();
-    boost::shared_ptr<const Detector> det =
-        boost::dynamic_pointer_cast<const Detector>(m_detectors[3]);
+    std::shared_ptr<const Detector> det =
+        std::dynamic_pointer_cast<const Detector>(m_detectors[3]);
     det->getBoundingBox(bbox);
     V3D scale((bbox.xMax() - bbox.xMin()), (bbox.yMax() - bbox.yMin()),
               (bbox.zMax() - bbox.zMin()));
@@ -161,9 +160,9 @@ public:
     TS_ASSERT_EQUALS(m_instrument->getDetectorIDs().size(), 512);
 
     RectangularDetector_const_sptr bank1 =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
+        std::dynamic_pointer_cast<const RectangularDetector>(
             m_instrument->getComponentByName("bank1"));
-    boost::shared_ptr<const Detector> det = bank1->getAtXY(2, 3);
+    std::shared_ptr<const Detector> det = bank1->getAtXY(2, 3);
     TS_ASSERT(det);
     std::map<specnum_t, V3D> nb;
 
@@ -240,5 +239,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS */

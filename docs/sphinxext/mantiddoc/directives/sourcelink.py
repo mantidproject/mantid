@@ -1,15 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import subprocess
-from six import iteritems
-
 import mantid
 from .base import AlgorithmBaseDirective #pylint: disable=unused-import
 
@@ -204,7 +200,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         valid_ext_list = []
 
         self.add_rst(self.make_header("Source"))
-        for extension, filepath in iteritems(file_paths):
+        for extension, filepath in file_paths.items():
             if filepath is not None:
                 self.output_path_to_page(filepath, extension)
                 valid_ext_list.append(extension)

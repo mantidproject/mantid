@@ -5,22 +5,15 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-New
-###
-
-Improvements
-############
-
-Algorithms
--------------
-
-Bug Fixes
-#########
-- :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` can produce an empty dead time table, the time data is offset such that the start of thepulse is at time zero. The start and end date logs have been fixed and if no group name is present a default is generated.
-
+.. figure::  ../../images/MuonTabPlots.png
+   :height: 400px
+   :align: center
 
 Muon Analysis 2 and Frequency Domain Interfaces
----------------------------------------------------
+##################################################
+
+New Features
+------------
 - The plotting window within the Muon Analysis 2 and Frequency Domain Interfaces has been converted into a dockable window,
   which can be docked and undocked at will. This change improves the user experience for those working on laptops.
 - Improved the plotting within the Muon Analysis 2 and Frequency Domain interfaces by introducing tiled plotting.
@@ -36,11 +29,36 @@ Muon Analysis 2 and Frequency Domain Interfaces
 - Addition of a sequential fitting tab, enabling both sequential, and simultaneous sequential fits.
 
 Bug Fixes
-#########
+---------
 
-- The elemental analysis GUI can now handle legacy data which is missing a response dataset, e.g Delayed.
 - Fixed a bug with constraints in the Muon Analysis 2 GUI which would cause Mantid to crash.
-- Fixed a bug in Muon Analysis Old that prevented the muon fitting functions from appearing in the data analysis tab.
 - Data sets can now be reloaded while the Instrument View is open without crashing Mantid.
+- Fixed a bug where the incorrect path would be shown after loading a data file by run number.
+- The increment arrow no longer gives a spurious warning that the requested run exceeds the current run.
+
+Elemental Analysis
+##################
+
+Bug Fixes
+---------
+- The elemental analysis GUI can now handle legacy data which is missing a response dataset, e.g Delayed.
+- Fixed a bug where Elemental analysis gave an error when loading data.
+- Elemental analysis bug has been fixed that prevented co-adding data.
+- Peak data file has been updated. It now includes the same transition for different isotopes.
+
+Algorithms
+##########
+
+Bug Fixes
+---------
+- :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` can produce an empty deadtime table, where the time data is offset such that the start of the pulse is at time zero. The start and end date logs have been fixed and if there is no group name present a default is generated.
+
+Muon Analysis (old)
+###################
+
+Bug Fixes
+---------
+- Fixed a bug in Muon Analysis Old that prevented the muon fitting functions from appearing in the data analysis tab.
+
 
 :ref:`Release 5.0.0 <v5.0.0>`

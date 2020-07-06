@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
 from .model import SampleLogsModel
 from .view import SampleLogsView
 
@@ -23,12 +22,14 @@ class SampleLogs(object):
                                                      self.model.get_name(),
                                                      self.model.isMD(),
                                                      self.model.getNumExperimentInfo())
+        self.filtered = True
         self.setup_table()
 
-    def clicked(self):
-        """When a log is clicked update stats with selected log and replot the
-        logs
+    def update(self):
+        """Update stats with selected log and replot the
+        logs.  Finally update any other view aspects associated with the selected log.
         """
+        self.log_changed()
         self.update_stats()
         self.plot_logs()
 
@@ -37,6 +38,17 @@ class SampleLogs(object):
         display the data in a table workspace or something
         """
         self.print_selected_logs()
+
+    def log_changed(self):
+        """Update interface aspects
+        """
+        #determine if any of the logs might support filtering
+        are_any_logs_filtered = False
+        for row in self.view.get_selected_row_indexes():
+            if self.model.get_is_log_filtered(self.view.get_row_log_name(row)):
+                are_any_logs_filtered = True
+                break
+        self.view.set_log_controls(are_any_logs_filtered)
 
     def print_selected_logs(self):
         """Print all selected logs"""
@@ -74,7 +86,7 @@ class SampleLogs(object):
         """
         selected_rows = self.view.get_selected_row_indexes()
         if len(selected_rows) == 1:
-            stats = self.model.get_statistics(self.view.get_row_log_name(selected_rows[0]))
+            stats = self.model.get_statistics(self.view.get_row_log_name(selected_rows[0]), self.filtered)
             if stats:
                 self.view.set_statistics(stats)
             else:
@@ -96,4 +108,10 @@ class SampleLogs(object):
 
     def setup_table(self):
         """Set the model in the view to the one create from the model"""
+        self.view.show_plot_and_stats(self.model.are_any_logs_plottable())
         self.view.set_model(self.model.getItemModel())
+
+    def filtered_changed(self, state):
+        self.filtered = state
+        self.plot_logs()
+        self.update_stats()

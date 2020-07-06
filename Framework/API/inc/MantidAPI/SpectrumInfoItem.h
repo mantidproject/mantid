@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SPECTRUMINFOITEM_H_
-#define MANTID_API_SPECTRUMINFOITEM_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
@@ -60,6 +59,8 @@ public:
     return m_spectrumInfo->hasUniqueDetector(m_index);
   }
 
+  bool hasDetectors() const { return m_spectrumInfo->hasDetectors(m_index); }
+
   const Mantid::SpectrumDefinition &spectrumDefinition() const {
     return m_spectrumInfo->spectrumDefinition(m_index);
   }
@@ -79,5 +80,3 @@ public:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_SPECTRUMINFOITEM_H_ */

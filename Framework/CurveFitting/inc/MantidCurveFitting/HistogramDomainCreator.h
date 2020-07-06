@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATOR_H_
+#pragma once
 
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/IMWDomainCreator.h"
 #include "MantidKernel/System.h"
 
@@ -43,22 +43,20 @@ namespace CurveFitting {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport HistogramDomainCreator : public IMWDomainCreator {
+class MANTID_CURVEFITTING_DLL HistogramDomainCreator : public IMWDomainCreator {
 public:
   HistogramDomainCreator(Kernel::IPropertyManager &manager,
                          const std::string &workspacePropertyName);
 
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                    std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
-  boost::shared_ptr<API::Workspace> createOutputWorkspace(
+  std::shared_ptr<API::Workspace> createOutputWorkspace(
       const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::FunctionValues> values,
+      std::shared_ptr<API::FunctionDomain> domain,
+      std::shared_ptr<API::FunctionValues> values,
       const std::string &outputWorkspacePropertyName) override;
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATOR_H_ */

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -133,13 +131,13 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if can_dim != sample_dim and can_dim != 0:
             result['ContainerRuns'] = message.format('Container', can_dim, sample_dim)
         if str_dim != 0:
-            issues['SampleTransmissionRuns'] = tr_message.format('SampleTransmission', str_dim)
+            result['SampleTransmissionRuns'] = tr_message.format('SampleTransmission', str_dim)
         if ctr_dim != 0:
-            issues['ContainerTransmissionRuns'] = tr_message.format('ContainerTransmission', ctr_dim)
+            result['ContainerTransmissionRuns'] = tr_message.format('ContainerTransmission', ctr_dim)
         if btr_dim != 0:
-            issues['TransmissionBeamRuns'] = tr_message.format('TransmissionBeam', btr_dim)
+            result['TransmissionBeamRuns'] = tr_message.format('TransmissionBeam', btr_dim)
         if atr_dim != 0:
-            issues['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber', atr_dim)
+            result['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber', atr_dim)
         if mask_dim != sample_dim and mask_dim != 0:
             result['MaskFiles'] = message.format('Mask', mask_dim, sample_dim)
         if ref_dim != sample_dim and ref_dim != 0:
@@ -477,5 +475,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                            WedgeOffset=self.getProperty('WedgeOffset').value,
                            AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
                            PanelOutputWorkspaces=panel_ws_group)
+
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)

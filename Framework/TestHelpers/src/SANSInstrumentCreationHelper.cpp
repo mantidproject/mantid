@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -44,7 +44,7 @@ const int SANSInstrumentCreationHelper::nMonitors = 2;
  * @param workspace: name of the workspace to be created.
  */
 Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(
-    std::string workspace) {
+    const std::string &workspace) {
   // Create a test workspace with test data with a well defined peak
   // The test instrument has two monitor channels
   Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(
@@ -67,7 +67,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(
  */
 void SANSInstrumentCreationHelper::runLoadInstrument(
     const std::string &inst_name,
-    Mantid::DataObjects::Workspace2D_sptr workspace) {
+    const Mantid::DataObjects::Workspace2D_sptr &workspace) {
   // Determine the search directory for XML instrument definition files (IDFs)
   // std::string directoryName =
   // Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
@@ -97,11 +97,12 @@ void SANSInstrumentCreationHelper::runLoadInstrument(
  * @param nybins: number of bins in Y
  */
 void SANSInstrumentCreationHelper::runLoadMappingTable(
-    Mantid::DataObjects::Workspace2D_sptr workspace, int nxbins, int nybins) {
+    const Mantid::DataObjects::Workspace2D_sptr &workspace, int nxbins,
+    int nybins) {
   // Get the number of monitor channels
   size_t nMonitors(0);
   size_t nXbins, nYbins;
-  boost::shared_ptr<const Instrument> instrument = workspace->getInstrument();
+  std::shared_ptr<const Instrument> instrument = workspace->getInstrument();
   std::vector<detid_t> monitors = instrument->getMonitors();
   nMonitors = monitors.size();
 

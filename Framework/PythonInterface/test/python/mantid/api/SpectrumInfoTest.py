@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.api import SpectrumDefinition
+
 
 class SpectrumInfoTest(unittest.TestCase):
 
@@ -39,6 +38,13 @@ class SpectrumInfoTest(unittest.TestCase):
             is the same as in memory. """
         info = self._ws.spectrumInfo()
         self.assertEqual(info.size(), 3)
+
+    def test_detectorCount(self):
+        """ Check total detector count """
+        info = self._ws.spectrumInfo()
+        # One detector cleared. So not counted.
+        self.assertEqual(info.detectorCount(), 2)
+
 
     def test_isMonitor(self):
         """ Check if a monitor is present. """

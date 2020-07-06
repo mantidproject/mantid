@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/Shape2DCollection.h"
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -128,8 +128,6 @@ void Shape2DCollection::removeShapes(const QList<Shape2D *> &shapeList) {
   }
 }
 
-/**
- */
 void Shape2DCollection::setWindow(const RectF &surface,
                                   const QRect &viewport) const {
   m_viewport = viewport;
@@ -679,7 +677,7 @@ void Shape2DCollection::saveToTableWorkspace() {
  * @param ws :: table workspace to load shapes from.
  */
 void Shape2DCollection::loadFromTableWorkspace(
-    Mantid::API::ITableWorkspace_const_sptr ws) {
+    const Mantid::API::ITableWorkspace_const_sptr &ws) {
   using namespace Mantid::API;
   auto columnNames = ws->getColumnNames();
 

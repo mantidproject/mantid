@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_RRFMUON_H_
-#define MANTID_ALGORITHM_RRFMUON_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -44,10 +43,8 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Get conversion factor from frequency units to input workspace units
-  double unitConversionFactor(std::string uin, std::string uuser);
+  double unitConversionFactor(const std::string &uin, const std::string &uuser);
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_RRFMUON_H_*/

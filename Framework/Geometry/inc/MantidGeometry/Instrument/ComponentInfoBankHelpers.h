@@ -1,5 +1,10 @@
-#ifndef MANTID_GEOMETRY_COMPONENTINFOBANKHELPERS_H_
-#define MANTID_GEOMETRY_COMPONENTINFOBANKHELPERS_H_
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include <Eigen/Core>
@@ -26,5 +31,3 @@ offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo,
 } // namespace ComponentInfoBankHelpers
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_COMPONENTINFOBANKHELPERS_H_ */

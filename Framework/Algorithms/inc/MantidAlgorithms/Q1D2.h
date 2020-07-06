@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_Q1D2_H_
-#define MANTID_ALGORITHMS_Q1D2_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -23,7 +23,7 @@ namespace Algorithms {
     @author Steve Williams ISIS Rutherford Appleton Laboratory
     @date 10/12/2010
 */
-class DLLExport Q1D2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Q1D2 : public API::Algorithm {
 public:
   /// Default constructor
   Q1D2();
@@ -63,13 +63,13 @@ private:
   // these are the steps that are run on each individual spectrum
   void
   calculateNormalization(const size_t wavStart, const size_t wsIndex,
-                         API::MatrixWorkspace_const_sptr pixelAdj,
-                         API::MatrixWorkspace_const_sptr wavePixelAdj,
+                         const API::MatrixWorkspace_const_sptr &pixelAdj,
+                         const API::MatrixWorkspace_const_sptr &wavePixelAdj,
                          double const *const binNorms,
                          double const *const binNormEs,
                          HistogramData::HistogramY::iterator norm,
                          HistogramData::HistogramY::iterator normETo2) const;
-  void pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
+  void pixelWeight(const API::MatrixWorkspace_const_sptr &pixelAdj,
                    const size_t wsIndex, double &weight, double &error) const;
   void addWaveAdj(const double *c, const double *Dc,
                   HistogramData::HistogramY::iterator bInOut,
@@ -98,5 +98,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_Q1D2_H_*/

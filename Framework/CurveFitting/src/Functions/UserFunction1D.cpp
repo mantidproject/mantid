@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -49,7 +49,7 @@ double *UserFunction1D::AddVariable(const char *varName, void *palg) {
  */
 void UserFunction1D::declareAdditionalProperties() {
   declareProperty("Function", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The fit function");
   declareProperty("InitialParameters", "",
                   "The comma separated list of initial values of the fit "
@@ -146,16 +146,16 @@ void UserFunction1D::functionDeriv(const double *in, Jacobian *out,
       dp[i] = 0.01;
   }
 
-  if (!m_tmp) {
-    m_tmp.reset(new double[nData]);
-    m_tmp1.reset(new double[nData]);
+  if (m_tmp.empty()) {
+    m_tmp.resize(nData);
+    m_tmp1.resize(nData);
   }
 
-  function(in, m_tmp.get(), xValues, nData);
+  function(in, m_tmp.data(), xValues, nData);
 
   for (int j = 0; j < m_nPars; j++) {
     in1[j] += dp[j];
-    function(&in1[0], m_tmp1.get(), xValues, nData);
+    function(&in1[0], m_tmp1.data(), xValues, nData);
     for (size_t i = 0; i < nData; i++) {
       out->set(i, j, (m_tmp1[i] - m_tmp[i]) / dp[j]);
     }

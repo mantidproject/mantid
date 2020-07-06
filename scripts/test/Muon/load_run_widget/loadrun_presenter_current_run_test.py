@@ -1,19 +1,33 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.py3compat import mock
+from unittest import mock
+from unittest.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
-from qtpy.QtWidgets import QApplication, QWidget
+from qtpy.QtWidgets import QApplication, QMessageBox, QWidget
 
 import Muon.GUI.Common.utilities.muon_file_utils as fileUtils
+import Muon.GUI.Common.message_box as messageBox
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.thread_model import ThreadModel, ThreadModelWorker
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+
+# this class is required to keep track of error signal emissions since the output is garbage collected by the time
+# we reach the equal assertion
+
+
+class MockSignalHandler(object):
+    def __init__(self, parent=None):
+        self.call_count = 0
+
+    def signalReceived(self):
+        self.call_count+=1
 
 
 @start_qapplication
@@ -27,6 +41,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
         return run_twice
 
+    @staticmethod
     def load_failure(self):
         raise ValueError("Error text")
 
@@ -37,6 +52,13 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
     def create_fake_workspace(self):
         return {'MainFieldDirection': 'transverse'}
+
+    def create_mock_signal_handler(self):
+        self.thread_model = ThreadModel(self.model)
+        self.thread_model_worker = ThreadModelWorker(self.thread_model)
+        self.thread_model_worker.signals.error = mock.Mock()
+        self.signal_handler = MockSignalHandler()
+        self.thread_model_worker.signals.error.connect(self.signal_handler.signalReceived())
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
@@ -94,16 +116,19 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
         self.assertEqual(self.view.get_run_edit_text(), '1234')
 
-    def test_load_current_run_displays_error_message_if_fails_to_load(self):
+    def test_load_current_run_emits_error_signal_if_fails_to_load(self):
+        self.create_mock_signal_handler()
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.view.warning_popup.call_count, 1)
+        self.assertEqual(self.signal_handler.call_count, 1)
 
     @run_test_with_and_without_threading
-    def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self):
+    # the following patch is required because the warning popup originates from thread_model in this case
+    @patch("Muon.GUI.Common.load_run_widget.load_run_presenter.thread_model.warning")
+    def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self, warning_mock):
         # set up previous data
         workspace = self.create_fake_workspace()
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs",
@@ -140,7 +165,11 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.assertEqual(self.presenter.workspaces, [workspace])
 
     @run_test_with_and_without_threading
-    def test_load_current_run_displays_error_if_incrementing_past_current_run(self):
+    # the following patch is required because the warning popup also originates from thread_model in this case
+    @patch("Muon.GUI.Common.load_run_widget.load_run_presenter.thread_model.warning")
+    def test_load_current_run_emits_error_signal_if_incrementing_past_current_run(self, warning_mock):
+        self.create_mock_signal_handler()
+
         # set up current run
         workspace = self.create_fake_workspace()
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs",
@@ -152,7 +181,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.view.warning_popup.call_count, 1)
+        self.assertEqual(self.signal_handler.call_count, 1)
 
 
 if __name__ == '__main__':

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.api import MatrixWorkspace, Run
 from mantid.simpleapi import SANSILLReduction, config, mtd
@@ -17,10 +15,12 @@ class SANSILLReductionTest(unittest.TestCase):
     _facility = None
     _instrument = None
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
 
+    def setUp(self):
         self._facility = config['default.facility']
         self._instrument = config['default.instrument']
 

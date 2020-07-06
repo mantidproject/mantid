@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PSEUDOVOIGTTEST_H_
-#define MANTID_CURVEFITTING_PSEUDOVOIGTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -17,7 +16,7 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/MersenneTwister.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -426,7 +425,7 @@ public:
 private:
   IPeakFunction_sptr getInitializedPV(double center, double intensity,
                                       double fwhm, double mixing) {
-    IPeakFunction_sptr pv = boost::make_shared<PseudoVoigt>();
+    IPeakFunction_sptr pv = std::make_shared<PseudoVoigt>();
     pv->initialize();
     pv->setParameter("PeakCentre", center);
     pv->setParameter("FWHM", fwhm);
@@ -512,5 +511,3 @@ private:
 
   std::vector<double> m_xValues;
 };
-
-#endif /* MANTID_CURVEFITTING_PSEUDOVOIGTTEST_H_ */

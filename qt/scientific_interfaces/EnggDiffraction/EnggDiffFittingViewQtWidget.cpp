@@ -19,7 +19,7 @@
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <Poco/Path.h>
 
@@ -27,6 +27,7 @@
 #include <QFileDialog>
 #include <QHelpEvent>
 #include <QSettings>
+#include <utility>
 
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
@@ -49,16 +50,17 @@ const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
 EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
-    QWidget * /*parent*/, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
-    boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
-    boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
-    boost::shared_ptr<IEnggDiffractionParam> mainParam,
-    boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner,
-    boost::shared_ptr<IEnggDiffractionParam> fileSettings)
+    QWidget * /*parent*/, std::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
+    std::shared_ptr<IEnggDiffractionSettings> mainSettings,
+    std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+    std::shared_ptr<IEnggDiffractionParam> mainParam,
+    std::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner,
+    std::shared_ptr<IEnggDiffractionParam> fileSettings)
     : IEnggDiffFittingView(), m_fittedDataVector(),
-      m_fileSettings(fileSettings), m_mainMsgProvider(mainMsg),
-      m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
-      m_presenter(boost::make_shared<EnggDiffFittingPresenter>(
+      m_fileSettings(std::move(fileSettings)),
+      m_mainMsgProvider(std::move(mainMsg)),
+      m_mainPythonRunner(std::move(mainPythonRunner)),
+      m_presenter(std::make_shared<EnggDiffFittingPresenter>(
           this, std::make_unique<EnggDiffFittingModel>(), mainCalib,
           mainParam)) {
 
@@ -274,7 +276,7 @@ void EnggDiffFittingViewQtWidget::resetCanvas() {
 }
 
 void EnggDiffFittingViewQtWidget::setDataVector(
-    std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
+    std::vector<std::shared_ptr<QwtData>> &data, bool focused,
     bool plotSinglePeaks, const std::string &xAxisLabel) {
 
   if (!plotSinglePeaks) {
@@ -292,7 +294,7 @@ void EnggDiffFittingViewQtWidget::setDataVector(
 }
 
 void EnggDiffFittingViewQtWidget::dataCurvesFactory(
-    std::vector<boost::shared_ptr<QwtData>> &data,
+    std::vector<std::shared_ptr<QwtData>> &data,
     std::vector<QwtPlotCurve *> &dataVector, bool focused) {
 
   // clear vector
@@ -560,7 +562,7 @@ void EnggDiffFittingViewQtWidget::setFittingRunNumVec(
 void EnggDiffFittingViewQtWidget::setPeakPick() {
   auto bk2bk =
       FunctionFactory::Instance().createFunction("BackToBackExponential");
-  auto bk2bkFunc = boost::dynamic_pointer_cast<IPeakFunction>(bk2bk);
+  auto bk2bkFunc = std::dynamic_pointer_cast<IPeakFunction>(bk2bk);
   // set the peak to BackToBackExponential function
   setPeakPicker(bk2bkFunc);
   setPeakPickerEnabled(true);

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
-#define MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -19,7 +18,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Timer.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <cxxtest/TestSuite.h>
 
@@ -39,9 +38,9 @@ private:
     IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(2, eventType);
     coord_t min(-10.0f), max(10.0f);
     ws->addDimension(
-        boost::make_shared<MDHistoDimension>("A", "A", frame, min, max, 1));
+        std::make_shared<MDHistoDimension>("A", "A", frame, min, max, 1));
     ws->addDimension(
-        boost::make_shared<MDHistoDimension>("B", "B", frame, min, max, 1));
+        std::make_shared<MDHistoDimension>("B", "B", frame, min, max, 1));
     ws->initialize();
     // Split to level 1
     ws->splitBox();
@@ -65,7 +64,7 @@ public:
                      sizeof(MDEventInserter<MDEW_LEAN_2D::sptr>::MDEventType));
 
     // Create an input workspace
-    MDEW_LEAN_2D::sptr ws2d = boost::dynamic_pointer_cast<MDEW_LEAN_2D>(
+    MDEW_LEAN_2D::sptr ws2d = std::dynamic_pointer_cast<MDEW_LEAN_2D>(
         createInputWorkspace("MDLeanEvent"));
 
     // Create the inserter.
@@ -98,7 +97,7 @@ public:
 
     // Create an input workspace.
     MDEW_2D::sptr ws2d =
-        boost::dynamic_pointer_cast<MDEW_2D>(createInputWorkspace("MDEvent"));
+        std::dynamic_pointer_cast<MDEW_2D>(createInputWorkspace("MDEvent"));
 
     // Create the inserter.
     MDEventInserter<MDEW_2D::sptr> inserter(ws2d);
@@ -121,5 +120,3 @@ public:
     TS_ASSERT_EQUALS(2, ws2d->getNPoints());
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TEIXEIRAWATERSQETEST_H_
-#define TEIXEIRAWATERSQETEST_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
@@ -20,7 +19,7 @@
 #include <numeric>
 #include <random>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 using Mantid::CurveFitting::Functions::TeixeiraWaterSQE;
 
 class TeixeiraWaterSQETest : public CxxTest::TestSuite {
@@ -91,8 +90,8 @@ private:
     }
   };
 
-  boost::shared_ptr<TestableTeixeiraWaterSQE> createTestTeixeiraWaterSQE() {
-    auto func = boost::make_shared<TestableTeixeiraWaterSQE>();
+  std::shared_ptr<TestableTeixeiraWaterSQE> createTestTeixeiraWaterSQE() {
+    auto func = std::make_shared<TestableTeixeiraWaterSQE>();
     func->initialize();
     func->setParameter("Height", 1.0);
     func->setParameter("DiffCoeff", 1.0); // 1Angstrom
@@ -103,5 +102,3 @@ private:
     return func;
   }
 };
-
-#endif /*TEIXEIRAWATERSQETEST_H_*/

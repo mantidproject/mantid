@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_
-#define MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
@@ -33,14 +32,14 @@ template <typename T>
 class DLLExport FirstExperimentInfoQueryAdapter
     : public FirstExperimentInfoQuery {
 public:
-  using Adaptee_sptr = boost::shared_ptr<const T>;
+  using Adaptee_sptr = std::shared_ptr<const T>;
 
 private:
   Adaptee_sptr m_ws;
 
 public:
   FirstExperimentInfoQueryAdapter(Mantid::API::IMDWorkspace_sptr ws) {
-    m_ws = boost::dynamic_pointer_cast<const T>(ws);
+    m_ws = std::dynamic_pointer_cast<const T>(ws);
     if (!m_ws) {
       throw std::invalid_argument(
           "Workspace object is of the wrong type for this adapter.");
@@ -49,7 +48,7 @@ public:
 
   bool hasOrientedLattice() const {
     Mantid::API::MultipleExperimentInfos_const_sptr expInfos =
-        boost::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(
+        std::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(
             m_ws);
     bool hasLattice = false;
     if (expInfos != NULL && expInfos->getNumExperimentInfo() > 0) {
@@ -62,7 +61,7 @@ public:
 
   bool hasRotatedGoniometer() const {
     Mantid::API::MultipleExperimentInfos_const_sptr expInfos =
-        boost::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(
+        std::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(
             m_ws);
     bool hasRotatedGoniometer = false;
     if (expInfos != NULL && expInfos->getNumExperimentInfo() > 0) {
@@ -75,5 +74,3 @@ public:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_ */

@@ -36,9 +36,6 @@ General properties
 | ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing``      |
 |                                  | algorithms that should be hidden in Mantid.      |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
-| ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``                 |
-|                                  | memory for reference in scripts.                 |                        |
-+----------------------------------+--------------------------------------------------+------------------------+
 | ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
 |                                  | that should be hidden in Mantid.                 |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
@@ -262,6 +259,8 @@ Plotting Settings
 |``plots.yAxesScale``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.line.Style``             |Default Line style on 1d plots                                    |``solid``, ``dashed``|
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.line.DrawStyle``         |Default Draw style on 1d plots                                    |``default``,``steps``|
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.line.Width``             |Default Line width on 1d plots                                    |``1.5``              |
 +---------------------------------+------------------------------------------------------------------+---------------------+

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SUMROWCOLUMNTEST_H_
-#define SUMROWCOLUMNTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/SumRowColumn.h"
@@ -58,7 +57,7 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-        output = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        output = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("H")));
     // Check a couple of values
     TS_ASSERT_EQUALS(output->x(0).size(), 10)
@@ -72,7 +71,7 @@ public:
     TS_ASSERT_EQUALS(output->e(0)[9], 0)
 
     TSM_ASSERT("Should have an empty unit",
-               boost::dynamic_pointer_cast<Mantid::Kernel::Units::Empty>(
+               std::dynamic_pointer_cast<Mantid::Kernel::Units::Empty>(
                    output->getAxis(0)->unit()))
   }
 
@@ -93,7 +92,7 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-        output = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        output = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("V")));
     // Check a couple of values
     TS_ASSERT_EQUALS(output->x(0).size(), 10)
@@ -111,5 +110,3 @@ private:
   Mantid::Algorithms::SumRowColumn summer;
   std::string inputWS;
 };
-
-#endif /*SUMROWCOLUMNTEST_H_*/

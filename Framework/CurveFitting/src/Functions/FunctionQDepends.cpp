@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 
@@ -96,7 +96,7 @@ void FunctionQDepends::setAttribute(const std::string &attName,
  * @param endX unused
  */
 void FunctionQDepends::setMatrixWorkspace(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
+    std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
     double startX, double endX) {
   UNUSED_ARG(startX);
   UNUSED_ARG(endX);
@@ -132,7 +132,7 @@ std::vector<double> FunctionQDepends::extractQValues(
   auto axis_ptr =
       dynamic_cast<Mantid::API::NumericAxis *>(workspace.getAxis(1));
   if (axis_ptr) {
-    const boost::shared_ptr<Kernel::Unit> &unit_ptr = axis_ptr->unit();
+    const std::shared_ptr<Kernel::Unit> &unit_ptr = axis_ptr->unit();
     if (unit_ptr->unitID() == "MomentumTransfer") {
       qs = axis_ptr->getValues();
     }

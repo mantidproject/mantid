@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FloatingWindow_H
-#define FloatingWindow_H
+#pragma once
 
 #include <QMainWindow>
 
@@ -20,7 +19,8 @@ class QSize;
 class FloatingWindow : public QMainWindow {
   Q_OBJECT
 public:
-  FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f = nullptr);
+  FloatingWindow(ApplicationWindow *appWindow,
+                 const Qt::WindowFlags &f = nullptr);
   ~FloatingWindow() override;
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();
@@ -52,5 +52,3 @@ private:
   bool m_dragMouseDown;
   QPoint m_dragStartPos;
 };
-
-#endif

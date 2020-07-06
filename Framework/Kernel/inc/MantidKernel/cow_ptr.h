@@ -1,17 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDKERNEL_COW_PTR_H
-#define MANTIDKERNEL_COW_PTR_H
+#pragma once
 
 #include "MultiThreaded.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <mutex>
@@ -42,8 +40,8 @@ namespace Kernel {
 */
 template <typename DataType> class cow_ptr {
 public:
-  using ptr_type = boost::shared_ptr<DataType>; ///< typedef for the storage
-  using value_type = DataType;                  ///< typedef for the data type
+  using ptr_type = std::shared_ptr<DataType>; ///< typedef for the storage
+  using value_type = DataType;                ///< typedef for the data type
 
 private:
   ptr_type Data; ///< Real object Ptr
@@ -107,7 +105,7 @@ cow_ptr<DataType>::cow_ptr(DataType *resourcePtr) : Data(resourcePtr) {}
   Constructor : creates new data() object
 */
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr() : Data(boost::make_shared<DataType>()) {}
+cow_ptr<DataType>::cow_ptr() : Data(std::make_shared<DataType>()) {}
 
 /**
   Copy constructor : double references the data object
@@ -116,7 +114,7 @@ cow_ptr<DataType>::cow_ptr() : Data(boost::make_shared<DataType>()) {}
 // Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept
-    : Data(boost::atomic_load(&A.Data)) {}
+    : Data(std::atomic_load(&A.Data)) {}
 
 /**
   Assignment operator : double references the data object
@@ -129,7 +127,7 @@ template <typename DataType>
 cow_ptr<DataType> &cow_ptr<DataType>::
 operator=(const cow_ptr<DataType> &A) noexcept {
   if (this != &A) {
-    boost::atomic_store(&Data, boost::atomic_load(&A.Data));
+    std::atomic_store(&Data, std::atomic_load(&A.Data));
   }
   return *this;
 }
@@ -143,7 +141,7 @@ operator=(const cow_ptr<DataType> &A) noexcept {
 template <typename DataType>
 cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) noexcept {
   if (this->Data != A) {
-    boost::atomic_store(&Data, boost::atomic_load(&A));
+    std::atomic_store(&Data, std::atomic_load(&A));
   }
   return *this;
 }
@@ -168,7 +166,7 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
     // Check again because another thread may have taken copy and dropped
     // reference count since previous check
     if (!Data.unique()) {
-      boost::atomic_store(&Data, boost::make_shared<DataType>(*Data));
+      std::atomic_store(&Data, std::make_shared<DataType>(*Data));
     }
   }
   return *Data;
@@ -176,12 +174,12 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
 
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) noexcept {
-  boost::atomic_store(&this->Data, std::move(resourceSptr));
+  std::atomic_store(&this->Data, std::move(resourceSptr));
 }
 
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
-  boost::atomic_store(&this->Data, boost::atomic_load(&resourceSptr));
+  std::atomic_store(&this->Data, std::atomic_load(&resourceSptr));
 }
 
 } // NAMESPACE Kernel
@@ -193,5 +191,3 @@ using MantidVec = std::vector<double>;
 using MantidVecPtr = Kernel::cow_ptr<MantidVec>;
 
 } // NAMESPACE Mantid
-
-#endif // MANTIDKERNEL_COW_PTR_H

@@ -1,32 +1,37 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <functional>
+#include <qobject.h>
 #include <tuple>
+
+#include <iostream>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
-    BaseCustomInstrumentView *view, BaseCustomInstrumentModel *model,
-    QWidget *analysisPaneView)
+    IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model,
+    IPlotFitAnalysisPanePresenter *analysisPanePresenter)
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
-      m_loadRunObserver(nullptr), m_analysisPaneView(analysisPaneView) {
+      m_loadRunObserver(nullptr),
+      m_analysisPanePresenter(analysisPanePresenter) {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
 }
 
 void BaseCustomInstrumentPresenter::addInstrument() {
   auto setUp = setupInstrument();
-  initLayout(&setUp);
+  initLayout(setUp);
 }
 
 void BaseCustomInstrumentPresenter::initLayout(
@@ -42,7 +47,8 @@ void BaseCustomInstrumentPresenter::initLayout(
 }
 
 void BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
-  m_view->setupInstrumentAnalysisSplitters(m_analysisPaneView);
+  auto paneView = m_analysisPanePresenter->getView();
+  m_view->setupInstrumentAnalysisSplitters(paneView->getQWidget());
 }
 
 void BaseCustomInstrumentPresenter::loadAndAnalysis(
@@ -89,25 +95,6 @@ void BaseCustomInstrumentPresenter::initInstrument(
   for (auto options : customContextMenu) {
     m_view->addObserver(options);
   }
-}
-
-typedef std::pair<std::string,
-                  std::vector<std::function<bool(std::map<std::string, bool>)>>>
-    instrumentSetUp;
-typedef std::vector<std::tuple<std::string, Observer *>>
-    instrumentObserverOptions;
-std::pair<instrumentSetUp, instrumentObserverOptions>
-
-BaseCustomInstrumentPresenter::setupInstrument() {
-  instrumentSetUp setUpContextConditions;
-
-  // set up the slots for the custom context menu
-  std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions;
-  std::vector<std::function<bool(std::map<std::string, bool>)>> binders;
-
-  setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
-
-  return std::make_pair(setUpContextConditions, customInstrumentOptions);
 }
 
 } // namespace MantidWidgets

@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 '''
 @author Jose Borreguero, NScD
 @date October 06, 2013
 '''
-from __future__ import (absolute_import, division, print_function)
 import numpy
 import scipy.interpolate
 from mantid.api import IFunction1D, FunctionFactory
@@ -191,5 +190,5 @@ try:
     import dsfinterp  # noqa
     FunctionFactory.subscribe(DSFinterp1DFit)
 except ImportError:
-    logger.debug('Failed to subscribe fit function DSFinterp1DFit. ' +
-                 'Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
+    logger.debug('Failed to subscribe fit function DSFinterp1DFit. '
+                 + 'Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')

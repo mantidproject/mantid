@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_COPYLOGSTEST_H_
-#define MANTID_ALGORITHMS_COPYLOGSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -137,7 +136,7 @@ public:
   }
 
   // Run the Copy Logs algorithm
-  void runAlg(MatrixWorkspace_sptr in, MatrixWorkspace_sptr out,
+  void runAlg(const MatrixWorkspace_sptr &in, const MatrixWorkspace_sptr &out,
               const std::string &mode) {
     CopyLogs alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -150,18 +149,16 @@ public:
   }
 
   // Add a string sample log to the workspace
-  void addSampleLog(MatrixWorkspace_sptr ws, const std::string &name,
+  void addSampleLog(const MatrixWorkspace_sptr &ws, const std::string &name,
                     const std::string &value) {
     Run &run = ws->mutableRun();
     run.addLogData(new PropertyWithValue<std::string>(name, value));
   }
 
   // Add a double sample log to the workspace
-  void addSampleLog(MatrixWorkspace_sptr ws, const std::string &name,
+  void addSampleLog(const MatrixWorkspace_sptr &ws, const std::string &name,
                     const double value) {
     Run &run = ws->mutableRun();
     run.addLogData(new PropertyWithValue<double>(name, value));
   }
 };
-
-#endif /* MANTID_ALGORITHMS_COPYLOGSTEST_H_ */

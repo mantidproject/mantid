@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Qwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/CoordTransform.h"
@@ -15,6 +15,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidQtWidgets/Common/QStringUtils.h"
 #include <QStringBuilder>
+#include <utility>
 
 using MantidQt::API::toQStringInternal;
 using namespace Mantid::Kernel;
@@ -39,7 +40,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
     Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScaleY,
     Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
     Mantid::API::MDNormalization normalize, bool isDistribution)
-    : MantidQwtWorkspaceData(logScaleY), m_workspace(workspace),
+    : MantidQwtWorkspaceData(logScaleY), m_workspace(std::move(workspace)),
       m_preview(false), m_start(start), m_end(end), m_normalization(normalize),
       m_isDistribution(isDistribution), m_transform(nullptr),
       m_plotAxis(PlotDistance), m_currentPlotAxis(PlotDistance) {
@@ -269,7 +270,7 @@ void MantidQwtIMDWorkspaceData::setPreviewMode(bool preview) {
     // Refer to the last workspace = the intermediate in the case of MDHisto
     // binning
     const size_t indexOfWS = nOriginalWorkspaces - 1; // Get the last workspace
-    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(
+    m_originalWorkspace = std::dynamic_pointer_cast<IMDWorkspace>(
         m_workspace->getOriginalWorkspace(indexOfWS));
   }
 
@@ -309,7 +310,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
 
       bool regularBinnedMDWorkspace = false;
       if (auto mdew =
-              boost::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(
+              std::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(
                   m_workspace)) {
         Mantid::API::BoxController_const_sptr controller =
             mdew->getBoxController();
@@ -323,7 +324,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
       }
 
       if (nullptr !=
-              boost::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(
+              std::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(
                   originalWS) ||
           regularBinnedMDWorkspace) {
         for (size_t d = 0; d < diff.getNumDims(); d++) {

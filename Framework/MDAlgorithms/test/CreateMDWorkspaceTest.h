@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_
-#define MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -75,7 +74,7 @@ public:
                      const std::runtime_error &);
 
     // Wrong number of frames
-    TS_ASSERT_THROWS(!FrameworkManager::Instance().exec(
+    TS_ASSERT_THROWS(FrameworkManager::Instance().exec(
                          "CreateMDWorkspace", 12, "OutputWorkspace",
                          "simple_md", "Dimensions", "3", "Extents",
                          "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
@@ -92,8 +91,9 @@ public:
                    ->isExecuted());
   }
 
-  void do_test_exec(std::string Filename, bool lean, int MinRecursionDepth = 0,
-                    int expectedNumMDBoxes = 216, bool withFrames = false) {
+  void do_test_exec(const std::string &Filename, bool lean,
+                    int MinRecursionDepth = 0, int expectedNumMDBoxes = 216,
+                    bool withFrames = false) {
 
     std::string wsName = "CreateMDWorkspaceTest_out";
     CreateMDWorkspace alg;
@@ -126,7 +126,7 @@ public:
     // Get it from data service
     IMDEventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve(wsName)));
     TS_ASSERT(ws);
 
@@ -153,14 +153,14 @@ public:
 
     if (lean) {
       MDEventWorkspace3Lean::sptr ews =
-          boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(ws);
+          std::dynamic_pointer_cast<MDEventWorkspace3Lean>(ws);
       TS_ASSERT(ews);
       if (!ews)
         return;
       bc = ews->getBoxController();
     } else {
       MDEventWorkspace3::sptr ews =
-          boost::dynamic_pointer_cast<MDEventWorkspace3>(ws);
+          std::dynamic_pointer_cast<MDEventWorkspace3>(ws);
       TS_ASSERT(ews);
       if (!ews)
         return;
@@ -217,5 +217,3 @@ public:
 
   void test_exec_MinRecursionDepth() { do_test_exec("", true, 2, 216 * 216); }
 };
-
-#endif /* MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_ */

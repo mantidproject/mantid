@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PYTHONINTERFACECPP_PYTHONINTERPRETERGLOBALFIXTURE_H
-#define PYTHONINTERFACECPP_PYTHONINTERPRETERGLOBALFIXTURE_H
+#pragma once
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidPythonInterface/core/NDArray.h"
@@ -53,5 +52,3 @@ public:
     return true;
   }
 };
-
-#endif // PYTHONINTERFACECPP_PYTHONINTERPRETERGLOBALFIXTURE_H

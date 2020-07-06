@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Python/CodeExecution.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
@@ -16,8 +16,13 @@ using Mantid::PythonInterface::GlobalInterpreterLock;
 
 namespace {
 
+struct ScriptEditorDetails {
+  ScriptEditor *editor;
+  int lineOffset;
+};
+
 // Map co_filename objects from PyCodeObject to an editor object
-QHash<PyObject *, ScriptEditor *> EDITOR_LOOKUP;
+QHash<PyObject *, ScriptEditorDetails> EDITOR_LOOKUP;
 
 /**
  * A callback, set using PyEval_SetTrace, that is called by Python
@@ -39,7 +44,9 @@ int traceLineNumber(PyObject *obj, PyFrameObject *frame, int event,
     return 0;
   auto iter = EDITOR_LOOKUP.constFind(frame->f_code->co_filename);
   if (iter != EDITOR_LOOKUP.constEnd()) {
-    iter.value()->updateProgressMarkerFromThread(frame->f_lineno, false);
+    const auto &details = iter.value();
+    int lineLoc = frame->f_lineno + details.lineOffset;
+    details.editor->updateProgressMarkerFromThread(lineLoc, false);
   }
   return 0;
 }
@@ -60,32 +67,35 @@ CodeExecution::CodeExecution(ScriptEditor *editor) : m_editor(editor) {}
  * @param filename A string containing the filename of the source code
  * @param flags An OR-ed combination of compiler flags
  * @param globals A dictionary containing the current globals mapping
+ * @param lineOffset The number of lines offset to apply to the marker
  */
 PyObject *CodeExecution::execute(const QString &codeStr,
                                  const QString &filename, int flags,
-                                 PyObject *globals) const {
+                                 PyObject *globals, int lineOffset) const {
   GlobalInterpreterLock gil;
   PyCompilerFlags compileFlags;
   compileFlags.cf_flags = flags;
   auto compiledCode = Py_CompileStringFlags(codeStr.toUtf8().constData(),
                                             filename.toUtf8().constData(),
                                             Py_file_input, &compileFlags);
-  if (compiledCode) {
-    if (m_editor) {
-      const auto coFileObject = ((PyCodeObject *)compiledCode)->co_filename;
-      const auto posIter = EDITOR_LOOKUP.insert(coFileObject, m_editor);
-      PyEval_SetTrace((Py_tracefunc)&traceLineNumber, nullptr);
-      const auto result =
-          PyEval_EvalCode(CODE_OBJECT(compiledCode), globals, globals);
-      PyEval_SetTrace(nullptr, nullptr);
-      EDITOR_LOOKUP.erase(posIter);
-      return result;
-    } else {
-      return PyEval_EvalCode(CODE_OBJECT(compiledCode), globals, globals);
-    }
-  } else {
+  if (!compiledCode) {
     return nullptr;
   }
-}
+
+  if (!m_editor) {
+    return PyEval_EvalCode(CODE_OBJECT(compiledCode), globals, globals);
+  }
+
+  ScriptEditorDetails editor_details{m_editor, lineOffset};
+  const auto coFileObject = ((PyCodeObject *)compiledCode)->co_filename;
+  const auto posIter = EDITOR_LOOKUP.insert(coFileObject, editor_details);
+  PyEval_SetTrace((Py_tracefunc)&traceLineNumber, nullptr);
+  const auto result =
+      PyEval_EvalCode(CODE_OBJECT(compiledCode), globals, globals);
+  PyEval_SetTrace(nullptr, nullptr);
+  EDITOR_LOOKUP.erase(posIter);
+  return result;
+
+} // namespace MantidQt::Widgets::Common::Python
 
 } // namespace MantidQt::Widgets::Common::Python

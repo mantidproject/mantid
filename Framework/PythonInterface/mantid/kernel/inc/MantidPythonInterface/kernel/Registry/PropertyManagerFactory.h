@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_PROPERTYMANAGERFACTORY_H
-#define MANTID_PYTHONINTERFACE_PROPERTYMANAGERFACTORY_H
+#pragma once
 
 #include <boost/python/dict.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -18,10 +17,8 @@ namespace PythonInterface {
 namespace Registry {
 
 /// Create a C++ PropertyMananager from a Python dictionary
-boost::shared_ptr<Kernel::PropertyManager>
+std::shared_ptr<Kernel::PropertyManager>
 createPropertyManager(const boost::python::dict &mapping);
 } // namespace Registry
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif // MANTID_PYTHONINTERFACE_PROPERTYMANAGERFACTORY_H

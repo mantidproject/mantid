@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
-#define MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
@@ -25,7 +24,7 @@ namespace DataObjects {
 class DLLExport OffsetsWorkspace : public SpecialWorkspace2D {
 public:
   OffsetsWorkspace() = default;
-  OffsetsWorkspace(Geometry::Instrument_const_sptr inst);
+  OffsetsWorkspace(const Geometry::Instrument_const_sptr &inst);
 
   /// Returns a clone of the workspace
   std::unique_ptr<OffsetsWorkspace> clone() const {
@@ -54,12 +53,10 @@ private:
 };
 
 /// shared pointer to the OffsetsWorkspace class
-using OffsetsWorkspace_sptr = boost::shared_ptr<OffsetsWorkspace>;
+using OffsetsWorkspace_sptr = std::shared_ptr<OffsetsWorkspace>;
 
 /// shared pointer to a const OffsetsWorkspace
-using OffsetsWorkspace_const_sptr = boost::shared_ptr<const OffsetsWorkspace>;
+using OffsetsWorkspace_const_sptr = std::shared_ptr<const OffsetsWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_ */

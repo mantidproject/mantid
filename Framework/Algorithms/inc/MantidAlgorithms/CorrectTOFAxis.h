@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CORRECTTOFAXIS_H_
-#define MANTID_ALGORITHMS_CORRECTTOFAXIS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -44,8 +43,8 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-  void useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs);
-  void correctManually(API::MatrixWorkspace_sptr outputWs);
+  void useReferenceWorkspace(const API::MatrixWorkspace_sptr &outputWs);
+  void correctManually(const API::MatrixWorkspace_sptr &outputWs);
   double averageL2(const API::SpectrumInfo &spectrumInfo);
   void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2,
                        double &epp);
@@ -54,5 +53,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CORRECTTOFAXIS_H_ */

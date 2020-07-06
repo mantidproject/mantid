@@ -18,7 +18,7 @@ Overview
 ^^^^^^^^
 
 Mantid follow the LLVM C++ coding standards and standards on this
-page.  Where these standards overlap the standards on this page take
+page. Where these standards overlap the standards on this page take
 precedence.
 
 `This page
@@ -57,6 +57,7 @@ Layout of Header File
 The contents of the header file should be arranged in the following
 order:
 
+- ``#pragma once`` header guard to prevent duplicate imports.
 - ``#include`` directives in the following order, where each section shold be
   sorted alphabetically:
 

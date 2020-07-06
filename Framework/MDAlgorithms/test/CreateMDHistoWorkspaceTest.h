@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CREATEMDHISTOWORKSPACETEST_H_
-#define MANTID_MDEVENTS_CREATEMDHISTOWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
@@ -28,7 +27,7 @@ private:
   be overriden in individual tests.
   */
   IAlgorithm_sptr make_standard_algorithm(const std::string &outWSName) {
-    IAlgorithm_sptr alg = boost::make_shared<CreateMDHistoWorkspace>();
+    IAlgorithm_sptr alg = std::make_shared<CreateMDHistoWorkspace>();
     alg->initialize();
     alg->setRethrows(true);
     alg->setPropertyValue("SignalInput", "1,2,3");
@@ -208,5 +207,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_MDEVENTS_CREATEMDHISTOWORKSPACETEST_H_ */

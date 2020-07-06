@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef TABLE_STATISTICS_H
-#define TABLE_STATISTICS_H
+#pragma once
 
 #include "Table.h"
 
@@ -44,7 +43,7 @@ public:
   //! supported statistics types
   enum Type { row, column };
   TableStatistics(ScriptingEnv *env, QWidget *parent, Table *base, Type,
-                  QList<int> targets);
+                  const QList<int> &targets);
   //! return the type of statistics
   Type type() const { return d_type; }
   //! return the base table of which statistics are displayed
@@ -73,5 +72,3 @@ private:
   Type d_type;
   QList<int> d_targets;
 };
-
-#endif

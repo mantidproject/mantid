@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
 #include "MantidAPI/CoordTransform.h"
@@ -350,9 +350,9 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
 namespace MantidQt {
 namespace API {
 
-size_t
-getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
-                            size_t dimX, size_t dimY) {
+size_t getMissingHKLDimensionIndex(
+    const Mantid::API::IMDWorkspace_const_sptr &workspace, size_t dimX,
+    size_t dimY) {
   for (size_t i = 0; i < workspace->getNumDims(); ++i) {
     auto dimension = workspace->getDimension(i);
     const auto &frame = dimension->getMDFrame();

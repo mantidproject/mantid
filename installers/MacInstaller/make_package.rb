@@ -17,6 +17,8 @@ AT_EXECUTABLE_TAG = '@executable_path'
 AT_LOADER_TAG = '@loader_path'
 AT_RPATH_TAG = '@rpath'
 BUNDLED_PY_MODULES_COMMON = [
+  'appnope',
+  'backcall',
   'certifi',
   'chardet',
   'CifFile',
@@ -30,6 +32,7 @@ BUNDLED_PY_MODULES_COMMON = [
   'ipykernel',
   'jupyter_core',
   'jupyter_client',
+  'kiwisolver.%s.so',
   'markupsafe',
   'matplotlib',
   'mistune.py',
@@ -38,6 +41,7 @@ BUNDLED_PY_MODULES_COMMON = [
   'numpy',
   'pexpect',
   'pickleshare.py',
+  'pip',
   'pkg_resources',
   'prompt_toolkit',
   'ptyprocess',
@@ -49,7 +53,6 @@ BUNDLED_PY_MODULES_COMMON = [
   'tornado',
   'requests',
   'scipy',
-  'sip.so',
   'six.py',
   'sphinx',
   'sphinx_bootstrap_theme',
@@ -59,23 +62,7 @@ BUNDLED_PY_MODULES_COMMON = [
   'wcwidth',
   'yaml',
   'zmq'
-].freeze
-BUNDLED_PY_MODULES_PY2 = [
-  '_posixsubprocess32.so',
-  'backports',
-  'enum',
-  'funcsigs',
-  'kiwisolver.so',
-  'pathlib2',
-  'scandir.py',
-  'simplegeneric.py',
-  'subprocess32.py'
-].freeze
-BUNDLED_PY_MODULES_PY3 = [
-  'appnope',
-  'backcall',
-  'kiwisolver.%s.so'
-].freeze
+]
 BUNDLED_PY_MODULES_MANTIDPLOT = [
   'PyQt4/__init__.py',
   'PyQt4/Qt.so',
@@ -85,8 +72,9 @@ BUNDLED_PY_MODULES_MANTIDPLOT = [
   'PyQt4/QtSql.so',
   'PyQt4/QtSvg.so',
   'PyQt4/QtXml.so',
+  'PyQt4/sip.so',
   'PyQt4/uic'
-].freeze
+]
 BUNDLED_PY_MODULES_WORKBENCH = [
   'PyQt5/__init__.py',
   'PyQt5/Qt.so',
@@ -98,9 +86,10 @@ BUNDLED_PY_MODULES_WORKBENCH = [
   'PyQt5/QtSvg.so',
   'PyQt5/QtWidgets.so',
   'PyQt5/QtXml.so',
+  'PyQt5/sip.so',
   'PyQt5/uic',
   'psutil'
-].freeze
+]
 DEBUG = 1
 FRAMEWORK_IDENTIFIER = '.framework'
 HOMEBREW_PREFIX = '/usr/local'
@@ -593,29 +582,40 @@ contents_frameworks = bundle_path + 'Contents/Frameworks'
 # additional executables not detectable by dependency analysis
 executables = ["#{contents_macos}/MantidNexusParallelLoader"]
 
+# Create list of packages to bundle
+python_version_full = python_version(host_python_exe.to_s)
+python_version_major = python_version_full[0]
+python_version_minor = python_version_full[1]
+so_suffix = ''
+
+# === legacy: can be removed one all builders moved to homebrew HEAD. The lists at the top can then be frozen again ===
+# Allow building with old brew python 3.7 package when brew was fixed for 2/3 compatability
+# plus new HEAD state.
+# We use the presence of sip.so in the top-level site-packages to determine if we are in the legacy mode or HEAD.
+# sip.so is bundled inside PyQt with homebrew at HEAD
+_py_home = host_python_exe.realpath.parent.parent
+_src_site_packages = Pathname.new("#{_py_home}/lib/python#{python_version_major}.#{python_version_minor}/site-packages")
+if Pathname.new("#{_src_site_packages}/sip.so").exist?
+  so_suffix = 'm'
+  BUNDLED_PY_MODULES_COMMON << 'sip.so'
+  BUNDLED_PY_MODULES_MANTIDPLOT.delete('PyQt4/sip.so')
+  BUNDLED_PY_MODULES_WORKBENCH.delete('PyQt5/sip.so')
+end
+# ==== end legacy =======
+
+bundled_packages = BUNDLED_PY_MODULES_COMMON.map { |s| s % "cpython-%d%d%s-darwin" % [python_version_major, python_version_minor, so_suffix] }
 # check we have a known bundle
 if bundle_path.to_s.end_with?('MantidWorkbench.app')
-  bundled_packages = BUNDLED_PY_MODULES_COMMON + BUNDLED_PY_MODULES_WORKBENCH
+  bundled_packages += BUNDLED_PY_MODULES_WORKBENCH
   bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
 elsif bundle_path.to_s.end_with?('MantidPlot.app')
-  bundled_packages = BUNDLED_PY_MODULES_COMMON + BUNDLED_PY_MODULES_MANTIDPLOT
+  bundled_packages += BUNDLED_PY_MODULES_MANTIDPLOT
   bundled_qt_plugins = QT_PLUGINS_COMMON
   host_qt_plugins_dir = QT4_PLUGINS_DIR
   executables << "#{contents_macos}/MantidPlot"
 else
   fatal("Unknown bundle type #{bundle_path}. Expected MantidPlot.app or MantidWorkbench.app.")
-end
-
-python_version_full = python_version(host_python_exe.to_s)
-python_version_major = python_version_full[0]
-python_version_minor = python_version_full[1]
-if python_version_major == 2
-  bundled_packages += BUNDLED_PY_MODULES_PY2
-elsif python_version_major == 3
-  bundled_packages += BUNDLED_PY_MODULES_PY3.map { |s| s % "cpython-%d%dm-darwin" % [python_version_major, python_version_minor] }
-else
-  fatal("Unknown Python version: #{python_version_major}. Expected <= 3")
 end
 
 # We start with the assumption CMake has installed all required target libraries/executables

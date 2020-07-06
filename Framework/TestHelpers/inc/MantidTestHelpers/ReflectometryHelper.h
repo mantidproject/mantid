@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTHELPERS_REFLECTOMETRYHELPER_H_
-#define MANTID_TESTHELPERS_REFLECTOMETRYHELPER_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -64,5 +63,3 @@ MatrixWorkspace_sptr createWorkspaceSingle(const double startX = 1,
                                            const double deltaX = 1);
 } // namespace TestHelpers
 } // namespace Mantid
-
-#endif // MANTID_TESTHELPERS_REFLECTOMETRYHELPER_H_

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWSINDEXDIALOG_H_
-#define MANTIDWSINDEXDIALOG_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -73,7 +72,7 @@ public:
   /// Constructor - starting at start and ending at end.
   Interval(int start, int end);
   /// Constructor - attempts to parse given string to find start and end.
-  explicit Interval(QString /*intervalString*/);
+  explicit Interval(const QString & /*intervalString*/);
   /// Copy constructor
   Interval(const Interval & /*copy*/);
 
@@ -115,9 +114,9 @@ public:
   /// Constructor - with empty list.
   IntervalList(void);
   /// Constructor - with a list created by parsing the input string
-  explicit IntervalList(QString /*intervals*/);
+  explicit IntervalList(const QString & /*intervals*/);
   /// Constructor - with a list containing a single Interval
-  explicit IntervalList(Interval /*interval*/);
+  explicit IntervalList(const Interval & /*interval*/);
   /// Copy Constructor
   IntervalList(const IntervalList & /*copy*/);
 
@@ -221,7 +220,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexWidget : public QWidget {
     QLineEdit *lineEdit() { return _lineEdit; };
     /// if Error is not empty, it will make the * label visible and set the
     /// tooltip as the error.
-    void setError(QString error);
+    void setError(const QString &error);
 
   private:
     QLineEdit *_lineEdit;
@@ -269,7 +268,7 @@ public:
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a
   /// list of the names of workspaces to be plotted.
-  MantidWSIndexWidget(QWidget *parent, Qt::WindowFlags flags,
+  MantidWSIndexWidget(QWidget *parent, const Qt::WindowFlags &flags,
                       const QList<QString> &wsNames,
                       const bool showWaterfallOption = false,
                       const bool showTiledOption = false,
@@ -392,7 +391,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexDialog : public QDialog {
 
 public:
   /// Constructor - has a list of the names of workspaces to be plotted.
-  MantidWSIndexDialog(QWidget *parent, Qt::WindowFlags flags,
+  MantidWSIndexDialog(QWidget *parent, const Qt::WindowFlags &flags,
                       const QList<QString> &wsNames,
                       const bool showWaterfallOption = false,
                       const bool showPlotAll = true,
@@ -437,4 +436,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDWSINDEXDIALOG_H_

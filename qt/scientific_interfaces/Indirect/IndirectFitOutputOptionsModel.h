@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
+#pragma once
 
 #include "IIndirectFitOutputOptionsModel.h"
 
@@ -60,25 +59,29 @@ public:
                         std::string const &outputName) override;
 
 private:
-  void plotResult(Mantid::API::WorkspaceGroup_const_sptr groupWorkspace,
+  void plotResult(const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace,
                   std::string const &plotType);
-  void plotAll(Mantid::API::WorkspaceGroup_const_sptr groupWorkspace);
-  void plotAll(Mantid::API::MatrixWorkspace_const_sptr workspace);
-  void plotAllSpectra(Mantid::API::MatrixWorkspace_const_sptr workspace);
-  void plotParameter(Mantid::API::WorkspaceGroup_const_sptr groupWorkspace,
+  void plotAll(const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace);
+  void plotAll(const Mantid::API::MatrixWorkspace_const_sptr &workspace);
+  void plotAllSpectra(const Mantid::API::MatrixWorkspace_const_sptr &workspace);
+  void
+  plotParameter(const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace,
+                std::string const &parameter);
+  void plotParameter(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                      std::string const &parameter);
-  void plotParameter(Mantid::API::MatrixWorkspace_const_sptr workspace,
-                     std::string const &parameter);
-  void plotParameterSpectrum(Mantid::API::MatrixWorkspace_const_sptr workspace,
-                             std::string const &parameter);
+  void plotParameterSpectrum(
+      const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+      std::string const &parameter);
 
-  void plotPDF(Mantid::API::MatrixWorkspace_const_sptr workspace,
+  void plotPDF(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                std::string const &plotType);
 
-  void replaceFitResult(Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-                        Mantid::API::MatrixWorkspace_sptr singleFitWorkspace,
-                        std::string const &outputName);
-  void setOutputAsResultWorkspace(Mantid::API::IAlgorithm_sptr algorithm);
+  void
+  replaceFitResult(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,
+                   const Mantid::API::MatrixWorkspace_sptr &singleFitWorkspace,
+                   std::string const &outputName);
+  void
+  setOutputAsResultWorkspace(const Mantid::API::IAlgorithm_sptr &algorithm);
   void setResultWorkspace(std::string const &groupName);
 
   Mantid::API::WorkspaceGroup_sptr m_resultGroup;
@@ -89,5 +92,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

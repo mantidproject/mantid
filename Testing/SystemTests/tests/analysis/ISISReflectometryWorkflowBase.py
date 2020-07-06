@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 System Test for ISIS Reflectometry reduction
 Adapted from scripts provided by Max Skoda.
 """
-from __future__ import (print_function)
 from mantid.simpleapi import *
 from mantid import ConfigService
 
@@ -168,8 +167,7 @@ def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers,
         LoadEventNexus(event_run_name, OutputWorkspace=event_run_name, LoadMonitors=True)
     event_monitor_names = [str(run_number)+'_monitors' for run_number in event_run_numbers]
     # Group and save
-    GroupWorkspaces(InputWorkspaces=run_names + transmission_run_names + event_run_names +
-                    event_monitor_names,
+    GroupWorkspaces(InputWorkspaces=run_names + transmission_run_names + event_run_names + event_monitor_names,
                     OutputWorkspace='Input')
     SaveNexus(InputWorkspace='Input', Filename=input_workspaces_file)
 

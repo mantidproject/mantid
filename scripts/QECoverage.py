@@ -1,12 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements
 # pylint: disable= too-many-branches, no-self-use
-from __future__ import (absolute_import, division, print_function)
 from mantidqt.gui_helper import get_qapplication, show_interface_help
 import numpy as np
 import os
@@ -471,9 +470,9 @@ class QECoverageGUI(QtWidgets.QWidget):
             Emax_min = -4896
 
         self.emaxfield_msgbox.setText("Invalid input has been provided for Emax. "
-                                      "Emax cannot be less than " +
-                                      str(Emax_min) + ", when Ef is set as " +
-                                      ana + "! Please try again.")
+                                      "Emax cannot be less than "
+                                      + str(Emax_min) + ", when Ef is set as "
+                                      + ana + "! Please try again.")
 
         if float(self.indirect_emax_input.text()) < Emax_min:
             self.indirect_emax_input.setText(str(Emax_min))

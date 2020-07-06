@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_MUONPREPROCESSTEST_H_
-#define MANTID_MUON_MUONPREPROCESSTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -13,6 +12,8 @@
 #include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -27,7 +28,7 @@ namespace {
 IAlgorithm_sptr
 algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
 
-  auto alg = boost::make_shared<MuonPreProcess>();
+  auto alg = std::make_shared<MuonPreProcess>();
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWSName);
   alg->setProperty("OutputWorkspace", "__notUsed");
@@ -42,22 +43,23 @@ class setUpADSWithWorkspace {
 public:
   std::string const inputWSName = "inputData";
 
-  setUpADSWithWorkspace(Workspace_sptr ws) {
+  setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
   };
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
 };
 
 // Set up algorithm with none of the optional properties
-IAlgorithm_sptr setUpAlgorithmWithNoOptionalProperties(Workspace_sptr ws) {
-  setUpADSWithWorkspace setup(ws);
+IAlgorithm_sptr
+setUpAlgorithmWithNoOptionalProperties(const Workspace_sptr &ws) {
+  setUpADSWithWorkspace setup(std::move(ws));
   IAlgorithm_sptr alg =
       algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   return alg;
 }
 
 // Set up algorithm with TimeOffset applied
-IAlgorithm_sptr setUpAlgorithmWithTimeOffset(MatrixWorkspace_sptr ws,
+IAlgorithm_sptr setUpAlgorithmWithTimeOffset(const MatrixWorkspace_sptr &ws,
                                              const double &offset) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
@@ -68,8 +70,8 @@ IAlgorithm_sptr setUpAlgorithmWithTimeOffset(MatrixWorkspace_sptr ws,
 
 // Set up algorithm with DeadTimeTable applied
 IAlgorithm_sptr
-setUpAlgorithmWithDeadTimeTable(MatrixWorkspace_sptr ws,
-                                ITableWorkspace_sptr deadTimes) {
+setUpAlgorithmWithDeadTimeTable(const MatrixWorkspace_sptr &ws,
+                                const ITableWorkspace_sptr &deadTimes) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
       algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
@@ -78,7 +80,7 @@ setUpAlgorithmWithDeadTimeTable(MatrixWorkspace_sptr ws,
 }
 
 // Set up algorithm with TimeMin applied
-IAlgorithm_sptr setUpAlgorithmWithTimeMin(MatrixWorkspace_sptr ws,
+IAlgorithm_sptr setUpAlgorithmWithTimeMin(const MatrixWorkspace_sptr &ws,
                                           const double &timeMin) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
@@ -88,7 +90,7 @@ IAlgorithm_sptr setUpAlgorithmWithTimeMin(MatrixWorkspace_sptr ws,
 }
 
 // Set up algorithm with TimeMax applied
-IAlgorithm_sptr setUpAlgorithmWithTimeMax(MatrixWorkspace_sptr ws,
+IAlgorithm_sptr setUpAlgorithmWithTimeMax(const MatrixWorkspace_sptr &ws,
                                           const double &timeMax) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
@@ -99,12 +101,12 @@ IAlgorithm_sptr setUpAlgorithmWithTimeMax(MatrixWorkspace_sptr ws,
 
 // Get the workspace at a particular index from the output workspace
 // group produced by the PreProcess alg
-MatrixWorkspace_sptr getOutputWorkspace(IAlgorithm_sptr muonPreProcessAlg,
-                                        const int &index) {
+MatrixWorkspace_sptr
+getOutputWorkspace(const IAlgorithm_sptr &muonPreProcessAlg, const int &index) {
   WorkspaceGroup_sptr outputWS;
   outputWS = muonPreProcessAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr wsOut =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
+      std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
   return wsOut;
 }
 
@@ -229,7 +231,7 @@ public:
     outputWS = alg->getProperty("OutputWorkspace");
 
     MatrixWorkspace_sptr wsOut =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.200, 0.001);
@@ -258,7 +260,7 @@ public:
     outputWS = alg->getProperty("OutputWorkspace");
 
     MatrixWorkspace_sptr wsOut =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
 
     // Using "FullBinsOnly" as false in Rebin preserves
     // the counts at the expense of an uneven bin
@@ -412,7 +414,7 @@ public:
 
   void test_that_execption_thrown_if_input_workspace_group_is_empty() {
 
-    WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr wsGroup = std::make_shared<WorkspaceGroup>();
     auto alg = setUpAlgorithmWithNoOptionalProperties(wsGroup);
 
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
@@ -423,7 +425,7 @@ public:
 
     auto wsOneSpectra = createCountsWorkspace(1, 10, 0.0);
     auto wsTwoSpectra = createCountsWorkspace(2, 10, 0.0);
-    WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr wsGroup = std::make_shared<WorkspaceGroup>();
     wsGroup->addWorkspace(wsOneSpectra);
     wsGroup->addWorkspace(wsTwoSpectra);
     auto alg = setUpAlgorithmWithNoOptionalProperties(wsGroup);
@@ -431,5 +433,3 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 };
-
-#endif /* MANTID_MUON_MUONPREPROCESSTEST_H_ */

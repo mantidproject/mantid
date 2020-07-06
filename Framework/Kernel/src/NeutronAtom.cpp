@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
@@ -49,7 +49,7 @@ void calculateScatteringLengths(NeutronAtom &atom) {
  * @param coh_xs :: The coherent neutron cross-section
  * @param inc_xs :: The incoherent neutron cross-section
  * @param tot_xs :: The total neutron cross-section
- * @param abs_xs :: The absolute neutron cross-section
+ * @param abs_xs :: The absorption neutron cross-section
  */
 NeutronAtom::NeutronAtom(const uint16_t z, const double coh_b_real,
                          const double inc_b_real, const double coh_xs,
@@ -70,7 +70,7 @@ NeutronAtom::NeutronAtom(const uint16_t z, const double coh_b_real,
  * @param coh_xs :: The coherent neutron cross-section
  * @param inc_xs :: The incoherent neutron cross-section
  * @param tot_xs :: The total neutron cross-section
- * @param abs_xs :: The absolute neutron cross-section
+ * @param abs_xs :: The absorption neutron cross-section
  */
 NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          const double coh_b_real, const double inc_b_real,

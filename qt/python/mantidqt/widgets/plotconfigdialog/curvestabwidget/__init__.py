@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib import rcParams
 from matplotlib.axes import ErrorbarContainer
@@ -119,6 +117,12 @@ class CurveProperties(dict):
             if k not in ['hide', 'hide_errors']:
                 kwargs[k] = v
         kwargs['visible'] = not self.hide
+
+        # If the long form of the marker name is currently being used, it is changed to the short form which is
+        # understood by matplotlib.
+        if kwargs['marker'] in MARKER_MAP:
+            kwargs['marker'] = MARKER_MAP[kwargs['marker']]
+
         return kwargs
 
     @classmethod
@@ -138,14 +142,15 @@ class CurveProperties(dict):
         props['markerfacecolor'] = view.marker.get_face_color()
         props['markeredgecolor'] = view.marker.get_edge_color()
         # Errorbar props
-        props['hide_errors'] = view.errorbars.get_hide()
-        props['errorevery'] = view.errorbars.get_error_every()
-        props['capsize'] = view.errorbars.get_capsize()
-        props['capthick'] = view.errorbars.get_cap_thickness()
-        props['ecolor'] = view.errorbars.get_color()
-        # setting errorbar line width to 0 sets width to default, so add a
-        # little bit on to avoid this
-        props['elinewidth'] = view.errorbars.get_width() + 1e-6
+        if view.errorbars.isEnabled():
+            props['hide_errors'] = view.errorbars.get_hide()
+            props['errorevery'] = view.errorbars.get_error_every()
+            props['capsize'] = view.errorbars.get_capsize()
+            props['capthick'] = view.errorbars.get_cap_thickness()
+            props['ecolor'] = view.errorbars.get_color()
+            # setting errorbar line width to 0 sets width to default, so add a
+            # little bit on to avoid this
+            props['elinewidth'] = view.errorbars.get_width() + 1e-6
         return cls(props)
 
     @classmethod

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTWINDOW_H
-#define INSTRUMENTWINDOW_H
+#pragma once
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -13,7 +12,7 @@
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <MdiSubWindow.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ApplicationWindow;
 class MantidUI;
@@ -68,5 +67,3 @@ public slots:
 private:
   MantidQt::MantidWidgets::InstrumentWidget *m_instrumentWidget;
 };
-
-#endif // INSTRUMENTWINDOW_H

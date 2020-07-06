@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_LOGPARSER_H_
-#define MANTID_KERNEL_LOGPARSER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,7 +12,7 @@
 #include "MantidKernel/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <map>
@@ -45,6 +44,8 @@ public:
   static const std::string currentPeriodLogName() { return "current_period"; }
   /// Returns the name of the log created that defines the status during a run
   static const std::string statusLogName() { return "running"; }
+  /// Returns the name of the log that contains given period filter
+  static const std::string currentPeriodLogName(const int period);
   /// Returns the name of the log that contains all of the periods
   static const std::string periodsLogName() { return "periods"; }
 
@@ -98,10 +99,10 @@ private:
   using CommandMap = std::map<std::string, commands>;
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
-  boost::shared_ptr<Kernel::Property> m_periods;
+  std::shared_ptr<Kernel::Property> m_periods;
 
   /// TimeSeriesProperty<bool> containing running status. Created by LogParser
-  boost::shared_ptr<Kernel::TimeSeriesProperty<bool>> m_status;
+  std::shared_ptr<Kernel::TimeSeriesProperty<bool>> m_status;
 
   /// Number of periods
   int m_nOfPeriods;
@@ -121,5 +122,3 @@ MANTID_KERNEL_DLL double timeMean(const Kernel::Property *p);
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_LOGPARSER_H_*/

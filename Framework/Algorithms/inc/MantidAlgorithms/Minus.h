@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MINUS_H_
-#define MANTID_ALGORITHMS_MINUS_H_
+#pragma once
 #include "MantidAlgorithms/BinaryOperation.h"
 
 namespace Mantid {
@@ -26,7 +25,7 @@ difference data </LI>
 @author Nick Draper
 @date 14/12/2007
 */
-class DLLExport Minus : public BinaryOperation {
+class MANTID_ALGORITHMS_DLL Minus : public BinaryOperation {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Minus"; }
@@ -67,8 +66,8 @@ private:
   std::string checkSizeCompatibility(
       const API::MatrixWorkspace_const_sptr lhs,
       const API::MatrixWorkspace_const_sptr rhs) const override;
-  bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs) const;
+  bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr &lhs,
+                              const API::MatrixWorkspace_const_sptr &rhs) const;
   bool
   checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
                      const API::MatrixWorkspace_const_sptr rhs) const override;
@@ -76,5 +75,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_MINUS_H_*/

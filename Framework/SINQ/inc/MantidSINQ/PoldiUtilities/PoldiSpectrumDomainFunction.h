@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
-#define MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
@@ -75,7 +74,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
       current.emplace_back(static_cast<double>(i + 0.5) * deltaD);
     }
 
-    domain = boost::make_shared<API::FunctionDomain1DVector>(current);
+    domain = std::make_shared<API::FunctionDomain1DVector>(current);
     values.reset(*domain);
   }
 
@@ -103,7 +102,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
   int minTOFN;
 };
 
-using Poldi2DHelper_sptr = boost::shared_ptr<Poldi2DHelper>;
+using Poldi2DHelper_sptr = std::shared_ptr<Poldi2DHelper>;
 
 class WrapAroundJacobian : public API::Jacobian {
 public:
@@ -231,7 +230,7 @@ public:
 
   std::string name() const override { return "PoldiSpectrumDomainFunction"; }
 
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
   void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                           API::FunctionValues &values) const override;
 
@@ -266,5 +265,3 @@ protected:
 
 } // namespace Poldi
 } // namespace Mantid
-
-#endif /* MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_ */

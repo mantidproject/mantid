@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This algorithm takes a 3D MD workspace and performs certain axis transposings
@@ -19,8 +19,7 @@
  *
  *
  */
-#ifndef TRANSPOSE3D_H_
-#define TRANSPOSE3D_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
@@ -55,13 +54,11 @@ private:
   /// Execution code
   void exec() override;
 
-  void doYXZ(Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doXZY(Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doTRICS(Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doAMOR(Mantid::API::IMDHistoWorkspace_sptr inws);
+  void doYXZ(const Mantid::API::IMDHistoWorkspace_sptr &inws);
+  void doXZY(const Mantid::API::IMDHistoWorkspace_sptr &inws);
+  void doTRICS(const Mantid::API::IMDHistoWorkspace_sptr &inws);
+  void doAMOR(const Mantid::API::IMDHistoWorkspace_sptr &inws);
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                    Mantid::API::IMDHistoWorkspace_sptr outws);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
 };
-
-#endif /*TRANSPOSE3D_H_*/

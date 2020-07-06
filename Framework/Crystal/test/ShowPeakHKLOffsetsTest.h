@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * ShowPeakHKLOffsetsTest.h
@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef SHOWPEAKHKLOFFSETSTEST_H_
-#define SHOWPEAKHKLOFFSETSTEST_H_
+#pragma once
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/ShowPeakHKLOffsets.h"
@@ -52,7 +51,7 @@ public:
     TS_ASSERT(show.execute())
     TS_ASSERT(show.isExecuted())
     show.setProperty("HKLIntegerOffsets", "offsets");
-    boost::shared_ptr<Mantid::API::ITableWorkspace> Offsets =
+    std::shared_ptr<Mantid::API::ITableWorkspace> Offsets =
         show.getProperty("HKLIntegerOffsets");
 
     TS_ASSERT_DELTA(Offsets->Double(3, 1), 0.0186555, .1)
@@ -65,5 +64,3 @@ public:
     TS_ASSERT_DELTA(Offsets->Double(23, 0), -0.00976605, .1)
   }
 };
-
-#endif /* SHOWPEAKHKLOFFSETSTEST_H_ */

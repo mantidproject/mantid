@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTINTERFACESGENERAL_DLLCONFIG_H_
-#define MANTIDQTINTERFACESGENERAL_DLLCONFIG_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -20,5 +19,3 @@
 #define MANTIDQT_INTERFACESGENERAL_DLL DLLImport
 #define EXTERN_MANTIDQT_INTERFACESGENERAL EXTERN_IMPORT
 #endif
-
-#endif // MANTIDQTINTERFACESGENERAL_DLLCONFIG_H_

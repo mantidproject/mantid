@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TESTSAMPLEENVIRONMENT_H_
-#define TESTSAMPLEENVIRONMENT_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -16,8 +15,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
 
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using Mantid::Geometry::SampleEnvironment;
 
@@ -32,7 +31,7 @@ public:
 
   void test_Constructor_Sets_Name_And_Single_Element() {
     using Mantid::Geometry::Container;
-    auto can = boost::make_shared<Container>("");
+    auto can = std::make_shared<Container>("");
     can->setID("8mm");
 
     SampleEnvironment kit("TestKit", can);
@@ -92,16 +91,16 @@ public:
   }
 
 private:
-  boost::shared_ptr<SampleEnvironment> createTestKit() {
+  std::shared_ptr<SampleEnvironment> createTestKit() {
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
 
     // at centre
     ShapeFactory factory;
-    auto can = boost::make_shared<Container>(factory.createShape(
+    auto can = std::make_shared<Container>(factory.createShape(
         ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
     can->setID("8mm");
-    auto kit = boost::make_shared<SampleEnvironment>("TestKit", can);
+    auto kit = std::make_shared<SampleEnvironment>("TestKit", can);
     // before sample
     kit->add(ComponentCreationHelper::createSphere(0.1, V3D(-0.25, 0.0, 0.0)));
     // after sample
@@ -109,5 +108,3 @@ private:
     return kit;
   }
 };
-
-#endif // TESTSAMPLEENVIRONMENT_H_

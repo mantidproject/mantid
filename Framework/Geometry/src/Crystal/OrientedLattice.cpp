@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Exception.h"
@@ -343,6 +343,12 @@ bool OrientedLattice::GetABC(const DblMatrix &UB, V3D &a_dir, V3D &b_dir,
 void OrientedLattice::recalculate() {
   UnitCell::recalculate();
   UB = U * getB();
+}
+bool OrientedLattice::operator==(const OrientedLattice &other) const {
+  return UB == other.UB;
+}
+bool OrientedLattice::operator!=(const OrientedLattice &other) const {
+  return UB != other.UB;
 }
 } // Namespace Geometry
 } // Namespace Mantid

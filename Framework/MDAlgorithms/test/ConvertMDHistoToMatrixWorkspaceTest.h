@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * ConvertMDHistoToMatrixWorkspaceTest.h
@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_
-#define CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -209,7 +208,7 @@ public:
                                "_"); // Not really required for child algorithm
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+    auto slice = std::dynamic_pointer_cast<IMDWorkspace>(temp);
 
     ConvertMDHistoToMatrixWorkspace convert_alg;
     convert_alg.setRethrows(true);
@@ -289,7 +288,7 @@ public:
                                "_"); // Not really required for child algorithm
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+    auto slice = std::dynamic_pointer_cast<IMDWorkspace>(temp);
 
     ConvertMDHistoToMatrixWorkspace convert_alg;
     convert_alg.setRethrows(true);
@@ -371,7 +370,7 @@ public:
                                "_"); // Not really required for child algorithm
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+    auto slice = std::dynamic_pointer_cast<IMDWorkspace>(temp);
 
     ConvertMDHistoToMatrixWorkspace convert_alg;
     convert_alg.setRethrows(true);
@@ -571,4 +570,3 @@ public:
 private:
   IAlgorithm_sptr alg;
 };
-#endif /* CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_ */

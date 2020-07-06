@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Logger.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -46,7 +46,7 @@ std::vector<std::string> MultiFileValidator::allowedValues() const {
  * @returns A pointer to a new validator with the same properties as this one
  */
 IValidator_sptr MultiFileValidator::clone() const {
-  return boost::make_shared<MultiFileValidator>(*this);
+  return std::make_shared<MultiFileValidator>(*this);
 }
 
 /** Checks that the files exist. The filenames of any files that dont exist

@@ -1,20 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_BEAMLINE_COMPONENTINFO_H_
-#define MANTID_BEAMLINE_COMPONENTINFO_H_
+#pragma once
 
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
-#include <boost/iterator/reverse_iterator.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -27,24 +25,24 @@ class DetectorInfo;
 */
 class MANTID_BEAMLINE_DLL ComponentInfo {
 private:
-  boost::shared_ptr<const std::vector<size_t>> m_assemblySortedDetectorIndices;
+  std::shared_ptr<const std::vector<size_t>> m_assemblySortedDetectorIndices;
   /// Contains only indices of non-detector components
-  boost::shared_ptr<const std::vector<size_t>> m_assemblySortedComponentIndices;
+  std::shared_ptr<const std::vector<size_t>> m_assemblySortedComponentIndices;
   /// Ranges of component ids that are contiguous blocks of detectors.
-  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+  std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
       m_detectorRanges;
   /// Ranges of component ids that are contiguous blocks of components.
-  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+  std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
       m_componentRanges;
-  boost::shared_ptr<const std::vector<size_t>> m_parentIndices;
-  boost::shared_ptr<std::vector<std::vector<size_t>>> m_children;
+  std::shared_ptr<const std::vector<size_t>> m_parentIndices;
+  std::shared_ptr<std::vector<std::vector<size_t>>> m_children;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<
       Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>
       m_rotations;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
   Mantid::Kernel::cow_ptr<std::vector<ComponentType>> m_componentType;
-  boost::shared_ptr<const std::vector<std::string>> m_names;
+  std::shared_ptr<const std::vector<std::string>> m_names;
 
   const size_t m_size = 0;
   const int64_t m_sourceIndex = -1;
@@ -74,23 +72,21 @@ private:
 public:
   ComponentInfo();
   ComponentInfo(
-      boost::shared_ptr<const std::vector<size_t>>
-          assemblySortedDetectorIndices,
-      boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+      std::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
+      std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
           detectorRanges,
-      boost::shared_ptr<const std::vector<size_t>>
-          assemblySortedComponentIndices,
-      boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+      std::shared_ptr<const std::vector<size_t>> assemblySortedComponentIndices,
+      std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
           componentRanges,
-      boost::shared_ptr<const std::vector<size_t>> parentIndices,
-      boost::shared_ptr<std::vector<std::vector<size_t>>> children,
-      boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-      boost::shared_ptr<std::vector<
-          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      std::shared_ptr<const std::vector<size_t>> parentIndices,
+      std::shared_ptr<std::vector<std::vector<size_t>>> children,
+      std::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+      std::shared_ptr<std::vector<Eigen::Quaterniond,
+                                  Eigen::aligned_allocator<Eigen::Quaterniond>>>
           rotations,
-      boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-      boost::shared_ptr<std::vector<ComponentType>> componentType,
-      boost::shared_ptr<const std::vector<std::string>> names,
+      std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
+      std::shared_ptr<std::vector<ComponentType>> componentType,
+      std::shared_ptr<const std::vector<std::string>> names,
       int64_t sourceIndex, int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
@@ -161,12 +157,11 @@ public:
     bool empty() const { return m_begin == m_end; }
     auto begin() const -> decltype(m_begin) { return m_begin; }
     auto end() const -> decltype(m_end) { return m_end; }
-    boost::reverse_iterator<std::vector<size_t>::const_iterator>
-    rbegin() const {
-      return boost::make_reverse_iterator(m_end);
+    std::reverse_iterator<std::vector<size_t>::const_iterator> rbegin() const {
+      return std::make_reverse_iterator(m_end);
     }
-    boost::reverse_iterator<std::vector<size_t>::const_iterator> rend() const {
-      return boost::make_reverse_iterator(m_begin);
+    std::reverse_iterator<std::vector<size_t>::const_iterator> rend() const {
+      return std::make_reverse_iterator(m_begin);
     }
   };
 
@@ -183,5 +178,3 @@ private:
 };
 } // namespace Beamline
 } // namespace Mantid
-
-#endif /* MANTID_BEAMLINE_COMPONENTINFO_H_ */

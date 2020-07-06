@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKL_H_
-#define MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKL_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
@@ -48,7 +47,7 @@ private:
   /// Execution code
   void exec() override;
 
-  void exportEvents(API::IMDEventWorkspace_sptr mdws,
+  void exportEvents(const API::IMDEventWorkspace_sptr &mdws,
                     std::vector<Kernel::V3D> &vec_event_qsample,
                     std::vector<signal_t> &vec_event_signal,
                     std::vector<detid_t> &vec_event_det);
@@ -75,7 +74,7 @@ private:
 
   void getUBMatrix();
 
-  void getRange(const std::vector<Kernel::V3D> vec_hkl,
+  void getRange(const std::vector<Kernel::V3D> &vec_hkl,
                 std::vector<double> &extentMins,
                 std::vector<double> &extentMaxs);
 
@@ -86,5 +85,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKL_H_ */

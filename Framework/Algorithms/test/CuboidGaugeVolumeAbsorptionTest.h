@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CuboidGaugeVolumeAbsorptionTEST_H_
-#define CuboidGaugeVolumeAbsorptionTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -126,7 +125,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     // This test cut and paste from FlatPlateAbsorption. Since we have a larger
     // sample now, but the
@@ -144,5 +143,3 @@ public:
 private:
   Mantid::Algorithms::CuboidGaugeVolumeAbsorption atten;
 };
-
-#endif /*CuboidGaugeVolumeAbsorptionTEST_H_*/

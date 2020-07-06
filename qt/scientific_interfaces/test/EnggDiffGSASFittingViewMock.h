@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFGSASFITTINGVIEWMOCK_H_
-#define MANTID_CUSTOMINTERFACES_ENGGDIFFGSASFITTINGVIEWMOCK_H_
+#pragma once
 
 #include "../EnggDiffraction/IEnggDiffFittingView.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -59,7 +58,7 @@ public:
   MOCK_CONST_METHOD0(getXMin, boost::optional<double>());
 
   MOCK_METHOD1(plotCurve,
-               void(const std::vector<boost::shared_ptr<QwtData>> &curve));
+               void(const std::vector<std::shared_ptr<QwtData>> &curve));
 
   MOCK_METHOD0(resetCanvas, void());
 
@@ -79,5 +78,3 @@ public:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif // MANTID_CUSTOMINTERFACES_ENGGDIFFGSASFITTINGVIEWMOCK_H_

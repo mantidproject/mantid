@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * IntegratePeakTimeSlicesTest.h
@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef INTEGRATEPEAKTIMESLICESTEST_H_
-#define INTEGRATEPEAKTIMESLICESTEST_H_
+#pragma once
 
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -98,10 +97,10 @@ public:
     if (bankC->type().compare("RectangularDetector") != 0)
       throw std::runtime_error(" No Rect bank named bank 1");
 
-    boost::shared_ptr<const Geometry::RectangularDetector> bankR =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(bankC);
+    std::shared_ptr<const Geometry::RectangularDetector> bankR =
+        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(bankC);
 
-    boost::shared_ptr<Geometry::Detector> pixelp =
+    std::shared_ptr<Geometry::Detector> pixelp =
         bankR->getAtXY(PeakCol, PeakRow);
     const auto &detectorInfo = wsPtr->detectorInfo();
     const auto detInfoIndex = detectorInfo.indexOf(pixelp->getID());
@@ -133,7 +132,7 @@ public:
     for (int row = 0; row < NRC; row++)
       for (int col = 0; col < NRC; col++) {
 
-        boost::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
+        std::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
 
         detid2index_map::const_iterator it = map.find(detP->getID());
         size_t wsIndex = (*it).second;
@@ -190,8 +189,7 @@ public:
 
       double intensity = algP.getProperty("Intensity");
       double sigma = algP.getProperty("SigmaIntensity");
-      boost::shared_ptr<TableWorkspace> Twk =
-          algP.getProperty("OutputWorkspace");
+      std::shared_ptr<TableWorkspace> Twk = algP.getProperty("OutputWorkspace");
 
       TS_ASSERT_LESS_THAN(fabs(intensity - 60300), 1500.0);
       // RT: my understanding is that there are 2 close minima
@@ -239,10 +237,10 @@ private:
   /**
    *   Calculates Q
    */
-  double calcQ(RectangularDetector_const_sptr bankP,
+  double calcQ(const RectangularDetector_const_sptr &bankP,
                const DetectorInfo &detectorInfo, int row, int col,
                double time) {
-    boost::shared_ptr<Detector> detP = bankP->getAtXY(col, row);
+    std::shared_ptr<Detector> detP = bankP->getAtXY(col, row);
     const auto detInfoIndex = detectorInfo.indexOf(detP->getID());
     const auto L1 = detectorInfo.l1();
     const auto L2 = detectorInfo.l2(detInfoIndex);
@@ -271,7 +269,7 @@ private:
     const size_t &ntimes = (size_t)NTimes;
     const size_t &nvals = (size_t)NTimes;
 
-    Workspace2D_sptr wsPtr = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr wsPtr = std::dynamic_pointer_cast<Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, ntimes,
                                             nvals));
     // wsPtr->initialize(NVectors, ntimes, nvals);
@@ -287,4 +285,3 @@ private:
     return wsPtr;
   }
 };
-#endif /* INTEGRATEPEAKTIMESLICESTEST_H_ */

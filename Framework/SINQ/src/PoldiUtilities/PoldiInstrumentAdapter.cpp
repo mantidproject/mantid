@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
@@ -26,12 +26,12 @@ const std::string PoldiInstrumentAdapter::m_chopperSpeedTargetPropertyName =
 
 std::map<std::string, AbstractDoubleValueExtractor_sptr>
     PoldiInstrumentAdapter::m_extractors = {
-        {"dbl list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
-                         boost::make_shared<VectorDoubleValueExtractor>())},
-        {"int list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
-                         boost::make_shared<VectorIntValueExtractor>())},
-        {"number", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
-                       boost::make_shared<NumberDoubleValueExtractor>())}};
+        {"dbl list", std::static_pointer_cast<AbstractDoubleValueExtractor>(
+                         std::make_shared<VectorDoubleValueExtractor>())},
+        {"int list", std::static_pointer_cast<AbstractDoubleValueExtractor>(
+                         std::make_shared<VectorIntValueExtractor>())},
+        {"number", std::static_pointer_cast<AbstractDoubleValueExtractor>(
+                       std::make_shared<NumberDoubleValueExtractor>())}};
 
 /** Constructor with workspace argument
  *
@@ -304,7 +304,7 @@ PoldiInstrumentAdapter::getExtractorForProperty(
  */
 void PoldiInstrumentAdapter::setSpectrum(
     const Instrument_const_sptr &mantidInstrument) {
-  m_spectrum = boost::make_shared<PoldiSourceSpectrum>(mantidInstrument);
+  m_spectrum = std::make_shared<PoldiSourceSpectrum>(mantidInstrument);
 }
 
 } // namespace Poldi

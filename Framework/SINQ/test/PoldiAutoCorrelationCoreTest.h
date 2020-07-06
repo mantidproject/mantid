@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIAUTOCORRELATIONCORETEST_H_
-#define MANTID_SINQ_POLDIAUTOCORRELATIONCORETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -40,16 +39,15 @@ class TestablePoldiAutoCorrelationCore : public PoldiAutoCorrelationCore {
 class PoldiAutoCorrelationCoreTest : public CxxTest::TestSuite {
 private:
   TestablePoldiAutoCorrelationCore getCorrelationCoreWithInstrument() {
-    boost::shared_ptr<PoldiAbstractDetector> detector(
+    std::shared_ptr<PoldiAbstractDetector> detector(
         new ConfiguredHeliumDetector);
 
     int deadWires[] = {0, 1, 2, 3, 4, 5, 394, 395, 396, 397, 398, 399};
-    boost::shared_ptr<PoldiDeadWireDecorator> deadWireDecorator(
+    std::shared_ptr<PoldiDeadWireDecorator> deadWireDecorator(
         new PoldiDeadWireDecorator(std::set<int>(deadWires, deadWires + 12),
                                    detector));
 
-    boost::shared_ptr<MockChopper> mockChopper =
-        boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(deadWireDecorator, mockChopper);
@@ -70,10 +68,9 @@ public:
   PoldiAutoCorrelationCoreTest() : m_log("PoldiAutoCorrelationCoreTest") {}
 
   void testsetInstrument() {
-    boost::shared_ptr<MockDetector> mockDetector =
-        boost::make_shared<MockDetector>();
-    boost::shared_ptr<MockChopper> mockChopper =
-        boost::make_shared<MockChopper>();
+    std::shared_ptr<MockDetector> mockDetector =
+        std::make_shared<MockDetector>();
+    std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(mockDetector, mockChopper);
@@ -91,11 +88,10 @@ public:
   }
 
   void testgetTOFsFor1Angstrom() {
-    boost::shared_ptr<PoldiAbstractDetector> detector(
+    std::shared_ptr<PoldiAbstractDetector> detector(
         new ConfiguredHeliumDetector);
 
-    boost::shared_ptr<MockChopper> mockChopper =
-        boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(detector, mockChopper);
@@ -112,11 +108,10 @@ public:
   }
 
   void testgetDistances() {
-    boost::shared_ptr<PoldiAbstractDetector> detector(
+    std::shared_ptr<PoldiAbstractDetector> detector(
         new ConfiguredHeliumDetector);
 
-    boost::shared_ptr<MockChopper> mockChopper =
-        boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(detector, mockChopper);
@@ -135,8 +130,8 @@ public:
   void testcalculateDWeights() {
     TestablePoldiAutoCorrelationCore autoCorrelationCore =
         getCorrelationCoreWithInstrument();
-    boost::shared_ptr<MockChopper> mockChopper =
-        boost::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
+    std::shared_ptr<MockChopper> mockChopper =
+        std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
     EXPECT_CALL(*mockChopper, distanceFromSample()).WillOnce(Return(11800.0));
 
     std::vector<double> tofsD1 = autoCorrelationCore.getTofsFor1Angstrom(
@@ -157,8 +152,8 @@ public:
   void testgetNormalizedTOFSum() {
     TestablePoldiAutoCorrelationCore autoCorrelationCore =
         getCorrelationCoreWithInstrument();
-    boost::shared_ptr<MockChopper> mockChopper =
-        boost::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
+    std::shared_ptr<MockChopper> mockChopper =
+        std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
     EXPECT_CALL(*mockChopper, distanceFromSample())
         .Times(2)
         .WillRepeatedly(Return(11800.0));
@@ -268,8 +263,8 @@ public:
   void testgetCMessAndCSigma() {
     TestablePoldiAutoCorrelationCore autoCorrelationCore =
         getCorrelationCoreWithInstrument();
-    boost::shared_ptr<MockChopper> mockChopper =
-        boost::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
+    std::shared_ptr<MockChopper> mockChopper =
+        std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
 
     Workspace2D_sptr testWorkspace =
         WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
@@ -348,5 +343,3 @@ public:
 private:
   Mantid::Kernel::Logger m_log;
 };
-
-#endif /* MANTID_SINQ_POLDIAUTOCORRELATIONCORETEST_H_ */

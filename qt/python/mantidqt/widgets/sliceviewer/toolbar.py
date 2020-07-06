@@ -1,37 +1,54 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
-#
-#
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 from mantidqt.MPLwidgets import NavigationToolbar2QT
 from mantidqt.icons import get_icon
 from qtpy.QtCore import Signal, Qt, QSize
 from qtpy.QtWidgets import QLabel, QSizePolicy
 
 
+class ToolItemText:
+    HOME = 'Home'
+    PAN = 'Pan'
+    ZOOM = 'Zoom'
+    GRID = 'Grid'
+    LINEPLOTS = 'LinePlots'
+    OVERLAYPEAKS = 'OverlayPeaks'
+    NONORTHOGONAL_AXES = 'NonOrthogonalAxes'
+    SAVE = 'Save'
+    CUSTOMIZE = 'Customize'
+
+
 class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
-    gridClicked = Signal()
+    gridClicked = Signal(bool)
+    homeClicked = Signal()
     linePlotsClicked = Signal(bool)
+    nonOrthogonalClicked = Signal(bool)
+    peaksOverlayClicked = Signal(bool)
     plotOptionsChanged = Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'home', None),
-        ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
+        (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
+        (ToolItemText.PAN, 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan',
+         False),
+        (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
-        ('Grid', 'Toggle grid on/off', 'mdi.grid', 'gridClicked', None),
-        ('LinePlots', 'Toggle lineplots on/off', 'mdi.chart-bell-curve', 'linePlotsClicked', False),
-        ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
+        (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', False),
+        (ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
+         'linePlotsClicked', False),
+        (ToolItemText.OVERLAYPEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
+         'peaksOverlayClicked', None),
+        (ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
+         'nonOrthogonalClicked', False),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
+        (ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None),
+        (ToolItemText.CUSTOMIZE, 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
     )
 
     def _init_toolbar(self):
@@ -40,8 +57,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                 self.addSeparator()
             else:
                 if fa_icon:
-                    a = self.addAction(get_icon(fa_icon),
-                                       text, getattr(self, callback))
+                    a = self.addAction(get_icon(fa_icon), text, getattr(self, callback))
                 else:
                     a = self.addAction(text, getattr(self, callback))
                 self._actions[callback] = a
@@ -57,9 +73,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         if self.coordinates:
             self.locLabel = QLabel("", self)
             self.locLabel.setAlignment(Qt.AlignRight | Qt.AlignTop)
-            self.locLabel.setSizePolicy(
-                QSizePolicy(QSizePolicy.Expanding,
-                            QSizePolicy.Ignored))
+            self.locLabel.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored))
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
 
@@ -69,3 +83,28 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     def edit_parameters(self):
         NavigationToolbar2QT.edit_parameters(self)
         self.plotOptionsChanged.emit()
+
+    def set_action_enabled(self, text: str, state: bool):
+        """
+        Sets the enabled/disabled state of action with the given text
+        :param text: Text on the action
+        :param state: Enabled if True else it is disabled
+        """
+        actions = self.actions()
+        for action in actions:
+            if action.text() == text:
+                if action.isChecked() and not state:
+                    action.trigger()  # ensure view reacts appropriately
+                action.setEnabled(state)
+
+    def set_action_checked(self, text: str,  state: bool):
+        """
+        Sets the checked/unchecked state of toggle button with the given text
+        :param text: Text on the action
+        :param state: checked if True else it is disabled
+        """
+        actions = self.actions()
+        for action in actions:
+            if action.text() == text:
+                if action.isChecked() != state:
+                    action.trigger()  # ensure view reacts appropriately

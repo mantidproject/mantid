@@ -1,21 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,non-parent-init-called,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 import systemtesting
 import mantid.simpleapi as ms
 from mantid import mtd
-from six import with_metaclass
 
 
-class ISISIndirectDiffractionReduction(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISIndirectDiffractionReduction(metaclass=ABCMeta):
     """
     Base class for tests that use the ISISIndirectDiffractionReduction algorithm.
     """

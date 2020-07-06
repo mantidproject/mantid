@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MODERATORTZERO_H_
-#define MANTID_ALGORITHMS_MODERATORTZERO_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -56,7 +56,7 @@ namespace Algorithms {
   @author Jose Borreguero
   @date 03/04/2013
 */
-class DLLExport ModeratorTzero : public Mantid::API::Algorithm {
+class MANTID_ALGORITHMS_DLL ModeratorTzero : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   ModeratorTzero();
@@ -113,5 +113,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_MODERATORTZERO_H_*/
