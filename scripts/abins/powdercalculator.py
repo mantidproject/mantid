@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-from typing import Any, Dict, Tuple
+from typing import Dict, Tuple
 
 import abins
 from abins.constants import CONSTANT, GAMMA_POINT, NUM_ZERO

@@ -17,6 +17,7 @@ class AtomsData(collections.abc.Sequence):
 
         # Make a map matching int indices to atoms_data keys
         test = re.compile(r'^atom_(\d+)$')
+
         def _get_index_if_atom(label: str) -> Union[int, None]:
             match = test.match(label)
             if match is None:
