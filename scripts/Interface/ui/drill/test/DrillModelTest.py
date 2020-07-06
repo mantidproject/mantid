@@ -190,6 +190,18 @@ class DrillModelTest(unittest.TestCase):
         self.model.setInstrument("test")
         self.assertEqual(self.model.getAvailableAcquisitionModes(), [])
 
+    def test_setCycleAndExperiment(self):
+        self.model.setCycleAndExperiment("test1", "test2")
+        self.assertEqual(self.model.cycleNumber, "test1")
+        self.assertEqual(self.model.experimentId, "test2")
+
+    def test_getCycleAndExperiment(self):
+        self.model.cycleNumber = "test1"
+        self.model.experimentId = "test2"
+        c, e = self.model.getCycleAndExperiment()
+        self.assertEqual(c, "test1")
+        self.assertEqual(e, "test2")
+
     def test_initController(self):
         self.mController.reset_mock()
         self.model.algorithm = None

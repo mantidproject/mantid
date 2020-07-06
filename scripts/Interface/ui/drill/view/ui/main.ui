@@ -70,6 +70,44 @@
        </widget>
       </item>
       <item>
+       <widget class="QLineEdit" name="cycleNumber">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Cycle number</string>
+        </property>
+        <property name="placeholderText">
+         <string>Cycle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="experimentId">
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Experiment ID</string>
+        </property>
+        <property name="placeholderText">
+         <string>Experiment</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="datadirs">
         <property name="toolTip">
          <string>Manage data directories</string>
@@ -391,7 +429,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

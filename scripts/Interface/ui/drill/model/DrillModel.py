@@ -188,6 +188,26 @@ class DrillModel(QObject):
             return list()
         return RundexSettings.ACQUISITION_MODES[self.instrument]
 
+    def setCycleAndExperiment(self, cycle, experiment):
+        """
+        Set the cycle number and the experiment ID.
+
+        Args:
+            cycle (str): cycle number
+            experiment (str): experiment ID
+        """
+        self.cycleNumber = cycle
+        self.experimentId = experiment
+
+    def getCycleAndExperiment(self):
+        """
+        Get the cycle number and the experiment ID.
+
+        Returns:
+            str, str: cycle number, experiment ID
+        """
+        return self.cycleNumber, self.experimentId
+
     def _initController(self):
         """
         Initialize the parameter controller.
@@ -473,10 +493,10 @@ class DrillModel(QObject):
         self.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
         self.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
 
-        # experiments
-        if RundexSettings.CYCLE_JSON_KEY in json_data:
+        # cycle number and experiment id
+        if ((RundexSettings.CYCLE_JSON_KEY in json_data)
+                and (RundexSettings.EXPERIMENT_JSON_KEY in json_data)):
             self.cycleNumber = json_data[RundexSettings.CYCLE_JSON_KEY]
-        if RundexSettings.EXPERIMENT_JSON_KEY in json_data:
             self.experimentId = json_data[RundexSettings.EXPERIMENT_JSON_KEY]
 
         # visual setings

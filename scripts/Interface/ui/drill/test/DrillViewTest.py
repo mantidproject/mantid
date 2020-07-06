@@ -359,6 +359,11 @@ class DrillViewTest(unittest.TestCase):
         self.view.modeSelector.setCurrentText.assert_called_once_with(
                 "test")
 
+    def test_setCycleAndExperiment(self):
+        self.view.setCycleAndExperiment("test1", "test2")
+        self.assertEqual(self.view.cycleNumber.text(), "test1")
+        self.assertEqual(self.view.experimentId.text(), "test2")
+
     def test_setTable(self):
         self.view.set_table(["test", "test"])
         self.view.table.setColumnCount.assert_called_once_with(2)

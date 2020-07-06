@@ -185,6 +185,32 @@ class DrillTest(unittest.TestCase):
             self.assertDictEqual(mSettings,
                                  RundexSettings.SETTINGS[mAcquisitionMode])
 
+    def test_changeCycleAndExperiment(self):
+        # only 1 value is set
+        self.view.cycleNumber.setText("test1")
+        self.view.cycleNumber.editingFinished.emit()
+        self.assertIsNone(self.model.cycleNumber)
+        self.assertIsNone(self.model.experimentId)
+        self.view.cycleNumber.setText("")
+        self.view.experimentId.setText("test2")
+        self.view.experimentId.editingFinished.emit()
+        self.assertIsNone(self.model.cycleNumber)
+        self.assertIsNone(self.model.experimentId)
+
+        # both cycle and exp set
+        self.view.cycleNumber.setText("test1")
+        self.view.experimentId.setText("test2")
+        self.assertIsNone(self.model.cycleNumber)
+        self.assertIsNone(self.model.experimentId)
+        self.view.cycleNumber.editingFinished.emit()
+        self.assertEqual(self.model.cycleNumber, "test1")
+        self.assertEqual(self.model.experimentId, "test2")
+        self.view.cycleNumber.setText("test2")
+        self.view.experimentId.setText("test1")
+        self.view.experimentId.editingFinished.emit()
+        self.assertEqual(self.model.cycleNumber, "test2")
+        self.assertEqual(self.model.experimentId, "test1")
+
     @mock.patch('Interface.ui.drill.view.DrillView.manageuserdirectories')
     def test_userDirectories(self, mDirectoriesManager):
         QTest.mouseClick(self.view.datadirs, Qt.LeftButton)

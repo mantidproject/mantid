@@ -23,6 +23,7 @@ class DrillPresenterTest(unittest.TestCase):
                 'Interface.ui.drill.presenter.DrillPresenter.DrillModel')
         self.mModel = patch.start()
         self.mModel.return_value.getColumnHeaderData.return_value = [], []
+        self.mModel.return_value.getCycleAndExperiment.return_value = "", ""
         self.addCleanup(patch.stop)
 
         self.view = mock.Mock()

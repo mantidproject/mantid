@@ -39,6 +39,13 @@ class DrillView(QMainWindow):
     acquisitionModeChanged = Signal(str)
 
     """
+    Sent when the cycle number and experiment ID are set.
+    Args:
+        str, str: cycle number, experiment ID
+    """
+    cycleAndExperimentChanged = Signal(str, str)
+
+    """
     Sent when a row is added to the table.
     Args:
         int: row index
@@ -146,6 +153,9 @@ class DrillView(QMainWindow):
         self.modeSelector.currentTextChanged.connect(
                 self._changeAcquisitionMode)
 
+        self.cycleNumber.editingFinished.connect(self._changeCycleOrExperiment)
+        self.experimentId.editingFinished.connect(self._changeCycleOrExperiment)
+
         self.datadirs.setIcon(icons.get_icon("mdi.folder"))
         self.datadirs.clicked.connect(self.show_directory_manager)
 
@@ -247,6 +257,17 @@ class DrillView(QMainWindow):
         if self.isWindowModified():
             self._saveDataQuestion()
         self.acquisitionModeChanged.emit(acquisitionMode)
+
+    def _changeCycleOrExperiment(self):
+        """
+        Triggered when editing cycle number or experiment ID field.
+        """
+        cycle = self.cycleNumber.text()
+        exp = self.experimentId.text()
+        if (cycle and exp):
+            self.cycleAndExperimentChanged.emit(cycle, exp)
+        self.setWindowModified(True)
+
 
     def _getSelectionShape(self, selection):
         """
@@ -586,6 +607,17 @@ class DrillView(QMainWindow):
         self.modeSelector.blockSignals(True)
         self.modeSelector.setCurrentText(mode)
         self.modeSelector.blockSignals(False)
+
+    def setCycleAndExperiment(self, cycle, experiment):
+        """
+        Set the cycle number and the experiment ID.
+
+        Args:
+            cycle (str): cycle number
+            experiment (str): experiment ID
+        """
+        self.cycleNumber.setText(cycle)
+        self.experimentId.setText(experiment)
 
     def set_table(self, columns, tooltips=None):
         """

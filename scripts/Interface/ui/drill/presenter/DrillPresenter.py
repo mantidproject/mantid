@@ -27,6 +27,8 @@ class DrillPresenter:
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
         self.view.acquisitionModeChanged.connect(self.acquisitionModeChanged)
+        self.view.cycleAndExperimentChanged.connect(
+                self.model.setCycleAndExperiment)
         self.view.rowAdded.connect(self.model.addSample)
         self.view.rowDeleted.connect(self.model.deleteSample)
         self.view.dataChanged.connect(self.model.changeParameter)
@@ -157,6 +159,8 @@ class DrillPresenter:
         self.view.set_available_modes(
                 self.model.getAvailableAcquisitionModes())
         self.view.set_acquisition_mode(self.model.getAcquisitionMode())
+        cycle, exp = self.model.getCycleAndExperiment()
+        self.view.setCycleAndExperiment(cycle, exp)
         # update the table
         columns, tooltips = self.model.getColumnHeaderData()
         self.view.set_table(columns, tooltips)
