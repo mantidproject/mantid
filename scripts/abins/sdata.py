@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Optional, Union
+import collections.abc
+from typing import Dict, List, Optional, overload, Union
 import numpy as np
 from numbers import Real
 
@@ -12,10 +13,17 @@ from mantid.kernel import logger as mantid_logger
 import abins
 from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
 
+# Type annotation for atom items e.g. data['atom_1']
+OneAtomSData = Dict[str, np.ndarray]
 
-class SData:
+
+class SData(collections.abc.Sequence):
     """
     Class for storing S(Q, omega) with relevant metadata
+
+    indexing will return dict(s) of S by quantum order for atom(s)
+    corresponding to index/slice. Be aware that this is zero-based indexing, so
+    s_data[1] will return the item corresponding to 'atom_2'.
     """
 
     def __init__(self, *,
@@ -164,3 +172,23 @@ class SData:
 
     def __str__(self):
         return "Dynamical structure factors data"
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    @overload  # noqa F811
+    def __getitem__(self, item: int) -> OneAtomSData:
+        ...
+
+    @overload  # noqa F811
+    def __getitem__(self, item: slice) -> List[OneAtomSData]:
+        ...
+
+    def __getitem__(self, item):  # noqa F811
+        if isinstance(item, int):
+            return self._data[f"atom_{item + 1}"]['s']
+        elif isinstance(item, slice):
+            return [self[i] for i in range(len(self))[item]]
+        else:
+            raise TypeError(
+                "Indices must be integers or slices, not {}.".format(type(item)))
