@@ -172,34 +172,6 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       DESTINATION MantidPlot.app/Contents/MacOS/
       RENAME mantidpython
     )
-    # Add launcher application for a Mantid IPython console
-    install(
-      PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
-      DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/
-      RENAME MantidPython
-    )
-    install(
-      FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
-      DESTINATION MantidPython\ \(optional\).app/Contents/
-      RENAME Info.plist
-    )
-    install(FILES ${CMAKE_SOURCE_DIR}/images/MantidPython.icns
-            DESTINATION MantidPython\ \(optional\).app/Contents/Resources/
-    )
-    # Add launcher application for Mantid IPython notebooks
-    install(
-      PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx_launcher
-      DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/
-      RENAME MantidNotebook
-    )
-    install(
-      FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
-      DESTINATION MantidNotebook\ \(optional\).app/Contents/
-      RENAME Info.plist
-    )
-    install(FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
-            DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/
-    )
   endif()
 
   if(ENABLE_WORKBENCH)
@@ -218,6 +190,11 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       PROGRAMS ${CMAKE_BINARY_DIR}/MantidWorkbench_osx_launcher.install
       DESTINATION MantidWorkbench.app/Contents/MacOS/
       RENAME MantidWorkbench
+    )
+    install(
+      PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
+      DESTINATION MantidWorkbench.app/Contents/MacOS/
+      RENAME mantidpython
     )
     install(
       FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidworkbench_Info.plist

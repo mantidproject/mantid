@@ -112,7 +112,11 @@ Directory Properties
 |                                      | that Mantid requires to function correctly.       |                                     |
 |                                      | **WARNING:** Do not alter the default value.      |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
-
+| ``python.plugins.manifest``          | A path to the location of the manifest file       | N/A                                 |
+|                                      | containing paths to each of the python algorithm  |                                     |
+|                                      | files.                                            |                                     |
+|                                      | **WARNING:** Do not alter the default value.      |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 
 
 Logging Properties

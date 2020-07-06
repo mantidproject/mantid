@@ -30,7 +30,9 @@ class GeneralSettingsView(general_base, general_form):
         self.deleteLater()
         super(GeneralSettingsView, self).closeEvent(event)
 
-    def create_font_dialog(self, parent):
-        font_dialog = QFontDialog(parent.font(), parent)
+    def create_font_dialog(self, parent, font=None):
+        if not font:
+            font = parent.font()
+        font_dialog = QFontDialog(font, parent)
         font_dialog.open()
         return font_dialog
