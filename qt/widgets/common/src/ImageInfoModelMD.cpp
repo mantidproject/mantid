@@ -8,19 +8,26 @@
 #include "MantidQtWidgets/Common/ImageInfoModelMD.h"
 #include <climits>
 
+namespace {
+constexpr double UNSET_VALUE = std::numeric_limits<double>::max();
+}
+
 namespace MantidQt {
 namespace MantidWidgets {
 
-std::vector<QString> ImageInfoModelMD::getInfoList(const double x,
-                                                   const double y,
-                                                   const double signal) {
-  std::vector<QString> list;
-  constexpr auto dblmax(std::numeric_limits<double>::max());
-  addNameAndValue("x", list, x, 4, (x != dblmax));
-  addNameAndValue("y", list, y, 4, (y != dblmax));
-  addNameAndValue("Signal", list, signal, 4, (signal != dblmax));
+/// @copydoc MantidQt::MantidWidgets::ImageInfoModel::info
+ImageInfoModel::ImageInfo ImageInfoModelMD::info(const double x, const double y,
+                                                 const double signal) const {
+  ImageInfo info({"x", "y", "Signal"});
 
-  return list;
+  auto valueOrMissing = [this](double value) {
+    return value == UNSET_VALUE ? MissingValue : defaultFormat(value);
+  };
+  info.setValue(0, valueOrMissing(x));
+  info.setValue(1, valueOrMissing(y));
+  info.setValue(2, valueOrMissing(signal));
+
+  return info;
 }
 
 } // namespace MantidWidgets

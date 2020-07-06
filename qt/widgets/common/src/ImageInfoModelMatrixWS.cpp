@@ -12,219 +12,225 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
-#include <cfloat>
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace {
+/// Flag value to specify a value should show as unspecified
+constexpr auto UNSET_VALUE = std::numeric_limits<double>::max();
+
 Logger g_log("ImageInfoModelMatrixWS");
-}
+
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 /**
  * Constructor
+ * @param workspace A MatrixWorkspace to provide information for the model
  */
-ImageInfoModelMatrixWS::ImageInfoModelMatrixWS()
-    : m_workspace(nullptr), m_spectrumInfo(nullptr), m_xMin(DBL_MAX),
-      m_xMax(DBL_MIN) {}
-
-// Creates a list containing pairs of strings with information about the
-// coordinates in the workspace.
-std::vector<QString> ImageInfoModelMatrixWS::getInfoList(const double x,
-                                                         const double specNum,
-                                                         const double signal) {
-
-  std::vector<QString> list;
-
-  if (!m_workspace) {
-    return list;
-  }
-  constexpr auto dblmax(std::numeric_limits<double>::max());
-  bool getValues(true);
-  if (x == dblmax || specNum == dblmax || signal == dblmax)
-    getValues = false;
-
-  const int spectrumNumber = static_cast<int>(specNum + 0.5);
-  size_t wsIndex = 0;
-  if (getValues) {
-    try {
-      wsIndex = m_workspace->getIndexFromSpectrumNumber(spectrumNumber);
-    } catch (std::runtime_error &error) {
-      g_log.debug(error.what());
-      return list;
-    }
-
-    if (x >= m_xMax || x <= m_xMin)
-      return list;
-  }
-
-  addNameAndValue("Signal", list, signal, 4, getValues);
-  addNameAndValue("Spec Num", list, spectrumNumber, 0, getValues);
-
-  std::string x_label = "";
-  const auto &old_unit = m_workspace->getAxis(0)->unit();
-  if (old_unit) {
-    x_label = old_unit->caption();
-    addNameAndValue(x_label, list, x, 4, getValues, old_unit);
-  }
-
-  const auto &spec = m_workspace->getSpectrum(wsIndex);
-  const auto &ids = spec.getDetectorIDs();
-  if (!ids.empty()) {
-    const auto id = *(ids.begin());
-    addNameAndValue("Det ID", list, id, 0, getValues);
-  }
-
-  /* Cannot get any more information if we do not have a instrument, source and
-   * sample */
-  if (!(m_instrument && m_source && m_sample)) {
-    return list;
-  }
-
-  if (!old_unit) {
-    g_log.debug("No UNITS on MatrixWorkspace X-axis");
-    return list;
-  }
-
-  if (!m_spectrumInfo->hasDetectors(wsIndex)) {
-    g_log.debug() << "No DETECTOR for wsIndex " << wsIndex
-                  << " in MatrixWorkspace\n";
-    return list;
-  }
-
-  const double l1 = m_spectrumInfo->l1();
-  const double l2 = m_spectrumInfo->l2(wsIndex);
-  double two_theta(0.0);
-  double azi(0.0);
-  if (!m_spectrumInfo->isMonitor(wsIndex)) {
-    two_theta = m_spectrumInfo->twoTheta(wsIndex);
-    azi = m_spectrumInfo->detector(wsIndex).getPhi();
-  }
-  addNameAndValue("L2(m)", list, l2, 4, getValues);
-  addNameAndValue("TwoTheta(Deg)", list, two_theta * Mantid::Geometry::rad2deg,
-                  2, getValues);
-  addNameAndValue("Azimuthal(Deg)", list, azi * Mantid::Geometry::rad2deg, 2,
-                  getValues);
-
-  int emode(0);
-  double efixed(0.0), delta(0.0);
-
-  // try getting direct geometry information from the run object
-  if (efixed == 0) {
-    const Mantid::API::Run &run = m_workspace->run();
-    if (run.hasProperty("Ei")) {
-      efixed = run.getPropertyValueAsType<double>("Ei");
-      emode = 1; // only correct if direct geometry
-    } else if (run.hasProperty("EnergyRequested")) {
-      efixed = run.getPropertyValueAsType<double>("EnergyRequested");
-      emode = 1;
-    } else if (run.hasProperty("EnergyEstimate")) {
-      efixed = run.getPropertyValueAsType<double>("EnergyEstimate");
-      emode = 1;
-    }
-  }
-
-  // If it did not get emode & efixed, try getting indirect geometry information
-  // from the detector object
-  if (efixed == 0) {
-    const auto &det = m_spectrumInfo->detector(wsIndex);
-    if (!(m_spectrumInfo->isMonitor(wsIndex) && det.hasParameter("Efixed"))) {
-      try {
-        const ParameterMap &pmap = m_workspace->constInstrumentParameters();
-        const Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
-        if (par) {
-          efixed = par->value<double>();
-          emode = 2;
-        }
-      } catch (std::runtime_error &) {
-        g_log.debug() << "Failed to get Efixed from detector ID: "
-                      << det.getID() << " in MatrixWSDataSource\n";
-        efixed = 0;
-      }
-    }
-  }
-
-  if (efixed == 0)
-    emode = 0;
-
-  const double tof =
-      old_unit->convertSingleToTOF(x, l1, l2, two_theta, emode, efixed, delta);
-  if (x_label != "Time-of-flight") {
-    const auto tof_unit = UnitFactory::Instance().create("TOF");
-    addNameAndValue("Time-of-flight", list, tof, 4, getValues, tof_unit);
-  }
-
-  if (x_label != "Wavelength") {
-    const auto wl_unit = UnitFactory::Instance().create("Wavelength");
-    const double wavelength = wl_unit->convertSingleFromTOF(
-        tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("Wavelength", list, wavelength, 4, getValues, wl_unit);
-  }
-
-  if (x_label != "Energy") {
-    const auto e_unit = UnitFactory::Instance().create("Energy");
-    const double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
-                                                       emode, efixed, delta);
-    addNameAndValue("Energy", list, energy, 4, getValues, e_unit);
-  }
-
-  if (x_label != "d-Spacing" &&
-      ((two_theta != 0.0 && emode == 0) || !getValues)) {
-    const auto d_unit = UnitFactory::Instance().create("dSpacing");
-    const double d_spacing = d_unit->convertSingleFromTOF(
-        tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("d-Spacing", list, d_spacing, 4, getValues, d_unit);
-  }
-
-  if (x_label != "q" && (two_theta != 0.0 || !getValues)) {
-    const auto q_unit = UnitFactory::Instance().create("MomentumTransfer");
-    const double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
-                                                      emode, efixed, delta);
-    addNameAndValue("|Q|", list, mag_q, 4, getValues, q_unit);
-  }
-
-  if (x_label != "DeltaE" && (two_theta != 0.0 && emode != 0)) {
-    const auto deltaE_unit = UnitFactory::Instance().create("DeltaE");
-    const double delta_E = deltaE_unit->convertSingleFromTOF(
-        tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("DeltaE", list, delta_E, 4, getValues, deltaE_unit);
-  }
-  return list;
+ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(
+    Mantid::API::MatrixWorkspace_sptr workspace)
+    : m_workspace(std::move(workspace)), m_spectrumInfo(nullptr),
+      m_xMin(UNSET_VALUE), m_xMax(UNSET_VALUE) {
+  cacheWorkspaceInfo();
 }
 
-void ImageInfoModelMatrixWS::setWorkspace(
-    const Mantid::API::Workspace_sptr &ws) {
-  auto matWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  if (matWs != m_workspace) {
-    updateCachedWorkspaceInfo(matWs);
+/// @copydoc MantidQt::MantidWidgets::ImageInfoModel::info
+ImageInfoModel::ImageInfo
+ImageInfoModelMatrixWS::info(const double x, const double y,
+                             const double signal) const {
+  ImageInfo info(createItemNames());
+  if (x == UNSET_VALUE || y == UNSET_VALUE || signal == UNSET_VALUE)
+    return info;
+
+  info.setValue(0, defaultFormat(x));
+  const auto yAxis = m_workspace->getAxis(1);
+  const auto wsIndex = yAxis->indexOfValue(y);
+  const auto &spectrum = m_workspace->getSpectrum(wsIndex);
+  if (yAxis->isSpectra()) {
+    info.setValue(1, defaultFormat(spectrum.getSpectrumNo()));
+  } else {
+    info.setValue(1, defaultFormat(y));
+  }
+  info.setValue(2, defaultFormat(signal));
+
+  if (!(m_instrument && m_source && m_sample))
+    return info;
+
+  // Everything else requires an instrument
+  if (m_spectrumInfo->hasDetectors(wsIndex))
+    info.setValue(3, defaultFormat(*spectrum.getDetectorIDs().begin()));
+
+  info.setValue(4, defaultFormat(m_spectrumInfo->l2(wsIndex)));
+  info.setValue(5, defaultFormat(m_spectrumInfo->signedTwoTheta(wsIndex)));
+  info.setValue(6, defaultFormat(m_spectrumInfo->azimuthal(wsIndex)));
+
+  setUnitsInfo(&info, 7, wsIndex, x);
+
+  return info;
+}
+
+/**
+ * Add the unit-related quantities to the info list
+ * @param info Existing ImageInfo object
+ * @param infoIndex The index to start at when adding units information
+ * @param wsIndex The wsIndex whose spectrum is under the cursor
+ */
+void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
+                                          int infoIndex, const size_t wsIndex,
+                                          const double x) const {
+  const auto l1 = m_spectrumInfo->l1();
+  const auto l2 = m_spectrumInfo->l2(wsIndex);
+  const auto twoTheta = m_spectrumInfo->twoTheta(wsIndex);
+  const auto [emode, efixed] = efixedAt(wsIndex);
+
+  double tof(0.0);
+  if (m_xunit == "TOF") {
+    // set as first element in list already
+    tof = x;
+  } else {
+    tof = UnitConversion::run(m_xunit.toStdString(), "TOF", x, l1, l2, twoTheta,
+                              emode, efixed);
+    info->setValue(infoIndex, defaultFormat(tof));
+    ++infoIndex;
+  }
+
+  const auto &unitFactory = UnitFactory::Instance();
+  const auto tofUnit = unitFactory.create("TOF");
+  for (const auto &unitName : {"Wavelength", "Energy", "dSpacing"}) {
+    if (unitName == m_xunit)
+      continue;
+    const auto unit = unitFactory.create(unitName);
+    const auto unitValue =
+        unit->convertSingleFromTOF(tof, l1, l2, twoTheta, 0, 0.0, 0.0);
+    info->setValue(infoIndex, defaultFormat(unitValue));
+    ++infoIndex;
+  }
+  if (efixed > 0.0) {
+    for (const auto &unitName : {"MomentumTransfer", "DeltaE"}) {
+      if (unitName == m_xunit)
+        continue;
+      const auto unit = unitFactory.create(unitName);
+      const auto unitValue =
+          unit->convertSingleFromTOF(tof, l1, l2, twoTheta, emode, efixed, 0.0);
+      info->setValue(infoIndex, defaultFormat(unitValue));
+      ++infoIndex;
+    }
   }
 }
 
-void ImageInfoModelMatrixWS::updateCachedWorkspaceInfo(
-    const Mantid::API::MatrixWorkspace_sptr &ws) {
-  g_log.debug("updating cached values");
-  m_workspace = ws;
+/**
+ * Cache metadata for the workspace for faster lookup
+ */
+void ImageInfoModelMatrixWS::cacheWorkspaceInfo() {
+  g_log.debug("Updating cached workspace info");
   m_workspace->getXMinMax(m_xMin, m_xMax);
   m_spectrumInfo = &m_workspace->spectrumInfo();
   m_instrument = m_workspace->getInstrument();
   if (m_instrument) {
     m_source = m_instrument->getSource();
     if (!m_source) {
-      g_log.debug("No SOURCE on instrument in MatrixWorkspace");
+      g_log.debug("No source on instrument in MatrixWorkspace");
     }
 
     m_sample = m_instrument->getSample();
     if (!m_sample) {
-      g_log.debug("No SAMPLE on instrument in MatrixWorkspace");
+      g_log.debug("No sample on instrument in MatrixWorkspace");
     }
   } else {
-    g_log.debug("No INSTRUMENT on MatrixWorkspace");
+    g_log.debug("No instrument on MatrixWorkspace");
   }
+  if (auto xunit = m_workspace->getAxis(0)->unit())
+    m_xunit = QString::fromStdString(xunit->unitID());
+  else
+    m_xunit = "x";
+  if (auto yaxis = m_workspace->getAxis(1)) {
+    if (yaxis->isSpectra())
+      m_yunit = "Spectrum";
+    else if (auto yunit = yaxis->unit())
+      m_yunit = QString::fromStdString(yunit->unitID());
+  } else
+    m_yunit = "y";
+}
+
+/**
+ * Create a sequence of names for each item this model will produce
+ */
+ImageInfoModel::ImageInfo::StringItems
+ImageInfoModelMatrixWS::createItemNames() const {
+  ImageInfoModel::ImageInfo::StringItems names;
+  names.reserve(itemCount());
+  auto appendName = [&names](const auto name) { names.emplace_back(name); };
+  auto appendNameIfXUnitNot = [this, &names, &appendName](const auto name) {
+    if (name != this->m_xunit)
+      appendName(name);
+  };
+
+  appendName(m_xunit);
+  appendName(m_yunit);
+  appendName("Signal");
+  appendName("Det ID");
+  appendName("L2(m)");
+  appendName("TwoTheta(Deg)");
+  appendName("Azimuthal(Deg)");
+  appendNameIfXUnitNot("TOF");
+  appendNameIfXUnitNot("Wavelength");
+  appendNameIfXUnitNot("Energy");
+  appendNameIfXUnitNot("dSpacing");
+  appendNameIfXUnitNot("q");
+  appendNameIfXUnitNot("DeltaE");
+
+  return names;
+}
+
+/**
+ * Return tuple(emode, efixed) for the pixel at the given workspace index
+ * @param wsIndex Indeox of spectrum to query
+ */
+std::tuple<Mantid::Kernel::DeltaEMode::Type, double>
+ImageInfoModelMatrixWS::efixedAt(const size_t wsIndex) const {
+  DeltaEMode::Type emode(DeltaEMode::Elastic);
+  double efixed(0.0);
+  const auto &run = m_workspace->run();
+  // try getting direct geometry information from the run object first
+  if (run.hasProperty("Ei")) {
+    efixed = run.getPropertyValueAsType<double>("Ei");
+    emode = DeltaEMode::Direct;
+  } else if (run.hasProperty("EnergyRequested")) {
+    efixed = run.getPropertyValueAsType<double>("EnergyRequested");
+    emode = DeltaEMode::Direct;
+  } else if (run.hasProperty("EnergyEstimate")) {
+    efixed = run.getPropertyValueAsType<double>("EnergyEstimate");
+    emode = DeltaEMode::Direct;
+  }
+
+  if (efixed != 1) {
+    const auto &detector = m_spectrumInfo->detector(wsIndex);
+    if (!(m_spectrumInfo->isMonitor(wsIndex) &&
+          detector.hasParameter("Efixed"))) {
+      try {
+        const ParameterMap &pmap = m_workspace->constInstrumentParameters();
+        const Parameter_sptr par = pmap.getRecursive(&detector, "Efixed");
+        if (par) {
+          efixed = par->value<double>();
+          emode = DeltaEMode::Indirect;
+        }
+      } catch (std::runtime_error &exc) {
+        g_log.debug() << "Failed to get efixed from spectrum at index "
+                      << wsIndex << ": " << exc.what() << "\n";
+        efixed = 0.0;
+      }
+    }
+  }
+
+  return std::make_tuple(emode, efixed);
 }
 
 } // namespace MantidWidgets

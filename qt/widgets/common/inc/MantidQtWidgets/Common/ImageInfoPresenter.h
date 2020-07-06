@@ -11,8 +11,6 @@
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
 
-#include <QTableWidget>
-
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -25,17 +23,11 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoPresenter {
 public:
   ImageInfoPresenter(IImageInfoWidget *view);
 
-  std::vector<QString> getInfoList(const double x = DBL_MAX,
-                                   const double y = DBL_MAX,
-                                   const double z = DBL_MAX);
-
-  void createImageInfoModel(const std::string &ws_type);
+  void cursorAt(const double x, const double y, const double signal);
   void setWorkspace(const Mantid::API::Workspace_sptr &ws);
 
-  std::shared_ptr<ImageInfoModel> getModel() { return m_model; }
-
 private:
-  std::shared_ptr<ImageInfoModel> m_model;
+  std::unique_ptr<ImageInfoModel> m_model;
   IImageInfoWidget *m_view;
 };
 

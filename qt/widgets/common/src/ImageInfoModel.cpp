@@ -8,13 +8,30 @@
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
 #include "MantidQtWidgets/Common/QStringUtils.h"
 
-#include <QRegExp>
-#include <iomanip>
 #include <sstream>
+
+namespace {}
 
 namespace MantidQt {
 namespace MantidWidgets {
 
+// ImageInfo
+
+/**
+ * Construct an ImageInfo to store name/value pairs
+ * @param names The names of the name/value pairs in the table
+ */
+ImageInfoModel::ImageInfo::ImageInfo(
+    ImageInfoModel::ImageInfo::StringItems names)
+    : m_names(std::move(names)) {
+  m_values.resize(m_names.size(), MissingValue);
+}
+
+// ImageInfoModel
+
+/**
+ * Appends a name/value to the given list
+ */
 void ImageInfoModel::addNameAndValue(const std::string &label,
                                      std::vector<QString> &list,
                                      const double value, const int precision,
@@ -28,12 +45,9 @@ void ImageInfoModel::addNameAndValue(const std::string &label,
   list.emplace_back(headerLabel);
 
   if (includeValue) {
-    QString valueString = QString::number(value, 'f', precision);
-    // remove any trailing zeros after decimal place
-    valueString.replace(QRegExp("(\\.\\d*[1-9])(0+)$|\\.0+$"), "\\1");
-    list.emplace_back(valueString);
+    list.emplace_back(QString::number(value, 'f', precision));
   } else
-    list.emplace_back(QString("-"));
+    list.emplace_back(MissingValue);
 }
 
 } // namespace MantidWidgets
