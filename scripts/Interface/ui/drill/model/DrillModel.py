@@ -354,10 +354,6 @@ class DrillModel(QObject):
                     value = True
                 if value in ['false', 'False', 'FALSE']:
                     value = False
-                if (name not in RundexSettings.SETTINGS[self.acquisitionMode]):
-                    self.paramError.emit(row, self.columns[column],
-                                          "Unknown option")
-                    return
                 options[name] = value
             for (k, v) in options.items():
                 self.checkParameter(k, v, row)

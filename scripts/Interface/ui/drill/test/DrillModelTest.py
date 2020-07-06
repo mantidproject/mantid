@@ -369,10 +369,6 @@ class DrillModelTest(unittest.TestCase):
                                    'invalid')
         self.assertEqual(self.model.samples, samples)
         self.mController.return_value.addParameter.assert_not_called()
-        self.model.changeParameter(0,
-                                   self.model.columns.index("CustomOptions"),
-                                   'invalid=invalid')
-        self.mController.return_value.addParameter.assert_not_called()
 
         # valid custom options
         self.model.changeParameter(0,
