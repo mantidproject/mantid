@@ -279,7 +279,10 @@ class DrillModel(QObject):
                   or (isinstance(p, MatrixWorkspaceProperty))):
                 t = "workspace"
             elif (isinstance(p, StringPropertyWithValue)):
-                t = "combobox"
+                if (p.allowedValues):
+                    t = "combobox"
+                else:
+                    t = "string"
             elif (isinstance(p, BoolPropertyWithValue)):
                 t = "bool"
             else:
