@@ -71,7 +71,6 @@ ImageInfoModelMatrixWS::info(const double x, const double y,
   info.setValue(4, defaultFormat(m_spectrumInfo->l2(wsIndex)));
   info.setValue(5, defaultFormat(m_spectrumInfo->signedTwoTheta(wsIndex)));
   info.setValue(6, defaultFormat(m_spectrumInfo->azimuthal(wsIndex)));
-
   setUnitsInfo(&info, 7, wsIndex, x);
 
   return info;
@@ -96,10 +95,17 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
     // set as first element in list already
     tof = x;
   } else {
-    tof = UnitConversion::run(m_xunit.toStdString(), "TOF", x, l1, l2, twoTheta,
-                              emode, efixed);
-    info->setValue(infoIndex, defaultFormat(tof));
-    ++infoIndex;
+    try {
+      tof = UnitConversion::run(m_xunit.toStdString(), "TOF", x, l1, l2,
+                                twoTheta, emode, efixed);
+      info->setValue(infoIndex, defaultFormat(tof));
+      ++infoIndex;
+    } catch (std::invalid_argument &exc) {
+      // without TOF we can't get to the other units
+      g_log.debug() << "Error calculating TOF from " << m_xunit.toStdString()
+                    << ": " << exc.what() << "\n";
+      return;
+    }
   }
 
   const auto &unitFactory = UnitFactory::Instance();
@@ -196,39 +202,47 @@ ImageInfoModelMatrixWS::createItemNames() const {
  */
 std::tuple<Mantid::Kernel::DeltaEMode::Type, double>
 ImageInfoModelMatrixWS::efixedAt(const size_t wsIndex) const {
-  DeltaEMode::Type emode(DeltaEMode::Elastic);
+  DeltaEMode::Type emode = m_workspace->getEMode();
   double efixed(0.0);
-  const auto &run = m_workspace->run();
-  // try getting direct geometry information from the run object first
-  if (run.hasProperty("Ei")) {
-    efixed = run.getPropertyValueAsType<double>("Ei");
-    emode = DeltaEMode::Direct;
-  } else if (run.hasProperty("EnergyRequested")) {
-    efixed = run.getPropertyValueAsType<double>("EnergyRequested");
-    emode = DeltaEMode::Direct;
-  } else if (run.hasProperty("EnergyEstimate")) {
-    efixed = run.getPropertyValueAsType<double>("EnergyEstimate");
-    emode = DeltaEMode::Direct;
-  }
+  if (m_spectrumInfo->isMonitor(wsIndex))
+    return std::make_tuple(emode, efixed);
 
-  if (efixed != 1) {
-    const auto &detector = m_spectrumInfo->detector(wsIndex);
-    if (!(m_spectrumInfo->isMonitor(wsIndex) &&
-          detector.hasParameter("Efixed"))) {
-      try {
-        const ParameterMap &pmap = m_workspace->constInstrumentParameters();
-        const Parameter_sptr par = pmap.getRecursive(&detector, "Efixed");
-        if (par) {
-          efixed = par->value<double>();
-          emode = DeltaEMode::Indirect;
-        }
-      } catch (std::runtime_error &exc) {
-        g_log.debug() << "Failed to get efixed from spectrum at index "
-                      << wsIndex << ": " << exc.what() << "\n";
-        efixed = 0.0;
+  if (emode == DeltaEMode::Direct) {
+    const auto &run = m_workspace->run();
+    for (const auto &logName : {"Ei", "EnergyRequested", "EnergyEstimate"}) {
+      if (run.hasProperty(logName)) {
+        efixed = run.getPropertyValueAsType<double>(logName);
+        break;
       }
     }
+  } else if (emode == DeltaEMode::Indirect) {
+    const auto &detector = m_spectrumInfo->detector(wsIndex);
+    const ParameterMap &pmap = m_workspace->constInstrumentParameters();
+    try {
+      for (const auto &paramName : {"Efixed", "Efixed-val"}) {
+        auto parameter = pmap.getRecursive(&detector, paramName);
+        if (parameter) {
+          efixed = parameter->value<double>();
+          break;
+        }
+        // check the instrument as if the detector is a group the above
+        // recursion doesn't work
+        parameter = pmap.getRecursive(m_instrument.get(), paramName);
+        if (parameter) {
+          efixed = parameter->value<double>();
+          break;
+        }
+      }
+    } catch (std::runtime_error &exc) {
+      g_log.debug() << "Failed to get efixed from spectrum at index " << wsIndex
+                    << ": " << exc.what() << "\n";
+      efixed = 0.0;
+    }
   }
+
+  // if it's not possible to find an efixed we are forced to treat is as elastic
+  if (efixed == 0.0)
+    emode = DeltaEMode::Elastic;
 
   return std::make_tuple(emode, efixed);
 }
