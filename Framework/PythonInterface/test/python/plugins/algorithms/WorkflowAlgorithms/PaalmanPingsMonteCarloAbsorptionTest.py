@@ -22,12 +22,14 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         Load('irs26173_graphite002_red.nxs', OutputWorkspace='container_ws')
         Load('osi104367_elf.nxs', OutputWorkspace='indirect_elastic_ws')
         Load('ILL_IN16B_FWS_Reduced.nxs', OutputWorkspace='indirect_fws_ws')
+        Load('HRP38692a', OutputWorkspace='elastic_ws')
 
     def setUp(self):
         self._red_ws = mtd['red_ws']
         self._container_ws = mtd['container_ws']
         self._indirect_elastic_ws = mtd['indirect_elastic_ws']
         self._indirect_fws_ws = mtd['indirect_fws_ws']
+        self._elastic_ws = mtd['elastic_ws']
 
         self._expected_unit = self._red_ws.getAxis(0).getUnit().unitID()
         self._expected_hist = 10
@@ -156,6 +158,12 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_blocksize = 1
         self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(0), 'Degrees')
 
+    def _run_elastic_test(self, shape):
+        self._expected_unit = "TOF"
+        self._expected_hist = 11
+        self._expected_blocksize = 23987
+        self._run_correction_and_test(shape, self._elastic_ws, 'Label')
+
     def test_material_with_cross_section(self):
         self._material_with_cross_section_test(self._run_correction_and_test)
 
@@ -194,6 +202,9 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
     def test_annulus_indirect_fws(self):
         self._annulus_test(self._run_indirect_fws_test_red)
+
+    def test_cylinder_elastic(self):
+        self._cylinder_test(self._run_elastic_test)
 
 if __name__ == "__main__":
     unittest.main()
