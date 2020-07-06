@@ -33,7 +33,7 @@ from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidg
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.plot_widget.plot_widget import PlotWidget
 from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
-from mantidqt.utils.observer_pattern import GenericObserver
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 TAB_ORDER = ["Home", "Grouping", "Phase Table", "Transform", "Fitting", "Sequential Fitting", "Results"]
@@ -156,9 +156,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.enable_tab_observer,
             self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
         self.transform.new_data_observer(
-            self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
-        self.transform.new_data_observer(
-            self.update_plot_observer)
+            self.transform_finished_observer)
 
         self.context.data_context.message_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.message_observer)
@@ -180,6 +178,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
         self.update_plot_observer = GenericObserver(self.plot_widget.presenter.update_plot)
+        self.transform_finished_observer = GenericObserverWithArgPassing(self.handle_transform_performed)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
 
     def handle_tab_changed(self):
@@ -192,6 +191,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             return
         
         self.plot_widget.presenter.handle_plot_mode_changed(plot_mode)
+
+    def handle_transform_performed(self, new_data_workspace_name):
+        self.fitting_tab.fitting_tab_presenter.handle_new_data_loaded()
+        self.fitting_tab.fitting_tab_presenter.set_display_workspace(new_data_workspace_name)
+        self.plot_widget.presenter.update_plot(autoscale=True)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(

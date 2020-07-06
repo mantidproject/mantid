@@ -83,7 +83,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self._view.on_plot_mode_changed(self.handle_plot_mode_changed_by_user)
 
-    def handle_data_updated(self):
+    def handle_data_updated(self, autoscale=False):
         """
         Handles the group and pairs calculation finishing by plotting the loaded groups and pairs.
         """
@@ -92,14 +92,14 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys, tiled_by)
 
-        self.plot_all_selected_data(autoscale=False, hold_on=False)
+        self.plot_all_selected_data(autoscale=autoscale, hold_on=False)
 
-    def update_plot(self):
+    def update_plot(self, autoscale=False):
         if self.context.gui_context['PlotMode'] == PlotMode.Data:
-            self.handle_data_updated()
+            self.handle_data_updated(autoscale=autoscale)
         elif self.context.gui_context['PlotMode'] == PlotMode.Fitting:  # Plot the displayed workspace
             self.handle_plot_selected_fits(
-                self._get_selected_fit_workspaces()
+                self._get_selected_fit_workspaces(), autoscale
             )
 
     def handle_plot_mode_changed(self, plot_mode : PlotMode):
@@ -268,7 +268,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._figure_presenter.create_single_plot()
         
 
-    def handle_plot_selected_fits(self, fit_information_list: List[FitPlotInformation]):
+    def handle_plot_selected_fits(self, fit_information_list: List[FitPlotInformation], autoscale=False):
         """Plots a list of selected fit workspaces (obtained from fit and seq fit tabs).
         :param fit_information_list: List of named tuples each entry of the form (fit, input_workspaces)
         """
@@ -282,7 +282,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                 workspace_list += fit_information.input_workspaces + fit_workspaces
                 indices += [0] * len(fit_information.input_workspaces) + fit_indices
 
-        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale)
 
     def handle_plot_guess_changed(self):
         if self.context.fitting_context.guess_ws is None:

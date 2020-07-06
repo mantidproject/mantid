@@ -163,6 +163,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def display_workspace(self):
         return str(self.parameter_display_combo.currentText())
 
+    @display_workspace.setter
+    def display_workspace(self, value):
+        self.parameter_display_combo.blockSignals(True)
+        self.parameter_display_combo.setCurrentText(value)
+        self.parameter_display_combo.blockSignals(False)
+
     @property
     def fit_object(self):
         return self.function_browser.getGlobalFunction()
