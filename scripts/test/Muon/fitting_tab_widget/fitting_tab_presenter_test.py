@@ -64,6 +64,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view = self.widget.fitting_tab_view
         self.view.warning_popup = mock.MagicMock()
         self.presenter.model = mock.MagicMock()
+        self.presenter.model.context = self.context
         self.presenter.model.get_function_name.return_value = 'GausOsc'
 
     @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.WorkspaceSelectorView.get_selected_data')

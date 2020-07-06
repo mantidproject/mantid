@@ -7,10 +7,10 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -28,8 +28,7 @@ std::vector<std::string>
  * @author Janik Zikovsky
  * @date 2011-02-25 11:54:52.003137
  */
-class DLLExport CreateMDWorkspace
-    : public MDAlgorithms::BoxControllerSettingsAlgorithm {
+class DLLExport CreateMDWorkspace : public API::BoxControllerSettingsAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CreateMDWorkspace"; }

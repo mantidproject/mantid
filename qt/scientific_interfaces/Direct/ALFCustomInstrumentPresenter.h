@@ -25,31 +25,28 @@ class MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter
 
 public:
   ALFCustomInstrumentPresenter(
-      ALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
-      MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane);
+      IALFCustomInstrumentView *view, IALFCustomInstrumentModel *model,
+      MantidWidgets::IPlotFitAnalysisPanePresenter *analysisPane);
   ~ALFCustomInstrumentPresenter() {
     delete m_extractSingleTubeObserver;
     delete m_averageTubeObserver;
-    delete m_analysisPane;
-    delete m_model;
+    m_analysisPane->destructor();
   };
 
   void addInstrument() override;
 
-protected:
   void loadSideEffects() override;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
-
-private:
   void setUpInstrumentAnalysisSplitter() override;
 
   void extractSingleTube();
   void averageTube();
 
-  ALFCustomInstrumentView *m_view;
-  ALFCustomInstrumentModel *m_model;
-  MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPane;
+private:
+  IALFCustomInstrumentView *m_view;
+  IALFCustomInstrumentModel *m_model;
+  MantidWidgets::IPlotFitAnalysisPanePresenter *m_analysisPane;
   VoidObserver *m_extractSingleTubeObserver;
   VoidObserver *m_averageTubeObserver;
 };

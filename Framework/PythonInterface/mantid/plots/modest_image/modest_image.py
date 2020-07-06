@@ -54,7 +54,7 @@ class ModestImage(mi.AxesImage):
         ACCEPTS: numpy/PIL Image A
         """
         self._full_res = A
-        self._A = A
+        self._A = cbook.safe_masked_invalid(A)
 
         if self._A.dtype != np.uint8 and not np.can_cast(self._A.dtype,
                                                          np.float):

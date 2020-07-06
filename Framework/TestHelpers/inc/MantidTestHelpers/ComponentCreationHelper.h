@@ -45,7 +45,7 @@ tests.
 
 //----------------------------------------------------------------------------------------------
 
-/// Add a spherical sample at samplePos to given instrument.
+/// Add a sample at samplePos to given instrument.
 void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
                            const Mantid::Kernel::V3D &samplePos);
 
@@ -180,7 +180,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
                                            const std::vector<double> &azim);
 /**
  * Create an test instrument with n panels of 9 cylindrical detectors, a source
- * and spherical sample shape.
+ * and a sample position.
  * Detectors have IDs assigned as follows:
  * 7 8 9
  * 4 5 6

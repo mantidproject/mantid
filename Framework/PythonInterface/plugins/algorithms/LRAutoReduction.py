@@ -690,8 +690,14 @@ class LRAutoReduction(PythonAlgorithm):
             LiquidsReflectometryReduction(**kwargs)
 
         elif "WithReference":
+            # Get Refl1D parameters for theoretical model
             refl1d_parameters = self.getProperty("Refl1DModelParameters").value
             kwargs['Refl1DModelParameters'] = refl1d_parameters
+
+            # Modify output wksp name to match backwards compatibility for UI
+            _time = int(time.time())
+            kwargs["OutputWorkspace"] = kwargs["OutputWorkspace"] + '_#' + str(_time) + 'ts'
+
             LRReductionWithReference(**kwargs)
 
         # Put the reflectivity curve together

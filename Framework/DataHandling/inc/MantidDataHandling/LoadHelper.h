@@ -37,8 +37,9 @@ public:
   double calculateTOF(double, double);
   double getInstrumentProperty(const API::MatrixWorkspace_sptr &,
                                const std::string &);
-  void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails);
-  void dumpNexusAttributes(NXhandle nxfileID, std::string &indentStr);
+  void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
+                             const std::string &entryName = "");
+  void dumpNexusAttributes(NXhandle nxfileID);
   std::string dateTimeInIsoFormat(const std::string &);
 
   void moveComponent(const API::MatrixWorkspace_sptr &ws,

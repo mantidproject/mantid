@@ -544,9 +544,8 @@ public:
     source->setPos(V3D(0, 0.0, -11.739));
     testInst->add(source);
     testInst->markAsSource(source);
-    // Define a sample as a simple sphere
-    ObjComponent *sample =
-        new ObjComponent("samplePos", IObject_sptr(), testInst.get());
+    // Define a sample position
+    Component *sample = new Component("samplePos", testInst.get());
     testInst->setPos(0.0, 0.0, 0.0);
     testInst->add(sample);
     testInst->markAsSamplePos(sample);

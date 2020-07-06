@@ -6,19 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from mantid.plots.mantidaxes import MantidAxes
-
-from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from matplotlib.legend import Legend
+
+from mantid.plots.mantidaxes import MantidAxes
+from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.config import DEFAULT_SCRIPT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
-                                                         generate_axis_scale_commands)
+                                                         generate_axis_scale_commands,
+                                                         generate_tick_commands,
+                                                         generate_grid_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
+from workbench.plotting.plotscriptgenerator.fitting import get_fit_cmds
 from mantidqt.plotting.figuretype import FigureType, axes_type
 
 FIG_VARIABLE = "fig"
@@ -27,6 +30,8 @@ if hasattr(Legend, "set_draggable"):
     SET_DRAGGABLE_METHOD = "set_draggable(True)"
 else:
     SET_DRAGGABLE_METHOD = "draggable()"
+FIT_DOCUMENTATION_STRING = "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more " \
+                           "details"
 
 
 def generate_script(fig, exclude_headers=False):
@@ -65,6 +70,9 @@ def generate_script(fig, exclude_headers=False):
             if not curve_in_ax(ax):
                 continue
             plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
+
+        plot_commands.extend(generate_tick_commands(ax))
+        plot_commands.extend(generate_grid_commands(ax))
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
@@ -75,14 +83,23 @@ def generate_script(fig, exclude_headers=False):
     if not plot_commands:
         return
 
+    fit_commands, fit_headers = get_fit_cmds(fig)
+
     cmds = [] if exclude_headers else [DEFAULT_SCRIPT_CONTENT]
+    if exclude_headers and fit_headers:
+        cmds.extend(fit_headers)
     if plot_headers:
         cmds.extend(plot_headers)
+    if fit_commands:
+        cmds.append(FIT_DOCUMENTATION_STRING)
+        cmds.extend(fit_commands + [''])
     cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
     cmds.append("plt.show()")
-    cmds.append("# Scripting Plots in Mantid: https://docs.mantidproject.org/nightly/plotting/scripting_plots.html")
+    cmds.append("# Scripting Plots in Mantid:")
+    cmds.append("# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+
     return '\n'.join(cmds)
 
 

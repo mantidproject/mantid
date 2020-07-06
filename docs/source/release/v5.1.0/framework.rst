@@ -28,6 +28,7 @@ Algorithms
 - Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Bug fixed where setting ResimulateTracksForDifferentWavelengths parameter to True was being ignored
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections are not calculated anymore for masked spectra
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections can be calculated for a workspace without a sample eg container only
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has received a number of updates:
 
   - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
@@ -42,6 +43,10 @@ Algorithms
 
 Data Handling
 -------------
+
+- Added a case to :ref:`Load <algm-Load>` to handle ``WorkspaceGroup`` as the output type
+
+- Added an algorithm, :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` that reads raw NeXuS ILL D7 instrument data
 
 - The material definition has been extended to include an optional filename containing a profile of attenuation factor versus wavelength. This new filename has been added as a parameter to these algorithms:
 
@@ -69,8 +74,7 @@ Python
 ------
 - A list of spectrum numbers can be got by calling getSpectrumNumbers on a
   workspace. For example: spec_nums = ws.getSpectrumNumbers()
-
-- Documentation for manipulating :ref:`workspaces <scripting_workspaces>` and :ref:`plots <scripting_plots>` within a script have been produced.
+- Documentation for manipulating :ref:`workspaces <02_scripting_workspaces>` and :ref:`plots <02_scripting_plots>` within a script have been produced.
 - Property.units now attempts to encode with windows-1252 if utf-8 fails.
 - Property.unitsAsBytes has been added to retrieve the raw bytes from the units string.
 

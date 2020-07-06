@@ -8,12 +8,14 @@
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import QMainWindow, QStatusBar
 
+from mantid.api import Workspace
 from mantidqt.widgets.observers.observing_view import ObservingView
 
 
 class StatusBarView(QMainWindow, ObservingView):
     close_signal = Signal()
     rename_signal = Signal(str)
+    replace_signal = Signal(str, Workspace)
 
     def __init__(self, parent, central_widget, name, window_width=600, window_height=400, presenter=None):
         super(StatusBarView, self).__init__(parent)

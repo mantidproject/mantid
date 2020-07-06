@@ -1126,3 +1126,22 @@ def get_axes_from_figure(figure):
     axes = [img.axes for img in images]
 
     return axes
+
+
+def get_legend_handles(ax):
+    """
+    Get a list of the Line2D and ErrorbarContainer objects to be
+    included in the legend so that the order is always the same.
+    """
+    handles = []
+    for line in ax.lines:
+        if line.get_label() == "_nolegend_":
+            # If the line has no label find the ErrorbarContainer that corresponds to it (if one exists)
+            for container in ax.containers:
+                if isinstance(container, ErrorbarContainer) and container[0] == line:
+                    handles.append(container)
+                    break
+        else:
+            handles.append(line)
+
+    return handles

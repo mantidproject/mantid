@@ -49,9 +49,8 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -82,9 +81,8 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 

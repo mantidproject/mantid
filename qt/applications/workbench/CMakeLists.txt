@@ -78,6 +78,7 @@ set(TEST_FILES
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfitting.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgenerator.py
     workbench/plotting/test/test_figureerrorsmanager.py
     workbench/plotting/test/test_figureinteraction.py
@@ -94,6 +95,7 @@ set(TEST_FILES
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py
+    workbench/widgets/settings/test/test_settings_model.py
     workbench/widgets/settings/test/test_settings_presenter.py
     workbench/widgets/settings/test/test_settings_view.py
     workbench/widgets/settings/general/test/test_general_settings.py

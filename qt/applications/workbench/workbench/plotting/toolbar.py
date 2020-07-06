@@ -160,9 +160,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             toolbar_action.setEnabled(on)
             toolbar_action.setVisible(on)
 
-        # show/hide separator
-        fit_action = self._actions['toggle_fit']
-        self.toggle_separator_visibility(fit_action, on)
+        # Show/hide the separator between this button and help button
+        action = self._actions['waterfall_fill_area']
+        self.toggle_separator_visibility(action, on)
 
     def set_generate_plot_script_enabled(self, enabled):
         action = self._actions['generate_plot_script']
@@ -171,10 +171,12 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Show/hide the separator between this button and the "Fit" button
         self.toggle_separator_visibility(action, enabled)
 
-    def _set_fit_enabled(self, on):
+    def set_fit_enabled(self, on):
         action = self._actions['toggle_fit']
         action.setEnabled(on)
         action.setVisible(on)
+        # Show/hide the separator between this button and help button / waterfall options
+        self.toggle_separator_visibility(action, on)
 
     def waterfall_offset_amount(self):
         self.sig_waterfall_offset_amount_triggered.emit()
@@ -204,18 +206,18 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 break
 
     def set_buttons_visiblity(self, fig):
-        if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] and len(fig.get_axes()) > 1:
-            self._set_fit_enabled(False)
+        if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
+            self.set_fit_enabled(False)
 
         # if any of the lines are a sample log plot disable fitting
         for ax in fig.get_axes():
             for artist in ax.get_lines():
                 try:
                     if ax.get_artists_sample_log_plot_details(artist) is not None:
-                        self._set_fit_enabled(False)
+                        self.set_fit_enabled(False)
                         break
-                except ValueError:
-                    #The artist is not tracked - ignore this one and check the rest
+                except Exception:
+                    # The artist is not tracked - ignore this one and check the rest
                     continue
 
         # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
@@ -224,7 +226,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 fig.get_axes()[0].is_waterfall():
             self.set_generate_plot_script_enabled(False)
 
-        #reenable script generation for colormaps
+        # reenable script generation for colormaps
         if self.is_colormap(fig):
             self.set_generate_plot_script_enabled(True)
 

@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -259,6 +260,9 @@ void CreateSampleWorkspace::exec() {
         std::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
+
+  auto sampleSphere = createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+  ws->mutableSample().setShape(sampleSphere);
 
   ws->setYUnit("Counts");
   ws->setTitle("Test Workspace");
@@ -581,10 +585,8 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
   chopper->setPos(V3D(0.0, 0.0, -0.25 * sourceSampleDistance));
   testInst->add(chopper);
 
-  // Define a sample as a simple sphere
-  auto sampleSphere = createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
+  // Define a sample position
+  Component *sample = new Component("sample", testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);

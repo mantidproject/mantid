@@ -19,7 +19,7 @@ public:
   using ErrorReporter::ErrorReporter;
 
   /// generates the message body for a error message
-  std::string generateErrorMessage() override {
+  std::string generateErrorMessage() const override {
     return ErrorReporter::generateErrorMessage();
   }
 

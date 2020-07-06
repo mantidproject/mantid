@@ -187,7 +187,7 @@ void AbsorptionCorrections::run() {
   QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
 
   IAlgorithm_sptr monteCarloAbsCor =
-      AlgorithmManager::Instance().create("CalculateMonteCarloAbsorption");
+      AlgorithmManager::Instance().create("PaalmanPingsMonteCarloAbsorption");
   monteCarloAbsCor->initialize();
 
   monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
@@ -226,8 +226,6 @@ void AbsorptionCorrections::run() {
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
   monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
-  long const wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
-  monteCarloAbsCor->setProperty("NumberOfWavelengthPoints", wave);
   long const events = static_cast<long>(m_uiForm.spNumberEvents->value());
   monteCarloAbsCor->setProperty("EventsPerPoint", events);
   auto const interpolation =
@@ -352,11 +350,8 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(
     double const canBackThickness = m_uiForm.spFlatCanBackThickness->value();
     alg->setProperty("ContainerBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double const canInnerRadius = m_uiForm.spCylSampleRadius->value();
-    alg->setProperty("ContainerInnerRadius", canInnerRadius);
-
     double const canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
-    alg->setProperty("ContainerOuterRadius", canOuterRadius);
+    alg->setProperty("ContainerRadius", canOuterRadius);
 
   } else if (shape == "Annulus") {
     double const canInnerRadius = m_uiForm.spAnnCanInnerRadius->value();
@@ -529,7 +524,6 @@ void AbsorptionCorrections::getParameterDefaults(
     const Instrument_const_sptr &instrument) {
   setBeamWidthValue(instrument, "Workflow.beam-width");
   setBeamHeightValue(instrument, "Workflow.beam-height");
-  setWavelengthsValue(instrument, "Workflow.absorption-wavelengths");
   setEventsValue(instrument, "Workflow.absorption-events");
   setInterpolationValue(instrument, "Workflow.absorption-interpolation");
   setMaxAttemptsValue(instrument, "Workflow.absorption-attempts");
@@ -554,17 +548,6 @@ void AbsorptionCorrections::setBeamHeightValue(
         instrument->getStringParameter(beamHeightParamName)[0]);
     auto const beamHeightValue = beamHeight.toDouble();
     m_uiForm.spBeamHeight->setValue(beamHeightValue);
-  }
-}
-
-void AbsorptionCorrections::setWavelengthsValue(
-    const Instrument_const_sptr &instrument,
-    std::string const &wavelengthsParamName) const {
-  if (instrument->hasParameter(wavelengthsParamName)) {
-    auto const wavelengths = QString::fromStdString(
-        instrument->getStringParameter(wavelengthsParamName)[0]);
-    auto const wavelengthsValue = wavelengths.toInt();
-    m_uiForm.spNumberWavelengths->setValue(wavelengthsValue);
   }
 }
 

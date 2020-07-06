@@ -9,9 +9,11 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use("Agg")  # noqa
 from matplotlib.axes import Axes
 from matplotlib.legend import Legend
+from matplotlib.ticker import NullLocator
 
 from mantid.plots import MantidAxes
 from unittest.mock import Mock, patch
@@ -23,6 +25,7 @@ GEN_PLOT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_plot_command'
 GEN_SUBPLOTS_CMD = 'workbench.plotting.plotscriptgenerator.generate_subplots_command'
 GEN_AXIS_LIMIT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_axis_limit_commands'
 GET_AUTOSCALE_LIMITS = 'workbench.plotting.plotscriptgenerator.axes.get_autoscale_limits'
+GET_FIT_COMMANDS = 'workbench.plotting.plotscriptgenerator.get_fit_cmds'
 
 SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
                  "from mantid.api import AnalysisDataService\n"
@@ -41,7 +44,37 @@ SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
                  "\n"
                  "plt.show()"
                  "\n"
-                 "# Scripting Plots in Mantid: https://docs.mantidproject.org/nightly/plotting/scripting_plots.html")
+                 "# Scripting Plots in Mantid:"
+                 "\n"
+                 "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+
+SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
+                          "import matplotlib.pyplot as plt\n"
+                          "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details\n"
+                          "Function=\"GaussOsc\"\n"
+                          "InputWorkspace=\"TestWorkspace\"\n"
+                          "Output=\"TestOutput\"\n"
+                          "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)\n"
+                          "\n"
+                          "from mantid.api import AnalysisDataService\n"
+                          "\n"
+                          "ADS.retrieve(...)\n"
+                          "\n"
+                          "fig, axes = plt.subplots(...)\n"
+                          "axes[0].plot(...)\n"
+                          "axes[0].plot(...)\n"
+                          "axes[0].set_xlim(...)\n"
+                          "axes[0].set_ylim(...)\n"
+                          "\n"
+                          "axes[1].plot(...)\n"
+                          "axes[1].set_xlim(...)\n"
+                          "axes[1].set_ylim(...)\n"
+                          "\n"
+                          "plt.show()"
+                          "\n"
+                          "# Scripting Plots in Mantid:"
+                          "\n"
+                          "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
 
 class PlotScriptGeneratorTest(unittest.TestCase):
@@ -59,6 +92,10 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         cls.subplots_cmd = "plt.subplots(...)"
         cls.plot_cmd = "plot(...)"
         cls.ax_limit_cmds = ['set_xlim(...)', 'set_ylim(...)']
+        cls.fit_cmds = ["Function=\"GaussOsc\"", "InputWorkspace=\"TestWorkspace\"",
+                        "Output=\"TestOutput\"",
+                        "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)"]
+        cls.fit_header = ["from mantid.simpleapi import Fit"]
 
     def _gen_mock_axes(self, **kwargs):
         mock_kwargs = {
@@ -77,10 +114,15 @@ class PlotScriptGeneratorTest(unittest.TestCase):
             'get_xscale': lambda: 'linear',
             'get_yscale': lambda: 'linear',
             'get_xlim': lambda: (-0.02, 1.02),
-            'get_ylim': lambda: (-0.02, 1.02)
+            'get_ylim': lambda: (-0.02, 1.02),
+            'xaxis': Mock(),
+            'yaxis': Mock()
         }
         mock_kwargs.update(kwargs)
         mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
+        mock_ax.xaxis.minor.locator = Mock(spec=NullLocator)
+        mock_ax.xaxis._gridOnMajor = False
+        mock_ax.yaxis._gridOnMajor = False
         return mock_ax
 
     def test_generate_script_returns_None_if_no_MantidAxes_in_figure(self):
@@ -109,7 +151,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
                                          get_lines=lambda: [None],
                                          numRows=1, numCols=2, colNum=1)
         mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2],
-                        axes= [mock_axes1, mock_axes2])
+                        axes=[mock_axes1, mock_axes2])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
 
         output_script = generate_script(mock_fig, exclude_headers=True)
         self.assertEqual(SAMPLE_SCRIPT, output_script)
@@ -128,6 +171,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
 
         mock_ax = self._gen_mock_axes(legend_=True)
         mock_fig = Mock(get_axes=lambda: [mock_ax])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
         if hasattr(Legend, "set_draggable"):
             self.assertIn('.legend().set_draggable(True)', generate_script(mock_fig))
         else:
@@ -146,7 +190,106 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_autoscale_lims.return_value = (-0.02, 1.02)
 
         mock_fig = Mock(get_axes=lambda: [self._gen_mock_axes()])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
         self.assertNotIn('.legend()', generate_script(mock_fig))
+
+    @patch(GET_AUTOSCALE_LIMITS)
+    @patch(GEN_WS_RETRIEVAL_CMDS)
+    @patch(GEN_PLOT_CMDS)
+    @patch(GEN_SUBPLOTS_CMD)
+    def test_generate_script_adds_minor_ticks_command_if_axes_has_minor_ticks(self,
+                                                                              mock_subplots_cmd,
+                                                                              mock_plot_cmd,
+                                                                              mock_retrieval_cmd,
+                                                                              mock_autoscale_lims):
+        mock_retrieval_cmd.return_value = self.retrieval_cmds
+        mock_subplots_cmd.return_value = self.subplots_cmd
+        mock_plot_cmd.return_value = self.plot_cmd
+        mock_autoscale_lims.return_value = (-0.02, 1.02)
+
+        mock_ax = self._gen_mock_axes()
+        mock_ax.xaxis.minor.locator = Mock()
+        mock_fig = Mock(get_axes=lambda: [mock_ax])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
+
+        self.assertIn('axes.minorticks_on()', generate_script(mock_fig))
+
+    @patch(GET_AUTOSCALE_LIMITS)
+    @patch(GEN_WS_RETRIEVAL_CMDS)
+    @patch(GEN_PLOT_CMDS)
+    @patch(GEN_SUBPLOTS_CMD)
+    def test_generate_script_adds_show_minor_gridlines_command_if_axes_has_attribute(self,
+                                                                                     mock_subplots_cmd,
+                                                                                     mock_plot_cmd,
+                                                                                     mock_retrieval_cmd,
+                                                                                     mock_autoscale_lims):
+        mock_retrieval_cmd.return_value = self.retrieval_cmds
+        mock_subplots_cmd.return_value = self.subplots_cmd
+        mock_plot_cmd.return_value = self.plot_cmd
+        mock_autoscale_lims.return_value = (-0.02, 1.02)
+
+        mock_ax = self._gen_mock_axes()
+        mock_ax.xaxis.minor.locator = Mock()
+        mock_ax.show_minor_gridlines = True
+        mock_fig = Mock(get_axes=lambda: [mock_ax])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
+
+        self.assertIn('axes.show_minor_gridlines = True', generate_script(mock_fig))
+
+    @patch(GET_AUTOSCALE_LIMITS)
+    @patch(GEN_WS_RETRIEVAL_CMDS)
+    @patch(GEN_PLOT_CMDS)
+    @patch(GEN_SUBPLOTS_CMD)
+    def test_generate_script_adds_grid_command_if_axes_has_grid(self,
+                                                                mock_subplots_cmd,
+                                                                mock_plot_cmd,
+                                                                mock_retrieval_cmd,
+                                                                mock_autoscale_lims):
+        mock_retrieval_cmd.return_value = self.retrieval_cmds
+        mock_subplots_cmd.return_value = self.subplots_cmd
+        mock_plot_cmd.return_value = self.plot_cmd
+        mock_autoscale_lims.return_value = (-0.02, 1.02)
+
+        mock_ax = self._gen_mock_axes()
+        mock_ax.show_minor_gridlines = True
+        mock_ax.xaxis._gridOnMajor = True
+        mock_ax.yaxis._gridOnMajor = True
+        mock_fig = Mock(get_axes=lambda: [mock_ax])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
+
+        self.assertIn('axes.grid(True, axis=\'both\', which=\'both\')', generate_script(mock_fig))
+
+    @patch(GET_FIT_COMMANDS)
+    @patch(GET_AUTOSCALE_LIMITS)
+    @patch(GEN_AXIS_LIMIT_CMDS)
+    @patch(GEN_WS_RETRIEVAL_CMDS)
+    @patch(GEN_PLOT_CMDS)
+    @patch(GEN_SUBPLOTS_CMD)
+    def test_generate_script_compiles_script_correctly_with_fit(self, mock_subplots_cmd,
+                                                                mock_plot_cmd, mock_retrieval_cmd,
+                                                                mock_axis_lim_cmd,
+                                                                mock_autoscale_lims,
+                                                                mock_fit_cmds):
+
+        mock_retrieval_cmd.return_value = self.retrieval_cmds
+        mock_subplots_cmd.return_value = self.subplots_cmd
+        mock_plot_cmd.return_value = self.plot_cmd
+        mock_axis_lim_cmd.return_value = self.ax_limit_cmds
+        mock_autoscale_lims.return_value = (-0.02, 1.02)
+        mock_fit_cmds.return_value = self.fit_cmds, self.fit_header
+
+        mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None],
+                                         get_lines=lambda: [None, None],
+                                         numRows=1, numCols=2, colNum=0)
+        mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None],
+                                         get_lines=lambda: [None],
+                                         numRows=1, numCols=2, colNum=1)
+        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2],
+                        axes=[mock_axes1, mock_axes2])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = "OutputWorkspace"
+
+        output_script = generate_script(mock_fig, exclude_headers=True)
+        self.assertEqual(SAMPLE_SCRIPT_WITH_FIT, output_script)
 
 
 if __name__ == '__main__':

@@ -118,11 +118,7 @@ createHollowCylinder(double innerRadius, double outerRadius, double height,
 }
 
 void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
-  // Define a sample as a simple sphere
-  IObject_sptr sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, instrument.get());
+  Component *sample = new Component("sample", instrument.get());
   instrument->setPos(samplePos);
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
@@ -734,9 +730,8 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -779,9 +774,8 @@ createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
   instrument->markAsSource(source);
 
   // A sample
-  auto *sample = new ObjComponent("some-surface-holder");
+  auto *sample = new Component("some-surface-holder");
   sample->setPos(V3D(0, 0, 0));
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -827,7 +821,7 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
 
   // A sample
   if (haveSample) {
-    ObjComponent *sample = new ObjComponent("some-sample");
+    Component *sample = new Component("some-sample");
 
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
@@ -881,9 +875,8 @@ Instrument_sptr createSimpleInstrumentWithRotation(
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -937,9 +930,8 @@ Instrument_sptr createInstrumentWithSourceRotation(
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 

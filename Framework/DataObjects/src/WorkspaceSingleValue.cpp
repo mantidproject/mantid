@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/IPropertyManager.h"
 
@@ -25,8 +27,11 @@ WorkspaceSingleValue::WorkspaceSingleValue(
   data.setCounts(1, value);
   data.setCountStandardDeviations(1, error);
   data.setPointStandardDeviations(1, 0.0);
-
   setDistribution(true);
+  // Add a set of axes to the workspace
+  m_axes.resize(2);
+  m_axes[0] = std::make_unique<API::RefAxis>(this);
+  m_axes[1] = std::make_unique<API::SpectraAxis>(this);
 }
 
 WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
