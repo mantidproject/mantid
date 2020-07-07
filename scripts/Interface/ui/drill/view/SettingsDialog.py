@@ -155,6 +155,8 @@ class SettingsDialog(QDialog):
         # widgets
         self.settings = dict()
 
+        self.invalidSettings = set()
+
     def initWidgets(self, types, values, doc):
         """
         Initialize the dialog widgets by providing the settings types, allowed
@@ -226,8 +228,9 @@ class SettingsDialog(QDialog):
         """
         This method is called when the validation has been done. It changes the
         stylesheet of the corresponding widget to inform the user on the
-        parameter state (valid or not). It also changes the widget tooltip to
-        display the error msg.
+        parameter state (valid or not). It changes the widget tooltip to
+        display the error msg. It also toogles the state of the validation
+        button depending on the presence or not of invalid values in the dialog.
 
         Args:
             name (str): setting name
@@ -235,13 +238,23 @@ class SettingsDialog(QDialog):
             msg (str): facultative error message associated with an invalid
                        setting
         """
-        if (name in self.settings):
-            if valid:
-                self.settings[name].widget.setStyleSheet("")
-            else:
-                self.settings[name].widget.setStyleSheet(
-                        "QLineEdit {background-color: #3fff0000;}")
-            if not valid and msg is not None:
+        if (name not in self.settings):
+            return
+
+        if valid:
+            self.settings[name].widget.setStyleSheet("")
+            self.settings[name].widget.setToolTip(self.settings[name].doc)
+            self.invalidSettings.discard(name)
+            if not self.invalidSettings:
+                self.okButton.setDisabled(False)
+                self.applyButton.setDisabled(False)
+        else:
+            self.settings[name].widget.setStyleSheet(
+                    "QLineEdit {background-color: #3fff0000;}")
+            if msg is not None:
                 self.settings[name].widget.setToolTip(msg)
             else:
                 self.settings[name].widget.setToolTip(self.settings[name].doc)
+            self.invalidSettings.add(name)
+            self.okButton.setDisabled(True)
+            self.applyButton.setDisabled(True)
