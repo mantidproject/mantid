@@ -619,7 +619,13 @@ class DrillModel(QObject):
         """
         del self.samples[ref]
 
-    def get_rows_contents(self):
+    def getRowsContents(self):
+        """
+        Get all the samples as a table, 1 sample per row.
+
+        Returns:
+            list(list(str)): table contents
+        """
         rows = list()
         for sample in self.samples:
             row = list()

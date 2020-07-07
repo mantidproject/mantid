@@ -76,7 +76,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.model.getAvailableAcquisitionModes.assert_called_once()
         self.model.getAcquisitionMode.assert_called_once()
         self.model.getColumnHeaderData.assert_called_once()
-        self.model.get_rows_contents.assert_called_once()
+        self.model.getRowsContents.assert_called_once()
 
         self.view.set_available_modes.assert_called_once()
         self.view.set_acquisition_mode.assert_called_once()
