@@ -14,7 +14,13 @@ Name = "Frequency_Domain_Analysis_2"
 
 if 'muon_freq' in globals():
     muon_freq = globals()['muon_freq']
-    if not muon_freq.isHidden():
+    # If the object is deleted in the C++ side it can still exist in the
+    # python globals list. The try catch block below checks for this.
+    try:
+        is_hidden = muon_freq.isHidden()
+    except RuntimeError:
+        is_hidden = True
+    if not is_hidden:
         muon_freq.setWindowState(
             muon_freq.windowState(
             ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)

@@ -12,8 +12,14 @@ from Muon.GUI.Common.usage_report import report_interface_startup
 Name = "Muon_Analysis_2"
 
 if 'muon_analysis' in globals():
-    muon_analysis = globals()['muon_analysis']
-    if not muon_analysis.isHidden():
+    muon_analysis = globals()['muon_freq']
+    # If the object is deleted in the C++ side it can still exist in the
+    # python globals list. The try catch block below checks for this.
+    try:
+        is_hidden = muon_analysis.isHidden()
+    except RuntimeError:
+        is_hidden = True
+    if not is_hidden:
         muon_analysis.setWindowState(
             muon_analysis.windowState(
             ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
