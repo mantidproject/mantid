@@ -340,6 +340,9 @@ InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
   } else if (obj->type() == "ring") {
     subShapeMap = this->encodeRing(static_cast<const Shape2DRing *>(obj));
     map.insert(QString("type"), QVariant(QString("ring")));
+  } else if (obj->type() == "sector") {
+    subShapeMap = this->encodeSector(static_cast<const Shape2DSector *>(obj));
+    map.insert(QString("type"), QVariant(QString("sector")));
   } else if (obj->type() == "free") {
     subShapeMap = this->encodeFree(static_cast<const Shape2DFree *>(obj));
     map.insert(QString("type"), QVariant(QString("free")));
@@ -395,6 +398,24 @@ InstrumentWidgetEncoder::encodeRing(const Shape2DRing *obj) {
   map.insert(QString("xWidth"), QVariant(xWidth));
   map.insert(QString("yWidth"), QVariant(yWidth));
   map.insert(QString("shape"), QVariant(this->encodeShape(baseShape)));
+
+  return map;
+}
+
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeSector(const Shape2DSector *obj) {
+  const auto outerRadius = obj->getDouble("outerRadius");
+  const auto innerRadius = obj->getDouble("innerRadius");
+  const auto startAngle = obj->getDouble("startAngle");
+  const auto endAngle = obj->getDouble("endAngle");
+  const auto center = obj->getPoint("center");
+
+  QMap<QString, QVariant> map;
+  map.insert(QString("outerRadius"), QVariant(outerRadius));
+  map.insert(QString("innerRadius"), QVariant(innerRadius));
+  map.insert(QString("startAngle"), QVariant(startAngle));
+  map.insert(QString("endAngle"), QVariant(endAngle));
+  map.insert(QString("center"), QVariant(center));
 
   return map;
 }
