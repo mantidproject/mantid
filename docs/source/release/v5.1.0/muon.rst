@@ -40,5 +40,6 @@ Improvements
 - Improved the maintainability of the fitting code in the Muon Analysis interface by removing redundant and duplicated code.
   These changes will make the addition of new functionality in the future easier.
 - The plot guess option within the fitting tab will now update when a parameter is changed.
+- Have updated the FDA GUI so that it functions correctly for frquency transforms and single fits.
 
 :ref:`Release 5.1.0 <v5.1.0>`
