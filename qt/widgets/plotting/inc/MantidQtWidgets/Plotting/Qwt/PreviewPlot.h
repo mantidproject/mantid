@@ -112,6 +112,9 @@ public:
   void disableYAxisMenu();
   void disableContextMenu();
 
+  // Needed to match the interface of the MPL graph widget
+  void allowRedraws(bool) { return; }
+
 signals:
   /// Signals that the plot should be refreshed
   void needToReplot();
