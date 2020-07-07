@@ -212,21 +212,25 @@ class DrillModel(QObject):
         """
         Initialize the parameter controller.
         """
+        def onParamOk(p):
+            if ((p.name in self.columns) or (p.name in self.settings)):
+                self.paramOk.emit(p.sample, p.name)
+            else:
+                self.paramOk.emit(p.sample, RundexSettings.CUSTOM_OPT_JSON_KEY)
+
+        def onParamError(p):
+            if ((p.name in self.columns) or (p.name in self.settings)):
+                self.paramError.emit(p.sample, p.name, p.errorMsg)
+            else:
+                self.paramError.emit(p.sample,
+                                     RundexSettings.CUSTOM_OPT_JSON_KEY,
+                                     p.errorMsg)
+
         if (self.algorithm is None):
             return
         self.controller = ParameterController(self.algorithm)
-        self.controller.signals.okParam.connect(
-                lambda p : self.paramOk.emit(
-                    p.sample, p.name if p.name in self.columns
-                    else RundexSettings.CUSTOM_OPT_JSON_KEY
-                    )
-                )
-        self.controller.signals.wrongParam.connect(
-                lambda p : self.paramError.emit(
-                    p.sample, p.name if p.name in self.columns
-                    else RundexSettings.CUSTOM_OPT_JSON_KEY, p.errorMsg
-                    )
-                )
+        self.controller.signals.okParam.connect(onParamOk)
+        self.controller.signals.wrongParam.connect(onParamError)
         self.controller.start()
 
     def setSettings(self, settings):
