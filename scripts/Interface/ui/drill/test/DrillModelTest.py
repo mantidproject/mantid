@@ -75,6 +75,11 @@ class DrillModelTest(unittest.TestCase):
         self.mConfig.__getitem__.return_value = "i1"
         self.addCleanup(patch.stop)
 
+        # mock logger
+        patch = mock.patch('Interface.ui.drill.model.DrillModel.logger')
+        self.mLogger = patch.start()
+        self.addCleanup(patch.stop)
+
         # mock specifications
         patch = mock.patch.dict(
                 'Interface.ui.drill.model.DrillModel.RundexSettings.TECHNIQUE',
@@ -413,6 +418,34 @@ class DrillModelTest(unittest.TestCase):
         self.mDrillTask.reset_mock()
         self.model.tasksPool.reset_mock()
 
+    def test_onTaskStated(self):
+        self.model.processStarted = mock.Mock()
+        self.model._onTaskStarted(0)
+        self.mLogger.information.assert_called_once()
+        self.model.processStarted.emit.assert_called_once()
+
+    def test_onTaskSuccess(self):
+        self.model.processSuccess = mock.Mock()
+        self.model._onTaskSuccess(0)
+        self.mLogger.information.assert_called_once()
+        self.model.processSuccess.emit.assert_called_once()
+
+    def test_onTaskError(self):
+        self.model.processError = mock.Mock()
+        self.model._onTaskError(0, "")
+        self.mLogger.error.assert_called_once()
+        self.model.processError.emit.assert_called_once()
+
+    def test_onProcessingProgress(self):
+        self.model.progressUpdate = mock.Mock()
+        self.model._onProcessingProgress(0)
+        self.model.progressUpdate.emit.assert_called_once()
+
+    def test_onProcessingDone(self):
+        self.model.processingDone = mock.Mock()
+        self.model._onProcessingDone()
+        self.model.processingDone.emit.assert_called_once()
+
     def test_stopProcess(self):
         self.model.stopProcess()
         self.model.tasksPool.abortProcessing.assert_called_once()
@@ -443,6 +476,49 @@ class DrillModelTest(unittest.TestCase):
             "GlobalSettings": self.SETTINGS["a1"],
             "Samples": []
             })
+
+    def test_getRundexFile(self):
+        self.model.rundexFile = "test"
+        self.assertEqual(self.model.getRundexFile(), "test")
+
+    def test_getVisualSettings(self):
+        self.model.visualSettings = "test"
+        self.assertEqual(self.model.getVisualSettings(), "test")
+
+    def test_getColumnHeaderData(self):
+        mAlg = mock.Mock()
+        self.mSapi.AlgorithmManager.createUnmanaged.return_value = mAlg
+        mProperty = mock.Mock()
+        mProperty.documentation = "testDoc"
+        mAlg.getProperty.return_value = mProperty
+        title, doc = self.model.getColumnHeaderData()
+        self.assertEqual(title, ["c1", "c2", "CustomOptions"])
+        self.assertEqual(doc, ["testDoc", "testDoc", "testDoc"])
+
+    def test_addSample(self):
+        self.assertEqual(self.model.samples, [])
+        self.model.addSample(0)
+        self.assertEqual(self.model.samples, [{}])
+        self.model.samples[0] = {"a": "b"}
+        self.model.addSample(0)
+        self.assertEqual(self.model.samples, [{}, {"a": "b"}])
+        self.model.addSample(2)
+        self.assertEqual(self.model.samples, [{}, {"a": "b"}, {}])
+
+    def test_deleteSample(self):
+        self.model.samples = [{"n": 1}, {"n": 2}, {"n": 3}]
+        self.model.deleteSample(0)
+        self.assertEqual(self.model.samples, [{"n": 2}, {"n": 3}])
+        self.model.deleteSample(1)
+        self.assertEqual(self.model.samples, [{"n": 2}])
+
+    def test_getRowsContents(self):
+        table = self.model.getRowsContents()
+        self.assertEqual(table, [])
+        self.model.samples = [{"c1": "test1", "c2": "test2"},
+                              {"c2": "test3"}]
+        table = self.model.getRowsContents()
+        self.assertEqual(table, [["test1", "test2"], ["", "test3"]])
 
 
 if __name__ == "__main__":
