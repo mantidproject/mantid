@@ -5,20 +5,22 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+
 
 class DataAnalysisContext(MuonContext):
     def __init__(self, muon_data_context=None, muon_gui_context=None,
                  muon_group_context=None, fitting_context=None, muon_phase_context=None):
         super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
-        muon_group_context=muon_group_context, fitting_context=fitting_context, muon_phase_context=muon_phase_context)
+                         muon_group_context=muon_group_context, fitting_context=fitting_context, muon_phase_context=muon_phase_context)
         self.workspace_suffix = 'MA'
         self.base_directory = 'Muon Data'
 
     def get_names_of_workspaces_to_fit(
             self, runs='', group_and_pair='', phasequad=False, rebin=False, freq="None"):
-            return self.get_names_of_time_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
-                                                                   phasequad=phasequad, rebin=rebin)
-    
+        return self.get_names_of_time_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
+                                                               phasequad=phasequad, rebin=rebin)
+
     def get_names_of_time_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', phasequad=False, rebin=False):
         group, pair = self.get_group_and_pair(group_and_pair)

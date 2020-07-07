@@ -80,10 +80,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context = FittingContext()
 
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
-                                   muon_gui_context=self.gui_context,
-                                   muon_group_context=self.group_pair_context,
-                                   fitting_context=self.fitting_context,
-                                   muon_phase_context=self.phase_context)
+                                           muon_gui_context=self.gui_context,
+                                           muon_group_context=self.group_pair_context,
+                                           fitting_context=self.fitting_context,
+                                           muon_phase_context=self.phase_context)
 
         # create the Dockable plot widget
         self.fitting_tab = FittingTabWidget(self.context, self)

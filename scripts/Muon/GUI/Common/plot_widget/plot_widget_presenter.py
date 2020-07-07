@@ -54,7 +54,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self.update_view_from_model()
 
         self.data_plot_range = MUON_ANALYSIS_DEFAULT_X_RANGE
-        self.fitting_plot_range = FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE if isinstance(self.context, FrequencyDomainAnalysisContext) else MUON_ANALYSIS_DEFAULT_X_RANGE
+        self.fitting_plot_range = FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE if\
+            isinstance(self.context, FrequencyDomainAnalysisContext) else MUON_ANALYSIS_DEFAULT_X_RANGE
         self.data_plot_tiled_state = None
 
     def update_view_from_model(self):
@@ -112,7 +113,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
     def handle_plot_mode_changed_for_muon_analysis(self, plot_mode : PlotMode):
         if plot_mode == self.context.gui_context['PlotMode']:
             return
-        
+
         self.context.gui_context['PlotMode'] = plot_mode
 
         self._view.set_plot_mode(str(plot_mode))
@@ -132,7 +133,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
     def handle_plot_mode_changed_for_frequency_domain_analysis(self, plot_mode : PlotMode):
         if plot_mode == self.context.gui_context['PlotMode']:
             return
-        
+
         self.context.gui_context['PlotMode'] = plot_mode
 
         self._view.set_plot_mode(str(plot_mode))
@@ -298,7 +299,6 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         Handles the instrument being changed by creating a blank plot window
         """
         self._figure_presenter.create_single_plot()
-        
 
     def handle_plot_selected_fits(self, fit_information_list: List[FitPlotInformation], autoscale=False):
         """Plots a list of selected fit workspaces (obtained from fit and seq fit tabs).

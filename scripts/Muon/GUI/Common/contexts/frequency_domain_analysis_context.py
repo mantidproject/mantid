@@ -12,7 +12,7 @@ class FrequencyDomainAnalysisContext(MuonContext):
     def __init__(self, muon_data_context=None, muon_gui_context=None,
                  muon_group_context=None, fitting_context=None, muon_phase_context=None, frequency_context=None):
         super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
-        muon_group_context=muon_group_context, fitting_context=fitting_context, muon_phase_context=muon_phase_context)
+                         muon_group_context=muon_group_context, fitting_context=fitting_context, muon_phase_context=muon_phase_context)
         self.workspace_suffix = 'FA'
         self.base_directory = 'Frequency Domain'
 
@@ -25,13 +25,14 @@ class FrequencyDomainAnalysisContext(MuonContext):
     def get_workspace_names_for_FFT_analysis(self, use_raw=True):
         # workspace_options = self.get_names_of_workspaces_to_fit(
         #     runs='All', group_and_pair='All', phasequad=True, rebin=not use_raw)
-        workspace_options = self.get_names_of_time_domain_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True, rebin=not use_raw)
+        workspace_options = self.get_names_of_time_domain_workspaces_to_fit(runs='All', group_and_pair='All',
+                                                                            phasequad=True, rebin=not use_raw)
         return workspace_options
 
     def get_names_of_workspaces_to_fit(
             self, runs='', group_and_pair='', phasequad=False, rebin=False, freq="None"):
         return self.get_names_of_frequency_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
-                                                                        phasequad=phasequad, frequency_type=freq)
+                                                                    phasequad=phasequad, frequency_type=freq)
 
     def get_names_of_frequency_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', phasequad=False, frequency_type="None"):

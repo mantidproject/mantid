@@ -48,7 +48,7 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         :return: A string containing the plot type
         """
         pass
-    
+
     @abstractmethod
     def get_plot_mode(self):
         """

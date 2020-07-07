@@ -189,7 +189,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             plot_mode = PlotMode.Fitting
         else:
             return
-        
+
         self.plot_widget.presenter.handle_plot_mode_changed(plot_mode)
 
     def handle_transform_performed(self, new_data_workspace_name):
