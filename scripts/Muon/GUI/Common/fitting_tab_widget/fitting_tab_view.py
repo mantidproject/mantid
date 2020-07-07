@@ -18,11 +18,11 @@ allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletch
 
 
 class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
-    def __init__(self, parent=None):
+    def __init__(self, simultaneous_item_list, is_frequency_domain=False, parent=None):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
         self.setup_fit_options_table()
-        self.setup_simul_fit_combo_box()
+        self.setup_simul_fit_combo_box(simultaneous_item_list)
         self.undo_fit_button.setEnabled(False)
 
         self.function_browser = FunctionBrowser(self, True)
@@ -34,6 +34,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
 
         self.disable_simul_fit_options()
+
+        if is_frequency_domain:
+            self.hide_simultaneous_fit_options()
 
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)
@@ -68,9 +71,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         else:
             self.parameter_display_combo.setCurrentIndex(count - 1)
 
-    def setup_simul_fit_combo_box(self):
-        self.simul_fit_by_combo.addItem("Run")
-        self.simul_fit_by_combo.addItem("Group/Pair")
+    def setup_simul_fit_combo_box(self, item_list):
+        for item in item_list:
+            self.simul_fit_by_combo.addItem(item)
 
     def set_datasets_in_function_browser(self, data_set_name_list):
         number_of_data_sets = self.function_browser.getNumberOfDatasets()
@@ -271,6 +274,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.simul_fit_by_combo.setEnabled(False)
         self.simul_fit_by_specifier.setEnabled(False)
         self.select_workspaces_to_fit_button.setEnabled(False)
+
+    def hide_simultaneous_fit_options(self):
+        self.simul_fit_checkbox.hide()
+        self.simul_fit_by_combo.hide()
+        self.simul_fit_by_specifier.hide()
+        self.select_workspaces_to_fit_button.hide()
 
     def enable_simul_fit_options(self):
         self.simul_fit_by_combo.setEnabled(True)

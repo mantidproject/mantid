@@ -55,6 +55,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
         self.data_plot_range = MUON_ANALYSIS_DEFAULT_X_RANGE
         self.fitting_plot_range = FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE if isinstance(self.context, FrequencyDomainAnalysisContext) else MUON_ANALYSIS_DEFAULT_X_RANGE
+        self.data_plot_tiled_state = None
 
     def update_view_from_model(self):
         """"Updates the view based on data in the model """
@@ -103,6 +104,12 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             )
 
     def handle_plot_mode_changed(self, plot_mode : PlotMode):
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
+            self.handle_plot_mode_changed_for_frequency_domain_analysis(plot_mode)
+        else:
+            self.handle_plot_mode_changed_for_muon_analysis(plot_mode)
+
+    def handle_plot_mode_changed_for_muon_analysis(self, plot_mode : PlotMode):
         if plot_mode == self.context.gui_context['PlotMode']:
             return
         
@@ -116,6 +123,31 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             self._figure_presenter.set_plot_range(self.data_plot_range)
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
+            self.update_plot()
+            self.data_plot_range = self._figure_presenter.get_plot_x_range()
+            self._figure_presenter.set_plot_range(self.fitting_plot_range)
+
+        self._figure_presenter.autoscale_y_axes()
+
+    def handle_plot_mode_changed_for_frequency_domain_analysis(self, plot_mode : PlotMode):
+        if plot_mode == self.context.gui_context['PlotMode']:
+            return
+        
+        self.context.gui_context['PlotMode'] = plot_mode
+
+        self._view.set_plot_mode(str(plot_mode))
+        if plot_mode == PlotMode.Data:
+            self._view.enable_plot_type_combo()
+            self._view.enable_tile_plotting_options()
+            self._view.set_is_tiled_plot(self.data_plot_tiled_state)
+            self.update_plot()
+            self.fitting_plot_range = self._figure_presenter.get_plot_x_range()
+            self._figure_presenter.set_plot_range(self.data_plot_range)
+        elif plot_mode == PlotMode.Fitting:
+            self._view.disable_plot_type_combo()
+            self._view.disable_tile_plotting_options()
+            self.data_plot_tiled_state = self._view.is_tiled_plot()
+            self._view.set_is_tiled_plot(False)
             self.update_plot()
             self.data_plot_range = self._figure_presenter.get_plot_x_range()
             self._figure_presenter.set_plot_range(self.fitting_plot_range)

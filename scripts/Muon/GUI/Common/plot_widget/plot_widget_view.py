@@ -69,6 +69,12 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         """
         return self.tiled_plot_checkbox.isChecked()
 
+    def set_is_tiled_plot(self, is_tiled):
+        """
+        Sets whether a tiled plot should made
+        """
+        self.tiled_plot_checkbox.setChecked(is_tiled)
+
     def is_raw_plot(self):
         """
         Checks if plotting raw data
@@ -154,3 +160,19 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         Disable plot type collection
         """
         self.plot_type_combo.setEnabled(False)
+
+    def enable_tile_plotting_options(self):
+        """
+        Enable tile plotting
+        """
+        self.tiled_plot_checkbox.setEnabled(True)
+        self.tiled_by_combo.setEnabled(True)
+        self.plot_raw_checkbox.setEnabled(True)
+
+    def disable_tile_plotting_options(self):
+        """
+        Disable tile plotting
+        """
+        self.tiled_plot_checkbox.setEnabled(False)
+        self.tiled_by_combo.setEnabled(False)
+        self.plot_raw_checkbox.setEnabled(False)

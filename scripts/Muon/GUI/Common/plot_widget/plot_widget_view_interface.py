@@ -82,6 +82,13 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         pass
 
     @abstractmethod
+    def set_is_tiled_plot(self, is_tiled : bool):
+        """
+        Sets whether a tiled plot should made
+        """
+        pass
+
+    @abstractmethod
     def on_rebin_options_changed(self, slot):
         """
         Connect the plot_rebin checkbox to the input slot
@@ -161,5 +168,19 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
     def disable_plot_type_combo(self):
         """
         Disable plot type collection
+        """
+        pass
+
+    @abstractmethod
+    def enable_tile_plotting_options(self):
+        """
+        Enable tile plotting
+        """
+        pass
+
+    @abstractmethod
+    def disable_tile_plotting_options(self):
+        """
+        Disable tile plotting
         """
         pass
