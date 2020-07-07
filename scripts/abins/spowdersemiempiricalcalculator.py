@@ -261,11 +261,6 @@ class SPowderSemiEmpiricalCalculator(object):
         logger.notice(msg)
 
     def _calculate_s_powder_one_atom(self, atom=None):
-        s = self._calculate_s_powder_one_atom_core(atom=atom)
-
-        return s
-
-    def _calculate_s_powder_one_atom_core(self, atom=None):
         """
         :param atom: number of atom
         :returns: s, and corresponding frequencies for all quantum events taken into account
@@ -593,5 +588,4 @@ class SPowderSemiEmpiricalCalculator(object):
             self._report_progress(str(data) + " has been calculated.")
 
         data.check_thresholds()
-
         return data

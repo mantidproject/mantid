@@ -118,7 +118,8 @@ class SData(collections.abc.Sequence):
         Returns the data.
         :returns: data
         """
-        full_data = self._data
+        # Use a shallow copy so that 'frequencies' is not added to self._data
+        full_data = self._data.copy()
         full_data.update({'frequencies': self._frequencies})
         return full_data
 
@@ -186,7 +187,7 @@ class SData(collections.abc.Sequence):
 
     def __getitem__(self, item):  # noqa F811
         if isinstance(item, int):
-            return self._data[f"atom_{item + 1}"]['s']
+            return self._data[f"atom_{item}"]['s']
         elif isinstance(item, slice):
             return [self[i] for i in range(len(self))[item]]
         else:

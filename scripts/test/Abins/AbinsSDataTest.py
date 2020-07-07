@@ -17,9 +17,9 @@ class AbinsSDataTest(unittest.TestCase):
         self.default_min_wavenumber = abins.parameters.sampling['min_wavenumber']
         self.default_max_wavenumber = abins.parameters.sampling['max_wavenumber']
         self.logger = logging.getLogger('abins-sdata-test')
-        self.sample_data = {'atom_1': {'s':
+        self.sample_data = {'atom_0': {'s':
                                        {'order_1': np.array([0., 0.001, 1., 1., 0., 0.,])}},
-                            'atom_2': {'s':
+                            'atom_1': {'s':
                                        {'order_1': np.array([0., 1.001, 2., 0., 3., 0.,])}}}
 
         self.frequencies = np.linspace(105, 145, 5)
@@ -40,10 +40,10 @@ class AbinsSDataTest(unittest.TestCase):
         self.assertTrue(np.allclose(s_data.extract()['frequencies'],
                                     self.frequencies))
 
+        self.assertTrue(np.allclose(s_data.extract()['atom_0']['s']['order_1'],
+                                    self.sample_data['atom_0']['s']['order_1']))
         self.assertTrue(np.allclose(s_data.extract()['atom_1']['s']['order_1'],
                                     self.sample_data['atom_1']['s']['order_1']))
-        self.assertTrue(np.allclose(s_data.extract()['atom_2']['s']['order_1'],
-                                    self.sample_data['atom_2']['s']['order_1']))
 
         with self.assertRaises(AssertionError):
             with self.assertLogs(logger=self.logger, level='WARNING'):
@@ -56,14 +56,14 @@ class AbinsSDataTest(unittest.TestCase):
     def test_s_data_indexing(self):
         s_data = SData(data=self.sample_data, frequencies=self.frequencies)
         self.assertTrue(np.allclose(s_data[1]['order_1'],
-                                    self.sample_data['atom_2']['s']['order_1']))
+                                    self.sample_data['atom_1']['s']['order_1']))
 
         sliced_items = s_data[:]
         self.assertIsInstance(sliced_items, list)
         self.assertTrue(np.allclose(sliced_items[0]['order_1'],
-                                    self.sample_data['atom_1']['s']['order_1']))
+                                    self.sample_data['atom_0']['s']['order_1']))
         self.assertTrue(np.allclose(sliced_items[1]['order_1'],
-                                    self.sample_data['atom_2']['s']['order_1']))
+                                    self.sample_data['atom_1']['s']['order_1']))
 
     def test_sample_form(self):
         sample_form = 'Polycrystalline'
