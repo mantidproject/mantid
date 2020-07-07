@@ -102,10 +102,27 @@ class AxesTabWidgetPresenter:
         """Update the axes with the user inputted properties"""
         # Make sure current_view_props is up to date if values have been changed
         self.axis_changed()
-        ax_names = self.axes_names_dict.keys()
         view_props = self.current_view_props
-        for key in ax_names:
-            ax = self.axes_names_dict[key]
+        for ax in self.axes_names_dict.values():
+
+            if self.current_view_props['minor_ticks']:
+                ax.minorticks_on()
+            else:
+                ax.minorticks_off()
+
+            ax.show_minor_gridlines = self.current_view_props['minor_gridlines']
+
+            # If the grid is enabled update it
+            if ax.show_minor_gridlines:
+                if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
+                    ax.grid(True, which='minor')
+                elif ax.xaxis._gridOnMajor:
+                    ax.grid(True, axis='x', which='minor')
+                elif ax.yaxis._gridOnMajor:
+                    ax.grid(True, axis='y', which='minor')
+            else:
+                ax.grid(False, which='minor')
+
             if "xlabel" in view_props:
                 ax.set_xlabel(view_props['xlabel'])
                 ax.set_xscale(view_props['xscale'])
