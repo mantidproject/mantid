@@ -14,6 +14,7 @@ from qtpy import uic
 from mantidqt.widgets import manageuserdirectories, instrumentselector
 from mantid.kernel import config  # noqa
 from mantidqt import icons
+from mantidqt.interfacemanager import InterfaceManager
 
 from ..presenter.DrillPresenter import DrillPresenter
 
@@ -142,6 +143,7 @@ class DrillView(QMainWindow):
         self.actionProcessRow.triggered.connect(self.process_selected_rows)
         self.actionProcessAll.triggered.connect(self.process_all_rows)
         self.actionStopProcessing.triggered.connect(self.processStopped.emit)
+        self.actionHelp.triggered.connect(self.helpWindow)
 
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
         self.instrumentselector.setToolTip("Instrument")
@@ -186,7 +188,7 @@ class DrillView(QMainWindow):
         self.save.clicked.connect(self.saveRundexAs)
 
         self.help.setIcon(icons.get_icon("mdi.help"))
-        self.help.clicked.connect(self.display_help)
+        self.help.clicked.connect(self.helpWindow)
 
         self.fill.setIcon(icons.get_icon("mdi.arrow-expand-down"))
         self.fill.clicked.connect(self.automatic_filling)
@@ -464,8 +466,12 @@ class DrillView(QMainWindow):
         else:
             self.saveRundexAs()
 
-    def display_help(self):
-        pass
+    def helpWindow(self):
+        """
+        Popup the help window.
+        """
+        InterfaceManager().showHelpPage(
+                "qthelp://org.mantidproject/doc/interfaces/drill.html")
 
     def automatic_filling(self):
         """

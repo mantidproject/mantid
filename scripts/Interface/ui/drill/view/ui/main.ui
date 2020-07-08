@@ -467,6 +467,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionHelp"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuProcess"/>
@@ -565,6 +566,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>DrILL help</string>
    </property>
   </action>
  </widget>
