@@ -54,4 +54,3 @@ class DrillAlgorithmObserver(AlgorithmObserver):
             msp (str): an associated message
         """
         self.signals.progress.emit(p)
-
