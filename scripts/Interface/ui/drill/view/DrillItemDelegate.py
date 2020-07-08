@@ -8,6 +8,7 @@
 from qtpy.QtWidgets import QItemDelegate
 from qtpy.QtGui import QFontMetrics
 
+
 class DrillItemDelegate(QItemDelegate):
     """
     Class that defines a special delegate for drill table cell contents
@@ -78,4 +79,3 @@ class DrillItemDelegate(QItemDelegate):
             boudingRectangle = fontMetric.boundingRect(text)
 
         super(DrillItemDelegate, self).drawDisplay(painter, option, rect, text)
-
