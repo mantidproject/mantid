@@ -147,7 +147,7 @@ class DrillModel(QObject):
             list(str): list of techniques
         """
         return [technique for (instrument, technique)
-                              in RundexSettings.TECHNIQUE.items()]
+                in RundexSettings.TECHNIQUE.items()]
 
     def setAcquisitionMode(self, mode):
         """
@@ -349,7 +349,7 @@ class DrillModel(QObject):
             for option in contents.split(';'):
                 if ('=' not in option):
                     self.paramError.emit(row, self.columns[column],
-                                          "Badly formatted custom options")
+                                         "Badly formatted custom options")
                     return
                 name = option.split("=")[0]
                 value = option.split("=")[1]
@@ -403,7 +403,6 @@ class DrillModel(QObject):
             elements (list(int)): list of sample indexes to be processed
         """
         tasks = list()
-        errors = list()
         for e in elements:
             if (e >= len(self.samples)) or (not self.samples[e]):
                 continue
@@ -420,7 +419,7 @@ class DrillModel(QObject):
         """
         name = str(ref + 1)
         logger.information("Starting of sample {0} processing"
-                .format(name))
+                           .format(name))
         self.processStarted.emit(ref)
 
     def _onTaskSuccess(self, ref):
@@ -645,4 +644,3 @@ class DrillModel(QObject):
                 row.append(';'.join(options))
             rows.append(row)
         return rows
-
