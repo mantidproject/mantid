@@ -80,6 +80,9 @@ public:
   virtual void displayMessage(const std::string &message) const = 0;
   virtual void disableSpectrumPlotSelection() = 0;
 
+  virtual void allowRedraws(bool state) = 0;
+  virtual void redrawPlots() = 0;
+
 public slots:
   virtual void clearTopPreview() = 0;
   virtual void clearBottomPreview() = 0;

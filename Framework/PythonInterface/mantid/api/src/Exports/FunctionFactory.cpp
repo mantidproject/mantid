@@ -9,6 +9,7 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -29,6 +30,7 @@ using Mantid::API::FunctionFactoryImpl;
 using Mantid::API::IBackgroundFunction;
 using Mantid::API::IFunction;
 using Mantid::API::IPeakFunction;
+using Mantid::API::MultiDomainFunction;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 using Mantid::PythonInterface::UninstallTrace;
 
@@ -223,6 +225,10 @@ void export_FunctionFactory() {
            "Return a pointer to the requested function")
       .def("createInitialized", &FunctionFactoryImpl::createInitialized,
            (arg("self"), arg("init_expr")),
+           "Return a pointer to the requested function")
+      .def("createInitializedMultiDomainFunction",
+           &FunctionFactoryImpl::createInitializedMultiDomainFunction,
+           (arg("self"), arg("init_expr"), arg("domain_number")),
            "Return a pointer to the requested function")
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from IFunction into the factory")

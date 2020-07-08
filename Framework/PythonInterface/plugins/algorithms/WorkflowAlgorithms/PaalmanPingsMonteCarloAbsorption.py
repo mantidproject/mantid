@@ -519,18 +519,18 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._efixed = self._get_efixed()
 
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
-        self._sample_coherent_cross_section = self.getPropertyValue('SampleCoherentXSection')
-        self._sample_incoherent_cross_section = self.getPropertyValue('SampleIncoherentXSection')
-        self._sample_attenuation_cross_section = self.getPropertyValue('SampleAttenuationXSection')
+        self._sample_coherent_cross_section = self.getProperty('SampleCoherentXSection').value
+        self._sample_incoherent_cross_section = self.getProperty('SampleIncoherentXSection').value
+        self._sample_attenuation_cross_section = self.getProperty('SampleAttenuationXSection').value
         self._sample_density_type = self.getPropertyValue('SampleDensityType')
         self._sample_number_density_unit = self.getPropertyValue('SampleNumberDensityUnit')
         self._sample_density = self.getProperty('SampleDensity').value
 
         if self._container_ws:
             self._container_chemical_formula = self.getPropertyValue('ContainerChemicalFormula')
-            self._container_coherent_cross_section = self.getPropertyValue('ContainerCoherentXSection')
-            self._container_incoherent_cross_section = self.getPropertyValue('ContainerIncoherentXSection')
-            self._container_attenuation_cross_section = self.getPropertyValue('ContainerAttenuationXSection')
+            self._container_coherent_cross_section = self.getProperty('ContainerCoherentXSection').value
+            self._container_incoherent_cross_section = self.getProperty('ContainerIncoherentXSection').value
+            self._container_attenuation_cross_section = self.getProperty('ContainerAttenuationXSection').value
             self._container_density_type = self.getPropertyValue('ContainerDensityType')
             self._container_number_density_unit = self.getPropertyValue('ContainerNumberDensityUnit')
             self._container_density = self.getProperty('ContainerDensity').value

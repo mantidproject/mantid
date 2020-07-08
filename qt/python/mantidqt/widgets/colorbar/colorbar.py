@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
+from mantid.kernel import ConfigService
 from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
@@ -102,13 +103,11 @@ class ColorbarWidget(QWidget):
         When a new plot is created this method should be called with the new mappable
         """
         self.ax.clear()
-        try: # Use current cmap
+        try:  # Use current cmap
             cmap = get_current_cmap(self.colorbar)
         except AttributeError:
-            try: # else use viridis
-                cmap = cm.viridis
-            except AttributeError: # else default
-                cmap = None
+            # else use default
+            cmap = ConfigService.getString("plots.images.Colormap")
         self.colorbar = Colorbar(ax=self.ax, mappable=mappable)
         self.cmin_value, self.cmax_value = mappable.get_clim()
         self.update_clim_text()

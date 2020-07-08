@@ -51,6 +51,7 @@ public:
   int getPeakRadius() const;
   std::string costFunction() const;
   bool convolveMembers() const;
+  bool outputCompositeMembers() const;
   std::string fitEvaluationType() const;
   std::string fitType() const;
   bool ignoreInvalidData() const;
@@ -71,6 +72,7 @@ public:
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setBackgroundA0(double value);
+  void setHiddenProperties(std::vector<std::string>);
 
 public slots:
   void fit();

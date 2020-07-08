@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -41,6 +42,11 @@ public:
   }
   static void destroySuite(PolarizationEfficiencyCorTest *suite) {
     delete suite;
+  }
+
+  PolarizationEfficiencyCorTest() {
+    // To make sure API is initialized properly
+    Mantid::API::FrameworkManager::Instance();
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
