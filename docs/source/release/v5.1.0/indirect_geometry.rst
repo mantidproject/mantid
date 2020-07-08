@@ -31,7 +31,7 @@ Improvements
 - Improved the responsiveness of the function browsers within the Indirect Data Analysis interface.
 - Raw data will now be plotted from the input workspace, rather than the fit workspace, allowing the full range of data to be seen irrespective of the fitting bounds.
 - Added the fit output information (Algorithm status and Chi squared) to each fitting tab of the Indirect Data Analysis interface.
-  This change introduces two additional outputs from the QENSFit algorithms (fit status and Chi squared), which may be used to monitor the outcome of the fit.
+  This change introduces two optional outputs from the QENSFit algorithms (fit status and Chi squared), which may be used to monitor the outcome of the fit.
 
 Bug Fixes
 #########
