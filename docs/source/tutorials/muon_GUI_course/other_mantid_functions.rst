@@ -8,9 +8,9 @@ Other Mantid Functions and Basic Data Manipulation
 
 This section allows the user to:
 
-* become familiar with the content of Mantid workspaces
-* learn how to read/export data
-* learn how to overlay data/change plot style
+* Become familiar with the content of Mantid workspaces.
+* Learn how to read/export data.
+* Learn how to overlay data/change plot style.
 
 .. contents:: Table of Contents
   :local:
@@ -33,7 +33,7 @@ which have been run on this workspace.
 The workspace list pane is found on the left-hand side of the main MantidWorkbench window. 
 When a muon data set is loaded via the GUI, the Matrix Workspaces are created automatically.
 
-*   **NAME12345 MA** which contains all the Muon Analysis data for run 12345 on the NAME instrument. 
+*   **NAME12345 MA** which contains all the Muon Analysis data for run `12345` on the `NAME` instrument. 
     This data is further separated into more sub-workspaces, these are listed below.
 *   **NAME12345 Raw Data MA**, holds within it raw positron counts for each individual detector.
     To examine the data collected in a single detector, right click on workspace and select Plot Spectrum.
@@ -45,7 +45,7 @@ When a muon data set is loaded via the GUI, the Matrix Workspaces are created au
 *   **NAME12345 Pairs MA** these workspaces contain the Pairs (such as 'long' which is created by default) specified in the *Grouping Options* tab of the interface (see the Grouping section in :ref:`the_tabs_grouping` for more).
     Each workspace's name contains the name of the pair it holds data for. 
 
-*   **Fitting Results MA** contains the workspaces produced when data is fitted, the spectra and tables within are named with the convention 'NAME12345; Group/Pair Asym; Asymmetry; MA; Fitted; FunctionName'. 
+*   **Fitting Results MA** contains the workspaces produced when data is fitted, the spectra and tables within are named with the convention `NAME12345; Group/Pair Asym; Asymmetry; MA; Fitted; FunctionName`. 
     In order, the parts of these names correspond to: the data run, the group or pair fitted, the fact the data is asymmetry, that it is from Muon Analysis, that it has been 
     fitted, and what function(s) were used. Data in Fitting Results MA is split into the following sub-workspaces:
 
@@ -63,8 +63,7 @@ of hybrid workflow demonstrates the versatility of the MantidWorkbench interface
 Other types of object, such as Tables, Matrices and Notes, may be created through the
 MantidWorkbench interface. As these are not workspaces the Algorithms can't directly be applied.
 However, Tables may be converted to either a Table or Matrix workspace through an
-option on the analysis menu for subsequent data processing. For instance, converting the
-Results Table to a matrix workspace enables MantidWorkbench fitting to be carried out.
+option on the analysis menu for subsequent data processing.
 
 Loading Data
 ------------
@@ -76,12 +75,12 @@ hold a workspace history which lists the algorithms that have been applied to th
 To load a raw data file *without using* the Mantid Analysis GUI, and examine its content:
 
 1. In the 'Workspaces' pane, click Load>File
-2. Load the file HIFI00062798.nxs from the Reference Material folder by using the Browse button - See Figure 4.
+2. Load the file `HIFI00062798.nxs` from the Reference Material folder by using the `Browse` button - See Figure 4.
 
 .. figure:: /images/load_file2.gif
     :align: center
 
-    Figure 4: Loading the HIFI00062798.nxs data file into Mantid using the Browse button instead of the Analysis GUI.
+    Figure 4: Loading the `HIFI00062798.nxs` data file into Mantid using the `Browse` button instead of the Analysis GUI.
 
 Workspace Information
 ---------------------
@@ -90,24 +89,24 @@ Click on the arrow beside the file name – this allows information about the fo
 data file to be viewed. The following should be seen in the Workspace List pane to
 the right of the screen.
 
-It can be seen that a workspace called HIFI00062798 has been created and:
+It can be seen that a workspace called `HIFI00062798` has been created. It
 
 * is a 2D array
-* the data has been collected from a silver calibration measurement taken in a transverse field of 20G
-* it contains 64 spectra (or histograms i.e. one for each HiFi detector)
+* of data that has been collected from a silver calibration measurement taken in a transverse field of 20G.
+* It contains 64 spectra (or histograms i.e. one for each HiFi detector)
 * there are 2048 time channels, or bins, per plot
 
 However, the NeXuS format allows a lot more information be stored in a data file than that listed above. As an example 
-right click on the file name and select 'Show Sample Logs'. A list of experiment and
+right click on the file name and select `Show Sample Logs`. A list of experiment and
 instrument parameters that have been logged during a measurement, from
 magnetic fields to sample temperatures, appears.
 
-To interrogate any of these logs double click on the 'Name', try this with Temp_Cryostat as shown in figure 5.
+To interrogate any of these logs double click on the `Name`, try this with `Temp_Cryostat` as shown in figure 5.
 
 .. figure:: /images/sample_logs2.gif
     :align: center
 
-    Figure 5: How to open the Sample Logs for the workspace and opening file Temp_Cryostat.
+    Figure 5: How to open the Sample Logs from the workspace and inspecting `Temp_Cryostat`.
 
 Plotting spectra
 ----------------
@@ -125,7 +124,7 @@ This process is illustrated below.
 .. figure:: /images/plot_spectrum2.gif
     :align: center
 
-    Figure 6: How to plot an individual detector spectrum. This example shows spectrum 10 for the HIFI00062798 dataset.
+    Figure 6: How to plot an individual detector spectrum. This example shows spectrum `10` for the `HIFI00062798` dataset.
 
 For information:
 
@@ -146,18 +145,18 @@ bottom of the workspace list pane can be used.
 
 Follow the instructions below to try this
 
-1. Load the workspace HIFI00062798.nxs, see `Loading Data`_ for more on how to do this.
-2. Using the drop-down menu next to the Execute button, type or select SaveAscii, and click Execute. This is shown in Figure 8.
+1. Load the workspace `HIFI00062798.nxs`, see `Loading Data`_ for more on how to do this.
+2. Using the drop-down menu next to the `Execute` button, type or select `SaveAscii`, then click `Execute`. This is shown in Figure 8.
 
 .. figure:: /images/save_ascii2.gif
     :align: center
 
-    Figure 8: Where to find the SaveAscii Algorithm.
+    Figure 8: Where to find the `SaveAscii` Algorithm.
 
-3. The SaveAscii Input Dialog box - shown in Figure should appear. Select a directory (for the written data file) and specify a file name. 
-4. Note the workspace to be exported can be selected from the uppermost dropdown list, next to InputWorkspace, in this case let us leave it as HIFI00062798. 
-5. Define which workspace spectra to export using the WorkspaceIndexMin and WorkspaceIndexMax inputs. Use these to save spectra 10 and 11.
-6. Choose the type of data separator used in the file (CSV is usually a reliable option), add comments and uncheck the WriteXError box.
+3. The `SaveAscii` Input Dialog box - shown in Figure 8 should appear. Select a directory (for the written data file) and specify a file name. 
+4. Note the workspace to be exported can be selected from the uppermost dropdown list, next to `InputWorkspace`, in this case let us leave it as `HIFI00062798`. 
+5. Define which workspace spectra to export using the `WorkspaceIndexMin` and `WorkspaceIndexMax` inputs. Use these to save spectra `10` and `11`.
+6. Choose the type of data separator used in the file (CSV is usually a reliable option), add comments and uncheck the `WriteXError` box.
 7. Export the spectra.
 
 Overlaying and Styling Plots
@@ -169,15 +168,15 @@ from the workspace pane.
 
 To try this follow these instructions:
 
-1. Load the HIFI00062798 workspace and plot spectrum number 10 from the workspace panel, as described in `Loading Data`_ .
-2. Go to the 'Plots' menu by clicking the button of the same name in the bottom left of the window, and ensure that the plot of spectrum 10 is selected in bold.
+1. Load the `HIFI00062798` workspace and plot spectrum number `10` from the workspace panel, as described in `Loading Data`_ .
+2. Go to the `Plots` menu by clicking the `Plots` tab (by default) in the bottom left of the window, and ensure that the plot of spectrum `10` is selected in bold.
 3. Return to the workspaces panel and right click on the HIFI00062798 workspace, as before going to Plot but this time selecting 'Overplot Spectrum...' rather than 'Spectrum...'. Plot spectrum 20.
-4. Spectrum 20 should now be visible on the spectrum 10 plot along with the original data. This process is shown in Figure 9 below.
+4. Spectrum `20` should now be visible on the spectrum `10` plot along with the original data. This process is shown in Figure 9 below.
 
 .. figure:: /images/overlay2.gif
     :align: center
 
-    Figure 9: How to overlay one plot (detector 20) onto another (detector 10).
+    Figure 9: How to overlay one plot (detector `20`) onto another (detector `10`).
 
 Plot Styles
 -----------
@@ -188,10 +187,10 @@ using the gear icon at the top of the plot window, this will open the Figure opt
 To demonstrate changing a plot's markers and curve colour follow these instructions:
 
 1. Spectrum 20 of HIFI00062798 should already have been plotted, via the Workspaces pane. If not, do so now.
-2. Click the gear icon above the plot, this will bring up a new Figure options window for the data set.
-3. Go to the Curves tab and use the Color (RGBA) option under Line to change the colour from Blue to Red. Click on the coloured square to change it.
-4. Click Apply to view the changes and save the selected option.
-5. To change the marker style - by default none are shown - use the Style drop-down menu under the Marker heading in bold, use this now to change the marker style to square. Again, click Apply.
+2. Click the settings (gear) icon above the plot, this will bring up a new Figure options window for the data set.
+3. Go to the `Curves` tab and use the `Color` (RGBA) option under `Line` to change the colour from Blue to Red. Click on the coloured square to change it.
+4. Click `Apply` to view the changes and save the selected option.
+5. To change the marker style (by default none are shown) use the `Style` drop-down menu under the `Marker` tab, use this now to change the `Marker Style` to square. Then click `Apply`.
 
 .. figure:: /images/othermantidfunctionsfig10.gif
     :align: center
@@ -207,11 +206,11 @@ See the instructions below for an example on how to change the X-Axis limits and
 
 1. Load the MUSR00024563 dataset using the muon analysis GUI. How to do this is described in the Home section of :ref:`the_tabs_home`.
 2. Plot the backwards counts in the Workspace pane
-3. Open the Figure options menu, or **or** double click on the X axis to Edit axis.
-4. In the Axes tab of the Figure options, set the value in the box labelled Upper Limit to 16 **or** do the same for the box labelled Max in the Edit axis dialog.
-5. Press Apply, **or** click the OK button.
-6. In the Y-Axis section of the figure options, use the Scale drop-down menu and change the setting to log **or** double click on the Y axis and tick the box labelled Log.
-7. Click OK and observe the changes to the plot, this process is shown for the Figure options in Figure 11, and the Edit axis in Figure 12. 
+3. Open the Figure options' menu, or **or** double click on the X axis to edit the axis.
+4. In the Axes tab of the Figure options, set the value in the box labelled `Upper Limit` to `16` **or** do the same for the box labelled `Max` in the Edit axis dialog.
+5. Press `Apply`, **or** click the `OK` button.
+6. In the `Axis` tab of the figure options, click the `y` button. Then use the `Scale` drop-down menu and change the setting to `log`. **Or** double click on the Y axis of the plot and tick the box labelled 'Log'.
+7. Click `OK` and observe the changes to the plot, this process is shown for the Figure options and Edit axis in Figures 11 and 12 respectively. 
 
 .. figure:: /images/othermantidfunctionsfig11.gif
     :align: center
@@ -226,5 +225,4 @@ See the instructions below for an example on how to change the X-Axis limits and
     Note that if the scale limits include negative values when doing this, Mantid 
     will automatically use a 'symmetrical log' scale, which allows for negative values by having a range around 0 where
     the scale is linear not logarithmic.
-
 
