@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+from matplotlib.collections import QuadMesh
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from mantid.plots.datafunctions import update_colorbar_scale
 from mantidqt.utils.qt import block_signals
@@ -36,16 +38,17 @@ class ImagesTabWidgetPresenter:
         props = self.view.get_properties()
         # if only one colorbar apply settings to all images
         if len(get_colorbars_from_fig(self.fig)) == 1:
-            images = self.image_names_dict.values()
+            # flatten the values into one list
+            images = sum(self.image_names_dict.values(), [])
         else:
-            images = [self.get_selected_image()]
+            images = self.get_selected_image()
 
         for image in images:
             if image.colorbar:
                 image.colorbar.set_label(props.label)
 
             image.set_cmap(props.colormap)
-            if props.interpolation:
+            if props.interpolation and (not isinstance(image, QuadMesh) or not isinstance(image, Poly3DCollection)):
                 image.set_interpolation(props.interpolation)
 
             update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)
@@ -112,7 +115,7 @@ class ImagesTabWidgetPresenter:
         self.view.select_image_combo_box.clear()
         for img in get_images_from_fig(self.fig):
             self.image_names_dict = self.set_name_in_names_dict(
-                self.generate_image_name(img), img, self.image_names_dict)
+                self.generate_image_name(img[0]), img, self.image_names_dict)
         self.view.populate_select_image_combo_box(
             sorted(self.image_names_dict.keys()))
 

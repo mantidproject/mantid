@@ -116,5 +116,6 @@ Bugfixes
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
 - Changing a curve's properties on a plot no longer changes the order of the plot legend.
 - Fixed a bug which prevented the double click axis editor menus from working for tiled plots.
+- Select image in the plot figure option contains each image rather than each spectra for colorfil plots of workspaces with a numeric vertical axis
 
 :ref:`Release 5.1.0 <v5.1.0>`

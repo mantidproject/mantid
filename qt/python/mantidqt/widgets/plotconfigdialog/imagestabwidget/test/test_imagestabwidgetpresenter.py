@@ -63,8 +63,21 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
 
     def test_image_dict_names_populated_on_init(self):
         presenter = self._generate_presenter()
-        expected = {'(0, 1) - {}'.format(self.img0_label): self.img0,
-                    'Second Axes: (1, 1) - {}'.format(self.img1_label): self.img1}
+        expected = {'(0, 1) - {}'.format(self.img0_label): [self.img0],
+                    'Second Axes: (1, 1) - {}'.format(self.img1_label): [self.img1]}
+        self.assertEqual(presenter.image_names_dict, expected)
+
+    def test_image_dict_names_populated_correctly_for_plot_done_per_spectra(self):
+        ws = CreateWorkspace(DataX=list([0, 1, 1.5, 1.75, 1.83])*4, DataY=range(20), NSpec=4, OutputWorkspace='test_ws',
+                             VerticalAxisUnit='TOF', VerticalAxisValues=[1, 2, 4, 10])
+        fig = figure()
+        axes = fig.add_subplot(111, projection='mantid')
+        label = 'Test_Label'
+        img = axes.pcolormesh(ws, label=label)
+        fig.colorbar(img)
+        mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - {}'.format(label))
+        presenter = self._generate_presenter(fig=fig, view=mock_view)
+        expected = {'(0, 0) - {}'.format(label): axes.collections}
         self.assertEqual(presenter.image_names_dict, expected)
 
     def test_generate_image_name(self):
