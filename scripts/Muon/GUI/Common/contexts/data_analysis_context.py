@@ -13,7 +13,7 @@ class DataAnalysisContext(MuonContext):
                  muon_group_context=None, fitting_context=None, muon_phase_context=None):
         super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
                          muon_group_context=muon_group_context, fitting_context=fitting_context, muon_phase_context=muon_phase_context)
-        self.workspace_suffix = 'MA'
+        self.workspace_suffix = ' MA'
         self.base_directory = 'Muon Data'
 
     def get_names_of_workspaces_to_fit(

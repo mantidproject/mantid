@@ -13,7 +13,7 @@ class FrequencyDomainAnalysisContext(MuonContext):
                  muon_group_context=None, fitting_context=None, muon_phase_context=None, frequency_context=None):
         super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
                          muon_group_context=muon_group_context, fitting_context=fitting_context, muon_phase_context=muon_phase_context)
-        self.workspace_suffix = 'FA'
+        self.workspace_suffix = ' FD'
         self.base_directory = 'Frequency Domain'
 
         self._frequency_context = frequency_context
