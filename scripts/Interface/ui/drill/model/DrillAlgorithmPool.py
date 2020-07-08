@@ -29,8 +29,8 @@ class DrillAlgorithmPool(QThreadPool):
         self.signals = DrillAlgorithmPoolSignals()
         # list of all tasks
         self._tasks = list()
-        # number of finished tasks
-        self._tasksDone = 0
+        # set of finished tasks
+        self._tasksDone = set()
         # progress value of each task (between 0.0 and 1.0)
         self._progresses = dict()
         # if the threadpool is currently running
@@ -66,7 +66,7 @@ class DrillAlgorithmPool(QThreadPool):
         for task in self._tasks:
             task.cancel()
         self._tasks.clear()
-        self._tasksDone = 0
+        self._tasksDone.clear()
         self._progresses.clear()
         self.signals.processingDone.emit()
 
@@ -79,6 +79,8 @@ class DrillAlgorithmPool(QThreadPool):
             ret (int): return code. (0 for success)
             msf (str): error msg if needed
         """
+        if (ref in self._tasksDone):
+            return
         self._progresses[ref] = 1.0
         if ret:
             self.signals.taskError.emit(ref, msg)
@@ -86,12 +88,12 @@ class DrillAlgorithmPool(QThreadPool):
             self.signals.taskSuccess.emit(ref)
 
         if self._running:
-            self._tasksDone += 1
-            if (self._tasksDone == len(self._tasks)):
+            self._tasksDone.add(ref)
+            if (len(self._tasksDone) == len(self._tasks)):
                 self.clear()
                 self._running = False
                 self._tasks.clear()
-                self._tasksDone = 0
+                self._tasksDone.clear()
                 self._progresses.clear()
                 self.signals.processingDone.emit()
 
