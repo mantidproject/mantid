@@ -11,7 +11,6 @@ from isis_powder.polaris_routines.polaris_enums import POLARIS_CHOPPER_MODES
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
-    ParamMapEntry(ext_name="bw_order", int_name="bw_order", optional=True),
     ParamMapEntry(ext_name="calibration_directory", int_name="calibration_dir"),
     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_path"),
     ParamMapEntry(ext_name="config_file", int_name="config_file"),
@@ -26,6 +25,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="freq_params", int_name="freq_params", optional=True),
     ParamMapEntry(ext_name="grouping_file_name", int_name="grouping_file_name"),
     ParamMapEntry(ext_name="input_mode", int_name="input_mode", enum_class=INPUT_BATCHING),
+    ParamMapEntry(ext_name="lorch_filter", int_name="lorch_filter", optional=True),
     ParamMapEntry(ext_name="merge_banks", int_name="merge_banks", optional=True),
     ParamMapEntry(ext_name="mode", int_name="mode", enum_class=POLARIS_CHOPPER_MODES,
                   optional=True),

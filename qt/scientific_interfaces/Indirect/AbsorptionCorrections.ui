@@ -114,7 +114,7 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="1" column="2">
+      <item row="1" column="0">
        <widget class="QLabel" name="lbNumberEvents">
         <property name="text">
          <string>Events:</string>
@@ -122,29 +122,6 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QSpinBox" name="spNumberWavelengths">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>10000</number>
-        </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lbNumberWavelengths">
-        <property name="text">
-         <string>Number Wavelengths:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
        <widget class="QSpinBox" name="spNumberEvents">
         <property name="maximum">
          <number>1000000</number>
@@ -1339,7 +1316,6 @@
  </customwidgets>
  <tabstops>
   <tabstop>ckUseCan</tabstop>
-  <tabstop>spNumberWavelengths</tabstop>
   <tabstop>spNumberEvents</tabstop>
   <tabstop>spBeamHeight</tabstop>
   <tabstop>spBeamWidth</tabstop>

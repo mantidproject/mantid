@@ -64,8 +64,8 @@ void LoadHKL::exec() {
   detector->setPos(0.0, 0.0, 0.0);
   inst->add(detector); // This takes care of deletion
   inst->markAsDetector(detector);
-  Mantid::Geometry::ObjComponent *sample =
-      new Mantid::Geometry::ObjComponent("Sample");
+  Mantid::Geometry::Component *sample =
+      new Mantid::Geometry::Component("Sample");
   inst->add(sample); // This takes care of deletion
   inst->markAsSamplePos(sample);
   Mantid::Geometry::ObjComponent *source =

@@ -7,7 +7,9 @@ set(SRC_FILES
 set(MOC_FILES
     ALFView.h
     ALFCustomInstrumentView.h
-    ALFCustomInstrumentPresenter.h)
+    ALFCustomInstrumentPresenter.h
+    ALFCustomInstrumentModel.h
+    ALFCustomInstrumentMocks.h)
     
 set(INC_FILES
     DllConfig.h)
@@ -48,7 +50,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/")
 
-find_package(BoostPython REQUIRED)
 mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    QT_VERSION 5
                    SRC
@@ -83,4 +84,4 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/") 
 # Testing target
-# add_subdirectory(test)
+add_subdirectory(test)

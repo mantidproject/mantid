@@ -167,10 +167,15 @@ This functionality is useful for debugging python code that is spawned in separa
 The remote debugger needs to be added as a configuration to be used easily:
 
 1. Click the Add Configuration button at the top of the main window or click ``Run->Edit Configurations...``
-2. Click the + button and add "Python Remote Debug" to the list of configurations.
+2. Click the + button and add "Python Debug Server" to the list of configurations.
 3. Give it a name, and set the port number to ``44444``.
 4. Leave "Suspend after connect" ticked if you would like any connections to the debugger to act as a breakpoint. It may be useful to untick this if you would like to hit a breakpoint in a loop inside an algorithm that runs many times but does not always hit that breakpoint.
 5. Click OK.
+
+You will also need to install the python package ``pydevd_pycharm`` which can be done by:
+
+1. Navigating to the directory that contains the python interpreter ``<Mantid Source Directory>/external/src/ThirdParty/lib/python3.8/``
+2. Running the following in the terminal ``.\python -m pip install pydevd_pycharm``
 
 To use the remote debugger:
 
@@ -183,7 +188,7 @@ To use the remote debugger:
         import pydevd_pycharm
         pydevd_pycharm.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
 
-4. Start Mantid or the test you wish to debug.
+4. Start Mantid or the test you wish to debug (do not stop the remote debugger).
 5. If "Suspend after connect" has been ticked the point at which the two lines have been pasted will act as a breakpoint. Otherwise, the code will stop at the next breakpoint *after* the pasted lines.
 6. You can now use the PyCharm debugger as normal.
 

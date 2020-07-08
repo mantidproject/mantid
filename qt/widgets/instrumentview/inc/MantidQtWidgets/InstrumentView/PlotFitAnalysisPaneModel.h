@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllOption.h"
 #include "MantidAPI/IFunction.h"
 
 #include <map>
@@ -14,12 +15,14 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class PlotFitAnalysisPaneModel {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneModel {
 
 public:
-  IFunction_sptr doFit(const std::string &wsName,
-                       const std::pair<double, double> &range,
-                       const IFunction_sptr &func);
+  PlotFitAnalysisPaneModel(){};
+  virtual ~PlotFitAnalysisPaneModel(){};
+  virtual IFunction_sptr doFit(const std::string &wsName,
+                               const std::pair<double, double> &range,
+                               const IFunction_sptr func);
 };
 
 } // namespace MantidWidgets

@@ -29,8 +29,8 @@ AX_VIEW = 'mantidqt.widgets.plotconfigdialog.axestabwidget.presenter.AxesTabWidg
 CURVE_VIEW = 'mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter.CurvesTabWidgetView'
 IMAGE_VIEW = 'mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter.ImagesTabWidgetView'
 LEGEND_VIEW = 'mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter.LegendTabWidgetView'
-
 new_ax_view_props = {
+
     'title': 'New Title',
     'xlim': [0.1, 10],
     'xlabel': 'New X Label',
@@ -112,7 +112,9 @@ def _run_apply_properties_on_figure_with_curve():
 def _run_apply_properties_on_figure_with_image():
     img_fig = figure()
     img_ax = img_fig.add_subplot(111)
-    img_ax.imshow([[0, 1], [0, 1]], label='old label')
+    image = img_ax.imshow([[0, 1], [0, 1]])
+    cb = img_fig.colorbar(image)
+    cb.set_label('old label')
 
     with patch.object(AxesTabWidgetPresenter, 'update_view', mock_axes_tab_presenter_update_view):
         presenter = PlotConfigDialogPresenter(img_fig, view=Mock())
@@ -164,7 +166,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
 
         # Mock images tab view
         cls.img_view_mock = Mock(
-            get_selected_image_name=lambda: '(0, 0) - old label',
+            get_selected_image_name=lambda: '(0, 0) - _image0',
             get_properties=lambda: ImageProperties(new_image_props))
         cls.img_view_patch = patch(IMAGE_VIEW, lambda x: cls.img_view_mock)
         cls.img_view_patch.start()
@@ -189,7 +191,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.legend_view_patch.stop()
 
     def test_apply_properties_on_figure_with_image_sets_label(self):
-        self.assertEqual(new_image_props['label'], self.new_img.get_label())
+        self.assertEqual(new_image_props['label'], self.new_img.colorbar._label)
 
     def test_apply_properties_on_figure_with_image_sets_colormap(self):
         self.assertEqual(new_image_props['colormap'], self.new_img.cmap.name)
@@ -270,11 +272,6 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                          not any([err_set.get_visible()
                                   for err_sets in self.new_curve[1:]
                                   for err_set in err_sets]))
-
-    def test_apply_properties_on_figure_with_curve_sets_error_every(self):
-        self.assertEqual(1, len(self.new_curve[2][0].get_segments()))
-        self.assertEqual(new_curve_view_props['errorevery'],
-                         self.new_curve.errorevery)
 
     def test_apply_properties_on_figure_with_curve_sets_cap_size(self):
         self.assertEqual(new_curve_view_props['capsize'],

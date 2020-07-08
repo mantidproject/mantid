@@ -80,12 +80,16 @@ class PropertyNames(object):
 
     # all these array properties must have either single value, or
     # as many, as there are reflected beams (i.e. angle configurations)
-    PROPETIES_TO_SIZE_MATCH = [DB, ANGLE_OPTION, THETA,
-                               SUM_TYPE, HIGH_FRG_HALF_WIDTH, HIGH_FRG_HALF_WIDTH_DIRECT,
-                               HIGH_BKG_OFFSET, HIGH_BKG_OFFSET_DIRECT, HIGH_BKG_WIDTH, HIGH_BKG_WIDTH_DIRECT,
-                               LOW_FRG_HALF_WIDTH, LOW_FRG_HALF_WIDTH_DIRECT, LOW_BKG_OFFSET, LOW_BKG_OFFSET_DIRECT,
-                               LOW_BKG_WIDTH, LOW_BKG_WIDTH_DIRECT, START_WS_INDEX, END_WS_INDEX, START_WS_INDEX_DIRECT,
-                               END_WS_INDEX_DIRECT]
+    PROPETIES_TO_SIZE_MATCH = [DB, ANGLE_OPTION, THETA, SUM_TYPE, GROUPING_FRACTION,
+                               HIGH_FRG_HALF_WIDTH, HIGH_FRG_HALF_WIDTH_DIRECT,
+                               HIGH_BKG_OFFSET, HIGH_BKG_OFFSET_DIRECT,
+                               HIGH_BKG_WIDTH, HIGH_BKG_WIDTH_DIRECT,
+                               LOW_FRG_HALF_WIDTH, LOW_FRG_HALF_WIDTH_DIRECT,
+                               LOW_BKG_OFFSET, LOW_BKG_OFFSET_DIRECT,
+                               LOW_BKG_WIDTH, LOW_BKG_WIDTH_DIRECT,
+                               START_WS_INDEX, END_WS_INDEX,
+                               START_WS_INDEX_DIRECT, END_WS_INDEX_DIRECT,
+                               WAVELENGTH_LOWER, WAVELENGTH_UPPER]
 
     DAN = 'DetectorAngle'
     SAN = 'SampleAngle'

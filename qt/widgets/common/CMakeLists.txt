@@ -14,6 +14,7 @@ set(
   src/DropEventHelper.cpp
   src/EditLocalParameterDialog.cpp
   src/FileDialogHandler.cpp
+  src/FileFinderWidget.cpp
   src/FilePropertyWidget.cpp
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
@@ -33,6 +34,11 @@ set(
   # todo: move this to the instrument view library when the slice
   # viewer library is removed
   src/IFunctionModel.cpp
+  src/ImageInfoModel.cpp
+  src/ImageInfoModelMatrixWS.cpp
+  src/ImageInfoModelMD.cpp
+  src/ImageInfoPresenter.cpp
+  src/ImageInfoWidget.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/InterfaceManager.cpp
@@ -55,7 +61,6 @@ set(
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
-  src/MWRunFiles.cpp
   src/NotificationService.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
@@ -158,8 +163,10 @@ set(
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/GenericDialog.h
-  inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
+  inc/MantidQtWidgets/Common/IFunctionView.h
+  inc/MantidQtWidgets/Common/IImageInfoWidget.h
+  inc/MantidQtWidgets/Common/ImageInfoWidget.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -177,7 +184,7 @@ set(
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
-  inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/NotificationService.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
@@ -185,6 +192,7 @@ set(
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -246,6 +254,10 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
+    inc/MantidQtWidgets/Common/ImageInfoModel.h
+    inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
+    inc/MantidQtWidgets/Common/ImageInfoModelMD.h
+    inc/MantidQtWidgets/Common/ImageInfoPresenter.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
@@ -255,6 +267,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+    inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -294,7 +307,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/LogValueSelector.ui
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
-    inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
@@ -322,6 +335,11 @@ set(
   src/HelpWindow.cpp
   src/FlowLayout.cpp
   src/Hint.cpp
+  src/ImageInfoModel.cpp
+  src/ImageInfoModelMatrixWS.cpp
+  src/ImageInfoModelMD.cpp
+  src/ImageInfoPresenter.cpp
+  src/ImageInfoWidget.cpp
   src/InterfaceManager.cpp
   src/ListPropertyWidget.cpp
   src/LocalParameterEditor.cpp
@@ -336,7 +354,7 @@ set(
   src/MdSettings.cpp
   src/Message.cpp
   src/NonOrthogonal.cpp
-  src/MWRunFiles.cpp
+  src/FileFinderWidget.cpp
   src/OptionsPropertyWidget.cpp
   src/pixmaps.cpp
   src/PlotAxis.cpp
@@ -497,11 +515,12 @@ set(
   inc/MantidQtWidgets/Common/MantidDialog.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
   inc/MantidQtWidgets/Common/MantidWidget.h
-  inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RepoTreeView.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -539,6 +558,8 @@ set(
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/CatalogSearch.h
   inc/MantidQtWidgets/Common/CatalogSelector.h
+  inc/MantidQtWidgets/Common/IImageInfoWidget.h
+  inc/MantidQtWidgets/Common/ImageInfoWidget.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
@@ -611,6 +632,10 @@ set(
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFunctionView.h
+  inc/MantidQtWidgets/Common/ImageInfoModel.h
+  inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
+  inc/MantidQtWidgets/Common/ImageInfoModelMD.h
+  inc/MantidQtWidgets/Common/ImageInfoPresenter.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/IProjectSerialisable.h
   inc/MantidQtWidgets/Common/LogValueFinder.h
@@ -624,6 +649,7 @@ set(
   inc/MantidQtWidgets/Common/PluginLibraries.h
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QStringUtils.h
   inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
@@ -762,7 +788,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
-    inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
@@ -793,7 +819,7 @@ foreach(
 endforeach()
 
 # Python unit tests
-set(TEST_PY_FILES test/MWRunFilesTest.py)
+set(TEST_PY_FILES test/FileFinderWidgetTest.py)
 
 set(
   TARGET_LIBRARIES
@@ -841,10 +867,6 @@ if(ENABLE_WORKBENCH)
     endif()
   endif()
 
-  find_package(
-    QScintillaQt5
-    REQUIRED
-  )
 endif()
 
 mtd_add_qt_library(
@@ -859,9 +881,12 @@ mtd_add_qt_library(
     QSCINTILLA_DLL
     QT4_DEFS
     USE_QTWEBKIT
-  INCLUDE_DIRS inc
-  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBS ${TARGET_LIBRARIES}
+  INCLUDE_DIRS
+    inc
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtHelp
     Qt4::QtNetwork
@@ -875,11 +900,6 @@ mtd_add_qt_library(
     @loader_path/../MacOS
     @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
-)
-
-find_package(
-  BoostPython
-  REQUIRED
 )
 
 mtd_add_qt_library(
@@ -896,14 +916,12 @@ mtd_add_qt_library(
     ${_webengine_def}
   INCLUDE_DIRS
     inc
-    ../../../Framework/PythonInterface/core/inc
-    ${PYTHON_INCLUDE_PATH}
-  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TARGET_LIBRARIES}
+    PUBLIC
     PythonInterfaceCore
-    ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
   QT5_LINK_LIBS
     Qt5::Concurrent
     Qt5::Help
@@ -978,6 +996,9 @@ set(
   test/FunctionMultiDomainPresenterTest.h
   test/FunctionBrowserUtilsTest.h
   test/LogValueFinderTest.h
+  test/ImageInfoModelMatrixWSTest.h
+  test/ImageInfoModelMDTest.h
+  test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
   test/NonOrthogonalTest.h
   test/ParseKeyValueStringTest.h
@@ -1031,6 +1052,7 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
     ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
   LINK_LIBS
     ${TARGET_LIBRARIES}
     DataObjects
@@ -1046,6 +1068,9 @@ set(
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
   test/FitPropertyBrowserTest.h
+  test/ImageInfoModelMatrixWSTest.h
+  test/ImageInfoModelMDTest.h
+  test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
@@ -1081,9 +1106,9 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
     ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
   LINK_LIBS
     ${TARGET_LIBRARIES}
-    ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     PythonInterfaceCore
     DataObjects

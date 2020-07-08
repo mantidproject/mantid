@@ -494,8 +494,8 @@ set_target_properties(Kernel
 
 target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
-                                  ${JSONCPP_INCLUDE_DIR}
-                           PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
+                                  ${JSONCPP_INCLUDE_DIR} ${NEXUS_INCLUDE_DIR}
+                           PRIVATE ${GSL_INCLUDE_DIR}
 			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -508,11 +508,6 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 
-# For older gcc versions (<4.5) if we do not put stdc++ first then things crash
-# when an exceptions are thrown in Python.
-if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
-  target_link_libraries(Kernel LINK_PRIVATE stdc++)
-endif()
 target_link_libraries(Kernel
                       PUBLIC
                       ${NEXUS_LIBRARIES}

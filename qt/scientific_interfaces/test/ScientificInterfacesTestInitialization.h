@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidPythonInterface/core/Testing/PythonInterpreterGlobalFixture.h"
+#include "MantidQtWidgets/Common/Testing/QApplicationGlobalFixture.h"
 
 //------------------------------------------------------------------------------
 // Static definitions
@@ -15,3 +16,4 @@
 // statements do not cause multiple-definition errors.
 //------------------------------------------------------------------------------
 static PythonInterpreterGlobalFixture PYTHON_INTERPRETER;
+static QApplicationGlobalFixture MAIN_QAPPLICATION;

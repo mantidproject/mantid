@@ -17,10 +17,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(
-    ALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
-    MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane)
-    : BaseCustomInstrumentPresenter(view, model, analysisPane->getView()),
-      m_view(view), m_model(model), m_analysisPane(analysisPane),
+    IALFCustomInstrumentView *view, IALFCustomInstrumentModel *model,
+    MantidWidgets::IPlotFitAnalysisPanePresenter *analysisPane)
+    : BaseCustomInstrumentPresenter(view, model, analysisPane), m_view(view),
+      m_model(model), m_analysisPane(analysisPane),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
   addInstrument();
 }
@@ -65,14 +65,14 @@ ALFCustomInstrumentPresenter::setupALFInstrument() {
 
   // set up custom context menu conditions
   std::function<bool(std::map<std::string, bool>)> extractConditionBinder =
-      std::bind(&ALFCustomInstrumentModel::extractTubeConditon, m_model,
+      std::bind(&IALFCustomInstrumentModel::extractTubeCondition, m_model,
                 std::placeholders::_1);
-  std::function<bool(std::map<std::string, bool>)> averageTubeConditonBinder =
-      std::bind(&ALFCustomInstrumentModel::averageTubeConditon, m_model,
+  std::function<bool(std::map<std::string, bool>)> averageTubeConditionBinder =
+      std::bind(&IALFCustomInstrumentModel::averageTubeCondition, m_model,
                 std::placeholders::_1);
 
   binders.emplace_back(extractConditionBinder);
-  binders.emplace_back(averageTubeConditonBinder);
+  binders.emplace_back(averageTubeConditionBinder);
 
   setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
 

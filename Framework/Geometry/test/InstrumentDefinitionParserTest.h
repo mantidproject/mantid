@@ -204,8 +204,8 @@ public:
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Z(), -17.0, 0.01);
 
-    std::shared_ptr<const IObjComponent> samplepos =
-        std::dynamic_pointer_cast<const IObjComponent>(i->getSample());
+    std::shared_ptr<const IComponent> samplepos =
+        std::dynamic_pointer_cast<const IComponent>(i->getSample());
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
@@ -436,12 +436,6 @@ public:
     TS_ASSERT(ptrDet17->isValid(V3D(0.0, -0.09, 0.01) + ptrDet17->getPos()));
     TS_ASSERT(!ptrDet17->isValid(V3D(0.09, 0.0, 0.01) + ptrDet17->getPos()));
     TS_ASSERT(!ptrDet17->isValid(V3D(-0.09, 0.0, 0.01) + ptrDet17->getPos()));
-
-    // test of sample shape
-    TS_ASSERT(samplepos->isValid(V3D(0.0, 0.0, 0.005) + samplepos->getPos()));
-    TS_ASSERT(!samplepos->isValid(V3D(0.0, 0.0, 0.05) + samplepos->getPos()));
-    TS_ASSERT(samplepos->isValid(V3D(10.0, 0.0, 0.005) + samplepos->getPos()));
-    TS_ASSERT(!samplepos->isValid(V3D(10.0, 0.0, 0.05) + samplepos->getPos()));
 
     // test of source shape
     TS_ASSERT(source->isValid(V3D(0.0, 0.0, 0.005) + source->getPos()));

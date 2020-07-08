@@ -65,10 +65,6 @@ private:
     UNUSED_ARG(spectrum);
     return "";
   };
-
-  std::vector<std::string> getSpectrumDependentAttributes() const override {
-    return std::vector<std::string>();
-  }
 };
 
 void setFittingFunction(IndirectFittingModel *model,

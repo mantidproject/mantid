@@ -192,7 +192,8 @@ def get_fft_component_from_workspace_name(input_workspace):
 
 def get_run_number_from_workspace_name(workspace_name, instrument):
     run = re.findall(r'%s(\d+)' % instrument, workspace_name)
-    return run[0]
+    if run:
+        return run[0]
 
 
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):

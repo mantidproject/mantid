@@ -227,7 +227,7 @@ void SingleFunctionTemplateBrowser::setBackgroundA0(double) {}
 void SingleFunctionTemplateBrowser::setResolution(std::string const &,
                                                   TableDatasetIndex const &) {}
 void SingleFunctionTemplateBrowser::setResolution(
-    const std::vector<std::pair<std::string, int>> &) {}
+    const std::vector<std::pair<std::string, size_t>> &) {}
 void SingleFunctionTemplateBrowser::setQValues(const std::vector<double> &) {}
 
 } // namespace IDA

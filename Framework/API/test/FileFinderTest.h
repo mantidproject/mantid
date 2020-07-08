@@ -606,7 +606,7 @@ public:
     const bool startingCaseOption = fileFinder.getCaseSensitive();
 
     // This test essentially covers the case where a user types an erroneous
-    // range of runs into an MWRunFiles widget.
+    // range of runs into an FileFinderWidget.
     // If they have accidentally typed in an extremely large range (most of
     // which dont exist) then it is important
     // that this fact is realised as early as possible, and the user is not

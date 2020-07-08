@@ -62,10 +62,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testWrapper = createTestInstance(mockBroker);
     TSM_ASSERT("testInstance should not have create data buffers yet",
                !testWrapper->hasData());
@@ -107,10 +106,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeISISEventSubscriber(2)))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(2)))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(2)));
     auto testInstance = createTestInstance(mockBroker);
     // Need 2 full loops to get both periods
     // Note: Only 2 iterations required as FakeISISEventSubscriber does not send
@@ -158,19 +156,16 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
 
-    constexpr size_t nCallsOne = 3;
-    constexpr size_t nCallsTwo = 2;
+    constexpr size_t nCallsOne = 2;
+    constexpr size_t nCallsTwo = 1;
 
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(nCallsOne))
         .WillOnce(Return(new FakeVariablePeriodSubscriber(0))) // 1st run
-        .WillOnce(Return(new FakeRunInfoStreamSubscriberVaryingNPeriods))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriberVaryingNPeriods));
     EXPECT_CALL(*mockBroker, subscribe_(_, _, _))
         .Times(Exactly(nCallsTwo))
-        .WillOnce(Return(new FakeVariablePeriodSubscriber(4))) // 2nd run
-        .WillOnce(
-            Return(new FakeISISSpDetStreamSubscriber)); // det-spec for 2nd run
+        .WillOnce(Return(new FakeVariablePeriodSubscriber(4))); // 2nd run
 
     auto testInstance = createTestInstance(mockBroker);
     TSM_ASSERT("testInstance should not have create data buffers yet",
@@ -225,10 +220,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeDataStreamSubscriber(1)))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testInstance = createTestInstance(mockBroker);
     TSM_ASSERT("testInstance should not have create data buffers yet",
                !testInstance->hasData());
@@ -269,10 +263,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeDataStreamSubscriber(3)))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testInstance = createTestInstance(mockBroker);
     TSM_ASSERT("testInstance should not have create data buffers yet",
                !testInstance->hasData());
@@ -310,10 +303,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeSampleEnvironmentSubscriber))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testInstance = createTestInstance(mockBroker);
     TSM_ASSERT("testInstance should not have create data buffers yet",
                !testInstance->hasData());
@@ -340,10 +332,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testInstance = createTestInstance(mockBroker);
     testInstance.runKafkaOneStep();
 
@@ -361,10 +352,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeEventSubscriber))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testInstance = createTestInstance(mockBroker);
 
     testInstance.runKafkaOneStep(); // Init
@@ -501,8 +491,7 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
-        .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber));
     auto testInstance = createTestInstance(mockBroker);
@@ -519,10 +508,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
-        .WillOnce(Return(new FakeEmptyStreamSubscriber))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeEmptyStreamSubscriber));
     auto testInstance = createTestInstance(mockBroker);
     testInstance.runKafkaOneStep();
     TS_ASSERT_THROWS(testInstance->extractData(), const std::runtime_error &);

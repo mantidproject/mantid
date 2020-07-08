@@ -491,4 +491,11 @@
 </idlist>
 -->
 
+  <parameter name="beam-width" type="number">
+    <value val="0.005"/>
+  </parameter>
+  <parameter name="beam-height" type="number">
+    <value val="0.005"/>
+  </parameter>
+
 </instrument>

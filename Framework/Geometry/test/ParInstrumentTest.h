@@ -30,7 +30,7 @@ public:
     source->setPos(0.0, 0.0, -10.0);
     instrument->add(source);
     instrument->markAsSource(source);
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
     det = new Detector("det1", 1, nullptr);

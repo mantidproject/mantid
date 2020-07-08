@@ -108,6 +108,8 @@ public:
   QList<double> getParameterValues() const;
   /// Get function parameter names
   QStringList getParameterNames() const;
+  // Get parameters used to run the Fit algorithm
+  std::string getFitAlgorithmParameters() const;
 
   /// Load function
   void loadFunction(const QString &funcString);
@@ -466,7 +468,7 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(const std::shared_ptr<Mantid::API::IFunction> &f) const;
+  void setWorkspace(const Mantid::API::IFunction_sptr &function) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
   /// Adds the workspace index property to the browser.
@@ -687,6 +689,9 @@ private:
 
   /// Should the data be normalised before fitting?
   bool m_shouldBeNormalised;
+
+  // Keep a history of the parameters used to run the Fit algorithm
+  std::string m_fitAlgParameters;
 
   /// If non-empty it contains references to the spectra
   /// allowed to be fitted in this browser:

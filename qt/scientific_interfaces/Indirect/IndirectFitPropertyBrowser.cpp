@@ -46,8 +46,7 @@ namespace IDA {
 IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent)
     : QDockWidget(parent), m_templateBrowser(nullptr),
       m_functionWidget(nullptr) {
-  setFeatures(QDockWidget::DockWidgetFloatable |
-              QDockWidget::DockWidgetMovable);
+  setFeatures(QDockWidget::DockWidgetFloatable);
   setWindowTitle("Fit Function");
 }
 
@@ -339,27 +338,28 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
   }
 }
 
-void IndirectFitPropertyBrowser::setCurrentDataset(TableRowIndex i) {
+void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0)
     return;
   if (isFullFunctionBrowserActive()) {
-    m_functionBrowser->setCurrentDataset(i.value);
+    m_functionBrowser->setCurrentDataset(static_cast<int>(i.value));
   } else {
-    m_templateBrowser->setCurrentDataset(i.value);
+    m_templateBrowser->setCurrentDataset(static_cast<int>(i.value));
   }
 }
 
-TableRowIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return TableRowIndex{m_functionBrowser->getCurrentDataset()};
+FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
+  return FitDomainIndex{
+      static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
-    TableRowIndex nData, const QStringList &datasetNames,
+    int nData, const QStringList &datasetNames,
     const std::vector<double> &qValues,
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
-  m_functionBrowser->setNumberOfDatasets(nData.value);
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+  m_functionBrowser->setNumberOfDatasets(nData);
   m_functionBrowser->setDatasetNames(datasetNames);
-  m_templateBrowser->setNumberOfDatasets(nData.value);
+  m_templateBrowser->setNumberOfDatasets(nData);
   m_templateBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setQValues(qValues);
   m_templateBrowser->setResolution(fitResolutions);
@@ -388,7 +388,7 @@ void IndirectFitPropertyBrowser::setModelResolution(
 }
 
 void IndirectFitPropertyBrowser::setModelResolution(
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   if (isFullFunctionBrowserActive()) {
     showFullFunctionBrowser(false);
   }

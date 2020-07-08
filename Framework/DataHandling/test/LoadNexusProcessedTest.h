@@ -1109,6 +1109,48 @@ public:
     }
   }
 
+  void test_Log_invalid_value_filtering_survives_save_and_load() {
+    LoadNexus alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    testFile = "ENGINX00228061_log_alarm_data.nxs";
+    alg.setPropertyValue("Filename", testFile);
+    testFile = alg.getPropertyValue("Filename");
+
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Test some aspects of the file
+    MatrixWorkspace_sptr workspace;
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(output_ws));
+
+    check_log(workspace, "cryo_temp1", 1, 3, 7.0);
+
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setPropertyValue("InputWorkspace", output_ws);
+    std::string filename = "LoadNexusProcessed_test_Log_invalid_value_"
+                           "filtering_survives_save_and_load.nxs";
+    save.setPropertyValue("Filename", filename);
+    filename = save.getPropertyValue("Filename");
+    save.execute();
+    LoadNexusProcessed load;
+    load.initialize();
+    load.setPropertyValue("Filename", filename);
+    load.setPropertyValue("OutputWorkspace", output_ws);
+    load.execute();
+
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace.get());
+    check_log(workspace, "cryo_temp1", 1, 3, 7.0);
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
+
   void test_log_filtering_survives_save_and_load() {
     LoadNexus alg;
     std::string group_ws = "test_log_filtering_survives_save_and_load";
@@ -1123,7 +1165,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     // Test some aspects of the file
-    auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr workspace;
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(group_ws + "_1"));
     // should be filtered
     check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);
@@ -1186,6 +1229,7 @@ private:
     }
   }
 
+  // There is also an explicit instantiation of this for doubles
   template <typename TYPE>
   void templated_equality_check(const std::string &message, const TYPE value,
                                 const TYPE refValue) {

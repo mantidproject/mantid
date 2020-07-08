@@ -285,6 +285,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def PyExec(self):
 
+        self.log().warning(
+            'CalculateMonteCarloAbsorption is deprecated, please use PaalmanPingsMonteCarloAbsorption instead.')
+
         # set up progress reporting
         prog = Progress(self, 0, 1, 10)
 

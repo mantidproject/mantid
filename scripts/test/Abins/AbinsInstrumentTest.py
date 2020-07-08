@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from AbinsModules.Instruments.Instrument import Instrument
+from abins.instruments.instrument import Instrument
 
 
-class AbinsInstrumentTest(unittest.TestCase):
+class InstrumentTest(unittest.TestCase):
     def test_instrument_notimplemented(self):
         instrument = Instrument()
 

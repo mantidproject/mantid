@@ -86,7 +86,7 @@ public:
   const T *operator[](const size_t row) const { return m_rawData[row]; }
 
   /// Array accessor. Use, e.g. Matrix[row][col]
-  T *operator[](const size_t row) { return m_rawData[row]; };
+  T *operator[](const size_t row) { return m_rawData[row]; }
 
   Matrix<T> &operator+=(const Matrix<T> &);     ///< Basic addition operator
   Matrix<T> operator+(const Matrix<T> &) const; ///< Basic addition operator

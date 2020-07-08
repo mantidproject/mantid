@@ -18,8 +18,12 @@ hacking Abins.
 Deprecation plans
 -----------------
 
+- Support for VASP OUTCAR files is currently included for validation
+  and troubleshooting purposes. Users are recommended to use the
+  vasprun.xml file input.
+
 - The *pkt_per_peak* and *fwhm* parameters in
-  ``AbinsParameters.sampling`` are no longer in use and should be
+  ``abins.parameters.sampling`` are no longer in use and should be
   removed in a future release.
 
 - The "SingleCrystal" modules and objects support non-existent
@@ -28,7 +32,7 @@ Deprecation plans
   change in the process.
 
 - The *frequencies_threshold* parameter in
-  ``AbinsParameters.sampling`` is currently non-functional and should
+  ``abins.parameters.sampling`` is currently non-functional and should
   be removed until it *is* functional.
 
 
@@ -41,8 +45,8 @@ histograms which have been resampled and broadened on a finite grid.
 
 The data range is determined by three parameters:
 
-- *min_wavenumber*, set in ``AbinsParameters.sampling``
-- *max_wavenumber*, set in ``AbinsParameters.sampling``
+- *min_wavenumber*, set in ``abins.parameters.sampling``
+- *max_wavenumber*, set in ``abins.parameters.sampling``
 - *bin_width*, a parameter set in the main Abins algorithm interface
   and passed as an argument to internal functions as appropriate. This
   parameter is more exposed than the energy range, as a convenient to
@@ -67,12 +71,12 @@ resolution function; in the implemented case (the TOSCA instrument)
 this is convolution with a Gaussian kernel with the energy-dependent
 width parameter (sigma) determined by a quadratic polynomial.
 Convolution with a varying kernel is not a common operation and is
-implemented within AbinsModules.
+implemented within abins.
 
 Earlier versions of Abins implemented a Gaussian kernel with a
 fixed number of points spread over a range scaled to the peak width,
 set by *pkt_per_peak* and *fwhm* parameters in
-``AbinsParameters.sampling``.
+``abins.parameters.sampling``.
 This method leads to aliasing when the x-coordinates are
 incommensurate with the histogram spacing, and an uneven number of
 samples falls into each bin.
@@ -83,11 +87,11 @@ samples falls into each bin.
 The safest way to avoid such trouble is for all broadening methods to
 output onto the regular *freq_points* grid. A number of broadening
 implementations have been provided in
-``AbinsModules.Instruments.Broadening``. It is up to the Instrument
+``abins.instruments.broadening``. It is up to the Instrument
 logic to dispatch broadening calls to the requested implementation,
 and it is up to specific Instruments to select an appropriate scheme
 for their needs.
-The advanced parameter *AbinsParameters.sampling['broadening_scheme']*
+The advanced parameter *abins.parameters.sampling['broadening_scheme']*
 is made available so that this can be overruled, but it is up to the
 Instrument to interpret this information. 'auto' should select an
 intelligent scheme and inappropriate methods can be forbidden.
@@ -103,7 +107,7 @@ Tests for Abins are located in a few places:
 
 Unit tests
 ~~~~~~~~~~
-Unit tests for the Python AbinsModules are in *scripts/test/Abins*.
+Unit tests for the Python abins modules are in *scripts/test/Abins*.
 These are set up with the other unit tests (``cmake --build . --target AllTests``)
 and can be run by filtering for Abins (``ctest -R Abins``).
 This will also run the Algorithm tests (next section).
@@ -111,14 +115,14 @@ This will also run the Algorithm tests (next section).
 Some of these tests load input data and check that the
 structure/vibration data has been read correctly. There is a
 consistent framework for this type of test established in
-``AbinsModules.GeneralLoadAbiInitioTester`` and inherited by
+``abins.input.tester`` and inherited by
 code-specific tests e.g. *AbinsLoadGAUSSIANTest*.  To create a new
 reference data file with a specific build of Abins, instantiate a
 Loader and pass it to *save_ab_initio_test_data*. This takes two lines of Python, e.g.:
 
 :: python
-   reader = AbinsModules.LoadCRYSTAL(input_ab_initio_filename='my_calc.out')
-   AbinsModules.GeneralLoadAbInitioTester.save_ab_initio_test_data(reader, 'my_new_test')
+   reader = abins.input.CRYSTALLoader(input_ab_initio_filename='my_calc.out')
+   reader.save_ab_initio_test_data(reader, 'my_new_test')
 
 which will write the necessary *my_new_test_data.txt* file and
 *my_new_test_atomic_displacements_data_{k}.txt* files for each phonon wavevector.

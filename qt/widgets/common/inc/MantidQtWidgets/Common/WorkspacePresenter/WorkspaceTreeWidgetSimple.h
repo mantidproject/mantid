@@ -54,6 +54,9 @@ signals:
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
   void showDetectorsClicked(const QStringList &workspaceNames);
   void plotAdvancedClicked(const QStringList &workspaceNames);
+  void plotSurfaceClicked(const QStringList &workspaceNames);
+  void plotWireframeClicked(const QStringList &workspaceNames);
+  void plotContourClicked(const QStringList &workspaceNames);
 
   void workspaceDoubleClicked(const QString &workspaceName);
   void treeSelectionChanged();
@@ -72,12 +75,16 @@ private slots:
   void onShowAlgorithmHistoryClicked();
   void onShowDetectorsClicked();
   void onPlotAdvancedClicked();
+  void onPlotSurfaceClicked();
+  void onPlotWireframeClicked();
+  void onPlotContourClicked();
 
 private:
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum,
       *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs, *m_plotColorfill,
       *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData,
-      *m_showAlgorithmHistory, *m_showDetectors, *m_plotAdvanced;
+      *m_showAlgorithmHistory, *m_showDetectors, *m_plotAdvanced,
+      *m_plotSurface, *m_plotWireframe, *m_plotContour;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

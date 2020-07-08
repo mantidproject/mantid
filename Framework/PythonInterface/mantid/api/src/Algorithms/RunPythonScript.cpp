@@ -9,7 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
-#include "MantidPythonInterface/core/ExtractWorkspace.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/IsNone.h"
 
@@ -249,7 +249,7 @@ std::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
   if (isNone(pyoutput))
     return Workspace_sptr();
 
-  auto ptrExtract = ExtractWorkspace(pyoutput);
+  auto ptrExtract = ExtractSharedPtr<API::Workspace>(pyoutput);
   if (ptrExtract.check()) {
     return ptrExtract();
   } else {

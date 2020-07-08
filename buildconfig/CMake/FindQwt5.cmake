@@ -5,18 +5,17 @@
 #   QWT5_LIBRARIES:   libraries to link against
 #   QWT5_VERSION:     a string containing the version number
 ###############################################################################
-# Hacky way to get CMake to find the updated mantidlibs version of qwt 
-set ( MANTIDLIBS mantidlibs34 )
+# Hacky way to get CMake to find the updated mantidlibs version of qwt
 find_path ( QWT5_INCLUDE_DIR qwt.h
-            PATHS /opt/rh/${MANTIDLIBS}/root/usr/include /opt/include /usr/local/include /usr/include ${CMAKE_INCLUDE_PATH}
-            PATH_SUFFIXES qwt5 qwt5-qt4 qwt-qt4 qwt
+            PATHS /opt/include /usr/local/include /usr/include ${CMAKE_INCLUDE_PATH}
+            PATH_SUFFIXES qwt5 qwt5-qt4 qwt-qt4
             NO_DEFAULT_PATH )
-find_library ( QWT5_LIBRARY NAMES qwt5-qt4 qwt-qt4 qwt5 qwt HINTS /opt/rh/${MANTIDLIBS}/root/usr/lib64 )
-find_library ( QWT5_LIBRARY_DEBUG NAMES qwtd qwtd5 )
+find_library ( QWT5_LIBRARY NAMES qwt5-qt4 qwt-qt4 qwt5 qwt.5 )
+find_library ( QWT5_LIBRARY_DEBUG NAMES qwtd5 )
 
 # in REQUIRED mode: terminate if one of the above find commands failed
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( Qwt DEFAULT_MSG QWT5_LIBRARY QWT5_INCLUDE_DIR )
+find_package_handle_standard_args( Qwt5 DEFAULT_MSG QWT5_LIBRARY QWT5_INCLUDE_DIR )
 
 # Parse version string from qwt_global.h
 file ( STRINGS ${QWT5_INCLUDE_DIR}/qwt_global.h QWT5_VERSION

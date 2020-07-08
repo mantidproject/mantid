@@ -7,7 +7,6 @@
 #pylint: disable=no-init,invalid-name,redefined-builtin
 import mantid
 from mantid.kernel import Direction, IntArrayProperty, StringArrayProperty, StringListValidator
-import sys
 import importlib
 
 
@@ -221,8 +220,6 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         if len(ok2run) > 0:
             raise RuntimeError(ok2run)
 
-        matplotlib = sys.modules['matplotlib']
-        matplotlib.use('agg')
         import matplotlib.pyplot as plt
 
         if isinstance(self._wksp, mantid.api.WorkspaceGroup):
@@ -247,7 +244,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
     def doPlotImage(self, ax, ws):
         spectra = ws.getNumberHistograms()
-        if spectra > 10:
+        number_of_lines = spectra if len(self.visibleSpectra) <= 0 else len(self.visibleSpectra)
+        if number_of_lines > 10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
         prog_reporter = mantid.api.Progress(self, start=0.0, end=1.0,
                                             nreports=spectra)
@@ -265,7 +263,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             ax.set_ylabel(ylabel)
             prog_reporter.report("Processing")
 
-        if 1 < spectra <= 10:
+        if 1 < number_of_lines <= 10:
             ax.legend()
 
 
