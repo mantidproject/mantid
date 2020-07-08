@@ -10,13 +10,6 @@ from typing import Dict, Tuple
 import abins
 from abins.constants import CONSTANT, GAMMA_POINT, NUM_ZERO
 
-try:
-    # noinspection PyUnresolvedReferences
-    from pathos.multiprocessing import ProcessPool
-    PATHOS_FOUND = True
-except ImportError:
-    PATHOS_FOUND = False
-
 
 # noinspection PyMethodMayBeStatic
 class PowderCalculator:
@@ -50,12 +43,7 @@ class PowderCalculator:
         b_tensors = {}
         a_tensors = {}
 
-        if PATHOS_FOUND:
-            threads = abins.parameters.performance['threads']
-            p_local = ProcessPool(nodes=threads)
-            tensors = p_local.map(self._calculate_powder_k, k_indices)
-        else:
-            tensors = [self._calculate_powder_k(k=k) for k in k_indices]
+        tensors = [self._calculate_powder_k(k=k) for k in k_indices]
 
         for indx, k in enumerate(k_indices):
             a_tensors[k] = tensors[indx][0]

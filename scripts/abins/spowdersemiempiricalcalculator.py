@@ -4,21 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import numpy as np
+
 import abins
 from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
                              HIGHER_ORDER_QUANTUM_EVENTS, MAX_ORDER, MIN_SIZE, ONE_DIMENSIONAL_INSTRUMENTS,
                              QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR,
                              S_LAST_INDEX)
 from abins.instruments import Instrument
-
-import gc
-try:
-    # noinspection PyUnresolvedReferences
-    from pathos.multiprocessing import ProcessingPool
-    PATHOS_FOUND = True
-except ImportError:
-    PATHOS_FOUND = False
-import numpy as np
 
 
 # noinspection PyMethodMayBeStatic
@@ -206,11 +199,7 @@ class SPowderSemiEmpiricalCalculator(object):
         atoms = range(self._num_atoms)
         self._prepare_data(k_point=q_indx)
 
-        if PATHOS_FOUND:
-            p_local = ProcessingPool(nodes=abins.parameters.performance['threads'])
-            result = p_local.map(self._calculate_s_powder_one_atom, atoms)
-        else:
-            result = [self._calculate_s_powder_one_atom(atom=atom) for atom in atoms]
+        result = [self._calculate_s_powder_one_atom(atom=atom) for atom in atoms]
 
         for atom in range(self._num_atoms):
             atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
