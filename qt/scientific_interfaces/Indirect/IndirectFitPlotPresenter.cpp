@@ -268,6 +268,7 @@ void IndirectFitPlotPresenter::updateFit() {
 
 void IndirectFitPlotPresenter::plotLines() {
   if (auto const resultWorkspace = m_model->getResultWorkspace()) {
+    plotInput(m_model->getWorkspace(), m_model->getActiveSpectrum());
     plotFit(resultWorkspace);
     updatePlotRange(m_model->getResultRange());
   } else if (auto const inputWorkspace = m_model->getWorkspace()) {
@@ -288,7 +289,6 @@ void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace,
 }
 
 void IndirectFitPlotPresenter::plotFit(const MatrixWorkspace_sptr &workspace) {
-  plotInput(workspace, WorkspaceIndex{0});
   if (auto doGuess = m_view->isPlotGuessChecked())
     plotGuess(doGuess);
   plotFit(workspace, WorkspaceIndex{1});
