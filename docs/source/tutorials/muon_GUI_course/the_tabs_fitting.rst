@@ -58,7 +58,7 @@ Where:
 * :math:`{\Delta}` is in :math:`{MHz}`.
 
 The compilation of custom functions is possible using C++ or Python, however this is beyond the scope of this tutorial. Detailed instructions for completing this for a 64-bit Windows
-platform can be found at http://www.mantidproject.org/Writing_a_Fit_Function and https://www.mantidproject.org/Introduction_to_Python_Fit_Functions, for fit functions in C++ and Python respectively.
+platform can be found at `writing a fit function <https://www.mantidproject.org/Writing_a_Fit_Function>`__ and `introduction to python fit functions  <https://www.mantidproject.org/Introduction_to_Python_Fit_Functions>`__, for fit functions in C++ and Python respectively.
 
 Using Fit Functions
 -------------------
