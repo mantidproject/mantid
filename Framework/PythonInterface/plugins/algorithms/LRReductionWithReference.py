@@ -87,7 +87,7 @@ class LRReductionWithReference(DataProcessorAlgorithm):
 
         # Process the reference normalization run
         norm_wksp = LiquidsReflectometryReduction(
-            RunNumbers=kwargs['RunNumbers'],
+            RunNumbers=[kwargs['NormalizationRunNumber']],
             InputWorkspace=kwargs['InputWorkspace'],
             NormalizationRunNumber=kwargs['NormalizationRunNumber'],
             SignalPeakPixelRange=kwargs['NormPeakPixelRange'],
