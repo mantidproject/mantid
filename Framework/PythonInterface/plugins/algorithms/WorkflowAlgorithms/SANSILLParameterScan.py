@@ -102,6 +102,11 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                                                   extensions=['nxs']),
                              doc='File containing the map of relative detector efficiencies.')
 
+        self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
+                             doc='The output sensitivity map workspace.')
+
         self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the default mask to be applied to all the detector configurations.')
 
@@ -109,11 +114,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
                              doc='File(s) containing the beam stop and other detector mask.')
-
-        self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc='The output sensitivity map workspace.')
 
         self.copyProperties('SANSILLReduction', ['NormaliseBy'])
 
@@ -129,6 +129,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              doc='Maximal y-index taken in the integration')
 
         self.setPropertyGroup('SensitivityMaps', 'Options')
+        self.setPropertyGroup('SensitivityOutputWorkspace', 'Options')
         self.setPropertyGroup('DefaultMaskFile', 'Options')
         self.setPropertyGroup('MaskFiles', 'Options')
         self.setPropertyGroup('NormaliseBy', 'Options')
