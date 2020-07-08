@@ -12,6 +12,7 @@ from qtpy.QtCore import *
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate
 
+
 class DrillTableWidget(QTableWidget):
     """
     Widget based on QTableWidget, used in the DrILL interface. It mainly binds
@@ -93,7 +94,7 @@ class DrillTableWidget(QTableWidget):
         n_rows = self.rowCount()
         n_cols = self.columnCount()
         if ((row < 0) or (row > n_rows) or (column < 0) or (column > n_cols)):
-            return;
+            return
         self.takeItem(row, column)
         self.cellChanged.emit(row, column)
 
@@ -194,7 +195,7 @@ class DrillTableWidget(QTableWidget):
             return
         n_rows = self.rowCount()
         n_columns = self.columnCount()
-        if ((row < 0) or (row >= n_rows) \
+        if ((row < 0) or (row >= n_rows)
                 or (column < 0) or (column >= n_columns)):
             return
         cell = QTableWidgetItem(contents)
