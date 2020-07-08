@@ -97,7 +97,7 @@ class DrillHeaderView(QHeaderView):
             li (int): the section logical index
         """
         return (li in self.buttonsRectangles) \
-           and (self.buttonsRectangles[li].contains(position))
+            and (self.buttonsRectangles[li].contains(position))
 
     def sectionSizeFromContents(self, li):
         """
