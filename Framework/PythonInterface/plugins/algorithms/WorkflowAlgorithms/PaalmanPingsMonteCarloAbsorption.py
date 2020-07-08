@@ -619,6 +619,11 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
                 return analyser_comp.getNumberParameter('EFixed')[0]
 
+        # Direct instruments don't use the Efixed instrument parameter
+        # The GetEi algorithm calculates and saves the Ei value to this sample log
+        if self._sample_ws.run().hasProperty('Ei'):
+            return  self._sample_ws.getRun().getProperty('Ei').value
+
         raise ValueError('No Efixed parameter found')
 
     # ------------------------------- Converting to/from wavelength -------------------------------
