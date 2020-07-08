@@ -14,7 +14,9 @@ from qtpy.QtCore import Qt, QPoint
 
 from Interface.ui.drill.view.DrillTableWidget import DrillTableWidget
 
+
 app = QApplication(sys.argv)
+
 
 class DrillTableWidgetTest(unittest.TestCase):
 
@@ -170,6 +172,6 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.assertEqual(self.table.item(0, 1).text(), "test2")
         self.table.setRowContents(0, ["test", "test2", "test3"])
 
+
 if __name__ == "__main__":
     unittest.main()
-
