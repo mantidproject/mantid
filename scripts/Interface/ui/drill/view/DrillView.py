@@ -109,8 +109,7 @@ class DrillView(QMainWindow):
         self.here = os.path.dirname(os.path.realpath(__file__))
 
         # setup ui
-        uic.loadUi(os.path.join(self.here, 'ui/main.ui'), self,
-                'Interface.ui.drill.main.DrillTableWidget')
+        uic.loadUi(os.path.join(self.here, 'ui/main.ui'), self)
         self.setup_header()
         self.setup_table()
         self.setFocus()
@@ -267,7 +266,6 @@ class DrillView(QMainWindow):
         if (cycle and exp):
             self.cycleAndExperimentChanged.emit(cycle, exp)
         self.setWindowModified(True)
-
 
     def _getSelectionShape(self, selection):
         """
