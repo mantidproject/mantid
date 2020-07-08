@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
 
 
 class IqtFitSequentialTest(unittest.TestCase):
-
     _iqt_ws = None
     _function = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=ExpDecay,Height=1,Lifetime=0.0247558;ties=(f1.Height=1-f0.A0)'
 
@@ -18,8 +18,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         self._iqt_ws = Load(Filename='iris26176_graphite002_iqt.nxs',
                             OutputWorkspace='iris26176_graphite002_iqt')
 
-
-#-----------------------------------Validation of result-------------------------------------
+    # -----------------------------------Validation of result-------------------------------------
 
     def _validate_output(self, params, result, fit_group):
         self.assertTrue(isinstance(params, ITableWorkspace))
@@ -36,8 +35,6 @@ class IqtFitSequentialTest(unittest.TestCase):
 
         self._validate_sample_log_values(result.getItem(0))
         self._validate_sample_log_values(fit_group.getItem(0))
-
-
 
     def _validate_table_shape(self, tableWS):
         # Check length of rows and columns
@@ -62,10 +59,10 @@ class IqtFitSequentialTest(unittest.TestCase):
         # Check histogram names
         text_axis = matrixWS.getAxis(1)
         self.assertTrue(text_axis.isText())
-        self.assertEqual('f0.A0',text_axis.label(0))
-        self.assertEqual('f1.Height',text_axis.label(1))
-        self.assertEqual('f1.Lifetime',text_axis.label(2))
-        self.assertEqual('Chi_squared',text_axis.label(3))
+        self.assertEqual('f0.A0', text_axis.label(0))
+        self.assertEqual('f1.Height', text_axis.label(1))
+        self.assertEqual('f1.Lifetime', text_axis.label(2))
+        self.assertEqual('Chi_squared', text_axis.label(3))
 
         # Check bin units
         self.assertEqual('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())
@@ -83,13 +80,12 @@ class IqtFitSequentialTest(unittest.TestCase):
         # Check histogram names
         text_axis = sub_ws.getAxis(1)
         self.assertTrue(text_axis.isText())
-        self.assertEqual('Data',text_axis.label(0))
-        self.assertEqual('Calc',text_axis.label(1))
-        self.assertEqual('Diff',text_axis.label(2))
+        self.assertEqual('Data', text_axis.label(0))
+        self.assertEqual('Calc', text_axis.label(1))
+        self.assertEqual('Diff', text_axis.label(2))
 
         # Check bin units
         self.assertEqual('ns', str(sub_ws.getAxis(0).getUnit().symbol()))
-
 
     def _validate_table_values(self, tableWS):
         # Check column data
@@ -100,7 +96,7 @@ class IqtFitSequentialTest(unittest.TestCase):
 
         # Check row data
         row = tableWS.row(0)
-        self.assertEqual(round(row['axis-1'], 6),  0.483619)
+        self.assertEqual(round(row['axis-1'], 6), 0.483619)
         self.assertEqual(round(row['f1.Height'], 6), 0.966344)
         self.assertEqual(round(row['f1.Lifetime'], 7), 0.0287491)
 
@@ -108,32 +104,32 @@ class IqtFitSequentialTest(unittest.TestCase):
         # Check f1.A0
         a0 = matrixWS.readY(0)
         self.assertEqual(round(a0[0], 7), 0.0336564)
-        self.assertEqual(round(a0[-1],7), 0.0182411)
+        self.assertEqual(round(a0[-1], 7), 0.0182411)
 
         # Check f1.Height
         height = matrixWS.readY(1)
         self.assertEqual(round(height[0], 6), 0.966344)
-        self.assertEqual(round(height[-1],6), 0.981759)
+        self.assertEqual(round(height[-1], 6), 0.981759)
 
         # Check f1.Lifetime
         lifetime = matrixWS.readY(2)
         self.assertEqual(round(lifetime[0], 7), 0.0287491)
-        self.assertEqual(round(lifetime[-1],7), 0.0034427)
+        self.assertEqual(round(lifetime[-1], 7), 0.0034427)
 
     def _validate_group_values(self, groupWS):
         sub_ws = groupWS.getItem(0)
         # Check Data
         data = sub_ws.readY(0)
         self.assertEqual(round(data[0], 6), 0.797069)
-        self.assertEqual(round(data[-1],6), 0.039044)
+        self.assertEqual(round(data[-1], 6), 0.039044)
         # Check Calc
         calc = sub_ws.readY(1)
         self.assertEqual(round(calc[0], 6), 0.870524)
-        self.assertEqual(round(calc[-1],6), 0.033886)
+        self.assertEqual(round(calc[-1], 6), 0.033886)
         # Check Diff
         diff = sub_ws.readY(2)
-        self.assertEqual(round(diff[0], 6),-0.073455)
-        self.assertEqual(round(diff[-1],6), 0.005157)
+        self.assertEqual(round(diff[0], 6), -0.073455)
+        self.assertEqual(round(diff[-1], 6), 0.005157)
 
     def _validate_sample_log_values(self, matrixWS):
         run = matrixWS.getRun()
@@ -146,23 +142,21 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertEqual(run.getProperty('iqt_resolution_workspace').value, 'iris26173_graphite002_res')
         self.assertEqual(run.getProperty('iqt_sample_workspace').value, 'iris26176_graphite002_red')
 
-
-
-#---------------------------------------Success cases--------------------------------------
+    # ---------------------------------------Success cases--------------------------------------
 
     def test_basic(self):
         """
         Tests a basic run of IqtfitSequential.
         """
         result, params, fit_group = IqtFitSequential(InputWorkspace=self._iqt_ws,
-                                                     Function=self._function,
-                                                     StartX=0,
-                                                     EndX=0.24,
-                                                     SpecMin=0,
-                                                     SpecMax=16)
+                                                                          Function=self._function,
+                                                                          StartX=0,
+                                                                          EndX=0.24,
+                                                                          SpecMin=0,
+                                                                          SpecMax=16)
         self._validate_output(params, result, fit_group)
 
-#----------------------------------------Failure cases-------------------------------------
+    # ----------------------------------------Failure cases-------------------------------------
 
     def test_minimum_spectra_number_less_than_0(self):
         self.assertRaises(ValueError, IqtFitSequential,
@@ -217,5 +211,6 @@ class IqtFitSequentialTest(unittest.TestCase):
                           OutputParameterWorkspace='table',
                           OutputWorkspaceGroup='fit_group')
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     unittest.main()
