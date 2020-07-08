@@ -11,6 +11,7 @@ import mantid.simpleapi as sapi
 
 from .DrillAlgorithmObserver import DrillAlgorithmObserver
 
+
 class DrillTaskSignals(QObject):
     """
     Signals that the DrillTask could send.
@@ -77,4 +78,3 @@ class DrillTask(QRunnable):
         if self.alg and self.alg.isRunning():
             self.alg.cancel()
             self.signals.finished.emit(self.ref, 1, "Processing cancelled")
-
