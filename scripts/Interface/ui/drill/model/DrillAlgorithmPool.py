@@ -109,4 +109,3 @@ class DrillAlgorithmPool(QThreadPool):
             progress += self._progresses[i] * 100
         progress /= len(self._tasks)
         self.signals.progressUpdate.emit(progress)
-
