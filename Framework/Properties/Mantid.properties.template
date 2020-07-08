@@ -21,7 +21,7 @@ Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
 
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Frequency_Domain_Analysis_Old.py Muon/Muon_Analysis.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Frequency_Domain_Analysis_Old.py Muon/Muon_Analysis.py General/Sample_Transmission_Calculator.py
 
 # Directory containing the above startup scripts
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
@@ -38,8 +38,8 @@ pvplugins.directory = @PV_PLUGINS_DIR@
 # Where to find Mantid Qt plugin libraries
 mantidqt.plugins.directory = @QT_PLUGINS_DIR@
 
-# Where to find python plugins
-python.plugins.directories = @PYTHONPLUGIN_DIRS@
+# Where to find the python plugin manifest file
+python.plugins.manifest = @PYTHONPLUGIN_MANIFEST@
 
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
@@ -232,6 +232,12 @@ projectSaving.warningSize = 10737418240
 # Whether to show titles on plots
 plots.ShowTitle = On
 
+# Whether to show minor ticks on plots
+plots.ShowMinorTicks = Off
+
+# Whether to show minor gridlines on plots
+plots.ShowMinorGridlines = Off
+
 # The default scale on 1d plots. Options are Linear or Log
 plots.xAxesScale = Linear
 plots.yAxesScale = Linear
@@ -262,3 +268,12 @@ plots.errorbar.errorEvery = 1
 
 # Default width of error bars in 1d plots
 plots.errorbar.Width = 1.0
+
+# Default legend location
+plots.legend.Location = best
+
+# Default legend size
+plots.legend.FontSize = 8
+
+# Default colormap for image plots
+plots.images.Colormap = viridis

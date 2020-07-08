@@ -15,6 +15,7 @@ set(SRC_FILES
     src/BinEdgeAxis.cpp
     src/BoostOptionalToAlgorithmProperty.cpp
     src/BoxController.cpp
+    src/BoxControllerSettingsAlgorithm.cpp
     src/CatalogManager.cpp
     src/CatalogSession.cpp
     src/Citation.cpp
@@ -180,6 +181,7 @@ set(INC_FILES
     inc/MantidAPI/BinEdgeAxis.h
     inc/MantidAPI/BoostOptionalToAlgorithmProperty.h
     inc/MantidAPI/BoxController.h
+    inc/MantidAPI/BoxControllerSettingsAlgorithm.h
     inc/MantidAPI/CatalogFactory.h
     inc/MantidAPI/CatalogManager.h
     inc/MantidAPI/CatalogSession.h
@@ -386,6 +388,7 @@ set(TEST_FILES
     AsynchronousTest.h
     BinEdgeAxisTest.h
     BoxControllerTest.h
+    BoxControllerSettingsAlgorithmTest.h
     CitationTest.h
     CommonBinsValidatorTest.h
     CompositeFunctionTest.h

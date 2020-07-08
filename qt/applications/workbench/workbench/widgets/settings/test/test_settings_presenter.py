@@ -7,15 +7,17 @@
 #  This file is part of the mantid workbench
 from unittest import TestCase
 
-from unittest.mock import call, Mock
+from unittest.mock import call, MagicMock, Mock
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictPropertyMock
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 
 class FakeMVP(object):
+
     def __init__(self):
         self.view = MockQWidget()
+        self.update_properties = MagicMock()
 
 
 class FakeSectionsListWidget:
@@ -42,6 +44,9 @@ class MockSettingsView(object):
         self.fitting_settings = FakeMVP()
         self.save_settings_button = MockQButton()
         self.help_button = MockQButton()
+        self.save_file_button = MockQButton()
+        self.load_file_button = MockQButton()
+        self.get_properties_filename = MagicMock(return_value="filename")
 
 
 class SettingsPresenterTest(TestCase):
@@ -70,3 +75,31 @@ class SettingsPresenterTest(TestCase):
 
         self.assertEqual(1, mock_view.container.replaceWidget.call_count)
         self.assertEqual(mock_view.categories_settings.view, presenter.current)
+
+    def test_action_save_settings_to_file(self):
+        mock_view = MockSettingsView()
+        mock_model = MagicMock()
+        presenter = SettingsPresenter(None, view=mock_view, model=mock_model,
+                                      general_settings=mock_view.general_settings,
+                                      categories_settings=mock_view.categories_settings,
+                                      plot_settings=mock_view.plot_settings,
+                                      fitting_settings=mock_view.fitting_settings)
+
+        presenter.action_save_settings_to_file()
+        presenter.model.save_settings_to_file.assert_called_once_with("filename", presenter.all_properties)
+
+    def test_action_load_settings_from_file(self):
+        mock_view = MockSettingsView()
+        mock_model = MagicMock()
+        presenter = SettingsPresenter(None, view=mock_view, model = mock_model,
+                                      general_settings=mock_view.general_settings,
+                                      categories_settings=mock_view.categories_settings,
+                                      plot_settings=mock_view.plot_settings,
+                                      fitting_settings=mock_view.fitting_settings)
+
+        presenter.action_load_settings_from_file()
+        presenter.model.load_settings_from_file.assert_called_once_with("filename", presenter.all_properties)
+        presenter.general_settings.update_properties.assert_called_once_with()
+        presenter.categories_settings.update_properties.assert_called_once_with()
+        presenter.plot_settings.update_properties.assert_called_once_with()
+        presenter.fitting_settings.update_properties.assert_called_once_with()

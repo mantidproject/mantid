@@ -112,7 +112,11 @@ Directory Properties
 |                                      | that Mantid requires to function correctly.       |                                     |
 |                                      | **WARNING:** Do not alter the default value.      |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
-
+| ``python.plugins.manifest``          | A path to the location of the manifest file       | N/A                                 |
+|                                      | containing paths to each of the python algorithm  |                                     |
+|                                      | files.                                            |                                     |
+|                                      | **WARNING:** Do not alter the default value.      |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 
 
 Logging Properties
@@ -254,6 +258,10 @@ Plotting Settings
 +=================================+==================================================================+=====================+
 |``plots.ShowTitle``              |Whether to show titles on plots                                   | ``On``, ``Off``     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowMinorTicks``         |Whether to show minor ticks on plots                              | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowMinorGridlines``     |Whether to show minor gridlines on plots                          | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.xAxesScale``             |The default x scale on 1d plots                                   |``Linear``, ``Log``  |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.yAxesScale``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
@@ -276,6 +284,12 @@ Plotting Settings
 |                                 |in 1d plots. Must be an integer                                   |                     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.errorbar.Width``         |Default width of error bars in 1d plots                           |``1.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.legend.FontSize``        |Default legend font size                                          |``8.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.legend.Location``        |Default legend location                                           |``best``             |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.images.Colormap``        |Default colormap for image plots                                  |``viridis``          |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 
 Getting access to Mantid properties

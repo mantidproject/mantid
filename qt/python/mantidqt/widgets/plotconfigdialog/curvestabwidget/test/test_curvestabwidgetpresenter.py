@@ -74,7 +74,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
     def test_populate_select_curve_combo_box_called_on_init(self):
         presenter = self._generate_presenter()
         presenter.view.populate_select_curve_combo_box.assert_called_once_with(
-            ["noerrors", "Workspace"])
+            ["Workspace", "noerrors"])
 
     def test_update_view_called_on_init(self):
         presenter = self._generate_presenter()

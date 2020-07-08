@@ -237,6 +237,16 @@ public:
     TS_ASSERT_DELTA(0.73100698, factorSample, 1e-8);
   }
 
+  void test_Construction_With_Env_But_No_Sample_Shape_Does_Not_Throw_Error() {
+    Mantid::API::Sample sample;
+    auto kit = createTestKit();
+    sample.setEnvironment(
+        std::make_unique<Mantid::Geometry::SampleEnvironment>(*kit));
+
+    TS_ASSERT_THROWS_NOTHING(
+        MCInteractionVolume mcv(sample, kit->getComponent(0).getBoundingBox()));
+  }
+
   //----------------------------------------------------------------------------
   // Failure cases
   //----------------------------------------------------------------------------

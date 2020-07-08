@@ -122,6 +122,9 @@ public:
   void displayMessage(const std::string &message) const override;
   void disableSpectrumPlotSelection() override;
 
+  void allowRedraws(bool state) override;
+  void redrawPlots() override;
+
 public slots:
   void clearTopPreview() override;
   void clearBottomPreview() override;

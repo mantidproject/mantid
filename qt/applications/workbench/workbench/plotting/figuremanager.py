@@ -17,7 +17,7 @@ from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.collections import LineCollection, QuadMesh
+from matplotlib.collections import LineCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtGui import QImage
@@ -347,8 +347,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            if not any(isinstance(x, QuadMesh) for x in ax.collections):
+            if type(ax) == Axes:
+                # Colorbar
+                continue
+            elif isinstance(ax, Axes3D):
+                # The grid toggle function for 3D plots doesn't let you choose between major and minor lines.
                 ax.grid(on)
+            else:
+                which = 'both' if hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
+                ax.grid(on, which=which)
         canvas.draw_idle()
 
     def fit_toggle(self):

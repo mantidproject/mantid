@@ -11,10 +11,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
-#include "MantidDataHandling/CreatePolarizationEfficiencies.h"
-#include "MantidDataHandling/JoinISISPolarizationEfficiencies.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
@@ -24,8 +23,6 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
-using namespace Mantid::DataHandling;
-using namespace Mantid::DataObjects;
 using namespace WorkspaceCreationHelper;
 
 class PolarizationCorrectionFredrikzeTest : public CxxTest::TestSuite {
@@ -40,6 +37,11 @@ public:
     delete suite;
   }
 
+  PolarizationCorrectionFredrikzeTest() {
+    // To make sure API is initialized properly
+    Mantid::API::FrameworkManager::Instance();
+  }
+
   void test_Init() {
     PolarizationCorrectionFredrikze alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -47,7 +49,8 @@ public:
   }
 
   void test_set_wrong_workspace_type_throws() {
-    MatrixWorkspace_sptr ws = std::make_shared<Workspace2D>();
+    MatrixWorkspace_sptr ws =
+        std::make_shared<Mantid::DataObjects::Workspace2D>();
     PolarizationCorrectionFredrikze alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", ws),
@@ -83,20 +86,21 @@ public:
                                         const std::string &pp,
                                         const std::string &alpha = "",
                                         const std::string &ap = "") {
-    CreatePolarizationEfficiencies alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setPropertyValue("Rho", rho);
-    alg.setPropertyValue("Pp", pp);
+    auto alg = AlgorithmManager::Instance().createUnmanaged(
+        "CreatePolarizationEfficiencies");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setPropertyValue("Rho", rho);
+    alg->setPropertyValue("Pp", pp);
     if (!ap.empty()) {
-      alg.setPropertyValue("Ap", ap);
-      alg.setPropertyValue("Alpha", alpha);
+      alg->setPropertyValue("Ap", ap);
+      alg->setPropertyValue("Alpha", alpha);
     }
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.execute();
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    alg->setPropertyValue("OutputWorkspace", "dummy");
+    alg->execute();
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     return outWS;
   }
 
@@ -147,9 +151,11 @@ public:
     Mantid::API::WorkspaceGroup_sptr inWS =
         std::make_shared<WorkspaceGroup>(); // Empty group ws.
 
-    inWS->addWorkspace(std::make_shared<TableWorkspace>()); // Group now
-                                                            // contains a
-                                                            // table workspace
+    inWS->addWorkspace(
+        std::make_shared<Mantid::DataObjects::TableWorkspace>()); // Group now
+                                                                  // contains a
+                                                                  // table
+                                                                  // workspace
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
@@ -332,17 +338,19 @@ public:
     auto Rho = Pa / Pp;
     auto Alpha = Aa / Ap;
 
-    Mantid::DataHandling::JoinISISPolarizationEfficiencies join_eff;
-    join_eff.initialize();
-    join_eff.setChild(true);
-    join_eff.setRethrows(true);
-    join_eff.setProperty("Pp", Pp);
-    join_eff.setProperty("Ap", Ap);
-    join_eff.setProperty("Rho", Rho);
-    join_eff.setProperty("Alpha", Alpha);
-    join_eff.setPropertyValue("OutputWorkspace", "dummy");
-    join_eff.execute();
-    MatrixWorkspace_sptr efficiencies = join_eff.getProperty("OutputWorkspace");
+    auto join_eff = AlgorithmManager::Instance().createUnmanaged(
+        "JoinISISPolarizationEfficiencies");
+    join_eff->initialize();
+    join_eff->setChild(true);
+    join_eff->setRethrows(true);
+    join_eff->setProperty("Pp", Pp);
+    join_eff->setProperty("Ap", Ap);
+    join_eff->setProperty("Rho", Rho);
+    join_eff->setProperty("Alpha", Alpha);
+    join_eff->setPropertyValue("OutputWorkspace", "dummy");
+    join_eff->execute();
+    MatrixWorkspace_sptr efficiencies =
+        join_eff->getProperty("OutputWorkspace");
     TS_ASSERT(efficiencies);
 
     auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.

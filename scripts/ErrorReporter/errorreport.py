@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import qtpy
-
 if qtpy.PYQT5:  # noqa
     from ErrorReporter import resources_qt5  # noqa
 elif qtpy.PYQT4:  # noqa
@@ -16,6 +15,7 @@ else:  # noqa
 from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QMessageBox
+from ErrorReporter.details_dialog import MoreDetailsDialog
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
@@ -75,6 +75,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
+        # Dialog window to show more details of the crash to the user.
+        self.details_dialog = MoreDetailsDialog(self)
+
     def quit(self):
         self.quit_signal.emit()
 
@@ -128,6 +131,11 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setEscapeButton(QMessageBox.Ok)
         msg.exec_()
+
+    def display_more_details(self, user_information_text, stacktrace_text):
+        self.details_dialog.set_stacktrace_text(stacktrace_text)
+        self.details_dialog.set_user_text(user_information_text)
+        self.details_dialog.show()
 
     def set_report_callback(self, callback):
         self.action.connect(callback)

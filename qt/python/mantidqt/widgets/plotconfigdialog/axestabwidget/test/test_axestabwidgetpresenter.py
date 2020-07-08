@@ -72,6 +72,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                     presenter.current_view_props.ylabel)
                 ax_mock.set_yscale.assert_called_once_with(
                     presenter.current_view_props.yscale)
+                ax_mock.minorticks_on.assert_called_once()
 
     def test_get_axes_names_dict(self):
         actual_dict = get_axes_names_dict(self.fig)
@@ -96,6 +97,8 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         self.assertEqual('Linear', actual_props.xscale)
         self.assertEqual('Y', actual_props.ylabel)
         self.assertEqual('Log', actual_props.yscale)
+        self.assertEqual(False, actual_props.minor_ticks)
+        self.assertEqual(False, actual_props.minor_gridlines)
 
     def test_populate_select_axes_combo_box_called_once_on_construction(self):
         presenter = self._generate_presenter()
