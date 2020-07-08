@@ -14,8 +14,6 @@ from qtpy.QtTest import QTest
 from qtpy.QtCore import Qt, QPoint
 
 from Interface.ui.drill.view.DrillView import DrillView
-from Interface.ui.drill.model.DrillModel import DrillModel
-from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
 from Interface.ui.drill.model.specifications import RundexSettings
 
 app = QApplication(sys.argv)

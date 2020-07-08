@@ -7,7 +7,7 @@
 
 import os
 
-from qtpy.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QDialog
+from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
 from qtpy.QtCore import *
 from qtpy import uic
 
