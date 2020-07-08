@@ -133,7 +133,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_sector = new QPushButton();
   m_sector->setCheckable(true);
   m_sector->setAutoExclusive(true);
-  m_sector->setIcon(QIcon(":/MaskTools/selection-box-ring.png"));
+  m_sector->setIcon(QIcon(":/MaskTools/selection-sector.png"));
   m_sector->setToolTip("Draw a circle sector (Shift+Alt+R)");
 
   m_free_draw = new QPushButton();
