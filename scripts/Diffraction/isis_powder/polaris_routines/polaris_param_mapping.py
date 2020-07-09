@@ -14,6 +14,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="calibration_directory", int_name="calibration_dir"),
     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_path"),
     ParamMapEntry(ext_name="config_file", int_name="config_file"),
+    ParamMapEntry(ext_name="debug", int_name="debug", optional=True),
     ParamMapEntry(ext_name="delta_r", int_name="delta_r", optional=True),
     ParamMapEntry(ext_name="delta_q", int_name="delta_q", optional=True),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="do_absorb_corrections"),
