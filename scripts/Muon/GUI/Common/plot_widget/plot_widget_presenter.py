@@ -140,6 +140,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if plot_mode == PlotMode.Data:
             self._view.enable_plot_type_combo()
             self._view.enable_tile_plotting_options()
+            self._view.enable_plot_raw_option()
             self._view.set_is_tiled_plot(self.data_plot_tiled_state)
             self.update_plot()
             self.fitting_plot_range = self._figure_presenter.get_plot_x_range()
@@ -147,6 +148,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
             self._view.disable_tile_plotting_options()
+            self._view.disable_plot_raw_option()
             self.data_plot_tiled_state = self._view.is_tiled_plot()
             self._view.set_is_tiled_plot(False)
             self.update_plot()

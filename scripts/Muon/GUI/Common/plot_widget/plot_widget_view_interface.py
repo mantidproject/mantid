@@ -184,3 +184,17 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         Disable tile plotting
         """
         pass
+
+    @abstractmethod
+    def disable_plot_raw_option(self):
+        """
+        Disable plot raw option
+        """
+        pass
+
+    @abstractmethod
+    def enable_plot_raw_option(self):
+        """
+        Enable plot raw option
+        """
+        pass

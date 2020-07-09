@@ -12,7 +12,7 @@ from Muon.GUI.Common.usage_report import report_interface_startup
 Name = "Muon_Analysis_2"
 
 if 'muon_analysis' in globals():
-    muon_analysis = globals()['muon_freq']
+    muon_analysis = globals()['muon_analysis']
     # If the object is deleted in the C++ side it can still exist in the
     # python globals list. The try catch block below checks for this.
     try:

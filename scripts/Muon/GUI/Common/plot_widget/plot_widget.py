@@ -11,7 +11,7 @@ from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel as Plo
 
 
 class PlotWidget(object):
-    def __init__(self, context=None, get_selected_fit_workspaces=None, parent=None):
+    def __init__(self, context=None, get_selected_fit_workspaces=lambda: [], parent=None):
         # The plotting canvas widget
         self.plotting_canvas_widget = PlottingCanvasWidget(parent, context=context)
         # The UI view

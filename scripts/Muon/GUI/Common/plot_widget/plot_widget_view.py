@@ -175,4 +175,15 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         """
         self.tiled_plot_checkbox.setEnabled(False)
         self.tiled_by_combo.setEnabled(False)
+
+    def disable_plot_raw_option(self):
+        """
+        Disable plot raw option
+        """
         self.plot_raw_checkbox.setEnabled(False)
+
+    def enable_plot_raw_option(self):
+        """
+        Enable plot raw option
+        """
+        self.plot_raw_checkbox.setEnabled(True)
