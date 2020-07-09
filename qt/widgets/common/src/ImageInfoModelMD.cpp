@@ -8,10 +8,6 @@
 #include "MantidQtWidgets/Common/ImageInfoModelMD.h"
 #include <climits>
 
-namespace {
-constexpr double UNSET_VALUE = std::numeric_limits<double>::max();
-}
-
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -20,8 +16,8 @@ ImageInfoModel::ImageInfo ImageInfoModelMD::info(const double x, const double y,
                                                  const double signal) const {
   ImageInfo info({"x", "y", "Signal"});
 
-  auto valueOrMissing = [this](double value) {
-    return value == UNSET_VALUE ? MissingValue : defaultFormat(value);
+  auto valueOrMissing = [](double value) {
+    return value == UnsetValue ? MissingValue : defaultFormat(value);
   };
   info.setValue(0, valueOrMissing(x));
   info.setValue(1, valueOrMissing(y));

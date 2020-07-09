@@ -21,7 +21,6 @@ public:
 
   virtual void cursorAt(const double x, const double y,
                         const double signal) = 0;
-  virtual void showInfo(const std::vector<QString> &info) = 0;
   virtual void showInfo(const ImageInfoModel::ImageInfo &info) = 0;
   virtual void setWorkspace(const Mantid::API::Workspace_sptr &ws) = 0;
 };

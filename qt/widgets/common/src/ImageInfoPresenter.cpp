@@ -45,6 +45,9 @@ void ImageInfoPresenter::setWorkspace(
   else {
     m_model = std::make_unique<ImageInfoModelMD>();
   }
+  // Blank view
+  cursorAt(ImageInfoModel::UnsetValue, ImageInfoModel::UnsetValue,
+           ImageInfoModel::UnsetValue);
 }
 
 } // namespace MantidWidgets

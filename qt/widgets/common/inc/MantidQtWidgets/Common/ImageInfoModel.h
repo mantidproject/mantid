@@ -45,6 +45,8 @@ public:
   static constexpr auto FourDigitPrecision = 4;
   /// Default float format
   static constexpr auto DecimalFormat = 'f';
+  /// Value to indicate that a MissingValue should be shown
+  static constexpr auto UnsetValue = std::numeric_limits<double>::max();
   /// MissingValue identifier
   static inline const QString MissingValue = QString("-");
 
@@ -69,12 +71,6 @@ public:
   */
   virtual ImageInfoModel::ImageInfo info(const double x, const double y,
                                          const double signal) const = 0;
-
-protected:
-  void addNameAndValue(const std::string &label, std::vector<QString> &list,
-                       const double value, const int precision,
-                       bool includeValue = true,
-                       const Mantid::Kernel::Unit_sptr &units = nullptr);
 };
 
 } // namespace MantidWidgets

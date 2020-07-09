@@ -27,28 +27,5 @@ ImageInfoModel::ImageInfo::ImageInfo(
   m_values.resize(m_names.size(), MissingValue);
 }
 
-// ImageInfoModel
-
-/**
- * Appends a name/value to the given list
- */
-void ImageInfoModel::addNameAndValue(const std::string &label,
-                                     std::vector<QString> &list,
-                                     const double value, const int precision,
-                                     bool includeValue,
-                                     const Mantid::Kernel::Unit_sptr &units) {
-  std::wstring unit;
-  auto headerLabel = QString::fromStdString(label);
-  if (units && !(unit = units->label().utf8()).empty()) {
-    headerLabel += "(" + MantidQt::API::toQStringInternal(unit) + ")";
-  }
-  list.emplace_back(headerLabel);
-
-  if (includeValue) {
-    list.emplace_back(QString::number(value, 'f', precision));
-  } else
-    list.emplace_back(MissingValue);
-}
-
 } // namespace MantidWidgets
 } // namespace MantidQt

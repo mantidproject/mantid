@@ -42,32 +42,6 @@ void ImageInfoWidget::cursorAt(const double x, const double y,
 
 /**
  * Display the information provided within the table cells
- * @param info A reference to a vector of header/value paris
- */
-void ImageInfoWidget::showInfo(const std::vector<QString> &info) {
-  if (info.empty())
-    return;
-
-  setColumnCount(static_cast<int>(info.size() / 2));
-
-  auto row = 0;
-  auto column = 0;
-  for (const auto &item : info) {
-    auto cell = new QTableWidgetItem(item);
-    setItem(row, column, cell);
-    cell->setFlags(Qt::ItemIsSelectable);
-    row++;
-    if (row == 2) {
-      row = 0;
-      column++;
-    }
-  }
-  horizontalHeader()->setMinimumSectionSize(50);
-  resizeColumnsToContents();
-}
-
-/**
- * Display the information provided within the table cells
  * @param info A reference to a collection of header/value pairs
  */
 void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {

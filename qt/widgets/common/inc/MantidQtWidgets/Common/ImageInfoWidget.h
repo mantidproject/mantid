@@ -26,7 +26,6 @@ public:
 
   void cursorAt(const double x, const double y, const double signal) override;
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
-  void showInfo(const std::vector<QString> &info) override;
   void showInfo(const ImageInfoModel::ImageInfo &info) override;
 
 private:

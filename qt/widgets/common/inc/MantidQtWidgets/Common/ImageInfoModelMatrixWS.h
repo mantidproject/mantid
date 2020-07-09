@@ -35,9 +35,6 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMatrixWS
     : public ImageInfoModel {
 
 public:
-  /// Return the number of information items this model will produce
-  static constexpr int itemCount() noexcept { return 13; }
-
   ImageInfoModelMatrixWS(Mantid::API::MatrixWorkspace_sptr workspace);
 
   ImageInfoModel::ImageInfo info(const double x, const double y,
@@ -49,7 +46,7 @@ private:
   std::tuple<Mantid::Kernel::DeltaEMode::Type, double>
   efixedAt(const size_t wsIndex) const;
   void cacheWorkspaceInfo();
-  ImageInfoModel::ImageInfo::StringItems createItemNames() const;
+  void createItemNames();
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_workspace;
@@ -57,8 +54,9 @@ private:
   std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_source;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
-  double m_xMin, m_xMax;
-  QString m_xunit, m_yunit;
+  ImageInfoModel::ImageInfo::StringItems m_names;
+  Mantid::Kernel::Unit_sptr m_xunit;
+  bool m_xIsTOF;
 };
 
 } // namespace MantidWidgets
