@@ -409,8 +409,8 @@ class DrillView(QMainWindow):
         if rows:
             for cell in self.invalidCells:
                 if cell[0] in rows:
-                    QMessageBox.warning(self, "Error", "Please check the " +
-                                        "parameters value before processing")
+                    QMessageBox.warning(self, "Error", "Please check the "
+                                        + "parameters value before processing")
                     return
             self.errorRows = set()
             self.process.emit(rows)
@@ -424,8 +424,8 @@ class DrillView(QMainWindow):
         if rows:
             for cell in self.invalidCells:
                 if cell[0] in rows:
-                    QMessageBox.warning(self, "Error", "Please check the " +
-                                        "parameters value before processing")
+                    QMessageBox.warning(self, "Error", "Please check the "
+                                        + "parameters value before processing")
                     return
             self.errorRows = set()
             self.process.emit(rows)
