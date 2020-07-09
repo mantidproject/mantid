@@ -33,10 +33,11 @@ class ParameterControllerTest(unittest.TestCase):
         self.assertEqual(p, pGet)
 
     def test_stop(self):
-        pass
-
-    def test_run(self):
-        pass
+        self.controller._running = True
+        self.controller.join = mock.Mock()
+        self.controller.stop()
+        self.assertEqual(self.controller._running, False)
+        self.controller.join.assert_called_once()
 
 
 if __name__ == "__main__":
