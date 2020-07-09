@@ -37,6 +37,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         if is_frequency_domain:
             self.hide_simultaneous_fit_options()
+            self.fit_options_table.hideRow(3)
+            self.fit_options_table.hideRow(4)
 
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)
