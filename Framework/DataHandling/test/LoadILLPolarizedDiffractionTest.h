@@ -565,7 +565,7 @@ public:
     LoadILLPolarizedDiffraction alg;
     alg.setChild(true);
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "394882"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "394458"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
