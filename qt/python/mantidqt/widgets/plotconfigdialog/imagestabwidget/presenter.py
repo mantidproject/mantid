@@ -93,7 +93,7 @@ class ImagesTabWidgetPresenter:
     @staticmethod
     def generate_image_name(image):
         """Generate a name for an image"""
-        label = image.get_label()
+        label = image.get_label().lstrip('_')
         ax_name = generate_ax_name(image.axes)
         if label:
             return "{} - {}".format(ax_name, label)

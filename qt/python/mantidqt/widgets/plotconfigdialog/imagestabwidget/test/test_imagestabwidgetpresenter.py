@@ -162,7 +162,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         ax.pcolormesh([[0, 2], [2, 0]])
-        view = Mock(get_selected_image_name=lambda: '(0, 0) - _collection0')
+        view = Mock(get_selected_image_name=lambda: '(0, 0) - collection0')
         presenter = self._generate_presenter(view, fig)
         presenter.view.enable_interpolation.assert_called_once_with(False)
 
