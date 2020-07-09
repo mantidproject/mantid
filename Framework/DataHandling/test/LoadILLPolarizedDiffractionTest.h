@@ -560,6 +560,48 @@ public:
     }
   }
 
+  void test_D7_sign_TwoTheta() {
+    // Tests pixel position alignment coming from the YIG calibration IPF file
+    LoadILLPolarizedDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "394882"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", true))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT(outputWS->isGroup())
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 1)
+    do_test_general_features(outputWS, "monochromatic");
+
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
+         ++entry_no) {
+      MatrixWorkspace_sptr workspaceEntry =
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+              outputWS->getItem(entry_no));
+      TS_ASSERT(workspaceEntry)
+
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) * RAD_2_DEG,
+                      -88.87, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(43) * RAD_2_DEG,
+                      -46.08, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(44) * RAD_2_DEG,
+                      -42.65, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(87) * RAD_2_DEG,
+                      0.13, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(88) * RAD_2_DEG,
+                      -0.80, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(131) * RAD_2_DEG,
+                      41.99, 0.01)
+    }
+  }
+
   void do_test_general_features(WorkspaceGroup_sptr outputWS,
                                 std::string measurementMode) {
     for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
