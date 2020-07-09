@@ -23,6 +23,8 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoPresenter {
 public:
   ImageInfoPresenter(IImageInfoWidget *view);
 
+  inline const ImageInfoModel &model() { return *m_model; }
+
   void cursorAt(const double x, const double y, const double signal);
   void setWorkspace(const Mantid::API::Workspace_sptr &ws);
 

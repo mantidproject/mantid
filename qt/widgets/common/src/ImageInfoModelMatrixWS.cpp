@@ -14,6 +14,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include <limits>
 
 using namespace Mantid::API;
@@ -21,11 +22,23 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace {
-/// Flag value to specify a value should show as unspecified
-constexpr auto UNSET_VALUE = std::numeric_limits<double>::max();
+
+/**
+ * Return an array of unit values to display with the point information
+ */
+static const std::array<std::tuple<Unit_sptr, bool>, 6> &displayUnits() {
+  static const std::array<std::tuple<Unit_sptr, bool>, 6> units = {
+      std::make_tuple(UnitFactory::Instance().create("TOF"), false),
+      std::make_tuple(UnitFactory::Instance().create("Wavelength"), false),
+      std::make_tuple(UnitFactory::Instance().create("Energy"), false),
+      std::make_tuple(UnitFactory::Instance().create("dSpacing"), false),
+      std::make_tuple(UnitFactory::Instance().create("MomentumTransfer"),
+                      false),
+      std::make_tuple(UnitFactory::Instance().create("DeltaE"), true)};
+  return units;
+}
 
 Logger g_log("ImageInfoModelMatrixWS");
-
 } // namespace
 
 namespace MantidQt {
@@ -37,8 +50,7 @@ namespace MantidWidgets {
  */
 ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(
     Mantid::API::MatrixWorkspace_sptr workspace)
-    : m_workspace(std::move(workspace)), m_spectrumInfo(nullptr),
-      m_xMin(UNSET_VALUE), m_xMax(UNSET_VALUE) {
+    : m_workspace(std::move(workspace)), m_spectrumInfo(nullptr) {
   cacheWorkspaceInfo();
 }
 
@@ -46,8 +58,8 @@ ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(
 ImageInfoModel::ImageInfo
 ImageInfoModelMatrixWS::info(const double x, const double y,
                              const double signal) const {
-  ImageInfo info(createItemNames());
-  if (x == UNSET_VALUE || y == UNSET_VALUE || signal == UNSET_VALUE)
+  ImageInfo info(m_names);
+  if (x == UnsetValue || y == UnsetValue || signal == UnsetValue)
     return info;
 
   info.setValue(0, defaultFormat(x));
@@ -69,8 +81,9 @@ ImageInfoModelMatrixWS::info(const double x, const double y,
     info.setValue(3, defaultFormat(*spectrum.getDetectorIDs().begin()));
 
   info.setValue(4, defaultFormat(m_spectrumInfo->l2(wsIndex)));
-  info.setValue(5, defaultFormat(m_spectrumInfo->signedTwoTheta(wsIndex)));
-  info.setValue(6, defaultFormat(m_spectrumInfo->azimuthal(wsIndex)));
+  info.setValue(
+      5, defaultFormat(m_spectrumInfo->signedTwoTheta(wsIndex) * rad2deg));
+  info.setValue(6, defaultFormat(m_spectrumInfo->azimuthal(wsIndex) * rad2deg));
   setUnitsInfo(&info, 7, wsIndex, x);
 
   return info;
@@ -81,6 +94,7 @@ ImageInfoModelMatrixWS::info(const double x, const double y,
  * @param info Existing ImageInfo object
  * @param infoIndex The index to start at when adding units information
  * @param wsIndex The wsIndex whose spectrum is under the cursor
+ * @param x The value from the cursor on the X axis
  */
 void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
                                           int infoIndex, const size_t wsIndex,
@@ -91,39 +105,29 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
   const auto [emode, efixed] = efixedAt(wsIndex);
 
   double tof(0.0);
-  if (m_xunit == "TOF") {
+  const auto &unitFactory = UnitFactory::Instance();
+  const auto tofUnit = unitFactory.create("TOF");
+  if (m_xIsTOF) {
     // set as first element in list already
     tof = x;
   } else {
     try {
-      tof = UnitConversion::run(m_xunit.toStdString(), "TOF", x, l1, l2,
-                                twoTheta, emode, efixed);
+      tof = UnitConversion::run(*m_xunit, *tofUnit, x, l1, l2, twoTheta, emode,
+                                efixed);
       info->setValue(infoIndex, defaultFormat(tof));
       ++infoIndex;
     } catch (std::invalid_argument &exc) {
       // without TOF we can't get to the other units
-      g_log.debug() << "Error calculating TOF from " << m_xunit.toStdString()
+      g_log.debug() << "Error calculating TOF from " << m_xunit->unitID()
                     << ": " << exc.what() << "\n";
       return;
     }
   }
-
-  const auto &unitFactory = UnitFactory::Instance();
-  const auto tofUnit = unitFactory.create("TOF");
-  for (const auto &unitName : {"Wavelength", "Energy", "dSpacing"}) {
-    if (unitName == m_xunit)
+  for (auto [unit, requiresEFixed] : displayUnits()) {
+    if (unit->unitID() == m_xunit->unitID())
       continue;
-    const auto unit = unitFactory.create(unitName);
-    const auto unitValue =
-        unit->convertSingleFromTOF(tof, l1, l2, twoTheta, 0, 0.0, 0.0);
-    info->setValue(infoIndex, defaultFormat(unitValue));
-    ++infoIndex;
-  }
-  if (efixed > 0.0) {
-    for (const auto &unitName : {"MomentumTransfer", "DeltaE"}) {
-      if (unitName == m_xunit)
-        continue;
-      const auto unit = unitFactory.create(unitName);
+    if (!requiresEFixed || efixed > 0.0) {
+      // the final parameter is unused and a relic
       const auto unitValue =
           unit->convertSingleFromTOF(tof, l1, l2, twoTheta, emode, efixed, 0.0);
       info->setValue(infoIndex, defaultFormat(unitValue));
@@ -137,7 +141,6 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
  */
 void ImageInfoModelMatrixWS::cacheWorkspaceInfo() {
   g_log.debug("Updating cached workspace info");
-  m_workspace->getXMinMax(m_xMin, m_xMax);
   m_spectrumInfo = &m_workspace->spectrumInfo();
   m_instrument = m_workspace->getInstrument();
   if (m_instrument) {
@@ -153,47 +156,66 @@ void ImageInfoModelMatrixWS::cacheWorkspaceInfo() {
   } else {
     g_log.debug("No instrument on MatrixWorkspace");
   }
-  if (auto xunit = m_workspace->getAxis(0)->unit())
-    m_xunit = QString::fromStdString(xunit->unitID());
-  else
-    m_xunit = "x";
-  if (auto yaxis = m_workspace->getAxis(1)) {
-    if (yaxis->isSpectra())
-      m_yunit = "Spectrum";
-    else if (auto yunit = yaxis->unit())
-      m_yunit = QString::fromStdString(yunit->unitID());
-  } else
-    m_yunit = "y";
+  m_xunit = m_workspace->getAxis(0)->unit();
+  m_xIsTOF = (m_xunit->unitID() == "TOF");
+  createItemNames();
 }
 
 /**
  * Create a sequence of names for each item this model will produce
+ * and store it internally
  */
-ImageInfoModel::ImageInfo::StringItems
-ImageInfoModelMatrixWS::createItemNames() const {
-  ImageInfoModel::ImageInfo::StringItems names;
-  names.reserve(itemCount());
-  auto appendName = [&names](const auto name) { names.emplace_back(name); };
-  auto appendNameIfXUnitNot = [this, &names, &appendName](const auto name) {
-    if (name != this->m_xunit)
-      appendName(name);
+void ImageInfoModelMatrixWS::createItemNames() {
+  auto appendName = [this](const auto &name) { m_names.emplace_back(name); };
+  auto shortUnitName = [](const Unit &unit) {
+    const auto caption = unit.caption();
+    if (caption.rfind("-flight") != std::string::npos)
+      return QString("TOF");
+    else if (caption == "q")
+      return QString("|Q|");
+    else
+      return QString::fromStdString(caption);
+  };
+  auto appendUnit = [&appendName, &shortUnitName](const auto &unit) {
+    QString name = shortUnitName(unit);
+    const auto unitLabel = unit.label().utf8();
+    if (!unitLabel.empty()) {
+      name += "(" + MantidQt::API::toQStringInternal(unitLabel) + ")";
+    }
+    appendName(name);
   };
 
-  appendName(m_xunit);
-  appendName(m_yunit);
+  // General information first
+  if (m_xunit && !m_xunit->caption().empty())
+    appendUnit(*m_xunit);
+  else
+    appendName("x");
+  if (auto yaxis = m_workspace->getAxis(1)) {
+    if (yaxis->isSpectra())
+      appendName("Spectrum");
+    else if (auto yunit = yaxis->unit()) {
+      if (!yunit->caption().empty())
+        appendUnit(*yunit);
+      else
+        appendName("y");
+    }
+  } else
+    appendName("y");
   appendName("Signal");
   appendName("Det ID");
   appendName("L2(m)");
   appendName("TwoTheta(Deg)");
   appendName("Azimuthal(Deg)");
-  appendNameIfXUnitNot("TOF");
-  appendNameIfXUnitNot("Wavelength");
-  appendNameIfXUnitNot("Energy");
-  appendNameIfXUnitNot("dSpacing");
-  appendNameIfXUnitNot("q");
-  appendNameIfXUnitNot("DeltaE");
 
-  return names;
+  // Add conversions to common units
+  auto appendUnitIfNotX = [this, &appendUnit](const auto &unit) {
+    if (unit.unitID() == m_xunit->unitID())
+      return;
+    appendUnit(unit);
+  };
+  for (const auto &unitInfo : displayUnits()) {
+    appendUnitIfNotX(*std::get<0>(unitInfo));
+  }
 }
 
 /**
