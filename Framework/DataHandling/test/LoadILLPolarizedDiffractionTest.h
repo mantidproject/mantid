@@ -587,17 +587,23 @@ public:
               outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) * RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+                          RAD_2_DEG,
                       -88.87, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(43) * RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(43) *
+                          RAD_2_DEG,
                       -46.08, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(44) * RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(44) *
+                          RAD_2_DEG,
                       -42.65, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(87) * RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(87) *
+                          RAD_2_DEG,
                       0.13, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(88) * RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(88) *
+                          RAD_2_DEG,
                       -0.80, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(131) * RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(131) *
+                          RAD_2_DEG,
                       41.99, 0.01)
     }
   }
