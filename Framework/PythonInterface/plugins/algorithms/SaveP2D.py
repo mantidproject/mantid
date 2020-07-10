@@ -56,7 +56,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         self.declareProperty('tthMin',
                              50,
                              direction=Direction.Input,
-                             doc='Minimum  for tth values')
+                             doc='Minimum for tth values')
         self.declareProperty('tthMax',
                              120,
                              direction=Direction.Input,
