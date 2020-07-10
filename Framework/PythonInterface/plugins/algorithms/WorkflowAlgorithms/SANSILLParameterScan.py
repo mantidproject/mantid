@@ -145,6 +145,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         _, load_ws_name = needs_loading(self.sample, "Load")
         Load(Filename=self.sample, OutputWorkspace=load_ws_name)
         ConjoinXRuns(InputWorkspaces=load_ws_name, OutputWorkspace="__joined", SampleLogAsXAxis=self.observable)
+        mtd[load_ws_name].delete()
 
         sort_x_axis_output = 'sorted'
         SortXAxis(InputWorkspace="__joined", OutputWorkspace="__" + sort_x_axis_output)
