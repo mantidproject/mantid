@@ -97,7 +97,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         # Workspace name
         Workspace = self.getPropertyValue('Workspace')
 
-        #wo_real = lambda x: np.real(lambertw(np.exp(x), 0))
+        
 
         # Create Output File
         OutFile = self.getPropertyValue('OutputFile') + '.p2d'
