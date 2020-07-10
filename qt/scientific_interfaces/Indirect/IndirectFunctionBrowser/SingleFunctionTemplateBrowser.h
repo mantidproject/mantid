@@ -21,6 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class IDAFunctionParameterEstimation;
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
@@ -33,6 +34,7 @@ class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateBrowser
 public:
   explicit SingleFunctionTemplateBrowser(
       const std::map<std::string, std::string> &functionInitialisationStrings,
+      std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation,
       QWidget *parent = nullptr);
   virtual ~SingleFunctionTemplateBrowser() = default;
   void updateAvailableFunctions(const std::map<std::string, std::string>

@@ -21,12 +21,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class IDAFunctionParameterEstimation;
+
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
 class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateModel : public FunctionModel {
 public:
   SingleFunctionTemplateModel();
+  SingleFunctionTemplateModel(
+      std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
   void setFunction(IFunction_sptr fun) override;
   void updateAvailableFunctions(
       const std::map<std::string, std::string> &functionInitialisationStrings);
@@ -41,6 +45,8 @@ public:
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
 
+  void estimateFunctionParameters();
+
 private:
   QString m_fitType;
   DataForParameterEstimationCollection m_estimationData;
@@ -48,6 +54,8 @@ private:
   QMap<QString, QStringList> m_globalParameterStore;
   std::string m_resolutionName;
   TableDatasetIndex m_resolutionIndex;
+  // Parameter estimation
+  std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
 };
 
 } // namespace IDA

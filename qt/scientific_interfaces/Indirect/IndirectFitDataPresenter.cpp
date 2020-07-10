@@ -177,7 +177,6 @@ void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
 void IndirectFitDataPresenter::handleSampleLoaded(
     const QString &workspaceName) {
   setModelWorkspace(workspaceName);
-  emit dataChanged();
   updateRanges();
   emit dataChanged();
 }

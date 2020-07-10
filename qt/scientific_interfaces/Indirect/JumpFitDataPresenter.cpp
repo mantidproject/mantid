@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitDataPresenter.h"
 #include "JumpFitDataTablePresenter.h"
+#include "IDAFunctionParameterEstimation.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
