@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
-import mock
+from unittest import mock
 
 from Interface.ui.drill.model.ParameterController import ParameterController, \
                                                          ControllerSignals, \
