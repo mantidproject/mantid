@@ -36,7 +36,7 @@ public:
         FunctionFactory::Instance().createInitializedMultiDomainFunction(
             "name=ExpDecay, Height=5, Lifetime=2", 2);
     auto doublePulseFunction =
-        getDoublePulseFunction(initialFunction, 5.0, 1.0, 2.0);
+        getDoublePulseMultiDomainFunction(initialFunction, 5.0, 1.0, 2.0);
     TS_ASSERT_EQUALS(
         "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
         "FixResolution=false,NumDeriv=true,$domains=i;name=ExpDecay,Height=5,"
@@ -48,17 +48,6 @@ public:
         "Height=1,Centre=-2.5,ties=(Height=1,Centre=-2.5);name=DeltaFunction,"
         "Height=2,Centre=2.5,ties=(Height=2,Centre=2.5)))",
         doublePulseFunction->asString());
-  }
-
-  void
-  test_double_pulse_function_throws_exception_if_inner_function_is_composite() {
-    auto initialFunction =
-        FunctionFactory::Instance().createInitializedMultiDomainFunction(
-            "(name=ExpDecay, Height=5, Lifetime=2; name=ExpDecay, Height=7, "
-            "Lifetime=3)",
-            5);
-    TS_ASSERT_THROWS(getDoublePulseFunction(initialFunction, 5.0, 1.0, 2.0),
-                     const std::runtime_error &);
   }
 
   void
@@ -95,7 +84,7 @@ public:
     auto initialFunction =
         FunctionFactory::Instance().createInitializedMultiDomainFunction(
             "(name=ExpDecay, Height=5, Lifetime=2; name=ExpDecay, Height=7, "
-            "Lifetime=3)",
+            "Lifetime = 3) ",
             5);
     TS_ASSERT_THROWS(extractInnerFunction(initialFunction),
                      const std::runtime_error &);

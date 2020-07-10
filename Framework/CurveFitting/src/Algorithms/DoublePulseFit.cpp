@@ -61,9 +61,10 @@ void setMultiDataProperties(
                            "_" + std::to_string(i));
 }
 
-Mantid::API::IFunction_sptr getDoublePulseFunction(
-    std::shared_ptr<const API::ParamFunction> const &function, double offset,
-    double firstPulseWeight, double secondPulseWeight) {
+Mantid::API::IFunction_sptr
+getDoublePulseFunction(std::shared_ptr<const API::IFunction> const &function,
+                       double offset, double firstPulseWeight,
+                       double secondPulseWeight) {
   auto clonedFunction = function->clone();
 
   auto convolution =
@@ -90,23 +91,16 @@ Mantid::API::IFunction_sptr getDoublePulseFunction(
   return convolution;
 }
 
-Mantid::API::IFunction_sptr getDoublePulseFunction(
+Mantid::API::IFunction_sptr getDoublePulseMultiDomainFunction(
     std::shared_ptr<const API::MultiDomainFunction> const &initialFunction,
     double offset, double firstPulseWeight, double secondPulseWeight) {
   auto doublePulseFunc = std::make_shared<API::MultiDomainFunction>();
   for (size_t domain = 0; domain < initialFunction->getNumberDomains();
        domain++) {
-    auto innerFunction = std::dynamic_pointer_cast<API::ParamFunction>(
-        initialFunction->getFunction(domain));
-    if (innerFunction) {
-      auto twoPulseInnerFunction = getDoublePulseFunction(
-          innerFunction, offset, firstPulseWeight, secondPulseWeight);
-      doublePulseFunc->addFunction(twoPulseInnerFunction);
-      doublePulseFunc->setDomainIndex(domain, domain);
-    } else {
-      throw std::runtime_error("Convolution does not support composite "
-                               "functions. DoublePulseFit.cpp");
-    }
+    auto twoPulseInnerFunction = getDoublePulseFunction(initialFunction->getFunction(domain), offset,
+                               firstPulseWeight, secondPulseWeight);
+    doublePulseFunc->addFunction(twoPulseInnerFunction);
+    doublePulseFunc->setDomainIndex(domain, domain);
   }
   return doublePulseFunc;
 }
@@ -226,20 +220,16 @@ void DoublePulseFit::execConcrete() {
   auto pulseOffset = getProperty("PulseOffset");
   auto firstPulseWeight = getProperty("FirstPulseWeight");
   auto secondPulseWeight = getProperty("SecondPulseWeight");
-  if (auto paramFunction =
-          std::dynamic_pointer_cast<Mantid::API::ParamFunction>(function)) {
-    doublePulseFunction = getDoublePulseFunction(
-        paramFunction, pulseOffset, firstPulseWeight, secondPulseWeight);
-  } else if (auto multiDomainFunction =
-                 std::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(
-                     function)) {
-    doublePulseFunction = getDoublePulseFunction(
+  if (auto multiDomainFunction =
+          std::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(
+              function)) {
+    doublePulseFunction = getDoublePulseMultiDomainFunction(
         multiDomainFunction, pulseOffset, firstPulseWeight, secondPulseWeight);
   } else {
-    throw std::runtime_error("Incompatible function form. DoublePulseFit.cpp");
+    doublePulseFunction = getDoublePulseFunction(
+        function, pulseOffset, firstPulseWeight, secondPulseWeight);
   }
 
-  g_log.notice(doublePulseFunction->asString());
   auto newFunc = Mantid::API::FunctionFactory::Instance().createInitialized(
       doublePulseFunction->asString());
   auto newFunc1 = Mantid::API::FunctionFactory::Instance().createInitialized(
@@ -247,8 +237,6 @@ void DoublePulseFit::execConcrete() {
       "0.2,Sigma=0.2,Frequency=1,Phi=0;(name=DeltaFunction,Height=1,Centre=-0."
       "33,ties=(Height=1,Centre=-0.33);name=DeltaFunction,Height=1,Centre=0,"
       "ties=(Height=1,Centre=0))");
-  g_log.notice(newFunc->asString());
-  g_log.notice(newFunc1->asString());
   runFitAlgorith(fitAlg, doublePulseFunction, getProperty("MaxIterations"));
 
   createOutput(fitAlg, doublePulseFunction);
