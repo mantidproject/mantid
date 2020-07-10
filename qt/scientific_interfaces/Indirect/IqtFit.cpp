@@ -70,7 +70,9 @@ void IqtFit::setupFitTab() {
 
 EstimationDataSelector IqtFit::getEstimationDataSelector() const {
   return
-      [](const MantidVec &x, const MantidVec &y, const std::pair<double, double> range) -> DataForParameterEstimation {
+      [](const MantidVec &x, const MantidVec &y,
+         const std::pair<double, double> range) -> DataForParameterEstimation {
+        (void)range;
         size_t const n = 4;
         if (y.size() < n + 1)
           return DataForParameterEstimation{{}, {}};

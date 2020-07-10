@@ -44,7 +44,8 @@ JumpFit::JumpFit(QWidget *parent)
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
   auto parameterEstimation = createParameterEstimation();
   auto templateBrowser = new SingleFunctionTemplateBrowser(
-      widthFits, std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
+      widthFits,
+      std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->dockArea->m_fitDataView,
@@ -105,8 +106,8 @@ void JumpFit::setRunEnabled(bool enable) {
 }
 
 EstimationDataSelector JumpFit::getEstimationDataSelector() const {
-  return [](const std::vector<double> &,
-            const std::vector<double> &, const std::pair<double, double> range) -> DataForParameterEstimation {
+  return [](const std::vector<double> &, const std::vector<double> &,
+            const std::pair<double, double>) -> DataForParameterEstimation {
     return DataForParameterEstimation{};
   };
 }

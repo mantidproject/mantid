@@ -94,14 +94,14 @@ void SingleFunctionTemplateModel::updateParameterEstimationData(
 }
 
 void SingleFunctionTemplateModel::estimateFunctionParameters() {
-  if (m_estimationData.size() != getNumberDomains()) {
+  if (m_estimationData.size() != static_cast<size_t>(getNumberDomains())) {
     return;
   }
   // Estimate function parameters - parameters are updated in-place.
   for (int i = 0; i < getNumberDomains(); ++i) {
-    auto& function = getSingleFunction(i);
-    m_parameterEstimation->estimateFunctionParameters(
-        function, m_estimationData[i]);
+    auto function = getSingleFunction(i);
+    m_parameterEstimation->estimateFunctionParameters(function,
+                                                      m_estimationData[i]);
   }
 }
 

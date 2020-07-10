@@ -30,6 +30,7 @@ Improvements
 - OutputCompositeMembers and ConvolveOutputs have been added as options in the ConvFit tab of Indirect Data Analysis.
 - Improved the responsiveness of the function browsers within the Indirect Data Analysis interface.
 - Raw data will now be plotted from the input workspace, rather than the fit workspace, allowing the full range of data to be seen irrespective of the fitting bounds.
+- Added fit parameter estimations to the MSD fitting tab within the Indirect Data Analysis interface.
 
 Bug Fixes
 #########

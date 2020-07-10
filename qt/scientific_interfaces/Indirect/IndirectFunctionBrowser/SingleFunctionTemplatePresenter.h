@@ -7,9 +7,9 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "IFQFitObserver.h"
 #include "ParameterEstimation.h"
-#include "IDAFunctionParameterEstimation.h"
 #include "SingleFunctionTemplateModel.h"
 
 #include <QMap>

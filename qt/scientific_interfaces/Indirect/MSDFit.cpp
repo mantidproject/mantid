@@ -116,7 +116,7 @@ void MSDFit::fitFunctionChanged() {
 
 std::string MSDFit::fitTypeString() const {
   // This function attempts to work out which fit type is being done. It will
-  // currently only recognize the three default types.
+  // currently only recognise the three default types.
   const auto numberOfGauss = numberOfCustomFunctions("MsdGauss");
   const auto numberOfPeters = numberOfCustomFunctions("MsdPeters");
   const auto numberOfYi = numberOfCustomFunctions("MsdYi");

@@ -119,7 +119,7 @@ MatrixWorkspace_sptr castToMatrixWorkspace(const Workspace_sptr &workspace) {
 }
 // Need to adjust the guess range so the first data point isn't thrown away
 constexpr double RANGEADJUSTMENT = 1e-5;
-inline void adjustRange(std::pair<double, double>& range) {
+inline void adjustRange(std::pair<double, double> &range) {
   range.first = (1 - RANGEADJUSTMENT) * range.first;
   range.second = (1 + RANGEADJUSTMENT) * range.second;
 }
