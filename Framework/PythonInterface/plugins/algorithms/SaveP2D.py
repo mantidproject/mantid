@@ -136,7 +136,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                 dp_center = (dp + Data.getDimension(1).getX(cdp + 1)) / 2.
                 last_dp = dp
                 pr.report("Processing")
-                sys.stdout.write("{:4.0f}%".format(cdp * 100. / ndp))
+                print("{:4.0f}%".format(cdp * 100. / ndp))
                 # iterate over all dSpacing values for the selected dPerpendicular value
                 for cd in range(Data.getDimension(0).getNBins()):
                     d = Data.dataX(cdp)[cd]
