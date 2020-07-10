@@ -50,6 +50,7 @@ class SliceViewer(object):
                                                       self.model.can_normalize_workspace(), parent)
         self.view.data_view.create_axes_orthogonal(
             redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
+        self.view.data_view.image_info_widget.setWorkspace(ws)
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
@@ -59,11 +60,7 @@ class SliceViewer(object):
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        if self.model.get_ws_type() == WS_TYPE.MATRIX:
-            self.view.data_view.image_info_widget.setWorkspace(ws)
-
         self.view.setWindowTitle(self.model.get_title())
-
         self.new_plot()
 
         # Start the GUI with zoom selected.
