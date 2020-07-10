@@ -939,8 +939,9 @@ public:
     void setWorkspace(SIP_PYOBJECT);
     %MethodCode
     try {
-      auto extractor = Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(boost::python::object(boost::python::handle<>(a0)));
-      sipCpp->setWorkspace(extractor());
+      using boost::python::extract;
+      using Mantid::PythonInterface::ExtractSharedPtr;
+      sipCpp->setWorkspace(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
     } catch(const std::exception & exc) {
       SIP_BLOCK_THREADS
       PyErr_SetString(PyExc_RuntimeError, exc.what());
