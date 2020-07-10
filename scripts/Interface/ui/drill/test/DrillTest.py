@@ -280,6 +280,7 @@ class DrillTest(unittest.TestCase):
                         False,
                         False,
                         False,
+                        False,
                         False
                         ]
                     },

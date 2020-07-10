@@ -62,6 +62,7 @@ class RundexSettings(object):
                 "ReferenceFiles",
                 "OutputWorkspace",
                 "WedgeWorkspace",
+                "SampleThickness",
                 "CustomOptions"
                 ],
             OMEGA_SCAN: [
