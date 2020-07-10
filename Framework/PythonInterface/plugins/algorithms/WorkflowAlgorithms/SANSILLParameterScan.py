@@ -148,6 +148,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         sort_x_axis_output = 'sorted'
         SortXAxis(InputWorkspace="__joined", OutputWorkspace="__" + sort_x_axis_output)
+        mtd["__" + sort_x_axis_output].getAxis(0).setUnit("label").setLabel('Omega', 'degrees')
 
         load_sensitivity, sens_input = needs_loading(self.sensitivity, 'Sensitivity')
         self.progress.report('Loading sensitivity')
