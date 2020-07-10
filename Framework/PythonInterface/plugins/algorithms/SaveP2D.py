@@ -166,7 +166,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                                     'lambdaMin'
                             ) < lhkl < self.getProeprtyValue('lambdaMax'):
                                 if self.getPropertyValue(
-                                        'dMin') < d < self.getProeprtyValue(
+                                        'dMin') < d < self.getPropertyValue(
                                             'dMax'):
                                     if self.getPropertyValue(
                                             'dpMin'
