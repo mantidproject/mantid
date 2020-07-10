@@ -13,6 +13,8 @@ from qtpy.QtWidgets import QApplication
 from qtpy.QtTest import QTest
 from qtpy.QtCore import Qt, QPoint
 
+from mantid.kernel import config
+
 from Interface.ui.drill.view.DrillView import DrillView
 from Interface.ui.drill.model.specifications import RundexSettings
 
@@ -133,6 +135,8 @@ class DrillTest(unittest.TestCase):
     ###########################################################################
 
     def setUp(self):
+        self.facility = config['default.facility']
+        config['default.facility'] = "ILL"
         # avoid popup messages
         patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
@@ -141,6 +145,9 @@ class DrillTest(unittest.TestCase):
         self.view = DrillView()
         self.presenter = self.view._presenter
         self.model = self.presenter.model
+
+    def tearDown(self):
+        config['default.facility'] = self.facility
 
     def test_changeInstrument(self):
         for i in range(self.view.instrumentselector.count()):
