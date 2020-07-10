@@ -42,6 +42,7 @@ Improvements
   These changes will make the addition of new functionality in the future easier.
 - The plot guess option within the fitting tab will now update when a parameter is changed.
 - Have updated the FDA GUI so that it functions correctly for frquency transforms and single fits.
+- Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
 
 Bug fixes
 ---------
