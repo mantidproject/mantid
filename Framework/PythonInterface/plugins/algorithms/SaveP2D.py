@@ -108,7 +108,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         lform = '{:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}\n'
 
         of = open(OutFile, 'w')
-        if (of):
+        with open(OutFile, 'w') as of:
             print('Exporting: ' + OutFile + '\n')
             # Create File header with additional information
             of.write('#Title: ' + Data.getTitle() + "\n")
