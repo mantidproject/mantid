@@ -22,11 +22,34 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+#include <tuple>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+
+std::tuple<std::string, std::string> commonSetUp() {
+  ConfigService::Instance().appendDataSearchSubDir("ILL/D7/");
+
+  auto oldFacility = ConfigService::Instance().getFacility().name();
+  ConfigService::Instance().setFacility("ILL");
+
+  auto oldInstrument = ConfigService::Instance().getInstrument().name();
+  ConfigService::Instance().setString("default.instrument", "D7");
+
+  return std::make_tuple(oldFacility, oldInstrument);
+}
+
+void commonTearDown(const std::string &oldFacility,
+                    const std::string &oldInstrument) {
+  if (!oldFacility.empty()) {
+    ConfigService::Instance().setFacility(oldFacility);
+  }
+  if (!oldInstrument.empty()) {
+    ConfigService::Instance().setString("default.instrument", oldInstrument);
+  }
+}
 
 class LoadILLPolarizedDiffractionTest : public CxxTest::TestSuite {
 public:
@@ -40,24 +63,10 @@ public:
   }
 
   void setUp() override {
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D7/");
-
-    m_oldFacility = ConfigService::Instance().getFacility().name();
-    ConfigService::Instance().setFacility("ILL");
-
-    m_oldInstrument = ConfigService::Instance().getInstrument().name();
-    ConfigService::Instance().setString("default.instrument", "D7");
+    std::tie(m_oldFacility, m_oldInstrument) = commonSetUp();
   }
 
-  void tearDown() override {
-    if (!m_oldFacility.empty()) {
-      ConfigService::Instance().setFacility(m_oldFacility);
-    }
-    if (!m_oldInstrument.empty()) {
-      ConfigService::Instance().setString("default.instrument",
-                                          m_oldInstrument);
-    }
-  }
+  void tearDown() override { commonTearDown(m_oldFacility, m_oldInstrument); }
 
   void test_Init() {
     LoadILLPolarizedDiffraction alg;
@@ -624,12 +633,16 @@ public:
   LoadILLPolarizedDiffractionTestPerformance() {}
 
   void setUp() override {
+    std::tie(m_oldFacility, m_oldInstrument) = commonSetUp();
+
     m_alg.initialize();
     m_alg.setChild(true);
     m_alg.setPropertyValue("Filename", "395850");
     m_alg.setPropertyValue("OutputWorkspace", "_outWS");
     m_alg.setPropertyValue("PositionCalibration", "Nexus");
   }
+
+  void tearDown() override { commonTearDown(m_oldFacility, m_oldInstrument); }
 
   void test_performance() {
     for (int i = 0; i < 50; ++i) {
@@ -639,4 +652,6 @@ public:
 
 private:
   LoadILLPolarizedDiffraction m_alg;
+  std::string m_oldFacility;
+  std::string m_oldInstrument;
 };
