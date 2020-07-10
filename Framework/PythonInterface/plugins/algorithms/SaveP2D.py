@@ -186,7 +186,6 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                     else:
                         # Write data into outfile
                         of.write(lform.format(thkl, lhkl, d, dp_center, Y))
-            of.close()
             print('\n\nExported: ' + OutFile + '\n')
 
 
