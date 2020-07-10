@@ -133,7 +133,7 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
   // calculate standard deviation of mean from sample mean
   std::transform(attFactorErrors.begin(), attFactorErrors.end(),
                  attFactorErrors.begin(), [this](double v) -> double {
-                   return v / sqrt(static_cast<double> (m_nevents));
+                   return v / sqrt(static_cast<double>(m_nevents));
                  });
 }
 
