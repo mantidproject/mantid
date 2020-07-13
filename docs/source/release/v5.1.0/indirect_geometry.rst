@@ -26,13 +26,16 @@ Improvements
 - The centre parameter has been added to delta function in the ConvFit tab of Indirect Data Analysis.
 - :ref- :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` will produce energy transfer axis which takes into account that doppler channels are linear in velocity (not in time, neither energy as was assumed before). This will affect doppler mode QENS only.
 - Added docking and undocking to the plot window and function browser window for the fit tabs in Indirect Data Analysis on workbench.
-- Update the Indirect, Corrections user interface to use the :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` algorithm
+- Update the Indirect, Corrections user interface to use the :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` algorithm and make it work for elastic datasets
 - OutputCompositeMembers and ConvolveOutputs have been added as options in the ConvFit tab of Indirect Data Analysis.
+- Improved the responsiveness of the function browsers within the Indirect Data Analysis interface.
+- Raw data will now be plotted from the input workspace, rather than the fit workspace, allowing the full range of data to be seen irrespective of the fitting bounds.
 
 Bug Fixes
 #########
 
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work correctly for annular sample in a container.
 - FQ and Msd tabs now label output workspaces with the fitting function.
+- Fixed a crash when switching between linear and flat backgrounds in the ConvFit tab.
 
 :ref:`Release 5.1.0 <v5.1.0>`

@@ -44,15 +44,14 @@ void SingleFunctionTemplatePresenter::updateAvailableFunctions(
 }
 
 void SingleFunctionTemplatePresenter::setFitType(const QString &name) {
-  m_view->clear();
-  m_model.setFitType(name);
   if (name == "None")
     return;
+  m_view->clear();
+  m_model.setFitType(name);
   auto functionParameters = m_model.getParameterNames();
   for (auto &parameter : functionParameters) {
     m_view->addParameter(parameter, m_model.getParameterDescription(parameter));
   }
-
   setErrorsEnabled(false);
   updateView();
   emit functionStructureChanged();
@@ -183,10 +182,10 @@ void SingleFunctionTemplatePresenter::setLocalParameterTie(
 void SingleFunctionTemplatePresenter::updateView() {
   if (m_model.getFitType() == "None")
     return;
-  for (auto parameterName : m_model.getParameterNames()) {
-    m_view->setParameterValue(parameterName,
-                              m_model.getParameter(parameterName),
-                              m_model.getParameterError(parameterName));
+  for (auto &parameterName : m_model.getParameterNames()) {
+    m_view->setParameterValueQuietly(parameterName,
+                                     m_model.getParameter(parameterName),
+                                     m_model.getParameterError(parameterName));
   }
 }
 

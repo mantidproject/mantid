@@ -16,6 +16,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::DeltaEMode;
 
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
@@ -76,10 +77,13 @@ MatrixWorkspace_sptr convertUnits(const MatrixWorkspace_sptr &workspace,
   convertAlg->setChild(true);
   convertAlg->setProperty("InputWorkspace", workspace);
   convertAlg->setProperty("OutputWorkspace", "__converted");
-  convertAlg->setProperty(
-      "EMode", Mantid::Kernel::DeltaEMode::asString(workspace->getEMode()));
-  convertAlg->setProperty("EFixed",
-                          workspace->getEFixed(workspace->getDetector(0)));
+  auto eMode = workspace->getEMode();
+  convertAlg->setProperty("EMode", DeltaEMode::asString(eMode));
+  if ((eMode == DeltaEMode::Type::Direct) ||
+      (eMode == DeltaEMode::Type::Indirect)) {
+    convertAlg->setProperty("EFixed",
+                            workspace->getEFixed(workspace->getDetector(0)));
+  }
   convertAlg->setProperty("Target", target);
   convertAlg->execute();
   return convertAlg->getProperty("OutputWorkspace");
@@ -486,7 +490,8 @@ void AbsorptionCorrections::convertSpectrumAxes(
 void AbsorptionCorrections::convertSpectrumAxes(
     const MatrixWorkspace_sptr &correction,
     const MatrixWorkspace_sptr &sample) {
-  if (correction && sample && getEMode(sample) == "Indirect") {
+  if (correction && sample &&
+      sample->getEMode() == DeltaEMode::Type::Indirect) {
     try {
       convertSpectrumAxis(correction, getEFixed(correction));
     } catch (std::runtime_error const &) {
