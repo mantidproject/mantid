@@ -60,7 +60,7 @@ Usage
     # Create a 2D Workspace containing d and dPerpendicular values with intensities
     CreateWorkspace(OutputWorkspace = 'Usage_Example', DataX = xDataTotal, DataY = zDataTotal, DataE = eDataTotal, WorkspaceTitle = 'test', NSpec = nSpec, UnitX = 'dSpacing', VerticalAxisUnit = 'dSpacingPerpendicular', VerticalAxisValues = yData)
     # Create a .p2d file containing the testdata	
-    PrintP2D(Workspace = "Usage_Example", OutputFile = "Usage_Example", RemoveNaN = False, RemoveNegatives = False, CutData = False)
+    SaveP2D(Workspace = "Usage_Example", OutputFile = "Usage_Example", RemoveNaN = False, RemoveNegatives = False, CutData = False)
 	
 Output:
 
