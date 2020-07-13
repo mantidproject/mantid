@@ -36,7 +36,7 @@ Usage
 
 **Example: Create a ".p2d" file from a 2D Workspace. Remember to change the Filepath for the OutputFile!**
 
-.. testcode:: PrintP2D
+.. testcode:: SaveP2D
 
 	# create a 2D Workspace
     # repeat this block for each spectrum
@@ -64,7 +64,7 @@ Usage
 	
 Output:
 
-.. testoutput:: PrintP2D
+.. testoutput:: SaveP2D
 
 	The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda get calculated in the algorithm)
 	
@@ -101,7 +101,7 @@ Output:
     25.2199975      3.4930167      8.0000000      3.5000000      1.0000000
     22.3888960      3.4945073      9.0000000      3.5000000      1.0000000
 
-	
+
 .. categories::
 
 .. sourcelink::
