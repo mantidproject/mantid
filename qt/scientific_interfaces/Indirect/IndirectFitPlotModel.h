@@ -49,6 +49,7 @@ public:
   double calculateHWHMMaximum(double minimum) const;
   double calculateHWHMMinimum(double maximum) const;
   bool canCalculateGuess() const;
+  bool isResolutionLoaded() const;
 
   void setActiveIndex(TableDatasetIndex index);
   void setActiveSpectrum(WorkspaceIndex spectrum);

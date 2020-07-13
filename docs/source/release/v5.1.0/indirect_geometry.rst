@@ -37,5 +37,6 @@ Bug Fixes
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work correctly for annular sample in a container.
 - FQ and Msd tabs now label output workspaces with the fitting function.
 - Fixed a crash when switching between linear and flat backgrounds in the ConvFit tab.
+- Disabled the plot guess checkbox within the ConvFit tab if a resolution file has not been loaded. This prevents a hard crash which can occur.
 
 :ref:`Release 5.1.0 <v5.1.0>`
