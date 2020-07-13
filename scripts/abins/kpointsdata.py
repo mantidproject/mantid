@@ -25,34 +25,24 @@ class KpointsData:
     in the dictionary is a numpy array. The meaning of keys in the
     dictionary is as follows:
 
-    "weights" - weights of all k-points; weights.shape == (self._num_k,);
+    "weights" - weights of all k-points; weights.shape == (num_k,);
 
-    "k_vectors"  - k_vectors of all k-points;  k_vectors.shape == (self._num_k, 3)
+    "k_vectors"  - k_vectors of all k-points;  k_vectors.shape == (num_k, 3)
 
-    "frequencies" - frequencies for all k-points; frequencies.shape == (self._num_k, self._num_freq)
+    "frequencies" - frequencies for all k-points; frequencies.shape == (num_k, num_freq)
 
     "atomic_displacements - atomic displacements for all k-points;
-                            atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, 3)
+                            atomic_displacements.shape == (num_k, num_atoms, num_freq, 3)
 
     """
 
-    def __init__(self, *, num_k, num_atoms, items):
+    def __init__(self, *, items):
         """
         :param num_k: total number of k-points (int)
         :param num_atoms: total number of atoms in the unit cell (int)
         :param items: dict of numpy arrays "weights", "k_vectors", "frequencies" and "atomic_displacements"
         """
         super(KpointsData, self).__init__()
-
-        if isinstance(num_k, int) and num_k > 0:
-            self._num_k = num_k
-        else:
-            raise ValueError("Invalid number of k-points.")
-
-        if isinstance(num_atoms, int) and num_atoms > 0:
-            self._num_atoms = num_atoms  # number of displacements for one k-point
-        else:
-            raise ValueError("Invalid number of atoms.")
 
         self._data = {}
 
@@ -74,9 +64,9 @@ class KpointsData:
 
         #  "weights"
         weights = items["weights"]
+        num_k = weights.size
 
         if not (isinstance(weights, np.ndarray)
-                and weights.shape == (self._num_k,)
                 and weights.dtype.num == FLOAT_ID
                 and np.allclose(weights, weights[weights >= 0])):
 
@@ -86,7 +76,7 @@ class KpointsData:
         k_vectors = items["k_vectors"]
 
         if not (isinstance(k_vectors, np.ndarray)
-                and k_vectors.shape == (self._num_k, dim)
+                and k_vectors.shape == (num_k, dim)
                 and k_vectors.dtype.num == FLOAT_ID):
 
             raise ValueError("Invalid value of k_vectors.")
@@ -95,15 +85,17 @@ class KpointsData:
         frequencies = items["frequencies"]
         num_freq = frequencies.shape[1]
         if not (isinstance(frequencies, np.ndarray)
-                and frequencies.shape == (self._num_k, num_freq)
+                and frequencies.shape == (num_k, num_freq)
                 and frequencies.dtype.num == FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
 
         # "atomic_displacements"
         atomic_displacements = items["atomic_displacements"]
+        num_atoms = atomic_displacements.shape[1]
+
         if not (isinstance(
                 atomic_displacements, np.ndarray)
-                and atomic_displacements.shape == (self._num_k, self._num_atoms, num_freq, dim)
+                and atomic_displacements.shape == (weights.size, num_atoms, num_freq, dim)
                 and atomic_displacements.dtype.num == COMPLEX_ID):
 
             raise ValueError("Invalid value of atomic_displacements.")
@@ -117,7 +109,7 @@ class KpointsData:
         indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
         for k in range(frequencies.shape[0]):
             freq_dic[str(k)] = frequencies[k, indx[k]]
-            for atom in range(self._num_atoms):
+            for atom in range(num_atoms):
                 temp = atomic_displacements[k]
                 atomic_displacements_dic[str(k)] = temp[:, indx[k]]
 

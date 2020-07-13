@@ -25,8 +25,6 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     in INS analysis.
     """
     def __init__(self, input_ab_initio_filename=None):
-        self._num_k = None
-        self._num_atoms = None
         self._sample_form = None
         self._ab_initio_program = None
         self._clerk = abins.IO(input_filename=input_ab_initio_filename,
@@ -45,8 +43,6 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
 
           2) Method should read from an ab initio file information about frequencies, atomic displacements,
           k-point vectors, weights of k-points and ions.
-
-             As a side-effect, self._num_k and self._num_atom should be set
 
           3) Method should reconstruct data for symmetry equivalent k-points
              (protected method _recover_symmetry_points).
@@ -131,8 +127,6 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors",
                                                   "atomic_displacements", "unit_cell", "atoms"])
         datasets = data["datasets"]
-        self._num_k = datasets["k_vectors"].shape[0]
-        self._num_atoms = len(datasets["atoms"])
 
         loaded_data = {"frequencies": datasets["frequencies"],
                        "weights": datasets["weights"],
@@ -151,9 +145,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         :returns: Returns an object of type AbinsData
         """
 
-        k_points = abins.KpointsData(num_atoms=self._num_atoms,
-                                     num_k=self._num_k,
-                                     #      1D [k] (one entry corresponds to weight of one k-point)
+        k_points = abins.KpointsData(#      1D [k] (one entry corresponds to weight of one k-point)
                                      items={"weights": data["weights"],
                                             # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
                                             "k_vectors": data["k_vectors"],

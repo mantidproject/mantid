@@ -17,8 +17,7 @@ from abins import KpointsData
 class CalculateQToscaTest(unittest.TestCase):
     def setUp(self):
         self._tosca_instrument = abins.instruments.get_instrument("TOSCA")
-        self._raw_data = KpointsData(num_k=1, num_atoms=2,
-                                     items={"k_vectors": np.asarray([[0.0, 0.0, 0.0]]),
+        self._raw_data = KpointsData(items={"k_vectors": np.asarray([[0.0, 0.0, 0.0]]),
                                             "weights": np.asarray([0.3]),
                                             # 6 frequencies, globally frequencies are in hartree units if necessary
                                             # they are converted to cm^-1
