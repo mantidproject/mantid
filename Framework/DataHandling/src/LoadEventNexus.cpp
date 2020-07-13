@@ -439,16 +439,21 @@ std::pair<DateAndTime, DateAndTime>
 firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
 
-  if (!file.hasAttr("offset"))
-    throw std::runtime_error("No ISO8601 offset attribute provided");
-
   const auto heldTimeZeroType = file.getInfo().type;
   // Nexus only requires event_time_zero to be a NXNumber, we support two
   // possibilities for held type
 
   std::string isooffset; // ISO8601 offset
-  file.getAttr("offset", isooffset);
-  DateAndTime offset(isooffset);
+  DateAndTime offset;
+  // According to the Nexus standard, if the offset is not present, it implies
+  // the offset is and absolute timestamp, which is relative to the start of
+  // Unix epoch (https://manual.nexusformat.org/classes/base_classes/NXlog.html)
+  if (!file.hasAttr("offset")) {
+    offset = DateAndTime("1970-01-01T00:00:00Z");
+  } else {
+    file.getAttr("offset", isooffset);
+    offset = DateAndTime(isooffset);
+  }
   std::string units; // time units
   if (file.hasAttr("units"))
     file.getAttr("units", units);
