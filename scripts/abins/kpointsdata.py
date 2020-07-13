@@ -4,30 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict, TypeVar, Type
 import numpy as np
 
-from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, ALL_KEYWORDS_K_DATA,
+from abins.constants import (ACOUSTIC_PHONON_THRESHOLD,
                              COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
 
 
-K = TypeVar('K', bound='KpointsData')  # Type variable for KpointsData or a subclass
-
 class KpointsData:
     """Class storing atomic frequencies and displacements at specific k-points
-
-    The data should be provided as a dictionary with the following form:
-
-    data = {"frequencies": numpy.array,
-            "atomic_displacements: numpy.array,
-            "weights": numpy.array,
-            "k_vectors": numpy.array,
-            "unit_cell": numpy.array}
-
-
-    Each entry in the dictionary corresponds to all k-points. Each item
-    in the dictionary is a numpy array. The meaning of keys in the
-    dictionary is as follows:
 
     "weights" - weights of all k-points; weights.shape == (num_k,);
 
@@ -42,7 +26,8 @@ class KpointsData:
                   unit_cell.shape == (3, 3)
 
     """
-    def __init__(self, *, frequencies, atomic_displacements, weights, k_vectors, unit_cell):
+    def __init__(self, *, frequencies: np.ndarray, atomic_displacements: np.ndarray,
+                 weights: np.ndarray, k_vectors: np.ndarray, unit_cell: np.ndarray) -> None:
         super().__init__()
 
         self._data = {}
@@ -91,7 +76,7 @@ class KpointsData:
         k_vectors_dic = {}
 
         indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
-        for k in range(frequencies.shape[0]):
+        for k in range(num_k):
             freq_dic[str(k)] = frequencies[k, indx[k]]
             for atom in range(num_atoms):
                 temp = atomic_displacements[k]
@@ -105,32 +90,6 @@ class KpointsData:
         self._data["atomic_displacements"] = atomic_displacements_dic
         self._data["k_vectors"] = k_vectors_dic
         self._data["weights"] = weights_dic
-
-    @classmethod
-    def from_dict(cls: Type[K], dct: Dict[str, np.ndarray]) -> K:
-        """Construct an object storing atomic frequencies and displacements at specific k-points
-
-        :param dct: collection of numpy arrays "weights", "k_vectors", "frequencies" and "atomic_displacements"
-
-        The data should be provided as a dictionary with the following form:
-
-        data = {"frequencies": numpy.array,
-                "atomic_displacements: numpy.array,
-                "weights": numpy.array,
-                "k_vectors": numpy.array,
-                "unit_cell": numpy.array}
-        """
-        if not isinstance(dct, dict):
-            raise TypeError("Expected a dictionary.")
-
-        if not sorted(dct.keys()) == sorted(ALL_KEYWORDS_K_DATA):
-            raise ValueError("Invalid structure of dictionary for KpointsData.from_dict()")
-
-        return cls(frequencies=dct["frequencies"],
-                   atomic_displacements=dct["atomic_displacements"],
-                   weights=dct["weights"],
-                   k_vectors=dct["k_vectors"],
-                   unit_cell=dct["unit_cell"])
 
     def get_gamma_point_data(self):
         """
@@ -156,7 +115,6 @@ class KpointsData:
         return k_points
 
     def extract(self):
-
         return self._data
 
     def __str__(self):

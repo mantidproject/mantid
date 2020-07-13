@@ -12,7 +12,6 @@ from abins.constants import ACOUSTIC_PHONON_THRESHOLD
 
 
 class KpointsDataTest(unittest.TestCase):
-
     _good_data_1 = {"k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
                     "weights": np.asarray([0.3, 0.2, 0.5]),
                     "frequencies": np.asarray([[1.0, 2.0, 34.0, 4.9, 1.0, 2.0],
@@ -72,24 +71,6 @@ class KpointsDataTest(unittest.TestCase):
                                              [0., 9.55, 0.],
                                              [0., 0., 6.92]])
                     }
-
-    def test_bad_items(self):
-        # Dict has wrong contents
-        with self.assertRaises(ValueError):
-            wrong_dict = {"k_vectors": [], "freq": []}
-            KpointsData.from_dict(wrong_dict)
-
-        with self.assertRaises(TypeError):
-            wrong_dict= ["k_vectors", 3, "freq"]
-            KpointsData.from_dict(wrong_dict)
-
-    def test_missing_key(self):
-        # missing atomic_displacements
-        items = self._good_data_1.copy()
-        del items["atomic_displacements"]
-
-        with self.assertRaises(ValueError):
-            KpointsData.from_dict(items)
 
     def test_wrong_value(self):
         # All values should be numpy arrays
@@ -165,7 +146,6 @@ class KpointsDataTest(unittest.TestCase):
             KpointsData(**wrong_items)
 
     def test_set_good_case(self):
-
         self._set_good_case_core(data=self._good_data_1)
         self._set_good_case_core(data=self._good_data_2)
 
@@ -183,7 +163,6 @@ class KpointsDataTest(unittest.TestCase):
                                                collected_data["atomic_displacements"][str(k)]))
             self.assertEqual(True, np.allclose(data["k_vectors"][k], collected_data["k_vectors"][str(k)]))
             self.assertEqual(data["weights"][k], collected_data["weights"][str(k)])
-
 
 if __name__ == "__main__":
     unittest.main()
