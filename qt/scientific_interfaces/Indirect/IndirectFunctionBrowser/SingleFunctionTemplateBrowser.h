@@ -59,6 +59,7 @@ public:
   void clear() override;
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
   void setBackgroundA0(double) override;
   void setResolution(std::string const &, TableDatasetIndex const &) override;
   void

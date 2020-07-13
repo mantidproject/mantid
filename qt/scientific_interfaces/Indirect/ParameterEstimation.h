@@ -22,7 +22,7 @@ struct DataForParameterEstimation {
 using DataForParameterEstimationCollection =
     std::vector<DataForParameterEstimation>;
 using EstimationDataSelector = std::function<DataForParameterEstimation(
-    const Mantid::MantidVec &x, const Mantid::MantidVec &y)>;
+    const Mantid::MantidVec &x, const Mantid::MantidVec &y, const std::pair<double, double> range)>;
 
 } // namespace IDA
 } // namespace CustomInterfaces

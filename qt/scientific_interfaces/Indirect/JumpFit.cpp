@@ -106,7 +106,7 @@ void JumpFit::setRunEnabled(bool enable) {
 
 EstimationDataSelector JumpFit::getEstimationDataSelector() const {
   return [](const std::vector<double> &,
-            const std::vector<double> &) -> DataForParameterEstimation {
+            const std::vector<double> &, const std::pair<double, double> range) -> DataForParameterEstimation {
     return DataForParameterEstimation{};
   };
 }

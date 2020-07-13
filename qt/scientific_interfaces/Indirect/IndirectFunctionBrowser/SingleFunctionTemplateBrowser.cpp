@@ -210,6 +210,9 @@ void SingleFunctionTemplateBrowser::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_presenter.updateParameterEstimationData(std::move(data));
 }
+void SingleFunctionTemplateBrowser::estimateFunctionParameters() {
+  m_presenter.estimateFunctionParameters();
+}
 
 void SingleFunctionTemplateBrowser::popupMenu(const QPoint &) {}
 

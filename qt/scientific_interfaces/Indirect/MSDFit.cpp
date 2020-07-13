@@ -140,8 +140,8 @@ std::string MSDFit::fitTypeString() const {
 // These function rely on the data returned from getEstimationDataSelector,
 // which should be appropriately configured.
 IDAFunctionParameterEstimation MSDFit::createParameterEstimation() const {
-  auto estimateGaus = [](::Mantid::API::IFunction_sptr &function,
-                         const DataForParameterEstimation &estimationData) {
+  auto estimateMsd = [](::Mantid::API::IFunction_sptr &function,
+                        const DataForParameterEstimation &estimationData) {
     auto y = estimationData.y;
     auto x = estimationData.x;
     double Msd = 6 * log(y[0] / y[1]) / (x[1] * x[1]);
@@ -152,11 +152,10 @@ IDAFunctionParameterEstimation MSDFit::createParameterEstimation() const {
   };
   IDAFunctionParameterEstimation parameterEstimation;
 
-  parameterEstimation.addParameterEstimationFunction(MSDGAUSSFUNC,
-                                                     estimateGaus);
+  parameterEstimation.addParameterEstimationFunction(MSDGAUSSFUNC, estimateMsd);
   parameterEstimation.addParameterEstimationFunction(MSDPETERSFUNC,
-                                                     estimateGaus);
-  parameterEstimation.addParameterEstimationFunction(MSDYIFUNC, estimateGaus);
+                                                     estimateMsd);
+  parameterEstimation.addParameterEstimationFunction(MSDYIFUNC, estimateMsd);
 
   return parameterEstimation;
 }

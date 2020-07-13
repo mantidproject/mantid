@@ -91,7 +91,6 @@ QString SingleFunctionTemplateModel::getFitType() { return m_fitType; }
 void SingleFunctionTemplateModel::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
-  estimateFunctionParameters();
 }
 
 void SingleFunctionTemplateModel::estimateFunctionParameters() {

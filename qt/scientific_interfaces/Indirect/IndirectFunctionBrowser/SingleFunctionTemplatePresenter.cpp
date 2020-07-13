@@ -144,6 +144,10 @@ void SingleFunctionTemplatePresenter::updateParameterEstimationData(
   m_model.updateParameterEstimationData(std::move(data));
   updateView();
 }
+void SingleFunctionTemplatePresenter::estimateFunctionParameters() {
+  m_model.estimateFunctionParameters();
+  updateView();
+}
 
 QStringList SingleFunctionTemplatePresenter::getDatasetNames() const {
   return m_model.getDatasetNames();

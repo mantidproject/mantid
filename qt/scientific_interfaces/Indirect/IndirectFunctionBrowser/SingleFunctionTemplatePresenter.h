@@ -61,6 +61,7 @@ public:
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
 
 signals:
   void functionStructureChanged();
