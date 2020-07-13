@@ -11,9 +11,9 @@ from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, ALL_KEYWORDS_K_DATA,
 
 
 class KpointsData:
-    """
-    Class for storing k-points data. The data is arranged as a dictionary.
-    The dictionary has the following form:
+    """Class storing atomic frequencies and displacements at specific k-points
+
+    The data should be provided as a dictionary with the following form:
 
     data = {"frequencies": numpy.array,
             "atomic_displacements: numpy.array,
@@ -21,8 +21,9 @@ class KpointsData:
             "k_vectors": numpy.array}
 
 
-    Each entry in the dictionary corresponds to all k-points. Each item in the dictionary is a numpy array. The meaning
-    of keys in the dictionary is as follows:
+    Each entry in the dictionary corresponds to all k-points. Each item
+    in the dictionary is a numpy array. The meaning of keys in the
+    dictionary is as follows:
 
     "weights" - weights of all k-points; weights.shape == (self._num_k,);
 
@@ -32,7 +33,6 @@ class KpointsData:
 
     "atomic_displacements - atomic displacements for all k-points;
                             atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, 3)
-
 
     """
 
