@@ -86,18 +86,43 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Maximum  for dp values')
 
+    def set_data_bounds(self):
+        self.lambdaMin = self.getProperty('lambdaMin').value
+        self.lambdaMax = self.getProperty('lambdaMax').value
+        self.dMin = self.getProperty('dMin').value
+        self.dMax = self.getProperty('dMax').value
+        self.dpMin = self.getProperty('dpMin').value
+        self.dpMax = self.getProperty('dpMax').value
+        self.tthMin = self.getProperty('tthMin').value
+        self.tthMax = self.getProperty('tthMax').value
+
+    def check_data_ranges(d, dp, lhkl, thkl):
+        return self.check_d_bounds(d) & self.check_dp_bounds(dp) & self.check_lambda_bounds(self,lhkl) &  \
+              self.check_tth_bounds(thkl) 
+
+    def check_d_bounds(self, d):
+        return self.dMin < d < self.dMax
+
+    def check_dp_bounds(self, dp):
+        return self.dpMin < dp < self.dpMax
+
+    def check_lambda_bounds(self, lhkl):
+        return self.lambdaMin < lhkl < self.lambdaMax
+
+    def check_tth_bounds(self, thkl):
+        return self.tthMin < thkl < self.tthMax
 
 # Create output file
-
     def PyExec(self):
 
         def wo_real(x):
             return np.real(lambertw(np.exp(x), 0))
 
+        if self.getPropertyValue('CutData') == '1':
+            self.set_data_bounds()
+
         # Workspace name
         Workspace = self.getPropertyValue('Workspace')
-
-        
 
         # Create Output File
         OutFile = self.getPropertyValue('OutputFile') + '.p2d'
@@ -159,30 +184,9 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                     thkl = 2. * np.arcsin(lhkl / 2. / d) / np.pi * 180.
                     # skip Values outside of specified data ranges if the option is activated
                     if self.getPropertyValue('CutData') == '1':
-                        if self.getPropertyValue(
-                                'tthMin') < thkl < self.getPropertyValue(
-                                    'tthMax'):
-                            if self.getPropertyValue(
-                                    'lambdaMin'
-                            ) < lhkl < self.getProeprtyValue('lambdaMax'):
-                                if self.getPropertyValue(
-                                        'dMin') < d < self.getPropertyValue(
-                                            'dMax'):
-                                    if self.getPropertyValue(
-                                            'dpMin'
-                                    ) < dp < self.getProeprtyValue('dpMax'):
-                                        # write data into outfile after checking all data ranges positive
-                                        of.write(
-                                            lform.format(
-                                                thkl, lhkl, d, dp_center, Y))
-                                    else:
-                                        continue
-                                else:
-                                    continue
-                            else:
-                                continue
-                        else:
-                            continue
+                        if self.check_data_ranges(d, dp_center, lhkl, thkl):
+                            # write data into outfile after checking all data ranges positive
+                            of.write(lform.format(thkl, lhkl, d, dp_center, Y))
                     else:
                         # Write data into outfile
                         of.write(lform.format(thkl, lhkl, d, dp_center, Y))
