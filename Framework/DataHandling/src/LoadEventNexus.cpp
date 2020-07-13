@@ -450,6 +450,8 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   // Unix epoch (https://manual.nexusformat.org/classes/base_classes/NXlog.html)
   if (!file.hasAttr("offset")) {
     offset = DateAndTime("1970-01-01T00:00:00Z");
+    logger.warning("event_time_zero: no ISO8601 offset attribute provided, "
+                   "Using UNIX epoch instead");
   } else {
     file.getAttr("offset", isooffset);
     offset = DateAndTime(isooffset);
