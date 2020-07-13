@@ -36,10 +36,11 @@ class KpointsData:
 
     """
 
-    def __init__(self, num_k=None, num_atoms=None):
+    def __init__(self, *, num_k, num_atoms, items):
         """
         :param num_k: total number of k-points (int)
         :param num_atoms: total number of atoms in the unit cell (int)
+        :param items: dict of numpy arrays "weights", "k_vectors", "frequencies" and "atomic_displacements"
         """
         super(KpointsData, self).__init__()
 
@@ -55,13 +56,11 @@ class KpointsData:
 
         self._data = {}
 
-    def set(self, items=None):
-
         if not isinstance(items, dict):
-            raise ValueError("New value of KpointsData should be a dictionary.")
+            raise TypeError("'items' for KpointsData should be a dictionary.")
 
         if not sorted(items.keys()) == sorted(ALL_KEYWORDS_K_DATA):
-            raise ValueError("Invalid structure of the dictionary.")
+            raise ValueError("Invalid structure of the items dictionary.")
 
         dim = 3
 

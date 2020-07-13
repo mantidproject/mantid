@@ -75,16 +75,18 @@ class KpointsDataTest(unittest.TestCase):
                                              [0., 0., 6.92]])
                     }
 
-    def setUp(self):
-        self.tester = KpointsData(num_k=3, num_atoms=2)
+    # def setUp(self):
+    #     self.tester = KpointsData(num_k=3, num_atoms=2)
 
-    # tests for append method
-    def test_no_dict(self):
-
-        # Case no dict to append
+    def test_bad_items(self):
+        # Dict has wrong contents
         with self.assertRaises(ValueError):
-            wrong_dict = ["k_vectors", 2, "freq"]
-            self.tester.set(items=wrong_dict)
+            wrong_dict = {"k_vectors": [], "freq": []}
+            KpointsData(num_k=3, num_atoms=2, items=wrong_dict)
+
+        with self.assertRaises(TypeError):
+            wrong_dict= ["k_vectors", 3, "freq"]
+            KpointsData(num_k=3, num_atoms=2, items=wrong_dict)
 
     def test_missing_key(self):
         # missing atomic_displacements
@@ -92,7 +94,7 @@ class KpointsDataTest(unittest.TestCase):
                  "weights": self._good_data_1["weights"],
                  "frequencies": self._good_data_1["frequencies"]}
         with self.assertRaises(ValueError):
-            self.tester.set(items=items)
+            KpointsData(num_k=3, num_atoms=2, items=items)
 
     def test_wrong_value(self):
         # value should be a numpy array with real numbers
@@ -101,7 +103,7 @@ class KpointsDataTest(unittest.TestCase):
                  "frequencies": self._good_data_1["frequencies"],
                  "atomic_displacements":  self._good_data_1["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.set(items=items)
+            KpointsData(num_k=3, num_atoms=2, items=items)
 
     def test_wrong_weight(self):
         # negative weight (weight should be represented as a positive real number)
@@ -110,7 +112,7 @@ class KpointsDataTest(unittest.TestCase):
                  "frequencies": self._good_data_1["frequencies"],
                  "atomic_displacements": self._good_data_1["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.set(items=items)
+            KpointsData(num_k=3, num_atoms=2, items=items)
 
     def test_wrong_freq(self):
         # frequencies as a string
@@ -119,7 +121,7 @@ class KpointsDataTest(unittest.TestCase):
                        "frequencies": "Wrong_freq",
                        "atomic_displacements": self._good_data_1["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.set(items=wrong_items)
+            KpointsData(num_k=3, num_atoms=2, items=wrong_items)
 
         # complex frequencies
         wrong_items = {"k_vectors": self._good_data_1["k_vectors"],
@@ -127,7 +129,7 @@ class KpointsDataTest(unittest.TestCase):
                        "frequencies": self._good_data_1["frequencies"].astype(complex),
                        "atomic_displacements": self._good_data_1["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.set(items=wrong_items)
+            KpointsData(num_k=3, num_atoms=2, items=wrong_items)
 
         # frequencies as 2D arrays but with a bad shape
         wrong_items = {"k_vectors": self._good_data_1["k_vectors"],
@@ -135,7 +137,7 @@ class KpointsDataTest(unittest.TestCase):
                        "frequencies": np.asarray([[1.0, 2.0, 34.0], [4.9, 1.0, 1.0]]),
                        "atomic_displacements": self._good_data_1["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.set(items=wrong_items)
+            KpointsData(num_k=3, num_atoms=2, items=wrong_items)
 
     def test_wrong_displacements(self):
         # displacements as a number
@@ -144,7 +146,7 @@ class KpointsDataTest(unittest.TestCase):
                        "frequencies": self._good_data_1["frequencies"],
                        "atomic_displacements": 1}
         with self.assertRaises(ValueError):
-            self.tester.set(items=wrong_items)
+            KpointsData(num_k=3, num_atoms=2, items=wrong_items)
 
         # wrong size of the second dimension
         wrong_items = {"k_vectors": self._good_data_1["k_vectors"],
@@ -159,7 +161,7 @@ class KpointsDataTest(unittest.TestCase):
                                                            self._good_data_1["atomic_displacements"][0, 1]]
                                                           )}
         with self.assertRaises(ValueError):
-            self.tester.set(items=wrong_items)
+            KpointsData(num_k=3, num_atoms=2, items=wrong_items)
 
         # displacements as numpy arrays with integers
         wrong_items = {"k_vectors": self._good_data_1["k_vectors"],
@@ -167,7 +169,7 @@ class KpointsDataTest(unittest.TestCase):
                        "frequencies": self._good_data_1["frequencies"],
                        "atomic_displacements": self._good_data_1["atomic_displacements"].astype(int)}
         with self.assertRaises(ValueError):
-            self.tester.set(items=wrong_items)
+            KpointsData(num_k=3, num_atoms=2, items=wrong_items)
 
         # displacements as a 1D array
         wrong_items = {"k_vectors": self._good_data_1["k_vectors"],
@@ -175,7 +177,7 @@ class KpointsDataTest(unittest.TestCase):
                        "frequencies": self._good_data_1["frequencies"],
                        "atomic_displacements": np.ravel(self._good_data_1["atomic_displacements"])}
         with self.assertRaises(ValueError):
-            self.tester.set(items=wrong_items)
+            KpointsData(num_k=3, num_atoms=2, items=wrong_items)
 
     def test_set_good_case(self):
 
@@ -183,8 +185,8 @@ class KpointsDataTest(unittest.TestCase):
         self._set_good_case_core(data=self._good_data_2)
 
     def _set_good_case_core(self, data):
-        self.tester.set(items=data)
-        collected_data = self.tester.extract()
+        kpd = KpointsData(num_k=3, num_atoms=2, items=data)
+        collected_data = kpd.extract()
 
         for k in range(data["frequencies"].shape[0]):
             indices = data["frequencies"][k] > ACOUSTIC_PHONON_THRESHOLD
@@ -197,20 +199,15 @@ class KpointsDataTest(unittest.TestCase):
             self.assertEqual(True, np.allclose(data["k_vectors"][k], collected_data["k_vectors"][str(k)]))
             self.assertEqual(data["weights"][k], collected_data["weights"][str(k)])
 
-    # tests for set method
-    def test_set_wrong_dict(self):
-        with self.assertRaises(ValueError):
-            self.tester.set([1, 2234, 8])
-
     # tests for constructor
     def test_constructor_assertions(self):
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            poor_tester = KpointsData(num_k=0.1, num_atoms=2)
+            poor_tester = KpointsData(num_k=0.1, num_atoms=2, items=self._good_data_1)
 
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            poor_tester = KpointsData(num_k=1, num_atoms=-2)
+            poor_tester = KpointsData(num_k=1, num_atoms=-2, items=self._good_data_1)
 
 
 if __name__ == "__main__":

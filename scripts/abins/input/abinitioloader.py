@@ -151,19 +151,19 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         :returns: Returns an object of type AbinsData
         """
 
-        k_points = abins.KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
-
-        # 1D [k] (one entry corresponds to weight of one k-point)
-        k_points.set({"weights": data["weights"],
-                      # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                      "k_vectors": data["k_vectors"],
-                      # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                      "frequencies": data["frequencies"],
-                      # 4D array [k][atom_n][freq][3] (one entry corresponds to
-                      # one coordinate for atom atom_n, frequency  freq and k-point k )
-                      "atomic_displacements": data["atomic_displacements"],
-                      "unit_cell": data["unit_cell"]
-                      })
+        k_points = abins.KpointsData(num_atoms=self._num_atoms,
+                                     num_k=self._num_k,
+                                     #      1D [k] (one entry corresponds to weight of one k-point)
+                                     items={"weights": data["weights"],
+                                            # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
+                                            "k_vectors": data["k_vectors"],
+                                            # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                                            "frequencies": data["frequencies"],
+                                            # 4D array [k][atom_n][freq][3] (one entry corresponds to
+                                            # one coordinate for atom atom_n, frequency  freq and k-point k )
+                                            "atomic_displacements": data["atomic_displacements"],
+                                            "unit_cell": data["unit_cell"]
+                                            })
 
         atoms = abins.AtomsData(data["atoms"])
         return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
