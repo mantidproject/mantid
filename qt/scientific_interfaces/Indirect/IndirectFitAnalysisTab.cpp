@@ -470,14 +470,15 @@ void IndirectFitAnalysisTab::updateFitStatus() {
   if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
     std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
     double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
-    std::vector<std::string> status(m_fittingModel->getNumberOfDomains(),
-                                    fit_status);
-    std::vector<double> chiSquared(m_fittingModel->getNumberOfDomains(), chi2);
+    const std::vector<std::string> status(m_fittingModel->getNumberOfDomains(),
+                                          fit_status);
+    const std::vector<double> chiSquared(m_fittingModel->getNumberOfDomains(),
+                                         chi2);
     m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
   } else {
-    std::vector<std::string> status =
+    const std::vector<std::string> status =
         m_fittingAlgorithm->getProperty("OutputStatus");
-    std::vector<double> chiSquared =
+    const std::vector<double> chiSquared =
         m_fittingAlgorithm->getProperty("OutputChiSquared");
     m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
   }
