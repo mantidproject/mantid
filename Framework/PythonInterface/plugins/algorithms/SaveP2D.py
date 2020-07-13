@@ -1,5 +1,4 @@
 import numpy as np
-import sys
 import math
 from scipy.special import lambertw
 from mantid.kernel import *
@@ -98,7 +97,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
 
     def check_data_ranges(d, dp, lhkl, thkl):
         return self.check_d_bounds(d) & self.check_dp_bounds(dp) & self.check_lambda_bounds(self,lhkl) &  \
-              self.check_tth_bounds(thkl) 
+              self.check_tth_bounds(thkl)
 
     def check_d_bounds(self, d):
         return self.dMin < d < self.dMax
