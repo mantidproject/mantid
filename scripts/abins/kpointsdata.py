@@ -4,11 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import Dict, TypeVar, Type
 import numpy as np
 
 from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, ALL_KEYWORDS_K_DATA,
                              COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
 
+
+K = TypeVar('K', bound='KpointsData')  # Type variable for KpointsData or a subclass
 
 class KpointsData:
     """Class storing atomic frequencies and displacements at specific k-points
@@ -18,7 +21,8 @@ class KpointsData:
     data = {"frequencies": numpy.array,
             "atomic_displacements: numpy.array,
             "weights": numpy.array,
-            "k_vectors": numpy.array}
+            "k_vectors": numpy.array,
+            "unit_cell": numpy.array}
 
 
     Each entry in the dictionary corresponds to all k-points. Each item
@@ -31,73 +35,53 @@ class KpointsData:
 
     "frequencies" - frequencies for all k-points; frequencies.shape == (num_k, num_freq)
 
-    "atomic_displacements - atomic displacements for all k-points;
-                            atomic_displacements.shape == (num_k, num_atoms, num_freq, 3)
+    "atomic_displacements" - atomic displacements for all k-points;
+                             atomic_displacements.shape == (num_k, num_atoms, num_freq, 3)
+
+    "unit_cell" - lattice vectors (use zeros for open boundary conditions);
+                  unit_cell.shape == (3, 3)
 
     """
-
-    def __init__(self, *, items):
-        """
-        :param num_k: total number of k-points (int)
-        :param num_atoms: total number of atoms in the unit cell (int)
-        :param items: dict of numpy arrays "weights", "k_vectors", "frequencies" and "atomic_displacements"
-        """
-        super(KpointsData, self).__init__()
+    def __init__(self, *, frequencies, atomic_displacements, weights, k_vectors, unit_cell):
+        super().__init__()
 
         self._data = {}
-
-        if not isinstance(items, dict):
-            raise TypeError("'items' for KpointsData should be a dictionary.")
-
-        if not sorted(items.keys()) == sorted(ALL_KEYWORDS_K_DATA):
-            raise ValueError("Invalid structure of the items dictionary.")
-
         dim = 3
 
-        # unit_cell
-        unit_cell = items["unit_cell"]
-        if not (isinstance(unit_cell, np.ndarray)
-                and unit_cell.shape == (dim, dim)
-                and unit_cell.dtype.num == FLOAT_ID):
+        for arg in (frequencies, atomic_displacements, weights, k_vectors, unit_cell):
+            if not isinstance(arg, np.ndarray):
+                raise TypeError("All arguments to KpointsData should be numpy arrays")
 
+        # unit_cell
+        if not (unit_cell.shape == (dim, dim)
+                and unit_cell.dtype.num == FLOAT_ID):
             raise ValueError("Invalid values of unit cell vectors.")
 
         #  "weights"
-        weights = items["weights"]
         num_k = weights.size
 
-        if not (isinstance(weights, np.ndarray)
-                and weights.dtype.num == FLOAT_ID
+        if not (weights.dtype.num == FLOAT_ID
                 and np.allclose(weights, weights[weights >= 0])):
-
             raise ValueError("Invalid value of weights.")
 
         #  "k_vectors"
-        k_vectors = items["k_vectors"]
-
-        if not (isinstance(k_vectors, np.ndarray)
-                and k_vectors.shape == (num_k, dim)
+        if not (k_vectors.shape == (num_k, dim)
                 and k_vectors.dtype.num == FLOAT_ID):
-
             raise ValueError("Invalid value of k_vectors.")
 
         #  "frequencies"
-        frequencies = items["frequencies"]
         num_freq = frequencies.shape[1]
-        if not (isinstance(frequencies, np.ndarray)
-                and frequencies.shape == (num_k, num_freq)
+        if not (frequencies.shape == (num_k, num_freq)
                 and frequencies.dtype.num == FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
 
         # "atomic_displacements"
-        atomic_displacements = items["atomic_displacements"]
+        if len(atomic_displacements.shape) != 4:
+            raise ValueError("atomic_displacements should have four dimensions")
         num_atoms = atomic_displacements.shape[1]
 
-        if not (isinstance(
-                atomic_displacements, np.ndarray)
-                and atomic_displacements.shape == (weights.size, num_atoms, num_freq, dim)
+        if not (atomic_displacements.shape == (weights.size, num_atoms, num_freq, dim)
                 and atomic_displacements.dtype.num == COMPLEX_ID):
-
             raise ValueError("Invalid value of atomic_displacements.")
 
         # remove data which correspond to imaginary frequencies
@@ -121,6 +105,32 @@ class KpointsData:
         self._data["atomic_displacements"] = atomic_displacements_dic
         self._data["k_vectors"] = k_vectors_dic
         self._data["weights"] = weights_dic
+
+    @classmethod
+    def from_dict(cls: Type[K], dct: Dict[str, np.ndarray]) -> K:
+        """Construct an object storing atomic frequencies and displacements at specific k-points
+
+        :param dct: collection of numpy arrays "weights", "k_vectors", "frequencies" and "atomic_displacements"
+
+        The data should be provided as a dictionary with the following form:
+
+        data = {"frequencies": numpy.array,
+                "atomic_displacements: numpy.array,
+                "weights": numpy.array,
+                "k_vectors": numpy.array,
+                "unit_cell": numpy.array}
+        """
+        if not isinstance(dct, dict):
+            raise TypeError("Expected a dictionary.")
+
+        if not sorted(dct.keys()) == sorted(ALL_KEYWORDS_K_DATA):
+            raise ValueError("Invalid structure of dictionary for KpointsData.from_dict()")
+
+        return cls(frequencies=dct["frequencies"],
+                   atomic_displacements=dct["atomic_displacements"],
+                   weights=dct["weights"],
+                   k_vectors=dct["k_vectors"],
+                   unit_cell=dct["unit_cell"])
 
     def get_gamma_point_data(self):
         """
