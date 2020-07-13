@@ -41,6 +41,7 @@ class KpointsData:
         if not (unit_cell.shape == (dim, dim)
                 and unit_cell.dtype.num == FLOAT_ID):
             raise ValueError("Invalid values of unit cell vectors.")
+        self.unit_cell = unit_cell
 
         #  "weights"
         num_k = weights.size
@@ -76,20 +77,19 @@ class KpointsData:
         k_vectors_dic = {}
 
         indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
-        for k in range(num_k):
-            freq_dic[str(k)] = frequencies[k, indx[k]]
+        for k_index in range(num_k):
+            freq_dic[k_index] = frequencies[k_index, indx[k_index]]
             for atom in range(num_atoms):
-                temp = atomic_displacements[k]
-                atomic_displacements_dic[str(k)] = temp[:, indx[k]]
+                temp = atomic_displacements[k_index]
+                atomic_displacements_dic[k_index] = temp[:, indx[k_index]]
 
-            weights_dic[str(k)] = weights[k]
-            k_vectors_dic[str(k)] = k_vectors[k]
+            weights_dic[k_index] = weights[k_index]
+            k_vectors_dic[k_index] = k_vectors[k_index]
 
-        self._data["unit_cell"] = unit_cell
-        self._data["frequencies"] = freq_dic
-        self._data["atomic_displacements"] = atomic_displacements_dic
-        self._data["k_vectors"] = k_vectors_dic
-        self._data["weights"] = weights_dic
+        self._frequencies = freq_dic
+        self._atomic_displacements = atomic_displacements_dic
+        self._k_vectors = k_vectors_dic
+        self._weights = weights_dic
 
     def get_gamma_point_data(self):
         """
@@ -99,23 +99,29 @@ class KpointsData:
         gamma_pkt_index = -1
 
         # look for index of Gamma point
-        for k in self._data["k_vectors"]:
-            if np.linalg.norm(self._data["k_vectors"][k]) < SMALL_K:
-                gamma_pkt_index = k
+        for k_index, k in self._k_vectors.items():
+            if np.linalg.norm(k) < SMALL_K:
+                gamma_pkt_index = k_index
                 break
-        if gamma_pkt_index == -1:
+        else:
             raise ValueError("Gamma point not found.")
 
         k_points = {"weights": {GAMMA_POINT: self._data["weights"][gamma_pkt_index]},
                     "k_vectors": {GAMMA_POINT: self._data["k_vectors"][gamma_pkt_index]},
                     "frequencies": {GAMMA_POINT: self._data["frequencies"][gamma_pkt_index]},
-                    "atomic_displacements": {GAMMA_POINT: self._data["atomic_displacements"][gamma_pkt_index]}
-                    }
+                    "atomic_displacements": {GAMMA_POINT: self._data["atomic_displacements"][gamma_pkt_index]},
+                    "unit_cell": self.unit_cell}
 
         return k_points
 
     def extract(self):
-        return self._data
+        extracted = {"unit_cell": self.unit_cell,
+                     "weights": {str(key): value for key, value in self._weights.items()},
+                     "k_vectors": {str(key): value for key, value in self._k_vectors.items()},
+                     "frequencies": {str(key): value for key, value in self._frequencies.items()},
+                     "atomic_displacements": {str(key): value for key, value in self._atomic_displacements.items()}}
+
+        return extracted
 
     def __str__(self):
         return "K-points data"

@@ -60,10 +60,10 @@ class PowderData:
         if not isinstance(items["b_tensors"], dict):
             raise ValueError("New value of Debye-Waller factors should be a dictionary.")
 
-        if items["a_tensors"][GAMMA_POINT].shape[0] != self._num_atoms:
+        if items["a_tensors"][str(GAMMA_POINT)].shape[0] != self._num_atoms:
             raise ValueError("Invalid dimension of a_tensors.")
 
-        if items["b_tensors"][GAMMA_POINT].shape[0] != self._num_atoms:
+        if items["b_tensors"][str(GAMMA_POINT)].shape[0] != self._num_atoms:
             raise ValueError("Invalid dimension of b_tensors.")
 
     def __str__(self) -> str:

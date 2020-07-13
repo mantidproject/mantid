@@ -28,7 +28,7 @@ class PowderCalculator:
         self._frequencies = k_data["frequencies"]  # type: Dict[str, np.ndarray]
         self._displacements = k_data["atomic_displacements"]  # type: Dict[str, np.ndarray]
 
-        self._num_atoms = self._displacements[GAMMA_POINT].shape[0]
+        self._num_atoms = self._displacements[str(GAMMA_POINT)].shape[0]
         self._atoms_data = abins_data.get_atoms_data().extract()
 
         self._clerk = abins.IO(input_filename=filename,
@@ -132,7 +132,7 @@ class PowderCalculator:
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
         powder_data = abins.PowderData(data["datasets"]["powder_data"],
-                                       num_atoms=data["datasets"]["powder_data"]["b_tensors"][GAMMA_POINT].shape[0])
+                                       num_atoms=data["datasets"]["powder_data"]["b_tensors"][str(GAMMA_POINT)].shape[0])
 
         return powder_data
 
