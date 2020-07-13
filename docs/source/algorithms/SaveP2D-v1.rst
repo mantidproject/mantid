@@ -36,7 +36,7 @@ Usage
 
 **Example: Create a ".p2d" file from a 2D Workspace. Remember to change the Filepath for the OutputFile!**
 
-.. testcode::PrintP2D
+.. testcode:: PrintP2D
 
 	# create a 2D Workspace
     # repeat this block for each spectrum

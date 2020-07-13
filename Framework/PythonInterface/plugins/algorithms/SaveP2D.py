@@ -56,7 +56,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         self.declareProperty('tthMin',
                              50,
                              direction=Direction.Input,
-                             doc='Minimum  for tth values')
+                             doc='Minimum for tth values')
         self.declareProperty('tthMax',
                              120,
                              direction=Direction.Input,
@@ -97,7 +97,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         # Workspace name
         Workspace = self.getPropertyValue('Workspace')
 
-        #wo_real = lambda x: np.real(lambertw(np.exp(x), 0))
+        
 
         # Create Output File
         OutFile = self.getPropertyValue('OutputFile') + '.p2d'
@@ -108,7 +108,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         lform = '{:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}\n'
 
         of = open(OutFile, 'w')
-        if (of):
+        with open(OutFile, 'w') as of:
             print('Exporting: ' + OutFile + '\n')
             # Create File header with additional information
             of.write('#Title: ' + Data.getTitle() + "\n")
@@ -136,7 +136,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                 dp_center = (dp + Data.getDimension(1).getX(cdp + 1)) / 2.
                 last_dp = dp
                 pr.report("Processing")
-                sys.stdout.write("{:4.0f}%".format(cdp * 100. / ndp))
+                print("{:4.0f}%".format(cdp * 100. / ndp))
                 # iterate over all dSpacing values for the selected dPerpendicular value
                 for cd in range(Data.getDimension(0).getNBins()):
                     d = Data.dataX(cdp)[cd]
@@ -166,7 +166,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                                     'lambdaMin'
                             ) < lhkl < self.getProeprtyValue('lambdaMax'):
                                 if self.getPropertyValue(
-                                        'dMin') < d < self.getProeprtyValue(
+                                        'dMin') < d < self.getPropertyValue(
                                             'dMax'):
                                     if self.getPropertyValue(
                                             'dpMin'
@@ -186,7 +186,6 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
                     else:
                         # Write data into outfile
                         of.write(lform.format(thkl, lhkl, d, dp_center, Y))
-            of.close()
             print('\n\nExported: ' + OutFile + '\n')
 
 
