@@ -190,6 +190,17 @@ class ColorbarWidget(QWidget):
         else:
             return Normalize(vmin=cmin, vmax=cmax)
 
+    def get_colorbar_scale(self):
+        norm = self.colorbar.norm
+        scale = 'linear'
+        kwargs = {}
+        if isinstance(norm, SymLogNorm):
+            scale = 'symlog'
+        elif isinstance(norm, PowerNorm):
+            scale = 'function'
+            kwargs = {'functions': (lambda x: np.power(x, norm.gamma), lambda x: np.power(x, 1 / norm.gamma))}
+        return scale, kwargs
+
     def clim_changed(self):
         """
         Called when either the min or max is changed. Will unset the autoscale.
