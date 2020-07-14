@@ -57,6 +57,8 @@ class RangeSelector(object):
             # local variables to avoid constant self lookup
             x_pos = event.xdata
             y_pos = event.ydata
+            if x_pos is None or y_pos is None:
+                return
 
             # If left button clicked, start moving peaks
             if event.button == 1 and self.marker:
@@ -77,6 +79,10 @@ class RangeSelector(object):
             """ Stop moving the markers when the mouse button is released """
             x_pos = event.xdata
             y_pos = event.ydata
+
+            if x_pos is None or y_pos is None:
+                return
+
             self.stop_markers(x_pos, y_pos)
 
         def motion_event(self, event):
