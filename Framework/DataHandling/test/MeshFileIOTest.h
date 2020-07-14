@@ -22,9 +22,9 @@ public:
   static void destroySuite(MeshFileIOTest *suite) { delete suite; }
 
   void testTranslate() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-
-    std::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
+    std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.translate(environmentMesh, {5, 5, 15});
     auto translatedVertices = environmentMesh->getVertices();
 
@@ -35,35 +35,40 @@ public:
   }
 
   void testTranslateFailWrongSize() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    std::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
+    std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     TS_ASSERT_THROWS(
         loader.translate(environmentMesh, {-1, 0, 1, 0, 0, 0, 0, 1}),
         const std::invalid_argument &);
   }
   void testGenerateXRotation() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
     auto rotationMatrix = loader.generateXRotation(90.0 * M_PI / 180);
     std::vector<double> vectorToMatch = {1, 0, 0, 0, 0, -1, 0, 1, 0};
     compareMatrix(vectorToMatch, rotationMatrix);
   }
 
   void testGenerateYRotation() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
     auto rotationMatrix = loader.generateYRotation(90.0 * M_PI / 180);
     std::vector<double> vectorToMatch = {0, 0, 1, 0, 1, 0, -1, 0, 0};
     compareMatrix(vectorToMatch, rotationMatrix);
   }
 
   void testGenerateZRotation() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
     auto rotationMatrix = loader.generateZRotation(90.0 * M_PI / 180);
     std::vector<double> vectorToMatch = {0, -1, 0, 1, 0, 0, 0, 0, 1};
     compareMatrix(vectorToMatch, rotationMatrix);
   }
 
   void testGenerateRotationMatrix() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
     auto rotationMatrix = loader.generateMatrix(
         90.0 * M_PI / 180, 60.0 * M_PI / 180, 30.0 * M_PI / 180);
     std::vector<double> vectorToMatch = {0.4330127,  0.7500000, 0.5000000,
@@ -73,8 +78,9 @@ public:
   }
 
   void testXRotation() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    std::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
+    std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 45 * M_PI / 180, 0, 0);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {
@@ -87,8 +93,9 @@ public:
     }
   }
   void testYRotation() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    std::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
+    std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 0, 90 * M_PI / 180, 0);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {-15, -5,  5,  -15, 5,  -5, -15, -5,
@@ -100,8 +107,9 @@ public:
   }
 
   void testZRotation() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    std::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
+    std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 0, 0, 180 * M_PI / 180);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {5,   5,  -15, -5,  -5, -15, -5, 5,
@@ -113,8 +121,9 @@ public:
   }
 
   void testMultiRotation() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    std::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
+    std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 70 * M_PI / 180, 20 * M_PI / 180,
                   35 * M_PI / 180);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
@@ -129,8 +138,9 @@ public:
   }
 
   void testTranslateAndRotate() {
-    LoadBinaryStl loader("dummyfilename", ScaleUnits::metres);
-    std::shared_ptr<MeshObject> environmentMesh = loadCube();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    auto loader = LoadBinaryStl(path, unit);
+    std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 0, 90 * M_PI / 180, 0);
     loader.translate(environmentMesh, {0, 0, 15});
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
@@ -143,15 +153,6 @@ public:
   }
 
 private:
-  // load a cube into a meshobject
-  std::unique_ptr<MeshObject> loadCube() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    constexpr ScaleUnits unit = ScaleUnits::metres;
-    auto loader = LoadBinaryStl(path, unit);
-    auto cube = loader.readStl();
-    return cube;
-  }
-
   void compareMatrix(const std::vector<double> &vectorToMatch,
                      const Kernel::Matrix<double> &rotationMatrix) {
     auto checkVector = rotationMatrix.getVector();
@@ -159,4 +160,6 @@ private:
       TS_ASSERT_DELTA(checkVector[i], vectorToMatch[i], 1e-7);
     }
   }
+
+  const ScaleUnits unit = ScaleUnits::metres;
 };

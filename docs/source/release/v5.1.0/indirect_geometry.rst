@@ -38,5 +38,9 @@ Bug Fixes
 - FQ and Msd tabs now label output workspaces with the fitting function.
 - Fixed a crash when switching between linear and flat backgrounds in the ConvFit tab.
 - Disabled the plot guess checkbox within the ConvFit tab if a resolution file has not been loaded. This prevents a hard crash which can occur.
+- Abins now supports vibrational calculations performed within the
+  DMOL3 quantum chemistry code with open boundary conditions
+  (i.e. free molecules). Previously, data files from such calculations
+  would yield a parsing error.
 
 :ref:`Release 5.1.0 <v5.1.0>`
