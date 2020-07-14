@@ -25,6 +25,8 @@ else:
         pass
 if IS_IN_MANTIDGUI:
     from qtpy.QtCore import QObject
+    from qtpy.QtCore import Qt
+    from qtpy.QtWidgets import QApplication
     from mantid.plots._compatability import plotSpectrum
     from matplotlib import pyplot
     from mantidqt.plotting.markers import RangeMarker
@@ -46,14 +48,55 @@ class RangeSelector(object):
             self._call_back = None
             self._ws_output_base = None
             self._graph = "Range Selector"
-            self.cid = None
+            self._cids = []
+            self.marker = None
+            self.canvas = None
+
+        def on_mouse_button_press(self, event):
+            """Respond to a MouseEvent where a button was pressed"""
+            # local variables to avoid constant self lookup
+            x_pos = event.xdata
+            y_pos = event.ydata
+
+            # If left button clicked, start moving peaks
+            if event.button == 1 and self.marker:
+                self.marker.mouse_move_start(x_pos, y_pos)
+
+        def stop_markers(self, x_pos, y_pos):
+            """
+            Stop all markers that are moving and draw the annotations
+            """
+            if self.marker:
+                self.marker.mouse_move(x_pos, y_pos)
+                self.marker.mouse_move_stop()
+                self.marker.min_marker.add_all_annotations()
+                self.marker.max_marker.add_all_annotations()
+
+
+        def on_mouse_button_release(self, event):
+            """ Stop moving the markers when the mouse button is released """
+            x_pos = event.xdata
+            y_pos = event.ydata
+            self.stop_markers(x_pos, y_pos)
+
+        def motion_event(self, event):
+            """ Move the marker if the mouse is moving and in range """
+            if event is None:
+                return
+
+            x = event.xdata
+            y = event.ydata
+            #self._set_hover_cursor(x, y)
+
+            if self.canvas and self.marker.mouse_move(x, y):
+                self.canvas.draw()
 
         def disconnect(self):
-            if IS_IN_MANTIDGUI:
-                fig = pyplot.gcf()
-                if len(fig.axes) > 0:
-                    ax = fig.axes[0]
-                    ax.remove_callback(self.cid)
+            if IS_IN_MANTIDGUI and self.canvas:
+                if self.marker:
+                    self.marker.range_changed.disconnect()
+                for cid in self._cids:
+                    self.canvas.mpl_disconnect(cid)
 
         def connect(self, ws, call_back, xmin=None, xmax=None,
                     range_min=None, range_max=None, x_title=None,
@@ -67,6 +110,7 @@ class RangeSelector(object):
             self._ws_output_base = ws_output_base
 
             g = plotSpectrum(ws, [0], True)
+            self.canvas = g.canvas
             g.suptitle(self._graph)
             l = g.axes[0]
             try:
@@ -83,12 +127,24 @@ class RangeSelector(object):
             if xmin is not None and xmax is not None:
                 l.set_xlim(xmin, xmax)
 
-            if range_min is not None and range_max is not None:
-                self.fit_range = RangeMarker(l.figure.canvas, 'green', range_min, range_max)
-            else:
-                self.fit_range = RangeMarker(l.figure.canvas, 'green', 0.0, 0.0)
+            if range_min is None or range_max is None:
+                range_min, range_max = l.get_xlim()
+                range_min = range_min + (range_max-range_min)/100.0
+                range_max = range_max - (range_max-range_min)/100.0
+            self.marker = RangeMarker(l.figure.canvas, 'green', range_min, range_max, line_style='--')
+            self.marker.min_marker.set_name('Min Q')
+            self.marker.max_marker.set_name('Max Q')
 
-            self.cid = l.callbacks.connect('xlim_changed', self._call_back)
+            def add_range(event):
+                #self.marker.min_marker.add_name()
+                #self.marker.max_marker.add_name()
+                self.marker.redraw()
+
+            self.marker.range_changed.connect(self._call_back)
+            self._cids.append(g.canvas.mpl_connect('draw_event', add_range))
+            self._cids.append(g.canvas.mpl_connect('button_press_event', self.on_mouse_button_press))
+            self._cids.append(g.canvas.mpl_connect('motion_notify_event',self.motion_event))
+            self._cids.append(g.canvas.mpl_connect('button_release_event', self.on_mouse_button_release))
 
     @classmethod
     def connect(cls, ws, call_back, xmin=None, xmax=None,

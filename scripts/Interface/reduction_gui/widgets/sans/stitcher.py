@@ -195,10 +195,9 @@ class StitcherWidget(BaseWidget):
             User requested to select range common to data sets 1 and 2
         """
         if self._low_q_data is not None:
-            def call_back(event_ax):
-                xmin, xmax = event_ax.get_xlim()
-                self._content.low_min_edit.setText("%-6.3g" % xmin)
-                self._content.low_max_edit.setText("%-6.3g" % xmax)
+            def call_back(minmax):
+                self._content.low_min_edit.setText("%-6.3g" % minmax[0])
+                self._content.low_max_edit.setText("%-6.3g" % minmax[1])
 
             ws_list = []
             if self._low_q_data is not None:
@@ -212,10 +211,9 @@ class StitcherWidget(BaseWidget):
             User requested to select range common to data sets 2 and 3
         """
         if self._medium_q_data is not None:
-            def call_back(event_ax):
-                xmin, xmax = event_ax.get_xlim()
-                self._content.medium_min_edit.setText("%-6.3g" % xmin)
-                self._content.medium_max_edit.setText("%-6.3g" % xmax)
+            def call_back(minmax):
+                self._content.medium_min_edit.setText("%-6.3g" % minmax[0])
+                self._content.medium_max_edit.setText("%-6.3g" % minmax[1])
 
             ws_list = []
             if self._medium_q_data is not None:
@@ -491,7 +489,7 @@ class StitcherWidget(BaseWidget):
 
         if len(ws_list) > 0:
             g = plotSpectrum(ws_list, [0], error_bars=True)
-            g.setName(self._graph)
+            g.suptitle(self._graph)
 
     def _save_result(self):
         """

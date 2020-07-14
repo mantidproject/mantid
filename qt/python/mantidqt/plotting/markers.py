@@ -913,7 +913,7 @@ class SingleMarker(QObject):
     def set_name(self, name):
         """Update the name of the marker by deleting the old one first"""
         self.remove_name()
-        del self.annotations[self.name]
+        #del self.annotations[self.name]
         self.name = name
         self.add_name()
 

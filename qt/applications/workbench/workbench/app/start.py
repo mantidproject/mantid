@@ -46,6 +46,7 @@ def qapplication():
     app = QApplication.instance()
     if app is None:
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+        QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
         argv = sys.argv[:]
         argv[0] = APPNAME  # replace application name
         # Workaround a segfault with the IPython console when using Python 3.5 + PyQt 5
