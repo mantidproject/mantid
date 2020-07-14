@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidDataHandling/LoadSampleShape.h"
-#include "MantidDataHandling/MeshFileIO.h"
+#include "MantidDataHandling/LoadSingleMesh.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
@@ -46,22 +46,20 @@ struct V3DTrueComparator {
   }
 };
 
-class DLLExport LoadStl : public MeshFileIO {
+class DLLExport LoadStl : public LoadSingleMesh {
 public:
-  LoadStl(std::string filename, ScaleUnits scaleType)
-      : MeshFileIO(scaleType), m_filename(std::move(std::move(filename))),
-        m_setMaterial(false) {}
-  LoadStl(std::string filename, ScaleUnits scaleType,
-          ReadMaterial::MaterialParameters params)
-      : MeshFileIO(scaleType), m_filename(std::move(std::move(filename))),
-        m_setMaterial(true), m_params(std::move(std::move(params))) {}
-  virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
+  LoadStl(std::string filename, std::ios_base::openmode mode,
+          ScaleUnits scaleType)
+      : LoadSingleMesh(filename, mode, scaleType), m_setMaterial(false) {}
+  LoadStl(std::string filename, std::ios_base::openmode mode,
+          ScaleUnits scaleType, ReadMaterial::MaterialParameters params)
+      : LoadSingleMesh(filename, mode, scaleType), m_setMaterial(true),
+        m_params(std::move(std::move(params))) {}
   virtual ~LoadStl() = default;
 
 protected:
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;
   void changeToVector();
-  const std::string m_filename;
   bool m_setMaterial;
   ReadMaterial::MaterialParameters m_params;
   std::unordered_set<std::pair<Kernel::V3D, uint32_t>, HashV3DPair,

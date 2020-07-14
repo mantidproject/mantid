@@ -18,6 +18,7 @@ namespace DataHandling {
      The following file types are supported
 
        STL file with suffix .stl
+       OFF file with suffix .off
 
 
 @author Karl Palmen ISIS;
@@ -51,8 +52,6 @@ private:
   void init() override;
   void exec() override;
 };
-void DLLExport rotate(Geometry::MeshObject &sampleMesh,
-                      const API::ExperimentInfo_const_sptr &inputWS);
 
 } // namespace DataHandling
 } // namespace Mantid
