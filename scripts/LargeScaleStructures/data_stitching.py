@@ -25,10 +25,7 @@ else:
         pass
 if IS_IN_MANTIDGUI:
     from qtpy.QtCore import QObject
-    from qtpy.QtCore import Qt
-    from qtpy.QtWidgets import QApplication
     from mantid.plots._compatability import plotSpectrum
-    from matplotlib import pyplot
     from mantidqt.plotting.markers import RangeMarker
 
 
@@ -73,7 +70,6 @@ class RangeSelector(object):
                 self.marker.mouse_move_stop()
                 self.marker.min_marker.add_all_annotations()
                 self.marker.max_marker.add_all_annotations()
-
 
         def on_mouse_button_release(self, event):
             """ Stop moving the markers when the mouse button is released """
