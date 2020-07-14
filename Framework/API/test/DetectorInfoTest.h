@@ -246,7 +246,7 @@ public:
     const auto &detectorInfo2 = ws2->detectorInfo();
     std::tie(lat, lon) = detectorInfo2.geographicalAngles(0);
     TS_ASSERT_EQUALS(lat, -M_PI / 2);
-    TS_ASSERT_EQUALS(lon, -M_PI);
+    TS_ASSERT_EQUALS(lon, 0);
 
     v = m_goofyRefFrame->vecPointingUp();
     auto ws3 = makeWorkspace(1, true, v);
@@ -259,7 +259,7 @@ public:
     const auto &detectorInfo4 = ws4->detectorInfo();
     std::tie(lat, lon) = detectorInfo4.geographicalAngles(0);
     TS_ASSERT_EQUALS(lat, -M_PI / 2);
-    TS_ASSERT_EQUALS(lon, -M_PI);
+    TS_ASSERT_EQUALS(lon, 0);
   }
 
   void test_geographicalAngles_zeroAngles() {
