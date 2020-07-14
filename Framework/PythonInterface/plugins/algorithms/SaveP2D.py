@@ -17,7 +17,7 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         return "The algorithm used to create a multidimensional '.p2d' file from a 2D workspace."
 
     def name(self):
-        return "SaveP2d"
+        return "SaveP2D"
 
     def seeAlso(self):
         return ["PowderReduceP2D", "Bin2DPowderDiffraction"]
