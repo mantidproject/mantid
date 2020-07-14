@@ -37,5 +37,9 @@ Bug Fixes
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work correctly for annular sample in a container.
 - FQ and Msd tabs now label output workspaces with the fitting function.
 - Fixed a crash when switching between linear and flat backgrounds in the ConvFit tab.
+- Abins now supports vibrational calculations performed within the
+  DMOL3 quantum chemistry code with open boundary conditions
+  (i.e. free molecules). Previously, data files from such calculations
+  would yield a parsing error.
 
 :ref:`Release 5.1.0 <v5.1.0>`
