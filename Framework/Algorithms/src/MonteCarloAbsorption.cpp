@@ -5,24 +5,17 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidHistogramData/Histogram.h"
-#include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -115,8 +108,8 @@ void MonteCarloAbsorption::init() {
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
 
-  InterpolationOption interpolateOpt;
-  declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
+  auto interpolateOpt = createInterpolateOption();
+  declareProperty(interpolateOpt->property(), interpolateOpt->propertyDoc());
   declareProperty("SparseInstrument", false,
                   "Enable simulation on special "
                   "instrument with a sparse grid of "
@@ -219,6 +212,50 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
   }
   return issues;
 }
+/**
+ * Factory method to return an instance of the required absorption strategy
+ * class
+ * @param beamProfile A reference to the object the beam profile
+ * @param sample A reference to the object defining details of the sample
+ * @param EMode The energy mode of the instrument
+ * @param nevents The number of Monte Carlo events used in the simulation
+ * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object
+ * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
+ * wavelength point or not
+ * @param pointsIn Where to simulate the scattering point
+ * @return a pointer to an MCAbsorptionStrategy object
+ */
+std::unique_ptr<MCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
+    const IBeamProfile &beamProfile, const API::Sample &sample,
+    Kernel::DeltaEMode::Type EMode, const size_t nevents,
+    const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
+  auto MCAbs = std::make_unique<MCAbsorptionStrategy>(
+      beamProfile, sample, EMode, nevents, maxScatterPtAttempts,
+      regenerateTracksForEachLambda, pointsIn);
+  return MCAbs;
+}
+
+/**
+ * Factory method to return an instance of the required SparseInstrument class
+ * @return a pointer to an SparseInstrument object
+ */
+std::unique_ptr<SparseInstrument>
+MonteCarloAbsorption::createSparseInstrument() {
+  auto sparseInst = std::make_unique<SparseInstrument>();
+  return sparseInst;
+}
+
+/**
+ * Factory method to return an instance of the required InterpolationOption class
+ * @return a pointer to an InterpolationOption object
+ */
+std::unique_ptr<InterpolationOption>
+MonteCarloAbsorption::createInterpolateOption() {
+  auto interpolationOpt = std::make_unique<InterpolationOption>();
+  return interpolationOpt;
+}
 
 /**
  * Run the simulation over the whole input workspace
@@ -261,11 +298,12 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   std::unique_ptr<const DetectorGridDefinition> detGrid;
   MatrixWorkspace_uptr sparseWS;
   if (useSparseInstrument) {
+    auto sparseInstrument = createSparseInstrument();
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    detGrid = SparseInstrument::createDetectorGridDefinition(
+    detGrid = sparseInstrument->createDetectorGridDefinition(
         inputWS, latitudinalDets, longitudinalDets);
-    sparseWS = SparseInstrument::createSparseWS(inputWS, *detGrid, nlambda);
+    sparseWS = sparseInstrument->createSparseWS(inputWS, *detGrid, nlambda);
   }
   MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
   const MatrixWorkspace &instrumentWS =
@@ -283,9 +321,9 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), efixed.emode(),
-                                nevents, maxScatterPtAttempts,
-                                resimulateTracksForDiffWavelengths, pointsIn);
+  auto strategy = createStrategy(*beamProfile, inputWS.sample(), efixed.emode(),
+                                 nevents, maxScatterPtAttempts,
+                                 resimulateTracksForDiffWavelengths, pointsIn);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 
@@ -327,8 +365,8 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     MCInteractionStatistics detStatistics(spectrumInfo.detector(i).getID(),
                                           inputWS.sample());
 
-    strategy.calculate(rng, detPos, packedLambdas, lambdaFixed,
-                       packedAttFactors, packedAttFactorErrors, detStatistics);
+    strategy->calculate(rng, detPos, packedLambdas, lambdaFixed,
+                        packedAttFactors, packedAttFactorErrors, detStatistics);
 
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
       g_log.debug(detStatistics.generateScatterPointStats());
@@ -426,14 +464,11 @@ void MonteCarloAbsorption::interpolateFromSparse(
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    const auto detPos = spectrumInfo.position(i) - samplePos;
     double lat, lon;
-    std::tie(lat, lon) =
-        SparseInstrument::geographicalAngles(detPos, *refFrame);
+    std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
     const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
-    const auto spatiallyInterpHisto =
-        SparseInstrument::interpolateFromDetectorGrid(lat, lon, sparseWS,
-                                                      nearestIndices);
+    const auto spatiallyInterpHisto = interpOpt.interpolateFromDetectorGrid(
+        lat, lon, sparseWS, nearestIndices);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);

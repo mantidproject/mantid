@@ -15,7 +15,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/HistogramIterator.h"
@@ -43,63 +42,13 @@ bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info,
 
 namespace Mantid {
 namespace Algorithms {
-namespace SparseInstrument {
-
-/** Calculate latitude and longitude for given vector.
- *  @param p A Mantid vector.
- *  @param refFrame A reference frame where p lives.
- *  @return A pair containing the latitude and longitude values.
- */
-std::pair<double, double>
-geographicalAngles(const Kernel::V3D &p,
-                   const Geometry::ReferenceFrame &refFrame) {
-  const double upCoord = p[refFrame.pointingUp()];
-  const double beamCoord = p[refFrame.pointingAlongBeam()];
-  const double leftoverCoord = p[refFrame.pointingHorizontal()];
-  const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
-  const double lon = std::atan2(leftoverCoord, beamCoord);
-  return std::pair<double, double>(lat, lon);
-}
-
-/** Find the latitude and longitude intervals the detectors
- *  of the given workspace spawn as seen from the sample.
- *  @param ws A workspace.
- *  @return A tuple containing the latitude and longitude ranges.
- */
-std::tuple<double, double, double, double>
-extremeAngles(const API::MatrixWorkspace &ws) {
-  const auto &spectrumInfo = ws.spectrumInfo();
-  const auto samplePos = spectrumInfo.samplePosition();
-  const auto refFrame = ws.getInstrument()->getReferenceFrame();
-  double minLat = std::numeric_limits<double>::max();
-  double maxLat = std::numeric_limits<double>::lowest();
-  double minLong = std::numeric_limits<double>::max();
-  double maxLong = std::numeric_limits<double>::lowest();
-  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    double lat, lon;
-    const auto detPos = spectrumInfo.position(i) - samplePos;
-    std::tie(lat, lon) = geographicalAngles(detPos, *refFrame);
-    if (lat < minLat) {
-      minLat = lat;
-    }
-    if (lat > maxLat) {
-      maxLat = lat;
-    }
-    if (lon < minLong) {
-      minLong = lon;
-    }
-    if (lon > maxLong) {
-      maxLong = lon;
-    }
-  }
-  return std::make_tuple(minLat, maxLat, minLong, maxLong);
-}
 
 /** Find the maximum and minimum wavelength points over the entire workpace.
  *  @param ws A workspace to investigate.
  *  @return A tuple containing the wavelength range.
  */
-std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws) {
+std::tuple<double, double>
+SparseInstrument::extremeWavelengths(const API::MatrixWorkspace &ws) {
   double currentMin = std::numeric_limits<double>::max();
   double currentMax = std::numeric_limits<double>::lowest();
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
@@ -118,7 +67,7 @@ std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws) {
  *  @return A template histogram.
  */
 Mantid::HistogramData::Histogram
-modelHistogram(const API::MatrixWorkspace &modelWS,
+SparseInstrument::modelHistogram(const API::MatrixWorkspace &modelWS,
                const size_t wavelengthPoints) {
   double minWavelength, maxWavelength;
   std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
@@ -145,7 +94,7 @@ modelHistogram(const API::MatrixWorkspace &modelWS,
 /** Creates a rectangular cuboid shape.
  *  @return A cube shape.
  */
-Geometry::IObject_sptr makeCubeShape() {
+Geometry::IObject_sptr SparseInstrument::makeCubeShape() {
   using namespace Poco::XML;
   const double dimension = 0.05;
   AutoPtr<Document> shapeDescription = new Document;
@@ -192,7 +141,7 @@ Geometry::IObject_sptr makeCubeShape() {
  * @throw runtime_error If creation fails.
  */
 API::MatrixWorkspace_uptr
-createSparseWS(const API::MatrixWorkspace &modelWS,
+SparseInstrument::createSparseWS(const API::MatrixWorkspace &modelWS,
                const Algorithms::DetectorGridDefinition &grid,
                const size_t wavelengthPoints) {
   // Build a quite standard and somewhat complete instrument.
@@ -285,72 +234,6 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
   return API::MatrixWorkspace_uptr(ws.release());
 }
 
-/** Calculate the distance between two points on a unit sphere.
- *  @param lat1 Latitude of the first point.
- *  @param long1 Longitude of the first point.
- *  @param lat2 Latitude of the second point.
- *  @param long2 Longitude of the second point.
- *  @return The distance between the points.
- */
-double greatCircleDistance(const double lat1, const double long1,
-                           const double lat2, const double long2) {
-  const double latD = std::sin((lat2 - lat1) / 2.0);
-  const double longD = std::sin((long2 - long1) / 2.0);
-  const double S =
-      latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
-  return 2.0 * std::asin(std::sqrt(S));
-}
-
-/** Calculate the inverse distance weights for the given distances.
- *  @param distances The distances.
- *  @return An array of inverse distance weights.
- */
-std::array<double, 4>
-inverseDistanceWeights(const std::array<double, 4> &distances) {
-  std::array<double, 4> weights;
-  for (size_t i = 0; i < weights.size(); ++i) {
-    if (distances[i] == 0.0) {
-      weights.fill(0.0);
-      weights[i] = 1.0;
-      return weights;
-    }
-    weights[i] = 1.0 / distances[i] / distances[i];
-  }
-  return weights;
-}
-
-/** Spatially interpolate a single histogram from four nearby detectors.
- *  @param lat Latitude of the interpolated detector.
- *  @param lon Longitude of the interpolated detector.
- *  @param ws A workspace containing the detectors used for the interpolation.
- *  @param indices Indices to the nearest neighbour detectors.
- *  @return An interpolated histogram.
- */
-HistogramData::Histogram
-interpolateFromDetectorGrid(const double lat, const double lon,
-                            const API::MatrixWorkspace &ws,
-                            const std::array<size_t, 4> &indices) {
-  auto h = ws.histogram(0);
-  const auto &spectrumInfo = ws.spectrumInfo();
-  const auto refFrame = ws.getInstrument()->getReferenceFrame();
-  std::array<double, 4> distances;
-  for (size_t i = 0; i < 4; ++i) {
-    double detLat, detLong;
-    std::tie(detLat, detLong) =
-        geographicalAngles(spectrumInfo.position(indices[i]), *refFrame);
-    distances[i] = greatCircleDistance(lat, lon, detLat, detLong);
-  }
-  const auto weights = inverseDistanceWeights(distances);
-  auto weightSum = weights[0];
-  h.mutableY() = weights[0] * ws.y(indices[0]);
-  for (size_t i = 1; i < 4; ++i) {
-    weightSum += weights[i];
-    h.mutableY() += weights[i] * ws.y(indices[i]);
-  }
-  h.mutableY() /= weightSum;
-  return h;
-}
-
 /** Creates a detector grid definition for a sparse instrument.
  *  @param modelWS A workspace the sparse instrument approximates.
  *  @param rows Number of rows in the detector grid.
@@ -358,13 +241,14 @@ interpolateFromDetectorGrid(const double lat, const double lon,
  *  @return A unique pointer pointing to the grid definition.
  */
 std::unique_ptr<const DetectorGridDefinition>
-createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
+SparseInstrument::createDetectorGridDefinition(
+    const API::MatrixWorkspace &modelWS,
                              const size_t rows, const size_t columns) {
   double minLat, maxLat, minLong, maxLong;
-  std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
+  std::tie(minLat, maxLat, minLong, maxLong) = modelWS.spectrumInfo().extremeAngles();
   return std::make_unique<Algorithms::DetectorGridDefinition>(
       minLat, maxLat, rows, minLong, maxLong, columns);
 }
-} // namespace SparseInstrument
+
 } // namespace Algorithms
 } // namespace Mantid

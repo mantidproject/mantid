@@ -20,7 +20,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid::Algorithms::SparseInstrument;
+using namespace Mantid::Algorithms;
 using namespace Mantid::Geometry;
 
 class SparseInstrumentTest : public CxxTest::TestSuite {
@@ -39,12 +39,14 @@ public:
 
   void test_createSparseWS() {
     using namespace WorkspaceCreationHelper;
+    SparseInstrument sparse;
     auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 10);
     const size_t gridRows = 5;
     const size_t gridCols = 3;
-    const auto grid = createDetectorGridDefinition(*ws, gridRows, gridCols);
+    const auto grid =
+        sparse.createDetectorGridDefinition(*ws, gridRows, gridCols);
     const size_t wavelengths = 3;
-    auto sparseWS = createSparseWS(*ws, *grid, wavelengths);
+    auto sparseWS = sparse.createSparseWS(*ws, *grid, wavelengths);
     TS_ASSERT_EQUALS(sparseWS->getNumberHistograms(), gridRows * gridCols)
     TS_ASSERT_EQUALS(sparseWS->blocksize(), wavelengths)
     const auto p = ws->points(0);
@@ -57,64 +59,30 @@ public:
     double maxLat;
     double minLon;
     double maxLon;
-    std::tie(minLat, maxLat, minLon, maxLon) = extremeAngles(*ws);
+    std::tie(minLat, maxLat, minLon, maxLon) =
+        ws->spectrumInfo().extremeAngles();
     double sparseMinLat;
     double sparseMaxLat;
     double sparseMinLon;
     double sparseMaxLon;
     std::tie(sparseMinLat, sparseMaxLat, sparseMinLon, sparseMaxLon) =
-        extremeAngles(*sparseWS);
+        sparseWS->spectrumInfo().extremeAngles();
     TS_ASSERT_EQUALS(sparseMinLat, minLat)
     TS_ASSERT_DELTA(sparseMaxLat, maxLat, 1e-8)
     TS_ASSERT_EQUALS(sparseMinLon, minLon)
     TS_ASSERT_DELTA(sparseMaxLon, maxLon, 1e-8)
   }
 
-  void test_extremeAngles_multipleDetectors() {
-    using namespace WorkspaceCreationHelper;
-    auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 1);
-    const auto &spectrumInfo = ws->spectrumInfo();
-    auto refFrame = ws->getInstrument()->getReferenceFrame();
-    double minLat;
-    double minLon;
-    double maxLat;
-    double maxLon;
-    std::tie(minLat, maxLat, minLon, maxLon) = extremeAngles(*ws);
-    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      const auto pos = spectrumInfo.position(i);
-      double lat;
-      double lon;
-      std::tie(lat, lon) = geographicalAngles(pos, *refFrame);
-      TS_ASSERT_LESS_THAN_EQUALS(minLat, lat)
-      TS_ASSERT_LESS_THAN_EQUALS(minLon, lon)
-      TS_ASSERT_LESS_THAN_EQUALS(lat, maxLat)
-      TS_ASSERT_LESS_THAN_EQUALS(lon, maxLon)
-    }
-  }
-
-  void test_extremeAngles_singleDetector() {
-    using namespace WorkspaceCreationHelper;
-    auto ws = create2DWorkspaceWithRectangularInstrument(1, 1, 1);
-    double minLat;
-    double minLon;
-    double maxLat;
-    double maxLon;
-    std::tie(minLat, maxLat, minLon, maxLon) = extremeAngles(*ws);
-    TS_ASSERT_EQUALS(minLat, 0)
-    TS_ASSERT_EQUALS(minLon, 0)
-    TS_ASSERT_EQUALS(maxLat, 0)
-    TS_ASSERT_EQUALS(maxLon, 0)
-  }
-
   void test_extremeWavelengths_binEdgeData() {
     using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
+    SparseInstrument sparse;
     const BinEdges edges{-1.0, 2.0, 4.0};
     const Counts counts{0.0, 0.0};
     auto ws = create<Workspace2D>(2, Histogram(edges, counts));
     ws->mutableX(1) = {-3.0, -1.0, 1.0};
     double minWavelength, maxWavelength;
-    std::tie(minWavelength, maxWavelength) = extremeWavelengths(*ws);
+    std::tie(minWavelength, maxWavelength) = sparse.extremeWavelengths(*ws);
     TS_ASSERT_EQUALS(minWavelength, -2.0)
     TS_ASSERT_EQUALS(maxWavelength, 3.0)
   }
@@ -122,65 +90,15 @@ public:
   void test_extremeWavelengths_pointData() {
     using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
+    SparseInstrument sparse;
     const Points edges{-1.0, 2.0, 4.0};
     const Counts counts{0.0, 0.0, 0.0};
     auto ws = create<Workspace2D>(2, Histogram(edges, counts));
     ws->mutableX(1) = {-3.0, -1.0, 1.0};
     double minWavelength, maxWavelength;
-    std::tie(minWavelength, maxWavelength) = extremeWavelengths(*ws);
+    std::tie(minWavelength, maxWavelength) = sparse.extremeWavelengths(*ws);
     TS_ASSERT_EQUALS(minWavelength, -3.0)
     TS_ASSERT_EQUALS(maxWavelength, 4.0)
-  }
-
-  void test_geographicalAngles_casualAngles() {
-    using Mantid::Kernel::V3D;
-    V3D v;
-    v[m_standardRefFrame.pointingHorizontal()] = 1.0;
-    v[m_standardRefFrame.pointingUp()] = 1.0;
-    double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(v, m_standardRefFrame);
-    TS_ASSERT_EQUALS(lat, M_PI / 4);
-    TS_ASSERT_EQUALS(lon, M_PI / 2);
-    v *= 0;
-    v[m_goofyRefFrame.pointingHorizontal()] = 1.0;
-    v[m_goofyRefFrame.pointingUp()] = 1.0;
-    std::tie(lat, lon) = geographicalAngles(v, m_goofyRefFrame);
-    TS_ASSERT_EQUALS(lat, M_PI / 4);
-    TS_ASSERT_EQUALS(lon, M_PI / 2);
-  }
-
-  void test_geographicalAngles_poles() {
-    using Mantid::Kernel::V3D;
-    V3D v = m_standardRefFrame.vecPointingUp();
-    double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(v, m_standardRefFrame);
-    TS_ASSERT_EQUALS(lat, M_PI / 2);
-    TS_ASSERT_EQUALS(lon, 0.0);
-    v *= -1;
-    std::tie(lat, lon) = geographicalAngles(v, m_standardRefFrame);
-    TS_ASSERT_EQUALS(lat, -M_PI / 2);
-    TS_ASSERT_EQUALS(lon, -M_PI);
-    v = m_goofyRefFrame.vecPointingUp();
-    std::tie(lat, lon) = geographicalAngles(v, m_goofyRefFrame);
-    TS_ASSERT_EQUALS(lat, M_PI / 2);
-    TS_ASSERT_EQUALS(lon, 0.0);
-    v *= -1;
-    std::tie(lat, lon) = geographicalAngles(v, m_goofyRefFrame);
-    TS_ASSERT_EQUALS(lat, -M_PI / 2);
-    TS_ASSERT_EQUALS(lon, -M_PI);
-  }
-
-  void test_geographicalAngles_zeroAngles() {
-    using Mantid::Kernel::V3D;
-    V3D v = m_standardRefFrame.vecPointingAlongBeam();
-    double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(v, m_standardRefFrame);
-    TS_ASSERT_EQUALS(lat, 0.0);
-    TS_ASSERT_EQUALS(lon, 0.0);
-    v = m_goofyRefFrame.vecPointingAlongBeam();
-    std::tie(lat, lon) = geographicalAngles(v, m_goofyRefFrame);
-    TS_ASSERT_EQUALS(lat, 0.0);
-    TS_ASSERT_EQUALS(lon, 0.0);
   }
 
   void test_greatCircleDistance() {

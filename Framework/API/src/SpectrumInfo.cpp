@@ -115,6 +115,44 @@ double SpectrumInfo::azimuthal(const size_t index) const {
   return phi / static_cast<double>(spectrumDefinition(index).size());
 }
 
+/** Calculate latitude and longitude for given spectrum index.
+ *  @param index Index of the spectrum that lat/long are required for
+ *  @return A pair containing the latitude and longitude values.
+ */
+std::pair<double, double>
+SpectrumInfo::geographicalAngles(const size_t index) const {
+  double lat{0.0}, lon{0.0};
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index)) {
+    auto latlong = m_detectorInfo.geographicalAngles(detIndex);
+    lat += latlong.first;
+    lon += latlong.second;
+  }
+  return std::pair<double, double>(
+      lat / static_cast<double>(spectrumDefinition(index).size()),
+      lon / static_cast<double>(spectrumDefinition(index).size()));
+}
+
+/** Calculate the distance between two points on a unit sphere.
+ *  @param lat1 Latitude of the first point.
+ *  @param long1 Longitude of the first point.
+ *  @param lat2 Latitude of the second point.
+ *  @param long2 Longitude of the second point.
+ *  @return The distance between the points.
+ */
+double SpectrumInfo::greatCircleDistance(const double lat1, const double long1,
+                                         const double lat2,
+                                         const double long2) const{
+  const double latD = std::sin((lat2 - lat1) / 2.0);
+  const double longD = std::sin((long2 - long1) / 2.0);
+  const double S =
+      latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
+  return 2.0 * std::asin(std::sqrt(S));
+}
+
+std::tuple<double, double, double, double> SpectrumInfo::extremeAngles() const {
+  return m_detectorInfo.extremeAngles();
+}
+
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;

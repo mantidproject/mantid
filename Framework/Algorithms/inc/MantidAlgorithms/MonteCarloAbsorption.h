@@ -13,7 +13,9 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
+#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 
 namespace Mantid {
 namespace API {
@@ -50,6 +52,17 @@ public:
     return "Calculates attenuation due to absorption and scattering in a "
            "sample & its environment using a Monte Carlo.";
   }
+
+protected:
+  virtual std::unique_ptr<MCAbsorptionStrategy> createStrategy(
+      const IBeamProfile &beamProfile, const API::Sample &sample,
+      Kernel::DeltaEMode::Type EMode, const size_t nevents,
+      const size_t maxScatterPtAttempts,
+      const bool regenerateTracksForEachLambda,
+      const MCInteractionVolume::ScatteringPointVicinity pointsIn =
+          MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
+  virtual std::unique_ptr <SparseInstrument> createSparseInstrument();
+  virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
 
 private:
   void init() override;

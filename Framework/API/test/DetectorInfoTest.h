@@ -10,6 +10,7 @@
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -48,6 +49,11 @@ public:
 
     m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
                                        numberOfBins);
+
+    m_goofyRefFrame = std::make_shared<ReferenceFrame>(
+        PointingAlong::X, PointingAlong::Y, Handedness::Left, "");
+    m_standardRefFrame = std::make_shared<ReferenceFrame>(
+        PointingAlong::Y, PointingAlong::Z, Handedness::Right, "");
   }
 
   void test_comparison() {
@@ -161,6 +167,116 @@ public:
     // Monitors
     TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(3), const std::logic_error &);
     TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), const std::logic_error &);
+  }
+
+  void test_extremeAngles_multipleDetectors() {
+    WorkspaceTester ws;
+    ws.initialize(4, 1, 1);
+    ws.setInstrument(
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+
+    double minLat;
+    double minLon;
+    double maxLat;
+    double maxLon;
+    const auto &detectorInfo = ws.detectorInfo();
+    std::tie(minLat, maxLat, minLon, maxLon) = detectorInfo.extremeAngles();
+    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+      double lat;
+      double lon;
+      std::tie(lat, lon) = detectorInfo.geographicalAngles(i);
+      TS_ASSERT_LESS_THAN_EQUALS(minLat, lat)
+      TS_ASSERT_LESS_THAN_EQUALS(minLon, lon)
+      TS_ASSERT_LESS_THAN_EQUALS(lat, maxLat)
+      TS_ASSERT_LESS_THAN_EQUALS(lon, maxLon)
+    }
+  }
+
+  void test_extremeAngles_singleDetector() {
+    WorkspaceTester ws;
+    ws.initialize(1, 1, 1);
+    ws.setInstrument(
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 1));
+    double minLat;
+    double minLon;
+    double maxLat;
+    double maxLon;
+    const auto &detectorInfo = ws.detectorInfo();
+    std::tie(minLat, maxLat, minLon, maxLon) = detectorInfo.extremeAngles();
+    TS_ASSERT_EQUALS(minLat, 0)
+    TS_ASSERT_EQUALS(minLon, 0)
+    TS_ASSERT_EQUALS(maxLat, 0)
+    TS_ASSERT_EQUALS(maxLon, 0)
+  }
+
+  void test_geographicalAngles_casualAngles() {
+    V3D v;
+    v[m_standardRefFrame->pointingHorizontal()] = 1.0;
+    v[m_standardRefFrame->pointingUp()] = 1.0;
+    auto ws = makeWorkspace(1, false, v);
+    const auto &detectorInfo = ws->detectorInfo();
+
+    double lat, lon;
+    std::tie(lat, lon) = detectorInfo.geographicalAngles(0);
+    TS_ASSERT_EQUALS(lat, M_PI / 4);
+    TS_ASSERT_EQUALS(lon, M_PI / 2);
+
+    v *= 0;
+    v[m_goofyRefFrame->pointingHorizontal()] = 1.0;
+    v[m_goofyRefFrame->pointingUp()] = 1.0;
+    auto ws2 = makeWorkspace(1, true, v);
+    const auto detectorInfo2 = ws2->detectorInfo();
+
+    std::tie(lat, lon) = detectorInfo2.geographicalAngles(0);
+    TS_ASSERT_EQUALS(lat, M_PI / 4);
+    TS_ASSERT_EQUALS(lon, M_PI / 2);
+  }
+
+  void test_geographicalAngles_poles() {
+    V3D v = m_standardRefFrame->vecPointingUp();
+    auto ws = makeWorkspace(1, false, v);
+    const auto &detectorInfo = ws->detectorInfo();
+
+    double lat, lon;
+    std::tie(lat, lon) = detectorInfo.geographicalAngles(0);
+    TS_ASSERT_EQUALS(lat, M_PI / 2);
+    TS_ASSERT_EQUALS(lon, 0.0);
+    v *= -1;
+    auto ws2 = makeWorkspace(1, false, v);
+    const auto &detectorInfo2 = ws2->detectorInfo();
+    std::tie(lat, lon) = detectorInfo2.geographicalAngles(0);
+    TS_ASSERT_EQUALS(lat, -M_PI / 2);
+    TS_ASSERT_EQUALS(lon, -M_PI);
+
+    v = m_goofyRefFrame->vecPointingUp();
+    auto ws3 = makeWorkspace(1, true, v);
+    const auto &detectorInfo3 = ws3->detectorInfo();
+    std::tie(lat, lon) = detectorInfo3.geographicalAngles(0);
+    TS_ASSERT_EQUALS(lat, M_PI / 2);
+    TS_ASSERT_EQUALS(lon, 0.0);
+    v *= -1;
+    auto ws4 = makeWorkspace(1, true, v);
+    const auto &detectorInfo4 = ws4->detectorInfo();
+    std::tie(lat, lon) = detectorInfo4.geographicalAngles(0);
+    TS_ASSERT_EQUALS(lat, -M_PI / 2);
+    TS_ASSERT_EQUALS(lon, -M_PI);
+  }
+
+  void test_geographicalAngles_zeroAngles() {
+    using Mantid::Kernel::V3D;
+    V3D v = m_standardRefFrame->vecPointingAlongBeam();
+    auto ws = makeWorkspace(1, false, v);
+    const auto &detectorInfo = ws->detectorInfo();
+    double lat, lon;
+    std::tie(lat, lon) = detectorInfo.geographicalAngles(0);
+    TS_ASSERT_EQUALS(lat, 0.0);
+    TS_ASSERT_EQUALS(lon, 0.0);
+    v = m_goofyRefFrame->vecPointingAlongBeam();
+    auto ws2 = makeWorkspace(1, false, v);
+    const auto &detectorInfo2 = ws->detectorInfo();
+    std::tie(lat, lon) = detectorInfo2.geographicalAngles(0);
+    TS_ASSERT_EQUALS(lat, 0.0);
+    TS_ASSERT_EQUALS(lon, 0.0);
   }
 
   void test_position() {
@@ -438,15 +554,29 @@ private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;
 
-  std::unique_ptr<MatrixWorkspace> makeWorkspace(size_t numSpectra) {
+  std::shared_ptr<Mantid::Geometry::ReferenceFrame> m_goofyRefFrame;
+  std::shared_ptr<Mantid::Geometry::ReferenceFrame> m_standardRefFrame;
+
+  std::unique_ptr<MatrixWorkspace>
+  makeWorkspace(size_t numSpectra, bool goofyReferenceFrame = false,
+                V3D detPos = {0, 0, 0}) {
     auto ws = std::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = std::make_shared<Instrument>("TestInstrument");
+    if (goofyReferenceFrame) {
+      inst->setReferenceFrame(m_goofyRefFrame);
+    } else {
+      inst->setReferenceFrame(m_standardRefFrame);
+    }
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
+      det->setPos(detPos);
       inst->add(det);
       inst->markAsDetector(det);
     }
+    ComponentCreationHelper::addSourceToInstrument(inst, V3D(0.0, 0.0, -10.0),
+                                                   "source");
+    ComponentCreationHelper::addSampleToInstrument(inst, V3D(0.0, 0.0, 0.0));
     ws->setInstrument(inst);
     auto &detInfo = ws->mutableDetectorInfo();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
@@ -454,6 +584,7 @@ private:
       if (i % 2 == 0)
         detInfo.setMasked(i, true);
     }
+
     return std::move(ws);
   }
 };

@@ -76,6 +76,10 @@ public:
   double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
   double azimuthal(const size_t index) const;
   double azimuthal(const std::pair<size_t, size_t> &index) const;
+  std::pair<double, double> geographicalAngles(const size_t index) const;
+  std::pair<double, double>
+  geographicalAngles(const std::pair<size_t, size_t> &index) const;
+  std::tuple<double, double, double, double> extremeAngles() const;
   Kernel::V3D position(const size_t index) const;
   Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
   Kernel::Quat rotation(const size_t index) const;

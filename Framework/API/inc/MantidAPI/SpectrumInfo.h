@@ -8,6 +8,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -68,6 +69,10 @@ public:
   double twoTheta(const size_t index) const;
   double signedTwoTheta(const size_t index) const;
   double azimuthal(const size_t index) const;
+  std::pair<double, double> geographicalAngles(const size_t index) const;
+  double greatCircleDistance(const double lat1, const double long1,
+                             const double lat2, const double long2) const;
+  std::tuple<double, double, double, double> extremeAngles() const;
   Kernel::V3D position(const size_t index) const;
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;
