@@ -446,11 +446,20 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(
   convertSpectrumAxis->initialize();
   convertSpectrumAxis->setProperty("InputWorkspace", workspace);
   convertSpectrumAxis->setProperty("OutputWorkspace", "__unused_for_child");
-  convertSpectrumAxis->setProperty("Target", "Theta");
+  convertSpectrumAxis->setProperty("Target", "SignedTheta");
   convertSpectrumAxis->setProperty("EMode", "Direct");
   convertSpectrumAxis->setProperty("OrderAxis", false);
   convertSpectrumAxis->execute();
-  return convertSpectrumAxis->getProperty("OutputWorkspace");
+  workspace = convertSpectrumAxis->getProperty("OutputWorkspace");
+
+  IAlgorithm_sptr changeSign = createChildAlgorithm("ConvertAxisByFormula");
+  changeSign->initialize();
+  changeSign->setProperty("InputWorkspace", workspace);
+  changeSign->setProperty("OutputWorkspace", "__unused_for_child");
+  changeSign->setProperty("Axis", "Y");
+  changeSign->setProperty("Formula", "-y");
+  changeSign->execute();
+  return changeSign->getProperty("OutputWorkspace");
 }
 
 /**
