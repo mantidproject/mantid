@@ -9,24 +9,70 @@ endif()
 # egg link name has to match setup.py name or Visual Studio generates
 # a warning that the output filename of the target does not match
 # the output that is produced by setuptools
-add_python_package(workbench
-  EXECUTABLE
-  EGGLINKNAME MantidWorkbench
-  EXCLUDE_FROM_INSTALL ${_exclude_on_install}
-  INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
-  INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
-)
+# Use setuptools bin launcher on Linux until ported to mantidworkbench.cpp
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  add_python_package(workbench
+    EXECUTABLE
+    EGGLINKNAME MantidWorkbench
+    EXCLUDE_FROM_INSTALL ${_exclude_on_install}
+    INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
+    INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
+  )
+else()
+  add_python_package(workbench
+    EXECUTABLE
+    EGGLINKNAME MantidWorkbench
+    EXCLUDE_FROM_INSTALL ${_exclude_on_install}
+    INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
+  )
+endif()
 
+# Launchers
+# Create wrapper executable/script to launch error reporter if main workbench process fails
+if(APPLE OR WIN32)
+  # development version
+  add_executable(MantidWorkbench mantidworkbench.cpp)
+  target_compile_definitions(MantidWorkbench 
+    PRIVATE
+    -DPYTHON_EXECUTABLE_PATH="${Python_EXECUTABLE}")
+  target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
+
+  # packaged version - creates a GUI application on Windows without a console
+  add_executable(MantidWorkbenchInstalled WIN32 mantidworkbench.cpp)
+  if(WIN32)
+    set(_py_exe "pythonw.exe")
+    set(_qt_plugins "..\\\\plugins\\\\qt5")
+  else()
+    set(_py_exe "python")
+    set(_qt_plugins "../PlugIns")
+  endif()
+  set_target_properties(MantidWorkbenchInstalled
+                        PROPERTIES
+                        OUTPUT_NAME MantidWorkbench
+                        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  target_compile_definitions(MantidWorkbenchInstalled
+    PRIVATE 
+    -DPYTHON_EXECUTABLE_PATH="${_py_exe}"
+    -DQT_PLUGIN_PATH="${_qt_plugins}")
+  target_link_libraries(MantidWorkbenchInstalled PRIVATE Boost::filesystem)
+  if(WIN32)
+    target_link_libraries(MantidWorkbenchInstalled PRIVATE Qt5::WinMain)
+  endif()
+  install(TARGETS MantidWorkbenchInstalled
+          DESTINATION ${WORKBENCH_BIN_DIR})
+endif()
+
+# Allow VS to start workbench for debugging
 set_target_properties(workbench PROPERTIES
                       VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
                       VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
-                      VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>
-                      )
+                      VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
+set_target_properties(MantidWorkbench PROPERTIES
+                      VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
 
+# process resources files 
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
-
 if (WIN32)
-
   function (CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
     # Set path and file content variables
     set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
@@ -121,8 +167,8 @@ pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}
   workbench ${TEST_FILES}
 )
 
-# Install MantidWorkbench for OSX
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # create Info.plist
   set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
   set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
   set ( MAC_BUNDLE_ICON MantidWorkbench.icns )

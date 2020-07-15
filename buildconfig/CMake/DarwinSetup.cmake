@@ -186,26 +186,10 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
     set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
     set(WORKBENCH_PLUGINS_DIR ${WORKBENCH_BUNDLE}PlugIns)
 
-    # Add launcher application for a Mantid Workbench
-    configure_file(
-      ${CMAKE_MODULE_PATH}/Packaging/osx/MantidWorkbench_osx_launcher.in
-      ${CMAKE_BINARY_DIR}/MantidWorkbench_osx_launcher.install @ONLY
-    )
-
-    install(
-      PROGRAMS ${CMAKE_BINARY_DIR}/MantidWorkbench_osx_launcher.install
-      DESTINATION MantidWorkbench.app/Contents/MacOS/
-      RENAME MantidWorkbench
-    )
     install(
       PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
       DESTINATION MantidWorkbench.app/Contents/MacOS/
       RENAME mantidpython
-    )
-    install(
-      FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidworkbench_Info.plist
-      DESTINATION MantidWorkbench.app/Contents/
-      RENAME Info.plist
     )
     install(
       FILES ${CMAKE_SOURCE_DIR}/images/MantidWorkbench.icns
