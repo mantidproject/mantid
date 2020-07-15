@@ -95,6 +95,9 @@ EstimationDataSelector MSDFit::getEstimationDataSelector() const {
         // Find data thats within range
         double xmin = range.first;
         double xmax = range.second;
+        if (xmin > xmax) {
+          return DataForParameterEstimation{};
+        }
 
         const auto startItr = std::find_if(
             x.cbegin(), x.cend(),
@@ -104,7 +107,11 @@ EstimationDataSelector MSDFit::getEstimationDataSelector() const {
             [xmax](const double &val) -> bool { return val > xmax; });
 
         size_t first = std::distance(x.cbegin(), startItr);
-        size_t m = std::distance(startItr, endItr - 1) / 2;
+        size_t end = std::distance(x.cbegin(), endItr);
+        size_t m = first + (end - first) / 2;
+
+        if (std::distance(startItr, endItr - 1) < 2)
+          return DataForParameterEstimation{};
 
         return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
       };
@@ -144,9 +151,13 @@ IDAFunctionParameterEstimation MSDFit::createParameterEstimation() const {
                         const DataForParameterEstimation &estimationData) {
     auto y = estimationData.y;
     auto x = estimationData.x;
+    if (x.size() != 2 || y.size() != 2) {
+      return;
+    }
     double Msd = 6 * log(y[0] / y[1]) / (x[1] * x[1]);
-    // If MSD less than zero, reject the estimate and set to 1
-    Msd = Msd > 0 ? Msd : 1.00;
+    // If MSD less than zero, reject the estimate and set to default value of
+    // 0.05, which leads to a (roughly) flat line
+    Msd = Msd > 0 ? Msd : 0.05;
     function->setParameter("Msd", Msd);
     function->setParameter("Height", y[0]);
   };
