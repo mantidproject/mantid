@@ -99,6 +99,7 @@ set(TEST_PY_FILES
     SymmetriseTest.py
     UpdatePeakParameterTableValueTest.py
     SANSSubtractTest.py
+    SaveP2DTest.py
     TOFTOFCropWorkspaceTest.py
     TOFTOFMergeRunsTest.py
     ExportSampleLogsToCSVFileTest.py
