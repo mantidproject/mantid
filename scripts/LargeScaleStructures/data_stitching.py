@@ -13,6 +13,7 @@ import sys
 from mantid.simpleapi import *
 from mantid.kernel import Logger
 from functools import cmp_to_key
+from qtpy.QtCore import QObject
 
 IS_IN_MANTIDGUI = False
 if "workbench.app.mainwindow" in sys.modules:
@@ -24,7 +25,6 @@ else:
     except(ImportError, ImportWarning):
         pass
 if IS_IN_MANTIDGUI:
-    from qtpy.QtCore import QObject
     from mantid.plots._compatability import plotSpectrum
     from mantidqt.plotting.markers import RangeMarker
 
