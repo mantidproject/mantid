@@ -51,6 +51,7 @@ public slots:
   void updateDataSelection();
   void updateAvailableSpectra();
   void updatePlots();
+  void updateFit();
   void updateGuess();
   void updateGuessAvailability();
   void enablePlotGuessInSeparateWindow();

@@ -168,7 +168,7 @@ The *create_total_scattering_pdf* method allows a user to create a Pair Distribu
 from focused POLARIS data, with a view performing further total scattering analysis.
 
 This function applies the placzek self scattering correction from
-:ref:CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering> before calculating the PDF
+:ref:`algm-CalculatePlaczekSelfScattering` before calculating the PDF
 
 This function requires the run_number you wish to analyse. The focused file for this run number must
 either be loaded in Mantid with the naming format given by the *focus* method:
@@ -198,6 +198,7 @@ The output PDF can be customized with the following parameters:
   [lower], or [lower, upper]. The upper bound serves to remove noise from the spectrum density, by default
   when a fourier filter is performed this is set to 1000 to minimise loss of detail while still being computationally
   efficient.
+- By calling with `debug=True` which will retain the intermediate self scattering correction workspace.
 
 Example
 =======

@@ -381,6 +381,16 @@ void IndirectFitPlotView::setHWHMRangeVisible(bool visible) {
   m_topPlot->getRangeSelector("HWHM")->setVisible(visible);
 }
 
+void IndirectFitPlotView::allowRedraws(bool state) {
+  m_topPlot->allowRedraws(state);
+  m_bottomPlot->allowRedraws(state);
+}
+
+void IndirectFitPlotView::redrawPlots() {
+  m_topPlot->replot();
+  m_bottomPlot->replot();
+}
+
 void IndirectFitPlotView::displayMessage(const std::string &message) const {
   QMessageBox::information(parentWidget(), "MantidPlot - Warning",
                            QString::fromStdString(message));

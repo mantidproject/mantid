@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
-
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QTimer>
@@ -14,6 +13,18 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+struct HoldRedrawing {
+  IIndirectFitPlotView *m_view;
+
+  HoldRedrawing(IIndirectFitPlotView *view) : m_view(view) {
+    m_view->allowRedraws(false);
+  }
+  ~HoldRedrawing() {
+    m_view->allowRedraws(true);
+    m_view->redrawPlots();
+  }
+};
 
 using namespace Mantid::API;
 
@@ -240,16 +251,24 @@ void IndirectFitPlotPresenter::setFitSingleSpectrumEnabled(bool enable) {
 }
 
 void IndirectFitPlotPresenter::updatePlots() {
+  HoldRedrawing holdRedrawing(m_view);
   m_view->clearPreviews();
-
   plotLines();
 
   updateRangeSelectors();
   updateFitRangeSelector();
 }
 
+void IndirectFitPlotPresenter::updateFit() {
+  HoldRedrawing holdRedrawing(m_view);
+  updateRangeSelectors();
+  updateFitRangeSelector();
+  updateGuess();
+}
+
 void IndirectFitPlotPresenter::plotLines() {
   if (auto const resultWorkspace = m_model->getResultWorkspace()) {
+    plotInput(m_model->getWorkspace(), m_model->getActiveSpectrum());
     plotFit(resultWorkspace);
     updatePlotRange(m_model->getResultRange());
   } else if (auto const inputWorkspace = m_model->getWorkspace()) {
@@ -270,7 +289,6 @@ void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace,
 }
 
 void IndirectFitPlotPresenter::plotFit(const MatrixWorkspace_sptr &workspace) {
-  plotInput(workspace, WorkspaceIndex{0});
   if (auto doGuess = m_view->isPlotGuessChecked())
     plotGuess(doGuess);
   plotFit(workspace, WorkspaceIndex{1});
@@ -352,7 +370,10 @@ void IndirectFitPlotPresenter::plotGuessInSeparateWindow(
       [this, workspace]() { m_model->appendGuessToInput(workspace); });
 }
 
-void IndirectFitPlotPresenter::clearGuess() { updatePlots(); }
+void IndirectFitPlotPresenter::clearGuess() {
+  m_view->removeFromTopPreview("Guess");
+  m_view->redrawPlots();
+}
 
 void IndirectFitPlotPresenter::updateHWHMSelector() {
   const auto hwhm = m_model->getFirstHWHM();
