@@ -283,7 +283,7 @@ class SliceViewerDataView(QWidget):
         the axes limits that have already been set
         """
         # ensure view is correct if zoomed in while swapping dimensions
-        # compute required extent and just have resampling imshow deal with it
+        # compute required extent and set after the new image is created
         old_extent = None
         if self.image is not None:
             old_extent = self.image.get_extent()
@@ -292,16 +292,19 @@ class SliceViewerDataView(QWidget):
                 old_extent = e3, e4, e1, e2
 
         self.clear_image()
-        self.image = imshow_sampling(
-            self.ax,
+        self.image = self.ax.imshow(
             ws,
             origin='lower',
             aspect='auto',
             interpolation='none',
             transpose=self.dimensions.transpose,
             norm=self.colorbar.get_norm(),
-            extent=old_extent,
             **kwargs)
+
+        if old_extent:
+            self.ax.set_xlim(old_extent[0], old_extent[1])
+            self.ax.set_ylim(old_extent[2], old_extent[3])
+
         self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         self.draw_plot()
@@ -312,7 +315,7 @@ class SliceViewerDataView(QWidget):
             if self.line_plots_active:
                 self._line_plots.plotter.delete_line_plot_lines()
             self.image_info_widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
-            self.image.remove()
+            self.ax.remove_artists_if(lambda art: art == self.image)
             self.image = None
 
     def clear_figure(self):
@@ -484,11 +487,10 @@ class SliceViewerDataView(QWidget):
     def set_normalization(self, ws, **kwargs):
         normalize_by_bin_width, _ = get_normalize_by_bin_width(ws, self.ax, **kwargs)
         is_normalized = normalize_by_bin_width or ws.isDistribution()
+        self.presenter.normalization = is_normalized
         if is_normalized:
-            self.presenter.normalization = mantid.api.MDNormalization.VolumeNormalization
             self.norm_opts.setCurrentIndex(1)
         else:
-            self.presenter.normalization = mantid.api.MDNormalization.NoNormalization
             self.norm_opts.setCurrentIndex(0)
 
 

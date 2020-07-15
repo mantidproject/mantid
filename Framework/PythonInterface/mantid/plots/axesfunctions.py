@@ -19,6 +19,7 @@ import sys
 import mantid.api
 import mantid.kernel
 import mantid.plots.modest_image
+from mantid.plots.resampling_image import samplingimage
 from mantid.plots.datafunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
@@ -620,21 +621,27 @@ def imshow(axes, workspace, *args, **kwargs):
                         number of bins, the polygons will be aligned with the axes
     :param transpose: ``bool`` to transpose the x and y axes of the plotted dimensions of an MDHistoWorkspace
     '''
+    transpose = kwargs.pop('transpose', False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        transpose = kwargs.pop('transpose', False)
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
     else:
-        transpose = kwargs.get('transpose', False)
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
         (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
+        _setLabels2D(axes,
+                     workspace,
+                     transpose=transpose,
+                     normalize_by_bin_width=normalize_by_bin_width)
+        # sample data for large workspaces to reduce the amount of time it takes to plot
+        if workspace.getNumberHistograms() > 5000:
+            return samplingimage.imshow_sampling(axes, workspace=workspace, *args, **kwargs)
+
         if aligned:
             (x, y, z, kwargs) = get_matrix_2d_ragged(workspace,
                                                      normalize_by_bin_width,
-                                                     axes=axes,
                                                      histogram2D=True,
                                                      transpose=transpose,
                                                      **kwargs)
@@ -643,17 +650,13 @@ def imshow(axes, workspace, *args, **kwargs):
                                            distribution=distribution,
                                            histogram2D=True,
                                            transpose=transpose)
-        _setLabels2D(axes,
-                     workspace,
-                     transpose=transpose,
-                     normalize_by_bin_width=normalize_by_bin_width)
     if 'extent' not in kwargs:
         if x.ndim == 2 and y.ndim == 2:
             kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
         else:
             kwargs['extent'] = [x[0], x[-1], y[0], y[-1]]
-    return mantid.plots.modest_image.imshow(axes, z, workspace=workspace, *args, **kwargs)
 
+    return mantid.plots.modest_image.imshow(axes, z, transpose=transpose, *args, **kwargs)
 
 def tripcolor(axes, workspace, *args, **kwargs):
     '''

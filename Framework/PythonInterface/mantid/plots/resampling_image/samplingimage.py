@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import matplotlib.image as mimage
 import matplotlib.colors
-from mantid.plots.axesfunctions import _setLabels2D
+from mantid.plots.datafunctions import interpolate_y_data, get_normalize_by_bin_width
 import mantid.api
 import numpy as np
 
@@ -24,7 +24,7 @@ class SamplingImage(mimage.AxesImage):
                  filternorm=1,
                  filterrad=4.0,
                  resample=False,
-                 normalize=mantid.api.MDNormalization.NoNormalization,
+                 normalize=None,
                  **kwargs):
         super().__init__(ax,
                          cmap=cmap,
@@ -37,8 +37,15 @@ class SamplingImage(mimage.AxesImage):
                          resample=resample,
                          **kwargs)
         self.ws = workspace
+        try:
+            self.spectrum_info = workspace.spectrumInfo()
+        except:
+            self.spectrum_info = None
         self.transpose = transpose
-        self.normalization = normalize
+        if normalize is None:
+            self.normalization = get_normalize_by_bin_width(self.ws, self.axes, **kwargs)
+        else:
+            self.normalization = normalize
         self._resize_cid, self._xlim_cid, self._ylim_cid = None, None, None
         self._resample_required = True
 
@@ -77,22 +84,21 @@ class SamplingImage(mimage.AxesImage):
         self._resample_required = True
 
     def _resample_image(self, xbins=None, ybins=None):
-        extent = self.get_extent()
-        if xbins is None or ybins is None:
-            bbox = self.get_window_extent().transformed(
-                self.axes.get_figure().dpi_scale_trans.inverted())
-            dpi = self.axes.get_figure().dpi
-            xbins = np.ceil(bbox.width * dpi)
-            ybins = np.ceil(bbox.height * dpi)
-        x = np.linspace(extent[0], extent[1], int(xbins))
-        y = np.linspace(extent[2], extent[3], int(ybins))
-        X, Y = np.meshgrid(x, y)
-        if self.transpose:
-            xy = np.vstack((Y.ravel(), X.ravel())).T
-        else:
-            xy = np.vstack((X.ravel(), Y.ravel())).T
-        data = self.ws.getSignalAtCoord(xy, self.normalization).reshape(X.shape)
-        self.set_data(data)
+        if self._resample_required:
+            extent = self.get_extent()
+            if xbins is None or ybins is None:
+                bbox = self.get_window_extent().transformed(
+                    self.axes.get_figure().dpi_scale_trans.inverted())
+                dpi = self.axes.get_figure().dpi
+                xbins = int(np.ceil(bbox.width * dpi))
+                ybins = int(np.ceil(bbox.height * dpi))
+
+            x = np.linspace(extent[0], extent[1], int(xbins))
+            normalize = get_normalize_by_bin_width(self.ws, self.axes)
+            data, _, _ = interpolate_y_data(self.ws, x, xbins, ybins, self.normalization, self.spectrum_info)
+            if self.transpose:
+                data = data.T
+            self.set_data(data)
 
     def _update_extent(self):
         """
@@ -139,7 +145,6 @@ def imshow_sampling(axes,
     """
     transpose = kwargs.pop('transpose', False)
 
-    _setLabels2D(axes, workspace, transpose=transpose, xscale='linear')
     if not extent:
         extent = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
                   workspace.getDimension(1).getMinimum(), workspace.getDimension(1).getMaximum())
