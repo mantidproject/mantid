@@ -137,13 +137,16 @@ void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
  * @param ynew A reference to the output Y values
  */
 void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
-                               HistogramY &ynew) {
+                               Histogram &output) {
   const auto xold = input.points();
   const auto &yold = input.y();
+  const auto &eold = input.e();
   const auto nypts = yold.size();
   size_t step(stepSize);
-  double x1(0.), x2(0.), y1(0.), y2(0.), overgap(0.);
+  double x1(0.), x2(0.), y1(0.), y2(0.), e1(0.), e2(0.), overgap(0.);
   // Copy over end value skipped by loop
+  auto ynew = output.mutableY();
+  auto enew = output.mutableE();
   ynew.back() = yold.back();
   for (size_t i = 0; i < nypts - 1; ++i) // Last point has been calculated
   {
@@ -155,14 +158,18 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
       x2 = xold[index2];
       overgap = 1.0 / (x2 - x1);
       y1 = yold[i];
+      e1 = eold[i];
       y2 = yold[index2];
+      e2 = yold[index2];
       step = 1;
       ynew[i] = yold[i];
+      enew[i] = eold[i];
       continue;
     }
     // Linear interpolation
     ynew[i] = (xp - x1) * y2 + (x2 - xp) * y1;
     ynew[i] *= overgap;
+    enew[i] = sqrt(pow((xp - x1) * e1, 2) + pow(((x2 - xp)) * e2, 2));
     step++;
   }
 }
@@ -227,15 +234,10 @@ size_t minSizeForLinearInterpolation() {
 Histogram interpolateLinear(const Histogram &input, const size_t stepSize) {
   sanityCheck(input, stepSize, minSizeForLinearInterpolation(), LINEAR_NAME);
 
-  HistogramY ynew(input.y().size());
-  interpolateYLinearInplace(input, stepSize, ynew);
   // Cheap copy
   Histogram output(input);
-  if (output.yMode() == Histogram::YMode::Counts) {
-    output.setCounts(ynew);
-  } else {
-    output.setFrequencies(ynew);
-  }
+  interpolateYLinearInplace(input, stepSize, output);
+
   return output;
 }
 
@@ -247,7 +249,7 @@ Histogram interpolateLinear(const Histogram &input, const size_t stepSize) {
  */
 void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
   sanityCheck(inOut, stepSize, minSizeForLinearInterpolation(), LINEAR_NAME);
-  interpolateYLinearInplace(inOut, stepSize, inOut.mutableY());
+  interpolateYLinearInplace(inOut, stepSize, inOut);
 }
 
 /**
@@ -317,4 +319,4 @@ void interpolateCSplineInplace(const Histogram &input, Histogram &output) {
 }
 
 } // namespace HistogramData
-} // namespace Mantid
+} // namespace HistogramData

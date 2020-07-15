@@ -132,23 +132,6 @@ SpectrumInfo::geographicalAngles(const size_t index) const {
       lon / static_cast<double>(spectrumDefinition(index).size()));
 }
 
-/** Calculate the distance between two points on a unit sphere.
- *  @param lat1 Latitude of the first point.
- *  @param long1 Longitude of the first point.
- *  @param lat2 Latitude of the second point.
- *  @param long2 Longitude of the second point.
- *  @return The distance between the points.
- */
-double SpectrumInfo::greatCircleDistance(const double lat1, const double long1,
-                                         const double lat2,
-                                         const double long2) const{
-  const double latD = std::sin((lat2 - lat1) / 2.0);
-  const double longD = std::sin((long2 - long1) / 2.0);
-  const double S =
-      latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
-  return 2.0 * std::asin(std::sqrt(S));
-}
-
 std::tuple<double, double, double, double> SpectrumInfo::extremeAngles() const {
   return m_detectorInfo.extremeAngles();
 }

@@ -61,7 +61,10 @@ protected:
       const bool regenerateTracksForEachLambda,
       const MCInteractionVolume::ScatteringPointVicinity pointsIn =
           MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
-  virtual std::unique_ptr <SparseInstrument> createSparseInstrument();
+  virtual std::unique_ptr<SparseWorkspace>
+  createSparseWorkspace(const API::MatrixWorkspace &modelWS,
+                        const size_t wavelengthPoints, const size_t rows,
+                        const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
 
 private:
@@ -82,9 +85,8 @@ private:
   createBeamProfile(const Geometry::Instrument &instrument,
                     const API::Sample &sample) const;
   void interpolateFromSparse(
-      API::MatrixWorkspace &targetWS, const API::MatrixWorkspace &sparseWS,
-      const Mantid::Algorithms::InterpolationOption &interpOpt,
-      const DetectorGridDefinition &detGrid);
+      API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
+      const Mantid::Algorithms::InterpolationOption &interpOpt);
 };
 } // namespace Algorithms
 } // namespace Mantid

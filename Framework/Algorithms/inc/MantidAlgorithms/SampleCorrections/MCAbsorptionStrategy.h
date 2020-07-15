@@ -52,6 +52,12 @@ public:
                  std::vector<double> &attFactorErrors,
                  MCInteractionStatistics &stats);
 
+protected:
+  virtual MCInteractionVolume createMCInteractionVolume(
+      const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
+      const size_t maxScatterAttempts,
+      const MCInteractionVolume::ScatteringPointVicinity pointsIn);
+
 private:
   const IBeamProfile &m_beamProfile;
   const MCInteractionVolume m_scatterVol;

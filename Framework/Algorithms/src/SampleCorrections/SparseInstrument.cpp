@@ -9,8 +9,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -48,7 +46,7 @@ namespace Algorithms {
  *  @return A tuple containing the wavelength range.
  */
 std::tuple<double, double>
-SparseInstrument::extremeWavelengths(const API::MatrixWorkspace &ws) {
+SparseWorkspace::extremeWavelengths(const API::MatrixWorkspace &ws) {
   double currentMin = std::numeric_limits<double>::max();
   double currentMax = std::numeric_limits<double>::lowest();
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
@@ -67,8 +65,8 @@ SparseInstrument::extremeWavelengths(const API::MatrixWorkspace &ws) {
  *  @return A template histogram.
  */
 Mantid::HistogramData::Histogram
-SparseInstrument::modelHistogram(const API::MatrixWorkspace &modelWS,
-               const size_t wavelengthPoints) {
+SparseWorkspace::modelHistogram(const API::MatrixWorkspace &modelWS,
+                                 const size_t wavelengthPoints) {
   double minWavelength, maxWavelength;
   std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
   HistogramData::Frequencies ys(wavelengthPoints, 0.0);
@@ -94,7 +92,7 @@ SparseInstrument::modelHistogram(const API::MatrixWorkspace &modelWS,
 /** Creates a rectangular cuboid shape.
  *  @return A cube shape.
  */
-Geometry::IObject_sptr SparseInstrument::makeCubeShape() {
+Geometry::IObject_sptr SparseWorkspace::makeCubeShape() {
   using namespace Poco::XML;
   const double dimension = 0.05;
   AutoPtr<Document> shapeDescription = new Document;
@@ -133,17 +131,19 @@ Geometry::IObject_sptr SparseInstrument::makeCubeShape() {
   return shapeFactory.createShape(typeElement);
 }
 
-/** Create a workspace whose instrument approximates that of modelWS.
- *  @param modelWS A workspace to model.
- *  @param grid An object defining the detector grid of the output workspace.
- *  @param wavelengthPoints Number of points in the output workspace.
- *  @return A workspace with sparse instrument.
- * @throw runtime_error If creation fails.
- */
-API::MatrixWorkspace_uptr
-SparseInstrument::createSparseWS(const API::MatrixWorkspace &modelWS,
-               const Algorithms::DetectorGridDefinition &grid,
-               const size_t wavelengthPoints) {
+SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
+                                 const size_t wavelengthPoints,
+                                 const size_t rows, const size_t columns)
+    : Workspace2D() {
+  double minLat, maxLat, minLong, maxLong;
+  std::tie(minLat, maxLat, minLong, maxLong) =
+      modelWS.spectrumInfo().extremeAngles();
+  m_gridDef = std::make_unique<Algorithms::DetectorGridDefinition>(
+      minLat, maxLat, rows, minLong, maxLong, columns);
+  const size_t numSpectra = rows * columns;
+  const auto h = modelHistogram(modelWS, wavelengthPoints);
+  initialize(numSpectra, h);
+
   // Build a quite standard and somewhat complete instrument.
   auto instrument =
       std::make_shared<Geometry::Instrument>("MC_simulation_instrument");
@@ -170,16 +170,13 @@ SparseInstrument::createSparseWS(const API::MatrixWorkspace &modelWS,
   source->setPos(sourcePos);
   instrument->add(source.get());
   instrument->markAsSource(source.release());
-  // Add detectors and link them to spectra.
-  const size_t numSpectra = grid.numberColumns() * grid.numberRows();
-  const auto h = modelHistogram(modelWS, wavelengthPoints);
-  auto ws = DataObjects::create<DataObjects::Workspace2D>(numSpectra, h);
+
   auto detShape = makeCubeShape();
-  for (size_t col = 0; col < grid.numberColumns(); ++col) {
-    const auto lon = grid.longitudeAt(col);
-    for (size_t row = 0; row < grid.numberRows(); ++row) {
-      const auto lat = grid.latitudeAt(row);
-      const size_t index = col * grid.numberRows() + row;
+  for (size_t col = 0; col < columns; ++col) {
+    const auto lon = m_gridDef->longitudeAt(col);
+    for (size_t row = 0; row < rows; ++row) {
+      const auto lat = m_gridDef->latitudeAt(row);
+      const size_t index = col * rows + row;
       const auto detID = static_cast<int>(index);
       std::ostringstream detName;
       detName << "det-" << detID;
@@ -193,15 +190,16 @@ SparseInstrument::createSparseWS(const API::MatrixWorkspace &modelWS,
         return p;
       }();
       det->setPos(pos);
-      ws->getSpectrum(index).setDetectorID(detID);
+      getSpectrum(index).setDetectorID(detID);
       instrument->add(det.get());
       instrument->markAsDetector(det.release());
     }
   }
-  ws->setInstrument(instrument);
+  setInstrument(instrument);
+
   // Copy things needed for the simulation from the model workspace.
-  auto &paramMap = ws->instrumentParameters();
-  auto parametrizedInstrument = ws->getInstrument();
+  auto &paramMap = instrumentParameters();
+  auto parametrizedInstrument = getInstrument();
   // Copy beam parameters.
   const auto modelSource = modelWS.getInstrument()->getSource();
   const auto beamWidthParam = modelSource->getNumberParameter("beam-width");
@@ -215,10 +213,9 @@ SparseInstrument::createSparseWS(const API::MatrixWorkspace &modelWS,
   }
   // Add information about EFixed in a proper place.
   const auto eMode = modelWS.getEMode();
-  ws->mutableRun().addProperty("deltaE-mode",
-                               Kernel::DeltaEMode::asString(eMode));
+  mutableRun().addProperty("deltaE-mode", Kernel::DeltaEMode::asString(eMode));
   if (eMode == Kernel::DeltaEMode::Direct) {
-    ws->mutableRun().addProperty("Ei", modelWS.getEFixed());
+    mutableRun().addProperty("Ei", modelWS.getEFixed());
   } else if (eMode == Kernel::DeltaEMode::Indirect) {
     const auto &detIDs = modelWS.detectorInfo().detectorIDs();
     if (!constantIndirectEFixed(modelWS, detIDs)) {
@@ -226,28 +223,76 @@ SparseInstrument::createSparseWS(const API::MatrixWorkspace &modelWS,
           "Sparse instrument with variable EFixed not supported.");
     }
     const auto e = modelWS.getEFixed(detIDs[0]);
-    const auto &sparseDetIDs = ws->detectorInfo().detectorIDs();
+    const auto &sparseDetIDs = detectorInfo().detectorIDs();
     for (int sparseDetID : sparseDetIDs) {
-      ws->setEFixed(sparseDetID, e);
+      setEFixed(sparseDetID, e);
     }
   }
-  return API::MatrixWorkspace_uptr(ws.release());
 }
 
-/** Creates a detector grid definition for a sparse instrument.
- *  @param modelWS A workspace the sparse instrument approximates.
- *  @param rows Number of rows in the detector grid.
- *  @param columns Number of columns in the detector gris.
- *  @return A unique pointer pointing to the grid definition.
+/** Spatially interpolate a single histogram from nearby detectors.
+ *  @param lat Latitude of the interpolated detector.
+ *  @param lon Longitude of the interpolated detector.
+ *  @return An interpolated histogram.
  */
-std::unique_ptr<const DetectorGridDefinition>
-SparseInstrument::createDetectorGridDefinition(
-    const API::MatrixWorkspace &modelWS,
-                             const size_t rows, const size_t columns) {
-  double minLat, maxLat, minLong, maxLong;
-  std::tie(minLat, maxLat, minLong, maxLong) = modelWS.spectrumInfo().extremeAngles();
-  return std::make_unique<Algorithms::DetectorGridDefinition>(
-      minLat, maxLat, rows, minLong, maxLong, columns);
+HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(
+    const double lat, const double lon) const {
+  const auto indices = m_gridDef->nearestNeighbourIndices(lat, lon);
+
+  auto h = histogram(0);
+
+  const auto refFrame = getInstrument()->getReferenceFrame();
+  std::array<double, 4> distances;
+  for (size_t i = 0; i < 4; ++i) {
+    double detLat, detLong;
+    std::tie(detLat, detLong) = spectrumInfo().geographicalAngles(indices[i]);
+    distances[i] = greatCircleDistance(lat, lon, detLat, detLong);
+  }
+  const auto weights = inverseDistanceWeights(distances);
+  auto weightSum = weights[0];
+  h.mutableY() = weights[0] * y(indices[0]);
+  for (size_t i = 1; i < 4; ++i) {
+    weightSum += weights[i];
+    h.mutableY() += weights[i] * y(indices[i]);
+  }
+  h.mutableY() /= weightSum;
+  return h;
+}
+
+/** Calculate the distance between two points on a unit sphere.
+ *  @param lat1 Latitude of the first point.
+ *  @param long1 Longitude of the first point.
+ *  @param lat2 Latitude of the second point.
+ *  @param long2 Longitude of the second point.
+ *  @return The distance between the points.
+ */
+double SparseWorkspace::greatCircleDistance(const double lat1,
+                                            const double long1,
+                                            const double lat2,
+                                            const double long2) {
+  const double latD = std::sin((lat2 - lat1) / 2.0);
+  const double longD = std::sin((long2 - long1) / 2.0);
+  const double S =
+      latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
+  return 2.0 * std::asin(std::sqrt(S));
+}
+
+/** Calculate the inverse distance weights for the given distances.
+ *  @param distances The distances.
+ *  @return An array of inverse distance weights.
+ */
+std::array<double, 4> SparseWorkspace::inverseDistanceWeights(
+    const std::array<double, 4> &distances) {
+  std::array<double, 4> weights;
+  for (size_t i = 0; i < weights.size(); ++i) {
+    if (distances[i] == 0.0) {
+      weights.fill(0.0);
+      weights[i] = 1.0;
+      return weights;
+    }
+    weights[i] = 1.0 / distances[i] / distances[i];
+  }
+  return weights;
 }
 
 } // namespace Algorithms

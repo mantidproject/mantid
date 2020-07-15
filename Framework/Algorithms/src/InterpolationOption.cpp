@@ -140,53 +140,5 @@ void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
   }
 }
 
-/** Spatially interpolate a single histogram from four nearby detectors.
- *  @param lat Latitude of the interpolated detector.
- *  @param lon Longitude of the interpolated detector.
- *  @param ws A workspace containing the detectors used for the interpolation.
- *  @param indices Indices to the nearest neighbour detectors.
- *  @return An interpolated histogram.
- */
-HistogramData::Histogram InterpolationOption::interpolateFromDetectorGrid(
-    const double lat, const double lon, const API::MatrixWorkspace &ws,
-    const std::array<size_t, 4> &indices) const {
-  auto h = ws.histogram(0);
-  const auto &spectrumInfo = ws.spectrumInfo();
-  const auto refFrame = ws.getInstrument()->getReferenceFrame();
-  std::array<double, 4> distances;
-  for (size_t i = 0; i < 4; ++i) {
-    double detLat, detLong;
-    std::tie(detLat, detLong) = spectrumInfo.geographicalAngles(indices[i]);
-    distances[i] = spectrumInfo.greatCircleDistance(lat, lon, detLat, detLong);
-  }
-  const auto weights = inverseDistanceWeights(distances);
-  auto weightSum = weights[0];
-  h.mutableY() = weights[0] * ws.y(indices[0]);
-  for (size_t i = 1; i < 4; ++i) {
-    weightSum += weights[i];
-    h.mutableY() += weights[i] * ws.y(indices[i]);
-  }
-  h.mutableY() /= weightSum;
-  return h;
-}
-
-/** Calculate the inverse distance weights for the given distances.
- *  @param distances The distances.
- *  @return An array of inverse distance weights.
- */
-std::array<double, 4> InterpolationOption::inverseDistanceWeights(
-    const std::array<double, 4> &distances) const{
-  std::array<double, 4> weights;
-  for (size_t i = 0; i < weights.size(); ++i) {
-    if (distances[i] == 0.0) {
-      weights.fill(0.0);
-      weights[i] = 1.0;
-      return weights;
-    }
-    weights[i] = 1.0 / distances[i] / distances[i];
-  }
-  return weights;
-}
-
 } // namespace Algorithms
 } // namespace Mantid

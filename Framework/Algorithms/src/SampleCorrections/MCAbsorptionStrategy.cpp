@@ -36,12 +36,31 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(
     const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda,
     const MCInteractionVolume::ScatteringPointVicinity pointsIn)
     : m_beamProfile(beamProfile),
-      m_scatterVol(MCInteractionVolume(sample,
-                                       beamProfile.defineActiveRegion(sample),
-                                       maxScatterPtAttempts, pointsIn)),
+      m_scatterVol(createMCInteractionVolume(
+          sample, beamProfile.defineActiveRegion(sample), maxScatterPtAttempts,
+          pointsIn)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
       m_error(1.0 / std::sqrt(m_nevents)), m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
+
+/**
+ * Factory method to return an instance of the required MCInteractionVolume
+ * class
+ * @param sample A reference to the object defining details of the sample
+ * @param activeRegion The bounding box within the sample where scatter points
+ * will be generated
+ * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object
+ * @param pointsIn Where to simulate the scattering point
+ * @return a pointer to an MCInteractionVolume object
+ */
+MCInteractionVolume MCAbsorptionStrategy::createMCInteractionVolume(
+    const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
+    const size_t maxScatterAttempts,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
+  return MCInteractionVolume(sample, activeRegion, maxScatterAttempts,
+                             pointsIn);
+}
 
 /**
  * Compute the correction for a final position of the neutron and wavelengths

@@ -241,14 +241,17 @@ std::unique_ptr<MCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
  * Factory method to return an instance of the required SparseInstrument class
  * @return a pointer to an SparseInstrument object
  */
-std::unique_ptr<SparseInstrument>
-MonteCarloAbsorption::createSparseInstrument() {
-  auto sparseInst = std::make_unique<SparseInstrument>();
-  return sparseInst;
+std::unique_ptr<SparseWorkspace> MonteCarloAbsorption::createSparseWorkspace(
+    const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints,
+    const size_t rows, const size_t columns) {
+  auto sparseWS = std::make_unique<SparseWorkspace>(modelWS, wavelengthPoints,
+                                                    rows, columns);
+  return sparseWS;
 }
 
 /**
- * Factory method to return an instance of the required InterpolationOption class
+ * Factory method to return an instance of the required InterpolationOption
+ * class
  * @return a pointer to an InterpolationOption object
  */
 std::unique_ptr<InterpolationOption>
@@ -295,15 +298,12 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   } else {
     nlambda = inputNbins;
   }
-  std::unique_ptr<const DetectorGridDefinition> detGrid;
-  MatrixWorkspace_uptr sparseWS;
+  SparseWorkspace_uptr sparseWS;
   if (useSparseInstrument) {
-    auto sparseInstrument = createSparseInstrument();
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    detGrid = sparseInstrument->createDetectorGridDefinition(
-        inputWS, latitudinalDets, longitudinalDets);
-    sparseWS = sparseInstrument->createSparseWS(inputWS, *detGrid, nlambda);
+    sparseWS = createSparseWorkspace(inputWS, nlambda, latitudinalDets,
+                                     longitudinalDets);
   }
   MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
   const MatrixWorkspace &instrumentWS =
@@ -408,7 +408,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (useSparseInstrument) {
-    interpolateFromSparse(*outputWS, simulationWS, interpolateOpt, *detGrid);
+    interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
   }
 
   return outputWS;
@@ -455,9 +455,8 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
 }
 
 void MonteCarloAbsorption::interpolateFromSparse(
-    MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS,
-    const Mantid::Algorithms::InterpolationOption &interpOpt,
-    const DetectorGridDefinition &detGrid) {
+    MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
+    const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
   const auto samplePos = spectrumInfo.samplePosition();
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
@@ -466,9 +465,8 @@ void MonteCarloAbsorption::interpolateFromSparse(
     PARALLEL_START_INTERUPT_REGION
     double lat, lon;
     std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
-    const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
-    const auto spatiallyInterpHisto = interpOpt.interpolateFromDetectorGrid(
-        lat, lon, sparseWS, nearestIndices);
+    const auto spatiallyInterpHisto =
+        sparseWS.interpolateFromDetectorGrid(lat, lon);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);

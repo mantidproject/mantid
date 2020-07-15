@@ -39,12 +39,6 @@ public:
   void applyInplace(HistogramData::Histogram &inOut, size_t stepSize) const;
   void applyInPlace(const HistogramData::Histogram &in,
                     HistogramData::Histogram &out) const;
-  HistogramData::Histogram
-  interpolateFromDetectorGrid(const double lat, const double lon,
-                              const API::MatrixWorkspace &ws,
-                              const std::array<size_t, 4> &indices) const;
-  std::array<double, 4>
-  inverseDistanceWeights(const std::array<double, 4> &distances) const;
 
 private:
   Value m_value = Value::Linear;
