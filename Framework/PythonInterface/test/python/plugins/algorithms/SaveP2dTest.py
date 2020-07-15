@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import shutil
+import os
 import numpy as np
 
 from mantid.simpleapi import (CreateWorkspace, DeleteWorkspace, SaveP2D)
