@@ -97,7 +97,8 @@ Mantid::API::IFunction_sptr getDoublePulseMultiDomainFunction(
   auto doublePulseFunc = std::make_shared<API::MultiDomainFunction>();
   for (size_t domain = 0; domain < initialFunction->getNumberDomains();
        domain++) {
-    auto twoPulseInnerFunction = getDoublePulseFunction(initialFunction->getFunction(domain), offset,
+    auto twoPulseInnerFunction =
+        getDoublePulseFunction(initialFunction->getFunction(domain), offset,
                                firstPulseWeight, secondPulseWeight);
     doublePulseFunc->addFunction(twoPulseInnerFunction);
     doublePulseFunc->setDomainIndex(domain, domain);
@@ -207,7 +208,7 @@ void DoublePulseFit::initConcrete() {
                   "Output is an empty string).");
   declareProperty("PulseOffset", 0.0, "The time offset between the two pulses");
   declareProperty("FirstPulseWeight", 0.5, "Weighting of first pulse.");
-  declareProperty("SecondPulseWeight", 0.5, "Weighting of first pulse.");
+  declareProperty("SecondPulseWeight", 0.5, "Weighting of second pulse.");
 }
 
 void DoublePulseFit::execConcrete() {

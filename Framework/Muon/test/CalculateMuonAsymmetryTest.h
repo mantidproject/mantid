@@ -327,7 +327,6 @@ public:
     alg->setProperty("EnableDoublePulse", true);
     alg->setProperty("PulseOffset", 0.33);
     alg->setProperty("FirstPulseWeight", 0.5);
-    alg->setProperty("SecondPulseWeight", 0.5);
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());

@@ -585,10 +585,8 @@ class FittingTabModel(object):
             muon_halflife = 2.2
             decay = math.exp(-offset / muon_halflife)
             first_pulse_weighting = decay / (1 + decay)
-            second_pulse_weighting = 1 / (1 + decay)
             parameters.update({'PulseOffset' : offset,
-                               'DoublePulseEnabled': True,'FirstPulseWeight': first_pulse_weighting,
-                               'SecondPulseWeight': second_pulse_weighting})
+                               'DoublePulseEnabled': True,'FirstPulseWeight': first_pulse_weighting})
 
         return parameters
 
@@ -611,10 +609,8 @@ class FittingTabModel(object):
             muon_halflife = 2.2
             decay = math.exp(-offset / muon_halflife)
             first_pulse_weighting = decay / (1 + decay)
-            second_pulse_weighting = 1 / (1 + decay)
             parameters.update({'PulseOffset' : offset,
-                               'DoublePulseEnabled': True,'FirstPulseWeight': first_pulse_weighting,
-                               'SecondPulseWeight': second_pulse_weighting})
+                               'DoublePulseEnabled': True,'FirstPulseWeight': first_pulse_weighting})
 
         return parameters
 

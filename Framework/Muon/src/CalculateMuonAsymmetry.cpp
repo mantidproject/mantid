@@ -97,8 +97,8 @@ void CalculateMuonAsymmetry::init() {
       "EnableDoublePulse", false,
       "Controls whether to perform a double pulse or single pulse fit.");
   declareProperty("PulseOffset", 0.0, "The time offset between the two pulses");
-  declareProperty("FirstPulseWeight", 0.5, "Weighting of first pulse.");
-  declareProperty("SecondPulseWeight", 0.5, "Weighting of first pulse.");
+  declareProperty("FirstPulseWeight", 0.5, "Weighting of first pulse.
+   The second pulse weighting is set as 1 - this.");
 }
 /*
  * Validate the input parameters
@@ -179,6 +179,7 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
                                                " name columns";
     }
   }
+
   return validationOutput;
 }
 /** Executes the algorithm
@@ -296,12 +297,11 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   if (doublePulseEnabled) {
     double pulseOffset = getProperty("PulseOffset");
     double firstPulseWeight = getProperty("FirstPulseWeight");
-    double secondPulseWeight = getProperty("SecondPulseWeight");
     fit = createChildAlgorithm("DoublePulseFit");
     fit->initialize();
     fit->setProperty("PulseOffset", pulseOffset);
     fit->setProperty("FirstPulseWeight", firstPulseWeight);
-    fit->setProperty("SecondPulseWeight", secondPulseWeight);
+    fit->setProperty("SecondPulseWeight", 1.0 - firstPulseWeight);
   } else {
     fit = createChildAlgorithm("Fit");
     fit->initialize();
