@@ -95,8 +95,8 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
         self.tthMin = self.getProperty('tthMin').value
         self.tthMax = self.getProperty('tthMax').value
 
-    def check_data_ranges(d, dp, lhkl, thkl):
-        return self.check_d_bounds(d) & self.check_dp_bounds(dp) & self.check_lambda_bounds(self,lhkl) &  \
+    def check_data_ranges(self, d, dp, lhkl, thkl):
+        return self.check_d_bounds(d) & self.check_dp_bounds(dp) & self.check_lambda_bounds(lhkl) &  \
               self.check_tth_bounds(thkl)
 
     def check_d_bounds(self, d):
