@@ -4,7 +4,7 @@ import shutil
 import os
 import numpy as np
 
-from mantid.simpleapi import (CreateWorkspace, DeleteWorkspace, SaveP2D)
+from mantid.simpleapi import *
 
 
 class SaveP2DTest(unittest.TestCase):
