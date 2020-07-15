@@ -99,7 +99,6 @@ set(TEST_PY_FILES
     SymmetriseTest.py
     UpdatePeakParameterTableValueTest.py
     SANSSubtractTest.py
-    SaveP2DTest.py
     TOFTOFCropWorkspaceTest.py
     TOFTOFMergeRunsTest.py
     ExportSampleLogsToCSVFileTest.py
@@ -115,7 +114,8 @@ set(TEST_PY_FILES
     VesuvioTOFFitTest.py
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
-    SaveYDATest.py)
+    SaveYDATest.py
+    SaveP2DTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
