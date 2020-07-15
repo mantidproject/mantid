@@ -12,6 +12,7 @@ from scipy.signal import savgol_filter
 
 
 class EnggEstimateFocussedBackground(PythonAlgorithm):
+    MIN_WINDOW_SIZE = 3
 
     def category(self):
         return "Diffraction\\Engineering"
@@ -59,7 +60,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         issues = dict()
         # check there are more than three points in a workspace
         inws = self.getProperty("InputWorkspace").value
-        if inws.blocksize() < 3:
+        if inws.blocksize() < self.MIN_WINDOW_SIZE:
             issues['InputWorkspace'] = "At least three points needed in each spectra"
         return issues
 
@@ -87,7 +88,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
             if not nwindow % 2:
                 nwindow += 1
 
-            if nwindow < 3:
+            if nwindow < self.MIN_WINDOW_SIZE:
                 raise RuntimeError('Convolution window must have at least three points')
             elif not nwindow < nbins:
                 # not effective due to edge effects of the convolution
