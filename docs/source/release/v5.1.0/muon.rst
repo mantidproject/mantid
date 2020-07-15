@@ -43,6 +43,7 @@ Improvements
 - The plot guess option within the fitting tab will now update when a parameter is changed.
 - Have updated the FDA GUI so that it functions correctly for frquency transforms and single fits.
 - Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
+- Updated :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` to allow double pulse fits.
 
 Bug fixes
 ---------

@@ -154,5 +154,6 @@ class CompositeFunctionDoublePulseFitTest(unittest.TestCase):
         self.assertAlmostEqual(values_column[0], 0.22, places=3)
         self.assertAlmostEqual(values_column[2], 1.5, places=3)
 
+
 if __name__ == '__main__':
     unittest.main()
