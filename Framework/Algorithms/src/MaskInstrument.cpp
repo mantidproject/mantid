@@ -68,8 +68,8 @@ void MaskInstrument::exec() {
   }
 
   if (auto event = dynamic_cast<DataObjects::EventWorkspace *>(outputWS.get()))
-      event->clearMRU();
-  }
+    event->clearMRU();
+}
 
 } // namespace Algorithms
 } // namespace Mantid
