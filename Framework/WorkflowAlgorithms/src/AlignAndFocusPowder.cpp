@@ -567,13 +567,7 @@ void AlignAndFocusPowder::exec() {
         "DetectorIDs",
         std::vector<detid_t>(maskedDetectors.begin(), maskedDetectors.end()));
     maskAlg->executeAsChildAlg();
-    MatrixWorkspace_sptr tmpW = maskAlg->getProperty("OutputWorkspace");
-
-    API::IAlgorithm_sptr clearAlg = createChildAlgorithm("ClearMaskedSpectra");
-    clearAlg->setProperty("InputWorkspace", tmpW);
-    clearAlg->setProperty("OutputWorkspace", tmpW);
-    clearAlg->executeAsChildAlg();
-    m_outputW = clearAlg->getProperty("OutputWorkspace");
+    m_outputW = maskAlg->getProperty("OutputWorkspace");
     m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();

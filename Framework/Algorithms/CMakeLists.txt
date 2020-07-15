@@ -43,7 +43,6 @@ set(SRC_FILES
     src/ClearCache.cpp
     src/ClearInstrumentParameters.cpp
     src/ClearMaskFlag.cpp
-    src/ClearMaskedSpectra.cpp
     src/CloneWorkspace.cpp
     src/Comment.cpp
     src/CommutativeBinaryOperation.cpp
@@ -370,7 +369,6 @@ set(INC_FILES
     inc/MantidAlgorithms/ClearCache.h
     inc/MantidAlgorithms/ClearInstrumentParameters.h
     inc/MantidAlgorithms/ClearMaskFlag.h
-    inc/MantidAlgorithms/ClearMaskedSpectra.h
     inc/MantidAlgorithms/CloneWorkspace.h
     inc/MantidAlgorithms/Comment.h
     inc/MantidAlgorithms/CommutativeBinaryOperation.h
@@ -714,7 +712,6 @@ set(TEST_FILES
     ClearCacheTest.h
     ClearInstrumentParametersTest.h
     ClearMaskFlagTest.h
-    ClearMaskedSpectraTest.h
     CloneWorkspaceTest.h
     CommentTest.h
     CommutativeBinaryOperationTest.h

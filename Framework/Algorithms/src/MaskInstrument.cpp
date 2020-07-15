@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaskInstrument.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -58,7 +60,16 @@ void MaskInstrument::exec() {
   auto &detectorInfo = outputWS->mutableDetectorInfo();
   for (const auto &id : detectorIds)
     detectorInfo.setMasked(detectorInfo.indexOf(id), true);
-}
+
+  const auto &spectrumInfo = outputWS->spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i))
+      outputWS->getSpectrum(i).clearData();
+  }
+
+  if (auto event = dynamic_cast<DataObjects::EventWorkspace *>(outputWS.get()))
+      event->clearMRU();
+  }
 
 } // namespace Algorithms
 } // namespace Mantid
