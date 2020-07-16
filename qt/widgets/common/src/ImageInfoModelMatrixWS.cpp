@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidQtWidgets/Common/QStringUtils.h"
 #include <limits>
@@ -112,14 +111,15 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
     tof = x;
   } else {
     try {
-      tof = UnitConversion::run(*m_xunit, *tofUnit, x, l1, l2, twoTheta, emode,
-                                efixed);
+      tof =
+          m_xunit->convertSingleToTOF(x, l1, l2, twoTheta, emode, efixed, 0.0);
       info->setValue(infoIndex, defaultFormat(tof));
       ++infoIndex;
-    } catch (std::invalid_argument &exc) {
+    } catch (std::exception &exc) {
       // without TOF we can't get to the other units
-      g_log.debug() << "Error calculating TOF from " << m_xunit->unitID()
-                    << ": " << exc.what() << "\n";
+      if (g_log.is(Logger::Priority::PRIO_DEBUG))
+        g_log.debug() << "Error calculating TOF from " << m_xunit->unitID()
+                      << ": " << exc.what() << "\n";
       return;
     }
   }
@@ -127,10 +127,16 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
     if (unit->unitID() == m_xunit->unitID())
       continue;
     if (!requiresEFixed || efixed > 0.0) {
-      // the final parameter is unused and a relic
-      const auto unitValue =
-          unit->convertSingleFromTOF(tof, l1, l2, twoTheta, emode, efixed, 0.0);
-      info->setValue(infoIndex, defaultFormat(unitValue));
+      try {
+        // the final parameter is unused and a relic
+        const auto unitValue = unit->convertSingleFromTOF(tof, l1, l2, twoTheta,
+                                                          emode, efixed, 0.0);
+        info->setValue(infoIndex, defaultFormat(unitValue));
+      } catch (std::exception &exc) {
+        if (g_log.is(Logger::Priority::PRIO_DEBUG))
+          g_log.debug() << "Error calculating " << unit->unitID() << " from "
+                        << m_xunit->unitID() << ": " << exc.what() << "\n";
+      }
       ++infoIndex;
     }
   }
