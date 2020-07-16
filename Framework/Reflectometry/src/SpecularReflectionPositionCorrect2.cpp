@@ -138,10 +138,6 @@ void SpecularReflectionPositionCorrect2::init() {
   nonNegativeDouble->setLowerExclusive(0.);
   declareProperty("PixelSize", EMPTY_DBL(), positiveDouble,
                   "Size of a detector pixel, in metres.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "DirectLineWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "A direct beam workspace for reference.");
 }
 
 /// Validate the algorithm's inputs.
@@ -160,10 +156,6 @@ SpecularReflectionPositionCorrect2::validateInputs() {
     if (isDefault("DirectLinePosition")) {
       issues["DirectLinePosition"] =
           "Direct line position required when no TwoTheta supplied.";
-    }
-    if (isDefault("DirectLineWorkspace")) {
-      issues["DirectLineWorkspace"] =
-          "Direct beam workspace required when no TwoTheta supplied.";
     }
     if (isDefault("PixelSize")) {
       issues["PixelSize"] = "Pixel size required for direct beam calibration.";
@@ -201,11 +193,9 @@ void SpecularReflectionPositionCorrect2::exec() {
   const auto alongDir = referenceFrame->vecPointingAlongBeam();
   const double beamOffsetOld = sampleToDetector.scalar_prod(alongDir);
 
-  const double twoThetaInRad =
-      isDefault("TwoTheta")
-          ? twoThetaFromDirectLine(detectorName, detectorID, samplePosition, l2,
-                                   alongDir, beamOffsetOld)
-          : twoThetaFromProperties(*inWS, l2);
+  const double twoThetaInRad = isDefault("DirectLinePosition")
+                                   ? twoThetaFromProperties(*inWS, l2)
+                                   : twoThetaFromDirectLine(*inWS, l2);
 
   correctDetectorPosition(outWS, detectorName, detectorID, twoThetaInRad,
                           correctionType, *referenceFrame, samplePosition,
@@ -252,13 +242,7 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
         sampleToDetector.scalar_prod(thetaSignDir);
     const double radius = std::hypot(beamOffsetOld, perpendicularOffsetOld);
     beamOffset = radius * std::cos(twoThetaInRad);
-  } else {
-    // Shouldn't get here unless there's been a coding error
-    std::ostringstream message;
-    message << "Invalid correction type '" << correctionType << "'";
-    throw std::runtime_error(message.str());
   }
-
   // Calculate the offset in the vertical direction, and the total
   // offset in the beam direction
   const double perpendicularOffset = beamOffset * std::tan(twoThetaInRad);
@@ -370,35 +354,24 @@ double SpecularReflectionPositionCorrect2::twoThetaFromProperties(
 }
 
 /**
- * Return a direct beam calibrated TwoTheta
- * @param detectorName name of the detector component
- * @param detectorID detector's id
- * @param samplePosition sample position
+ * Return the two theta corrected for the difference of offsets between the
+ * direct and reflected beam foreground centres.
+ * @param inWS the input workspace
  * @param l2 sample-to-detector distance
- * @param alongDir a unit vector pointing along the beam
- * @param beamOffset sample-to-detector distance on the beam axis
- * @return TwoTheta, in radians
+ * @return corrected two theta, in radians
  */
 double SpecularReflectionPositionCorrect2::twoThetaFromDirectLine(
-    const std::string &detectorName, const detid_t detectorID,
-    const V3D &samplePosition, const double l2, const V3D &alongDir,
-    const double beamOffset) {
-  double twoThetaInRad;
-  MatrixWorkspace_const_sptr directWS = getProperty("DirectLineWorkspace");
+    const API::MatrixWorkspace &inWS, const double l2) {
+  const double twoThetaInRad =
+      static_cast<double>(getProperty("TwoTheta")) * M_PI / 180.0;
   const double directLinePosition = getProperty("DirectLinePosition");
+  const double linePosition = getProperty("LinePosition");
   const double pixelSize = getProperty("PixelSize");
   const double directOffset =
-      offsetAngleFromCentre(*directWS, l2, directLinePosition, pixelSize);
-  const auto reflectedDetectorAngle = std::acos(beamOffset / l2);
-  const auto directInst = directWS->getInstrument();
-  const auto directDetPos =
-      declareDetectorPosition(*directInst, detectorName, detectorID);
-  const auto directSampleToDet = directDetPos - samplePosition;
-  const double directBeamOffset = directSampleToDet.scalar_prod(alongDir);
-  const double directL2 = directSampleToDet.norm();
-  const auto directDetectorAngle = std::acos(directBeamOffset / directL2);
-  twoThetaInRad = reflectedDetectorAngle - directDetectorAngle - directOffset;
-  return twoThetaInRad;
+      offsetAngleFromCentre(inWS, l2, directLinePosition, pixelSize);
+  const double reflectedOffset =
+      offsetAngleFromCentre(inWS, l2, linePosition, pixelSize);
+  return twoThetaInRad + directOffset - reflectedOffset;
 }
 
 } // namespace Reflectometry

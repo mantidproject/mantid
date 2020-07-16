@@ -5,13 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import (CompositeValidator, Direction, IntArrayLengthValidator, IntArrayBoundedValidator,
-                           IntArrayProperty, IntBoundedValidator, StringListValidator)
+                           IntArrayProperty, IntBoundedValidator, StringListValidator, EnabledWhenProperty, PropertyCriterion)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty,
                         PropertyMode, WorkspaceUnitValidator)
 from mantid.simpleapi import *
 import ReflectometryILL_common as common
 import ILL_utilities as utils
-import numpy
 
 
 class Prop:
@@ -110,6 +109,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         self._addSampleLogInfo(ws)
 
+        if self.getPropertyValue('AngleOption')=='DetectorAngle' and self.getPropertyValue('Measurement')=='ReflectedBeam':
+            # we still have to do this after having loaded and found the foreground centre of the reflected beam
+            ws = self._calibrateDetectorAngleByDirectBeam(ws)
+
         ws = self._waterCalibration(ws)
 
         ws = self._normaliseToSlits(ws)
@@ -145,9 +148,18 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              StringListValidator(['SampleAngle', 'DetectorAngle', 'UserAngle']))
         self.declareProperty(Prop.THETA,
                              defaultValue=-1.,
-                             doc='The bragg angle for reflected beam [Degree].')
+                             doc='The bragg angle for reflected beam [Degree], used if angle option is UserAngle.')
+        self.setPropertySettings(Prop.THETA,
+                                 EnabledWhenProperty('AngleOption', PropertyCriterion.IsEqualTo, 'UserAngle'))
         self.declareProperty('DirectBeamDetectorAngle', -1.,
-                             'The detector angle value [Degree] for the corresponding direct beam if angle option is DetectorAngle')
+                             'The detector angle value [Degree] for the corresponding direct beam, '
+                             'used if angle option is DetectorAngle')
+        self.declareProperty('DirectBeamForegroundCentre', -1.,
+                             'Fractional pixel index for the direct beam, used if angle option is DetectorAngle.')
+        self.setPropertySettings('DirectBeamDetectorAngle',
+                                 EnabledWhenProperty('AngleOption', PropertyCriterion.IsEqualTo, 'DetectorAngle'))
+        self.setPropertySettings('DirectBeamForegroundCentre',
+                                 EnabledWhenProperty('AngleOption', PropertyCriterion.IsEqualTo, 'DetectorAngle'))
         self.declareProperty(Prop.SUBALG_LOGGING,
                              defaultValue=SubalgLogging.OFF,
                              validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
@@ -221,9 +233,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             angle_option = self.getPropertyValue('AngleOption')
             if angle_option == 'UserAngle' and self.getProperty('BraggAngle').isDefault:
                 issues['BraggAngle'] = 'Bragg angle is mandatory if the angle option is UserAngle'
-            elif angle_option == 'DetectorAngle' and self.getProperty('DirectBeamDetectorAngle').isDefault:
-                issues['DirectBeamDetectorAngle'] = 'Direct beam detector angle is mandatory' \
-                                                       ' if the angle option is DetectorAngle'
+            elif angle_option == 'DetectorAngle':
+                if self.getProperty('DirectBeamDetectorAngle').isDefault:
+                    issues['DirectBeamDetectorAngle'] = 'Direct beam detector angle is mandatory' \
+                                                        ' if the angle option is DetectorAngle'
+                if self.getProperty('DirectBeamForegroundCentre').isDefault:
+                    issues['DirectBeamForegroundCentre'] = 'Direct beam foreground centre is mandatory' \
+                                                           ' if the angle option is DetectorAngle'
 
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
@@ -326,6 +342,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             halfWidths = [halfWidths[0], halfWidths[0]]
         return halfWidths
 
+    def _theta_from_detector_angles(self):
+        """Returns the bragg angle as half of detector angle difference"""
+        first_run = self.getProperty(Prop.RUN).value[0]
+        db_detector_angle = self.getProperty('DirectBeamDetectorAngle').value
+        return (common.detector_angle(first_run) - db_detector_angle) / 2.
+
     def _inputWS(self):
         """Return a raw input workspace."""
         inputFiles = self.getPropertyValue(Prop.RUN)
@@ -340,14 +362,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             'FitRangeUpper': self.getProperty(Prop.XMAX).value
         }
         if measurement_type == 'ReflectedBeam':
-            first_run = self.getProperty(Prop.RUN).value[0]
             bragg_angle = None
             angle_option = self.getPropertyValue('AngleOption')
+            first_run = self.getProperty(Prop.RUN).value[0]
             if angle_option == 'SampleAngle':
                 bragg_angle = common.sample_angle(first_run)
             elif angle_option == 'DetectorAngle':
-                db_detector_angle = self.getProperty('DirectBeamDetectorAngle').value
-                bragg_angle = (common.detector_angle(first_run) - db_detector_angle) / 2.
+                bragg_angle = self._theta_from_detector_angles()
+                # in this clause we still need to correct for the difference of foreground
+                # cetnres between direct and reflected beams
+                # but we need to load the reflected beam first to be able to do this
             elif angle_option == 'UserAngle':
                 bragg_angle = self.getProperty('BraggAngle').value
             load_options['BraggAngle'] = bragg_angle
@@ -520,5 +544,24 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return calibratedWS
 
+    def _calibrateDetectorAngleByDirectBeam(self, ws):
+        """Perform detector position correction for reflected beams."""
+        reflected_line = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
+        direct_line = self.getProperty('DirectBeamForegroundCentre').value
+        calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
+        calibratedWS = SpecularReflectionPositionCorrect(
+            InputWorkspace=ws,
+            OutputWorkspace=calibratedWSName,
+            DetectorComponentName='detector',
+            DirectLinePosition=direct_line,
+            LinePosition=reflected_line,
+            TwoTheta=2*self._theta_from_detector_angles(),
+            PixelSize=common.pixelSize(self._instrumentName),
+            DetectorCorrectionType='RotateAroundSample',
+            DetectorFacesSample=True,
+            EnableLogging=self._subalgLogging
+        )
+        self._cleanup.cleanup(ws)
+        return calibratedWS
 
 AlgorithmFactory.subscribe(ReflectometryILLPreprocess)

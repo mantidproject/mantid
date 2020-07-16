@@ -30,6 +30,7 @@ from mantid.kernel import (
 )
 from mantid.simpleapi import *
 import ILL_utilities as utils
+from ReflectometryILL_common import SampleLogs
 from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
 from ReflectometryILLSumForeground import SumType
 
@@ -651,6 +652,14 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         else:
             raise RuntimeError('Unable to retrieve the detector angle from ' + ws)
 
+    def foreground_centre_from_logs(self, ws):
+        """Returns the foreground centre from sample logs"""
+        run = mtd[ws].run()
+        if run.hasProperty(SampleLogs.LINE_POSITION):
+            return run.getLogData(SampleLogs.LINE_POSITION).value
+        else:
+            raise RuntimeError('Unable to retrieve the direct beam foreground centre needed for DAN option.')
+
     def preprocess_reflected_beam(self, run, out_ws, directBeamName, angle_index):
         """Runs preprocess for the reflected beam"""
         angle_option = self.get_value(PropertyNames.ANGLE_OPTION, angle_index)
@@ -678,6 +687,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             preprocess_args['BraggAngle'] = self.get_value(PropertyNames.THETA, angle_index)
         elif angle_option == PropertyNames.DAN:
             preprocess_args['DirectBeamDetectorAngle'] = self.detector_angle_from_logs(directBeamName)
+            preprocess_args['DirectBeamForegroundCentre'] = self.foreground_centre_from_logs(directBeamName)
         ReflectometryILLPreprocess(**preprocess_args)
 
     def sum_foreground(self, inputWorkspaceName, outputWorkspaceName, sumType, angle_index, directForegroundName = ''):
@@ -737,7 +747,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         foregroundName = reflectedBeamName + '_frg'
         directForegroundName = directBeamName + '_frg'
         sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
-        self.log().accumulate('Summation method: '+sum_type+'\n')
         sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
         self.sum_foreground(reflectedBeamName, foregroundName, sum_type, angle_index, directForegroundName)
         self._autoCleanup.cleanupLater(reflectedBeamName)
@@ -750,10 +759,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.setup()
         to_group = []
         scaleFactor = self.getProperty(PropertyNames.SCALE_FACTOR).value
-        self.log().accumulate('\nNumber of angles: {0}\n'.format(self._dimensionality))
         progress = Progress(self, start=0.0, end=1.0, nreports=self._dimensionality)
         for angle_index in range(self._dimensionality):
-            self.log().accumulate('Angle #{0}\n'.format(angle_index+1))
             runDB = self.make_name(self._db[angle_index])
             directBeamName = runDB + '_direct'
             directForegroundName = directBeamName + '_frg'
@@ -806,7 +813,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=self._outWS)
         self.setProperty(Prop.OUTPUT_WS, self._outWS)
         self._autoCleanup.finalCleanup()
-        self.log().flushNotice()
 
 
 AlgorithmFactory.subscribe(ReflectometryILLAutoProcess)

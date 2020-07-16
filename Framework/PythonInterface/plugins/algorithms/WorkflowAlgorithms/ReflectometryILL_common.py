@@ -190,8 +190,6 @@ class SampleLogs:
     SLIT2WIDTH = 'reduction.slit2width'
     SLIT3WIDTH = 'reduction.slit3width'
     SUM_TYPE = 'reduction.foreground.summation_type'
-    TWO_THETA = 'loader.two_theta'
-    REDUCTION_TWO_THETA = 'reduction.two_theta'
 
 
 class WSCleanup:
