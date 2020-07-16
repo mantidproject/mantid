@@ -86,6 +86,7 @@ Improvements
 - Improved loading of python plugins at startup on slow disks.
 - Sliceviewer no longer lists the reversed colourmaps along with the regular, instead they are accessed with a reverse checkbox.
 - Sliceviewer colourmap uses the default colourmap from the settings.
+- Code completions are now loaded when the code editor is first changed.
 
 Bugfixes
 ########
