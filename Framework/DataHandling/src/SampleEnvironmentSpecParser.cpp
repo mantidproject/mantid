@@ -406,7 +406,7 @@ SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
       std::unique_ptr<LoadStl> reader =
           LoadStlFactory::createReader(stlFileName, scaleType);
 
-      std::shared_ptr<Geometry::MeshObject> comp = reader->readStl();
+      std::shared_ptr<Geometry::MeshObject> comp = reader->readShape();
 
       Element *rotation = stlFileElement->getChildElement("rotation");
       if (rotation) {

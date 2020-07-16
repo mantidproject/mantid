@@ -161,6 +161,11 @@ void PlotPeakByLogValue::init() {
 
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
+
+  declareProperty(
+      "OutputFitStatus", false,
+      "Flag to output fit status information which consists of the fit "
+      "OutputStatus and the OutputChiSquared");
 }
 
 /**
@@ -181,6 +186,7 @@ void PlotPeakByLogValue::exec() {
   bool createFitOutput = getProperty("CreateOutput");
   bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   bool outputConvolvedMembers = getProperty("ConvolveMembers");
+  bool outputFitStatus = getProperty("OutputFitStatus");
   m_baseName = getPropertyValue("OutputWorkspace");
 
   bool isDataName = false; // if true first output column is of type string and
@@ -214,6 +220,17 @@ void PlotPeakByLogValue::exec() {
     covarianceWorkspaces.reserve(wsNames.size());
     fitWorkspaces.reserve(wsNames.size());
     parameterWorkspaces.reserve(wsNames.size());
+  }
+
+  std::vector<std::string> fitStatus;
+  std::vector<double> fitChiSquared;
+  if (outputFitStatus) {
+    declareProperty(std::make_unique<ArrayProperty<std::string>>(
+        "OutputStatus", Direction::Output));
+    declareProperty(std::make_unique<ArrayProperty<double>>("OutputChiSquared",
+                                                            Direction::Output));
+    fitStatus.reserve(wsNames.size());
+    fitChiSquared.reserve(wsNames.size());
   }
 
   double dProg = 1. / static_cast<double>(wsNames.size());
@@ -253,6 +270,11 @@ void PlotPeakByLogValue::exec() {
       parameterWorkspaces.emplace_back(outputParamWorkspace);
       covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
     }
+    if (outputFitStatus) {
+      fitStatus.push_back(fit->getProperty("OutputStatus"));
+      fitChiSquared.push_back(chi2);
+    }
+
     g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
                   << ' ' << chi2 << '\n';
 
@@ -266,6 +288,12 @@ void PlotPeakByLogValue::exec() {
     progress(Prog, ("Fitting Workspace: (" + current + ") - "));
     interruption_point();
   }
+
+  if (outputFitStatus) {
+    setProperty("OutputStatus", fitStatus);
+    setProperty("OutputChiSquared", fitChiSquared);
+  }
+
   finaliseOutputWorkspaces(createFitOutput, fitWorkspaces, parameterWorkspaces,
                            covarianceWorkspaces);
 }

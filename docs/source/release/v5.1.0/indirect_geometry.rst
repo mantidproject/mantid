@@ -31,6 +31,8 @@ Improvements
 - Improved the responsiveness of the function browsers within the Indirect Data Analysis interface.
 - Raw data will now be plotted from the input workspace, rather than the fit workspace, allowing the full range of data to be seen irrespective of the fitting bounds.
 - Added fit parameter estimations to the MSD fitting tab within the Indirect Data Analysis interface.
+- Added the fit output information (Algorithm status and Chi squared) to each fitting tab of the Indirect Data Analysis interface.
+  This change introduces two optional outputs from the QENSFit algorithms (fit status and Chi squared), which may be used to monitor the outcome of the fit.
 
 Bug Fixes
 #########
@@ -38,5 +40,9 @@ Bug Fixes
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work correctly for annular sample in a container.
 - FQ and Msd tabs now label output workspaces with the fitting function.
 - Fixed a crash when switching between linear and flat backgrounds in the ConvFit tab.
+- Abins now supports vibrational calculations performed within the
+  DMOL3 quantum chemistry code with open boundary conditions
+  (i.e. free molecules). Previously, data files from such calculations
+  would yield a parsing error.
 
 :ref:`Release 5.1.0 <v5.1.0>`

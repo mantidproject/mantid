@@ -58,7 +58,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
     ReadMaterial::MaterialParameters params;
     params.chemicalSymbol = "V";
     auto binaryStlReader = LoadBinaryStl(samplePath, scaleType, params);
-    std::shared_ptr<MeshObject> shape = binaryStlReader.readStl();
+    std::shared_ptr<MeshObject> shape = binaryStlReader.readShape();
     ws->mutableSample().setShape(shape);
 
     std::string envPath =
@@ -67,7 +67,8 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
     params.chemicalSymbol = "Ti-Zr";
     params.massDensity = 5.23;
     auto binaryStlReaderEnv = LoadBinaryStl(envPath, scaleType, params);
-    std::shared_ptr<MeshObject> environmentShape = binaryStlReaderEnv.readStl();
+    std::shared_ptr<MeshObject> environmentShape =
+        binaryStlReaderEnv.readShape();
 
     auto can = std::make_shared<Container>(environmentShape);
     std::unique_ptr<SampleEnvironment> environment =

@@ -22,7 +22,7 @@ public:
   void test_loading_cube_stl() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
     auto loader = LoadBinaryStl(path, units);
-    auto cube = loader.readStl();
+    auto cube = loader.readShape();
     assert_shape_matches(cube, 8, 12, 3000, 0.001);
   }
 
@@ -30,21 +30,21 @@ public:
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
     const ScaleUnits cm = ScaleUnits::centimetres;
     auto loader = LoadBinaryStl(path, cm);
-    auto cube = loader.readStl();
+    auto cube = loader.readShape();
     assert_shape_matches(cube, 8, 12, 0.003, 0.00001);
   }
 
   void test_loading_cylinder_stl() {
     std::string path = FileFinder::Instance().getFullPath("cylinderBin.stl");
     auto loader = LoadBinaryStl(path, units);
-    auto cylinder = loader.readStl();
+    auto cylinder = loader.readShape();
     assert_shape_matches(cylinder, 722, 1440, 589, 1);
   }
 
   void test_loading_tube_stl() {
     std::string path = FileFinder::Instance().getFullPath("tubeBin.stl");
     auto loader = LoadBinaryStl(path, units);
-    auto tube = loader.readStl();
+    auto tube = loader.readShape();
     assert_shape_matches(tube, 1080, 2160, 7068, 1);
   }
   // check that isBinaryStl returns false if the file contains an incomplete
@@ -73,7 +73,7 @@ public:
   void test_loading_large_stl() {
     std::string path = FileFinder::Instance().getFullPath("SI-4200-610.stl");
     auto loader = LoadBinaryStl(path, units);
-    auto LargeFile = loader.readStl();
+    auto LargeFile = loader.readShape();
     assert_shape_matches(LargeFile, 174388, 424694, 21218, 1);
   }
 

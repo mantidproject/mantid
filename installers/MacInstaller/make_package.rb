@@ -16,53 +16,15 @@ require 'pathname'
 AT_EXECUTABLE_TAG = '@executable_path'
 AT_LOADER_TAG = '@loader_path'
 AT_RPATH_TAG = '@rpath'
+# Collection modules to copy from system installation
+# Required to install other packages with pip
 BUNDLED_PY_MODULES_COMMON = [
-  'appnope',
-  'backcall',
-  'certifi',
-  'chardet',
-  'CifFile',
-  'cycler.py',
-  'dateutil',
-  'decorator.py',
-  'h5py',
-  'idna',
-  'IPython',
-  'ipython_genutils',
-  'ipykernel',
-  'jupyter_core',
-  'jupyter_client',
-  'kiwisolver.%s.so',
-  'markupsafe',
-  'matplotlib',
-  'mistune.py',
-  'mock',
-  'mpl_toolkits',
-  'numpy',
-  'pexpect',
-  'pickleshare.py',
   'pip',
   'pkg_resources',
-  'prompt_toolkit',
-  'ptyprocess',
-  'pygments',
-  'pyparsing.py',
-  'qtconsole',
-  'qtpy',
-  'pygments',
-  'tornado',
-  'requests',
-  'scipy',
-  'six.py',
-  'sphinx',
-  'sphinx_bootstrap_theme',
-  'traitlets',
-  'toml',
-  'urllib3',
-  'wcwidth',
-  'yaml',
-  'zmq'
+  'setuptools',
+  'wheel'
 ]
+# Brew Python packages to be copied to bundle
 BUNDLED_PY_MODULES_MANTIDPLOT = [
   'PyQt4/__init__.py',
   'PyQt4/Qt.so',
@@ -88,8 +50,9 @@ BUNDLED_PY_MODULES_WORKBENCH = [
   'PyQt5/QtXml.so',
   'PyQt5/sip.so',
   'PyQt5/uic',
-  'psutil'
 ]
+REQUIREMENTS_FILE = Pathname.new(__dir__) + 'requirements.txt'
+REQUIREMENTS_WORKBENCH_FILE = Pathname.new(__dir__) + 'requirements-workbench.txt'
 DEBUG = 1
 FRAMEWORK_IDENTIFIER = '.framework'
 HOMEBREW_PREFIX = '/usr/local'
@@ -134,6 +97,7 @@ end
 # +cmd+:: String giving command
 # return output string
 def execute(cmd, ignore_fail = false)
+  debug("Executing command #{cmd}")
   stdout, stderr, status = Open3.capture3(cmd)
   fatal("Command #{cmd} failed!\n" + stderr) if !ignore_fail && status != 0
   stdout
@@ -154,9 +118,11 @@ end
 # +destination+:: Destination directory for bundle
 # +host_python_exe+:: Executable of Python bundle to copy over
 # +bundled_packages+:: A list of packages that should be bundled
+# +requirements_files+:: A list of requirements files to install additional packages
 # returns the bundle site packages directory
 def deploy_python_framework(destination, host_python_exe,
-                            bundled_packages)
+                            bundled_packages,
+                            requirements_files)
   host_py_home = host_python_exe.realpath.parent.parent
   py_ver = host_py_home.basename
   bundle_python_framework = destination + 'Python.framework'
@@ -203,8 +169,8 @@ def deploy_python_framework(destination, host_python_exe,
     FileUtils.ln_s "python#{py_ver}", "python"
     FileUtils.ln_s "2to3-#{py_ver}", "2to3"
   end
-
-  # remove site-packages symlink and copy in just the packages we want
+  
+  # remove site-packages symlink, copy brew python modules and pip install the rest
   src_site_packages = Pathname.new("#{host_py_home}/lib/python#{py_ver}/site-packages")
   bundle_site_packages = Pathname.new("#{bundle_py_home}/lib/python#{py_ver}/site-packages")
   FileUtils.rm bundle_site_packages
@@ -212,6 +178,12 @@ def deploy_python_framework(destination, host_python_exe,
   copy_selection_recursive(bundled_packages, src_site_packages,
                            bundle_site_packages)
   make_writable(bundle_site_packages)
+  # remove distutils.cfg so pip paths are computed relative to the sys.prefix
+  FileUtils.rm Pathname.new("#{bundle_py_home}/lib/python#{py_ver}/distutils/distutils.cfg")
+  requirements_files.each do |requirements|
+    stdout = execute("#{bundle_py_home}/bin/python -m pip install -r #{requirements}")
+    debug(stdout)
+  end
 
   # fix mpl_toolkit if it is missing __init__
   mpltoolkit_init =
@@ -604,9 +576,11 @@ end
 # ==== end legacy =======
 
 bundled_packages = BUNDLED_PY_MODULES_COMMON.map { |s| s % "cpython-%d%d%s-darwin" % [python_version_major, python_version_minor, so_suffix] }
+requirements_files = [REQUIREMENTS_FILE]
 # check we have a known bundle
 if bundle_path.to_s.end_with?('MantidWorkbench.app')
   bundled_packages += BUNDLED_PY_MODULES_WORKBENCH
+  requirements_files << REQUIREMENTS_WORKBENCH_FILE
   bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
 elsif bundle_path.to_s.end_with?('MantidPlot.app')
@@ -621,7 +595,8 @@ end
 # We start with the assumption CMake has installed all required target libraries/executables
 # into the bundle and the main layout exists.
 bundle_py_site_packages = deploy_python_framework(contents_frameworks, host_python_exe,
-                                                  bundled_packages)
+                                                  bundled_packages, requirements_files)
+exit(0)
 if $PARAVIEW_BUILD_DIR.start_with?('/')
   pv_lib_dir = Pathname.new($PARAVIEW_BUILD_DIR) + 'lib'
   # add bare VTK/ParaView so libraries

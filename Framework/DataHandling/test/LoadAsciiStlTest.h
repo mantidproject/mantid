@@ -25,21 +25,21 @@ public:
   void test_cube() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
     auto Loader = LoadAsciiStl(path, units);
-    auto cube = Loader.readStl();
+    auto cube = Loader.readShape();
     assert_shape_matches(cube, 8, 12, 3000, 0.001);
   }
 
   void test_cylinder() {
     std::string path = FileFinder::Instance().getFullPath("cylinder.stl");
     auto Loader = LoadAsciiStl(path, units);
-    auto cylinder = Loader.readStl();
+    auto cylinder = Loader.readShape();
     assert_shape_matches(cylinder, 722, 1440, 589, 1);
   }
 
   void test_tube() {
     std::string path = FileFinder::Instance().getFullPath("tube.stl");
     auto Loader = LoadAsciiStl(path, units);
-    auto tube = Loader.readStl();
+    auto tube = Loader.readShape();
     assert_shape_matches(tube, 1080, 2160, 7068, 1);
   }
 
@@ -56,7 +56,7 @@ public:
   void loadFailureTest(const std::string &filename) {
     std::string path = FileFinder::Instance().getFullPath(filename);
     auto Loader = LoadAsciiStl(path, units);
-    TS_ASSERT_THROWS_ANYTHING(Loader.readStl());
+    TS_ASSERT_THROWS_ANYTHING(Loader.readShape());
   }
 
   void test_return_false_on_binary_stl() {

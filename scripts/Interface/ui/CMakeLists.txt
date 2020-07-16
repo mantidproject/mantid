@@ -4,7 +4,7 @@ add_subdirectory(batchwidget)
 add_subdirectory(poldi)
 
 set(UI_FILES
-    stitcher.ui)
+   )
 
 UiToPy(UI_FILES CompileUIUIBase)
 

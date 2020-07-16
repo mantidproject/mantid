@@ -18,6 +18,9 @@ add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
 # Prevent deprecation errors from std::tr1 in googletest until it is fixed
 # upstream. In MSVC 2017 and later
 add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+# Suppress warnings about std::iterator as a base. TBB emits this warning
+# and it is not yet fixed.
+add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
 
 # ##############################################################################
 # Additional compiler flags
