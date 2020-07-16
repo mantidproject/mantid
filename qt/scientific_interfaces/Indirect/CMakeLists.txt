@@ -75,6 +75,7 @@ set(
         IqtFit.cpp
         IqtFitModel.cpp
         IndirectFitPropertyBrowser.cpp
+        FitStatusWidget.cpp
         IndirectFunctionBrowser/ConvTypes.cpp
         IndirectFunctionBrowser/ConvFunctionModel.cpp
         IndirectFunctionBrowser/ConvTemplateBrowser.cpp
@@ -210,6 +211,7 @@ set(
         Quasi.h
         ResNorm.h
         Stretch.h
+        FitStatusWidget.h
 )
 
 set(
@@ -337,6 +339,7 @@ set(
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
         IndirectFitPropertyBrowser.cpp
+        FitStatusWidget.cpp
         IndirectFitPlotModel.cpp
         IndirectFitPlotPresenter.cpp
         IndirectFitPlotView.cpp
@@ -477,6 +480,7 @@ set(
         Quasi.h
         ResNorm.h
         Stretch.h
+        FitStatusWidget.h
 )
 
 set(
