@@ -15,7 +15,7 @@ namespace IDA {
 // Add function name and estimation function to the stored function map.
 void IDAFunctionParameterEstimation::addParameterEstimationFunction(
     const std::string &name, EstimationFunction function) {
-  m_funcMap.insert(std::make_pair(name, function));
+  m_funcMap.insert(std::make_pair(name, std::move(function)));
 }
 // Estimate the function parameters for the input function
 // If the input function exists in the stored map it will update the function

@@ -111,7 +111,7 @@ EstimationDataSelector JumpFit::getEstimationDataSelector() const {
     return DataForParameterEstimation{};
   };
 }
-// TODO: Implement parameter estimation or JumpFit functions
+// TODO: Implement parameter estimation for JumpFit functions
 IDAFunctionParameterEstimation JumpFit::createParameterEstimation() const {
 
   IDAFunctionParameterEstimation parameterEstimation;
