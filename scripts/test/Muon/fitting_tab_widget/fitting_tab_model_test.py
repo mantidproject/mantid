@@ -472,7 +472,6 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEquals(parameters['PulseOffset'], pulse_offset)
         self.assertEquals(parameters['DoublePulseEnabled'], True)
         self.assertAlmostEquals(parameters['FirstPulseWeight'], 0.287, places=3)
-        self.assertAlmostEquals(parameters['SecondPulseWeight'], 0.713, places=3)
 
     def test_that_single_fit_initialises_algorithm_with_correct_values_for_simultaneous_tf_asymmetry_double_pulse_mode(self):
         workspace_name = 'MUSR62260; Group; fwd;'
@@ -485,7 +484,6 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEquals(parameters['PulseOffset'], pulse_offset)
         self.assertEquals(parameters['DoublePulseEnabled'], True)
         self.assertAlmostEquals(parameters['FirstPulseWeight'], 0.287, places=3)
-        self.assertAlmostEquals(parameters['SecondPulseWeight'], 0.713, places=3)
 
 
 if __name__ == '__main__':

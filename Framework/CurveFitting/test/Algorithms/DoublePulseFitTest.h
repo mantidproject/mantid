@@ -71,7 +71,7 @@ public:
         FunctionFactory::Instance().createInitializedMultiDomainFunction(
             "name=ExpDecay, Height=5, Lifetime=2", 2);
     auto doublePulseFunction =
-        getDoublePulseFunction(initialFunction, 5.0, 1.0, 2.0);
+        getDoublePulseMultiDomainFunction(initialFunction, 5.0, 1.0, 2.0);
     auto restored_function = extractInnerFunction(
         std::dynamic_pointer_cast<MultiDomainFunction>(doublePulseFunction));
 

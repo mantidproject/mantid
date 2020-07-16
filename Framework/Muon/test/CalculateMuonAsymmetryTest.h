@@ -356,7 +356,6 @@ public:
       TS_ASSERT_DELTA(outWS->e(0)[40], 0.0015, delta);
       TS_ASSERT_DELTA(outWS->e(0)[100], 0.0015, delta);
     }
-    TS_ASSERT(false);
     clearADS();
   }
 };
