@@ -9,7 +9,6 @@
 
 #include <QMouseEvent>
 #include <QPainter>
-#include <QPainterPath>
 #include <QWheelEvent>
 
 #include <QLine>

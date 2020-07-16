@@ -127,6 +127,7 @@ set(SRC_FILES
     src/LoadSampleEnvironment.cpp
     src/LoadSampleShape.cpp
     src/LoadSassena.cpp
+    src/LoadSingleMesh.cpp
     src/LoadSpec.cpp
     src/LoadSpice2D.cpp
     src/LoadSpiceAscii.cpp
@@ -338,6 +339,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSampleEnvironment.h
     inc/MantidDataHandling/LoadSampleShape.h
     inc/MantidDataHandling/LoadSassena.h
+    inc/MantidDataHandling/LoadSingleMesh.h
     inc/MantidDataHandling/LoadSpec.h
     inc/MantidDataHandling/LoadSpice2D.h
     inc/MantidDataHandling/LoadSpiceAscii.h

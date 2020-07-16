@@ -71,7 +71,7 @@ public:
       InstrumentRayTracer tracker(m_inst);
       tracker.traceFromSample(testDir);
       Links results = tracker.getResults();
-      TS_ASSERT_EQUALS(results.size(), 3);
+      TS_ASSERT_EQUALS(results.size(), 2);
       // showResults(results, m_inst);
     }
   }

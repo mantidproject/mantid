@@ -106,7 +106,7 @@ def get_function_spec(func):
     args = argspec[0]
     if args:
         # For methods strip the self argument
-        if hasattr(func, 'im_func'):
+        if callable(func) and args[0] == "self":
             args = args[1:]
         defs = argspec[3]
     elif argspec[1] is not None:
@@ -174,7 +174,7 @@ def generate_call_tips(definitions, prepend_module_name=None):
             module_name = py_object.__module__
         else:
             module_name = prepend_module_name
-        if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
+        if callable(py_object) or inspect.isbuiltin(py_object):
             if isinstance(module_name, str):
                 call_tips.append(module_name + '.' + name + get_function_spec(py_object))
             else:
