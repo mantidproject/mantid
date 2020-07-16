@@ -20,6 +20,7 @@ AT_RPATH_TAG = '@rpath'
 # Required to install other packages with pip
 BUNDLED_PY_MODULES_COMMON = [
   'pip',
+  'pkg_resources',
   'setuptools',
   'wheel'
 ]
