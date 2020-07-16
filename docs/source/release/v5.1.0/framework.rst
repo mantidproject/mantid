@@ -40,6 +40,7 @@ Algorithms
    warning is printed at algorithm completion of the total number of data bytes discarded.
 - A bug introduced in v5.0 causing error values to tend to zero on multiple instances of :ref:`Rebin2D <algm-Rebin2D>` on the same workspace has been fixed.
 - Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
+- Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
 
 Data Handling
 -------------
