@@ -20,6 +20,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/IsNone.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
@@ -359,6 +360,13 @@ boost::python::dict validateInputs(IAlgorithm &self) {
                                                              std::string>;
   return MapToPyDictionary(map)();
 }
+
+void initializeProxy(IAlgorithm &self) {
+  // Release the GIL to stop workbench freezing while initializing the algorithms.
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock releaseGlobalInterpreterLock;
+  self.initialize();
+}
+
 } // namespace
 
 void export_ialgorithm() {
@@ -458,7 +466,7 @@ void export_ialgorithm() {
            "To query whether an algorithm "
            "should rethrow exceptions when "
            "executing.")
-      .def("initialize", &IAlgorithm::initialize, arg("self"),
+      .def("initialize", &initializeProxy, arg("self"),
            "Initializes the algorithm")
       .def("validateInputs", &validateInputs, arg("self"),
            "Cross-check all inputs and return any errors as a dictionary")
