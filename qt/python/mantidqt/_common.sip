@@ -936,6 +936,19 @@ class ImageInfoWidget : public QTableWidget {
 public:
     ImageInfoWidget(QWidget *parent = nullptr);
     void cursorAt(const double x, const double y, const double signal);
+    %MethodCode
+    try {
+      sipCpp->cursorAt(a0, a1, a2);
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
     void setWorkspace(SIP_PYOBJECT);
     %MethodCode
     try {
