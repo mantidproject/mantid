@@ -182,6 +182,38 @@ public:
     TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
   }
 
+    void test_tolerance_main_refl() {
+    const auto ws = createTestPeaksWorkspaceMainReflOnly();
+    auto alg = indexPeaks(ws, {{"Tolerance", "0.02"}, {"RoundHKLs", "0"}});
+
+    // Check the output properties
+    assertNumberPeaksIndexed(*alg, 3, 3, 0);
+
+    // spot check a few peaks for
+    // fractional Miller indices
+    const V3D peak_0_hkl_d(0.0, 0.0, 0.0); // first peak
+    const V3D peak_1_hkl_d(3, -1, 4);
+    const V3D peak_2_hkl_d(4, -1, 5);
+    const V3D peak_3_hkl_d(3, -0, 7);
+    const V3D peak_4_hkl_d(0.0, 0.0, 0.0); // last peak
+
+    const auto &peaks = ws->getPeaks();
+    V3D error = peak_0_hkl_d - peaks[0].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
+
+    error = peak_1_hkl_d - peaks[1].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
+
+    error = peak_2_hkl_d - peaks[2].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
+
+    error = peak_3_hkl_d - peaks[3].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
+
+    error = peak_4_hkl_d - peaks[4].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
+  }
+
   void test_no_roundHKLS_leaves_peaks_as_found() {
     const auto ws = createTestPeaksWorkspaceMainReflOnly();
     auto alg = indexPeaks(ws, {{"Tolerance", "0.1"}, {"RoundHKLs", "0"}});
