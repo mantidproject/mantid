@@ -9,6 +9,7 @@
 #
 from qtpy.QtCore import Qt, Signal, Slot
 
+import matplotlib.pyplot
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.plotting.functions import plot
@@ -129,7 +130,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
-        import matplotlib.pyplot as plt
         """
         Override the base class method. Initialise the peak editing tool.
         """

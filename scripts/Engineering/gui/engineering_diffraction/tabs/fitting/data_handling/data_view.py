@@ -25,7 +25,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         # xunit combo box
         self.setup_xunit_combobox()
 
-
     # =================
     # Slot Connectors
     # =================

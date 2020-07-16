@@ -12,6 +12,7 @@ from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling import d
 
 dir_path = "Engineering.gui.engineering_diffraction.tabs.fitting.data_handling"
 
+
 class FittingDataPresenterTest(unittest.TestCase):
     def setUp(self):
         self.model = mock.create_autospec(data_model.FittingDataModel)
@@ -280,12 +281,11 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.assertEqual(0, self.presenter.plot_added_notifier.notify_subscribers.call_count)
         self.assertEqual(0, self.presenter.plot_removed_notifier.notify_subscribers.call_count)
 
-
     def test_bgsub_first_time(self):
         # setup row
         self._setup_bgsub_test()
         # subtract background for first time
-        self.view.get_item_checked.return_value = True # determines is bgSubtract is checked or not
+        self.view.get_item_checked.return_value = True  # determines is bgSubtract is checked or not
         self.view.read_bg_params_from_table.return_value = [True, 40, 800, False]
         self.model.get_background_workspaces.return_value = None
         self.presenter._handle_table_cell_changed(1, 3)
@@ -328,6 +328,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.row_numbers["name2"] = 1
         self.model.get_loaded_workspaces.return_value = {"name1": self.ws1, "name2": self.ws2}
         self.model.estimate_background.return_value = self.ws2
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Engineering.gui.engineering_diffraction.tabs.common import create_error_message
-from mantid.simpleapi import logger, Plus, Minus
+from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 
