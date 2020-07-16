@@ -21,12 +21,12 @@ AT_RPATH_TAG = '@rpath'
 BUNDLED_PY_MODULES_COMMON = [
   'easy_install.py',
   'pip',
-  'pip*.egg-info',
+  'pip*.*-info',
   'pkg_resources',
   'setuptools',
-  'setuptools*.egg-info',
+  'setuptools*.*-info',
   'wheel',
-  'wheel*.egg-info'
+  'wheel*.*-info'
 ]
 # Brew Python packages to be copied to bundle
 BUNDLED_PY_MODULES_MANTIDPLOT = [
