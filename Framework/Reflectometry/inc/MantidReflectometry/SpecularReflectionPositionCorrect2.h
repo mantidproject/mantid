@@ -58,8 +58,6 @@ private:
   Kernel::V3D declareSamplePosition(const API::MatrixWorkspace &ws);
   double twoThetaFromProperties(const API::MatrixWorkspace &inWS,
                                 const double l2);
-  double twoThetaFromDirectLine(const API::MatrixWorkspace &inWS,
-                                const double l2);
 };
 
 } // namespace Reflectometry

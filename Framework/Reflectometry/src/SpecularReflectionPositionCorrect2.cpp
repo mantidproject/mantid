@@ -132,8 +132,6 @@ void SpecularReflectionPositionCorrect2::init() {
   nonNegativeDouble->setLower(0.);
   declareProperty("LinePosition", EMPTY_DBL(), nonNegativeDouble,
                   "A fractional workspace index for the specular line centre.");
-  declareProperty("DirectLinePosition", EMPTY_DBL(), nonNegativeDouble,
-                  "A fractional workspace index for the direct line centre.");
   auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   nonNegativeDouble->setLowerExclusive(0.);
   declareProperty("PixelSize", EMPTY_DBL(), positiveDouble,
@@ -148,17 +146,12 @@ SpecularReflectionPositionCorrect2::validateInputs() {
     issues["DetectorID"] =
         "DetectorID or DetectorComponentName has to be specified.";
   }
-  if (!isDefault("TwoTheta")) {
-    if (!isDefault("LinePosition") && isDefault("PixelSize")) {
-      issues["PixelSize"] = "Pixel size required.";
-    }
+  if (isDefault("TwoTheta")) {
+    issues["TwoTheta"] = "Two theta value is required.";
   } else {
-    if (isDefault("DirectLinePosition")) {
-      issues["DirectLinePosition"] =
-          "Direct line position required when no TwoTheta supplied.";
-    }
-    if (isDefault("PixelSize")) {
-      issues["PixelSize"] = "Pixel size required for direct beam calibration.";
+    if (!isDefault("LinePosition") && isDefault("PixelSize")) {
+      issues["PixelSize"] =
+          "Pixel size is required when line position is given.";
     }
   }
   return issues;
@@ -193,9 +186,7 @@ void SpecularReflectionPositionCorrect2::exec() {
   const auto alongDir = referenceFrame->vecPointingAlongBeam();
   const double beamOffsetOld = sampleToDetector.scalar_prod(alongDir);
 
-  const double twoThetaInRad = isDefault("DirectLinePosition")
-                                   ? twoThetaFromProperties(*inWS, l2)
-                                   : twoThetaFromDirectLine(*inWS, l2);
+  const double twoThetaInRad = twoThetaFromProperties(*inWS, l2);
 
   correctDetectorPosition(outWS, detectorName, detectorID, twoThetaInRad,
                           correctionType, *referenceFrame, samplePosition,
@@ -351,27 +342,6 @@ double SpecularReflectionPositionCorrect2::twoThetaFromProperties(
     twoThetaInRad -= offset;
   }
   return twoThetaInRad;
-}
-
-/**
- * Return the two theta corrected for the difference of offsets between the
- * direct and reflected beam foreground centres.
- * @param inWS the input workspace
- * @param l2 sample-to-detector distance
- * @return corrected two theta, in radians
- */
-double SpecularReflectionPositionCorrect2::twoThetaFromDirectLine(
-    const API::MatrixWorkspace &inWS, const double l2) {
-  const double twoThetaInRad =
-      static_cast<double>(getProperty("TwoTheta")) * M_PI / 180.0;
-  const double directLinePosition = getProperty("DirectLinePosition");
-  const double linePosition = getProperty("LinePosition");
-  const double pixelSize = getProperty("PixelSize");
-  const double directOffset =
-      offsetAngleFromCentre(inWS, l2, directLinePosition, pixelSize);
-  const double reflectedOffset =
-      offsetAngleFromCentre(inWS, l2, linePosition, pixelSize);
-  return twoThetaInRad + directOffset - reflectedOffset;
 }
 
 } // namespace Reflectometry
