@@ -72,7 +72,7 @@ constexpr double mmToMeter(const double x) { return x * 1.e-3; }
  *  @param ws a workspace to work on
  *  @return begin and end ws indices for non-monitor histograms
  */
-std::pair<size_t, size_t>
+std::pair<int, int>
 fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
   const size_t nHisto = ws.getNumberHistograms();
   size_t begin = 0;
@@ -90,7 +90,7 @@ fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
     }
     --end;
   }
-  return std::pair<size_t, size_t>{begin, end};
+  return std::pair<int, int>{begin, end};
 }
 
 /** Fill the X values of the first histogram of ws with values 0, 1, 2,...
@@ -619,8 +619,8 @@ double LoadILLReflectometry::reflectometryPeak() {
   if (!isDefault("ForegroundPeakCentre")) {
     return getProperty("ForegroundPeakCentre");
   }
-  size_t startIndex;
-  size_t endIndex;
+  int startIndex;
+  int endIndex;
   const auto autoIndices = fitIntegrationWSIndexRange(*m_localWorkspace);
   startIndex = autoIndices.first;
   endIndex = autoIndices.second;
@@ -634,8 +634,8 @@ double LoadILLReflectometry::reflectometryPeak() {
   integration->initialize();
   integration->setProperty("InputWorkspace", m_localWorkspace);
   integration->setProperty("OutputWorkspace", "__unused_for_child");
-  integration->setProperty("StartWorkspaceIndex", static_cast<int>(startIndex));
-  integration->setProperty("EndWorkspaceIndex", static_cast<int>(endIndex));
+  integration->setProperty("StartWorkspaceIndex", startIndex);
+  integration->setProperty("EndWorkspaceIndex", endIndex);
   if (!isDefault("FitRangeLower")) {
     integration->setProperty(
         "RangeLower", wavelengthToTOF(getProperty("FitRangeLower"),
