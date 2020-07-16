@@ -31,7 +31,7 @@ Output:
 
 .. testoutput:: MaskInstrumentExample
 
-  Detector 0 masked: True  data 0.3
+  Detector 0 masked: True  data 0.0
   Detector 1 masked: False data 0.3
   Detector 2 masked: True  data 0.0
   Detector 3 masked: True  data 0.0
