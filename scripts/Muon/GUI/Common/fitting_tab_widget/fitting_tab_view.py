@@ -179,7 +179,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     @display_workspace.setter
     def display_workspace(self, value):
         self.parameter_display_combo.blockSignals(True)
-        self.parameter_display_combo.setCurrentText(value)
+        index = self.parameter_display_combo.findText(value)
+        self.parameter_display_combo.setCurrentIndex(index)
         self.parameter_display_combo.blockSignals(False)
 
     @property
