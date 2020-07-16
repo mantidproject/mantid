@@ -30,7 +30,7 @@ algorithms which take a Matrix Workspace as input.
 In addition to data, workspaces hold a workspace history, which details the algorithms
 which have been run on this workspace.
 
-The workspace list pane is found on the left-hand side of the main MantidWorkbench window. 
+The `Analysis Data Service` (ADS), by default is found on the left-hand side of the main MantidWorkbench window. 
 When a muon data set is loaded via the GUI, the Matrix Workspaces are created automatically.
 
 *   **NAME12345 MA** which contains all the Muon Analysis data for run `12345` on the `NAME` instrument. 
@@ -74,7 +74,7 @@ hold a workspace history which lists the algorithms that have been applied to th
 
 To load a raw data file *without using* the Mantid Analysis GUI, and examine its content:
 
-1. In the 'Workspaces' pane, click Load>File
+1. In the ADS, click `Load`>`File`
 2. Load the file `HIFI00062798.nxs` from the Reference Material folder by using the `Browse` button - See Figure 4.
 
 .. figure:: /images/load_file2.gif
@@ -170,7 +170,7 @@ To try this follow these instructions:
 
 1. Load the `HIFI00062798` workspace and plot spectrum number `10` from the workspace panel, as described in `Loading Data`_ .
 2. Go to the `Plots` menu by clicking the `Plots` tab (by default) in the bottom left of the window, and ensure that the plot of spectrum `10` is selected in bold.
-3. Return to the workspaces panel and right click on the HIFI00062798 workspace, as before going to Plot but this time selecting 'Overplot Spectrum...' rather than 'Spectrum...'. Plot spectrum 20.
+3. Return to the ADS and right click on the `HIFI00062798` workspace, as before going to `Plot` but this time selecting `Overplot Spectrum...` instead of `Spectrum...`. Plot spectrum `20`.
 4. Spectrum `20` should now be visible on the spectrum `10` plot along with the original data. This process is shown in Figure 9 below.
 
 .. figure:: /images/overlay2.gif
@@ -186,7 +186,7 @@ using the gear icon at the top of the plot window, this will open the Figure opt
 
 To demonstrate changing a plot's markers and curve colour follow these instructions:
 
-1. Spectrum 20 of HIFI00062798 should already have been plotted, via the Workspaces pane. If not, do so now.
+1. Spectrum `20` of `HIFI00062798` should already have been plotted, via the ADS. If not, do so now.
 2. Click the settings (gear) icon above the plot, this will bring up a new Figure options window for the data set.
 3. Go to the `Curves` tab and use the `Color` (RGBA) option under `Line` to change the colour from Blue to Red. Click on the coloured square to change it.
 4. Click `Apply` to view the changes and save the selected option.
@@ -205,7 +205,7 @@ The axis limits can be changed either through the Figure options menu, or by dou
 See the instructions below for an example on how to change the X-Axis limits and set the Y-Scale to logarithmic.
 
 1. Load the MUSR00024563 dataset using the muon analysis GUI. How to do this is described in the Home section of :ref:`the_tabs_home`.
-2. Plot the backwards counts in the Workspace pane
+2. Plot the backwards counts from the ADS.
 3. Open the Figure options' menu, or **or** double click on the X axis to edit the axis.
 4. In the Axes tab of the Figure options, set the value in the box labelled `Upper Limit` to `16` **or** do the same for the box labelled `Max` in the Edit axis dialog.
 5. Press `Apply`, **or** click the `OK` button.
@@ -225,4 +225,3 @@ See the instructions below for an example on how to change the X-Axis limits and
     Note that if the scale limits include negative values when doing this, Mantid 
     will automatically use a 'symmetrical log' scale, which allows for negative values by having a range around 0 where
     the scale is linear not logarithmic.
-
