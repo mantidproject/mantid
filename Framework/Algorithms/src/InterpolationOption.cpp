@@ -5,8 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/InterpolationOption.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/ListValidator.h"
 

@@ -319,4 +319,4 @@ void interpolateCSplineInplace(const Histogram &input, Histogram &output) {
 }
 
 } // namespace HistogramData
-} // namespace HistogramData
+} // namespace Mantid

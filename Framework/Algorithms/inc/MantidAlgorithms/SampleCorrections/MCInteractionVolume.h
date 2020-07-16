@@ -63,9 +63,10 @@ public:
                                  Geometry::Track &beforeScatter,
                                  Geometry::Track &afterScatter,
                                  MCInteractionStatistics &stats) const;
-  double calculateAbsorption(const Geometry::Track &beforeScatter,
-                             const Geometry::Track &afterScatter,
-                             double lambdaBefore, double lambdaAfter) const;
+  virtual double calculateAbsorption(const Geometry::Track &beforeScatter,
+                                     const Geometry::Track &afterScatter,
+                                     double lambdaBefore,
+                                     double lambdaAfter) const;
   ComponentScatterPoint
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const;
 

@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include <memory>
 #include <string>
 
