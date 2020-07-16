@@ -362,8 +362,10 @@ boost::python::dict validateInputs(IAlgorithm &self) {
 }
 
 void initializeProxy(IAlgorithm &self) {
-  // Release the GIL to stop workbench freezing while initializing the algorithms.
-  Mantid::PythonInterface::ReleaseGlobalInterpreterLock releaseGlobalInterpreterLock;
+  // Release the GIL to stop workbench freezing while initializing the
+  // algorithms.
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock
+      releaseGlobalInterpreterLock;
   self.initialize();
 }
 
