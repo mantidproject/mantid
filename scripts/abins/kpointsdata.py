@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 
-from abins.constants import (ACOUSTIC_PHONON_THRESHOLD,
-                             COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
+from abins.constants import (COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
 
 
 class KpointsData:
@@ -70,26 +69,11 @@ class KpointsData:
                 and atomic_displacements.dtype.num == COMPLEX_ID):
             raise ValueError("Invalid value of atomic_displacements.")
 
-        # remove data which correspond to imaginary frequencies
-        freq_dic = {}
-        atomic_displacements_dic = {}
-        weights_dic = {}
-        k_vectors_dic = {}
-
-        indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
-        for k_index in range(num_k):
-            freq_dic[k_index] = frequencies[k_index, indx[k_index]]
-            for atom in range(num_atoms):
-                temp = atomic_displacements[k_index]
-                atomic_displacements_dic[k_index] = temp[:, indx[k_index]]
-
-            weights_dic[k_index] = weights[k_index]
-            k_vectors_dic[k_index] = k_vectors[k_index]
-
-        self._frequencies = freq_dic
-        self._atomic_displacements = atomic_displacements_dic
-        self._k_vectors = k_vectors_dic
-        self._weights = weights_dic
+        # Repackage data into dicts
+        self._frequencies = {k_index: frequencies[k_index, :] for k_index in range(num_k)}
+        self._atomic_displacements = {k_index: atomic_displacements[k_index] for k_index in range(num_k)}
+        self._k_vectors = {k_index: k_vectors[k_index] for k_index in range(num_k)}
+        self._weights = {k_index: weights[k_index] for k_index in range(num_k)}
 
     def get_gamma_point_data(self):
         """

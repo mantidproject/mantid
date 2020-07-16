@@ -60,7 +60,8 @@ class AbinsPowderDataTest(unittest.TestCase):
         extracted_data = good_powderdata.extract()
         for key in self.good_items:
             for k_point in self.good_items[key]:
-                self.assertEqual(True, np.allclose(self.good_items[key][k_point], extracted_data[key][k_point]))
+                self.assertEqual(True, np.allclose(self.good_items[key][k_point],
+                                                   extracted_data[key][str(k_point)]))
 
         # Should also work if num_atoms is not given
         PowderData(**self.good_items)

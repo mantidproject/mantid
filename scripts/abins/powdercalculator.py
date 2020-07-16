@@ -25,14 +25,22 @@ class PowderCalculator:
             raise ValueError("Object of AbinsData was expected.")
 
         k_data = abins_data.get_kpoints_data().extract()  # type: Dict[str, Dict[str, np.ndarray]]
-        self._frequencies = k_data["frequencies"]  # type: Dict[str, np.ndarray]
-        self._displacements = k_data["atomic_displacements"]  # type: Dict[str, np.ndarray]
+        self._frequencies = {}  # type: Dict[str, np.ndarray]
+        self._displacements = {}  # type: Dict[str, np.ndarray]
 
-        self._num_atoms = self._displacements[str(GAMMA_POINT)].shape[0]
         self._atoms_data = abins_data.get_atoms_data().extract()
 
         self._clerk = abins.IO(input_filename=filename,
                                group_name=abins.parameters.hdf_groups['powder_data'])
+
+        # Populate data, removing imaginary modes
+        from abins.constants import ACOUSTIC_PHONON_THRESHOLD
+        for k, frequencies in k_data["frequencies"].items():
+            indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
+            self._frequencies[int(k)] = frequencies[indx]
+            self._displacements[int(k)] = k_data["atomic_displacements"][k][:, indx]
+
+        self._num_atoms = self._displacements[GAMMA_POINT].shape[0]
 
     def _calculate_powder(self) -> abins.PowderData:
         """

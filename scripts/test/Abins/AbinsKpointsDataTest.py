@@ -154,12 +154,9 @@ class KpointsDataTest(unittest.TestCase):
         collected_data = kpd.extract()
 
         for k in range(data["frequencies"].shape[0]):
-            indices = data["frequencies"][k] > ACOUSTIC_PHONON_THRESHOLD
-            temp_f = data["frequencies"][k]
-            self.assertEqual(True, np.allclose(temp_f[indices],
+            self.assertEqual(True, np.allclose(data["frequencies"][k],
                                                collected_data["frequencies"][str(k)]))
-            temp_a = data["atomic_displacements"][k]
-            self.assertEqual(True, np.allclose(temp_a[:, indices],
+            self.assertEqual(True, np.allclose(data["atomic_displacements"][k],
                                                collected_data["atomic_displacements"][str(k)]))
             self.assertEqual(True, np.allclose(data["k_vectors"][k], collected_data["k_vectors"][str(k)]))
             self.assertEqual(data["weights"][k], collected_data["weights"][str(k)])

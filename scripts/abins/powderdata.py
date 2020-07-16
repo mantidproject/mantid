@@ -51,7 +51,8 @@ class PowderData:
 
     def extract(self) -> PowderDict:
         """Get tensor data as dict"""
-        return self._data
+        return {key: {str(k): array for k, array in data.items()}
+                for key, data in self._data.items()}
 
     def _check_data(self) -> None:
         for key in "a_tensors", "b_tensors", "frequencies":
