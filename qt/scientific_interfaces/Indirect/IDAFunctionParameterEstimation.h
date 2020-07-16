@@ -19,7 +19,7 @@ class MANTIDQT_INDIRECT_DLL IDAFunctionParameterEstimation {
                          const DataForParameterEstimation &estimationData)>;
 
 public:
-  void addParameterEstimationFunction(const std::string &functionName,
+  void addParameterEstimationFunction(std::string functionName,
                                       EstimationFunction function);
   void
   estimateFunctionParameters(::Mantid::API::IFunction_sptr &function,
