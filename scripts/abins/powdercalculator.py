@@ -49,8 +49,9 @@ class PowderCalculator:
             a_tensors[k] = tensors[indx][0]
             b_tensors[k] = tensors[indx][1]
 
-        powder = abins.PowderData(dict(b_tensors=b_tensors,
-                                       a_tensors=a_tensors),
+        powder = abins.PowderData(a_tensors=a_tensors,
+                                  b_tensors=b_tensors,
+                                  frequencies=self._frequencies,
                                   num_atoms=self._num_atoms)
         return powder
 
@@ -131,7 +132,7 @@ class PowderCalculator:
         :returns: object of type PowderData with mean square displacements.
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
-        powder_data = abins.PowderData(data["datasets"]["powder_data"],
+        powder_data = abins.PowderData(**data["datasets"]["powder_data"],
                                        num_atoms=data["datasets"]["powder_data"]["b_tensors"][str(GAMMA_POINT)].shape[0])
 
         return powder_data

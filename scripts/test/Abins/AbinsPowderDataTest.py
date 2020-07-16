@@ -13,52 +13,67 @@ class AbinsPowderDataTest(unittest.TestCase):
     def setUp(self):
         # hypothetical data for two atoms
         self.good_items = {
-            "a_tensors": {"0": np.asarray([[[0.01, 0.02, 0.03],
+            "a_tensors": {0: np.asarray([[[0.01, 0.02, 0.03],
                                             [0.01, 0.02, 0.03],
                                             [0.01, 0.02, 0.03]],
                                            [[0.01, 0.02, 0.03],
                                             [0.01, 0.02, 0.03],
                                             [0.01, 0.02, 0.03]]])},
 
-            "b_tensors": {"0": np.asarray([[[0.01, 0.02, 0.03],
+            "b_tensors": {0: np.asarray([[[0.01, 0.02, 0.03],
                                             [0.01, 0.02, 0.03],
                                             [0.01, 0.02, 0.03]],
                                            [[0.01, 0.02, 0.03],
                                             [0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03]]])}}
+                                            [0.01, 0.02, 0.03]]])},
+            "frequencies": {0: np.asarray([2.34, 5.67, 8.90])}}
 
     def test_bad_num_atoms(self):
         # wrong number of atoms
         with self.assertRaises(ValueError):
-            PowderData(self.good_items, num_atoms=-2)
+            PowderData(**self.good_items, num_atoms=-2)
 
     def test_bad_items(self):
-        # wrong items: list instead of numpy array
-        bad_items = {"a_tensors": [[0.002, 0.001]], "b_tensors": [[0.002, 0.001]]}
-        with self.assertRaises(ValueError):
-            PowderData(bad_items, num_atoms=2)
+        # wrong items: array instead of dict
+        bad_items = self.good_items.copy()
+        bad_items['a_tensors'] = bad_items['a_tensors'][0]
+        with self.assertRaises(TypeError):
+            PowderData(**bad_items, num_atoms=2)
+
+        # list instead of np array
+        bad_items = self.good_items.copy()
+        for key, value in bad_items.items():
+            bad_items[key][0] = value[0].tolist()
+        with self.assertRaises(TypeError):
+            PowderData(**bad_items, num_atoms=2)
 
         # wrong size of items: data only for one atom ; should be for two atoms
-        bad_items = {"a_tensors": {"0": np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
-                     "b_tensors": {"0": np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])}}
+        bad_items = {"a_tensors": {0: np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
+                     "b_tensors": {0: np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
+                     "frequencies": {0: np.asarray([[[1.23, 4.56, 7.89]]])}}
         with self.assertRaises(ValueError):
-            PowderData(bad_items, num_atoms=2)
+            PowderData(**bad_items, num_atoms=2)
 
     def test_good_case(self):
-        good_powderdata = PowderData(self.good_items, num_atoms=2)
+        good_powderdata = PowderData(**self.good_items, num_atoms=2)
 
         extracted_data = good_powderdata.extract()
         for key in self.good_items:
             for k_point in self.good_items[key]:
                 self.assertEqual(True, np.allclose(self.good_items[key][k_point], extracted_data[key][k_point]))
 
+        # Should also work if num_atoms is not given
+        PowderData(**self.good_items)
+
     def test_getters(self):
-        good_powderdata = PowderData(self.good_items, num_atoms=2)
+        good_powderdata = PowderData(**self.good_items, num_atoms=2)
         for k_point in self.good_items["a_tensors"]:
             self.assertTrue(np.allclose(self.good_items["a_tensors"][k_point],
                                         good_powderdata.get_a_tensors()[k_point]))
             self.assertTrue(np.allclose(self.good_items["b_tensors"][k_point],
                                         good_powderdata.get_b_tensors()[k_point]))
+            self.assertTrue(np.allclose(self.good_items["frequencies"][k_point],
+                                        good_powderdata.get_frequencies()[k_point]))
 
 if __name__ == '__main__':
     unittest.main()
