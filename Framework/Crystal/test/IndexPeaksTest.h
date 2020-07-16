@@ -182,7 +182,7 @@ public:
     TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
   }
 
-    void test_tolerance_main_refl() {
+  void test_tolerance_main_refl() {
     const auto ws = createTestPeaksWorkspaceMainReflOnly();
     auto alg = indexPeaks(ws, {{"Tolerance", "0.02"}, {"RoundHKLs", "0"}});
 
