@@ -57,7 +57,7 @@ window. There are two tabs within this window: axes options and curve options.
 In the "Axes" tab you can change the figure's title, the axes limits and scale
 and change the axes labels. There is also the "(Re-)Generate automatic legend"
 tick box at the bottom, make sure this is ticked if you want to update your
-legend.
+legend. The apply all button applies the current settings to all axes in the figure.
 
 In the "Curves" tab you can change the properties of curves within your figure.
 The drop down menu at the top gives a list of the curves present in the figure,

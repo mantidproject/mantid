@@ -1029,6 +1029,8 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     // set the temporary workspace to be the output workspace, so it keeps
     // adding different symmetries
     tempDataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+    tempDataWS->clearOriginalWorkspaces();
+    tempDataWS->clearTransforms();
     soIndex += 1;
   }
 

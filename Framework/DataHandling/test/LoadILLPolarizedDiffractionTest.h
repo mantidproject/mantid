@@ -22,11 +22,34 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+#include <tuple>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+
+std::tuple<std::string, std::string> commonSetUp() {
+  ConfigService::Instance().appendDataSearchSubDir("ILL/D7/");
+
+  auto oldFacility = ConfigService::Instance().getFacility().name();
+  ConfigService::Instance().setFacility("ILL");
+
+  auto oldInstrument = ConfigService::Instance().getInstrument().name();
+  ConfigService::Instance().setString("default.instrument", "D7");
+
+  return std::make_tuple(oldFacility, oldInstrument);
+}
+
+void commonTearDown(const std::string &oldFacility,
+                    const std::string &oldInstrument) {
+  if (!oldFacility.empty()) {
+    ConfigService::Instance().setFacility(oldFacility);
+  }
+  if (!oldInstrument.empty()) {
+    ConfigService::Instance().setString("default.instrument", oldInstrument);
+  }
+}
 
 class LoadILLPolarizedDiffractionTest : public CxxTest::TestSuite {
 public:
@@ -40,24 +63,10 @@ public:
   }
 
   void setUp() override {
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D7/");
-
-    m_oldFacility = ConfigService::Instance().getFacility().name();
-    ConfigService::Instance().setFacility("ILL");
-
-    m_oldInstrument = ConfigService::Instance().getInstrument().name();
-    ConfigService::Instance().setString("default.instrument", "D7");
+    std::tie(m_oldFacility, m_oldInstrument) = commonSetUp();
   }
 
-  void tearDown() override {
-    if (!m_oldFacility.empty()) {
-      ConfigService::Instance().setFacility(m_oldFacility);
-    }
-    if (!m_oldInstrument.empty()) {
-      ConfigService::Instance().setString("default.instrument",
-                                          m_oldInstrument);
-    }
-  }
+  void tearDown() override { commonTearDown(m_oldFacility, m_oldInstrument); }
 
   void test_Init() {
     LoadILLPolarizedDiffraction alg;
@@ -382,23 +391,17 @@ public:
               outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG,
                       12.66, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(43) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG,
                       55.45, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(44) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG,
                       58.79, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(87) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG,
                       101.58, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(88) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG,
                       100.78, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(131) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG,
                       143.57, 0.01)
     }
   }
@@ -430,23 +433,17 @@ public:
               outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG,
                       10.86, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(43) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG,
                       53.81, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(44) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG,
                       57.06, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(87) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG,
                       99.45, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(88) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG,
                       101.38, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(131) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG,
                       144.17, 0.01)
     }
   }
@@ -479,23 +476,17 @@ public:
               outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG,
                       10.86, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(43) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG,
                       53.81, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(44) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG,
                       57.06, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(87) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG,
                       99.45, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(88) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG,
                       101.38, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(131) *
-                          RAD_2_DEG,
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG,
                       144.17, 0.01)
     }
   }
@@ -578,6 +569,43 @@ public:
     }
   }
 
+  void test_D7_sign_TwoTheta() {
+    // Tests pixel position alignment coming from the YIG calibration IPF file
+    LoadILLPolarizedDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "394458"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", true))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT(outputWS->isGroup())
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 1)
+    do_test_general_features(outputWS, "monochromatic");
+
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
+         ++entry_no) {
+      MatrixWorkspace_sptr workspaceEntry =
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+              outputWS->getItem(entry_no));
+      TS_ASSERT(workspaceEntry)
+      auto axis = workspaceEntry->getAxis(1);
+      TS_ASSERT(!axis->isSpectra())
+      TS_ASSERT_DELTA(axis->getValue(0), -88.87, 0.01)
+      TS_ASSERT_DELTA(axis->getValue(43), -46.08, 0.01)
+      TS_ASSERT_DELTA(axis->getValue(44), -42.65, 0.01)
+      TS_ASSERT_DELTA(axis->getValue(87), 0.13, 0.01)
+      TS_ASSERT_DELTA(axis->getValue(88), -0.80, 0.01)
+      TS_ASSERT_DELTA(axis->getValue(131), 41.99, 0.01)
+    }
+  }
+
   void do_test_general_features(WorkspaceGroup_sptr outputWS,
                                 std::string measurementMode) {
     for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
@@ -624,12 +652,16 @@ public:
   LoadILLPolarizedDiffractionTestPerformance() {}
 
   void setUp() override {
+    std::tie(m_oldFacility, m_oldInstrument) = commonSetUp();
+
     m_alg.initialize();
     m_alg.setChild(true);
     m_alg.setPropertyValue("Filename", "395850");
     m_alg.setPropertyValue("OutputWorkspace", "_outWS");
     m_alg.setPropertyValue("PositionCalibration", "Nexus");
   }
+
+  void tearDown() override { commonTearDown(m_oldFacility, m_oldInstrument); }
 
   void test_performance() {
     for (int i = 0; i < 50; ++i) {
@@ -639,4 +671,6 @@ public:
 
 private:
   LoadILLPolarizedDiffraction m_alg;
+  std::string m_oldFacility;
+  std::string m_oldInstrument;
 };
