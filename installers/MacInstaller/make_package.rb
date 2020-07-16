@@ -19,10 +19,14 @@ AT_RPATH_TAG = '@rpath'
 # Collection modules to copy from system installation
 # Required to install other packages with pip
 BUNDLED_PY_MODULES_COMMON = [
+  'easy_install.py',
   'pip',
+  'pip*.egg-info',
   'pkg_resources',
   'setuptools',
-  'wheel'
+  'setuptools*.egg-info',
+  'wheel',
+  'wheel*.egg-info'
 ]
 # Brew Python packages to be copied to bundle
 BUNDLED_PY_MODULES_MANTIDPLOT = [
@@ -129,7 +133,7 @@ def deploy_python_framework(destination, host_python_exe,
   bundle_py_home = bundle_python_framework + "Versions/#{py_ver}"
   deployable_assets = [
     'Python', "bin/python#{py_ver}", "bin/2to3-#{py_ver}",
-    "lib/python#{py_ver}", 'Resources'
+    "include/python#{py_ver}", "lib/python#{py_ver}", 'Resources'
   ]
 
   deployable_assets.each do |asset|
@@ -596,7 +600,6 @@ end
 # into the bundle and the main layout exists.
 bundle_py_site_packages = deploy_python_framework(contents_frameworks, host_python_exe,
                                                   bundled_packages, requirements_files)
-exit(0)
 if $PARAVIEW_BUILD_DIR.start_with?('/')
   pv_lib_dir = Pathname.new($PARAVIEW_BUILD_DIR) + 'lib'
   # add bare VTK/ParaView so libraries
