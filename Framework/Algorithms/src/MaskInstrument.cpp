@@ -20,6 +20,13 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaskInstrument)
 
+/** Constructor
+ */
+MaskInstrument::MaskInstrument() {
+  useAlgorithm("MaskDetectors");
+  deprecatedDate("2020-07-16");
+}
+
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MaskInstrument::name() const { return "MaskInstrument"; }
 
@@ -33,8 +40,7 @@ const std::string MaskInstrument::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MaskInstrument::summary() const {
-  return "Mask detectors in the instrument WITHOUT clearing data in associated "
-         "spectra.";
+  return "Mask detectors in the instrument";
 }
 
 void MaskInstrument::init() {
