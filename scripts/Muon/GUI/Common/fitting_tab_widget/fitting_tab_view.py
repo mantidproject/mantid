@@ -15,6 +15,11 @@ allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletch
                       'Conjugate gradient (Polak-Ribiere imp.)',
                       'Damped GaussNewton', 'Levenberg-MarquardtMD', 'Simplex',
                       'SteepestDescent', 'Trust Region']
+FIT_START_TABLE_ROW = 0
+FIT_END_TABLE_ROW = 1
+RAW_DATA_TABLE_ROW = 3
+TF_ASYMMETRY_MODE_TABLE_ROW = 4
+DEFAULT_FREQUENCY_FIT_END_X = 250
 
 
 class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
@@ -37,8 +42,11 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         if is_frequency_domain:
             self.hide_simultaneous_fit_options()
-            self.fit_options_table.hideRow(3)
-            self.fit_options_table.hideRow(4)
+            self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
+            self.fit_options_table.hideRow(TF_ASYMMETRY_MODE_TABLE_ROW)
+            table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Start X")
+            table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "End X")
+            self.end_time = DEFAULT_FREQUENCY_FIT_END_X
 
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)
@@ -307,23 +315,23 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_options_table.setHorizontalHeaderLabels(
             ("Property;Value").split(";"))
 
-        table_utils.setRowName(self.fit_options_table, 0, "Time Start")
-        self.time_start = table_utils.addDoubleToTable(self.fit_options_table, 0.0, 0, 1)
+        table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Time Start")
+        self.time_start = table_utils.addDoubleToTable(self.fit_options_table, 0.0, FIT_START_TABLE_ROW, 1)
 
-        table_utils.setRowName(self.fit_options_table, 1, "Time End")
-        self.time_end = table_utils.addDoubleToTable(self.fit_options_table, 15.0, 1, 1)
+        table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "Time End")
+        self.time_end = table_utils.addDoubleToTable(self.fit_options_table, 15.0, FIT_END_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, 2, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 2, [])
         self.minimizer_combo.addItems(allowed_minimizers)
 
-        table_utils.setRowName(self.fit_options_table, 3, "Fit To Raw Data")
+        table_utils.setRowName(self.fit_options_table, RAW_DATA_TABLE_ROW, "Fit To Raw Data")
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, 3)
+            self.fit_options_table, True, RAW_DATA_TABLE_ROW)
 
-        table_utils.setRowName(self.fit_options_table, 4, "TF Asymmetry Mode")
+        table_utils.setRowName(self.fit_options_table, TF_ASYMMETRY_MODE_TABLE_ROW, "TF Asymmetry Mode")
         self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, False, 4)
+            self.fit_options_table, False, TF_ASYMMETRY_MODE_TABLE_ROW)
 
         table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
         self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 5, ['CentrePoint', 'Histogram'])

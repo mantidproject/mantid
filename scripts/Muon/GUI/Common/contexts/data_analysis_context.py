@@ -40,5 +40,9 @@ class DataAnalysisContext(MuonContext):
         return group_names + pair_names + phasequad_names
 
     @property
+    def default_fitting_plot_range(self):
+        return self.default_data_plot_range
+
+    @property
     def window_title(self):
         return "Muon Analysis"

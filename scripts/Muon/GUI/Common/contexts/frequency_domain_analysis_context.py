@@ -8,6 +8,9 @@ from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 
+FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE = [0.0, 1000.0]
+
+
 class FrequencyDomainAnalysisContext(MuonContext):
     def __init__(self, muon_data_context=None, muon_gui_context=None,
                  muon_group_context=None, fitting_context=None, muon_phase_context=None, frequency_context=None):
@@ -19,8 +22,8 @@ class FrequencyDomainAnalysisContext(MuonContext):
         self._frequency_context = frequency_context
 
     @property
-    def phase_context(self):
-        return self._phase_context
+    def default_fitting_plot_range(self):
+        return FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE
 
     def get_workspace_names_for_FFT_analysis(self, use_raw=True):
         # workspace_options = self.get_names_of_workspaces_to_fit(

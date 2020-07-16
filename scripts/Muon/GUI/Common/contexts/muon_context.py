@@ -20,6 +20,9 @@ from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapp
 from mantidqt.utils.observer_pattern import Observable
 
 
+MUON_ANALYSIS_DEFAULT_X_RANGE = [0.0, 15.0]
+
+
 class MuonContext(object):
     def __init__(self, muon_data_context=None, muon_gui_context=None,
                  muon_group_context=None, base_directory='Muon Data', muon_phase_context=None,
@@ -62,6 +65,10 @@ class MuonContext(object):
     @property
     def phase_context(self):
         return self._phase_context
+
+    @property
+    def default_data_plot_range(self):
+        return MUON_ANALYSIS_DEFAULT_X_RANGE
 
     def calculate_group(self, group_name, run, rebin=False):
         run_as_string = run_list_to_string(run)

@@ -18,9 +18,6 @@ from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from mantid.dataobjects import Workspace2D
 
-MUON_ANALYSIS_DEFAULT_X_RANGE = [0.0, 15.0]
-FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE = [0.0, 1000.0]
-
 
 class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
@@ -53,9 +50,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
         self.update_view_from_model()
 
-        self.data_plot_range = MUON_ANALYSIS_DEFAULT_X_RANGE
-        self.fitting_plot_range = FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE if\
-            isinstance(self.context, FrequencyDomainAnalysisContext) else MUON_ANALYSIS_DEFAULT_X_RANGE
+        self.data_plot_range = self.context.default_data_plot_range
+        self.fitting_plot_range = self.context.default_fitting_plot_range
         self.data_plot_tiled_state = None
 
     def update_view_from_model(self):
