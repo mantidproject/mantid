@@ -97,8 +97,9 @@ void CalculateMuonAsymmetry::init() {
       "EnableDoublePulse", false,
       "Controls whether to perform a double pulse or single pulse fit.");
   declareProperty("PulseOffset", 0.0, "The time offset between the two pulses");
-  declareProperty("FirstPulseWeight", 0.5, "Weighting of first pulse.
-   The second pulse weighting is set as 1 - this.");
+  declareProperty("FirstPulseWeight", 0.5,
+                  "Weighting of first pulse."
+                  "The second pulse weighting is set as 1 - this.");
 }
 /*
  * Validate the input parameters
