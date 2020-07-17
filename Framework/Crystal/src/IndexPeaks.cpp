@@ -299,6 +299,10 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
         stats.satellites.numIndexed++;
         stats.satellites.error += std::get<2>(satelliteInfo) / 3.;
       }
+    } else {
+      peak->setHKL(V3D(0, 0, 0));
+      peak->setIntHKL(V3D(0, 0, 0));
+      peak->setIntMNP(V3D(0, 0, 0));
     }
   }
   return stats;
