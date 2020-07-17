@@ -56,7 +56,6 @@ private:
   const IMCInteractionVolume &m_scatterVol;
   const size_t m_nevents;
   const size_t m_maxScatterAttempts;
-  const double m_error;
   const Kernel::DeltaEMode::Type m_EMode;
   const bool m_regenerateTracksForEachLambda;
 };

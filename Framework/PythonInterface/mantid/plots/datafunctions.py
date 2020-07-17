@@ -1101,7 +1101,7 @@ def add_colorbar_label(colorbar, axes):
     :param axes: the axes that the colorbar belongs to.
     """
     colorbar_labels = [ax.colorbar_label for ax in axes if hasattr(ax, 'colorbar_label')]
-    if colorbar_labels.count(colorbar_labels[0]) == len(colorbar_labels):
+    if colorbar_labels and colorbar_labels.count(colorbar_labels[0]) == len(colorbar_labels):
         colorbar.set_label(colorbar_labels[0])
 
 

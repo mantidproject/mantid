@@ -268,7 +268,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
     }
   }
 
-  environmentMesh = reader->readStl();
+  environmentMesh = reader->readShape();
 
   const double xRotation = DegreesToRadians(getProperty("xDegrees"));
   const double yRotation = DegreesToRadians(getProperty("yDegrees"));

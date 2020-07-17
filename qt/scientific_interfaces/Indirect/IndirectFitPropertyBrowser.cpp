@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPropertyBrowser.h"
+#include "FitStatusWidget.h"
 #include "FunctionTemplateBrowser.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -164,6 +165,7 @@ void IndirectFitPropertyBrowser::init() {
   auto w = new QWidget(this);
   m_mainLayout = new QVBoxLayout(w);
   m_mainLayout->setContentsMargins(0, 0, 0, 0);
+
   m_functionWidget = new QStackedWidget(this);
   if (m_templateBrowser) {
     m_functionWidget->insertWidget(0, m_templateBrowser);
@@ -171,7 +173,11 @@ void IndirectFitPropertyBrowser::init() {
     m_browserSwitcher->setObjectName("browserSwitcher");
     connect(m_browserSwitcher, SIGNAL(clicked(bool)), this,
             SLOT(showFullFunctionBrowser(bool)));
-    m_mainLayout->insertWidget(0, m_browserSwitcher);
+    m_fitStatusWidget = new FitStatusWidget(w);
+    m_fitStatusWidget->setObjectName("browserFitStatus");
+    m_fitStatusWidget->hide();
+    m_mainLayout->insertWidget(0, m_fitStatusWidget);
+    m_mainLayout->insertWidget(1, m_browserSwitcher);
   }
   m_functionWidget->addWidget(m_functionBrowser);
   auto splitter = new QSplitter(Qt::Vertical);
@@ -290,6 +296,24 @@ void IndirectFitPropertyBrowser::updateMultiDatasetParameters(
     m_templateBrowser->updateMultiDatasetParameters(paramTable);
 }
 
+void IndirectFitPropertyBrowser::updateFitStatusData(
+    const std::vector<std::string> &status,
+    const std::vector<double> &chiSquared) {
+  m_fitStatus = status;
+  m_fitChiSquared = chiSquared;
+  updateFitStatus(currentDataset());
+}
+
+void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
+  if (index.value + 1 > m_fitStatus.size() ||
+      index.value + 1 > m_fitChiSquared.size()) {
+    return;
+  }
+  m_fitStatusWidget->update(m_fitStatus[index.value],
+                            m_fitChiSquared[index.value]);
+  return;
+}
+
 /**
  * @return  The selected fit type in the fit type combo box.
  */
@@ -343,6 +367,7 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
 void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0)
     return;
+  updateFitStatus(i);
   if (isFullFunctionBrowserActive()) {
     m_functionBrowser->setCurrentDataset(static_cast<int>(i.value));
   } else {

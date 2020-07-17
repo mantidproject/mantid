@@ -213,6 +213,7 @@ class SliceViewerDataView(QWidget):
         self.axx.yaxis.tick_right()
         self.axy = self.fig.add_subplot(gs[0], sharey=image_axes)
         self.axy.xaxis.tick_top()
+        self.update_line_plot_limits()
         self.update_line_plot_labels()
         self.mpl_toolbar.update()  # sync list of axes in navstack
         self.canvas.draw_idle()
@@ -520,6 +521,16 @@ class SliceViewerDataView(QWidget):
         try:  # set line plot intensity axes to match colorbar limits
             self.axx.set_ylim(self.colorbar.cmin_value, self.colorbar.cmax_value)
             self.axy.set_xlim(self.colorbar.cmin_value, self.colorbar.cmax_value)
+            self.update_line_plot_scale()
+        except AttributeError:
+            pass
+
+    def update_line_plot_scale(self):
+        # set line plot scale axes to match colorbar scale
+        scale, kwargs = self.colorbar.get_colorbar_scale()
+        try:
+            self.axx.set_yscale(scale, **kwargs)
+            self.axy.set_xscale(scale, **kwargs)
         except AttributeError:
             pass
 

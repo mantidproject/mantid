@@ -38,11 +38,14 @@ public:
     std::vector<V3D> vertices{
         V3D(5, 5, -15), V3D(-5, -5, -15), V3D(-5, 5, -15), V3D(5, -5, -15),
         V3D(-5, 5, 15), V3D(-5, -5, 15),  V3D(5, -5, 15),  V3D(5, 5, 15)};
+
     auto writer = SaveStl(path, triangle, vertices, ScaleUnits::metres);
     writer.writeStl();
-    auto reader = LoadBinaryStl(path, ScaleUnits::metres);
-    TS_ASSERT(Poco::File(path).exists());
-    TS_ASSERT(reader.isBinarySTL(path));
+    {
+      auto reader = LoadBinaryStl(path, ScaleUnits::metres);
+      TS_ASSERT(Poco::File(path).exists());
+      TS_ASSERT(LoadBinaryStl::isBinarySTL(path));
+    }
     Poco::File(path).remove();
   }
 
@@ -59,14 +62,17 @@ public:
                                         5,   15, -5,  5,   15, -5,  -5, 15};
     auto writer = SaveStl(path, triangle, vertices, ScaleUnits::metres);
     writer.writeStl();
-    auto reader = LoadBinaryStl(cubePath, ScaleUnits::metres);
+
     TS_ASSERT(Poco::File(path).exists());
-    TS_ASSERT(reader.isBinarySTL(path));
-    auto shape = reader.readStl();
-    auto loadedTriangles = shape->getTriangles();
-    auto loadedVertices = shape->getVertices();
-    TS_ASSERT_EQUALS(loadedTriangles, triangle);
-    TS_ASSERT_EQUALS(loadedVertices, compareVertices);
+    TS_ASSERT(LoadBinaryStl::isBinarySTL(path));
+    {
+      auto reader = LoadBinaryStl(path, ScaleUnits::metres);
+      auto shape = reader.readShape();
+      auto loadedTriangles = shape->getTriangles();
+      auto loadedVertices = shape->getVertices();
+      TS_ASSERT_EQUALS(loadedTriangles, triangle);
+      TS_ASSERT_EQUALS(loadedVertices, compareVertices);
+    }
     Poco::File(path).remove();
   }
 

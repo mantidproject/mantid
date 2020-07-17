@@ -257,6 +257,46 @@ std::ostream &Logger::information() {
  */
 std::ostream &Logger::debug() { return getLogStream(Priority::PRIO_DEBUG); }
 
+/**
+ * accumulates a message to the buffer
+ * @param msg the log message
+ */
+void Logger::accumulate(const std::string &msg) {
+  m_logStream->accumulate(msg);
+}
+
+/**
+ * Flushes the accumulated message to the current channel
+ */
+void Logger::flush() { log(m_logStream->flush(), Priority(getLevel())); }
+
+/**
+ * Flushes the accumulated message to the given priority
+ * @param priority the log level priority
+ */
+void Logger::flush(Priority priority) { log(m_logStream->flush(), priority); }
+
+/// flushes the accumulated message with debug priority
+void Logger::flushDebug() { flush(Poco::Message::PRIO_DEBUG); }
+
+/// flushes the accumulated message with information priority
+void Logger::flushInformation() { flush(Poco::Message::PRIO_INFORMATION); }
+
+/// flushes the accumulated message with notice priority
+void Logger::flushNotice() { flush(Poco::Message::PRIO_NOTICE); }
+
+/// flushes the accumulated message with warning priority
+void Logger::flushWarning() { flush(Poco::Message::PRIO_WARNING); }
+
+/// flushes the accumulated message with error priority
+void Logger::flushError() { flush(Poco::Message::PRIO_ERROR); }
+
+/// flushes the accumulated message with fatal priority
+void Logger::flushFatal() { flush(Poco::Message::PRIO_FATAL); }
+
+/// flushes the accumulated messages without logging them
+void Logger::purge() { m_logStream->flush(); }
+
 /** Shuts down the logging framework and releases all Loggers.
  * Static method.
  */
@@ -367,7 +407,7 @@ std::ostream &Logger::getLogStream(Logger::Priority priority) {
  */
 Logger::Priority Logger::applyLevelOffset(Logger::Priority proposedLevel) {
   int retVal = proposedLevel;
-  // fast exit is offset is 0
+  // fast exit if offset is 0
   if (m_levelOffset == 0) {
     return proposedLevel;
   } else {

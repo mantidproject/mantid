@@ -57,7 +57,7 @@ public:
     // 3 random numbers per event expected
     MockRNG rng;
     EXPECT_CALL(rng, nextValue())
-        .Times(Exactly(30))
+        .Times(Exactly(3 * nevents))
         .WillRepeatedly(Return(0.5));
     const Mantid::Algorithms::IBeamProfile::Ray testRay = {V3D(-2, 0, 0),
                                                            V3D(1, 0, 0)};
@@ -74,8 +74,80 @@ public:
     MCInteractionStatistics trackStatistics(-1, testSampleSphere);
     mcabsorb.calculate(rng, endPos, lambdas, lambdaFixed, attenuationFactors,
                        attenuationFactorErrors, trackStatistics);
-    TS_ASSERT_DELTA(0.0043828472, attenuationFactors[0], 1e-08);
-    TS_ASSERT_DELTA(1.0 / std::sqrt(nevents), attenuationFactorErrors[0],
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&testBeamProfile));
+  }
+
+  void test_mean_and_sd_calculation() {
+    using Mantid::Kernel::V3D;
+    using namespace MonteCarloTesting;
+    using namespace ::testing;
+
+    // set source at 8cm away from origin with 6cm radius sphere so
+    // that distance from source to top of sphere is 10cm
+    Mantid::API::Sample testSampleSphere;
+    auto shape = ComponentCreationHelper::createSphere(0.06);
+    shape->setMaterial(Mantid::Kernel::Material(
+        "test",
+        Mantid::PhysicalConstants::NeutronAtom(
+            0, 0, 0, 0, 0, 1 /*total scattering xs*/, 0 /*absorption xs*/),
+        1));
+    testSampleSphere.setShape(shape);
+
+    MockBeamProfile testBeamProfile;
+    EXPECT_CALL(testBeamProfile, defineActiveRegion(_))
+        .WillOnce(Return(testSampleSphere.getShape().getBoundingBox()));
+    const size_t nevents(3), maxTries(100);
+    MCInteractionVolume interactionVolume(
+        testSampleSphere, testBeamProfile.defineActiveRegion(testSampleSphere));
+    MCAbsorptionStrategy mcabsorb(interactionVolume, testBeamProfile,
+                                  Mantid::Kernel::DeltaEMode::Type::Direct,
+                                  nevents, maxTries, false);
+    // 3 random numbers per event expected to generate x,y,z of each scatter pt
+    MockRNG rng;
+    EXPECT_CALL(rng, nextValue())
+        .Times(Exactly(3 * nevents))
+        .WillOnce(Return(0.5)) // one point at origin
+        .WillOnce(Return(0.5))
+        .WillOnce(Return(0.5))
+        .WillOnce(Return(0.5)) // one point up
+        .WillOnce(Return(1))
+        .WillOnce(Return(0.5))
+        .WillOnce(Return(0.5)) // one point down
+        .WillOnce(Return(0))
+        .WillOnce(Return(0.5));
+    const Mantid::Algorithms::IBeamProfile::Ray testRay = {V3D(0, 0, -0.08),
+                                                           V3D(0, 0, 1)};
+    EXPECT_CALL(testBeamProfile, generatePoint(_, _))
+        .Times(Exactly(static_cast<int>(nevents)))
+        .WillRepeatedly(Return(testRay));
+    const V3D endPos(0, 0, 0.08);
+    const double lambdaBefore(2.5), lambdaAfter(3.5);
+    const double lambdaFixed = lambdaAfter;
+
+    std::vector<double> lambdas = {lambdaBefore};
+    std::vector<double> attenuationFactors = {0};
+    std::vector<double> attenuationFactorErrors = {0};
+    MCInteractionStatistics trackStatistics(-1, testSampleSphere);
+    mcabsorb.calculate(rng, endPos, lambdas, lambdaFixed, attenuationFactors,
+                       attenuationFactorErrors, trackStatistics);
+    // the track through the origin should be 6 before and after scatter
+    // the longer track lengths that touch top and bottom of sphere should be
+    // 2h^2/sqrt(L1^2+h^2) ie 7.2 (before scatter) and 7.2 (after scatter)
+    std::vector<double> trackLengths = {2 * 7.2, 2 * 6.0, 2 * 7.2};
+    double expectedAverage = 0;
+    double expectedVar = 0;
+    for (auto trackLength : trackLengths) {
+      expectedAverage += (exp(-trackLength));
+    }
+    expectedAverage = expectedAverage / nevents;
+    for (auto trackLength : trackLengths) {
+      expectedVar += pow(exp(-trackLength) - expectedAverage, 2);
+    }
+    expectedVar = expectedVar / (nevents - 1);
+    TS_ASSERT_DELTA(expectedAverage, attenuationFactors[0], 1e-08);
+    double expectedSD = sqrt(expectedVar);
+    TS_ASSERT_DELTA(expectedSD / sqrt(nevents), attenuationFactorErrors[0],
                     1e-08);
   }
 
