@@ -1,8 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
 import numpy as np
 import math
 from scipy.special import lambertw
-from mantid.kernel import *
-from mantid.api import *
+from mantid import mtd
+from mantid.api import (AlgorithmFactory, PythonAlgorithm, FileAction, FileProperty, WorkspaceProperty, Progress)
+from mantid.kernel import Direction
 
 
 class SaveP2D(mantid.api.PythonAlgorithm):
