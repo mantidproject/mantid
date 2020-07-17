@@ -13,7 +13,7 @@ from mantid.api import (AlgorithmFactory, PythonAlgorithm, FileAction, FilePrope
 from mantid.kernel import Direction
 
 
-class SaveP2D(mantid.api.PythonAlgorithm):
+class SaveP2D(PythonAlgorithm):
     def category(self):
         return 'Tools//Algorithms'
 
@@ -139,7 +139,6 @@ class SaveP2D(mantid.api.PythonAlgorithm):
         form = '{:12.7f}'
         lform = '{:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}\n'
 
-        of = open(OutFile, 'w')
         with open(OutFile, 'w') as of:
             print('Exporting: ' + OutFile + '\n')
             # Create File header with additional information
@@ -200,4 +199,4 @@ class SaveP2D(mantid.api.PythonAlgorithm):
             print('\n\nExported: ' + OutFile + '\n')
 
 
-mantid.api.AlgorithmFactory.subscribe(SaveP2D)
+AlgorithmFactory.subscribe(SaveP2D)
