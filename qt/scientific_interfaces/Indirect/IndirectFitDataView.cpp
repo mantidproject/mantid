@@ -35,6 +35,8 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
   m_dataForm->lbResolution->hide();
   m_dataForm->dsbStartX->setRange(-1e100, 1e100);
   m_dataForm->dsbEndX->setRange(-1e100, 1e100);
+  m_dataForm->dsbStartX->setKeyboardTracking(false);
+  m_dataForm->dsbEndX->setKeyboardTracking(false);
 
   connect(m_dataForm->dsSample, SIGNAL(dataReady(const QString &)), this,
           SIGNAL(sampleLoaded(const QString &)));

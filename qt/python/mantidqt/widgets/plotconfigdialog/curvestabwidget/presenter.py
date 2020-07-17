@@ -285,12 +285,11 @@ class CurvesTabWidgetPresenter:
             self.view.close()
             return False
 
-        active_lines = FigureErrorsManager.get_curves_from_ax(selected_ax)
+        # Get the lines in the order that they are listed on the legend.
+        active_lines = datafunctions.get_legend_handles(selected_ax)
         for line in active_lines:
             self._update_selected_curve_name(line)
-
-        self.view.populate_select_curve_combo_box(
-            sorted(self.curve_names_dict.keys(), key=lambda s: s.lower()))
+        self.view.populate_select_curve_combo_box(list(self.curve_names_dict))
         return True
 
     def _update_selected_curve_name(self, curve):

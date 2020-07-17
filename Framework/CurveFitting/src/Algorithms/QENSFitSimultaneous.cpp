@@ -18,6 +18,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
@@ -378,6 +379,9 @@ void QENSFitSimultaneous::initConcrete() {
                   "If true members of any "
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
+  declareProperty("OutputCompositeMembers", false,
+                  "If true and CreateOutput is true then the value of each "
+                  "member of a Composite Function is also output.");
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
@@ -398,11 +402,10 @@ void QENSFitSimultaneous::initConcrete() {
                       PropertyMode::Optional),
                   "The output group workspace");
 
-  declareProperty("OutputStatus", "", Kernel::Direction::Output);
-  getPointerToProperty("OutputStatus")
-      ->setDocumentation("Whether the fit was successful");
-  declareProperty("OutputChi2overDoF", 0.0, "Returns the goodness of the fit",
-                  Kernel::Direction::Output);
+  declareProperty(
+      "OutputFitStatus", true,
+      "Flag to output fit status information, which consists of the fit "
+      "OutputStatus and the OutputChiSquared");
 
   std::vector<std::string> costFuncOptions =
       API::CostFunctionFactory::Instance().getKeys();
@@ -483,6 +486,7 @@ QENSFitSimultaneous::performFit(
     const std::string &output) {
   IFunction_sptr function = getProperty("Function");
   const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
   const bool calcErrors = getProperty("CalcErrors");
 
@@ -499,11 +503,22 @@ QENSFitSimultaneous::performFit(
   fit->setProperty("Minimizer", getPropertyValue("Minimizer"));
   fit->setProperty("CostFunction", getPropertyValue("CostFunction"));
   fit->setProperty("CalcErrors", calcErrors);
-  fit->setProperty("OutputCompositeMembers", true);
+  fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
   fit->setProperty("ConvolveMembers", convolveMembers);
   fit->setProperty("CreateOutput", true);
   fit->setProperty("Output", output);
   fit->executeAsChildAlg();
+
+  std::string status = fit->getProperty("OutputStatus");
+  double chiSquared = fit->getProperty("OutputChi2overDoF");
+
+  const bool outputFitStatus = getProperty("OutputFitStatus");
+  if (outputFitStatus) {
+    declareProperty("OutputStatus", "", Direction::Output);
+    declareProperty("OutputChiSquared", 0.0, Direction::Output);
+    setProperty("OutputStatus", status);
+    setProperty("OutputChiSquared", chiSquared);
+  }
 
   if (workspaces.size() == 1) {
     MatrixWorkspace_sptr outputWS = fit->getProperty("OutputWorkspace");

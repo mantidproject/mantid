@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, create_autospec, patch
 # thirdparty imports
 from mantid.api import MatrixWorkspace, SpecialCoordinateSystem
 from mantid.dataobjects import PeaksWorkspace
+from numpy.testing import assert_allclose
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.model import PeaksViewerModel, create_peaksviewermodel
@@ -57,7 +58,7 @@ class PeaksViewerModelTest(unittest.TestCase):
         call_args, call_kwargs = mock_painter.cross.call_args
         self.assertEqual(visible_peak_center[0], call_args[0])
         self.assertEqual(visible_peak_center[1], call_args[1])
-        self.assertAlmostEqual(0.450, call_args[2], places=3)
+        self.assertAlmostEqual(0.03, call_args[2], places=3)
         self.assertAlmostEqual(0.356, call_kwargs["alpha"], places=3)
         self.assertEqual(fg_color, call_kwargs["color"])
 
@@ -89,16 +90,17 @@ class PeaksViewerModelTest(unittest.TestCase):
         peak0.getHKL.assert_not_called()
         self.assertEqual([1, None, None], slicepoint)
 
-    def test_zoom_to(self):
+    def test_viewlimits(self):
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
         model, mock_painter = draw_peaks((visible_peak_center, invisible_center),
                                          fg_color='r',
                                          slice_value=0.5,
                                          slice_width=30)
 
-        model.zoom_to(0)
+        xlim, ylim = model.viewlimits(0)
 
-        mock_painter.zoom_to.assert_called_once()
+        assert_allclose((-0.13, 1.13), xlim)
+        assert_allclose((-0.43, 0.83), ylim)
 
     # -------------------------- Failure Tests --------------------------------
     def test_model_accepts_only_peaks_workspaces(self):

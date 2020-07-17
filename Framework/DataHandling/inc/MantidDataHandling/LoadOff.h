@@ -5,12 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "MantidDataHandling/MeshFileIO.h"
+#include "MantidDataHandling/LoadSingleMesh.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 
-#include <fstream>
 #include <functional>
 #include <unordered_set>
 
@@ -20,13 +19,11 @@ namespace Geometry {
 class MeshObject;
 }
 namespace DataHandling {
-namespace {
-Mantid::Kernel::Logger g_log("LoadOff");
-}
-class DLLExport LoadOff : public MeshFileIO {
+
+class DLLExport LoadOff : public LoadSingleMesh {
 public:
   LoadOff(const std::string &filename, ScaleUnits scaleType);
-  std::unique_ptr<Geometry::MeshObject> readOFFshape();
+  std::unique_ptr<Geometry::MeshObject> readShape() override;
 
 private:
   std::unique_ptr<Geometry::MeshObject> readOFFMeshObject();
@@ -34,7 +31,6 @@ private:
   void readOFFVertices();
   void readOFFTriangles();
 
-  std::ifstream m_file;
   uint32_t m_nVertices;
   uint32_t m_nTriangles;
 };

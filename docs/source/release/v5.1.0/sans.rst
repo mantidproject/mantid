@@ -20,6 +20,7 @@ Bug Fixed
   over any spectrum numbers not in workspace and emit a warning.
 - :ref:`SANSILLReduction <algm-SANSILLIntegration>` could fail if the detector was
   not aligned with the beam. The integration will now use another algorithm in this case.
+- Stiching tab for ORNL SANS is visible in the Workbench
 
 ISIS SANS Interface
 -------------------

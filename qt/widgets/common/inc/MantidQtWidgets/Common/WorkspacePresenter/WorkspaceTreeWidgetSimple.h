@@ -34,7 +34,8 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidgetSimple
     : public WorkspaceTreeWidget {
   Q_OBJECT
 public:
-  explicit WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *parent = nullptr);
+  explicit WorkspaceTreeWidgetSimple(bool viewOnly = false,
+                                     QWidget *parent = nullptr);
   ~WorkspaceTreeWidgetSimple();
 
   // Context Menu Handlers

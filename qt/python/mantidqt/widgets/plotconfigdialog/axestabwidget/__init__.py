@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from matplotlib.ticker import NullLocator
 from mpl_toolkits.mplot3d import Axes3D
 
 
@@ -36,6 +37,9 @@ class AxProperties(dict):
             props['zlim'] = ax.get_zlim()
             props['zlabel'] = ax.get_zlabel()
             props['zscale'] = ax.get_zscale().title()
+        else:
+            props['minor_ticks'] = not isinstance(ax.xaxis.minor.locator, NullLocator)
+            props['minor_gridlines'] = ax.show_minor_gridlines if hasattr(ax, 'show_minor_gridlines') else False
 
         return cls(props)
 
@@ -43,6 +47,8 @@ class AxProperties(dict):
     def from_view(cls, view):
         props = dict()
         props['title'] = view.get_title()
+        props['minor_ticks'] = view.get_show_minor_ticks()
+        props['minor_gridlines'] = view.get_show_minor_gridlines()
 
         ax = view.get_axis()
         props[f'{ax}lim'] = (view.get_lower_limit(), view.get_upper_limit())

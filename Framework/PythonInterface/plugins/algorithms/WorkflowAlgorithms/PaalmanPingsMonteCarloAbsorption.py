@@ -515,22 +515,22 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._emode = 'Elastic'
         else:
             self._emode = str(self._sample_ws.getEMode())
-        if self._emode == 'Indirect' or 'Direct':
+        if self._emode == 'Indirect' or self._emode == 'Direct':
             self._efixed = self._get_efixed()
 
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
-        self._sample_coherent_cross_section = self.getPropertyValue('SampleCoherentXSection')
-        self._sample_incoherent_cross_section = self.getPropertyValue('SampleIncoherentXSection')
-        self._sample_attenuation_cross_section = self.getPropertyValue('SampleAttenuationXSection')
+        self._sample_coherent_cross_section = self.getProperty('SampleCoherentXSection').value
+        self._sample_incoherent_cross_section = self.getProperty('SampleIncoherentXSection').value
+        self._sample_attenuation_cross_section = self.getProperty('SampleAttenuationXSection').value
         self._sample_density_type = self.getPropertyValue('SampleDensityType')
         self._sample_number_density_unit = self.getPropertyValue('SampleNumberDensityUnit')
         self._sample_density = self.getProperty('SampleDensity').value
 
         if self._container_ws:
             self._container_chemical_formula = self.getPropertyValue('ContainerChemicalFormula')
-            self._container_coherent_cross_section = self.getPropertyValue('ContainerCoherentXSection')
-            self._container_incoherent_cross_section = self.getPropertyValue('ContainerIncoherentXSection')
-            self._container_attenuation_cross_section = self.getPropertyValue('ContainerAttenuationXSection')
+            self._container_coherent_cross_section = self.getProperty('ContainerCoherentXSection').value
+            self._container_incoherent_cross_section = self.getProperty('ContainerIncoherentXSection').value
+            self._container_attenuation_cross_section = self.getProperty('ContainerAttenuationXSection').value
             self._container_density_type = self.getPropertyValue('ContainerDensityType')
             self._container_number_density_unit = self.getPropertyValue('ContainerNumberDensityUnit')
             self._container_density = self.getProperty('ContainerDensity').value
@@ -579,6 +579,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._setup()
         except Exception as err:
             issues['SampleWorkspace'] = str(err)
+            return issues
 
         if self._shape == 'Annulus':
             if self._sample_inner_radius >= self._sample_outer_radius:
@@ -617,6 +618,11 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
             if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
                 return analyser_comp.getNumberParameter('EFixed')[0]
+
+        # Direct instruments don't use the Efixed instrument parameter
+        # The GetEi algorithm calculates and saves the Ei value to this sample log
+        if self._sample_ws.run().hasProperty('Ei'):
+            return  self._sample_ws.getRun().getProperty('Ei').value
 
         raise ValueError('No Efixed parameter found')
 

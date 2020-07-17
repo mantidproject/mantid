@@ -81,7 +81,7 @@ int ErrorReporter::sendErrorReport() {
 
 /** Generates an error message in json format
  */
-std::string ErrorReporter::generateErrorMessage() {
+std::string ErrorReporter::generateErrorMessage() const {
   ::Json::Value message;
 
   // username

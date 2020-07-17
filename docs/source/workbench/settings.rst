@@ -58,12 +58,13 @@ Categories
 Plots
 =====
 
-- General: Choose whether to plot workspaces normalised by their bin width and whether to show their title.
+- General: Choose whether to plot workspaces normalised by their bin width, whether to show their title, and whether to show minor ticks and gridlines.
 - Axes: Should the Axes on plots be linear or logarithmic?
 - Line: Choose a line style and width.
 - Marker: Choose a default marker for plots, such as 'point'.
 - Error Bars: Control the error bars, such as by setting Capsize > 0, or displaying the Error Every 5 data points.
 - Legend: Set the default location for legends in plots.
+- Images: Set the default colormap for image plots.
 
 For more information, see :ref:`06_formatting_plots`
 

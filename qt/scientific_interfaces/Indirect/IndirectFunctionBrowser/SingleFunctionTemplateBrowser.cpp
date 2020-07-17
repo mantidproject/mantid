@@ -83,6 +83,7 @@ void SingleFunctionTemplateBrowser::addParameter(
   m_parameterManager->setDescription(newParameter,
                                      parameterDescription.toStdString());
   m_parameterManager->setDecimals(newParameter, 6);
+
   m_fitType->addSubProperty(newParameter);
   m_parameterMap.insert(parameterName, newParameter);
   m_parameterNames.insert(newParameter, parameterName);
@@ -169,6 +170,14 @@ void SingleFunctionTemplateBrowser::updateParameters(const IFunction &fun) {
 void SingleFunctionTemplateBrowser::setParameterValue(
     const QString &parameterName, double parameterValue,
     double parameterError) {
+  m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
+  m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
+}
+
+void SingleFunctionTemplateBrowser::setParameterValueQuietly(
+    const QString &parameterName, double parameterValue,
+    double parameterError) {
+  ScopedFalse _(m_emitParameterValueChange);
   m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
   m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
 }

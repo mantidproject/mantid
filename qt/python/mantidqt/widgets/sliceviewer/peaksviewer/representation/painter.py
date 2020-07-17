@@ -12,12 +12,14 @@ from matplotlib.patches import Circle, Ellipse, Patch, PathPatch, Wedge
 from matplotlib.transforms import Affine2D, IdentityTransform
 import numpy as np
 
+# constants
+ZOOM_PAD_FRAC = 0.2
+
 
 class EllipticalShell(Patch):
     """
     Elliptical shell patch.
     """
-
     def __str__(self):
         return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, thick={self.thick}, angle={self.angle})"
 
@@ -77,8 +79,6 @@ class MplPainter(object):
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
-    ZOOM_PAD_FRAC = 0.2
-
     def __init__(self, axes):
         """
         :param axes: A matplotlib.axes.Axes instance to draw on
@@ -158,29 +158,32 @@ class MplPainter(object):
         return self._axes.add_patch(
             Wedge((x, y), outer_radius, theta1=0.0, theta2=360., width=thick, **kwargs))
 
-    def zoom_to(self, artist):
-        """Set the view such that the given artist is in the center
+    def bbox(self, artist):
+        """Determine the lower-left and upper-right coordinates of
+        a box that encompasses the given artist
+        :param artist: An artist to inspect
         """
         # Use the bounding box of the artist with small amount of padding
         # to set the axis limits
         to_data_coords = self._axes.transData.inverted()
         artist_bbox = artist.get_extents()
-        ll, ur = to_data_coords.transform(artist_bbox.min), \
+        return to_data_coords.transform(artist_bbox.min), \
             to_data_coords.transform(artist_bbox.max)
-        # pad by fraction of maximum width so the artist is still in the center
-        xl, xr = ll[0], ur[0]
-        yb, yt = ll[1], ur[1]
-        padding = max(xr - xl, yt - yb) * self.ZOOM_PAD_FRAC
-        self._axes.set_xlim(xl - padding, xr + padding)
-        self._axes.set_ylim(yb - padding, yt + padding)
 
 
 class Painted(object):
     """Combine a collection of artists with the painter that created them"""
-
-    def __init__(self, painter, artists):
+    def __init__(self, painter, artists, effective_bbox=None):
+        """
+        :param painter: A reference to the painter responsible for
+                        drawing the artists.
+        :param artists: A list of drawn artists
+        :param effective_bbox: An optional bounding box for artists that
+                               represent something with no real extent
+        """
         self._painter = painter
         self._artists = artists
+        self._effective_bbox = effective_bbox
 
     @property
     def artists(self):
@@ -194,10 +197,17 @@ class Painted(object):
         for artist in self._artists:
             self._painter.remove(artist)
 
-    def zoom_to(self):
+    def viewlimits(self):
         """
-        Place the painted objects at the center of the view.
-        There is an assumption that the final artist represents the "largest"
-        object painted on the screen
+        Determine the view limits such that the artists are in the center
+        with some padding.
         """
-        self._painter.zoom_to(self._artists[-1])
+        if self._effective_bbox is None:
+            ll, ur = self._painter.bbox(self._artists[-1])
+        else:
+            ll, ur = self._effective_bbox
+        # pad by fraction of maximum width so the artist is still in the center
+        xl, xr = ll[0], ur[0]
+        yb, yt = ll[1], ur[1]
+        padding = max(xr - xl, yt - yb) * ZOOM_PAD_FRAC
+        return ((xl - padding, xr + padding), (yb - padding, yt + padding))

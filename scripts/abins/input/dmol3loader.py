@@ -40,7 +40,11 @@ class DMOL3Loader(AbInitioLoader):
             # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
             # geometry optimization. The last calculation in the file is expected to be calculation of vibrational data.
             # There may be some intermediate resume calculations.
-            self._parser.find_last(file_obj=dmol3_file, msg="$cell vectors")
+            try:
+                self._parser.find_last(file_obj=dmol3_file, msg="$cell vectors")
+            except EOFError:  # for non-period calc, go to final coordinates instead
+                dmol3_file.seek(0)
+                self._parser.find_last(file_obj=dmol3_file, msg="$coordinates")
 
             # read lattice vectors
             self._read_lattice_vectors(obj_file=dmol3_file, data=data)
@@ -48,6 +52,7 @@ class DMOL3Loader(AbInitioLoader):
             # read info about atoms and construct atom data
             masses = self._read_masses_from_file(obj_file=dmol3_file)
             self._read_atomic_coordinates(file_obj=dmol3_file, data=data, masses_from_file=masses)
+            self._num_atoms = len(data['atoms'])
 
             # read frequencies, corresponding atomic displacements and construct k-points data
             self._parser.find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
@@ -65,16 +70,25 @@ class DMOL3Loader(AbInitioLoader):
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
-        self._parser.find_first(file_obj=obj_file, msg="$cell vectors")
+        pos = obj_file.tell()
 
-        dim = 3
-        vectors = []
-        for i in range(dim):
-            line = obj_file.readline().split()
-            vector = [self._convert_to_angstroms(string=s) for s in line]
-            vectors.append(vector)
+        try:
+            self._parser.find_first(file_obj=obj_file, msg="$cell vectors")
 
-        data["unit_cell"] = np.asarray(vectors).astype(dtype=FLOAT_TYPE)
+        except EOFError:  # No unit cell for non-periodic calculations; set to zero
+            data["unit_cell"] = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
+
+        else:
+            dim = 3
+            vectors = []
+            for i in range(dim):
+                line = obj_file.readline().split()
+                vector = [self._convert_to_angstroms(string=s) for s in line]
+                vectors.append(vector)
+
+                data["unit_cell"] = np.asarray(vectors).astype(dtype=FLOAT_TYPE)
+
+        obj_file.seek(pos)
 
     def _convert_to_angstroms(self, string=None):
         """
@@ -141,9 +155,12 @@ class DMOL3Loader(AbInitioLoader):
         k_coordinates = [[0.0, 0.0, 0.0]]
         displacements = [[xdisp, ydisp, zdisp]]
 
+        #  Non-periodic calculations may remove modes 1-6
         self._num_modes = len(freq[0])
-        if self._num_modes % 3 == 0:
-            self._num_atoms = int(self._num_modes / 3)
+        if self._num_modes == 3 * self._num_atoms:
+            pass
+        elif self._num_modes + 6 == 3 * self._num_atoms:
+            pass
         else:
             raise ValueError("Invalid number of modes.")
 

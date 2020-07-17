@@ -10,9 +10,12 @@
 import unittest
 from unittest.mock import MagicMock
 
+# 3rd party
+from numpy.testing import assert_allclose
+
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter \
-    import MplPainter
+    import MplPainter, Painted
 
 
 class MplPainterTest(unittest.TestCase):
@@ -25,20 +28,6 @@ class MplPainterTest(unittest.TestCase):
         painter.remove(mock_artist)
 
         mock_artist.remove.assert_called_once()
-
-    def test_zoom_to_sets_xy_limits_so_xy_at_center(self):
-        artist, axes, bbox, inv_trans = (MagicMock(), ) * 4
-        # 1:1 transformation for simplicity
-        inv_trans.transform.side_effect = lambda x: x
-        axes.transData.inverted.return_value = inv_trans
-        artist.get_extents.return_value = bbox
-        bbox.min, bbox.max = (1., 1.5), (3., 3.5)
-        painter = MplPainter(axes)
-
-        painter.zoom_to(artist)
-
-        axes.set_xlim.assert_called_once_with(0.6, 3.4)
-        axes.set_ylim.assert_called_once_with(1.1, 3.9)
 
     def test_circle_draws_circle_patch(self):
         axes = MagicMock()
@@ -92,6 +81,42 @@ class MplPainterTest(unittest.TestCase):
 
         axes.add_patch.assert_called_once()
         self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=100, alpha=None)
+
+    def test_bbox_returns_ll_and_ur_of_containing_box(self):
+        artist, axes, bbox, inv_trans = (MagicMock(), ) * 4
+        # 1:1 transformation for simplicity
+        inv_trans.transform.side_effect = lambda x: x
+        axes.transData.inverted.return_value = inv_trans
+        artist.get_extents.return_value = bbox
+        bbox.min, bbox.max = (1., 1.5), (3., 3.5)
+        painter = MplPainter(axes)
+
+        ll, ur = painter.bbox(artist)
+
+        self.assertEqual(bbox.min, ll)
+        self.assertEqual(bbox.max, ur)
+
+    def test_painted_viewlimits_returns_limits_for_last_artist(self):
+        def create_mock_artist(extents):
+            artist = MagicMock()
+            bbox = MagicMock()
+            bbox.min, bbox.max = extents
+            artist.get_extents.return_value = bbox
+            return artist
+
+        axes, inv_trans = MagicMock(), MagicMock()
+        # 1:1 transformation for simplicity
+        inv_trans.transform.side_effect = lambda x: x
+        axes.transData.inverted.return_value = inv_trans
+        artists = create_mock_artist(((1., 1.5), (3., 3.5))), create_mock_artist(
+            ((1.1, 1.3), (2.9, 3.6)))
+        painter = MplPainter(axes)
+        painted = Painted(painter, artists)
+
+        xlim, ylim = painted.viewlimits()
+
+        assert_allclose((0.64, 3.36), xlim)
+        assert_allclose((0.84, 4.06), ylim)
 
     # --------------- failure tests -----------------
     def test_construction_raises_error_if_given_non_axes_instance(self):

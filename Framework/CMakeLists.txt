@@ -97,6 +97,7 @@ add_subdirectory(RemoteAlgorithms)
 add_subdirectory(RemoteJobManagers)
 add_subdirectory(SINQ)
 add_subdirectory(Muon)
+add_subdirectory(Reflectometry)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if(MPI_BUILD)
@@ -132,7 +133,8 @@ set(FRAMEWORK_LIBS
     RemoteAlgorithms
     RemoteJobManagers
     SINQ
-    Muon)
+    Muon
+    Reflectometry)
 
 add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 

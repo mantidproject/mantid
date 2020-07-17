@@ -81,8 +81,7 @@ class IndirectCommonTests(unittest.TestCase):
         path = os.path.join(os.path.expanduser('~'), "")
         config['defaultsave.directory'] = path
         workdir = indirect_common.getDefaultWorkingDirectory()
-        self.assertEqual(path.replace("\\", "/"), workdir,
-                         "The working directory does not match the expected one")
+        self.assertEqual(path, workdir, "The working directory does not match the expected one")
 
     def test_getDefaultWorkingDirectory_failure(self):
         config['defaultsave.directory'] = ''

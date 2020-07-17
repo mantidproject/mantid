@@ -20,6 +20,7 @@ set ( TEST_PY_FILES
    plotting_canvas/plotting_canvas_model_test.py
    external_plotting_model_test.py
    home_runinfo_presenter_test.py
+   home_tab_widget/home_instrument_widget_presenter_test.py
    list_selector/list_selector_view_test.py
    list_selector/list_selector_presenter_test.py
    load_run_widget/loadrun_model_test.py

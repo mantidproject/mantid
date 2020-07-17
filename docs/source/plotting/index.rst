@@ -9,7 +9,6 @@ Matplotlib in Mantid
    :glob:
    :maxdepth: 1
 
-   
    1DPlotsHelp
    WaterfallPlotsHelp
    ColorfillPlotsHelp
