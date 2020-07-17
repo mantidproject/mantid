@@ -5,7 +5,7 @@ from mantid.kernel import *
 from mantid.api import *
 
 
-class SaveP2D(DistributedDataProcessorAlgorithm):
+class SaveP2D(mantid.api.PythonAlgorithm):
     def category(self):
         return 'Tools//Algorithms'
 
@@ -192,4 +192,4 @@ class SaveP2D(DistributedDataProcessorAlgorithm):
             print('\n\nExported: ' + OutFile + '\n')
 
 
-AlgorithmFactory.subscribe(SaveP2D)
+mantid.api.AlgorithmFactory.subscribe(SaveP2D)
