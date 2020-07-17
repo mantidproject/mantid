@@ -191,4 +191,4 @@ class SaveP2D(mantid.api.PythonAlgorithm):
             print('\n\nExported: ' + OutFile + '\n')
 
 
-mantid.api.AlgorithmFactory.subscribe(SaveP2D)
+AlgorithmFactory.subscribe(SaveP2D)
