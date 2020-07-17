@@ -179,7 +179,7 @@ class FittingTabModel(object):
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
-        if 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']:
+        if self.double_pulse_enanbled():
             alg = self._create_double_pulse_alg()
         else:
             alg = mantid.AlgorithmManager.create("Fit")
@@ -225,7 +225,7 @@ class FittingTabModel(object):
 
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
-        if 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']:
+        if self.double_pulse_enanbled():
             alg = self._create_double_pulse_alg()
         else:
             alg = mantid.AlgorithmManager.create("Fit")
@@ -580,13 +580,13 @@ class FittingTabModel(object):
             'Minimizer': self.fitting_options["minimiser"],
         }
 
-        if ('DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']):
+        if self.double_pulse_enanbled():
             offset = self.context.gui_context['DoublePulseTime']
             muon_halflife = 2.2
             decay = math.exp(-offset / muon_halflife)
             first_pulse_weighting = decay / (1 + decay)
             parameters.update({'PulseOffset' : offset,
-                               'DoublePulseEnabled': True,'FirstPulseWeight': first_pulse_weighting})
+                               'EnableDoublePulse': True,'FirstPulseWeight': first_pulse_weighting})
 
         return parameters
 
@@ -604,15 +604,18 @@ class FittingTabModel(object):
             'EndX': self.fitting_options["endX"],
             'Minimizer': self.fitting_options["minimiser"],
         }
-        if ('DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']):
+        if self.double_pulse_enanbled():
             offset = self.context.gui_context['DoublePulseTime']
             muon_halflife = 2.2
             decay = math.exp(-offset / muon_halflife)
             first_pulse_weighting = decay / (1 + decay)
             parameters.update({'PulseOffset' : offset,
-                               'DoublePulseEnabled': True,'FirstPulseWeight': first_pulse_weighting})
+                               'EnableDoublePulse': True,'FirstPulseWeight': first_pulse_weighting})
 
         return parameters
+
+    def double_pulse_enanbled(self):
+        return 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']
 
     # get workspace information
     def get_selected_workspace_list(self):

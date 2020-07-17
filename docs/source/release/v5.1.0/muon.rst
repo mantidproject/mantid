@@ -44,6 +44,7 @@ Improvements
 - Have updated the FDA GUI so that it functions correctly for frquency transforms and single fits.
 - Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
 - Updated :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` to allow double pulse fits.
+- Tf asymmetry mode can now be performed on double pulse fits from the muon analysis GUI.
 
 Bug fixes
 ---------
