@@ -38,29 +38,21 @@ class MonteCarloAbsorption;
 */
 class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy {
 public:
-  MCAbsorptionStrategy(
-      const IBeamProfile &beamProfile, const API::Sample &sample,
-      Kernel::DeltaEMode::Type EMode, const size_t nevents,
-      const size_t maxScatterPtAttempts,
-      const bool regenerateTracksForEachLambda,
-      const MCInteractionVolume::ScatteringPointVicinity pointsIn =
-          MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
-  void calculate(Kernel::PseudoRandomNumberGenerator &rng,
+  MCAbsorptionStrategy(IMCInteractionVolume &interactionVolume,
+                       const IBeamProfile &beamProfile,
+                       Kernel::DeltaEMode::Type EMode, const size_t nevents,
+                       const size_t maxScatterPtAttempts,
+                       const bool regenerateTracksForEachLambda);
+  virtual void calculate(Kernel::PseudoRandomNumberGenerator &rng,
                  const Kernel::V3D &finalPos,
                  const std::vector<double> &lambdas, const double lambdaFixed,
                  std::vector<double> &attenuationFactors,
                  std::vector<double> &attFactorErrors,
                  MCInteractionStatistics &stats);
 
-protected:
-  virtual MCInteractionVolume createMCInteractionVolume(
-      const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
-      const size_t maxScatterAttempts,
-      const MCInteractionVolume::ScatteringPointVicinity pointsIn);
-
 private:
   const IBeamProfile &m_beamProfile;
-  const MCInteractionVolume m_scatterVol;
+  const IMCInteractionVolume &m_scatterVol;
   const size_t m_nevents;
   const size_t m_maxScatterAttempts;
   const double m_error;

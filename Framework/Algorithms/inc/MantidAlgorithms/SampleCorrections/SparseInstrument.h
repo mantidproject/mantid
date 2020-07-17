@@ -39,8 +39,8 @@ public:
   SparseWorkspace(const API::MatrixWorkspace &modelWS,
                   const size_t wavelengthPoints, const size_t rows,
                   const size_t columns);
-  HistogramData::Histogram interpolateFromDetectorGrid(const double lat,
-                                                       const double lon) const;
+  virtual HistogramData::Histogram
+  interpolateFromDetectorGrid(const double lat, const double lon) const;
 
 protected:
   std::unique_ptr<Algorithms::DetectorGridDefinition> m_gridDef;
@@ -49,9 +49,11 @@ protected:
   static double greatCircleDistance(const double lat1, const double long1,
                                     const double lat2, const double long2);
   Mantid::Geometry::IObject_sptr makeCubeShape();
-  HistogramData::Histogram modelHistogram(const API::MatrixWorkspace &modelWS,
-                                          const size_t wavelengthPoints);
-  std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws);
+  static HistogramData::Histogram
+  modelHistogram(const API::MatrixWorkspace &modelWS,
+                 const size_t wavelengthPoints);
+  static std::tuple<double, double>
+  extremeWavelengths(const API::MatrixWorkspace &ws);
 };
 
 /// unique pointer to Mantid::API::SparseWorkspace

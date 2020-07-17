@@ -231,9 +231,12 @@ std::unique_ptr<MCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
     Kernel::DeltaEMode::Type EMode, const size_t nevents,
     const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda,
     const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
+  MCInteractionVolume interactionVol(sample,
+                                     beamProfile.defineActiveRegion(sample),
+                                     maxScatterPtAttempts, pointsIn);
   auto MCAbs = std::make_unique<MCAbsorptionStrategy>(
-      beamProfile, sample, EMode, nevents, maxScatterPtAttempts,
-      regenerateTracksForEachLambda, pointsIn);
+      interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
+      regenerateTracksForEachLambda);
   return MCAbs;
 }
 

@@ -597,6 +597,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
+    inc/MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h
     inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
     inc/MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h
     inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h

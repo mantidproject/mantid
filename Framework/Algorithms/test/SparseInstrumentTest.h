@@ -40,9 +40,18 @@ public:
                                     const double lat2, const double long2) {
     return SparseWorkspace::greatCircleDistance(lat1, long1, lat2, long2);
   };
-  std::unique_ptr<DetectorGridDefinition> grid() {
-    return std::move(m_gridDef);
+  DetectorGridDefinition& grid() {
+    return *m_gridDef;
   }
+  static std::tuple<double, double>
+  extremeWavelengths(const Mantid::API::MatrixWorkspace &ws) {
+    return SparseWorkspace::extremeWavelengths(ws);
+  };
+  static Mantid::HistogramData::Histogram
+  modelHistogram(const Mantid::API::MatrixWorkspace &modelWS,
+                 const size_t wavelengthPoints) {
+    return SparseWorkspace::modelHistogram(modelWS, wavelengthPoints);
+  };
 };
 
 class SparseInstrumentTest : public CxxTest::TestSuite {
@@ -97,10 +106,8 @@ public:
     auto ws = create<Workspace2D>(2, Histogram(edges, counts));
     ws->mutableX(1) = {-3.0, -1.0, 1.0};
     double minWavelength, maxWavelength;
-    auto sparseWS = std::make_unique<SparseWorkspace>(*ws, 3, 2, 1);
-
-    minWavelength = sparseWS->dataX(0)[0];
-    maxWavelength = sparseWS->dataX(0)[sparseWS->blocksize() - 1];
+    std::tie(minWavelength, maxWavelength) =
+        SparseWorkspaceTest::extremeWavelengths(*ws);
     TS_ASSERT_EQUALS(minWavelength, -2.0)
     TS_ASSERT_EQUALS(maxWavelength, 3.0)
   }
@@ -113,10 +120,8 @@ public:
     auto ws = create<Workspace2D>(2, Histogram(edges, counts));
     ws->mutableX(1) = {-3.0, -1.0, 1.0};
     double minWavelength, maxWavelength;
-    auto sparseWS = std::make_unique<SparseWorkspace>(*ws, 3, 2, 1);
-
-    minWavelength = sparseWS->dataX(0)[0];
-    maxWavelength = sparseWS->dataX(0)[sparseWS->blocksize() - 1];
+    std::tie(minWavelength, maxWavelength) =
+        SparseWorkspaceTest::extremeWavelengths(*ws);
     TS_ASSERT_EQUALS(minWavelength, -3.0)
     TS_ASSERT_EQUALS(maxWavelength, 4.0)
   }
@@ -178,11 +183,8 @@ public:
     auto ws = create<Workspace2D>(2, Histogram(edges, counts));
     const auto points = ws->points(0);
     for (size_t nCounts = 2; nCounts < counts.size(); ++nCounts) {
-      const auto sparseWS =
-          std::make_unique<SparseWorkspace>(*ws, nCounts, 2, 1);
-      const auto histo = sparseWS->histogram(0);
+      const auto histo = SparseWorkspaceTest::modelHistogram(*ws, nCounts);
 
-      TS_ASSERT_EQUALS(sparseWS->blocksize(), nCounts)
       // Check the stepping inside modelHistogram retains the final wavelength
       // point as returned by extremeWavelengths w/o rounding errors
       // These have to be equal, don't use DELTA here!
@@ -218,18 +220,17 @@ public:
       }
     }
     auto &grid = sparseWS->grid();
-    double lat = grid->latitudeAt(0);
-    double lon = grid->longitudeAt(0);
-    auto indices = grid->nearestNeighbourIndices(lat, lon);
+    double lat = grid.latitudeAt(0);
+    double lon = grid.longitudeAt(0);
     auto h = sparseWS->interpolateFromDetectorGrid(lat, lon);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
     for (size_t i = 0; i < h.size(); ++i) {
       TS_ASSERT_EQUALS(h.y()[i], 0.0)
       TS_ASSERT_EQUALS(h.e()[i], 0.0)
     }
-    lat = (grid->latitudeAt(2) + grid->latitudeAt(1)) / 2.0;
-    lon = (grid->longitudeAt(3) + grid->longitudeAt(2)) / 2.0;
-    indices = sparseWS->grid()->nearestNeighbourIndices(lat, lon);
+    lat = (grid.latitudeAt(2) + grid.latitudeAt(1)) / 2.0;
+    lon = (grid.longitudeAt(3) + grid.longitudeAt(2)) / 2.0;
+    auto indices = sparseWS->grid().nearestNeighbourIndices(lat, lon);
     double val =
         static_cast<double>(indices[0] + indices[1] + indices[2] + indices[3]) /
         4.0;

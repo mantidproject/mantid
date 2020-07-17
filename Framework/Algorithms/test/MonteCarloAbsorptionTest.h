@@ -13,14 +13,20 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
+#include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -407,6 +413,70 @@ public:
   }
 
 private:
+  class MockMCAbsorptionStrategy final
+      : public Mantid::Algorithms::MCAbsorptionStrategy {
+  public:
+    MockMCAbsorptionStrategy(
+        Mantid::Algorithms::IMCInteractionVolume &interactionVolume,
+        const Mantid::Algorithms::IBeamProfile &beamProfile,
+        Mantid::Kernel::DeltaEMode::Type EMode, const size_t nevents,
+        const size_t maxScatterPtAttempts,
+        const bool regenerateTracksForEachLambda)
+        : MCAbsorptionStrategy(interactionVolume, beamProfile, EMode, nevents,
+                               maxScatterPtAttempts,
+                               regenerateTracksForEachLambda){};
+
+  public:
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
+    MOCK_METHOD7(calculate,
+                 void(Mantid::Kernel::PseudoRandomNumberGenerator &rng,
+                      const Mantid::Kernel::V3D &finalPos,
+                      const std::vector<double> &lambdas,
+                      const double lambdaFixed,
+                      std::vector<double> &attenuationFactors,
+                      std::vector<double> &attFactorErrors,
+                      Mantid::Algorithms::MCInteractionStatistics &stats));
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
+  };
+  class MockSparseWorkspace final : public Mantid::Algorithms::SparseWorkspace {
+  public:
+    MockSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS,
+                        const size_t wavelengthPoints, const size_t rows,
+                        const size_t columns)
+        : SparseWorkspace(modelWS, wavelengthPoints, rows, columns){};
+
+  public:
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
+    MOCK_CONST_METHOD2(interpolateFromDetectorGrid,
+                       Mantid::HistogramData::Histogram(const double lat,
+                                                        const double lon));
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
+  };
+  class TestMonteCarloAbsorption final
+      : public Mantid::Algorithms::MonteCarloAbsorption {
+    std::unique_ptr<Mantid::Algorithms::MCAbsorptionStrategy> createStrategy(
+        const Mantid::Algorithms::IBeamProfile &beamProfile,
+        const Mantid::API::Sample &sample,
+        Mantid::Kernel::DeltaEMode::Type EMode, const size_t nevents,
+        const size_t maxScatterPtAttempts,
+        const bool regenerateTracksForEachLambda,
+        const Mantid::Algorithms::MCInteractionVolume::ScatteringPointVicinity
+            pointsIn) override {
+      Mantid::Algorithms::MCInteractionVolume interactionVol(
+          sample, beamProfile.defineActiveRegion(sample), maxScatterPtAttempts,
+          pointsIn);
+      return std::make_unique<MockMCAbsorptionStrategy>(
+          interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
+          regenerateTracksForEachLambda);
+    }
+    std::unique_ptr<Mantid::Algorithms::SparseWorkspace>
+    createSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS,
+                          const size_t wavelengthPoints, const size_t rows,
+                          const size_t columns) {
+      return std::make_unique<MockSparseWorkspace>(modelWS, wavelengthPoints,
+                                                   rows, columns);
+    }
+  };
   Mantid::API::MatrixWorkspace_const_sptr
   runAlgorithm(const TestWorkspaceDescriptor &wsProps,
                const bool resimulateTracksForDiffWavelengths = false,

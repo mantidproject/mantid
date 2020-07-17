@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
@@ -20,6 +21,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
 
+using Mantid::Algorithms::IMCInteractionVolume;
 using Mantid::Algorithms::MCAbsorptionStrategy;
 using Mantid::Algorithms::MCInteractionStatistics;
 using Mantid::Algorithms::MCInteractionVolume;
@@ -47,7 +49,9 @@ public:
     EXPECT_CALL(testBeamProfile, defineActiveRegion(_))
         .WillOnce(Return(testSampleSphere.getShape().getBoundingBox()));
     const size_t nevents(10), maxTries(100);
-    MCAbsorptionStrategy mcabsorb(testBeamProfile, testSampleSphere,
+    MCInteractionVolume interactionVolume(
+        testSampleSphere, testBeamProfile.defineActiveRegion(testSampleSphere));
+    MCAbsorptionStrategy mcabsorb(interactionVolume, testBeamProfile,
                                   Mantid::Kernel::DeltaEMode::Type::Direct,
                                   nevents, maxTries, false);
     // 3 random numbers per event expected
@@ -76,14 +80,42 @@ public:
   }
 
   void test_Calculate() {
+    using namespace MonteCarloTesting;
+    using namespace ::testing;
     MockBeamProfile testBeamProfile;
-    MCAbsorptionStrategyWithMock testStrategy(
-        testBeamProfile, Mantid::API::Sample(),
-        Mantid::Kernel::DeltaEMode::Elastic, 1, 1, true,
-        MCInteractionVolume::ScatteringPointVicinity::SAMPLEONLY);
-    EXPECT_CALL(rng, calculateBeforeAfterTrack())
-        .Times(Exactly(30))
-        .WillRepeatedly(Return(0.5));
+    MockMCInteractionVolume testInteractionVolume;
+    MCAbsorptionStrategy testStrategy(testInteractionVolume, testBeamProfile,
+                                      Mantid::Kernel::DeltaEMode::Elastic, 5, 2,
+                                      true);
+    MockRNG rng;
+    std::vector<double> attenuationFactors = {0};
+    std::vector<double> attenuationFactorErrors = {0};
+    MCInteractionStatistics trackStatistics(-1, Mantid::API::Sample{});
+    EXPECT_CALL(testBeamProfile, generatePoint(_, _))
+        .Times(Exactly(static_cast<int>(6)));
+    EXPECT_CALL(testInteractionVolume, getBoundingBox())
+        .Times(1)
+        .WillOnce(ReturnRef(Mantid::Geometry::BoundingBox()));
+
+    EXPECT_CALL(testInteractionVolume,
+                calculateBeforeAfterTrack(_, _, _, _, _, _))
+        .Times(Exactly(6))
+        .WillOnce(Return(true))
+        .WillOnce(Return(false))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true));
+    EXPECT_CALL(testInteractionVolume, calculateAbsorption(_, _, _, _))
+        .Times(Exactly(5))
+        .WillOnce(Return(1.0))
+        .WillOnce(Return(2.0))
+        .WillOnce(Return(3.0))
+        .WillOnce(Return(4.0))
+        .WillOnce(Return(5.0));
+    testStrategy.calculate(rng, {0., 0., 0.}, {1.0}, 0., attenuationFactors,
+                           attenuationFactorErrors, trackStatistics);
+    TS_ASSERT_EQUALS(attenuationFactors[0], 3.0);
   }
 
   //----------------------------------------------------------------------------
@@ -102,7 +134,9 @@ public:
     RectangularBeamProfile testBeamProfile(
         ReferenceFrame(Y, Z, Right, "source"), V3D(), 1, 1);
     const size_t nevents(10), maxTries(1);
-    MCAbsorptionStrategy mcabs(testBeamProfile, testThinAnnulus,
+    MCInteractionVolume interactionVolume(
+        testThinAnnulus, testBeamProfile.defineActiveRegion(testThinAnnulus));
+    MCAbsorptionStrategy mcabs(interactionVolume, testBeamProfile,
                                Mantid::Kernel::DeltaEMode::Type::Direct,
                                nevents, maxTries, false);
     MockRNG rng;
@@ -134,11 +168,8 @@ private:
                                                const Mantid::API::Sample &));
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
-  class MockMCInteractionVolume final : public MCInteractionVolume {
+  class MockMCInteractionVolume final : public IMCInteractionVolume {
   public:
-    MockMCInteractionVolume(const Mantid::API::Sample &sample,
-                            const Mantid::Geometry::BoundingBox &activeRegion)
-        : MCInteractionVolume(sample, activeRegion) {}
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD6(calculateBeforeAfterTrack,
                        bool(Mantid::Kernel::PseudoRandomNumberGenerator &rng,
@@ -151,29 +182,9 @@ private:
                        double(const Mantid::Geometry::Track &beforeScatter,
                               const Mantid::Geometry::Track &afterScatter,
                               double lambdaBefore, double lambdaAfter));
+    MOCK_CONST_METHOD0(getBoundingBox, Mantid::Geometry::BoundingBox &());
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
-  class MCAbsorptionStrategyWithMock final : public MCAbsorptionStrategy {
-  public:
-    MCAbsorptionStrategyWithMock(
-        const Mantid::Algorithms::IBeamProfile &beamProfile,
-        const Mantid::API::Sample &sample,
-        Mantid::Kernel::DeltaEMode::Type EMode, const size_t nevents,
-        const size_t maxScatterPtAttempts,
-        const bool regenerateTracksForEachLambda,
-        const MCInteractionVolume::ScatteringPointVicinity pointsIn)
-        : MCAbsorptionStrategy(beamProfile, sample, EMode, nevents,
-                               maxScatterPtAttempts,
-                               regenerateTracksForEachLambda, pointsIn){};
 
-  protected:
-    MCInteractionVolume createMCInteractionVolume(
-        const Mantid::API::Sample &sample,
-        const Mantid::Geometry::BoundingBox &activeRegion,
-        const size_t maxScatterAttempts,
-        const MCInteractionVolume::ScatteringPointVicinity pointsIn) override {
-      return MockMCInteractionVolume(sample, activeRegion);
-    };
-  };
   Mantid::Kernel::Logger g_log{"MCAbsorptionStrategyTest"};
 };

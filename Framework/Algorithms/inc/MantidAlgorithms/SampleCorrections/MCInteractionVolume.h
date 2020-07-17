@@ -7,39 +7,25 @@
 #pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/Logger.h"
-#include <boost/optional.hpp>
+#include "MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h"
 
 namespace Mantid {
 namespace API {
 class Sample;
 }
 namespace Geometry {
-class IObject;
 class SampleEnvironment;
-class Track;
 } // namespace Geometry
 
-namespace Kernel {
-class PseudoRandomNumberGenerator;
-class V3D;
-} // namespace Kernel
 namespace Algorithms {
 class IBeamProfile;
-
-struct ComponentScatterPoint {
-  int componentIndex;
-  Kernel::V3D scatterPoint;
-};
 
 /**
   Defines a volume where interactions of Tracks and Objects can take place.
   Given an initial Track, end point & wavelengths it calculates the absorption
   correction factor.
 */
-class MANTID_ALGORITHMS_DLL MCInteractionVolume {
+class MANTID_ALGORITHMS_DLL MCInteractionVolume : public IMCInteractionVolume {
 public:
   enum class ScatteringPointVicinity {
     SAMPLEANDENVIRONMENT,
@@ -51,18 +37,12 @@ public:
                       const size_t maxScatterAttempts = 5000,
                       const ScatteringPointVicinity pointsIn =
                           ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
-  // No creation from temporaries as we store a reference to the object in
-  // the sample
-  MCInteractionVolume(const API::Sample &&sample,
-                      const Geometry::BoundingBox &&activeRegion) = delete;
 
   const Geometry::BoundingBox &getBoundingBox() const;
-  bool calculateBeforeAfterTrack(Kernel::PseudoRandomNumberGenerator &rng,
-                                 const Kernel::V3D &startPos,
-                                 const Kernel::V3D &endPos,
-                                 Geometry::Track &beforeScatter,
-                                 Geometry::Track &afterScatter,
-                                 MCInteractionStatistics &stats) const;
+  virtual bool calculateBeforeAfterTrack(
+      Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
+      const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
+      Geometry::Track &afterScatter, MCInteractionStatistics &stats) const;
   virtual double calculateAbsorption(const Geometry::Track &beforeScatter,
                                      const Geometry::Track &afterScatter,
                                      double lambdaBefore,
