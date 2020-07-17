@@ -39,6 +39,7 @@ from io import BytesIO
 
 from inspect import getfullargspec
 
+from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 
 ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
@@ -226,13 +227,13 @@ class CodeCompleter(object):
     are updated on every successful script execution.
     """
     def __init__(self, editor, env_globals=None):
+        self.simpleapi_in_completions = False
         self.editor = editor
         self.env_globals = env_globals
+        self.worker = None
 
         # A dict gives O(1) lookups and ensures we have no duplicates
         self._completions_dict = dict()
-        if "from mantid.simpleapi import *" in self.editor.text():
-            self._add_to_completions(self._get_module_call_tips('mantid.simpleapi'))
         if re.search("^#{0}import .*numpy( |,|$)", self.editor.text(), re.MULTILINE):
             self._add_to_completions(self._get_module_call_tips('numpy'))
         if re.search("^#{0}import .*pyplot( |,|$)", self.editor.text(), re.MULTILINE):
@@ -258,6 +259,19 @@ class CodeCompleter(object):
         with _ignore_matplotlib_deprecation_warnings():
             self._add_to_completions(self._get_completions_from_globals())
         self.editor.updateCompletionAPI(self.completions)
+
+    def add_simpleapi_to_completions_if_required(self):
+        """
+        If the simpleapi functions haven't been added to the completions, start a separate thread to load them in.
+        """
+        if not self.simpleapi_in_completions and "from mantid.simpleapi import *" in self.editor.text():
+            self.simpleapi_in_completions = True
+            self.worker = AsyncTask(self._add_simpleapi_to_completions_if_required)
+            self.worker.start()
+
+    def _add_simpleapi_to_completions_if_required(self):
+        self._add_to_completions(self._get_module_call_tips('mantid.simpleapi'))
+        self.update_completion_api()
 
     def _get_module_call_tips(self, module):
         """

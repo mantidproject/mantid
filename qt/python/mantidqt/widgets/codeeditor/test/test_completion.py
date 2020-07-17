@@ -26,8 +26,9 @@ class CodeCompletionTest(unittest.TestCase):
     def _run_check_call_tip_generated(self, script_text, call_tip_regex):
         completer = self._get_completer(script_text)
         update_completion_api_mock = completer.editor.updateCompletionAPI
-        call_tips = update_completion_api_mock.call_args_list[0][0][0]
-        self.assertEqual(1, update_completion_api_mock.call_count)
+        completer._add_simpleapi_to_completions_if_required()
+        call_tips = update_completion_api_mock.call_args_list[1][0][0]
+        self.assertEqual(2, update_completion_api_mock.call_count)
         self.assertGreater(len(call_tips), 1)
         self.assertTrue(re.search(call_tip_regex, ' '.join(call_tips)))
 
