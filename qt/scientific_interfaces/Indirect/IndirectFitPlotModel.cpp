@@ -285,12 +285,9 @@ bool IndirectFitPlotModel::canCalculateGuess() const {
 bool IndirectFitPlotModel::isResolutionLoaded() const {
   const auto model = dynamic_cast<ConvFitModel *>(m_fittingModel);
   if (model) {
-    if (m_fittingModel->getResolutionsForFit().size() != 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return m_fittingModel->getResolutionsForFit().size() != 0;
   }
+  // If its not a ConvFitModel it doesn't require a resolution, so return true
   return true;
 }
 
