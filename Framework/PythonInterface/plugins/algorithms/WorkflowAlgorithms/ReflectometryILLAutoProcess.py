@@ -28,11 +28,12 @@ from mantid.kernel import (
     StringArrayProperty,
     StringListValidator
 )
-from mantid.simpleapi import *
 import ILL_utilities as utils
 from ReflectometryILL_common import SampleLogs
 from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
 from ReflectometryILLSumForeground import SumType
+from mantid.simpleapi import *
+import math
 
 
 class PropertyNames(object):
@@ -636,6 +637,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             LowAngleBkgWidth=int(self.get_value(PropertyNames.LOW_BKG_WIDTH_DIRECT, angle_index)),
             HighAngleBkgOffset=int(self.get_value(PropertyNames.HIGH_BKG_OFFSET_DIRECT, angle_index)),
             HighAngleBkgWidth=int(self.get_value(PropertyNames.HIGH_BKG_WIDTH_DIRECT, angle_index)),
+            FlatBackground=self.getPropertyValue(PropertyNames.BKG_METHOD_DIRECT),
             FitStartWorkspaceIndex=int(self.get_value(PropertyNames.START_WS_INDEX_DIRECT, angle_index)),
             FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX_DIRECT, angle_index)),
             FitRangeLower=self.getProperty(PropertyNames.XMIN_DIRECT).value,
@@ -660,6 +662,13 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         else:
             raise RuntimeError('Unable to retrieve the direct beam foreground centre needed for DAN option.')
 
+    def log_foreground_centres(self, reflectedBeamName, directBeamName):
+        """Logs the fractional foreground centres for direct and reflected beams"""
+        db_frg_centre = mtd[directBeamName].run().getLogData(SampleLogs.LINE_POSITION).value
+        rb_frg_centre = mtd[reflectedBeamName].run().getLogData(SampleLogs.LINE_POSITION).value
+        self.log().accumulate('Direct beam foreground centre: {0:.5f}\n'.format(db_frg_centre))
+        self.log().accumulate('Reflected beam foreground centre: {0:.5f}\n'.format(rb_frg_centre))
+
     def preprocess_reflected_beam(self, run, out_ws, directBeamName, angle_index):
         """Runs preprocess for the reflected beam"""
         angle_option = self.get_value(PropertyNames.ANGLE_OPTION, angle_index)
@@ -672,6 +681,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             'FluxNormalisation': self.getProperty(Prop.FLUX_NORM_METHOD).value,
             'SubalgorithmLogging': self._subalgLogging,
             'Cleanup': self._cleanup,
+            'FlatBackground': self.getPropertyValue(PropertyNames.BKG_METHOD),
             'ForegroundHalfWidth': [int(self.get_value(PropertyNames.LOW_FRG_HALF_WIDTH, angle_index)),
                                     int(self.get_value(PropertyNames.HIGH_FRG_HALF_WIDTH, angle_index))],
             'LowAngleBkgOffset': int(self.get_value(PropertyNames.LOW_BKG_OFFSET, angle_index)),
@@ -689,6 +699,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             preprocess_args['DirectBeamDetectorAngle'] = self.detector_angle_from_logs(directBeamName)
             preprocess_args['DirectBeamForegroundCentre'] = self.foreground_centre_from_logs(directBeamName)
         ReflectometryILLPreprocess(**preprocess_args)
+        self.log().accumulate('Angle method: {0}\n'.format(angle_option))
+        rb_frg_centre = mtd[out_ws].run().getLogData(SampleLogs.FOREGROUND_CENTRE).value
+        self.log().accumulate('Final source (mid chopper) to sample distance [m]: {0:.5f}\n'.
+                              format(mtd[out_ws].spectrumInfo().l1()))
+        self.log().accumulate('Final reflected foreground centre distance [m]: {0:.5f}\n'.
+                              format(mtd[out_ws].spectrumInfo().l2(rb_frg_centre)))
 
     def sum_foreground(self, inputWorkspaceName, outputWorkspaceName, sumType, angle_index, directForegroundName = ''):
         """Run the ReflectometryILLSumForeground, empty directForegroundName decides, if reflected beam is present."""
@@ -744,11 +760,18 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
     def process_reflected_beam(self, reflectedInput, reflectedBeamName, directBeamName, angle_index):
         """Processes the reflected beam for the given angle."""
         self.preprocess_reflected_beam(reflectedInput, reflectedBeamName, directBeamName, angle_index)
+        self.log_foreground_centres(reflectedBeamName, directBeamName)
         foregroundName = reflectedBeamName + '_frg'
         directForegroundName = directBeamName + '_frg'
         sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
+        self.log().accumulate('Summation method: {0}\n'.format(sum_type))
         sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
         self.sum_foreground(reflectedBeamName, foregroundName, sum_type, angle_index, directForegroundName)
+        if sum_type == 'SumInLambda':
+            final_two_theta = mtd[foregroundName].spectrumInfo().twoTheta(0) * 180/math.pi
+            self.log().accumulate('Final 2theta of summed foreground [degree]: {0:.5f}\n'.
+                                  format(final_two_theta))
+        # think how to get the two theta for SumInQ ?
         self._autoCleanup.cleanupLater(reflectedBeamName)
         self._autoCleanup.cleanupLater(foregroundName)
         return foregroundName
@@ -760,14 +783,19 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         to_group = []
         scaleFactor = self.getProperty(PropertyNames.SCALE_FACTOR).value
         progress = Progress(self, start=0.0, end=1.0, nreports=self._dimensionality)
+        self.log().purge()
+        self.log().accumulate('\nNumber of angles treated: {0}\n'.format(self._dimensionality))
         for angle_index in range(self._dimensionality):
             runDB = self.make_name(self._db[angle_index])
+            self.log().accumulate('Angle 1:\n')
+            self.log().accumulate('Direct Beam: {0}\n'.format(runDB))
             directBeamName = runDB + '_direct'
             directForegroundName = directBeamName + '_frg'
             if directBeamName not in mtd.getObjectNames() or not self.getProperty(PropertyNames.CACHE_DIRECT_BEAM).value:
                 self.process_direct_beam(directBeamName, directForegroundName, angle_index)
             if not self.is_polarized():
                 runRB = self.make_name(self._rb[angle_index])
+                self.log().accumulate('Reflected Beam: {0}\n'.format(runRB))
                 reflectedBeamName = runRB + '_reflected'
                 reflectedBeamInput = self.compose_run_string(self._rb[angle_index])
                 to_convert_to_q = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName, directBeamName, angle_index)
@@ -813,6 +841,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=self._outWS)
         self.setProperty(Prop.OUTPUT_WS, self._outWS)
         self._autoCleanup.finalCleanup()
-
+        self.log().flushNotice()
 
 AlgorithmFactory.subscribe(ReflectometryILLAutoProcess)

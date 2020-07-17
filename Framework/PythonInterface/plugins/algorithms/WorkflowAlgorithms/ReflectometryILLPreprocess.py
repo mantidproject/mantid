@@ -370,8 +370,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             elif angle_option == 'DetectorAngle':
                 bragg_angle = self._theta_from_detector_angles()
                 # in this clause we still need to correct for the difference of foreground
-                # cetnres between direct and reflected beams
-                # but we need to load the reflected beam first to be able to do this
+                # centres between direct and reflected beams
+                # but we need first to load the reflected beam to be able to do this
             elif angle_option == 'UserAngle':
                 bragg_angle = self.getProperty('BraggAngle').value
             load_options['BraggAngle'] = bragg_angle
@@ -552,7 +552,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             InputWorkspace=ws,
             OutputWorkspace=calibratedWSName,
             DetectorComponentName='detector',
-            LinePosition=direct_line, # this is the direct line position
+            LinePosition=direct_line, # yes, this is the direct line position!
             TwoTheta=2*self._theta_from_detector_angles(),
             PixelSize=common.pixelSize(self._instrumentName),
             DetectorCorrectionType='RotateAroundSample',

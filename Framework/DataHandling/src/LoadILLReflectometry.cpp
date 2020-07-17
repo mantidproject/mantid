@@ -625,6 +625,8 @@ double LoadILLReflectometry::reflectometryPeak() {
   startIndex = autoIndices.first;
   endIndex = autoIndices.second;
   if (!isDefault("FitStartWorkspaceIndex")) {
+    // The start workspace index offset is not taken into account in the
+    // foreground finding.
     startIndex = getProperty("FitStartWorkspaceIndex");
   }
   if (!isDefault("FitEndWorkspaceIndex")) {
@@ -926,6 +928,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
                                                  pairSeparation, "meter", true);
       m_localWorkspace->mutableRun().addProperty(
           "VirtualChopper.dist_chop_samp", pairCentre, "meter", true);
+      pairCentre -=  0.5 * pairSeparation;
     } catch (std::runtime_error &) {
       try {
         pairCentre = mmToMeter(doubleFromRun(
@@ -941,7 +944,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
             "Unable to extract chopper to sample distance");
       }
     }
-    return pairCentre - 0.5 * pairSeparation;
+    return pairCentre;
   } else {
     const double chopperDist =
         mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
