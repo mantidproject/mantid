@@ -108,7 +108,7 @@ Instrument::Instrument(const Instrument &instr)
     // Now check whether the current component is the source or sample.
     // As the majority of components will be detectors, we will rarely get to
     // here
-    if (const auto *obj = dynamic_cast<const ObjComponent *>(it->get())) {
+    if (const auto *obj = dynamic_cast<const Component *>(it->get())) {
       const std::string objName = obj->getName();
       // This relies on the source and sample having a unique name.
       // I think the way our instrument definition files work ensures this is
@@ -588,6 +588,15 @@ void Instrument::markAsSamplePos(const IComponent *comp) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsSamplePos() called on a "
                              "parametrized Instrument object.");
+
+  auto objComp = dynamic_cast<const IObjComponent *>(comp);
+  if (objComp) {
+    throw std::runtime_error(
+        "Instrument::markAsSamplePos() called on an IObjComponent "
+        "object that supports shape definition. Sample is prevented from "
+        "being this type because the shape must only be stored in "
+        "ExperimentInfo::m_sample.");
+  }
 
   if (!m_sampleCache) {
     if (comp->getName().empty()) {

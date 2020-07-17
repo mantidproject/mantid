@@ -289,6 +289,7 @@ public:
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", boost::numeric_cast<int>(specMin));
     alg.setProperty("SpecMax", boost::numeric_cast<int>(specMax));
+    alg.setProperty("OutputCompositeMembers", true);
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("ExtractMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");

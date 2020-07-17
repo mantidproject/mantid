@@ -20,11 +20,22 @@ namespace {
 constexpr char *WORKSPACE_NAME = "DummyWS";
 
 MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms,
-                                               const size_t numberOfBins) {
+                                               const size_t numberOfBins,
+                                               bool addLogs = true) {
 
   MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(
       numberOfHistograms, numberOfBins);
   ws->setYUnit("Counts");
+  if (addLogs) {
+    for (size_t index = 0; index < numberOfHistograms; index++) {
+
+      ws->mutableRun().addProperty("First good spectra " +
+                                       std::to_string(index),
+                                   int(double(numberOfBins) / 2.));
+      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
+                                   numberOfBins);
+    }
+  }
   AnalysisDataService::Instance().addOrReplace(WORKSPACE_NAME, ws);
 
   return ws;
@@ -57,8 +68,12 @@ public:
   }
 
 private:
-  std::tuple<double, double> calculateBackgroundFromFit(IAlgorithm_sptr &,
-                                                        double, int) override {
+  std::tuple<double, double>
+  calculateBackgroundFromFit(IAlgorithm_sptr &,
+                             const std::pair<double, double> &range,
+                             const int &index) override {
+    (void)range;
+    (void)index;
     return std::make_tuple(m_background, m_fitQuality);
   }
   double m_background{0.00};
@@ -82,9 +97,80 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_that_algorithm_does_not_execute_if_invalid_workspace_type() {
+  void test_that_algorithm_does_not_execute_if_invalid_y_label() {
     PSIBackgroundSubtraction alg;
     auto ws = createInvalidTestWorkspace(2, 100);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    clearADS();
+  }
+
+  void test_that_algorithm_does_not_execute_if_no_good_data() {
+    PSIBackgroundSubtraction alg;
+    auto ws = createCountsTestWorkspace(2, 100, false);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    clearADS();
+  }
+
+  void test_that_algorithm_does_not_execute_if_bad_first_good_data() {
+    PSIBackgroundSubtraction alg;
+    int numberOfHistograms = 2;
+    int numberOfBins = 100;
+    auto ws =
+        createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
+    for (int index = 0; index < numberOfHistograms; index++) {
+      ws->mutableRun().addProperty(
+          "First good spectra " + std::to_string(index), -1);
+      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
+                                   numberOfBins - 10);
+    }
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    clearADS();
+  }
+
+  void test_that_algorithm_does_not_execute_if_bad_last_good_data() {
+    PSIBackgroundSubtraction alg;
+    int numberOfHistograms = 2;
+    int numberOfBins = 100;
+    auto ws =
+        createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
+    for (int index = 0; index < numberOfHistograms; index++) {
+      ws->mutableRun().addProperty(
+          "First good spectra " + std::to_string(index), 1);
+      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
+                                   numberOfBins * 2);
+    }
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    clearADS();
+  }
+
+  void test_that_algorithm_does_not_execute_if_last_before_first_good_data() {
+    PSIBackgroundSubtraction alg;
+    int numberOfHistograms = 2;
+    int numberOfBins = 100;
+    auto ws =
+        createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
+    for (int index = 0; index < numberOfHistograms; index++) {
+      ws->mutableRun().addProperty(
+          "First good spectra " + std::to_string(index), 50);
+      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
+                                   40);
+    }
 
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);

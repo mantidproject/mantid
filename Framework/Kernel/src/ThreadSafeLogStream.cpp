@@ -50,6 +50,26 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c) {
   return static_cast<int>(c);
 }
 
+/**
+ * accumulate a message to the thread safe accummulator.
+ * @param message :: The log message
+ */
+void ThreadSafeLogStreamBuf::accumulate(const std::string &message) {
+  std::lock_guard<std::mutex> lock(m_mutex);
+  m_accumulator[Poco::Thread::currentTid()] += message;
+}
+
+/**
+ * Returns and flushes the accumulated message
+ * @returns The accumulated message
+ */
+std::string ThreadSafeLogStreamBuf::flush() {
+  const std::string returnValue = m_accumulator[Poco::Thread::currentTid()];
+  std::lock_guard<std::mutex> lock(m_mutex);
+  m_accumulator[Poco::Thread::currentTid()] = "";
+  return returnValue;
+}
+
 //************************************************************
 // ThreadSafeLogIOS
 //************************************************************
@@ -236,3 +256,20 @@ ThreadSafeLogStream::priority(Poco::Message::Priority priority) {
   m_buf.setPriority(priority);
   return *this;
 }
+
+/**
+ * accumulate a message
+ * @param message :: The log message
+ * @returns A reference to the log stream with the given priority level
+ */
+ThreadSafeLogStream &
+ThreadSafeLogStream::accumulate(const std::string &message) {
+  m_buf.accumulate(message);
+  return *this;
+}
+
+/**
+ * Flush the accumulated message
+ * @returns The accumulated message
+ */
+std::string ThreadSafeLogStream::flush() { return m_buf.flush(); }

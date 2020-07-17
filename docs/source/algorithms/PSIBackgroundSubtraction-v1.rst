@@ -18,11 +18,12 @@ The background is removed from the original data through the following formula,
 where :math:`y_{cor}(t)` is the corrected bin data, :math:`y_{org}(t)` the original counts data and :math:`B` is the
 flat background.
 
-To obtain the flat background, :math:`B`, the second-half of the raw-data is fitted with the following function,
+To obtain the flat background, :math:`B`, the second-half of the good raw-data is fitted with the following function,
 
 .. math:: f(t) = \mbox{A}e^{-\lambda t} + B
 
-where the first term represents a ExpDecay function, see :ref:`func-ExpDecayMuon`.
+where the first term represents a ExpDecay function, see :ref:`func-ExpDecayMuon`. 
+The good raw-data is defined as being from the bin containing the `first good data` to the bin containing the `last good data`.
 
 The algorithm takes in an input workspace and performs the correction inplace on the workspace. The number of iterations
 can be specified through an optional parameter. If a poor quality fit is returned, a warning will be displayed in the
@@ -47,6 +48,9 @@ Usage
     # Create workspaces
     input_workspace = CreateWorkspace(time, counts)
     input_workspace.setYUnit("Counts")
+    run = input_workspace.getRun()
+    run.addProperty("First good spectra 0",10,"None",True)
+    run.addProperty("Last good spectra 0",99,"None",True)
     workspace_copy = input_workspace.clone()
 
     # Run PSIBackgroundSubtraction Algorithm
@@ -54,8 +58,9 @@ Usage
 
     # Find the difference between the workspaces
     workspace_diff = Minus(workspace_copy, input_workspace)
+    diffs = np.round(workspace_diff.readY(0),4)
     # The counts in workspace diff should be a flat line corresponding to the background
-    print("Differences in counts are: {}".format(workspace_diff.dataY(0)))
+    print("Differences in counts are: {}".format(diffs))
 
 Output:
 

@@ -339,46 +339,51 @@ BoundingBox
 ComponentInfo::componentBoundingBox(const size_t index,
                                     const BoundingBox *reference) const {
   // Check that we have a valid shape here
-  if (!hasValidShape(index) ||
-      componentType(index) == Beamline::ComponentType::Infinite) {
+  if (componentType(index) == Beamline::ComponentType::Infinite) {
     return BoundingBox(); // Return null bounding box
   }
-  const auto &s = this->shape(index);
-  BoundingBox absoluteBB = s.getBoundingBox();
+  if (!hasValidShape(index)) {
+    return BoundingBox(this->position(index).X(), this->position(index).Y(),
+                       this->position(index).Z(), this->position(index).X(),
+                       this->position(index).Y(), this->position(index).Z());
+  } else {
+    const auto &s = this->shape(index);
+    BoundingBox absoluteBB = s.getBoundingBox();
 
-  // modify in place for speed
-  const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);
-  // Scale
-  absoluteBB.xMin() *= scaleFactor[0];
-  absoluteBB.xMax() *= scaleFactor[0];
-  absoluteBB.yMin() *= scaleFactor[1];
-  absoluteBB.yMax() *= scaleFactor[1];
-  absoluteBB.zMin() *= scaleFactor[2];
-  absoluteBB.zMax() *= scaleFactor[2];
-  // Rotate
-  (this->rotation(index))
-      .rotateBB(absoluteBB.xMin(), absoluteBB.yMin(), absoluteBB.zMin(),
-                absoluteBB.xMax(), absoluteBB.yMax(), absoluteBB.zMax());
+    // modify in place for speed
+    const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);
+    // Scale
+    absoluteBB.xMin() *= scaleFactor[0];
+    absoluteBB.xMax() *= scaleFactor[0];
+    absoluteBB.yMin() *= scaleFactor[1];
+    absoluteBB.yMax() *= scaleFactor[1];
+    absoluteBB.zMin() *= scaleFactor[2];
+    absoluteBB.zMax() *= scaleFactor[2];
+    // Rotate
+    (this->rotation(index))
+        .rotateBB(absoluteBB.xMin(), absoluteBB.yMin(), absoluteBB.zMin(),
+                  absoluteBB.xMax(), absoluteBB.yMax(), absoluteBB.zMax());
 
-  // Shift
-  const Eigen::Vector3d localPos = m_componentInfo->position(index);
-  absoluteBB.xMin() += localPos[0];
-  absoluteBB.xMax() += localPos[0];
-  absoluteBB.yMin() += localPos[1];
-  absoluteBB.yMax() += localPos[1];
-  absoluteBB.zMin() += localPos[2];
-  absoluteBB.zMax() += localPos[2];
+    // Shift
+    const Eigen::Vector3d localPos = m_componentInfo->position(index);
+    absoluteBB.xMin() += localPos[0];
+    absoluteBB.xMax() += localPos[0];
+    absoluteBB.yMin() += localPos[1];
+    absoluteBB.yMax() += localPos[1];
+    absoluteBB.zMin() += localPos[2];
+    absoluteBB.zMax() += localPos[2];
 
-  if (reference && !reference->isAxisAligned()) { // copy coordinate system
+    if (reference && !reference->isAxisAligned()) { // copy coordinate system
 
-    std::vector<Kernel::V3D> coordSystem;
-    coordSystem.assign(reference->getCoordSystem().begin(),
-                       reference->getCoordSystem().end());
+      std::vector<Kernel::V3D> coordSystem;
+      coordSystem.assign(reference->getCoordSystem().begin(),
+                         reference->getCoordSystem().end());
 
-    // realign to reference coordinate system
-    absoluteBB.realign(&coordSystem);
+      // realign to reference coordinate system
+      absoluteBB.realign(&coordSystem);
+    }
+    return absoluteBB;
   }
-  return absoluteBB;
 }
 
 /**

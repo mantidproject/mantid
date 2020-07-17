@@ -53,6 +53,8 @@ class CurvesTabWidgetPresenter:
             self.line_apply_to_all)
         self.view.marker.apply_to_all_button.clicked.connect(
             self.marker_apply_to_all)
+        self.view.marker.marker_style_combo_box.currentTextChanged.connect(
+            self.view.marker.set_colour_fields_enabled)
         self.view.errorbars.apply_to_all_button.clicked.connect(
             self.errorbars_apply_to_all)
 
@@ -125,6 +127,14 @@ class CurvesTabWidgetPresenter:
             curve_index = ax.get_lines().index(curve[0])
             errorbar = True
 
+        # When you remove the curve on a waterfall plot, the remaining curves are repositioned so that they are
+        # equally spaced apart. However since the curve is being replotted we don't want that to happen, so here
+        # the waterfall offsets are set to 0 so the plot appears to be non-waterfall. The offsets are then re-set
+        # after the curve is replotted.
+        if waterfall:
+            x_offset, y_offset = ax.waterfall_x_offset, ax.waterfall_y_offset
+            ax.waterfall_x_offset = ax.waterfall_y_offset = 0
+
         new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
 
@@ -139,6 +149,8 @@ class CurvesTabWidgetPresenter:
         ax.lines.insert(curve_index, ax.lines.pop())
 
         if waterfall:
+            # Set the waterfall offsets to what they were previously.
+            ax.waterfall_x_offset, ax.waterfall_y_offset = x_offset, y_offset
             if check_line_colour:
                 # curve can be either a Line2D or an ErrorContainer and the colour is accessed differently for each.
                 if not errorbar:
@@ -273,12 +285,11 @@ class CurvesTabWidgetPresenter:
             self.view.close()
             return False
 
-        active_lines = FigureErrorsManager.get_curves_from_ax(selected_ax)
+        # Get the lines in the order that they are listed on the legend.
+        active_lines = datafunctions.get_legend_handles(selected_ax)
         for line in active_lines:
             self._update_selected_curve_name(line)
-
-        self.view.populate_select_curve_combo_box(
-            sorted(self.curve_names_dict.keys(), key=lambda s: s.lower()))
+        self.view.populate_select_curve_combo_box(list(self.curve_names_dict))
         return True
 
     def _update_selected_curve_name(self, curve):

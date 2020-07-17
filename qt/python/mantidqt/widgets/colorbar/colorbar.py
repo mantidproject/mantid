@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
+from mantid.kernel import ConfigService
 from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
@@ -24,16 +25,19 @@ NORM_OPTS = ["Linear", "SymmetricLog10", "Power"]
 
 class ColorbarWidget(QWidget):
     colorbarChanged = Signal()  # The parent should simply redraw their canvas
+    cmap_list = sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
 
     def __init__(self, parent=None):
         super(ColorbarWidget, self).__init__(parent)
 
         self.setWindowTitle("Colorbar")
-        self.setMaximumWidth(200)
+        self.setMaximumWidth(100)
 
         self.cmap = QComboBox()
-        self.cmap.addItems(sorted(cm.cmap_d.keys()))
+        self.cmap.addItems(self.cmap_list)
         self.cmap.currentIndexChanged.connect(self.cmap_index_changed)
+        self.crev = QCheckBox('Reverse')
+        self.crev.stateChanged.connect(self.crev_checked_changed)
 
         self.cmin = QLineEdit()
         self.cmin_value = 0
@@ -84,11 +88,14 @@ class ColorbarWidget(QWidget):
         if parent:
             # Set facecolor to match parent
             self.canvas.figure.set_facecolor(parent.palette().window().color().getRgbF())
-        self.ax = self.canvas.figure.add_axes([0.4,0.05,0.2,0.9])
+        self.ax = self.canvas.figure.add_axes([0.0,0.02,0.2,0.97])
 
         # layout
         self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setSpacing(2)
         self.layout.addWidget(self.cmap)
+        self.layout.addWidget(self.crev)
         self.layout.addLayout(self.cmax_layout)
         self.layout.addWidget(self.canvas, stretch=1)
         self.layout.addLayout(self.cmin_layout)
@@ -100,26 +107,35 @@ class ColorbarWidget(QWidget):
         When a new plot is created this method should be called with the new mappable
         """
         self.ax.clear()
-        try: # Use current cmap
+        try:  # Use current cmap
             cmap = get_current_cmap(self.colorbar)
         except AttributeError:
-            try: # else use viridis
-                cmap = cm.viridis
-            except AttributeError: # else default
-                cmap = None
+            # else use default
+            cmap = ConfigService.getString("plots.images.Colormap")
         self.colorbar = Colorbar(ax=self.ax, mappable=mappable)
         self.cmin_value, self.cmax_value = mappable.get_clim()
         self.update_clim_text()
-        self.cmap_changed(cmap)
+        self.cmap_changed(cmap, False)
 
         mappable_cmap = get_current_cmap(mappable)
-        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(mappable_cmap.name))
+
+        if mappable_cmap.name.endswith('_r'):
+            self.crev.setChecked(True)
+        else:
+            self.crev.setChecked(False)
+        self.cmap.setCurrentIndex(self.cmap_list.index(mappable_cmap.name.replace('_r', '')))
+
         self.redraw()
 
     def cmap_index_changed(self):
-        self.cmap_changed(self.cmap.currentText())
+        self.cmap_changed(self.cmap.currentText(), self.crev.isChecked())
 
-    def cmap_changed(self, name):
+    def crev_checked_changed(self):
+        self.cmap_changed(self.cmap.currentText(), self.crev.isChecked())
+
+    def cmap_changed(self, name, rev):
+        if rev:
+            name += '_r'
         self.colorbar.mappable.set_cmap(name)
         if mpl_version_info() >= (3, 1):
             self.colorbar.update_normal(self.colorbar.mappable)
@@ -173,6 +189,17 @@ class ColorbarWidget(QWidget):
                               vmin=cmin, vmax=cmax)
         else:
             return Normalize(vmin=cmin, vmax=cmax)
+
+    def get_colorbar_scale(self):
+        norm = self.colorbar.norm
+        scale = 'linear'
+        kwargs = {}
+        if isinstance(norm, SymLogNorm):
+            scale = 'symlog'
+        elif isinstance(norm, PowerNorm):
+            scale = 'function'
+            kwargs = {'functions': (lambda x: np.power(x, norm.gamma), lambda x: np.power(x, 1 / norm.gamma))}
+        return scale, kwargs
 
     def clim_changed(self):
         """

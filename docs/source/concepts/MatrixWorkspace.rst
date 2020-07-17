@@ -85,6 +85,7 @@ Output:
     False       MDEventWorkspace<MDLeanEvent,3>
     False       MDHistoWorkspace
 
+
 Matrix Workspace Properties
 ###########################
 
@@ -95,7 +96,7 @@ Matrix Workspace Properties
 
 .. testcode:: MatrixWorkspaceProperties
 
-  # find out the number of histograms on a workspace use getNumberHistograms()
+  # To find out the number of histograms in a workspace use getNumberHistograms()
   print("number of histograms = {0}".format(ws.getNumberHistograms()))
 
   # To find out the number of bins along the x-axis use blocksize()

@@ -30,11 +30,8 @@ public:
     auto instr =
         std::make_shared<Mantid::Geometry::Instrument>("TestInstrument");
     ws->setInstrument(instr);
-    // Define a sample as a simple sphere
-    auto sample = new Mantid::Geometry::ObjComponent(
-        "samplePos",
-        ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-        instr.get());
+    // Define a sample position
+    auto sample = new Mantid::Geometry::Component("samplePos", instr.get());
     instr->setPos(0.0, 0.0, 0.0);
     instr->add(sample);
     instr->markAsSamplePos(sample);

@@ -83,6 +83,7 @@ protected:
   void setEditResultVisible(bool visible);
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
+  IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
 
 signals:
   void functionChanged();
@@ -117,6 +118,7 @@ protected slots:
       const std::unordered_map<std::string, ParameterValue> &parameters);
   void updateFitBrowserParameterValues();
   void updateFitBrowserParameterValuesFromAlg();
+  void updateFitStatus();
   void updateDataReferences();
   void updateResultOptions();
   void respondToFunctionChanged();
@@ -160,7 +162,6 @@ private:
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
-  IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
   TableDatasetIndex m_currentTableDatasetIndex;
   WorkspaceIndex m_singleFitWorkspaceIndex;

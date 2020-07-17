@@ -10,6 +10,8 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -56,16 +58,17 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
     ReadMaterial::MaterialParameters params;
     params.chemicalSymbol = "V";
     auto binaryStlReader = LoadBinaryStl(samplePath, scaleType, params);
-    std::shared_ptr<MeshObject> shape = binaryStlReader.readStl();
+    std::shared_ptr<MeshObject> shape = binaryStlReader.readShape();
     ws->mutableSample().setShape(shape);
 
     std::string envPath =
         Mantid::API::FileFinder::Instance().getFullPath("PearlEnvironment.stl");
     // set up a uniform material for whole environment here to give simple case
     params.chemicalSymbol = "Ti-Zr";
-    params.sampleMassDensity = 5.23;
+    params.massDensity = 5.23;
     auto binaryStlReaderEnv = LoadBinaryStl(envPath, scaleType, params);
-    std::shared_ptr<MeshObject> environmentShape = binaryStlReaderEnv.readStl();
+    std::shared_ptr<MeshObject> environmentShape =
+        binaryStlReaderEnv.readShape();
 
     auto can = std::make_shared<Container>(environmentShape);
     std::unique_ptr<SampleEnvironment> environment =
@@ -252,6 +255,53 @@ public:
     TS_ASSERT_DELTA(0.3373, outputWS->y(0)[3], delta);
     TS_ASSERT_DELTA(0.2725, outputWS->y(0)[4], delta);
     TS_ASSERT_DELTA(0.1121, outputWS->y(0).back(), delta);
+  }
+
+  void test_Workspace_With_Different_Lambda_Ranges() {
+    using namespace Mantid::API;
+
+    // create an instrument including some monitors so that there's a good
+    // variation in the wavelength range of the spectra when convert from TOF to
+    // wavelength
+    MatrixWorkspace_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 100,
+                                                                     true);
+    testWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    Mantid::Algorithms::ConvertUnits convert;
+    convert.initialize();
+    convert.setChild(true);
+    convert.setProperty("InputWorkspace", testWS);
+    convert.setProperty("Target", "Wavelength");
+    convert.setProperty("OutputWorkspace", "dummy");
+    convert.execute();
+    testWS = convert.getProperty("OutputWorkspace");
+
+    auto mcAbsorb = createAlgorithm();
+    addSample(testWS, Environment::SampleOnly);
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+  }
+
+  void test_ignore_masked_spectra() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
+    auto testWS = setUpWS(wsProps);
+    testWS->mutableSpectrumInfo().setMasked(0, true);
+    auto mcAbsorb = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+    auto outputWS = getOutputWorkspace(mcAbsorb);
+    // should still output a spectra but it should also be masked and equal to
+    // zero
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(outputWS->spectrumInfo().isMasked(0), true);
+    auto yData = outputWS->getSpectrum(0).dataY();
+    bool allZero = std::all_of(yData.begin(), yData.end(),
+                               [](double i) { return i == 0; });
+    TS_ASSERT_EQUALS(allZero, true);
   }
 
   //---------------------------------------------------------------------------

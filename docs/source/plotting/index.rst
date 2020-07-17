@@ -9,14 +9,23 @@ Matplotlib in Mantid
    :glob:
    :maxdepth: 1
 
-   scripting_plots
+   1DPlotsHelp
+   WaterfallPlotsHelp
+   ColorfillPlotsHelp
+   3DPlotsHelp
 
 **Other Plotting Documentation**
 
-* :ref:`scripting_plots`
+* :ref:`02_scripting_plots`
 * :ref:`06_formatting_plots`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
+**Help Documentation**
+
+* :ref:`Basic_1D_Plots`
+* :ref:`Waterfall_Plots`
+* :ref:`Colorfill_Plots`
+* :ref:`3D_Plots`
 
 .. contents:: Table of contents
     :local:

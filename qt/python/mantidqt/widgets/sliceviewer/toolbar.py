@@ -26,19 +26,21 @@ class ToolItemText:
 
 class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
-    gridClicked = Signal()
+    gridClicked = Signal(bool)
+    homeClicked = Signal()
     linePlotsClicked = Signal(bool)
     nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
     plotOptionsChanged = Signal()
+    zoomPanFinished = Signal()
 
     toolitems = (
-        (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'home', None),
+        (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
         (ToolItemText.PAN, 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan',
          False),
         (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
-        (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', None),
+        (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', False),
         (ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
          'linePlotsClicked', False),
         (ToolItemText.OVERLAYPEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
@@ -79,9 +81,35 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         # Adjust icon size or they are too small in PyQt5 by default
         self.setIconSize(QSize(24, 24))
 
+        # Location of a press event
+        self._pressed_xy = None
+
     def edit_parameters(self):
         NavigationToolbar2QT.edit_parameters(self)
         self.plotOptionsChanged.emit()
+
+    def press(self, event):
+        """
+        Called by matplotlib after a press event has been handled. Stores the location
+        of the event.
+        """
+        self._pressed_xy = event.x, event.y
+
+    def release(self, event):
+        """
+        Called when a zoom/pan event has completed. Mouse must move more than 5 pixels
+        to be consider a pan/zoom ending
+        """
+        if self._pressed_xy is None:
+            # this "should" never happen as the mouse press callback should have been
+            # called first
+            return
+
+        x, y = event.x, event.y
+        lastx, lasty = self._pressed_xy
+        if ((abs(x - lastx) < 5) or (abs(y - lasty) < 5)):
+            return
+        self.zoomPanFinished.emit()
 
     def set_action_enabled(self, text: str, state: bool):
         """
@@ -95,3 +123,15 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                 if action.isChecked() and not state:
                     action.trigger()  # ensure view reacts appropriately
                 action.setEnabled(state)
+
+    def set_action_checked(self, text: str, state: bool):
+        """
+        Sets the checked/unchecked state of toggle button with the given text
+        :param text: Text on the action
+        :param state: checked if True else it is disabled
+        """
+        actions = self.actions()
+        for action in actions:
+            if action.text() == text:
+                if action.isChecked() != state:
+                    action.trigger()  # ensure view reacts appropriately

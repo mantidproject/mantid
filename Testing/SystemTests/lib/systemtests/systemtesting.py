@@ -44,6 +44,17 @@ def santize_backslash(path):
     return path.replace('\\', '\\\\')
 
 
+def linux_distro_description():
+    """Human readable string for linux distro description
+    """
+    try:
+        lsb_descr = subprocess.check_output('lsb_release --description', shell=True,
+                                            stderr=subprocess.STDOUT).decode('utf-8')
+        return lsb_descr.strip()[len('Description:')+1:].strip()
+    except subprocess.CalledProcessError as exc:
+        return f'Unknown distribution: lsb_release -d failed {exc}'
+
+
 # Path to this file
 TESTING_FRAMEWORK_DIR = santize_backslash(os.path.dirname(os.path.realpath(__file__)))
 # Path to PythonInterface/test directory for testhelpers module
@@ -642,21 +653,6 @@ class TestScript(object):
 
     def asString(self, clean=False):
         code = """
-# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
-# Remove this when everything is switched to qtpy
-import sip
-try:
-    sip.setapi('QString', 2)
-    sip.setapi('QVariant', 2)
-    sip.setapi('QDate', 2)
-    sip.setapi('QDateTime', 2)
-    sip.setapi('QTextStream', 2)
-    sip.setapi('QTime', 2)
-    sip.setapi('QUrl', 2)
-except AttributeError:
-    # PyQt < v4.6
-    pass
-
 import sys
 for p in ('{test_framework}', '{pythoninterface_test_dir}', '{test_dir}'):
     sys.path.append(p)
@@ -708,22 +704,11 @@ class TestSuite(object):
         self._result.addItem(['test_name', self._fqtestname])
         sysinfo = platform.uname()
         self._result.addItem(['host_name', sysinfo[1]])
-        self._result.addItem(['environment', self.envAsString()])
+        self._result.addItem(['environment', envAsString()])
         self._result.status = 'skipped'  # the test has been skipped until it has been executed
 
     name = property(lambda self: self._fqtestname)
     status = property(lambda self: self._result.status)
-
-    def envAsString(self):
-        if os.name == 'nt':
-            system = platform.system().lower()[:3]
-            arch = platform.architecture()[0][:2]
-            env = system + arch
-        elif os.name == 'mac':
-            env = platform.mac_ver()[0]
-        else:
-            env = platform.dist()[0]
-        return env
 
     def markAsSkipped(self, reason):
         self.setOutputMsg(reason)
@@ -1207,16 +1192,16 @@ class MantidFrameworkConfig:
 # (platform) of this test.
 #########################################################################
 def envAsString():
-    """Returns a string describing the environment
-    (platform) of this test."""
-    if os.name == 'nt':
+    platform_name = sys.platform
+    if platform_name == 'win32':
         system = platform.system().lower()[:3]
         arch = platform.architecture()[0][:2]
         env = system + arch
-    elif os.name == 'mac':
+    elif platform_name == 'darwin':
         env = platform.mac_ver()[0]
     else:
-        env = platform.dist()[0] + "-" + platform.dist()[1]
+        # assume linux
+        env = linux_distro_description()
     return env
 
 

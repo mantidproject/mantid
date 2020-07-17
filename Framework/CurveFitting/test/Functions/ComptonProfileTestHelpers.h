@@ -157,7 +157,7 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
   source->setPos(V3D(0.0, 0.0, -11.005));
   inst->add(source);
   inst->markAsSource(source);
-  auto *sampleHolder = new ObjComponent("samplePos");
+  auto *sampleHolder = new Component("samplePos");
   sampleHolder->setPos(V3D(0.0, 0.0, 0.0));
   inst->add(sampleHolder);
   inst->markAsSamplePos(sampleHolder);

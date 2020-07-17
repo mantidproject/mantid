@@ -6,6 +6,9 @@
 
 .. properties::
 
+.. warning::
+
+  This algorithm is deprecated in favour of :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`.
 
 Description
 -----------

@@ -571,21 +571,13 @@ void DgsConvertToEnergyTransfer::exec() {
   if ("ISIS" == facility) {
     double scaleFactor =
         inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
-    const std::string scaleFactorName = "ScaleFactor";
-    IAlgorithm_sptr csvw =
-        this->createChildAlgorithm("CreateSingleValuedWorkspace");
-    csvw->setProperty("OutputWorkspace", scaleFactorName);
-    csvw->setProperty("DataValue", scaleFactor);
-    csvw->executeAsChildAlg();
-    MatrixWorkspace_sptr scaleFactorWS = csvw->getProperty("OutputWorkspace");
-
-    IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply");
-    mult->setProperty("LHSWorkspace", outputWS);
-    mult->setProperty("RHSWorkspace", scaleFactorWS);
-    mult->setProperty("OutputWorkspace", outputWS);
-    mult->executeAsChildAlg();
+    IAlgorithm_sptr scaleAlg = this->createChildAlgorithm("Scale");
+    scaleAlg->setProperty("InputWorkspace", outputWS);
+    scaleAlg->setProperty("Factor", scaleFactor);
+    scaleAlg->setProperty("Operation", "Multiply");
+    scaleAlg->setProperty("OutputWorkspace", outputWS);
+    scaleAlg->executeAsChildAlg();
   }
-
   this->setProperty("OutputWorkspace", outputWS);
 }
 

@@ -44,6 +44,7 @@ set(SRC_FILES
     src/LoadCalFile.cpp
     src/LoadCanSAS1D.cpp
     src/LoadCanSAS1D2.cpp
+    src/LoadCSNSNexus.cpp
     src/LoadDaveGrp.cpp
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
@@ -65,6 +66,7 @@ set(SRC_FILES
     src/LoadILLDiffraction.cpp
     src/LoadILLIndirect2.cpp
     src/LoadILLPolarizationFactors.cpp
+    src/LoadILLPolarizedDiffraction.cpp
     src/LoadILLReflectometry.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
@@ -125,6 +127,7 @@ set(SRC_FILES
     src/LoadSampleEnvironment.cpp
     src/LoadSampleShape.cpp
     src/LoadSassena.cpp
+    src/LoadSingleMesh.cpp
     src/LoadSpec.cpp
     src/LoadSpice2D.cpp
     src/LoadSpiceAscii.cpp
@@ -258,6 +261,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadCalFile.h
     inc/MantidDataHandling/LoadCanSAS1D.h
     inc/MantidDataHandling/LoadCanSAS1D2.h
+    inc/MantidDataHandling/LoadCSNSNexus.h
     inc/MantidDataHandling/LoadDaveGrp.h
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
@@ -279,6 +283,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLDiffraction.h
     inc/MantidDataHandling/LoadILLIndirect2.h
     inc/MantidDataHandling/LoadILLPolarizationFactors.h
+    inc/MantidDataHandling/LoadILLPolarizedDiffraction.h
     inc/MantidDataHandling/LoadILLReflectometry.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
@@ -334,6 +339,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSampleEnvironment.h
     inc/MantidDataHandling/LoadSampleShape.h
     inc/MantidDataHandling/LoadSassena.h
+    inc/MantidDataHandling/LoadSingleMesh.h
     inc/MantidDataHandling/LoadSpec.h
     inc/MantidDataHandling/LoadSpice2D.h
     inc/MantidDataHandling/LoadSpiceAscii.h
@@ -465,6 +471,7 @@ set(TEST_FILES
     LoadBinaryStlTest.h
     LoadCalFileTest.h
     LoadCanSAS1dTest.h
+    LoadCSNSNexusTest.h
     LoadDaveGrpTest.h
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
@@ -484,6 +491,7 @@ set(TEST_FILES
     LoadILLDiffractionTest.h
     LoadILLIndirect2Test.h
     LoadILLPolarizationFactorsTest.h
+    LoadILLPolarizedDiffractionTest.h
     LoadILLReflectometryTest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h

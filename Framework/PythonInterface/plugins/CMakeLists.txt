@@ -371,3 +371,4 @@ install(
     DESTINATION ${PLUGINS_DIR}/python
     RENAME "python-plugin-manifest.txt"
 )
+

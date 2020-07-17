@@ -26,7 +26,8 @@ public:
   AlgorithmObserverAdapter &
   operator=(const AlgorithmObserverAdapter &) = delete;
   void progressHandle(const API::IAlgorithm *alg, double p,
-                      const std::string &msg) override;
+                      const std::string &msg, const double estimatedTime,
+                      const int progressPrecision) override;
   void startingHandle(API::IAlgorithm_sptr alg) override;
   void finishHandle(const API::IAlgorithm *alg) override;
   void errorHandle(const API::IAlgorithm *alg,

@@ -279,7 +279,7 @@ void LoadNXSPE::exec() {
   source->setPos(0.0, 0.0, -10.);
   instrument->add(source);
   instrument->markAsSource(source);
-  Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
+  Geometry::Component *sample = new Geometry::Component("sample");
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 

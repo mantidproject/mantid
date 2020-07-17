@@ -40,7 +40,11 @@ class ConfigUserManager(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
-            os.remove(self.cfg.filename)
+            filename = self.cfg.filename
+            # Force QSettings destructor to run before
+            # deleting the file as it will just recreate it
+            del self.cfg
+            os.remove(filename)
         except:
             # File does not exist so it has been deleted already
             # This seems to happen when the whole module is ran in PyCharm
@@ -65,8 +69,11 @@ class ConfigUserTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            os.remove(cls.cfg.filename)
+            filename = cls.cfg.filename
+            # Force QSettings destructor to run before
+            # deleting the file as it will just recreate it
             del cls.cfg
+            os.remove(filename)
         except OSError:
             pass
 

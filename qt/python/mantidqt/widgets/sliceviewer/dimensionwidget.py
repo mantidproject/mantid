@@ -22,6 +22,7 @@ class State(Enum):
 class DimensionWidget(QWidget):
     dimensionsChanged = Signal()
     valueChanged = Signal()
+
     """
     Hold all the individual dimensions
 
@@ -39,7 +40,9 @@ class DimensionWidget(QWidget):
     def __init__(self, dims_info, parent=None):
         super().__init__(parent)
 
-        self.layout = QVBoxLayout(self)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         self.dims, self.qflags = [], []
         for n, dim in enumerate(dims_info):
             self.qflags.append(dim['qdim'])
@@ -53,7 +56,7 @@ class DimensionWidget(QWidget):
             widget.valueChanged.connect(self.valueChanged)
             if hasattr(widget, 'binningChanged'):
                 widget.binningChanged.connect(self.dimensionsChanged)
-            self.layout.addWidget(widget)
+            layout.addWidget(widget)
 
         self.set_initial_states()
 
@@ -82,7 +85,6 @@ class DimensionWidget(QWidget):
                     d.set_state(State.NONE)
 
         self.check_transpose()
-
         self.dimensionsChanged.emit()
 
     def check_transpose(self):
@@ -163,17 +165,18 @@ class Dimension(QWidget):
         self.number = number
 
         self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 2, 0, 0)
 
         self.name = QLabel(dim_info['name'])
         self.units = QLabel(dim_info['units'])
 
         self.x = QPushButton('X')
-        self.x.setFixedSize(32, 32)
+        self.x.setFixedSize(26, 26)
         self.x.setCheckable(True)
         self.x.clicked.connect(self.x_clicked)
 
         self.y = QPushButton('Y')
-        self.y.setFixedSize(32, 32)
+        self.y.setFixedSize(26, 26)
         self.y.setCheckable(True)
         self.y.clicked.connect(self.y_clicked)
 
@@ -188,8 +191,12 @@ class Dimension(QWidget):
         self.spinbox.editingFinished.connect(self.spinbox_changed)
 
         self.layout.addWidget(self.name)
-        self.layout.addWidget(self.x)
-        self.layout.addWidget(self.y)
+        self.button_layout = QHBoxLayout()
+        self.button_layout.setContentsMargins(0, 0, 0, 0)
+        self.button_layout.setSpacing(0)
+        self.button_layout.addWidget(self.x)
+        self.button_layout.addWidget(self.y)
+        self.layout.addLayout(self.button_layout)
         self.layout.addWidget(self.slider, stretch=1)
         self.layout.addStretch(0)
         self.layout.addWidget(self.spinbox)

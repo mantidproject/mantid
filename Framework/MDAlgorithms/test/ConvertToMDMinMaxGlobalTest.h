@@ -46,8 +46,8 @@ Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx,
   testInst->add(source);
   testInst->markAsSource(source);
   // Define a sample as a simple sphere
-  Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent(
-      "samplePos", Mantid::Geometry::IObject_sptr(), testInst.get());
+  Mantid::Geometry::Component *sample =
+      new Mantid::Geometry::Component("samplePos", testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);

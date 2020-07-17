@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPropertyBrowser.h"
+#include "FitStatusWidget.h"
 #include "FunctionTemplateBrowser.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -46,8 +47,7 @@ namespace IDA {
 IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent)
     : QDockWidget(parent), m_templateBrowser(nullptr),
       m_functionWidget(nullptr) {
-  setFeatures(QDockWidget::DockWidgetFloatable |
-              QDockWidget::DockWidgetMovable);
+  setFeatures(QDockWidget::DockWidgetFloatable);
   setWindowTitle("Fit Function");
 }
 
@@ -85,17 +85,14 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
       nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
   m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("CreateOutput"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("LogValue"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PassWSIndexToFunction"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("ConvolveMembers"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(
-      QString("OutputCompositeMembers"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("OutputWorkspace"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("IgnoreInvalidData"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("Output"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PeakRadius"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PlotParameter"));
+}
+
+void IndirectFitPropertyBrowser::setHiddenProperties(
+    std::vector<std::string> hiddenProperties) {
+  for (const auto &propertyName : hiddenProperties) {
+    m_fitOptionsBrowser->addPropertyToBlacklist(
+        QString::fromStdString(propertyName));
+  }
 }
 
 bool IndirectFitPropertyBrowser::isFullFunctionBrowserActive() const {
@@ -168,6 +165,7 @@ void IndirectFitPropertyBrowser::init() {
   auto w = new QWidget(this);
   m_mainLayout = new QVBoxLayout(w);
   m_mainLayout->setContentsMargins(0, 0, 0, 0);
+
   m_functionWidget = new QStackedWidget(this);
   if (m_templateBrowser) {
     m_functionWidget->insertWidget(0, m_templateBrowser);
@@ -175,7 +173,11 @@ void IndirectFitPropertyBrowser::init() {
     m_browserSwitcher->setObjectName("browserSwitcher");
     connect(m_browserSwitcher, SIGNAL(clicked(bool)), this,
             SLOT(showFullFunctionBrowser(bool)));
-    m_mainLayout->insertWidget(0, m_browserSwitcher);
+    m_fitStatusWidget = new FitStatusWidget(w);
+    m_fitStatusWidget->setObjectName("browserFitStatus");
+    m_fitStatusWidget->hide();
+    m_mainLayout->insertWidget(0, m_fitStatusWidget);
+    m_mainLayout->insertWidget(1, m_browserSwitcher);
   }
   m_functionWidget->addWidget(m_functionBrowser);
   auto splitter = new QSplitter(Qt::Vertical);
@@ -250,6 +252,11 @@ bool IndirectFitPropertyBrowser::convolveMembers() const {
          "0";
 }
 
+bool IndirectFitPropertyBrowser::outputCompositeMembers() const {
+  return m_fitOptionsBrowser->getProperty("OutputCompositeMembers")
+             .toStdString() != "0";
+}
+
 std::string IndirectFitPropertyBrowser::fitEvaluationType() const {
   return m_fitOptionsBrowser->getProperty("EvaluationType").toStdString();
 }
@@ -287,6 +294,24 @@ void IndirectFitPropertyBrowser::updateMultiDatasetParameters(
     m_functionBrowser->updateMultiDatasetParameters(paramTable);
   else
     m_templateBrowser->updateMultiDatasetParameters(paramTable);
+}
+
+void IndirectFitPropertyBrowser::updateFitStatusData(
+    const std::vector<std::string> &status,
+    const std::vector<double> &chiSquared) {
+  m_fitStatus = status;
+  m_fitChiSquared = chiSquared;
+  updateFitStatus(currentDataset());
+}
+
+void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
+  if (index.value + 1 > m_fitStatus.size() ||
+      index.value + 1 > m_fitChiSquared.size()) {
+    return;
+  }
+  m_fitStatusWidget->update(m_fitStatus[index.value],
+                            m_fitChiSquared[index.value]);
+  return;
 }
 
 /**
@@ -342,6 +367,7 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
 void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0)
     return;
+  updateFitStatus(i);
   if (isFullFunctionBrowserActive()) {
     m_functionBrowser->setCurrentDataset(static_cast<int>(i.value));
   } else {

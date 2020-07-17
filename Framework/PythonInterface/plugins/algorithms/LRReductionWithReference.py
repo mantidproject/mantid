@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-import copy
 import json
 import numpy as np
 
@@ -13,6 +12,7 @@ from mantid.api import DataProcessorAlgorithm
 from mantid.simpleapi import \
     AlgorithmFactory, \
     CreateWorkspace, \
+    DeleteWorkspace, \
     Divide, \
     LiquidsReflectometryReduction
 
@@ -71,7 +71,7 @@ class LRReductionWithReference(DataProcessorAlgorithm):
     def PyInit(self):
         self.copyProperties(LR_ALG_FOR_PROPS, PROPS_TO_COPY)
         self.declareProperty("Refl1DModelParameters", "",
-                             doc="JSON string for Refl1D theoretical model paramters")
+                             doc="JSON string for Refl1D theoretical model parameters")
 
     def PyExec(self):
         try:
@@ -86,15 +86,40 @@ class LRReductionWithReference(DataProcessorAlgorithm):
             kwargs[prop] = self.getProperty(prop).value
 
         # Process the reference normalization run
-        norm_kwargs = copy.deepcopy(kwargs)
-        norm_kwargs['SignalPeakPixelRange'] = kwargs['NormPeakPixelRange']
-        norm_kwargs['SubtractSignalBackground'] = kwargs['SubtractNormBackground']
-        norm_kwargs['SignalBackgroundPixelRange'] = kwargs['NormBackgroundPixelRange']
-        norm_kwargs['NormFlag'] = False
-        norm_kwargs['LowResDataAxisPixelRangeFlag'] = kwargs['LowResNormAxisPixelRangeFlag']
-        norm_kwargs['LowResDataAxisPixelRange'] = kwargs['LowResNormAxisPixelRange']
-        norm_kwargs['ApplyScalingFactor'] = False
-        norm_wksp = LiquidsReflectometryReduction(**norm_kwargs)
+        norm_wksp = LiquidsReflectometryReduction(
+            RunNumbers=[kwargs['NormalizationRunNumber']],
+            InputWorkspace='',
+            NormalizationRunNumber=kwargs['NormalizationRunNumber'],
+            SignalPeakPixelRange=kwargs['NormPeakPixelRange'],
+            SubtractSignalBackground=kwargs['SubtractNormBackground'],
+            SignalBackgroundPixelRange=kwargs['NormBackgroundPixelRange'],
+            NormFlag=False,
+            NormPeakPixelRange=kwargs['NormPeakPixelRange'],
+            SubtractNormBackground=kwargs['SubtractNormBackground'],
+            NormBackgroundPixelRange=kwargs['NormBackgroundPixelRange'],
+            LowResDataAxisPixelRangeFlag=kwargs['LowResNormAxisPixelRangeFlag'],
+            LowResDataAxisPixelRange=kwargs['LowResNormAxisPixelRange'],
+            LowResNormAxisPixelRangeFlag=kwargs['LowResNormAxisPixelRangeFlag'],
+            LowResNormAxisPixelRange=kwargs['LowResNormAxisPixelRange'],
+            TOFRange=kwargs['TOFRange'],
+            TOFRangeFlag=kwargs['TOFRangeFlag'],
+            QMin=kwargs['QMin'],
+            QStep=kwargs['QStep'],
+            AngleOffset=kwargs['AngleOffset'],
+            AngleOffsetError=kwargs['AngleOffsetError'],
+            OutputWorkspace=kwargs['OutputWorkspace'],
+            ApplyScalingFactor=False,
+            ScalingFactorFile=kwargs['ScalingFactorFile'],
+            SlitTolerance=kwargs['SlitTolerance'],
+            SlitsWidthFlag=kwargs['SlitsWidthFlag'],
+            IncidentMediumSelected=kwargs['IncidentMediumSelected'],
+            GeometryCorrectionFlag=kwargs['GeometryCorrectionFlag'],
+            FrontSlitName=kwargs['FrontSlitName'],
+            BackSlitName=kwargs['BackSlitName'],
+            TOFSteps=kwargs['TOFSteps'],
+            CropFirstAndLastPoints=kwargs['CropFirstAndLastPoints'],
+            ApplyPrimaryFraction=kwargs['ApplyPrimaryFraction'],
+            PrimaryFractionRange=kwargs['PrimaryFractionRange'])
 
         # Calculate the theoretical reflectivity for normalization using Refl1D
         q = norm_wksp.readX(0)
@@ -112,14 +137,20 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         incident_flux = Divide(norm_wksp, model_wksp)
 
         # Process the sample run(s)
-        sample_kwargs = copy.deepcopy(kwargs)
-        sample_kwargs['NormFlag'] = False
-        sample_kwargs['ApplyScalingFactor'] = False
-        sample_wksp = LiquidsReflectometryReduction(**sample_kwargs)
+        kwargs['NormFlag'] = False
+        kwargs['ApplyScalingFactor'] = False
+        sample_wksp = LiquidsReflectometryReduction(**kwargs)
 
         # Normalize using the incident flux
         out_wksp = Divide(sample_wksp, incident_flux)
+
+        # Output
         self.setProperty('OutputWorkspace', out_wksp)
+
+        # Clean up
+        DeleteWorkspace(model_wksp)
+        DeleteWorkspace(norm_wksp)
+        DeleteWorkspace(incident_flux)
 
     def calculate_reflectivity(self, model_description, q, q_resolution=0.025):
         """

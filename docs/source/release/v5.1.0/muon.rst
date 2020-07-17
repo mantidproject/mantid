@@ -30,6 +30,8 @@ New Features
 - Addition of background correction algorithm (PSIBackgroundCorrection) to remove the background present in
   PSI bin data loaded using LoadPSIMuonBin.
 - Addition of a LoadMuonNexusV2 algorithm to load the new Muon V2 files, see :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>`.
+- Updated rounding for time zero and first good data to be 3 decimal places.
+- Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
 
 Improvements
 -------------
@@ -39,5 +41,9 @@ Improvements
 - Improved the maintainability of the fitting code in the Muon Analysis interface by removing redundant and duplicated code.
   These changes will make the addition of new functionality in the future easier.
 - The plot guess option within the fitting tab will now update when a parameter is changed.
+
+Bug fixes
+---------
+- Fixed an issue where ties set in Muon Analysis were not being respected.
 
 :ref:`Release 5.1.0 <v5.1.0>`

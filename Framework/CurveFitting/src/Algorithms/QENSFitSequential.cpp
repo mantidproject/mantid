@@ -471,6 +471,10 @@ void QENSFitSequential::init() {
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
 
+  declareProperty("OutputCompositeMembers", false,
+                  "If true and CreateOutput is true then the value of each "
+                  "member of a Composite Function is also output.");
+
   declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "ConvolveMembers", false),
                   "If true and OutputCompositeMembers is true members of any "
@@ -502,6 +506,11 @@ void QENSFitSequential::init() {
 
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
+
+  declareProperty(
+      "OutputFitStatus", false,
+      "Flag to output fit status information, which consists of the fit "
+      "OutputStatus and the OutputChiSquared");
 }
 
 std::map<std::string, std::string> QENSFitSequential::validateInputs() {
@@ -758,8 +767,10 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
   const std::vector<double> exclude = getProperty("Exclude");
   const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
+  const bool outputFitStatus = getProperty("OutputFitStatus");
   IFunction_sptr inputFunction = getProperty("Function");
 
   // Run PlotPeaksByLogValue
@@ -773,7 +784,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("IgnoreInvalidData", ignoreInvalidData);
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
-  plotPeaks->setProperty("OutputCompositeMembers", true);
+  plotPeaks->setProperty("OutputCompositeMembers", outputCompositeMembers);
   plotPeaks->setProperty("ConvolveMembers", convolveMembers);
   plotPeaks->setProperty("MaxIterations", getPropertyValue("MaxIterations"));
   plotPeaks->setProperty("Minimizer", getPropertyValue("Minimizer"));
@@ -783,7 +794,23 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("EvaluationType", getPropertyValue("EvaluationType"));
   plotPeaks->setProperty("FitType", getPropertyValue("FitType"));
   plotPeaks->setProperty("CostFunction", getPropertyValue("CostFunction"));
+  plotPeaks->setProperty("OutputFitStatus", outputFitStatus);
+
   plotPeaks->executeAsChildAlg();
+
+  if (outputFitStatus) {
+    declareProperty(std::make_unique<ArrayProperty<std::string>>(
+        "OutputStatus", Direction::Output));
+    declareProperty(std::make_unique<ArrayProperty<double>>("OutputChiSquared",
+                                                            Direction::Output));
+    std::vector<std::string> outputStatus =
+        plotPeaks->getProperty("OutputStatus");
+    std::vector<double> outputChiSquared =
+        plotPeaks->getProperty("OutputChiSquared");
+    setProperty("OutputStatus", std::move(outputStatus));
+    setProperty("OutputChiSquared", std::move(outputChiSquared));
+  }
+
   return plotPeaks->getProperty("OutputWorkspace");
 }
 

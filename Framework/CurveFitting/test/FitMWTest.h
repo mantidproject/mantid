@@ -647,8 +647,8 @@ public:
     instrument->add(source);
     source->setPos(0.0, 0.0, -10.0);
     instrument->markAsSource(source);
-    Mantid::Geometry::ObjComponent *sample =
-        new Mantid::Geometry::ObjComponent("sample", instrument.get());
+    Mantid::Geometry::Component *sample =
+        new Mantid::Geometry::Component("sample", instrument.get());
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
     auto *det = new Mantid::Geometry::Detector("det", 1, nullptr);

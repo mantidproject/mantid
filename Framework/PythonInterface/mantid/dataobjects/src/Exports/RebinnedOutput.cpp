@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 

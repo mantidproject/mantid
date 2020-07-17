@@ -138,7 +138,7 @@ private:
       instrument->markAsDetector(detector);
       detectors.emplace_back(detector);
     }
-    ObjComponent *sample = new ObjComponent("sample", shape, instrument.get());
+    Component *sample = new Component("sample", instrument.get());
     sample->setPos(0, 0, 0);
     instrument->add(sample);
     instrument->markAsSamplePos(sample);

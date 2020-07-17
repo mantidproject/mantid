@@ -99,12 +99,17 @@ def errorbars_in_ax(ax):
 
 
 def get_images_from_fig(fig):
-    """Return a list of images in the given Figure"""
+    """
+    Return the images in the given Figure.
+    This is a list of list so ensure images that are a group of collections remain together
+    """
     colorbar_images = get_colorbars_from_fig(fig)
     images = []
     for ax in fig.get_axes():
         ax_imgs = get_images_from_ax(ax)
-        images += [img for img in ax_imgs if img not in colorbar_images]
+        imgs = [img for img in ax_imgs if img not in colorbar_images]
+        if imgs:
+            images.append(imgs)
     return images
 
 

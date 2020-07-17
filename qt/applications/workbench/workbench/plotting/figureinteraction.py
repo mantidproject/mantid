@@ -16,6 +16,7 @@ from copy import copy
 from functools import partial
 
 # third party imports
+from matplotlib.axes import Axes
 from matplotlib.container import ErrorbarContainer
 from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
@@ -170,6 +171,9 @@ class FigureInteraction(object):
                     self.canvas.toolbar.release_pan(event)
                 finally:
                     event.button = 3
+        elif event.button == self.canvas.buttond.get(Qt.RightButton) and self.toolbar_manager.is_zoom_active():
+            # Reset the axes limits if you right click while using the zoom tool.
+            self.toolbar_manager.emit_sig_home_clicked()
 
         if self.toolbar_manager.is_tool_active():
             for marker in self.markers:
@@ -230,10 +234,10 @@ class FigureInteraction(object):
                 move_and_show(XAxisEditor(canvas, ax))
             elif (ax.yaxis.contains(event)[0]
                   or any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
-                if ax == axes[0]:
-                    move_and_show(YAxisEditor(canvas, ax))
-                else:
+                if type(ax) == Axes:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
+                else:
+                    move_and_show(YAxisEditor(canvas, ax))
             elif hasattr(ax, 'zaxis'):
                 if ax.zaxis.label.contains(event)[0]:
                     move_and_show(LabelEditor(canvas, ax.zaxis.label))
@@ -637,7 +641,8 @@ class FigureInteraction(object):
 
     def motion_event(self, event):
         """ Move the marker if the mouse is moving and in range """
-        if self.toolbar_manager.is_tool_active() or event is None:
+        if self.toolbar_manager.is_tool_active() or self.toolbar_manager.is_fit_active() \
+                or event is None:
             return
 
         x = event.xdata
@@ -674,52 +679,63 @@ class FigureInteraction(object):
             return
         self._toggle_normalization(ax)
 
-    def _toggle_normalization(self, ax):
-        waterfall = isinstance(ax, MantidAxes) and ax.is_waterfall()
-        if waterfall:
-            x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-            has_fill = ax.waterfall_has_fill()
+    def _toggle_normalization(self, selected_ax):
+        if figure_type(self.canvas.figure) == FigureType.Image and len(self.canvas.figure.get_axes()) > 1:
+            axes = datafunctions.get_axes_from_figure(self.canvas.figure)
+        else:
+            axes = [selected_ax]
 
-            if has_fill:
-                line_colour_fill = datafunctions.waterfall_fill_is_line_colour(ax)
-                if line_colour_fill:
-                    fill_colour = None
-                else:
-                    fill_colour = datafunctions.get_waterfall_fills(ax)[0].get_facecolor()
+        for ax in axes:
+            waterfall = isinstance(ax, MantidAxes) and ax.is_waterfall()
+            if waterfall:
+                x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+                has_fill = ax.waterfall_has_fill()
 
-            ax.update_waterfall(0, 0)
+                if has_fill:
+                    line_colour_fill = datafunctions.waterfall_fill_is_line_colour(ax)
+                    if line_colour_fill:
+                        fill_colour = None
+                    else:
+                        fill_colour = datafunctions.get_waterfall_fills(ax)[0].get_facecolor()
 
-        # The colorbar can get screwed up with ragged workspaces and log scales as they go
-        # through the normalisation toggle.
-        # Set it to Linear and change it back after if necessary, since there's no reason
-        # to duplicate the handling.
-        colorbar_log = False
-        if ax.images:
-            colorbar_log = isinstance(ax.images[-1].norm, LogNorm)
-            if colorbar_log:
-                self._change_colorbar_axes(Normalize)
+                ax.update_waterfall(0, 0)
 
-        self._change_plot_normalization(ax)
+            # The colorbar can get screwed up with ragged workspaces and log scales as they go
+            # through the normalisation toggle.
+            # Set it to Linear and change it back after if necessary, since there's no reason
+            # to duplicate the handling.
+            colorbar_log = False
+            if ax.images:
+                colorbar_log = isinstance(ax.images[-1].norm, LogNorm)
+                if colorbar_log:
+                    self._change_colorbar_axes(Normalize)
 
-        if ax.lines:  # Relim causes issues with colour plots, which have no lines.
-            ax.relim()
+            self._change_plot_normalization(ax)
 
-        if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
-            colorbar_min = np.nanmin(ax.images[-1].get_array())
-            colorbar_max = np.nanmax(ax.images[-1].get_array())
-            for image in ax.images:
-                image.set_clim(colorbar_min, colorbar_max)
-            if colorbar_log:  # If it had a log scaled colorbar before, put it back.
-                self._change_colorbar_axes(LogNorm)
+            if ax.lines:  # Relim causes issues with colour plots, which have no lines.
+                ax.relim()
 
-        ax.autoscale()
+            if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
+                colorbar_min = np.nanmin(ax.images[-1].get_array())
+                colorbar_max = np.nanmax(ax.images[-1].get_array())
+                for image in ax.images:
+                    image.set_clim(colorbar_min, colorbar_max)
 
-        datafunctions.set_initial_dimensions(ax)
-        if waterfall:
-            ax.update_waterfall(x, y)
+                    # Update the colorbar label
+                    cb = image.colorbar
+                    if cb:
+                        datafunctions.add_colorbar_label(cb, ax.get_figure().axes)
+                if colorbar_log:  # If it had a log scaled colorbar before, put it back.
+                    self._change_colorbar_axes(LogNorm)
 
-            if has_fill:
-                ax.set_waterfall_fill(True, fill_colour)
+            ax.autoscale()
+
+            datafunctions.set_initial_dimensions(ax)
+            if waterfall:
+                ax.update_waterfall(x, y)
+
+                if has_fill:
+                    ax.set_waterfall_fill(True, fill_colour)
 
         self.canvas.draw()
 
@@ -749,7 +765,7 @@ class FigureInteraction(object):
                 if figure_type(self.canvas.figure) in [FigureType.Image, FigureType.Contour]:
                     arg_set_copy.pop('specNum')
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
-                    if ws_artist.spec_num == arg_set.get('specNum'):
+                    if ws_artist.spec_num == arg_set_copy.get('specNum'):
                         ws_artist.is_normalized = not is_normalized
 
                         # This check is to prevent the contour lines being re-plotted using the colorfill plot args.

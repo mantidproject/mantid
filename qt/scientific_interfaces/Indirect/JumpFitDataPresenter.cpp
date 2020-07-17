@@ -40,6 +40,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
   updateParameterSelectionEnabled();
   m_notifier = Notifier<IFQFitObserver>();
   m_notifier.subscribe(SingleFunctionTemplateBrowser);
+  showParameterComboBoxes();
 }
 
 void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
@@ -55,14 +56,12 @@ void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
 }
 
 void JumpFitDataPresenter::handleMultipleInputSelected() {
-  hideParameterComboBoxes();
   m_notifier.notify([](IFQFitObserver &obs) {
     obs.updateAvailableFunctions(availableFits.at(DataType::ALL));
   });
 }
 
 void JumpFitDataPresenter::handleSingleInputSelected() {
-  showParameterComboBoxes();
   m_dataIndex = TableDatasetIndex{0};
   std::string currentText = m_cbParameterType->currentText().toStdString();
   auto dataType = m_cbParameterType->currentText() == QString("Width")

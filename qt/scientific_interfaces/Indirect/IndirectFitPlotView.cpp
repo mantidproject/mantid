@@ -56,14 +56,6 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   // Create a Splitter and place two plots within the splitter layout
   createSplitterWithPlots();
 
-  // Avoids squished plots for >qt5
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  char const *const overrideLabel = "";
-  m_topPlot->setOverrideAxisLabel(AxisID::XBottom, overrideLabel);
-  m_bottomPlot->setOverrideAxisLabel(AxisID::YLeft, overrideLabel);
-  m_plotForm->dwMiniPlots->setFeatures(QDockWidget::NoDockWidgetFeatures);
-#endif
-
   m_plotForm->cbDataSelection->hide();
   addFitRangeSelector();
   addBackgroundRangeSelector();
@@ -81,9 +73,9 @@ void IndirectFitPlotView::createSplitterWithPlots() {
 void IndirectFitPlotView::createSplitter() {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   auto const dragIcon = Icons::getIcon("mdi.dots-horizontal");
-  m_splitter = std::make_unique<Splitter>(dragIcon, m_plotForm->dwLayout);
+  m_splitter = std::make_unique<Splitter>(dragIcon);
 #else
-  m_splitter = std::make_unique<QSplitter>(m_plotForm->dwLayout);
+  m_splitter = std::make_unique<QSplitter>();
 #endif
   m_splitter->setOrientation(Qt::Vertical);
   m_splitter->setStyleSheet(
@@ -387,6 +379,16 @@ void IndirectFitPlotView::setBackgroundRangeVisible(bool visible) {
 
 void IndirectFitPlotView::setHWHMRangeVisible(bool visible) {
   m_topPlot->getRangeSelector("HWHM")->setVisible(visible);
+}
+
+void IndirectFitPlotView::allowRedraws(bool state) {
+  m_topPlot->allowRedraws(state);
+  m_bottomPlot->allowRedraws(state);
+}
+
+void IndirectFitPlotView::redrawPlots() {
+  m_topPlot->replot();
+  m_bottomPlot->replot();
 }
 
 void IndirectFitPlotView::displayMessage(const std::string &message) const {

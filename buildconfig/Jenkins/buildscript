@@ -134,17 +134,8 @@ else
     SCL_ENABLE="eval"
 fi
 
-# Check if this is a Python 2 build and set CMake arguments.
-PY2_BUILD=false
-PY3_BUILD=false
-if [[ ${JOB_NAME} == *python2* ]]; then
-    PY2_BUILD=true
-    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=OFF"
-else
-    PY3_BUILD=true
-    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
-    PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
-fi
+# Use Python 3 build of ParaView
+PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
 
 # For pull requests decide on what to build based on changeset and Jenkins
 # parameters.
@@ -168,10 +159,8 @@ if [[ ${PRBUILD} == true ]]; then
     if [[ ${ON_RHEL7} == true ]]; then
         # rhel does system testing if there are any non-doc or gui changes
         if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
-            if [[ ${PY3_BUILD} == true ]]; then
-               DO_BUILD_PKG=true
-               DO_SYSTEMTESTS=true
-            fi
+            DO_BUILD_PKG=true
+            DO_SYSTEMTESTS=true
         fi
         elif [[ ${ON_UBUNTU} == true ]]; then
         # ubuntu does the docs build
@@ -196,6 +185,8 @@ fi
 #                            the links helps keep it fresh
 #   - build/Testing/**: old ctest xml files will change over time and removing
 #                       the links helps keep it fresh
+#   - build/qt/**/ui_*.h: Header files produced from .ui files can remain stale
+#                         if a .ui file is removed from a CMakeLists.txt file
 ###############################################################################
 if [ -z "$BUILD_DIR" ]; then
     echo "Build directory not set. Cannot continue"
@@ -210,7 +201,7 @@ mkdir -p $BUILD_DIR
 
 # Tidy build dir
 rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
-find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
+find ${BUILD_DIR:?} \( -name 'ui_*.h' -o -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
     rm -rf $BUILD_DIR/eigen-*
@@ -314,13 +305,13 @@ fi
 
 if [[ ${JOB_NAME} == *address* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=Address"
-    
+
 elif [[ ${JOB_NAME} == *memory* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=memory"
-    
+
 elif [[ ${JOB_NAME} == *thread* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=thread"
-    
+
 elif [[ ${JOB_NAME} == *undefined* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=undefined"
 fi

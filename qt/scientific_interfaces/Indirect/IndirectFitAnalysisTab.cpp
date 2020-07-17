@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitAnalysisTab.h"
-#include "ui_IqtFit.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
@@ -178,9 +177,6 @@ void IndirectFitAnalysisTab::setFitPropertyBrowser(
     IndirectFitPropertyBrowser *browser) {
   browser->init();
   m_fitPropertyBrowser = browser;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  m_fitPropertyBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
-#endif
 }
 
 void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
@@ -359,8 +355,9 @@ void IndirectFitAnalysisTab::updateFitOutput(bool error) {
   if (error) {
     m_fittingModel->cleanFailedRun(m_fittingAlgorithm);
     m_fittingAlgorithm.reset();
-  } else
+  } else {
     m_fittingModel->addOutput(m_fittingAlgorithm);
+  }
 }
 
 void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
@@ -389,6 +386,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   m_fitPropertyBrowser->setErrorsEnabled(!error);
   if (!error) {
     updateFitBrowserParameterValuesFromAlg();
+    updateFitStatus();
     setModelFitFunction();
   }
   m_spectrumPresenter->enableView();
@@ -464,7 +462,27 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
         "Warning issue updating parameter values in fit property browser");
   }
 }
+/**
+ * Updates the fit output status
+ */
+void IndirectFitAnalysisTab::updateFitStatus() {
 
+  if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
+    std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
+    double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
+    const std::vector<std::string> status(m_fittingModel->getNumberOfDomains(),
+                                          fit_status);
+    const std::vector<double> chiSquared(m_fittingModel->getNumberOfDomains(),
+                                         chi2);
+    m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
+  } else {
+    const std::vector<std::string> status =
+        m_fittingAlgorithm->getProperty("OutputStatus");
+    const std::vector<double> chiSquared =
+        m_fittingAlgorithm->getProperty("OutputChiSquared");
+    m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
+  }
+}
 /**
  * Plots the spectra corresponding to the selected parameters
  */
@@ -650,8 +668,6 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
   fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
   fitAlgorithm->setProperty("MaxIterations",
                             m_fitPropertyBrowser->maxIterations());
-  fitAlgorithm->setProperty("ConvolveMembers",
-                            m_fitPropertyBrowser->convolveMembers());
   fitAlgorithm->setProperty("PeakRadius",
                             m_fitPropertyBrowser->getPeakRadius());
   fitAlgorithm->setProperty("CostFunction",
@@ -662,10 +678,18 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
                             m_fitPropertyBrowser->fitEvaluationType());
   fitAlgorithm->setProperty("PeakRadius",
                             m_fitPropertyBrowser->getPeakRadius());
+  if (m_fitPropertyBrowser->convolveMembers()) {
+    fitAlgorithm->setProperty("ConvolveMembers", true);
+    fitAlgorithm->setProperty("OutputCompositeMembers", true);
+  } else {
+    fitAlgorithm->setProperty("OutputCompositeMembers",
+                              m_fitPropertyBrowser->outputCompositeMembers());
+  }
 
   if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
     fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
   }
+  fitAlgorithm->setProperty("OutputFitStatus", true);
 }
 
 /*
@@ -812,8 +836,7 @@ void IndirectFitAnalysisTab::respondToBackgroundChanged(double value) {
 
 void IndirectFitAnalysisTab::respondToFunctionChanged() {
   setModelFitFunction();
-  m_plotPresenter->updatePlots();
-  m_plotPresenter->updateGuessAvailability();
+  m_plotPresenter->updateFit();
   emit functionChanged();
 }
 

@@ -71,7 +71,7 @@ public:
       setMaterial.incoherentXSection = 1.;
       setMaterial.attenuationXSection = 1.;
       setMaterial.scatteringXSection = 1.;
-      setMaterial.sampleNumberDensity = 1.;
+      setMaterial.numberDensity = 1.;
       return setMaterial;
     }
     ();
@@ -92,7 +92,7 @@ public:
       setMaterial.coherentXSection = 1.;
       setMaterial.attenuationXSection = 1.;
       setMaterial.scatteringXSection = 1.;
-      setMaterial.sampleNumberDensity = 1.;
+      setMaterial.numberDensity = 1.;
       return setMaterial;
     }
     ();
@@ -112,7 +112,7 @@ public:
       setMaterial.coherentXSection = 1.;
       setMaterial.incoherentXSection = 1.;
       setMaterial.scatteringXSection = 1.;
-      setMaterial.sampleNumberDensity = 1.;
+      setMaterial.numberDensity = 1.;
       return setMaterial;
     }
     ();
@@ -132,7 +132,7 @@ public:
       setMaterial.coherentXSection = 1.;
       setMaterial.incoherentXSection = 1.;
       setMaterial.attenuationXSection = 1.;
-      setMaterial.sampleNumberDensity = 1.;
+      setMaterial.numberDensity = 1.;
       return setMaterial;
     }
     ();
@@ -144,7 +144,7 @@ public:
                      "no ChemicalFormula or AtomicNumber is "
                      "given.")
   }
-  void testFailureValidateInputsNoSampleNumberDensity() {
+  void testFailureValidateInputsNoNumberDensity() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 0;
@@ -160,7 +160,7 @@ public:
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
     TS_ASSERT_EQUALS(
-        result["SampleNumberDensity"],
+        result["NumberDensity"],
         "The number density must be specified with a use-defined material.")
   }
 
@@ -169,7 +169,7 @@ public:
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
-      setMaterial.sampleNumberDensity = 1;
+      setMaterial.numberDensity = 1;
       return setMaterial;
     }
     ();
@@ -195,12 +195,12 @@ public:
     TS_ASSERT(result.empty());
   }
 
-  void testSuccessfullValidateInputsSampleMass() {
+  void testSuccessfullValidateInputsMass() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
-      setMaterial.sampleMassDensity = 1;
+      setMaterial.massDensity = 1;
       return setMaterial;
     }
     ();
@@ -210,12 +210,12 @@ public:
     TS_ASSERT(result.empty());
   }
 
-  void testFailureValidateInputsSampleNumberAndZParam() {
+  void testFailureValidateInputsNumberAndZParam() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
-      setMaterial.sampleNumberDensity = 1;
+      setMaterial.numberDensity = 1;
       setMaterial.zParameter = 1;
       setMaterial.unitCellVolume = 1;
       return setMaterial;
@@ -225,25 +225,25 @@ public:
     auto result = ReadMaterial::validateInputs(params);
 
     TS_ASSERT_EQUALS(result["ZParameter"],
-                     "Cannot give ZParameter with SampleNumberDensity set")
+                     "Cannot give ZParameter with NumberDensity set")
   }
 
-  void testFailureValidateInputsZParamWithSampleMass() {
+  void testFailureValidateInputsZParamWithMass() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
       setMaterial.zParameter = 1;
       setMaterial.unitCellVolume = 1;
-      setMaterial.sampleMassDensity = 1;
+      setMaterial.massDensity = 1;
       return setMaterial;
     }
     ();
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["SampleMassDensity"],
-                     "Cannot give SampleMassDensity with ZParameter set")
+    TS_ASSERT_EQUALS(result["MassDensity"],
+                     "Cannot give MassDensity with ZParameter set")
   }
 
   void testFailureValidateInputsZParamWithoutUnitCell() {
@@ -262,29 +262,28 @@ public:
                      "UnitCellVolume must be provided with ZParameter")
   }
 
-  void testFailureValidateInputsSampleNumWithSampleMass() {
+  void testFailureValidateInputsNumWithMass() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
-      setMaterial.sampleNumberDensity = 1;
-      setMaterial.sampleMassDensity = 1;
+      setMaterial.numberDensity = 1;
+      setMaterial.massDensity = 1;
       return setMaterial;
     }
     ();
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(
-        result["SampleMassDensity"],
-        "Cannot give SampleMassDensity with SampleNumberDensity set")
+    TS_ASSERT_EQUALS(result["MassDensity"],
+                     "Cannot give MassDensity with NumberDensity set")
   }
 
   void testMaterialIsCorrect() {
     const ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
-      setMaterial.sampleNumberDensity = 1;
+      setMaterial.numberDensity = 1;
       setMaterial.coherentXSection = 1;
       setMaterial.incoherentXSection = 2;
       setMaterial.attenuationXSection = 3;
@@ -313,7 +312,7 @@ public:
     const ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
-      setMaterial.sampleNumberDensity = 1;
+      setMaterial.numberDensity = 1;
       return setMaterial;
     }
     ();
@@ -355,7 +354,7 @@ public:
     const ReadMaterial::MaterialParameters massParams = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
-      setMaterial.sampleMassDensity = MASS_DENSITY;
+      setMaterial.massDensity = MASS_DENSITY;
       return setMaterial;
     }
     ();
@@ -368,18 +367,18 @@ public:
     }
 
     // test getting the number density from the mass and volume
-    const ReadMaterial::MaterialParameters sampleParams = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
-      setMaterial.sampleMass = 5.; // grams
-      setMaterial.sampleVolume = setMaterial.sampleMass / MASS_DENSITY;
+      setMaterial.mass = 5.; // grams
+      setMaterial.volume = setMaterial.mass / MASS_DENSITY;
       return setMaterial;
     }
     ();
 
     {
       ReadMaterial reader;
-      reader.setMaterialParameters(sampleParams);
+      reader.setMaterialParameters(params);
       auto material = reader.buildMaterial();
       TS_ASSERT_DELTA(material->numberDensity(), NUMBER_DENSITY, 1e-7);
     }
@@ -391,10 +390,10 @@ public:
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 0;
       setMaterial.massNumber = 0;
-      setMaterial.sampleNumberDensity = 1;
+      setMaterial.numberDensity = 1;
       setMaterial.zParameter = EMPTY_DOUBLE_VAL;
       setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
-      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.massDensity = EMPTY_DOUBLE_VAL;
       return setMaterial;
     }
     ();

@@ -326,7 +326,8 @@ public:
     // Nullify shape and retest BoundingBox
     shapes->at(0) = std::shared_ptr<const Geometry::IObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
-    TS_ASSERT(boundingBox.isNull());
+    TS_ASSERT((boundingBox.minPoint() - Kernel::V3D{1., 1., 1.}).norm() < 1e-9);
+    TS_ASSERT((boundingBox.maxPoint() - Kernel::V3D{1., 1., 1.}).norm() < 1e-9);
   }
 
   // Test calculation of the bounding box for a milimiter-sized
@@ -373,7 +374,8 @@ public:
     // Nullify shape and retest BoundingBox
     shapes->at(0) = std::shared_ptr<const Geometry::IObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
-    TS_ASSERT(boundingBox.isNull());
+    TS_ASSERT((boundingBox.minPoint() - Kernel::V3D{1., 1., 1.}).norm() < 1e-9);
+    TS_ASSERT((boundingBox.maxPoint() - Kernel::V3D{1., 1., 1.}).norm() < 1e-9);
   }
 
   void test_boundingBox_complex() {
@@ -408,8 +410,8 @@ public:
     // min in the sample (source is ignored by design in instrument 1.0 and
     // instrument 2.0).
     TS_ASSERT((boundingBox.minPoint() -
-               (Kernel::V3D{samplePos[0] - radius, samplePos[1] - radius,
-                            samplePos[2] - radius}))
+               (Kernel::V3D{samplePos[0], detectorPos[1] - radius,
+                            detectorPos[2] - radius}))
                   .norm() < 1e-9);
     // max is the detector
     TS_ASSERT((boundingBox.maxPoint() -
@@ -478,10 +480,8 @@ public:
     instrument.markAsSource(source);
 
     // A sample
-    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    Component *sample = new Component("some-surface-holder");
     sample->setPos(V3D{0, 0, 0});
-    sample->setShape(
-        ComponentCreationHelper::createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
     instrument.add(sample);
     instrument.markAsSamplePos(sample);
 

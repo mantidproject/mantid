@@ -15,13 +15,13 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/RemoveConst.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -102,9 +102,8 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
  */
 void setMonitorWorkspace(MatrixWorkspace &self,
                          const boost::python::object &value) {
-
   MatrixWorkspace_sptr monWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      Mantid::PythonInterface::ExtractWorkspace(value)());
+      Mantid::PythonInterface::ExtractSharedPtr<Workspace>(value)());
   self.setMonitorWorkspace(monWS);
 }
 /**

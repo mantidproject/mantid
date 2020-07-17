@@ -113,6 +113,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
         mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
+        mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_markertabwidget_view.py
         mantidqt/widgets/plotconfigdialog/test/test_apply_all_properties.py
         mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
@@ -122,6 +123,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_sliceinfo.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py

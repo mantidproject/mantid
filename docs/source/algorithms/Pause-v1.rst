@@ -25,9 +25,9 @@ Usage
 
    import time
 	
-   start_time = time.clock()
+   start_time = time.time()
    Pause(0.05)
-   end_time = time.clock()
+   end_time = time.time()
    print("The algorithm paused for {:.2f} seconds.".format(end_time-start_time))
 	
 Output:
