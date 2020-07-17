@@ -4,6 +4,8 @@ import shutil
 import os
 import numpy as np
 
+import mantid
+from mantid.api import *
 from mantid.simpleapi import *
 
 
