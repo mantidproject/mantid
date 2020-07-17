@@ -79,7 +79,7 @@ class SaveP2DTest(unittest.TestCase):
     def test_savep2d_cut_data_dp(self):
          SaveP2D(Workspace = self._workspace, OutputFile = os.path.join(self._test_dir, "test_savep2d_cut_data_dp"), RemoveNaN = False, RemoveNegatives = False, CutData = True, tthMin = 10, tthMax = 140, lambdaMin = 1.4, lambdaMax = 2.496, dMin = 2.5, dMax = 7.5)
          text = '#Title: test\n#Inst: .prm\n#Binning: ddperp   0.8888889    1.0000000\n#Bank: 1\n#2theta   lambda   d-value   dp-value   counts\n  28.5401669      1.4789581      3.0000000      1.5000000      3.0000000\n  21.4420009      1.4882141      4.0000000      1.5000000     -1.0000000\n  17.1666094      1.4924723      5.0000000      1.5000000      0.0000000\n  14.3112545      1.4947782      6.0000000      1.5000000            nan\n  12.2697184      1.4961662      7.0000000      1.5000000      3.0000000\n'
-         with open(os.path.join(self._test_dir, "ref_savep2d_cut_data_dp.txt", 'w')) as of:
+         with open(os.path.join(self._test_dir, "ref_savep2d_cut_data_dp.txt"), 'w') as of:
             of.write(text)
          self._assert_file_content_equal(os.path.join(self._test_dir, "ref_savep2d_cut_data_dp.txt"), os.path.join(self._test_dir, "test_savep2d_cut_data_dp.p2d"))
 
