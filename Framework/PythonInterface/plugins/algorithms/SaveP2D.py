@@ -5,7 +5,7 @@ from mantid.kernel import *
 from mantid.api import *
 
 
-class SaveP2D(mantid.api.PythonAlgorithm):
+class SaveP2D(PythonAlgorithm):
     def category(self):
         return 'Tools//Algorithms'
 
