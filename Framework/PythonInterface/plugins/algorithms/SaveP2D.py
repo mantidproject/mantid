@@ -131,7 +131,6 @@ class SaveP2D(mantid.api.PythonAlgorithm):
         form = '{:12.7f}'
         lform = '{:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}   {:12.7f}\n'
 
-        of = open(OutFile, 'w')
         with open(OutFile, 'w') as of:
             print('Exporting: ' + OutFile + '\n')
             # Create File header with additional information
