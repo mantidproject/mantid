@@ -327,10 +327,11 @@ InstrumentWidgetDecoder::decodeSector(const QMap<QString, QVariant> &map) {
   const double innerRadius = map[QString("innerRadius")].toDouble();
   const double startAngle = map[QString("startAngle")].toDouble();
   const double endAngle = map[QString("endAngle")].toDouble();
-  const QPointF center = map[QString("center")].toPointF();
+  const double centerX = map[QString("centerX")].toDouble();
+  const double centerY = map[QString("centerY")].toDouble();
 
   return new Shape2DSector(innerRadius, outerRadius, startAngle, endAngle,
-                           center);
+                           QPointF(centerX, centerY));
 }
 
 Shape2D *

@@ -408,14 +408,16 @@ InstrumentWidgetEncoder::encodeSector(const Shape2DSector *obj) {
   const auto innerRadius = obj->getDouble("innerRadius");
   const auto startAngle = obj->getDouble("startAngle");
   const auto endAngle = obj->getDouble("endAngle");
-  const auto center = obj->getPoint("center");
+  const auto centerX = obj->getPoint("center").x();
+  const auto centerY = obj->getPoint("center").y();
 
   QMap<QString, QVariant> map;
   map.insert(QString("outerRadius"), QVariant(outerRadius));
   map.insert(QString("innerRadius"), QVariant(innerRadius));
   map.insert(QString("startAngle"), QVariant(startAngle));
   map.insert(QString("endAngle"), QVariant(endAngle));
-  map.insert(QString("center"), QVariant(center));
+  map.insert(QString("centerX"), QVariant(centerX));
+  map.insert(QString("centerY"), QVariant(centerY));
 
   return map;
 }

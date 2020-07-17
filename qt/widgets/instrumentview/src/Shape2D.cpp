@@ -773,7 +773,7 @@ void Shape2DSector::refit() {
       BBox.bottomRight().y() == bRectBottomRight.y()) {
 
     // top left corner is moving
-    computeScaling(BBox.topLeft(), BBox.bottomRight(), bRectBottomRight, 0);
+    computeScaling(BBox.topLeft(), BBox.bottomRight(), bRectTopLeft, 0);
 
   } else if (BBox.topLeft().x() != bRectTopLeft.x() &&
              BBox.bottomRight().y() != bRectBottomRight.y() &&
@@ -818,6 +818,7 @@ void Shape2DSector::refit() {
 
     m_center.setX(m_center.x() + xDiff);
     m_center.setY(m_center.y() + yDiff);
+    resetBoundingRect();
   }
 }
 
@@ -948,9 +949,15 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
   switch (i) {
   case 0:
     m_outerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
+    if (m_outerRadius < m_innerRadius) {
+      m_outerRadius = 1.01 * m_innerRadius;
+    }
     break;
   case 1:
     m_innerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
+    if (m_outerRadius < m_innerRadius) {
+      m_innerRadius = 0.99 * m_outerRadius;
+    }
     break;
   case 2:
     newAngle = atan2(to_center.y(), to_center.x());
@@ -1026,7 +1033,7 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
     m_endAngle = newAngle;
     break;
   }
-  refit();
+  resetBoundingRect();
 }
 
 QStringList Shape2DSector::getDoubleNames() const {
@@ -1064,10 +1071,10 @@ void Shape2DSector::setDouble(const QString &prop, double value) {
     m_innerRadius = value;
     refit();
   } else if (prop == "startAngle") {
-    m_startAngle = value * to_radians;
+    m_startAngle = fmod(value, 360) * to_radians;
     refit();
   } else if (prop == "endAngle") {
-    m_endAngle = value * to_radians;
+    m_endAngle = fmod(value, 360) * to_radians;
     refit();
   }
 }
