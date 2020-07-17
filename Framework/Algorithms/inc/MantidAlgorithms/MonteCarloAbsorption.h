@@ -54,11 +54,15 @@ public:
   }
 
 protected:
-  virtual std::unique_ptr<MCAbsorptionStrategy> createStrategy(
+  virtual std::shared_ptr<IMCAbsorptionStrategy>
+  createStrategy(const IMCInteractionVolume &interactionVol,
+                 const IBeamProfile &beamProfile, const API::Sample &sample,
+                 Kernel::DeltaEMode::Type EMode, const size_t nevents,
+                 const size_t maxScatterPtAttempts,
+                 const bool regenerateTracksForEachLambda);
+  virtual std::shared_ptr<IMCInteractionVolume> createInteractionVolume(
       const IBeamProfile &beamProfile, const API::Sample &sample,
-      Kernel::DeltaEMode::Type EMode, const size_t nevents,
       const size_t maxScatterPtAttempts,
-      const bool regenerateTracksForEachLambda,
       const MCInteractionVolume::ScatteringPointVicinity pointsIn =
           MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
   virtual std::unique_ptr<SparseWorkspace>

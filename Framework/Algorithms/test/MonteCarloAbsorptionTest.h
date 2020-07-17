@@ -309,6 +309,42 @@ public:
     TS_ASSERT_EQUALS(allZero, true);
   }
 
+  void test_UnitTest() {
+    using Mantid::Kernel::DeltaEMode;
+    const int nspectra = 5;
+    const int nbins = 10;
+    TestWorkspaceDescriptor wsProps = {
+        nspectra, nbins, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
+    auto testWS = setUpWS(wsProps);
+    auto mcAbsorb = std::make_shared<TestMonteCarloAbsorption>();
+    auto MCAbsorptionStrategy = std::make_shared<MockMCAbsorptionStrategy>();
+    mcAbsorb->setAbsorptionStrategy(MCAbsorptionStrategy);
+    const int nevents = 300;
+    mcAbsorb->initialize();
+    mcAbsorb->setRethrows(true);
+    mcAbsorb->setChild(true);
+    mcAbsorb->setProperty("EventsPerPoint", nevents);
+    mcAbsorb->setPropertyValue("OutputWorkspace", "__unused_on_child");
+    using namespace ::testing;
+    std::vector<double> dummyAttenuationFactorResult(nbins);
+    dummyAttenuationFactorResult = {10.0, 9.0, 8.0, 7.0, 6.0,
+                                    5.0,  4.0, 3.0, 2.0, 1.0};
+    std::vector<double> dummyAttenuationFactorErr(nbins);
+    dummyAttenuationFactorErr = {1.0, 1.1, 1.0, 1.1, 0.9,
+                                 1.2, 1.0, 1.1, 1.1, 1.0};
+
+    EXPECT_CALL(*MCAbsorptionStrategy, calculate(_, _, _, _, _, _, _))
+        .Times(Exactly(static_cast<int>(nspectra)))
+        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttenuationFactorResult),
+                              SetArgReferee<5>(dummyAttenuationFactorErr)));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+    auto outputWS = getOutputWorkspace(mcAbsorb);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nspectra);
+    TS_ASSERT_EQUALS(10.0, outputWS->y(0).front());
+    TS_ASSERT_EQUALS(1.0, outputWS->e(0).front());
+  }
+
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
@@ -414,18 +450,7 @@ public:
 
 private:
   class MockMCAbsorptionStrategy final
-      : public Mantid::Algorithms::MCAbsorptionStrategy {
-  public:
-    MockMCAbsorptionStrategy(
-        Mantid::Algorithms::IMCInteractionVolume &interactionVolume,
-        const Mantid::Algorithms::IBeamProfile &beamProfile,
-        Mantid::Kernel::DeltaEMode::Type EMode, const size_t nevents,
-        const size_t maxScatterPtAttempts,
-        const bool regenerateTracksForEachLambda)
-        : MCAbsorptionStrategy(interactionVolume, beamProfile, EMode, nevents,
-                               maxScatterPtAttempts,
-                               regenerateTracksForEachLambda){};
-
+      : public Mantid::Algorithms::IMCAbsorptionStrategy {
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD7(calculate,
@@ -454,20 +479,21 @@ private:
   };
   class TestMonteCarloAbsorption final
       : public Mantid::Algorithms::MonteCarloAbsorption {
-    std::unique_ptr<Mantid::Algorithms::MCAbsorptionStrategy> createStrategy(
+  public:
+    void setAbsorptionStrategy(
+        std::shared_ptr<MockMCAbsorptionStrategy> absStrategy) {
+      m_MCAbsorptionStrategy = absStrategy;
+    }
+
+  protected:
+    std::shared_ptr<Mantid::Algorithms::IMCAbsorptionStrategy> createStrategy(
+        const Mantid::Algorithms::IMCInteractionVolume &interactionVol,
         const Mantid::Algorithms::IBeamProfile &beamProfile,
         const Mantid::API::Sample &sample,
         Mantid::Kernel::DeltaEMode::Type EMode, const size_t nevents,
         const size_t maxScatterPtAttempts,
-        const bool regenerateTracksForEachLambda,
-        const Mantid::Algorithms::MCInteractionVolume::ScatteringPointVicinity
-            pointsIn) override {
-      Mantid::Algorithms::MCInteractionVolume interactionVol(
-          sample, beamProfile.defineActiveRegion(sample), maxScatterPtAttempts,
-          pointsIn);
-      return std::make_unique<MockMCAbsorptionStrategy>(
-          interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
-          regenerateTracksForEachLambda);
+        const bool regenerateTracksForEachLambda) override {
+      return m_MCAbsorptionStrategy;
     }
     std::unique_ptr<Mantid::Algorithms::SparseWorkspace>
     createSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS,
@@ -476,6 +502,9 @@ private:
       return std::make_unique<MockSparseWorkspace>(modelWS, wavelengthPoints,
                                                    rows, columns);
     }
+
+  private:
+    std::shared_ptr<MockMCAbsorptionStrategy> m_MCAbsorptionStrategy;
   };
   Mantid::API::MatrixWorkspace_const_sptr
   runAlgorithm(const TestWorkspaceDescriptor &wsProps,

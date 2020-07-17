@@ -30,7 +30,7 @@ namespace Algorithms {
  * wavelength point or not
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(
-    IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
+    const IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
     DeltaEMode::Type EMode, const size_t nevents,
     const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda)
     : m_beamProfile(beamProfile), m_scatterVol(interactionVolume),

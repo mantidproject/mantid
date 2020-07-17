@@ -72,7 +72,6 @@ private:
 
 namespace Mantid {
 namespace Algorithms {
-class MCInteractionVolume;
 
 DECLARE_ALGORITHM(MonteCarloAbsorption)
 
@@ -212,9 +211,34 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
   }
   return issues;
 }
+
+/**
+ * Factory method to return an instance of the required interaction volume
+ * class
+ * @param beamProfile A reference to the object the beam profile
+ * @param sample A reference to the object defining details of the sample
+ * @param nevents The number of Monte Carlo events used in the simulation
+ * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object
+ * @param pointsIn Where to generate the scattering point in
+ * @return a pointer to an MCAbsorptionStrategy object
+ */
+std::shared_ptr<IMCInteractionVolume>
+MonteCarloAbsorption::createInteractionVolume(
+    const IBeamProfile &beamProfile, const API::Sample &sample,
+    const size_t maxScatterPtAttempts,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
+  auto interactionVol = std::make_shared<MCInteractionVolume>(
+      sample, beamProfile.defineActiveRegion(sample), maxScatterPtAttempts,
+      pointsIn);
+  return interactionVol;
+}
+
 /**
  * Factory method to return an instance of the required absorption strategy
  * class
+ * @param interactionVol The interaction volume object to inject into the
+ * strategy
  * @param beamProfile A reference to the object the beam profile
  * @param sample A reference to the object defining details of the sample
  * @param EMode The energy mode of the instrument
@@ -223,18 +247,14 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  * point within the object
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
- * @param pointsIn Where to simulate the scattering point
  * @return a pointer to an MCAbsorptionStrategy object
  */
-std::unique_ptr<MCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
-    const IBeamProfile &beamProfile, const API::Sample &sample,
-    Kernel::DeltaEMode::Type EMode, const size_t nevents,
-    const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda,
-    const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
-  MCInteractionVolume interactionVol(sample,
-                                     beamProfile.defineActiveRegion(sample),
-                                     maxScatterPtAttempts, pointsIn);
-  auto MCAbs = std::make_unique<MCAbsorptionStrategy>(
+std::shared_ptr<IMCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
+    const IMCInteractionVolume &interactionVol, const IBeamProfile &beamProfile,
+    const API::Sample &sample, Kernel::DeltaEMode::Type EMode,
+    const size_t nevents, const size_t maxScatterPtAttempts,
+    const bool regenerateTracksForEachLambda) {
+  auto MCAbs = std::make_shared<MCAbsorptionStrategy>(
       interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
       regenerateTracksForEachLambda);
   return MCAbs;
@@ -324,11 +344,15 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  auto strategy = createStrategy(*beamProfile, inputWS.sample(), efixed.emode(),
-                                 nevents, maxScatterPtAttempts,
-                                 resimulateTracksForDiffWavelengths, pointsIn);
+  auto interactionVolume = createInteractionVolume(
+      *beamProfile, inputWS.sample(), maxScatterPtAttempts, pointsIn);
+  auto strategy = createStrategy(
+      *interactionVolume, *beamProfile, inputWS.sample(), efixed.emode(),
+      nevents, maxScatterPtAttempts, resimulateTracksForDiffWavelengths);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
+
+  MersenneTwister rng(seed);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(simulationWS))
   for (int64_t i = 0; i < nhists; ++i) {
@@ -345,7 +369,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     const auto &detPos = spectrumInfo.position(i);
     const double lambdaFixed =
         toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
-    MersenneTwister rng(seed);
+
 
     const auto lambdas = simulationWS.points(i).rawData();
 
