@@ -5,6 +5,7 @@ import os
 import numpy as np
 
 import mantid
+from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
