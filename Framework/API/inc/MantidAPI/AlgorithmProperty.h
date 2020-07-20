@@ -47,7 +47,7 @@ public:
                         Kernel::IValidator_sptr(new Kernel::NullValidator),
                     unsigned int direction = Kernel::Direction::Input);
 
-  AlgorithmProperty(const AlgorithmProperty &);
+  AlgorithmProperty(const AlgorithmProperty &) = default;
   // Unhide base class member that would be hidden by implicitly declared
   // assignment operator
   using Kernel::PropertyWithValue<HeldType>::operator=;

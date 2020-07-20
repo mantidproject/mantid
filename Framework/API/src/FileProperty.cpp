@@ -204,12 +204,6 @@ FileProperty::FileProperty(const std::string &name,
     : FileProperty(name, default_value, action, std::vector<std::string>(exts),
                    direction) {}
 
-FileProperty::FileProperty(const FileProperty &other)
-    : Kernel::PropertyWithValue<std::string>(other), m_action(other.m_action),
-      m_defaultExt(other.m_defaultExt), m_runFileProp(other.m_runFileProp),
-      m_oldLoadPropValue(other.m_oldLoadPropValue),
-      m_oldLoadFoundFile(other.m_oldLoadFoundFile) {}
-
 /**
  * Check if this is a load property
  * @returns True if the property is a Load property and false otherwise

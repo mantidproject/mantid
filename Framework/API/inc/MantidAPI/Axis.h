@@ -90,6 +90,7 @@ public:
 
 protected:
   Axis(const Axis &) = default;
+  Axis &operator=(const Axis &) = default;
 
 private:
   /// The user-defined title for this axis

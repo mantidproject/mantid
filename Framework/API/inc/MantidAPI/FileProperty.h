@@ -73,7 +73,8 @@ public:
                unsigned int action, std::initializer_list<std::string> exts,
                unsigned int direction = Kernel::Direction::Input);
 
-  FileProperty(const FileProperty &);
+  FileProperty(const FileProperty &) = default;
+  FileProperty &operator=(const FileProperty &) = default;
 
   /// 'Virtual copy constructor
   FileProperty *clone() const override { return new FileProperty(*this); }
@@ -119,9 +120,6 @@ private:
   std::string m_oldLoadPropValue;
   /// Last value of foundFile used in FileProperty::setLoadProperty
   std::string m_oldLoadFoundFile;
-
-  /// Private, unimplemented copy assignment operator
-  FileProperty &operator=(const FileProperty &right);
 };
 
 #ifdef _WIN32

@@ -37,10 +37,6 @@ AlgorithmProperty::AlgorithmProperty(const std::string &propName,
                                           std::move(validator), direction),
       m_algmStr() {}
 
-AlgorithmProperty::AlgorithmProperty(const AlgorithmProperty &other)
-    : Kernel::PropertyWithValue<std::shared_ptr<IAlgorithm>>(other),
-      m_algmStr(other.m_algmStr) {}
-
 /**
  * Return the algorithm as string
  * @returns The algorithm serialized as a string
