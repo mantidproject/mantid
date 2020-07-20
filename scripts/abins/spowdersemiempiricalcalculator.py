@@ -45,7 +45,6 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             raise ValueError("Object of type AbinsData was expected.")
         self._q2_indices = list(self._abins_data.get_kpoints_data().extract()["k_vectors"].keys())
-        self._atoms = self._abins_data.get_atoms_data().extract()
 
         if isinstance(abins_data, abins.AbinsData):
             self._abins_data = abins_data
@@ -98,7 +97,6 @@ class SPowderSemiEmpiricalCalculator(object):
 
         self._a_traces = None
         self._b_traces = None
-        self._atoms_data = None
         self._fundamentals_freq = None
 
     def _calculate_s(self):
@@ -186,25 +184,11 @@ class SPowderSemiEmpiricalCalculator(object):
         Evaluates S for all atoms for the given q-point and checks if S is consistent.
         :returns: Python dictionary with S data
         """
-
-        s_all_atoms = self._calculate_s_powder_over_atoms_core(q_indx=q_indx)
-        return s_all_atoms
-
-    def _calculate_s_powder_over_atoms_core(self, q_indx=None):
-        """
-        Helper function for _calculate_s_powder_1d.
-        :returns: Python dictionary with S data
-        """
-        atoms_items = {}
-        atoms = range(self._num_atoms)
         self._prepare_data(k_point=q_indx)
 
-        result = [self._calculate_s_powder_one_atom(atom=atom) for atom in atoms]
-
-        for atom in range(self._num_atoms):
-            atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
-            self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
-        return atoms_items
+        return {f"atom_{atom_index}":
+                {"s": self._calculate_s_powder_one_atom(atom=atom_index, report_progress=True)}
+                for atom_index in range(self._num_atoms)}
 
     def _prepare_data(self, k_point=None):
         """
@@ -250,9 +234,11 @@ class SPowderSemiEmpiricalCalculator(object):
         from mantid.kernel import logger
         logger.notice(msg)
 
-    def _calculate_s_powder_one_atom(self, atom=None):
+    def _calculate_s_powder_one_atom(self, atom=None, report_progress=False):
         """
         :param atom: number of atom
+        :param report_progress: Write to logger after calculating data
+
         :returns: s, and corresponding frequencies for all quantum events taken into account
         """
         s = {}
@@ -291,6 +277,9 @@ class SPowderSemiEmpiricalCalculator(object):
                 local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(
                     atom=atom, local_freq=local_freq, local_coeff=local_coeff,
                     fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order)
+
+        if report_progress:
+            self._report_progress(msg=f"S for atom {atom} has been calculated.")
 
         return s
 
