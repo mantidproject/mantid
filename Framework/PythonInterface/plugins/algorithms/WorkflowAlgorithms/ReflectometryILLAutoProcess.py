@@ -234,9 +234,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             doc='The output workspace group.')
         self.declareProperty(
             PropertyNames.BKG_METHOD_DIRECT,
-            defaultValue=BkgMethod.CONSTANT,
+            defaultValue=BkgMethod.AVERAGE,
             validator=StringListValidator(
-                [BkgMethod.CONSTANT,
+                [BkgMethod.AVERAGE,
+                 BkgMethod.CONSTANT,
                  BkgMethod.LINEAR,
                  BkgMethod.OFF]
             ),
@@ -244,9 +245,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
         self.declareProperty(
             PropertyNames.BKG_METHOD,
-            defaultValue=BkgMethod.CONSTANT,
+            defaultValue=BkgMethod.AVERAGE,
             validator=StringListValidator(
-                [BkgMethod.CONSTANT,
+                [BkgMethod.AVERAGE,
+                 BkgMethod.CONSTANT,
                  BkgMethod.LINEAR,
                  BkgMethod.OFF]
             ),

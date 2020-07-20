@@ -11,6 +11,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspac
 from mantid.simpleapi import *
 import ReflectometryILL_common as common
 import ILL_utilities as utils
+import numpy as np
 
 
 class Prop:
@@ -38,6 +39,7 @@ class Prop:
 
 
 class BkgMethod:
+    AVERAGE = 'Background Average'
     CONSTANT = 'Background Constant Fit'
     LINEAR = 'Background Linear Fit'
     OFF = 'Background OFF'
@@ -188,8 +190,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                               validator=maxTwoNonnegativeInts),
                              doc='Number of foreground pixels at lower and higher angles from the centre pixel.')
         self.declareProperty(Prop.BKG_METHOD,
-                             defaultValue=BkgMethod.CONSTANT,
-                             validator=StringListValidator([BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]),
+                             defaultValue=BkgMethod.AVERAGE,
+                             validator=StringListValidator([BkgMethod.AVERAGE, BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]),
                              doc='Flat background calculation method for background subtraction.')
         self.declareProperty(Prop.LOW_BKG_OFFSET,
                              defaultValue=7,
@@ -462,6 +464,22 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return normalisedWS
 
+    def _calculate_average_background(self, transposedWS, transposedBkgWSName, ranges):
+        """Calculates mean background in the specified detector region"""
+        nspec = transposedWS.getNumberHistograms()
+        blocksize = transposedWS.blocksize()
+        y = transposedWS.extractY()
+        x = transposedWS.extractX()
+        transposedBkgWS = CloneWorkspace(InputWorkspace=transposedWS, OutputWorkspace=transposedBkgWSName)
+        condition = (((x >= ranges[0]) & (x <= ranges[1])) | ((x >= ranges[2]) & (x <= ranges[3])))
+        bkg_region = np.extract(condition, y)
+        bkg_region = bkg_region.reshape((nspec, int(bkg_region.size/nspec)))
+        bkg = np.mean(bkg_region, axis=1)
+        for channel in range(nspec):
+            transposedBkgWS.setE(channel, np.zeros(blocksize))
+            transposedBkgWS.setY(channel, bkg[channel] * np.ones(blocksize))
+        return transposedBkgWS
+
     def _subtractFlatBkg(self, ws):
         """Return a workspace where a flat background has been subtracted from ws."""
         method = self.getProperty(Prop.BKG_METHOD).value
@@ -481,16 +499,21 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         )
         self._cleanup.cleanup(clonedWS)
         ranges = self._flatBkgRanges(ws)
-        polynomialDegree = 0 if self.getProperty(Prop.BKG_METHOD).value == BkgMethod.CONSTANT else 1
+        self.log().information('Calculating background in the range ' + str(ranges))
         transposedBkgWSName = self._names.withSuffix('transposed_flat_background')
-        transposedBkgWS = CalculatePolynomialBackground(
-            InputWorkspace=transposedWS,
-            OutputWorkspace=transposedBkgWSName,
-            Degree=polynomialDegree,
-            XRanges=ranges,
-            CostFunction='Unweighted least squares',
-            EnableLogging=self._subalgLogging
-        )
+        if method == BkgMethod.CONSTANT or method == BkgMethod.LINEAR:
+            # fit with polynomial
+            polynomialDegree = 0 if method == BkgMethod.CONSTANT else 1
+            transposedBkgWS = CalculatePolynomialBackground(
+                InputWorkspace=transposedWS,
+                OutputWorkspace=transposedBkgWSName,
+                Degree=polynomialDegree,
+                XRanges=ranges,
+                CostFunction='Unweighted least squares',
+                EnableLogging=self._subalgLogging
+            )
+        elif method == BkgMethod.AVERAGE:
+            transposedBkgWS = self._calculate_average_background(transposedWS, transposedBkgWSName, ranges)
         self._cleanup.cleanup(transposedWS)
         bkgWSName = self._names.withSuffix('flat_background')
         bkgWS = Transpose(
