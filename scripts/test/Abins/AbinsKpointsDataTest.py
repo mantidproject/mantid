@@ -7,7 +7,7 @@
 import unittest
 import numpy as np
 
-from abins import KpointsData
+from abins.kpointsdata import KpointsData, KpointData
 from abins.constants import ACOUSTIC_PHONON_THRESHOLD
 
 
@@ -160,6 +160,29 @@ class KpointsDataTest(unittest.TestCase):
                                                collected_data["atomic_displacements"][str(k)]))
             self.assertEqual(True, np.allclose(data["k_vectors"][k], collected_data["k_vectors"][str(k)]))
             self.assertEqual(data["weights"][k], collected_data["weights"][str(k)])
+
+    def test_len(self):
+        kpd = KpointsData(**self._good_data_1)
+        self.assertEqual(len(kpd), 3)
+
+    def test_indexing(self):
+        data = self._good_data_1
+        k_points_data = KpointsData(**data)
+
+        for kpd in (k_points_data, k_points_data[:], list(k_points_data)):
+            for k in range(data["frequencies"].shape[0]):
+                self.assertIsInstance(kpd[k], KpointData)
+                self.assertEqual(True, np.allclose(data["k_vectors"][k],
+                                                   kpd[k].k))
+                self.assertEqual(data["weights"][k], kpd[k].weight)
+                self.assertEqual(True, np.allclose(data["frequencies"][k],
+                                                   kpd[k].frequencies))
+                self.assertEqual(True, np.allclose(data["atomic_displacements"][k],
+                                                   kpd[k].atomic_displacements))
+
+            with self.assertRaises(IndexError):
+                kpd[3]
+
 
 if __name__ == "__main__":
     unittest.main()

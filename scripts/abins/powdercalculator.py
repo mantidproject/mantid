@@ -24,7 +24,7 @@ class PowderCalculator:
         if not isinstance(abins_data, abins.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
 
-        k_data = abins_data.get_kpoints_data().extract()  # type: Dict[str, Dict[str, np.ndarray]]
+        k_data = abins_data.get_kpoints_data()  # type: abins.KpointsData
         self._frequencies = {}  # type: Dict[str, np.ndarray]
         self._displacements = {}  # type: Dict[str, np.ndarray]
 
@@ -34,10 +34,10 @@ class PowderCalculator:
                                group_name=abins.parameters.hdf_groups['powder_data'])
 
         # Populate data, removing imaginary modes
-        for k, frequencies in k_data["frequencies"].items():
-            indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
-            self._frequencies[int(k)] = frequencies[indx]
-            self._displacements[int(k)] = k_data["atomic_displacements"][k][:, indx]
+        for k, k_point_data in enumerate(k_data):
+            indx = k_point_data.frequencies > ACOUSTIC_PHONON_THRESHOLD
+            self._frequencies[k] = k_point_data.frequencies[indx]
+            self._displacements[k] = k_point_data.atomic_displacements[:, indx]
 
         self._num_atoms = self._displacements[GAMMA_POINT].shape[0]
 
@@ -52,9 +52,9 @@ class PowderCalculator:
 
         tensors = [self._calculate_powder_k(k=k) for k in k_indices]
 
-        for indx, k in enumerate(k_indices):
-            a_tensors[k] = tensors[indx][0]
-            b_tensors[k] = tensors[indx][1]
+        for indx, k_index in enumerate(k_indices):
+            a_tensors[k_index] = tensors[indx][0]
+            b_tensors[k_index] = tensors[indx][1]
 
         powder = abins.PowderData(a_tensors=a_tensors,
                                   b_tensors=b_tensors,

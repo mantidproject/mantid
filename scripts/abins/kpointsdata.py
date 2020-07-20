@@ -4,12 +4,22 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import collections.abc
+from typing import List, NamedTuple, overload
 import numpy as np
 
 from abins.constants import (COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
 
 
-class KpointsData:
+class KpointData(NamedTuple):
+    """Vibrational frequency / displacement data at a particular k-point"""
+    k: np.ndarray
+    weight: float
+    frequencies: np.ndarray
+    atomic_displacements: np.ndarray
+
+
+class KpointsData(collections.abc.Sequence):
     """Class storing atomic frequencies and displacements at specific k-points
 
     "weights" - weights of all k-points; weights.shape == (num_k,);
@@ -113,3 +123,25 @@ class KpointsData:
 
     def __str__(self):
         return "K-points data"
+
+    def __len__(self):
+        return self._weights.size
+
+    @overload  # noqa F811
+    def __getitem__(self, item: int) -> KpointData:
+        ...
+
+    @overload  # noqa F811
+    def __getitem__(self, item: slice) -> List[KpointData]:
+        ...
+
+    def __getitem__(self, item):  # noqa F811
+        if isinstance(item, int):
+            return KpointData(self._k_vectors[item],
+                              self._weights[item],
+                              self._frequencies[item],
+                              self._atomic_displacements[item])
+        elif isinstance(item, slice):
+            return [self[i] for i in range(len(self))[item]]
+
+        return self._data[item]
