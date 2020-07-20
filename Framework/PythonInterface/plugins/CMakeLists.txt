@@ -288,6 +288,7 @@ set(PYTHON_PLUGINS
   algorithms/SelectNexusFilesByMetadata.py
   algorithms/CompareSampleLogs.py
   algorithms/MuonMaxent.py
+  algorithms/SaveP2D.py
   functions/AFMZF.py
   functions/PCRmagnetZFKT.py
   functions/StretchedExpFTHelper.py
