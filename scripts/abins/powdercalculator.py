@@ -28,10 +28,7 @@ class PowderCalculator:
         self._frequencies = {}  # type: Dict[str, np.ndarray]
         self._displacements = {}  # type: Dict[str, np.ndarray]
 
-        self._atoms_data = abins_data.get_atoms_data().extract()
-
-        self._clerk = abins.IO(input_filename=filename,
-                               group_name=abins.parameters.hdf_groups['powder_data'])
+        atoms_data = abins_data.get_atoms_data()
 
         # Populate data, removing imaginary modes
         for k, k_point_data in enumerate(k_data):
@@ -39,7 +36,10 @@ class PowderCalculator:
             self._frequencies[k] = k_point_data.frequencies[indx]
             self._displacements[k] = k_point_data.atomic_displacements[:, indx]
 
-        self._num_atoms = self._displacements[GAMMA_POINT].shape[0]
+        self._masses = np.asarray([atoms_data[atom]["mass"] for atom in range(len(atoms_data))])
+
+        self._clerk = abins.IO(input_filename=filename,
+                               group_name=abins.parameters.hdf_groups['powder_data'])
 
     def _calculate_powder(self) -> abins.PowderData:
         """
@@ -59,7 +59,7 @@ class PowderCalculator:
         powder = abins.PowderData(a_tensors=a_tensors,
                                   b_tensors=b_tensors,
                                   frequencies=self._frequencies,
-                                  num_atoms=self._num_atoms)
+                                  num_atoms=len(self._masses))
         return powder
 
     def _calculate_powder_k(self, *, k: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -74,8 +74,8 @@ class PowderCalculator:
         #     dim -- size of displacement vector for one atom (dim = 3)
 
         # masses[num_atoms, num_freq]
-        masses = np.asarray([([self._atoms_data["atom_%s" % atom]["mass"]] * self._frequencies[k].size)
-                             for atom in range(self._num_atoms)])
+        num_freq = self._frequencies[k].size
+        masses = np.asarray([np.full(num_freq, mass) for mass in self._masses])
 
         # disp[num_atoms, num_freq, dim]
         disp = self._displacements[k]  # type np.ndarray
