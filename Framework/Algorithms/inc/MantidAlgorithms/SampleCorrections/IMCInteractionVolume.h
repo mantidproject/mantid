@@ -43,6 +43,8 @@ public:
                                      double lambdaBefore,
                                      double lambdaAfter) const = 0;
   virtual const Geometry::BoundingBox &getBoundingBox() const = 0;
+  virtual const Geometry::BoundingBox getFullBoundingBox() const = 0;
+  virtual void setActiveRegion(const Geometry::BoundingBox &region) = 0;
 };
 
 } // namespace Algorithms

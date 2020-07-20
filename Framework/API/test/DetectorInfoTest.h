@@ -169,46 +169,6 @@ public:
     TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), const std::logic_error &);
   }
 
-  void test_extremeAngles_multipleDetectors() {
-    WorkspaceTester ws;
-    ws.initialize(4, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
-
-    double minLat;
-    double minLon;
-    double maxLat;
-    double maxLon;
-    const auto &detectorInfo = ws.detectorInfo();
-    std::tie(minLat, maxLat, minLon, maxLon) = detectorInfo.extremeAngles();
-    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      double lat;
-      double lon;
-      std::tie(lat, lon) = detectorInfo.geographicalAngles(i);
-      TS_ASSERT_LESS_THAN_EQUALS(minLat, lat)
-      TS_ASSERT_LESS_THAN_EQUALS(minLon, lon)
-      TS_ASSERT_LESS_THAN_EQUALS(lat, maxLat)
-      TS_ASSERT_LESS_THAN_EQUALS(lon, maxLon)
-    }
-  }
-
-  void test_extremeAngles_singleDetector() {
-    WorkspaceTester ws;
-    ws.initialize(1, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 1));
-    double minLat;
-    double minLon;
-    double maxLat;
-    double maxLon;
-    const auto &detectorInfo = ws.detectorInfo();
-    std::tie(minLat, maxLat, minLon, maxLon) = detectorInfo.extremeAngles();
-    TS_ASSERT_EQUALS(minLat, 0)
-    TS_ASSERT_EQUALS(minLon, 0)
-    TS_ASSERT_EQUALS(maxLat, 0)
-    TS_ASSERT_EQUALS(maxLon, 0)
-  }
-
   void test_geographicalAngles_casualAngles() {
     V3D v;
     v[m_standardRefFrame->pointingHorizontal()] = 1.0;
@@ -584,7 +544,6 @@ private:
       if (i % 2 == 0)
         detInfo.setMasked(i, true);
     }
-
     return std::move(ws);
   }
 };

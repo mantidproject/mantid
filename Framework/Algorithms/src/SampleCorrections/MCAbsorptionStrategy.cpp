@@ -30,13 +30,30 @@ namespace Algorithms {
  * wavelength point or not
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(
-    const IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
+    IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
     DeltaEMode::Type EMode, const size_t nevents,
     const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda)
-    : m_beamProfile(beamProfile), m_scatterVol(interactionVolume),
+    : m_beamProfile(beamProfile),
+      m_scatterVol(setActiveRegion(interactionVolume, beamProfile)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
       m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
+
+/**
+ * Set the active region on the interaction volume as smaller of the sample
+ * bounding box and the beam cross section. Trying to keep the beam details
+ * outside the interaction volume class
+ * @param interactionVolume The interaction volume object
+ * @param beamProfile The beam profile
+ * @return The interaction volume object with active region set
+ */
+IMCInteractionVolume &
+MCAbsorptionStrategy::setActiveRegion(IMCInteractionVolume &interactionVolume,
+                                      const IBeamProfile &beamProfile) {
+  interactionVolume.setActiveRegion(
+      beamProfile.defineActiveRegion(interactionVolume.getFullBoundingBox()));
+  return interactionVolume;
+}
 
 /**
  * Compute the correction for a final position of the neutron and wavelengths

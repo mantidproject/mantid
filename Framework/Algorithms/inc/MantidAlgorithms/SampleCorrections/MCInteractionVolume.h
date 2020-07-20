@@ -33,22 +33,24 @@ public:
     ENVIRONMENTONLY
   };
   MCInteractionVolume(const API::Sample &sample,
-                      const Geometry::BoundingBox &activeRegion,
                       const size_t maxScatterAttempts = 5000,
                       const ScatteringPointVicinity pointsIn =
                           ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
 
-  const Geometry::BoundingBox &getBoundingBox() const;
+  const Geometry::BoundingBox &getBoundingBox() const override;
+  const Geometry::BoundingBox getFullBoundingBox() const override;
   virtual bool calculateBeforeAfterTrack(
       Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
       const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
-      Geometry::Track &afterScatter, MCInteractionStatistics &stats) const;
+      Geometry::Track &afterScatter,
+      MCInteractionStatistics &stats) const override;
   virtual double calculateAbsorption(const Geometry::Track &beforeScatter,
                                      const Geometry::Track &afterScatter,
                                      double lambdaBefore,
-                                     double lambdaAfter) const;
+                                     double lambdaAfter) const override;
   ComponentScatterPoint
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const;
+  void setActiveRegion(const Geometry::BoundingBox &region) override;
 
 private:
   int getComponentIndex(Kernel::PseudoRandomNumberGenerator &rng) const;
@@ -57,7 +59,7 @@ private:
                                Kernel::PseudoRandomNumberGenerator &rng) const;
   const std::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
-  const Geometry::BoundingBox m_activeRegion;
+  Geometry::BoundingBox m_activeRegion;
   const size_t m_maxScatterAttempts;
   const ScatteringPointVicinity m_pointsIn;
 };

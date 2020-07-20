@@ -16,6 +16,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -215,9 +216,7 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
 /**
  * Factory method to return an instance of the required interaction volume
  * class
- * @param beamProfile A reference to the object the beam profile
  * @param sample A reference to the object defining details of the sample
- * @param nevents The number of Monte Carlo events used in the simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a random
  * point within the object
  * @param pointsIn Where to generate the scattering point in
@@ -225,12 +224,10 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  */
 std::shared_ptr<IMCInteractionVolume>
 MonteCarloAbsorption::createInteractionVolume(
-    const IBeamProfile &beamProfile, const API::Sample &sample,
-    const size_t maxScatterPtAttempts,
+    const API::Sample &sample, const size_t maxScatterPtAttempts,
     const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
   auto interactionVol = std::make_shared<MCInteractionVolume>(
-      sample, beamProfile.defineActiveRegion(sample), maxScatterPtAttempts,
-      pointsIn);
+      sample, maxScatterPtAttempts, pointsIn);
   return interactionVol;
 }
 
@@ -240,7 +237,6 @@ MonteCarloAbsorption::createInteractionVolume(
  * @param interactionVol The interaction volume object to inject into the
  * strategy
  * @param beamProfile A reference to the object the beam profile
- * @param sample A reference to the object defining details of the sample
  * @param EMode The energy mode of the instrument
  * @param nevents The number of Monte Carlo events used in the simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a random
@@ -250,9 +246,9 @@ MonteCarloAbsorption::createInteractionVolume(
  * @return a pointer to an MCAbsorptionStrategy object
  */
 std::shared_ptr<IMCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
-    const IMCInteractionVolume &interactionVol, const IBeamProfile &beamProfile,
-    const API::Sample &sample, Kernel::DeltaEMode::Type EMode,
-    const size_t nevents, const size_t maxScatterPtAttempts,
+    IMCInteractionVolume &interactionVol, const IBeamProfile &beamProfile,
+    Kernel::DeltaEMode::Type EMode, const size_t nevents,
+    const size_t maxScatterPtAttempts,
     const bool regenerateTracksForEachLambda) {
   auto MCAbs = std::make_shared<MCAbsorptionStrategy>(
       interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
@@ -264,10 +260,10 @@ std::shared_ptr<IMCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
  * Factory method to return an instance of the required SparseInstrument class
  * @return a pointer to an SparseInstrument object
  */
-std::unique_ptr<SparseWorkspace> MonteCarloAbsorption::createSparseWorkspace(
+std::shared_ptr<SparseWorkspace> MonteCarloAbsorption::createSparseWorkspace(
     const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints,
     const size_t rows, const size_t columns) {
-  auto sparseWS = std::make_unique<SparseWorkspace>(modelWS, wavelengthPoints,
+  auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints,
                                                     rows, columns);
   return sparseWS;
 }
@@ -321,7 +317,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   } else {
     nlambda = inputNbins;
   }
-  SparseWorkspace_uptr sparseWS;
+  SparseWorkspace_sptr sparseWS;
   if (useSparseInstrument) {
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
@@ -344,15 +340,13 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  auto interactionVolume = createInteractionVolume(
-      *beamProfile, inputWS.sample(), maxScatterPtAttempts, pointsIn);
-  auto strategy = createStrategy(
-      *interactionVolume, *beamProfile, inputWS.sample(), efixed.emode(),
-      nevents, maxScatterPtAttempts, resimulateTracksForDiffWavelengths);
+  auto interactionVolume =
+      createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn);
+  auto strategy =
+      createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents,
+                     maxScatterPtAttempts, resimulateTracksForDiffWavelengths);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
-
-  MersenneTwister rng(seed);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(simulationWS))
   for (int64_t i = 0; i < nhists; ++i) {
@@ -369,7 +363,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     const auto &detPos = spectrumInfo.position(i);
     const double lambdaFixed =
         toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
-
+    MersenneTwister rng(seed);
 
     const auto lambdas = simulationWS.points(i).rawData();
 
@@ -485,7 +479,6 @@ void MonteCarloAbsorption::interpolateFromSparse(
     MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
     const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
-  const auto samplePos = spectrumInfo.samplePosition();
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {

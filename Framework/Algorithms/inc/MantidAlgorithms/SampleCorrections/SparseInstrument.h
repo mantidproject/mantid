@@ -6,10 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidDataObjects/Workspace2D.h"
-//#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Objects/IObject.h"
 
 #include <array>
@@ -54,10 +53,13 @@ protected:
                  const size_t wavelengthPoints);
   static std::tuple<double, double>
   extremeWavelengths(const API::MatrixWorkspace &ws);
+  static std::tuple<double, double, double, double>
+  extremeAngles(const API::MatrixWorkspace &ws);
 };
 
 /// unique pointer to Mantid::API::SparseWorkspace
 using SparseWorkspace_uptr = std::unique_ptr<SparseWorkspace>;
+using SparseWorkspace_sptr = std::shared_ptr<SparseWorkspace>;
 
 } // namespace Algorithms
 } // namespace Mantid

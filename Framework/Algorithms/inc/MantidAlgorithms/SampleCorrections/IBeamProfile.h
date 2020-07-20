@@ -35,7 +35,7 @@ public:
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
                             const Geometry::BoundingBox &) const = 0;
   virtual Geometry::BoundingBox
-  defineActiveRegion(const API::Sample &) const = 0;
+  defineActiveRegion(const Geometry::BoundingBox &) const = 0;
 };
 
 } // namespace Algorithms

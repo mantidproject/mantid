@@ -96,7 +96,8 @@ public:
     Sample testSample;
     testSample.setShape(ComponentCreationHelper::createSphere(0.5));
 
-    auto region = profile.defineActiveRegion(testSample);
+    auto region =
+        profile.defineActiveRegion(testSample.getShape().getBoundingBox());
     TS_ASSERT(region.isNonNull());
     TS_ASSERT_EQUALS(V3D(-0.5, -0.5, -0.5), region.minPoint());
     TS_ASSERT_EQUALS(V3D(0.5, 0.5, 0.5), region.maxPoint());
@@ -111,7 +112,8 @@ public:
     Sample testSample;
     testSample.setShape(ComponentCreationHelper::createSphere(0.5));
 
-    auto region = profile.defineActiveRegion(testSample);
+    auto region =
+        profile.defineActiveRegion(testSample.getShape().getBoundingBox());
     TS_ASSERT(region.isNonNull());
     TS_ASSERT_EQUALS(V3D(-0.5, -0.05, -0.1), region.minPoint());
     TS_ASSERT_EQUALS(V3D(0.5, 0.05, 0.1), region.maxPoint());

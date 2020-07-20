@@ -40,9 +40,7 @@ public:
                                     const double lat2, const double long2) {
     return SparseWorkspace::greatCircleDistance(lat1, long1, lat2, long2);
   };
-  DetectorGridDefinition& grid() {
-    return *m_gridDef;
-  }
+  DetectorGridDefinition &grid() { return *m_gridDef; }
   static std::tuple<double, double>
   extremeWavelengths(const Mantid::API::MatrixWorkspace &ws) {
     return SparseWorkspace::extremeWavelengths(ws);
@@ -52,6 +50,10 @@ public:
                  const size_t wavelengthPoints) {
     return SparseWorkspace::modelHistogram(modelWS, wavelengthPoints);
   };
+  static std::tuple<double, double, double, double>
+  extremeAngles(const Mantid::API::MatrixWorkspace &ws) {
+    return SparseWorkspace::extremeAngles(ws);
+  }
 };
 
 class SparseInstrumentTest : public CxxTest::TestSuite {
@@ -85,17 +87,53 @@ public:
     double minLon;
     double maxLon;
     std::tie(minLat, maxLat, minLon, maxLon) =
-        ws->spectrumInfo().extremeAngles();
+        SparseWorkspaceTest::extremeAngles(*ws);
     double sparseMinLat;
     double sparseMaxLat;
     double sparseMinLon;
     double sparseMaxLon;
     std::tie(sparseMinLat, sparseMaxLat, sparseMinLon, sparseMaxLon) =
-        sparseWS->spectrumInfo().extremeAngles();
+        SparseWorkspaceTest::extremeAngles(*ws);
     TS_ASSERT_EQUALS(sparseMinLat, minLat)
     TS_ASSERT_DELTA(sparseMaxLat, maxLat, 1e-8)
     TS_ASSERT_EQUALS(sparseMinLon, minLon)
     TS_ASSERT_DELTA(sparseMaxLon, maxLon, 1e-8)
+  }
+
+  void test_extremeAngles_multipleDetectors() {
+    using namespace WorkspaceCreationHelper;
+    auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 1);
+    const auto &spectrumInfo = ws->spectrumInfo();
+    double minLat;
+    double minLon;
+    double maxLat;
+    double maxLon;
+    std::tie(minLat, maxLat, minLon, maxLon) =
+        SparseWorkspaceTest::extremeAngles(*ws);
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      double lat;
+      double lon;
+      std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
+      TS_ASSERT_LESS_THAN_EQUALS(minLat, lat)
+      TS_ASSERT_LESS_THAN_EQUALS(minLon, lon)
+      TS_ASSERT_LESS_THAN_EQUALS(lat, maxLat)
+      TS_ASSERT_LESS_THAN_EQUALS(lon, maxLon)
+    }
+  }
+
+  void test_extremeAngles_singleDetector() {
+    using namespace WorkspaceCreationHelper;
+    auto ws = create2DWorkspaceWithRectangularInstrument(1, 1, 1);
+    double minLat;
+    double minLon;
+    double maxLat;
+    double maxLon;
+    std::tie(minLat, maxLat, minLon, maxLon) =
+        SparseWorkspaceTest::extremeAngles(*ws);
+    TS_ASSERT_EQUALS(minLat, 0)
+    TS_ASSERT_EQUALS(minLon, 0)
+    TS_ASSERT_EQUALS(maxLat, 0)
+    TS_ASSERT_EQUALS(maxLon, 0)
   }
 
   void test_extremeWavelengths_binEdgeData() {
@@ -148,7 +186,7 @@ public:
 
     std::tie(lat, lon) = spectrumInfo.geographicalAngles(3);
     std::tie(sparseLat, sparseLon) =
-        sparseWS->spectrumInfo().geographicalAngles(3);
+        sparseWS->spectrumInfo().geographicalAngles(11);
     TS_ASSERT_DELTA(sparseLat, lat, 1e-8)
     TS_ASSERT_EQUALS(sparseLon, lon)
   }
@@ -169,7 +207,7 @@ public:
     TS_ASSERT_LESS_THAN(sparseLon, lon)
 
     std::tie(sparseLat, sparseLon) =
-        sparseWS->spectrumInfo().geographicalAngles(0);
+        sparseWS->spectrumInfo().geographicalAngles(3);
     TS_ASSERT_LESS_THAN(lat, sparseLat)
     TS_ASSERT_LESS_THAN(lon, sparseLon)
   }
@@ -234,6 +272,23 @@ public:
     double val =
         static_cast<double>(indices[0] + indices[1] + indices[2] + indices[3]) /
         4.0;
+    h = sparseWS->interpolateFromDetectorGrid(lat, lon);
+    TS_ASSERT_EQUALS(h.size(), wavelengths)
+    for (size_t i = 0; i < h.size(); ++i) {
+      TS_ASSERT_DELTA(h.y()[i], val, 1e-7)
+      TS_ASSERT_EQUALS(h.e()[i], 0.0)
+    }
+    lat = grid.latitudeAt(1);
+    lon = (grid.longitudeAt(3) + grid.longitudeAt(2)) / 2.0;
+    indices = sparseWS->grid().nearestNeighbourIndices(lat, lon);
+    double distance1 = sparseWS->greatCircleDistance(
+        lat, lon, grid.latitudeAt(1), grid.longitudeAt(2));
+    double distance2 = sparseWS->greatCircleDistance(
+        lat, lon, grid.latitudeAt(2), grid.longitudeAt(2));
+    double sumWeights = 2 / pow(distance1, 2) + 2 / pow(distance2, 2);
+    val = (static_cast<double>(indices[0] + indices[2]) / pow(distance1, 2) +
+           static_cast<double>(indices[1] + indices[3]) / pow(distance2, 2)) /
+          sumWeights;
     h = sparseWS->interpolateFromDetectorGrid(lat, lon);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
     for (size_t i = 0; i < h.size(); ++i) {

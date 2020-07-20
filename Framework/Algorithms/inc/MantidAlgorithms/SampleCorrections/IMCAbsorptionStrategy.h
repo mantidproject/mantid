@@ -8,8 +8,8 @@
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/DeltaEMode.h"
 #include <tuple>
@@ -28,20 +28,20 @@ class IBeamProfile;
 class MonteCarloAbsorption;
 
 /**
-  Implements the algorithm for calculating the correction factor for
-  self-attenuation and single wavelength using a Monte Carlo. A single
-  instance has a fixed nominal source position, nominal sample
-  position & sample + containers shapes.
+  Defines a base class for objects that calculate correction factors for
+  self-attenuation
 
 */
 class MANTID_ALGORITHMS_DLL IMCAbsorptionStrategy {
 public:
+  virtual ~IMCAbsorptionStrategy() = default;
   virtual void calculate(Kernel::PseudoRandomNumberGenerator &rng,
-                 const Kernel::V3D &finalPos,
-                 const std::vector<double> &lambdas, const double lambdaFixed,
-                 std::vector<double> &attenuationFactors,
-                 std::vector<double> &attFactorErrors,
-                 MCInteractionStatistics &stats)=0;
+                         const Kernel::V3D &finalPos,
+                         const std::vector<double> &lambdas,
+                         const double lambdaFixed,
+                         std::vector<double> &attenuationFactors,
+                         std::vector<double> &attFactorErrors,
+                         MCInteractionStatistics &stats) = 0;
 };
 
 } // namespace Algorithms

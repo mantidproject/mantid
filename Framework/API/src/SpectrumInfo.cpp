@@ -132,10 +132,6 @@ SpectrumInfo::geographicalAngles(const size_t index) const {
       lon / static_cast<double>(spectrumDefinition(index).size()));
 }
 
-std::tuple<double, double, double, double> SpectrumInfo::extremeAngles() const {
-  return m_detectorInfo.extremeAngles();
-}
-
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;

@@ -21,22 +21,20 @@ namespace Algorithms {
 
 /**
  * Construct the volume encompassing the sample + any environment kit. The
- * beam profile defines a bounding region for the sampling of the scattering
+ * active region defines a bounding region for the sampling of the scattering
  * position.
  * @param sample A reference to a sample object that defines a valid shape
  * & material
- * @param activeRegion Restrict scattering point sampling to this region
  * @param maxScatterAttempts The maximum number of tries to generate a random
  * point within the object. [Default=5000]
  * @param pointsIn Where to generate the scattering point in
  */
 MCInteractionVolume::MCInteractionVolume(
-    const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
-    const size_t maxScatterAttempts,
+    const API::Sample &sample, const size_t maxScatterAttempts,
     const MCInteractionVolume::ScatteringPointVicinity pointsIn)
     : m_sample(sample.getShape().clone()), m_env(nullptr),
-      m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts),
-      m_pointsIn(pointsIn) {
+      m_activeRegion(getFullBoundingBox()),
+      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn) {
   try {
     m_env = &sample.getEnvironment();
     assert(m_env);
@@ -70,6 +68,26 @@ MCInteractionVolume::MCInteractionVolume(
  */
 const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
   return m_sample->getBoundingBox();
+}
+
+/**
+ * Returns the axis-aligned bounding box for the volume including env
+ * @return A reference to the bounding box
+ */
+const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
+  auto sampleBox = m_sample->getBoundingBox();
+  if (m_env) {
+    try {
+      const auto &envBox = m_env->boundingBox();
+      sampleBox.grow(envBox);
+    } catch (std::runtime_error &) {
+    }
+  }
+  return sampleBox;
+}
+
+void MCInteractionVolume::setActiveRegion(const Geometry::BoundingBox &region) {
+  m_activeRegion = region;
 }
 
 /**

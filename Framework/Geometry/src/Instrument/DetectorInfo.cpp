@@ -338,36 +338,6 @@ DetectorInfo::geographicalAngles(const std::pair<size_t, size_t> &index) const {
   return std::pair<double, double>(lat, lon);
 }
 
-/** Find the latitude and longitude intervals the detectors
- *  of the given workspace spawn as seen from the sample.
- *  @param ws A workspace.
- *  @return A tuple containing the latitude and longitude ranges.
- */
-std::tuple<double, double, double, double> DetectorInfo::extremeAngles() const{
-  const auto samplePos = samplePosition();
-  double minLat = std::numeric_limits<double>::max();
-  double maxLat = std::numeric_limits<double>::lowest();
-  double minLong = std::numeric_limits<double>::max();
-  double maxLong = std::numeric_limits<double>::lowest();
-  for (size_t i = 0; i < size(); ++i) {
-    double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(i);
-    if (lat < minLat) {
-      minLat = lat;
-    }
-    if (lat > maxLat) {
-      maxLat = lat;
-    }
-    if (lon < minLong) {
-      minLong = lon;
-    }
-    if (lon > maxLong) {
-      maxLong = lon;
-    }
-  }
-  return std::make_tuple(minLat, maxLat, minLong, maxLong);
-}
-
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
   return Kernel::toV3D(m_detectorInfo->position(index));

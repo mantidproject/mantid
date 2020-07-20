@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/HistogramIterator.h"
@@ -41,103 +42,12 @@ bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info,
 namespace Mantid {
 namespace Algorithms {
 
-/** Find the maximum and minimum wavelength points over the entire workpace.
- *  @param ws A workspace to investigate.
- *  @return A tuple containing the wavelength range.
- */
-std::tuple<double, double>
-SparseWorkspace::extremeWavelengths(const API::MatrixWorkspace &ws) {
-  double currentMin = std::numeric_limits<double>::max();
-  double currentMax = std::numeric_limits<double>::lowest();
-  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    const auto h = ws.histogram(i);
-    const auto first = h.begin();
-    currentMin = std::min(first->center(), currentMin);
-    const auto last = std::prev(h.end());
-    currentMax = std::max(last->center(), currentMax);
-  }
-  return std::make_tuple(currentMin, currentMax);
-}
-
-/** Create a template histogram for the sparse instrument workspace.
- *  @param modelWS A workspace the sparse instrument is approximating.
- *  @param wavelengthPoints Number of points in the output histogram.
- *  @return A template histogram.
- */
-Mantid::HistogramData::Histogram
-SparseWorkspace::modelHistogram(const API::MatrixWorkspace &modelWS,
-                                 const size_t wavelengthPoints) {
-  double minWavelength, maxWavelength;
-  std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
-  HistogramData::Frequencies ys(wavelengthPoints, 0.0);
-  HistogramData::FrequencyVariances es(wavelengthPoints, 0.0);
-  HistogramData::Points ps(wavelengthPoints, 0.0);
-  HistogramData::Histogram h(ps, ys, es);
-  auto &xs = h.mutableX();
-  if (wavelengthPoints > 1) {
-    const double step = (maxWavelength - minWavelength) /
-                        static_cast<double>(wavelengthPoints - 1);
-    for (size_t i = 0; i < xs.size() - 1; ++i) {
-      xs[i] = minWavelength + step * static_cast<double>(i);
-    }
-    // Force last point as otherwise it might be slightly off due to
-    // small rounding errors in the calculation above.
-    xs.back() = maxWavelength;
-  } else {
-    xs.front() = (minWavelength + maxWavelength) / 2.0;
-  }
-  return h;
-}
-
-/** Creates a rectangular cuboid shape.
- *  @return A cube shape.
- */
-Geometry::IObject_sptr SparseWorkspace::makeCubeShape() {
-  using namespace Poco::XML;
-  const double dimension = 0.05;
-  AutoPtr<Document> shapeDescription = new Document;
-  AutoPtr<Element> typeElement = shapeDescription->createElement("type");
-  typeElement->setAttribute("name", "detector");
-  AutoPtr<Element> shapeElement = shapeDescription->createElement("cuboid");
-  shapeElement->setAttribute("id", "cube");
-  const std::string posCoord = std::to_string(dimension / 2);
-  const std::string negCoord = std::to_string(-dimension / 2);
-  AutoPtr<Element> element =
-      shapeDescription->createElement("left-front-bottom-point");
-  element->setAttribute("x", negCoord);
-  element->setAttribute("y", negCoord);
-  element->setAttribute("z", posCoord);
-  shapeElement->appendChild(element);
-  element = shapeDescription->createElement("left-front-top-point");
-  element->setAttribute("x", negCoord);
-  element->setAttribute("y", posCoord);
-  element->setAttribute("z", posCoord);
-  shapeElement->appendChild(element);
-  element = shapeDescription->createElement("left-back-bottom-point");
-  element->setAttribute("x", negCoord);
-  element->setAttribute("y", negCoord);
-  element->setAttribute("z", negCoord);
-  shapeElement->appendChild(element);
-  element = shapeDescription->createElement("right-front-bottom-point");
-  element->setAttribute("x", posCoord);
-  element->setAttribute("y", negCoord);
-  element->setAttribute("z", posCoord);
-  shapeElement->appendChild(element);
-  typeElement->appendChild(shapeElement);
-  AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
-  algebraElement->setAttribute("val", "cube");
-  typeElement->appendChild(algebraElement);
-  Geometry::ShapeFactory shapeFactory;
-  return shapeFactory.createShape(typeElement);
-}
-
 SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
                                  const size_t wavelengthPoints,
                                  const size_t rows, const size_t columns)
     : Workspace2D() {
   double minLat, maxLat, minLong, maxLong;
-  std::tie(minLat, maxLat, minLong, maxLong) =
-      modelWS.spectrumInfo().extremeAngles();
+  std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
   m_gridDef = std::make_unique<Algorithms::DetectorGridDefinition>(
       minLat, maxLat, rows, minLong, maxLong, columns);
   const size_t numSpectra = rows * columns;
@@ -230,33 +140,127 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
   }
 }
 
-/** Spatially interpolate a single histogram from nearby detectors.
- *  @param lat Latitude of the interpolated detector.
- *  @param lon Longitude of the interpolated detector.
- *  @return An interpolated histogram.
+/** Find the latitude and longitude intervals the detectors
+ *  of the given workspace span as seen from the sample.
+ *  Just do this for detectors that have a histogram in the ws
+ *  @param ws A workspace.
+ *  @return A tuple containing the latitude and longitude ranges.
  */
-HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(
-    const double lat, const double lon) const {
-  const auto indices = m_gridDef->nearestNeighbourIndices(lat, lon);
-
-  auto h = histogram(0);
-
-  const auto refFrame = getInstrument()->getReferenceFrame();
-  std::array<double, 4> distances;
-  for (size_t i = 0; i < 4; ++i) {
-    double detLat, detLong;
-    std::tie(detLat, detLong) = spectrumInfo().geographicalAngles(indices[i]);
-    distances[i] = greatCircleDistance(lat, lon, detLat, detLong);
+std::tuple<double, double, double, double>
+SparseWorkspace::extremeAngles(const API::MatrixWorkspace &ws) {
+  const auto &spectrumInfo = ws.spectrumInfo();
+  const auto refFrame = ws.getInstrument()->getReferenceFrame();
+  double minLat = std::numeric_limits<double>::max();
+  double maxLat = std::numeric_limits<double>::lowest();
+  double minLong = std::numeric_limits<double>::max();
+  double maxLong = std::numeric_limits<double>::lowest();
+  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+    double lat, lon;
+    std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
+    if (lat < minLat) {
+      minLat = lat;
+    }
+    if (lat > maxLat) {
+      maxLat = lat;
+    }
+    if (lon < minLong) {
+      minLong = lon;
+    }
+    if (lon > maxLong) {
+      maxLong = lon;
+    }
   }
-  const auto weights = inverseDistanceWeights(distances);
-  auto weightSum = weights[0];
-  h.mutableY() = weights[0] * y(indices[0]);
-  for (size_t i = 1; i < 4; ++i) {
-    weightSum += weights[i];
-    h.mutableY() += weights[i] * y(indices[i]);
+  return std::make_tuple(minLat, maxLat, minLong, maxLong);
+}
+
+/** Find the maximum and minimum wavelength points over the entire workpace.
+ *  @param ws A workspace to investigate.
+ *  @return A tuple containing the wavelength range.
+ */
+std::tuple<double, double>
+SparseWorkspace::extremeWavelengths(const API::MatrixWorkspace &ws) {
+  double currentMin = std::numeric_limits<double>::max();
+  double currentMax = std::numeric_limits<double>::lowest();
+  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+    const auto h = ws.histogram(i);
+    const auto first = h.begin();
+    currentMin = std::min(first->center(), currentMin);
+    const auto last = std::prev(h.end());
+    currentMax = std::max(last->center(), currentMax);
   }
-  h.mutableY() /= weightSum;
+  return std::make_tuple(currentMin, currentMax);
+}
+
+/** Create a template histogram for the sparse instrument workspace.
+ *  @param modelWS A workspace the sparse instrument is approximating.
+ *  @param wavelengthPoints Number of points in the output histogram.
+ *  @return A template histogram.
+ */
+Mantid::HistogramData::Histogram
+SparseWorkspace::modelHistogram(const API::MatrixWorkspace &modelWS,
+                                const size_t wavelengthPoints) {
+  double minWavelength, maxWavelength;
+  std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
+  HistogramData::Frequencies ys(wavelengthPoints, 0.0);
+  HistogramData::FrequencyVariances es(wavelengthPoints, 0.0);
+  HistogramData::Points ps(wavelengthPoints, 0.0);
+  HistogramData::Histogram h(ps, ys, es);
+  auto &xs = h.mutableX();
+  if (wavelengthPoints > 1) {
+    const double step = (maxWavelength - minWavelength) /
+                        static_cast<double>(wavelengthPoints - 1);
+    for (size_t i = 0; i < xs.size() - 1; ++i) {
+      xs[i] = minWavelength + step * static_cast<double>(i);
+    }
+    // Force last point as otherwise it might be slightly off due to
+    // small rounding errors in the calculation above.
+    xs.back() = maxWavelength;
+  } else {
+    xs.front() = (minWavelength + maxWavelength) / 2.0;
+  }
   return h;
+}
+
+/** Creates a rectangular cuboid shape.
+ *  @return A cube shape.
+ */
+Geometry::IObject_sptr SparseWorkspace::makeCubeShape() {
+  using namespace Poco::XML;
+  const double dimension = 0.05;
+  AutoPtr<Document> shapeDescription = new Document;
+  AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+  typeElement->setAttribute("name", "detector");
+  AutoPtr<Element> shapeElement = shapeDescription->createElement("cuboid");
+  shapeElement->setAttribute("id", "cube");
+  const std::string posCoord = std::to_string(dimension / 2);
+  const std::string negCoord = std::to_string(-dimension / 2);
+  AutoPtr<Element> element =
+      shapeDescription->createElement("left-front-bottom-point");
+  element->setAttribute("x", negCoord);
+  element->setAttribute("y", negCoord);
+  element->setAttribute("z", posCoord);
+  shapeElement->appendChild(element);
+  element = shapeDescription->createElement("left-front-top-point");
+  element->setAttribute("x", negCoord);
+  element->setAttribute("y", posCoord);
+  element->setAttribute("z", posCoord);
+  shapeElement->appendChild(element);
+  element = shapeDescription->createElement("left-back-bottom-point");
+  element->setAttribute("x", negCoord);
+  element->setAttribute("y", negCoord);
+  element->setAttribute("z", negCoord);
+  shapeElement->appendChild(element);
+  element = shapeDescription->createElement("right-front-bottom-point");
+  element->setAttribute("x", posCoord);
+  element->setAttribute("y", negCoord);
+  element->setAttribute("z", posCoord);
+  shapeElement->appendChild(element);
+  typeElement->appendChild(shapeElement);
+  AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
+  algebraElement->setAttribute("val", "cube");
+  typeElement->appendChild(algebraElement);
+  Geometry::ShapeFactory shapeFactory;
+  return shapeFactory.createShape(typeElement);
 }
 
 /** Calculate the distance between two points on a unit sphere.
@@ -293,6 +297,36 @@ std::array<double, 4> SparseWorkspace::inverseDistanceWeights(
     weights[i] = 1.0 / distances[i] / distances[i];
   }
   return weights;
+}
+
+/** Spatially interpolate a single histogram from nearby detectors.
+ *  @param lat Latitude of the interpolated detector.
+ *  @param lon Longitude of the interpolated detector.
+ *  @return An interpolated histogram.
+ */
+HistogramData::Histogram
+SparseWorkspace::interpolateFromDetectorGrid(const double lat,
+                                             const double lon) const {
+  const auto indices = m_gridDef->nearestNeighbourIndices(lat, lon);
+
+  auto h = histogram(0);
+
+  const auto refFrame = getInstrument()->getReferenceFrame();
+  std::array<double, 4> distances;
+  for (size_t i = 0; i < 4; ++i) {
+    double detLat, detLong;
+    std::tie(detLat, detLong) = spectrumInfo().geographicalAngles(indices[i]);
+    distances[i] = greatCircleDistance(lat, lon, detLat, detLong);
+  }
+  const auto weights = inverseDistanceWeights(distances);
+  auto weightSum = weights[0];
+  h.mutableY() = weights[0] * y(indices[0]);
+  for (size_t i = 1; i < 4; ++i) {
+    weightSum += weights[i];
+    h.mutableY() += weights[i] * y(indices[i]);
+  }
+  h.mutableY() /= weightSum;
+  return h;
 }
 
 } // namespace Algorithms

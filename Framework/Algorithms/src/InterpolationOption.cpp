@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <cassert>
 
