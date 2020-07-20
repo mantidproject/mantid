@@ -890,14 +890,18 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
 
     } else if ((key != "OutputBins") && (key != "OutputExtents")) {
       // make sure the names of non-directional dimensions are the same
-      const std::string nameData = tempDataWS->getDimension(parametersIndex)->getName();
-      if(value.find(nameData) != 0){
-        g_log.error()<<"Dimension "<<nameData<<" from the temporary workspace"
-                    " is not one of the binning dimensions, "
-                    " or dimensions are in the wrong order."<<std::endl;
-        throw(std::invalid_argument("Beside the Q dimensions, "
-                                    "TemporaryDataWorkspace does not have the "
-                                    "same dimension names as OutputWorkspace."));
+      const std::string nameData =
+          tempDataWS->getDimension(parametersIndex)->getName();
+      if (value.find(nameData) != 0) {
+        g_log.error() << "Dimension " << nameData
+                      << " from the temporary workspace"
+                         " is not one of the binning dimensions, "
+                         " or dimensions are in the wrong order."
+                      << std::endl;
+        throw(
+            std::invalid_argument("Beside the Q dimensions, "
+                                  "TemporaryDataWorkspace does not have the "
+                                  "same dimension names as OutputWorkspace."));
       }
     }
     parametersIndex++;
