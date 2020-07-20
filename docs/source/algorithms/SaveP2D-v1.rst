@@ -50,24 +50,44 @@ Usage
     zDataTotal = []					                         # intensity values for all spectra
     eDataTotal = []                                          # error values for all spectra
     nSpec = len(yData)-1                                     # number of spectra
-    
+
     # Create d and intensity lists for workspace
     for i in range(0,nSpec):
         xDataTotal.extend(xData)	   # extends the list of x values in accordance to the number of spectra used
         zDataTotal.extend(zData)	   # extends the list of intensity values in accordance to the number of spectra used
         eDataTotal.extend(eData)       # extends the list of error values in accordance to the number of spectra used
-    
+
     # Create a 2D Workspace containing d and dPerpendicular values with intensities
     CreateWorkspace(OutputWorkspace = 'Usage_Example', DataX = xDataTotal, DataY = zDataTotal, DataE = eDataTotal, WorkspaceTitle = 'test', NSpec = nSpec, UnitX = 'dSpacing', VerticalAxisUnit = 'dSpacingPerpendicular', VerticalAxisValues = yData)
+
+    # Save to the users home directory
+    file_name = "Usage_Example"
+    path = os.path.join(os.path.expanduser("~"), file_name)
+
     # Create a .p2d file containing the testdata	
-    SaveP2D(Workspace = "Usage_Example", OutputFile = "Usage_Example", RemoveNaN = False, RemoveNegatives = False, CutData = False)
-	
+    SaveP2D(Workspace = "Usage_Example", OutputFile = path, RemoveNaN = False, RemoveNegatives = False, CutData = False)
+
+    # Does the file exist? If it exists, print it!
+    path = os.path.join(os.path.expanduser("~"), file_name + '.p2d')
+    if os.path.isfile(path):
+        with open(path, 'r') as of:
+            data = of.readlines()
+        for entry in data:
+            print(entry[:-2]) # leave out the last 2 characters to remove unnecessary newlines
+
 Output:
+The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda get calculated in the algorithm):
 
 .. testoutput:: SaveP2D
 
-	The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda get calculated in the algorithm)
-	
+    Exporting: /jenkins_workdir/workspace/pull_requests-ubuntu/build/docs/Usage_Example.p2d
+
+     0%
+    33%
+    67%
+
+
+    Exported: /jenkins_workdir/workspace/pull_requests-ubuntu/build/docs/Usage_Example.p2d
 	#Title: test
     #Inst: .prm #give a filename to read data with GSAS-II
     #Binning: ddperp   0.8888889    1.0000000
@@ -81,8 +101,8 @@ Output:
     14.3112545      1.4947782      6.0000000      1.5000000      1.0000000
     12.2697184      1.4961662      7.0000000      1.5000000      1.0000000
     10.7376523      1.4970660      8.0000000      1.5000000      1.0000000
-    9.5455787      1.4976825      9.0000000      1.5000000      1.0000000
-    147.7039064      1.9210925      1.0000000      2.5000000      1.0000000
+     9.5455787      1.4976825      9.0000000      1.5000000      1.0000000
+   147.7039064      1.9210925      1.0000000      2.5000000      1.0000000
     74.0366222      2.4082809      2.0000000      2.5000000      1.0000000
     48.4687709      2.4628222      3.0000000      2.5000000      1.0000000
     36.1141714      2.4797153      4.0000000      2.5000000      1.0000000
@@ -91,8 +111,8 @@ Output:
     20.5194188      2.4935442      7.0000000      2.5000000      1.0000000
     17.9428625      2.4950714      8.0000000      2.5000000      1.0000000
     15.9421282      2.4961135      9.0000000      2.5000000      1.0000000
-    178.1486860      1.9997390      1.0000000      3.5000000      1.0000000
-    112.5838945      3.3275045      2.0000000      3.5000000      1.0000000
+   178.1486860      1.9997390      1.0000000      3.5000000      1.0000000
+   112.5838945      3.3275045      2.0000000      3.5000000      1.0000000
     70.0240404      3.4424897      3.0000000      3.5000000      1.0000000
     51.4130764      3.4700953      4.0000000      3.5000000      1.0000000
     40.7483187      3.4814929      5.0000000      3.5000000      1.0000000
