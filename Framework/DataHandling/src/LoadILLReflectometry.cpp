@@ -625,8 +625,6 @@ double LoadILLReflectometry::reflectometryPeak() {
   startIndex = autoIndices.first;
   endIndex = autoIndices.second;
   if (!isDefault("FitStartWorkspaceIndex")) {
-    // The start workspace index offset is not taken into account in the
-    // foreground finding.
     startIndex = getProperty("FitStartWorkspaceIndex");
   }
   if (!isDefault("FitEndWorkspaceIndex")) {
@@ -676,7 +674,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   if (revMinFwhmIt == ys.crend() || maxFwhmIt == ys.cend()) {
     g_log.warning() << "Couldn't determine fwhm of beam, using position of max "
                        "value as beam center.\n";
-    return centreByMax;
+    return centreByMax + startIndex;
   }
   const auto fwhm =
       static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
@@ -707,12 +705,12 @@ double LoadILLReflectometry::reflectometryPeak() {
   const std::string fitStatus = fit->getProperty("OutputStatus");
   if (fitStatus != "success") {
     g_log.warning("Fit not successful, using position of max value.\n");
-    return centreByMax;
+    return centreByMax + startIndex;
   }
   const auto centre = gaussian->centre();
   g_log.debug() << "Sigma: " << gaussian->fwhm() << '\n';
   g_log.debug() << "Estimated peak position: " << centre << '\n';
-  return centre;
+  return centre + startIndex;
 }
 
 /** Compute the detector rotation angle around origin
