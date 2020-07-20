@@ -60,48 +60,48 @@ class SaveP2D(PythonAlgorithm):
             doc=
             'Use the following inputs to limit data in Theta, lambda, d and dp'
         )
-        self.declareProperty('tthMin',
+        self.declareProperty('TthMin',
                              50,
                              direction=Direction.Input,
                              doc='Minimum for tth values')
-        self.declareProperty('tthMax',
+        self.declareProperty('TthMax',
                              120,
                              direction=Direction.Input,
                              doc='Maximum  for tth values')
-        self.declareProperty('lambdaMin',
+        self.declareProperty('LambdaMin',
                              0.3,
                              direction=Direction.Input,
                              doc='Minimum  for lambda values')
-        self.declareProperty('lambdaMax',
+        self.declareProperty('LambdaMax',
                              1.1,
                              direction=Direction.Input,
                              doc='Maximum  for lambda values')
-        self.declareProperty('dMin',
+        self.declareProperty('DMin',
                              0.11,
                              direction=Direction.Input,
                              doc='Minimum  for d values')
-        self.declareProperty('dMax',
+        self.declareProperty('DMax',
                              1.37,
                              direction=Direction.Input,
                              doc='Maximum  for d values')
-        self.declareProperty('dpMin',
+        self.declareProperty('DpMin',
                              0.48,
                              direction=Direction.Input,
                              doc='Minimum  for dp values')
-        self.declareProperty('dpMax',
+        self.declareProperty('DpMax',
                              1.76,
                              direction=Direction.Input,
                              doc='Maximum  for dp values')
 
     def set_data_bounds(self):
-        self.lambdaMin = self.getProperty('lambdaMin').value
-        self.lambdaMax = self.getProperty('lambdaMax').value
-        self.dMin = self.getProperty('dMin').value
-        self.dMax = self.getProperty('dMax').value
-        self.dpMin = self.getProperty('dpMin').value
-        self.dpMax = self.getProperty('dpMax').value
-        self.tthMin = self.getProperty('tthMin').value
-        self.tthMax = self.getProperty('tthMax').value
+        self.lambdaMin = self.getProperty('LambdaMin').value
+        self.lambdaMax = self.getProperty('LambdaMax').value
+        self.dMin = self.getProperty('DMin').value
+        self.dMax = self.getProperty('DMax').value
+        self.dpMin = self.getProperty('DpMin').value
+        self.dpMax = self.getProperty('DpMax').value
+        self.tthMin = self.getProperty('TthMin').value
+        self.tthMax = self.getProperty('TthMax').value
 
     def check_data_ranges(self, d, dp, lhkl, thkl):
         return self.check_d_bounds(d) & self.check_dp_bounds(dp) & self.check_lambda_bounds(lhkl) &  \
