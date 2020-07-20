@@ -8,7 +8,7 @@ import gc
 import numpy as np
 
 import abins
-from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
+from abins.constants import (CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
                              HIGHER_ORDER_QUANTUM_EVENTS, MAX_ORDER, MIN_SIZE, ONE_DIMENSIONAL_INSTRUMENTS,
                              QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR,
                              S_LAST_INDEX)
@@ -44,7 +44,7 @@ class SPowderSemiEmpiricalCalculator(object):
             self._abins_data = abins_data
         else:
             raise ValueError("Object of type AbinsData was expected.")
-        self._q2_indices = list(self._abins_data.get_kpoints_data().extract()["k_vectors"].keys())
+        self._num_k = len(self._abins_data.get_kpoints_data())
 
         if isinstance(abins_data, abins.AbinsData):
             self._abins_data = abins_data
@@ -93,7 +93,7 @@ class SPowderSemiEmpiricalCalculator(object):
         self._frequencies = self._bins[:-1] + (bin_width / 2)
         self._freq_size = self._bins.size - 1
 
-        self._num_atoms = len(self._abins_data.get_atoms_data().extract())
+        self._num_atoms = len(self._abins_data.get_atoms_data())
 
         self._a_traces = None
         self._b_traces = None
@@ -146,10 +146,10 @@ class SPowderSemiEmpiricalCalculator(object):
         Helper function. It calculates S for all q points  and all atoms.
         :returns: dictionary with S
         """
-        data = self._calculate_s_powder_over_atoms(q_indx=self._q2_indices[0])
+        data = self._calculate_s_powder_over_atoms(q_indx=0)
 
         # iterate over remaining q-points
-        for q in self._q2_indices[1:]:
+        for q in range(1, self._num_k):
             local_data = self._calculate_s_powder_over_atoms(q_indx=q)
             self._sum_s(current_val=data, addition=local_data)
         return data
@@ -160,10 +160,11 @@ class SPowderSemiEmpiricalCalculator(object):
         :param current_val: S accumulated so far
         :param addition: S to be added
         """
-        for atom in range(self._num_atoms):
+
+        for atom_key in current_val:
             for order in range(FUNDAMENTALS, self._quantum_order_num + S_LAST_INDEX):
-                temp = addition["atom_%s" % atom]["s"]["order_%s" % order]
-                current_val["atom_%s" % atom]["s"]["order_%s" % order] += temp
+                temp = addition[atom_key]["s"]["order_%s" % order]
+                current_val[atom_key]["s"]["order_%s" % order] += temp
 
     def _calculate_s_powder_1d(self):
         """
@@ -198,23 +199,21 @@ class SPowderSemiEmpiricalCalculator(object):
         # load powder data for one k
         clerk = abins.IO(input_filename=self._input_filename,
                          group_name=abins.parameters.hdf_groups['powder_data'])
-        powder_data = clerk.load(list_of_datasets=["powder_data"])
-        self._a_tensors = powder_data["datasets"]["powder_data"]["a_tensors"][k_point]
-        self._b_tensors = powder_data["datasets"]["powder_data"]["b_tensors"][k_point]
+        powder_data = abins.PowderData.from_extracted(clerk.load(list_of_datasets=["powder_data"]
+                                                                 )["datasets"]["powder_data"])
+        self._a_tensors = powder_data.get_a_tensors()[k_point]
+        self._b_tensors = powder_data.get_b_tensors()[k_point]
 
         self._a_traces = np.trace(a=self._a_tensors, axis1=1, axis2=2)
         self._b_traces = np.trace(a=self._b_tensors, axis1=2, axis2=3)
 
-        # load dft data for one k point
+        self._fundamentals_freq = powder_data.get_frequencies()[k_point]
+
+        # load dft data to get k-point weighting
         clerk = abins.IO(input_filename=self._input_filename,
                          group_name=abins.parameters.hdf_groups['ab_initio_data'])
         dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
-
-        frequencies = dft_data["datasets"]["frequencies"][int(k_point)]
-        indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
-        self._fundamentals_freq = frequencies[indx]
-
-        self._weight = dft_data["datasets"]["weights"][int(k_point)]
+        self._weight = dft_data["datasets"]["weights"][k_point]
 
         # free memory
         gc.collect()

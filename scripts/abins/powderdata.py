@@ -53,6 +53,16 @@ class PowderData:
         return {key: {str(k): array for k, array in data.items()}
                 for key, data in self._data.items()}
 
+    @classmethod
+    def from_extracted(cls, dct: PowderDict,
+                       num_atoms: Optional[int] = None):
+        """Reconstruct a PowderData object from the extracted dictionary representation"""
+        a_tensors = {int(k_index): data for k_index, data in dct['a_tensors'].items()}
+        b_tensors = {int(k_index): data for k_index, data in dct['b_tensors'].items()}
+        frequencies = {int(k_index): data for k_index, data in dct['frequencies'].items()}
+        return cls(a_tensors=a_tensors, b_tensors=b_tensors,
+                   frequencies=frequencies, num_atoms=num_atoms)
+
     def _check_data(self) -> None:
         for key in "a_tensors", "b_tensors", "frequencies":
             if not isinstance(self._data[key], dict):
