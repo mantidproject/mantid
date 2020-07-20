@@ -4,7 +4,7 @@
 Extra functionality of MantidPlot
 =================================
 
-While we are working to bring Workbench functionality in line with Mantid Plot, there are a few features are as yet obly available in Plot.
+While we are working to bring Workbench functionality in line with Mantid Plot, there are a few features are as yet only available in Plot.
 
 
 .. figure:: /images/GeneralCategory.png

@@ -30,7 +30,7 @@ B - SNS Data
 Filter, process and compress event data.
 
 #. :ref:`algm-LoadEventNexus` - Load the given POWGEN data set, PG3_4871. If you need to reduce the number of events loaded, select only the first 4000 seconds of the run.
-#. Log the number of events in the Messages Box with the command `logger.notice(message)` (The function to get the number of events from a workspace called `ws` is `ws.getNumberEvents()`.
+#. Log the number of events in the Messages Box with the command `logger.notice("message")` (The function to get the number of events from a workspace called `ws` is `ws.getNumberEvents()`.
 #. :ref:`algm-FilterBadPulses` - Remove events that occurred while the accelerator was resetting, by setting the LowerCutoff to 99.5 % of the average beam proton charge.
 #. :ref:`algm-AlignDetectors` - Convert to d-spacing using the supplied calibration file called PG3_golden.cal
 #. :ref:`algm-Rebin` - Bin the data in d-spacing from 1.4 to 8 angstroms using logarithmic binning of .0004.
@@ -51,4 +51,4 @@ Merge, mask, correct and compare.
 #. :ref:`algm-DetectorEfficiencyCorUser` - Correct the data with the detector efficiency for this instrument.
 #. Compare the corrected with the unccorrected data, say bin 4 of spectrum number 7 (workspace index 6). 
 
-:ref: `Solutions <01_pim_sol>`
+:ref:`Solutions <01_pim_sol>`
