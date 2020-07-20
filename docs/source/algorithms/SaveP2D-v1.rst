@@ -79,15 +79,16 @@ Output:
 The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda get calculated in the algorithm):
 
 .. testoutput:: SaveP2D
+   :options: +ELLIPSIS
 
-    Exporting: /jenkins_workdir/workspace/pull_requests-ubuntu/build/docs/Usage_Example.p2d
+    Exporting: ...
 
      0%
     33%
     67%
 
 
-    Exported: /jenkins_workdir/workspace/pull_requests-ubuntu/build/docs/Usage_Example.p2d
+    Exported: ...
 	#Title: test
     #Inst: .prm #give a filename to read data with GSAS-II
     #Binning: ddperp   0.8888889    1.0000000
@@ -121,6 +122,10 @@ The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda 
     25.2199975      3.4930167      8.0000000      3.5000000      1.0000000
     22.3888960      3.4945073      9.0000000      3.5000000      1.0000000
 
+
+.. testcleanup:: SaveP2D
+
+    os.remove(path)
 
 .. categories::
 
