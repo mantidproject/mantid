@@ -15,7 +15,7 @@ from mantid.kernel import Direction
 
 class SaveP2D(PythonAlgorithm):
     def category(self):
-        return 'Tools//Algorithms'
+        return 'Diffraction//Data Handling'
 
     def summary(self):
         """
