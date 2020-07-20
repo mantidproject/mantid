@@ -42,7 +42,7 @@ class SingleDomainDoublePulseFitTest(unittest.TestCase):
         # Check that normalised data is correct
         result, message = CompareWorkspaces('ws_to_normalise', 'ws_correctly_normalised', Tolerance=1e-3)
         self.assertTrue(result)
-        
+
         AnalysisDataService.clear()
 
 
