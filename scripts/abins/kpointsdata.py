@@ -42,25 +42,27 @@ class KpointsData:
             raise ValueError("Invalid values of unit cell vectors.")
         self.unit_cell = unit_cell
 
-        #  "weights"
+        # weights
         num_k = weights.size
-
         if not (weights.dtype.num == FLOAT_ID
                 and np.allclose(weights, weights[weights >= 0])):
             raise ValueError("Invalid value of weights.")
+        self._weights = weights
 
-        #  "k_vectors"
+        # k_vectors
         if not (k_vectors.shape == (num_k, dim)
                 and k_vectors.dtype.num == FLOAT_ID):
             raise ValueError("Invalid value of k_vectors.")
+        self._k_vectors = k_vectors
 
-        #  "frequencies"
+        # frequencies
         num_freq = frequencies.shape[1]
         if not (frequencies.shape == (num_k, num_freq)
                 and frequencies.dtype.num == FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
+        self._frequencies = frequencies
 
-        # "atomic_displacements"
+        # atomic_displacements
         if len(atomic_displacements.shape) != 4:
             raise ValueError("atomic_displacements should have four dimensions")
         num_atoms = atomic_displacements.shape[1]
@@ -68,12 +70,14 @@ class KpointsData:
         if not (atomic_displacements.shape == (weights.size, num_atoms, num_freq, dim)
                 and atomic_displacements.dtype.num == COMPLEX_ID):
             raise ValueError("Invalid value of atomic_displacements.")
+        self._atomic_displacements = atomic_displacements
 
-        # Repackage data into dicts
-        self._frequencies = {k_index: frequencies[k_index, :] for k_index in range(num_k)}
-        self._atomic_displacements = {k_index: atomic_displacements[k_index] for k_index in range(num_k)}
-        self._k_vectors = {k_index: k_vectors[k_index] for k_index in range(num_k)}
-        self._weights = {k_index: weights[k_index] for k_index in range(num_k)}
+    @staticmethod
+    def _array_to_dict(array, string_key=False):
+        if string_key:
+            return {str(i): row for i, row in enumerate(array)}
+        else:
+            return {i: row for i, row in enumerate(array)}
 
     def get_gamma_point_data(self):
         """
@@ -81,9 +85,10 @@ class KpointsData:
         :returns: dictionary with data only for Gamma point
         """
         gamma_pkt_index = -1
+        k_vectors = self._array_to_dict(self._k_vectors)
 
         # look for index of Gamma point
-        for k_index, k in self._k_vectors.items():
+        for k_index, k in k_vectors.items():
             if np.linalg.norm(k) < SMALL_K:
                 gamma_pkt_index = k_index
                 break
@@ -100,11 +105,10 @@ class KpointsData:
 
     def extract(self):
         extracted = {"unit_cell": self.unit_cell,
-                     "weights": {str(key): value for key, value in self._weights.items()},
-                     "k_vectors": {str(key): value for key, value in self._k_vectors.items()},
-                     "frequencies": {str(key): value for key, value in self._frequencies.items()},
-                     "atomic_displacements": {str(key): value for key, value in self._atomic_displacements.items()}}
-
+                     "weights": self._array_to_dict(self._weights, string_key=True),
+                     "k_vectors": self._array_to_dict(self._k_vectors, string_key=True),
+                     "frequencies": self._array_to_dict(self._frequencies, string_key=True),
+                     "atomic_displacements": self._array_to_dict(self._atomic_displacements, string_key=True)}
         return extracted
 
     def __str__(self):
