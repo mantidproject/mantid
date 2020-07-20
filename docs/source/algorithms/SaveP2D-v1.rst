@@ -80,6 +80,7 @@ The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda 
 
 .. testoutput:: SaveP2D
    :options: +ELLIPSIS
+   :options: +ELLIPSIS
 
     Exporting: ...
 
