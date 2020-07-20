@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "RectF.h"
 
 #include <QColor>
@@ -324,6 +325,11 @@ public:
   QStringList getPointNames() const override { return QStringList("center"); }
   QPointF getPoint(const QString &prop) const override;
   void setPoint(const QString &prop, const QPointF &value) override;
+
+  /// Because setting the new bounding box makes no sense, this is just overrode
+  /// and does nothing at all
+  virtual void setBoundingRect(const RectF &rect) override { UNUSED_ARG(rect); }
+
   /// Load state for the shape from a project file
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
