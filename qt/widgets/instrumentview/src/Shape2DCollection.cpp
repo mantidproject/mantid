@@ -566,7 +566,8 @@ double Shape2DCollection::getCurrentDouble(const QString &prop) const {
 
 void Shape2DCollection::setCurrentDouble(const QString &prop, double value) {
   if (m_currentShape) {
-    return m_currentShape->setDouble(prop, value);
+    m_currentShape->setDouble(prop, value);
+    emit shapeChanged();
   }
 }
 
