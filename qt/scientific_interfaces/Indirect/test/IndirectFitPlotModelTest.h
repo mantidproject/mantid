@@ -194,6 +194,16 @@ public:
   }
 
   void
+  test_that_getGuessWorkspace_returns_a_workspace_with_the_correct_range() {
+    auto model = getFitPlotModel();
+    model.setStartX(3);
+    model.setEndX(8);
+
+    TS_ASSERT_EQUALS(model.getGuessWorkspace()->x(0)[0], 3);
+    TS_ASSERT_EQUALS(model.getGuessWorkspace()->x(0).back(), 8);
+  }
+
+  void
   test_that_getResultWorkspace_returns_a_nullptr_if_a_fit_has_not_yet_been_run() {
     auto const model = getFitPlotModel();
     TS_ASSERT(!model.getResultWorkspace());

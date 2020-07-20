@@ -356,6 +356,10 @@ void IndirectFitPropertyBrowser::updateParameterEstimationData(
   m_templateBrowser->updateParameterEstimationData(std::move(data));
 }
 
+void IndirectFitPropertyBrowser::estimateFunctionParameters() {
+  m_templateBrowser->estimateFunctionParameters();
+}
+
 void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
   if (isFullFunctionBrowserActive()) {
     m_functionBrowser->setBackgroundA0(value);

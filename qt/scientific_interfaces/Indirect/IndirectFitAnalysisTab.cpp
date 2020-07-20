@@ -329,14 +329,16 @@ void IndirectFitAnalysisTab::tableExcludeChanged(const std::string & /*unused*/,
 
 void IndirectFitAnalysisTab::startXChanged(double startX) {
   m_plotPresenter->setStartX(startX);
-  m_plotPresenter->updateGuess();
   m_fittingModel->setStartX(startX, m_plotPresenter->getSelectedDataIndex());
+  updateParameterEstimationData();
+  m_plotPresenter->updateGuess();
 }
 
 void IndirectFitAnalysisTab::endXChanged(double endX) {
   m_plotPresenter->setEndX(endX);
-  m_plotPresenter->updateGuess();
   m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex());
+  updateParameterEstimationData();
+  m_plotPresenter->updateGuess();
 }
 
 /**
@@ -653,6 +655,12 @@ void IndirectFitAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
       m_dataPresenter->getDataForParameterEstimation(
           getEstimationDataSelector()));
+  const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
+                                                     getSelectedSpectrum());
+  // If we haven't fit the data yet we may update the guess
+  if (!isFit) {
+    m_fitPropertyBrowser->estimateFunctionParameters();
+  }
 }
 
 /**

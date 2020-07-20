@@ -17,6 +17,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+class IDAFunctionParameterEstimation;
+
 class DLLExport JumpFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
@@ -39,6 +41,7 @@ protected:
 
 private:
   EstimationDataSelector getEstimationDataSelector() const override;
+  IDAFunctionParameterEstimation createParameterEstimation() const;
 
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;

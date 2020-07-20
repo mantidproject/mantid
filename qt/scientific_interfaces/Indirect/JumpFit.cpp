@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFit.h"
 #include "FQFitConstants.h"
-#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "JumpFitDataPresenter.h"
 
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -41,7 +42,10 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  auto templateBrowser = new SingleFunctionTemplateBrowser(widthFits);
+  auto parameterEstimation = createParameterEstimation();
+  auto templateBrowser = new SingleFunctionTemplateBrowser(
+      widthFits,
+      std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->dockArea->m_fitDataView,
@@ -102,10 +106,17 @@ void JumpFit::setRunEnabled(bool enable) {
 }
 
 EstimationDataSelector JumpFit::getEstimationDataSelector() const {
-  return [](const std::vector<double> &,
-            const std::vector<double> &) -> DataForParameterEstimation {
+  return [](const std::vector<double> &, const std::vector<double> &,
+            const std::pair<double, double>) -> DataForParameterEstimation {
     return DataForParameterEstimation{};
   };
+}
+// TODO: Implement parameter estimation for JumpFit functions
+IDAFunctionParameterEstimation JumpFit::createParameterEstimation() const {
+
+  IDAFunctionParameterEstimation parameterEstimation;
+
+  return parameterEstimation;
 }
 
 } // namespace IDA

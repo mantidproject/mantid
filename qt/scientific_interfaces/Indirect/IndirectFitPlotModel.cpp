@@ -117,7 +117,12 @@ void setFirstBackground(IFunction_sptr function, double value) {
 MatrixWorkspace_sptr castToMatrixWorkspace(const Workspace_sptr &workspace) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
-
+// Need to adjust the guess range so the first data point isn't thrown away
+constexpr double RANGEADJUSTMENT = 1e-5;
+inline void adjustRange(std::pair<double, double> &range) {
+  range.first = (1 - RANGEADJUSTMENT) * range.first;
+  range.second = (1 + RANGEADJUSTMENT) * range.second;
+}
 } // namespace
 
 namespace MantidQt {
@@ -309,9 +314,12 @@ MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
 }
 
 std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
+  std::pair<double, double> range;
   if (getResultWorkspace())
-    return getResultRange();
-  return getRange();
+    range = getResultRange();
+  range = getRange();
+  adjustRange(range);
+  return range;
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(

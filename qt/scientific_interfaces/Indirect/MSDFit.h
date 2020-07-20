@@ -15,6 +15,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+class IDAFunctionParameterEstimation;
+
 class DLLExport MSDFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
@@ -39,6 +41,7 @@ private:
   std::string fitTypeString() const;
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
+  IDAFunctionParameterEstimation createParameterEstimation() const;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
