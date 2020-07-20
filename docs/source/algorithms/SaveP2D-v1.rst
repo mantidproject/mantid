@@ -75,11 +75,14 @@ Usage
         for entry in data:
             print(entry[:-2]) # leave out the last 2 characters to remove unnecessary newlines
 
+.. testcleanup:: SaveP2D
+
+    os.remove(path)
+
 Output:
 The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda get calculated in the algorithm):
 
 .. testoutput:: SaveP2D
-   :options: +ELLIPSIS
    :options: +ELLIPSIS
 
     Exporting: ...
@@ -124,9 +127,7 @@ The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda 
     22.3888960      3.4945073      9.0000000      3.5000000      1.0000000
 
 
-.. testcleanup:: SaveP2D
 
-    os.remove(path)
 
 .. categories::
 
