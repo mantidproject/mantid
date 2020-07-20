@@ -201,7 +201,7 @@ class SPowderSemiEmpiricalCalculator(object):
         powder_data = clerk.load(list_of_datasets=["powder_data"])
         self._a_tensors = powder_data["datasets"]["powder_data"]["a_tensors"][k_point]
         self._b_tensors = powder_data["datasets"]["powder_data"]["b_tensors"][k_point]
-        
+
         self._a_traces = np.trace(a=self._a_tensors, axis1=1, axis2=2)
         self._b_traces = np.trace(a=self._b_tensors, axis1=2, axis2=3)
 

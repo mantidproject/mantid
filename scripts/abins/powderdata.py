@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import numbers
 import numpy as np
 from typing import Dict, Optional
 
@@ -64,7 +63,7 @@ class PowderData:
                     raise TypeError(f"Items in {key} dict should be numpy arrays")
 
         if self._num_atoms is not None:
-            num_atoms = int(self._num_atoms)
+            self._num_atoms = int(self._num_atoms)
 
             if self._num_atoms <= 0:
                 raise ValueError("Invalid value of num_atoms.")
