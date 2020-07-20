@@ -15,12 +15,12 @@ Input
 This algorithm can be used to create a powder pattern 2d (".p2d") output file as useable for 
 multidimensional Rietveld refinements. 
 The input for this algorithm needs to be a 2D workspace containing information about dSpacing and 
-dSpacingPerpendicular. A 2D workspace can be created using the :ref:`Bin2DPowderDiffraction 
-<Bin2DPowderDiffraction>` algorithm. 
-The input values removeNaN and removeNegatives control whether intensity values that are negative 
+dSpacingPerpendicular. A 2D workspace can be created using the :ref:`Bin2DPowderDiffraction
+<algm-Bin2DPowderDiffraction>` algorithm. 
+The input values ``removeNaN`` and ``removeNegatives`` control whether intensity values that are negative 
 or NaN, respectively, are automatically removed from the dataset. 
-RemoveNegatives also removes intensities equal to zero.
-Turning cutDdata on, allows to cut the measuring data to the specified ranges of 
+``RemoveNegatives`` also removes intensities equal to zero.
+Turning ``cutDdata`` on, allows to cut the measuring data to the specified ranges of 
 theta, lambda, dSpacing and dSpacingPerpendicular. 
 
 Output
@@ -36,7 +36,7 @@ Usage
 
 **Example: Create a ".p2d" file from a 2D Workspace. Remember to change the Filepath for the OutputFile!**
 
-.. testcode::PrintP2D
+.. testcode:: SaveP2D
 
 	# create a 2D Workspace
     # repeat this block for each spectrum
@@ -60,11 +60,11 @@ Usage
     # Create a 2D Workspace containing d and dPerpendicular values with intensities
     CreateWorkspace(OutputWorkspace = 'Usage_Example', DataX = xDataTotal, DataY = zDataTotal, DataE = eDataTotal, WorkspaceTitle = 'test', NSpec = nSpec, UnitX = 'dSpacing', VerticalAxisUnit = 'dSpacingPerpendicular', VerticalAxisValues = yData)
     # Create a .p2d file containing the testdata	
-    PrintP2D(Workspace = "Usage_Example", OutputFile = "Usage_Example", RemoveNaN = False, RemoveNegatives = False, CutData = False)
+    SaveP2D(Workspace = "Usage_Example", OutputFile = "Usage_Example", RemoveNaN = False, RemoveNegatives = False, CutData = False)
 	
 Output:
 
-.. testoutput:: PrintP2D
+.. testoutput:: SaveP2D
 
 	The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda get calculated in the algorithm)
 	
@@ -101,7 +101,7 @@ Output:
     25.2199975      3.4930167      8.0000000      3.5000000      1.0000000
     22.3888960      3.4945073      9.0000000      3.5000000      1.0000000
 
-	
+
 .. categories::
 
 .. sourcelink::
