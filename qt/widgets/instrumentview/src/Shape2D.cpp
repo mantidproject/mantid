@@ -648,7 +648,7 @@ bool Shape2DSector::selectAt(const QPointF &p) const { return contains(p); }
 bool Shape2DSector::contains(const QPointF &p) const {
   QPointF relPos = p - m_center;
 
-  double distance = sqrt(pow(relPos.x(), 2) + pow(relPos.y(), 2));
+  double distance = distanceBetween(relPos, QPointF(0, 0));
   if (distance < m_innerRadius || distance > m_outerRadius) {
     return false;
   }
@@ -738,10 +738,7 @@ QRectF findArcBoundingBox(double startAngle, double endAngle) {
 }
 
 void Shape2DSector::refit() {
-  if (m_innerRadius <= 0)
-    m_innerRadius = 0.000001;
-  if (m_outerRadius <= m_innerRadius)
-    m_outerRadius = m_innerRadius + 0.000001;
+  double epsilon = 1e-6;
 
   QRectF absoluteBBox = findArcBoundingBox(m_startAngle, m_endAngle);
   QRectF innerBBox(absoluteBBox.topLeft() * m_innerRadius + m_center,
@@ -767,18 +764,23 @@ void Shape2DSector::refit() {
       std::min(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
 
   // check if the bounding box has been modified
+
+  // since the calculus are made on relatively small numbers, some errors can
+  // progressively appear and stack, so we have to take a range rather than a
+  // strict equality
   if (BBox.topLeft().x() != bRectTopLeft.x() &&
       BBox.topLeft().y() != bRectTopLeft.y() &&
-      BBox.bottomRight().x() == bRectBottomRight.x() &&
-      BBox.bottomRight().y() == bRectBottomRight.y()) {
+      std::abs(BBox.bottomRight().x() - bRectBottomRight.x()) < epsilon &&
+      std::abs(BBox.bottomRight().y() - bRectBottomRight.y()) < epsilon) {
 
     // top left corner is moving
     computeScaling(BBox.topLeft(), BBox.bottomRight(), bRectTopLeft, 0);
 
   } else if (BBox.topLeft().x() != bRectTopLeft.x() &&
              BBox.bottomRight().y() != bRectBottomRight.y() &&
-             BBox.bottomRight().x() == bRectBottomRight.x() &&
-             BBox.topLeft().y() == bRectTopLeft.y()) {
+             std::abs(BBox.bottomRight().x() - bRectBottomRight.x()) <
+                 epsilon &&
+             std::abs(BBox.topLeft().y() - bRectTopLeft.y()) < epsilon) {
 
     // bottom left corner is moving
     computeScaling(BBox.bottomLeft(), BBox.topRight(),
@@ -786,16 +788,17 @@ void Shape2DSector::refit() {
 
   } else if (BBox.bottomRight().x() != bRectBottomRight.x() &&
              BBox.bottomRight().y() != bRectBottomRight.y() &&
-             BBox.topLeft().x() == bRectTopLeft.x() &&
-             BBox.topLeft().y() == bRectTopLeft.y()) {
+             std::abs(BBox.topLeft().x() - bRectTopLeft.x()) < epsilon &&
+             std::abs(BBox.topLeft().y() - bRectTopLeft.y()) < epsilon) {
 
     // bottom right corner is moving
     computeScaling(BBox.bottomRight(), BBox.topLeft(), bRectBottomRight, 2);
 
   } else if (BBox.bottomRight().x() != bRectBottomRight.x() &&
              BBox.topLeft().y() != bRectTopLeft.y() &&
-             BBox.topLeft().x() == bRectTopLeft.x() &&
-             BBox.bottomRight().y() == bRectBottomRight.y()) {
+             std::abs(BBox.topLeft().x() - bRectTopLeft.x()) < epsilon &&
+             std::abs(BBox.bottomRight().y() - bRectBottomRight.y()) <
+                 epsilon) {
 
     // top right corner is moving
     computeScaling(BBox.topRight(), BBox.bottomLeft(),
@@ -805,13 +808,12 @@ void Shape2DSector::refit() {
   // check if the shape has moved
   if ((BBox.bottomRight().x() != bRectBottomRight.x() &&
        BBox.topLeft().x() != bRectTopLeft.x() &&
-       BBox.bottomRight().x() - bRectBottomRight.x() ==
-           BBox.topLeft().x() - bRectTopLeft.x()) ||
+       std::abs((BBox.bottomRight().x() - bRectBottomRight.x()) -
+                (BBox.topLeft().x() - bRectTopLeft.x())) < epsilon) ||
       (BBox.bottomRight().y() != bRectBottomRight.y() &&
        BBox.topLeft().y() != bRectTopLeft.y() &&
-       BBox.bottomRight().y() - bRectBottomRight.y() ==
-           BBox.topLeft().y() - bRectTopLeft.y())) {
-
+       std::abs((BBox.bottomRight().y() - bRectBottomRight.y()) -
+                (BBox.topLeft().y() - bRectTopLeft.y())) < epsilon)) {
     // every corner has moved by the same distance -> the shape is being moved
     qreal xDiff = bRectBottomRight.x() - BBox.bottomRight().x();
     qreal yDiff = bRectBottomRight.y() - BBox.bottomRight().y();
@@ -874,7 +876,6 @@ void Shape2DSector::resetBoundingRect() {
   // based on the values of the different parameters defining a sector, compute
   // the new bounding box
   double x_min, x_max, y_min, y_max;
-
   if ((m_startAngle <= M_PI / 2 && m_endAngle >= M_PI / 2) ||
       (m_startAngle > m_endAngle &&
        !(m_startAngle >= M_PI / 2 && m_endAngle <= M_PI / 2))) {
@@ -948,13 +949,13 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
 
   switch (i) {
   case 0:
-    m_outerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
+    m_outerRadius = distanceBetween(to_center, QPointF(0, 0));
     if (m_outerRadius < m_innerRadius) {
       m_outerRadius = 1.01 * m_innerRadius;
     }
     break;
   case 1:
-    m_innerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
+    m_innerRadius = distanceBetween(to_center, QPointF(0, 0));
     if (m_outerRadius < m_innerRadius) {
       m_innerRadius = 0.99 * m_outerRadius;
     }
@@ -1047,36 +1048,36 @@ QStringList Shape2DSector::getDoubleNames() const {
 
 double Shape2DSector::getDouble(const QString &prop) const {
   double to_degrees = 180 / M_PI;
-  if (prop == "outerRadius") {
+  if (prop == "outerRadius")
     return m_outerRadius;
-  }
-  if (prop == "innerRadius") {
+  if (prop == "innerRadius")
     return m_innerRadius;
-  }
-  if (prop == "startAngle") {
+  if (prop == "startAngle")
     return m_startAngle * to_degrees;
-  }
-  if (prop == "endAngle") {
+  if (prop == "endAngle")
     return m_endAngle * to_degrees;
-  }
+
   return 0.0;
 }
 
 void Shape2DSector::setDouble(const QString &prop, double value) {
   double to_radians = M_PI / 180;
   if (prop == "outerRadius") {
-    m_outerRadius = value;
-    refit();
+    m_outerRadius = m_innerRadius < value ? value : 1.01 * m_innerRadius;
   } else if (prop == "innerRadius") {
-    m_innerRadius = value;
-    refit();
+    value = std::max(0.0, value);
+    m_innerRadius = m_outerRadius >= value ? value : 0.99 * m_outerRadius;
   } else if (prop == "startAngle") {
-    m_startAngle = fmod(value, 360) * to_radians;
-    refit();
+    m_startAngle = fmod(value, 360);
+    m_startAngle = m_startAngle > 0 ? m_startAngle : m_startAngle + 360;
+    m_startAngle *= to_radians;
   } else if (prop == "endAngle") {
-    m_endAngle = fmod(value, 360) * to_radians;
-    refit();
-  }
+    m_endAngle = fmod(value, 360);
+    m_endAngle = m_endAngle > 0 ? m_endAngle : m_endAngle + 360;
+    m_endAngle *= to_radians;
+  } else
+    return;
+  resetBoundingRect();
 }
 
 QPointF Shape2DSector::getPoint(const QString &prop) const {
