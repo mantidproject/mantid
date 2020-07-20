@@ -8,7 +8,7 @@ import numpy as np
 from typing import Dict, Tuple
 
 import abins
-from abins.constants import CONSTANT, GAMMA_POINT, NUM_ZERO
+from abins.constants import ACOUSTIC_PHONON_THRESHOLD, CONSTANT, GAMMA_POINT, NUM_ZERO
 
 
 # noinspection PyMethodMayBeStatic
@@ -34,7 +34,6 @@ class PowderCalculator:
                                group_name=abins.parameters.hdf_groups['powder_data'])
 
         # Populate data, removing imaginary modes
-        from abins.constants import ACOUSTIC_PHONON_THRESHOLD
         for k, frequencies in k_data["frequencies"].items():
             indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
             self._frequencies[int(k)] = frequencies[indx]
