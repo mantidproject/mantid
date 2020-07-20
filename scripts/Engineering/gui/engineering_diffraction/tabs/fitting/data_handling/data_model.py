@@ -50,20 +50,22 @@ class FittingDataModel(object):
         ws = self._loaded_workspaces[ws_name]
         ws_bg = self._background_workspaces[ws_name]
         bg_changed = False
-        if ws_bg and bg_params != self._bg_params[ws_name]:
-            # add bg back on to data
-            self.undo_background_subtraction(ws_name, update_bg_params=False)
+        if ws_bg and bg_params[1:] != self._bg_params[ws_name][1:]:
+            # add bg back on to data (but don't change bgsub status)
+            self.undo_background_subtraction(ws_name, isBGsub=bg_params[0])
             bg_changed = True
         if bg_changed or not ws_bg:
-            # revaluate background (or evaluate for first time)
+            # re-evaluate background (or evaluate for first time)
             self._bg_params[ws_name] = bg_params
             ws_bg = self.estimate_background(ws_name, *bg_params[1:])
+        # update bg sub status before Minus (updates plot which repopulates table)
+        self._bg_params[ws_name][0] = bg_params[0]
         Minus(LHSWorkspace=ws, RHSWorkspace=ws_bg, OutputWorkspace=ws_name)
 
-    def undo_background_subtraction(self, ws_name, update_bg_params=True):
+    def undo_background_subtraction(self, ws_name, isBGsub=False):
+        self._bg_params[ws_name][0] = isBGsub  # must do this before plotting which refreshes table
         Plus(LHSWorkspace=ws_name, RHSWorkspace=self.get_background_workspaces()[ws_name],
              OutputWorkspace=ws_name)
-        self._bg_params[ws_name][0] = not update_bg_params
 
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
         ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
@@ -72,8 +74,8 @@ class FittingDataModel(object):
         return ws_bg
 
     def plot_background_figure(self, ws_name):
-        ws = self._loaded_workspaces()[ws_name]
-        ws_bg = self._background_workspaces()[ws_name]
+        ws = self._loaded_workspaces[ws_name]
+        ws_bg = self._background_workspaces[ws_name]
         if ws_bg:
             fig, ax = subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]},
                                subplot_kw={'projection': 'mantid'})
