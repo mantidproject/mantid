@@ -75,23 +75,6 @@ QString QwtWorkspaceBinData::getXAxisLabel() const { return m_xTitle; }
  */
 QString QwtWorkspaceBinData::getYAxisLabel() const { return m_yTitle; }
 
-/**
- * @param rhs A source object whose state is copied here
- * @return A reference to this object
- */
-QwtWorkspaceBinData &QwtWorkspaceBinData::
-operator=(const QwtWorkspaceBinData &rhs) {
-  if (this != &rhs) {
-    m_binIndex = rhs.m_binIndex;
-    m_X = rhs.m_X;
-    m_Y = rhs.m_Y;
-    m_E = rhs.m_E;
-    m_xTitle = rhs.m_xTitle;
-    m_yTitle = rhs.m_yTitle;
-  }
-  return *this;
-}
-
 //-----------------------------------------------------------------------------
 // Private methods
 //-----------------------------------------------------------------------------

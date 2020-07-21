@@ -62,10 +62,6 @@ protected:
 
   /// A vector holding the centre values.
   std::vector<double> m_values;
-
-private:
-  /// Private, undefined copy assignment operator
-  const NumericAxis &operator=(const NumericAxis &);
 };
 
 } // namespace API

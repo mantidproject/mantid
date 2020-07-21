@@ -157,7 +157,7 @@ WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
 
   fixSpectrumNumbers(eventWs1, eventWs2, *output);
 
-  return std::move(output);
+  return output;
 }
 
 /** Checks that the two input workspace have common size and the same

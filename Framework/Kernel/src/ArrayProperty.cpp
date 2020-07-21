@@ -7,6 +7,7 @@
 #include "MantidKernel/ArrayProperty.h"
 
 // PropertyWithValue Definition
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {
@@ -77,6 +78,10 @@ ArrayProperty<T>::ArrayProperty(const std::string &name,
     : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
                                         values, std::move(validator),
                                         direction) {}
+
+template <typename T>
+ArrayProperty<T>::ArrayProperty(const ArrayProperty<T> &other)
+    : PropertyWithValue<std::vector<T>>(other) {}
 
 /// 'Virtual copy constructor'
 template <typename T> ArrayProperty<T> *ArrayProperty<T>::clone() const {

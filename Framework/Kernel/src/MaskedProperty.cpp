@@ -8,6 +8,7 @@
 #include "MantidKernel/PropertyHistory.h"
 
 // PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {
