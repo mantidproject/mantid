@@ -471,7 +471,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         y = transposedWS.extractY()
         x = transposedWS.extractX()
         transposedBkgWS = CloneWorkspace(InputWorkspace=transposedWS, OutputWorkspace=transposedBkgWSName)
-        condition = (((x >= ranges[0]) & (x <= ranges[1])) | ((x >= ranges[2]) & (x <= ranges[3])))
+        condition = (x >= ranges[0]) & (x <= ranges[1])
+        if len(ranges) == 4:
+            condition = (((x >= ranges[0]) & (x <= ranges[1])) | ((x >= ranges[2]) & (x <= ranges[3])))
         bkg_region = np.extract(condition, y)
         bkg_region = bkg_region.reshape((nspec, int(bkg_region.size/nspec)))
         bkg = np.mean(bkg_region, axis=1)
