@@ -85,14 +85,14 @@ The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda 
 .. testoutput:: SaveP2D
    :options: +ELLIPSIS
 
-    Exporting: ...
+    Exporting: /home/abc/Usage_Example.p2d
 
        0%
       33%
       67%
 
 
-    Exported: ...
+    Exported: /home/abc/Usage_Example.p2d
     #Title: test
     #Inst: .prm
     #Binning: ddperp   0.8888889    1.0000000
