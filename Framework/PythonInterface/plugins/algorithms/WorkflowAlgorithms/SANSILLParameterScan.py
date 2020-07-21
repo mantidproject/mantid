@@ -29,6 +29,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
     normalise = None
     thickness = None
     output2D = None
+    output_reduced = None
     observable = None
     pixel_y_min = None
     pixel_y_max = None
@@ -45,6 +46,29 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
     def name(self):
         return 'SANSILLParameterScan'
 
+    def validateInputs(self):
+        issues = dict()
+        message = 'Wrong number of {0} runs: {1}. Provide one or as many as sample runs: {2}.'
+        sample_dim = self.getPropertyValue('SampleRuns').count(',')
+        abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
+        can_dim = self.getPropertyValue('ContainerRuns').count(',')
+        mask_dim = self.getPropertyValue('MaskFiles').count(',')
+        sens_dim = self.getPropertyValue('SensitivityMaps').count(',')
+        if not (self.getPropertyValue('ReducedData') or self.getPropertyValue("Output2D")):
+            issues["ReducedData"] = "Please provide at least one output: ReducedData or Output2D."
+            issues["Output2D"] = "Please provide at least one output: ReducedData or Output2D."
+        if self.getPropertyValue('SampleRuns') == '':
+            issues['SampleRuns'] = 'Please provide at least one sample run.'
+        if abs_dim != sample_dim and abs_dim != 0:
+            issues['AbsorberRuns'] = message.format('Absorber', abs_dim, sample_dim)
+        if can_dim != sample_dim and can_dim != 0:
+            issues['ContainerRuns'] = message.format('Container', can_dim, sample_dim)
+        if mask_dim != sample_dim and mask_dim != 0:
+            issues['MaskFiles'] = message.format('Mask', mask_dim, sample_dim)
+        if sens_dim != sample_dim and sens_dim != 0:
+            issues['SensitivityMaps'] = message.format('Sensitivity', sens_dim, sample_dim)
+        return issues
+
     def setUp(self):
         self.sample = self.getPropertyValue('SampleRuns')
         self.absorber = self.getPropertyValue('AbsorberRuns')
@@ -55,6 +79,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
         self.output2D = self.getPropertyValue('Output2D')
+        self.output_reduced = self.getPropertyValue('ReducedData')
         self.observable = self.getPropertyValue('Observable')
         self.pixel_y_min = self.getProperty('PixelYMin').value
         self.pixel_y_max = self.getProperty('PixelYMax').value
@@ -62,7 +87,10 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
     def cleanUp(self):
         mtd["__joined"].delete()
-        mtd["sorted"].delete()
+        if mtd.doesExist("sorted"):
+            mtd["sorted"].delete()
+        if mtd.doesExist("masked"):
+            mtd["masked"].delete()
 
     def checkPixelY(self, height):
         if self.pixel_y_min > self.pixel_y_max:
@@ -74,8 +102,13 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
     def PyInit(self):
 
-        self.declareProperty(WorkspaceProperty('Output2D', '', direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('Output2D', '', direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
                              doc="The output workspace containing the 2D reduced data.")
+
+        self.declareProperty(WorkspaceProperty('ReducedData', '', direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc="The output workspace containing all the reduced data, before grouping.")
 
         self.declareProperty(MultipleFileProperty('SampleRuns',
                                                   action=FileAction.OptionalLoad,
@@ -147,7 +180,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         ConjoinXRuns(InputWorkspaces=load_ws_name, OutputWorkspace="__joined", SampleLogAsXAxis=self.observable)
         mtd[load_ws_name].delete()
 
-        sort_x_axis_output = 'sorted'
+        sort_x_axis_output = 'sorted' if not self.output_reduced else self.output_reduced
         SortXAxis(InputWorkspace="__joined", OutputWorkspace="__" + sort_x_axis_output)
         mtd["__" + sort_x_axis_output].getAxis(0).setUnit("label").setLabel('Omega', 'degrees')
 
@@ -197,14 +230,16 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                          NormaliseBy=self.normalise,
                          OutputWorkspace=sort_x_axis_output)
 
+        if self.output_reduced:
+            self.setProperty('ReducedData', mtd[self.output_reduced])
+
         instrument = mtd["__joined"].getInstrument()
         detector = instrument.getComponentByName("detector")
         if "detector-width" in detector.getParameterNames() and "detector-height" in detector.getParameterNames():
             width = int(detector.getNumberParameter("detector-width")[0])
             height = int(detector.getNumberParameter("detector-height")[0])
         else:
-            width, height = 100, 100
-            logger.warning("Width or height not found for the instrument. {0}, {1} assumed.".format(width, height))
+            raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
 
         self.checkPixelY(height)
         grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)
