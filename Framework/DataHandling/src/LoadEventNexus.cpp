@@ -999,6 +999,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   }
   //----------------- Pad Empty Pixels -------------------------------
   createSpectraMapping(m_filename, monitors, someBanks);
+  std::cout << "After createSpectraMapping" << std::endl;
 
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
@@ -1064,6 +1065,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     bool precount = getProperty("Precount");
     int chunk = getProperty("ChunkNumber");
     int totalChunks = getProperty("TotalChunks");
+    std::cout << "Before DefaultEventLoader" << std::endl;
+
     DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec,
                              bankNames, periodLog->valuesAsVector(), classType,
                              bankNumEvents, oldNeXusFileNames, precount, chunk,
