@@ -987,19 +987,8 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
       "0,0,0"));
 
-  // A source
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(sourcePos);
-  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
-  sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
+  addSourceToInstrument(instrument, sourcePos);
+  addSampleToInstrument(instrument, samplePos);
 
   size_t width = 100;
   size_t height = 100;

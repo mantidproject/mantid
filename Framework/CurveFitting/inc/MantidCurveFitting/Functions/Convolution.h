@@ -138,6 +138,7 @@ private:
   /// step in xValues) when in FFT mode, and the inverted resolution if in
   /// Direct mode
   mutable std::vector<double> m_resolution;
+  void innerFunctionsAre1D() const;
 };
 
 } // namespace Functions

@@ -311,7 +311,6 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
     break;
   }
 }
-
 /**
  * Gets the range of the specified axis
  * @param axisID An enumeration defining the axis

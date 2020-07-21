@@ -23,14 +23,13 @@ bool LoadAsciiStl::isAsciiSTL(const std::string &filename) {
   return (line.size() >= 5 && line.substr(0, 5) == "solid");
 }
 
-std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
-  std::ifstream file(m_filename.c_str());
+std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readShape() {
   std::string line;
-  getline(file, line);
+  getline(m_file, line);
   m_lineNumber++;
   Kernel::V3D t1, t2, t3;
   uint32_t vertexCount = 0;
-  while (readSTLTriangle(file, t1, t2, t3)) {
+  while (readSTLTriangle(m_file, t1, t2, t3)) {
     // Add triangle if all 3 vertices are distinct
     if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
         !areEqualVertices(t2, t3)) {

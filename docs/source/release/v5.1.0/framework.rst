@@ -39,6 +39,7 @@ Algorithms
    When such incomplete data is encountered, it is skipped until the next valid data is encountered and a
    warning is printed at algorithm completion of the total number of data bytes discarded.
 - A bug introduced in v5.0 causing error values to tend to zero on multiple instances of :ref:`Rebin2D <algm-Rebin2D>` on the same workspace has been fixed.
+- Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
 
 Data Handling
 -------------
@@ -76,6 +77,10 @@ Python
 - Documentation for manipulating :ref:`workspaces <02_scripting_workspaces>` and :ref:`plots <02_scripting_plots>` within a script have been produced.
 - Property.units now attempts to encode with windows-1252 if utf-8 fails.
 - Property.unitsAsBytes has been added to retrieve the raw bytes from the units string.
+
+Improvements
+------------
+- Updated the convolution function in the fitting framework to allow the convolution of two composite functions.
 
 Bugfixes
 --------
