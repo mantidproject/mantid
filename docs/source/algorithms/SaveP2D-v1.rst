@@ -73,7 +73,7 @@ Usage
         with open(path, 'r') as of:
             data = of.readlines()
         for entry in data:
-            print(entry[:-2]) # leave out the last 2 characters to remove unnecessary newlines
+            print(entry[:-1]) # leave out the last character to remove unnecessary newlines
 
 .. testcleanup:: SaveP2D
 
@@ -93,8 +93,8 @@ The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda 
 
 
     Exported: ...
-	#Title: test
-    #Inst: .prm #give a filename to read data with GSAS-II
+    #Title: test
+    #Inst: .prm
     #Binning: ddperp   0.8888889    1.0000000
     #Bank: 1
     #2theta   lambda   d-value   dp-value   counts
