@@ -28,6 +28,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 namespace {
+
 class ScopedFalse {
   bool &m_ref;
   bool m_oldValue;
@@ -44,6 +45,7 @@ public:
 
 ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent)
     : FunctionTemplateBrowser(parent), m_presenter(this) {
+  m_templateSubTypes.emplace_back(std::make_unique<LorentzianSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<FitSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<BackgroundSubType>());
   connect(&m_presenter, SIGNAL(functionStructureChanged()), this,
@@ -59,10 +61,11 @@ void ConvTemplateBrowser::createProperties() {
   createDeltaFunctionProperties();
   createTempCorrectionProperties();
 
-  m_browser->addProperty(m_subTypeProperties[0]);
+  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Lorentzian]);
+  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Fit]);
   m_browser->addProperty(m_deltaFunctionOn);
   m_browser->addProperty(m_tempCorrectionOn);
-  m_browser->addProperty(m_subTypeProperties[1]);
+  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Background]);
 
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);

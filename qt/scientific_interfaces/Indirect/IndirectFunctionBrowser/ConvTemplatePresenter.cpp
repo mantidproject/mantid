@@ -32,6 +32,8 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view)
 void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   if (subTypeIndex == SubTypeIndex::Fit) {
     m_model.setFitType(static_cast<FitType>(typeIndex));
+  } else if (subTypeIndex == SubTypeIndex::Lorentzian) {
+    m_model.setLorentzianType(static_cast<LorentzianType>(typeIndex));
   } else {
     m_model.setBackground(static_cast<BackgroundType>(typeIndex));
   }
@@ -96,6 +98,8 @@ void ConvTemplatePresenter::setFunction(const QString &funStr) {
                                               m_model.hasDeltaFunction());
 
   m_view->setSubType(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
+  m_view->setSubType(SubTypeIndex::Lorentzian,
+                     static_cast<int>(m_model.getLorentzianType()));
   m_view->setSubType(SubTypeIndex::Background,
                      static_cast<int>(m_model.getBackgroundType()));
   m_view->setEnum(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));

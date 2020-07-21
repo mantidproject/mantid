@@ -36,6 +36,7 @@ public:
   void setParameter(const QString &paramName, double value) override;
   void setParameterError(const QString &paramName, double value) override;
   FitType getFitType() const;
+  LorentzianType getLorentzianType() const;
   BackgroundType getBackgroundType() const;
   double getParameter(const QString &paramName) const override;
   double getParameterError(const QString &paramName) const override;
@@ -81,6 +82,7 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
 
   void setFitType(FitType fitType);
+  void setLorentzianType(LorentzianType lorentzianType);
   void setDeltaFunction(bool);
   bool hasDeltaFunction() const;
   void setTempCorrection(bool, double value);
@@ -103,9 +105,9 @@ public:
 private:
   void clearData();
   void setModel();
-  // QString buildFunctionString() const;
   boost::optional<QString> getLor1Prefix() const;
   boost::optional<QString> getLor2Prefix() const;
+  boost::optional<QString> getFitTypePrefix() const;
   boost::optional<QString> getDeltaPrefix() const;
   boost::optional<QString> getBackgroundPrefix() const;
   void setParameter(ParamID name, double value);
@@ -121,6 +123,8 @@ private:
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
   std::string buildPeaksFunctionString() const;
+  std::string buildLorentzianPeaksString() const;
+  std::string buildFitTypeString() const;
   std::string buildBackgroundFunctionString() const;
   std::string buildStretchExpFTFunctionString() const;
   std::string buildElasticDiffSphereFunctionString() const;
@@ -136,6 +140,7 @@ private:
 
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;
+  LorentzianType m_lorentzianType = LorentzianType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
   bool m_hasDeltaFunction = false;
   bool m_hasTempCorrection = false;
