@@ -22,8 +22,7 @@ class SData(collections.abc.Sequence):
     Class for storing S(Q, omega) with relevant metadata
 
     indexing will return dict(s) of S by quantum order for atom(s)
-    corresponding to index/slice. Be aware that this is zero-based indexing, so
-    s_data[1] will return the item corresponding to 'atom_2'.
+    corresponding to index/slice.
     """
 
     def __init__(self, *,
