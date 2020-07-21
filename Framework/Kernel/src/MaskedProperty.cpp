@@ -45,10 +45,6 @@ MaskedProperty<TYPE>::MaskedProperty(const std::string &name,
   this->setRemember(false);
 }
 
-template <typename T>
-MaskedProperty<T>::MaskedProperty(const MaskedProperty &other)
-    : Kernel::PropertyWithValue<T>(other), m_maskedValue(other.m_maskedValue) {}
-
 /**
  * Virtual copy
  */
