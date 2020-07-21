@@ -173,6 +173,10 @@ def deploy_python_framework(destination, host_python_exe,
     FileUtils.ln_s "python#{py_ver}", "python"
     FileUtils.ln_s "2to3-#{py_ver}", "2to3"
   end
+
+  # remove Info.plist files so outer application controls app display name
+  FileUtils.rm "#{bundle_py_home}/Resources/Info.plist"
+  FileUtils.rm "#{bundle_py_home}/Resources/Python.app/Contents/Info.plist"
   
   # remove site-packages symlink, copy brew python modules and pip install the rest
   src_site_packages = Pathname.new("#{host_py_home}/lib/python#{py_ver}/site-packages")
