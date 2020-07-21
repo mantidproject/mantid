@@ -640,7 +640,6 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
     if (!name.isEmpty()) {
       m_instrWidget->getSurface()->setCurrentDouble(
           name, m_doubleManager->value(prop));
-      m_instrWidget->updateInstrumentView();
     } else {
       name = m_pointComponentsMap[prop];
       if (!name.isEmpty()) {
@@ -653,6 +652,7 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
         m_instrWidget->getSurface()->setCurrentPoint(name, p);
       }
     }
+    m_instrWidget->updateInstrumentView();
   }
   m_instrWidget->update();
 }

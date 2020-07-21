@@ -588,7 +588,8 @@ QPointF Shape2DCollection::getCurrentPoint(const QString &prop) const {
 void Shape2DCollection::setCurrentPoint(const QString &prop,
                                         const QPointF &value) {
   if (m_currentShape) {
-    return m_currentShape->setPoint(prop, value);
+    m_currentShape->setPoint(prop, value);
+    emit shapeChanged();
   }
 }
 

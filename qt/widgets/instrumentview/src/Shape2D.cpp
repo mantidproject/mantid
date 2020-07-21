@@ -1090,6 +1090,7 @@ QPointF Shape2DSector::getPoint(const QString &prop) const {
 void Shape2DSector::setPoint(const QString &prop, const QPointF &value) {
   if (prop == "center") {
     m_center = value;
+    resetBoundingRect();
   }
 }
 
