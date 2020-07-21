@@ -1069,11 +1069,11 @@ void Shape2DSector::setDouble(const QString &prop, double value) {
     m_innerRadius = m_outerRadius >= value ? value : 0.99 * m_outerRadius;
   } else if (prop == "startAngle") {
     m_startAngle = fmod(value, 360);
-    m_startAngle = m_startAngle > 0 ? m_startAngle : m_startAngle + 360;
+    m_startAngle = m_startAngle >= 0 ? m_startAngle : m_startAngle + 360;
     m_startAngle *= to_radians;
   } else if (prop == "endAngle") {
     m_endAngle = fmod(value, 360);
-    m_endAngle = m_endAngle > 0 ? m_endAngle : m_endAngle + 360;
+    m_endAngle = m_endAngle >= 0 ? m_endAngle : m_endAngle + 360;
     m_endAngle *= to_radians;
   } else
     return;

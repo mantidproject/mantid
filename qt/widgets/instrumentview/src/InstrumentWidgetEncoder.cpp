@@ -406,8 +406,8 @@ QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeSector(const Shape2DSector *obj) {
   const auto outerRadius = obj->getDouble("outerRadius");
   const auto innerRadius = obj->getDouble("innerRadius");
-  const auto startAngle = obj->getDouble("startAngle");
-  const auto endAngle = obj->getDouble("endAngle");
+  const auto startAngle = obj->getDouble("startAngle") * M_PI / 180;
+  const auto endAngle = obj->getDouble("endAngle") * M_PI / 180;
   const auto centerX = obj->getPoint("center").x();
   const auto centerY = obj->getPoint("center").y();
 
