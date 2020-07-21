@@ -96,10 +96,7 @@ std::vector<T> readNexusAnyVector(::NeXus::File &file, size_t size,
                                   bool close_file,
                                   Kernel::Logger &logger) {
   if constexpr (sizeof(T) < sizeof(U)) {
-    // if (close_file)
-    //   file.closeData();
-    // throw std::runtime_error(
-        logger.warning("Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
+        logger.warning("Downcasting performed in NeXusIOHelper::readNexusAnyVector");
   }
   if constexpr (std::is_same<T, U>::value) {
     std::vector<T> buf(size);
@@ -150,7 +147,7 @@ template <typename T, typename U>
 T readNexusAnyVariable(::NeXus::File &file, bool close_file,
   Kernel::Logger &logger) {
   if constexpr (sizeof(T) < sizeof(U)) {
-        logger.warning("Downcasting is forbidden in NeXusIOHelper::readAnyVariable");
+        logger.warning("Downcasting performed in NeXusIOHelper::readAnyVariable");
   }
   if constexpr (std::is_same<T, U>::value) {
     T buf;
