@@ -9,8 +9,6 @@
 """State describing the calculation of the transmission for SANS reduction."""
 
 import json
-import copy
-import abc
 from typing import Dict
 
 from sans.common.configurations import Configurations

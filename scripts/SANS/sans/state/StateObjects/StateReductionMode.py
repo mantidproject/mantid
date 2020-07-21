@@ -6,14 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the state of the reduction."""
 
-import copy
 import json
 
-from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge,
-                               SANSFacility, DetectorType)
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.common.enums import (ReductionMode, ReductionDimensionality,
+                               FitModeForMerge)
 from sans.state.JsonSerializable import JsonSerializable
-from sans.state.automatic_setters import automatic_setters
 
 
 class StateReductionMode(metaclass=JsonSerializable):
@@ -42,8 +39,10 @@ class StateReductionMode(metaclass=JsonSerializable):
         is_invalid = {}
         if self.merge_max and self.merge_min:
             if self.merge_min > self.merge_max:
-                is_invalid.update({"StateReduction": "The minimum of the merge region is greater than the maximum."})
+                is_invalid.update({"StateReduction": "The minimum of the merge"
+                                                     " region is greater than"
+                                                     " the maximum."})
 
         if is_invalid:
-            raise ValueError("StateReduction: The provided inputs are illegal. "
-                             "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateReduction: The provided inputs are illegal."
+                             " Please see: {0}".format(json.dumps(is_invalid)))

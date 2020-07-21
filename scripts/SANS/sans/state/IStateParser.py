@@ -13,7 +13,7 @@ from sans.state.StateObjects.StateCompatibility import StateCompatibility
 from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
 from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors
-from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors, StateMove
+from sans.state.StateObjects.StateMoveDetectors import StateMove
 from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave

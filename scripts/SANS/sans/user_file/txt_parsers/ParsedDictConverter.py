@@ -7,7 +7,7 @@
 import abc
 import collections
 
-from sans.common.enums import DetectorType, RangeStepType, RebinType, FitType, DataType, FitModeForMerge, SANSInstrument
+from sans.common.enums import DetectorType, RangeStepType, RebinType, FitType, DataType, FitModeForMerge
 from sans.common.general_functions import get_ranges_from_event_slice_setting, get_ranges_for_rebin_setting, \
     get_ranges_for_rebin_array
 from sans.state.AllStates import AllStates

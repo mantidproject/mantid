@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, RebinType, FitModeForMerge, \
+from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, \
     DataType, FitType
 from sans.common.general_functions import get_bank_for_spectrum_number
 from sans.state.IStateParser import IStateParser
@@ -15,7 +15,7 @@ from sans.state.StateObjects.StateCompatibility import StateCompatibility
 from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor, get_normalize_to_monitor_builder
+from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateScale import StateScale
 from sans.state.StateObjects.StateSave import StateSave
