@@ -218,7 +218,7 @@ void applyToFitType(FitType fitType,
                     const std::function<void(ParamID)> &paramFun);
 
 void applyToLorentzianType(LorentzianType lorenzianType,
-                    const std::function<void(ParamID)> &paramFun);
+                           const std::function<void(ParamID)> &paramFun);
 
 void applyToBackground(BackgroundType bgType,
                        const std::function<void(ParamID)> &paramFun);
