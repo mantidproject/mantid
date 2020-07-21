@@ -506,6 +506,11 @@ void QENSFitSequential::init() {
 
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
+
+  declareProperty(
+      "OutputFitStatus", false,
+      "Flag to output fit status information, which consists of the fit "
+      "OutputStatus and the OutputChiSquared");
 }
 
 std::map<std::string, std::string> QENSFitSequential::validateInputs() {
@@ -765,6 +770,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
+  const bool outputFitStatus = getProperty("OutputFitStatus");
   IFunction_sptr inputFunction = getProperty("Function");
 
   // Run PlotPeaksByLogValue
@@ -788,7 +794,23 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("EvaluationType", getPropertyValue("EvaluationType"));
   plotPeaks->setProperty("FitType", getPropertyValue("FitType"));
   plotPeaks->setProperty("CostFunction", getPropertyValue("CostFunction"));
+  plotPeaks->setProperty("OutputFitStatus", outputFitStatus);
+
   plotPeaks->executeAsChildAlg();
+
+  if (outputFitStatus) {
+    declareProperty(std::make_unique<ArrayProperty<std::string>>(
+        "OutputStatus", Direction::Output));
+    declareProperty(std::make_unique<ArrayProperty<double>>("OutputChiSquared",
+                                                            Direction::Output));
+    std::vector<std::string> outputStatus =
+        plotPeaks->getProperty("OutputStatus");
+    std::vector<double> outputChiSquared =
+        plotPeaks->getProperty("OutputChiSquared");
+    setProperty("OutputStatus", std::move(outputStatus));
+    setProperty("OutputChiSquared", std::move(outputChiSquared));
+  }
+
   return plotPeaks->getProperty("OutputWorkspace");
 }
 

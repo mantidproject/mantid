@@ -33,6 +33,7 @@ using namespace Mantid::API;
 using namespace MantidWidgets;
 
 class FunctionTemplateBrowser;
+class FitStatusWidget;
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPropertyBrowser : public QDockWidget {
   Q_OBJECT
@@ -58,6 +59,9 @@ public:
   void updateParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const ITableWorkspace &params);
+  void updateFitStatusData(const std::vector<std::string> &status,
+                           const std::vector<double> &chiSquared);
+  void updateFitStatus(const FitDomainIndex index);
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveMembers);
   void setFitEnabled(bool enable);
@@ -71,6 +75,7 @@ public:
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
   void setBackgroundA0(double value);
   void setHiddenProperties(std::vector<std::string>);
 
@@ -111,8 +116,12 @@ private:
   FunctionBrowser *m_functionBrowser;
   FitOptionsBrowser *m_fitOptionsBrowser;
   FunctionTemplateBrowser *m_templateBrowser;
+  FitStatusWidget *m_fitStatusWidget;
   QStackedWidget *m_functionWidget;
   QCheckBox *m_browserSwitcher;
+
+  std::vector<std::string> m_fitStatus;
+  std::vector<double> m_fitChiSquared;
 };
 
 } // namespace IDA

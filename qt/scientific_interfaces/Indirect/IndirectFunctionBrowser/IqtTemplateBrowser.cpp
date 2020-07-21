@@ -341,6 +341,8 @@ void IqtTemplateBrowser::updateParameterEstimationData(
   m_presenter.updateParameterEstimationData(std::move(data));
 }
 
+void IqtTemplateBrowser::estimateFunctionParameters() {}
+
 void IqtTemplateBrowser::setBackgroundA0(double value) {
   m_presenter.setBackgroundA0(value);
 }

@@ -353,6 +353,8 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value,
 void ConvTemplateBrowser::updateParameterEstimationData(
     DataForParameterEstimationCollection &&) {}
 
+void ConvTemplateBrowser::estimateFunctionParameters() {}
+
 void ConvTemplateBrowser::setBackgroundA0(double value) {
   m_presenter.setBackgroundA0(value);
 }

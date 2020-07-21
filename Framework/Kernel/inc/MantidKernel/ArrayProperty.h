@@ -41,6 +41,8 @@ public:
       const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
       const unsigned int direction = Direction::Input);
 
+  ArrayProperty(const ArrayProperty &);
+
   ArrayProperty<T> *clone() const override;
 
   // Unhide the base class assignment operator

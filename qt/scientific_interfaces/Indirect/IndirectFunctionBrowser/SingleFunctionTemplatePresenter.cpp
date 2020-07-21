@@ -21,8 +21,9 @@ using namespace MantidWidgets;
  */
 SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(
     SingleFunctionTemplateBrowser *view,
-    const std::map<std::string, std::string> &functionInitialisationStrings)
-    : QObject(view), m_view(view), m_model() {
+    const std::map<std::string, std::string> &functionInitialisationStrings,
+    std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation)
+    : QObject(view), m_view(view), m_model(std::move(parameterEstimation)) {
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
           SLOT(editLocalParameter(const QString &)));
   connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this,
@@ -141,6 +142,11 @@ void SingleFunctionTemplatePresenter::setErrorsEnabled(bool enabled) {
 void SingleFunctionTemplatePresenter::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_model.updateParameterEstimationData(std::move(data));
+  updateView();
+}
+void SingleFunctionTemplatePresenter::estimateFunctionParameters() {
+  m_model.estimateFunctionParameters();
+  updateView();
 }
 
 QStringList SingleFunctionTemplatePresenter::getDatasetNames() const {

@@ -40,7 +40,7 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(
                                        beamProfile.defineActiveRegion(sample),
                                        maxScatterPtAttempts, pointsIn)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
-      m_error(1.0 / std::sqrt(m_nevents)), m_EMode(EMode),
+      m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
 
 /**
@@ -69,6 +69,9 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
                                      MCInteractionStatistics &stats) {
   const auto scatterBounds = m_scatterVol.getBoundingBox();
   const auto nbins = static_cast<int>(lambdas.size());
+
+  std::vector<double> wgtMean(attenuationFactors.size()),
+      wgtM2(attenuationFactors.size());
 
   for (size_t i = 0; i < m_nevents; ++i) {
     Geometry::Track beforeScatter;
@@ -100,6 +103,13 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
           const double wgt = m_scatterVol.calculateAbsorption(
               beforeScatter, afterScatter, lambdaIn, lambdaOut);
           attenuationFactors[j] += wgt;
+          // increment standard deviation using Welford algorithm
+          double delta = wgt - wgtMean[j];
+          wgtMean[j] += delta / static_cast<double>(i + 1);
+          wgtM2[j] += delta * (wgt - wgtMean[j]);
+          // calculate sample SD (M2/n-1)
+          // will give NaN for m_events=1, but that's correct
+          attFactorErrors[j] = sqrt(wgtM2[j] / static_cast<double>(i));
 
           break;
         }
@@ -120,7 +130,11 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
                  std::bind(std::divides<double>(), std::placeholders::_1,
                            static_cast<double>(m_nevents)));
 
-  std::fill(attFactorErrors.begin(), attFactorErrors.end(), m_error);
+  // calculate standard deviation of mean from sample mean
+  std::transform(attFactorErrors.begin(), attFactorErrors.end(),
+                 attFactorErrors.begin(), [this](double v) -> double {
+                   return v / sqrt(static_cast<double>(m_nevents));
+                 });
 }
 
 } // namespace Algorithms

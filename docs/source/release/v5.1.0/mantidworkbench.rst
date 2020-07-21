@@ -12,7 +12,8 @@ New
 - There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
 - A default legend location can be set in the Workbench settings.
 - The Sample Transmission Calculator is now implemented in workbench.
-- The axis tick markers in a plot can be switched between Log and decimal formats indepentantly of the axes scale.
+- The axis tick markers in a plot can be switched between Log and decimal formats independently of the axes scale.
+- Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
 
 Improvements
 ############
@@ -83,6 +84,9 @@ Improvements
 - Added an option in the settings to specify the default legend size.
 - Added an option to the settings window to set the default colormap for image plots.
 - Improved loading of python plugins at startup on slow disks.
+- Sliceviewer no longer lists the reversed colourmaps along with the regular, instead they are accessed with a reverse checkbox.
+- Sliceviewer colourmap uses the default colourmap from the settings.
+- Code completions are now loaded when the code editor is first changed.
 
 Bugfixes
 ########
@@ -115,6 +119,8 @@ Bugfixes
 - Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
 - Changing a curve's properties on a plot no longer changes the order of the plot legend.
+- Sub-plots in the sliceviewer now follow the scaling on the colorbar
 - Fixed a bug which prevented the double click axis editor menus from working for tiled plots.
+- Select image in the plot figure option contains each image rather than each spectra for colorfil plots of workspaces with a numeric vertical axis
 
 :ref:`Release 5.1.0 <v5.1.0>`

@@ -454,7 +454,7 @@ private:
       if (i % 2 == 0)
         detInfo.setMasked(i, true);
     }
-    return std::move(ws);
+    return ws;
   }
 };
 

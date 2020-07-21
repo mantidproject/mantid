@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
 
@@ -397,6 +398,53 @@ public:
                       1e-10);
       TS_ASSERT_DELTA(outa.getCalculated(i), h1 * h2 * exp(-s1 * xa[i] * xa[i]),
                       1e-10);
+    }
+  }
+
+  void test_convoluting_two_composite_functions() {
+    Convolution conv;
+    auto compositeFunction1 = std::make_shared<CompositeFunction>();
+    auto compositeFunction2 = std::make_shared<CompositeFunction>();
+    auto deltaFunction1 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=DeltaFunction, Centre=0.0, Height=3");
+    auto deltaFunction2 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=DeltaFunction, Centre=1.0, Height=5");
+    auto background1 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=LinearBackground, A0=0.0, A1=1.0");
+    auto background2 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=LinearBackground, A0=1.0, A1=2.0");
+
+    compositeFunction1->addFunction(deltaFunction1);
+    compositeFunction1->addFunction(deltaFunction2);
+    compositeFunction2->addFunction(background1);
+    compositeFunction2->addFunction(background2);
+    conv.addFunction(compositeFunction2);
+    conv.addFunction(compositeFunction1);
+
+    // Define domains
+    const int N = 116;
+    double xs[N]; // symmetric range
+    double xa[N]; // asymmetric range
+    double xm{-4.0}, xMs{4.0}, xMa{8.0};
+    double dxs{(xMs - xm) / (N - 1)}, dxa{(xMa - xm) / (N - 1)};
+    for (int i = 0; i < N; i++) {
+      xs[i] = xm + i * dxs;
+      xa[i] = xm + i * dxa;
+    }
+    // Carry out the convolution
+    FunctionDomain1DView ds(&xs[0], N); // symmetric domain
+    FunctionDomain1DView da(&xa[0], N); // asymmetric domain
+    FunctionValues outs(ds), outa(da);
+    conv.function(ds, outs);
+    conv.function(da, outa);
+
+    for (int i = 0; i < N; i++) {
+      TS_ASSERT_DELTA(outs.getCalculated(i), 24.0 * xs[i] - 7.0, 1e-10);
+      TS_ASSERT_DELTA(outa.getCalculated(i), 24.0 * xa[i] - 7.0, 1e-10);
     }
   }
 

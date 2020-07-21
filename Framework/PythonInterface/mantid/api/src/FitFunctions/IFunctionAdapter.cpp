@@ -32,29 +32,30 @@ namespace {
  * float,int,str,bool.
  * @return :: The created attribute.
  */
-IFunction::Attribute createAttributeFromPythonValue(const object &value) {
+IFunction::Attribute
+createAttributeFromPythonValue(IFunction::Attribute attrToUpdate,
+                               const object &value) {
 
   PyObject *rawptr = value.ptr();
-  IFunction::Attribute attr;
 
   if (PyBool_Check(rawptr) == 1) {
-    attr = IFunction::Attribute(extract<bool>(rawptr)());
+    attrToUpdate.setValue(extract<bool>(rawptr)());
   }
 #if PY_MAJOR_VERSION >= 3
   else if (PyLong_Check(rawptr) == 1) {
 #else
   else if (PyInt_Check(rawptr) == 1) {
 #endif
-    attr = IFunction::Attribute(extract<int>(rawptr)());
+    attrToUpdate.setValue(extract<int>(rawptr)());
   } else if (PyFloat_Check(rawptr) == 1) {
-    attr = IFunction::Attribute(extract<double>(rawptr)());
+    attrToUpdate.setValue(extract<double>(rawptr)());
   }
 #if PY_MAJOR_VERSION >= 3
   else if (PyUnicode_Check(rawptr) == 1) {
 #else
   else if (PyBytes_Check(rawptr) == 1) {
 #endif
-    attr = IFunction::Attribute(extract<std::string>(rawptr)());
+    attrToUpdate.setValue(extract<std::string>(rawptr)());
   } else if (PyList_Check(rawptr) == 1) {
     auto n = PyList_Size(rawptr);
     std::vector<double> vec;
@@ -62,12 +63,12 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
       auto v = extract<double>(PyList_GetItem(rawptr, i))();
       vec.emplace_back(v);
     }
-    attr = IFunction::Attribute(vec);
+    attrToUpdate.setValue(vec);
   } else {
     throw std::invalid_argument("Invalid attribute type. Allowed "
                                 "types=float,int,str,bool,list(float)");
   }
-  return attr;
+  return attrToUpdate;
 }
 
 } // namespace
@@ -117,7 +118,9 @@ void IFunctionAdapter::init() { callMethodNoCheck<void>(getSelf(), "init"); }
  */
 void IFunctionAdapter::declareAttribute(const std::string &name,
                                         const object &defaultValue) {
-  auto attr = createAttributeFromPythonValue(defaultValue);
+  auto attr = IFunction::hasAttribute(name) ? IFunction::getAttribute(name)
+                                            : Attribute();
+  attr = createAttributeFromPythonValue(attr, defaultValue);
   IFunction::declareAttribute(name, attr);
   try {
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name,
@@ -176,7 +179,8 @@ IFunctionAdapter::getAttributeValue(IFunction &self,
 void IFunctionAdapter::setAttributePythonValue(IFunction &self,
                                                const std::string &name,
                                                const object &value) {
-  self.setAttribute(name, createAttributeFromPythonValue(value));
+  auto previousAttr = self.getAttribute(name);
+  self.setAttribute(name, createAttributeFromPythonValue(previousAttr, value));
 }
 
 /**

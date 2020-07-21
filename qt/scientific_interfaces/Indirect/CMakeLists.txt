@@ -13,6 +13,7 @@ set(
         ConvFitModel.cpp
         DensityOfStates.cpp
         Elwin.cpp
+        IDAFunctionParameterEstimation.cpp
         FunctionTemplateBrowser.cpp
         ILLEnergyTransfer.cpp
         ISISCalibration.cpp
@@ -75,6 +76,7 @@ set(
         IqtFit.cpp
         IqtFitModel.cpp
         IndirectFitPropertyBrowser.cpp
+        FitStatusWidget.cpp
         IndirectFunctionBrowser/ConvTypes.cpp
         IndirectFunctionBrowser/ConvFunctionModel.cpp
         IndirectFunctionBrowser/ConvTemplateBrowser.cpp
@@ -210,6 +212,7 @@ set(
         Quasi.h
         ResNorm.h
         Stretch.h
+        FitStatusWidget.h
 )
 
 set(
@@ -311,6 +314,7 @@ set(
         ConvFitModel.cpp
         DensityOfStates.cpp
         Elwin.cpp
+        IDAFunctionParameterEstimation.cpp
         FunctionTemplateBrowser.cpp
         ILLEnergyTransfer.cpp
         ISISCalibration.cpp
@@ -337,6 +341,7 @@ set(
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
         IndirectFitPropertyBrowser.cpp
+        FitStatusWidget.cpp
         IndirectFitPlotModel.cpp
         IndirectFitPlotPresenter.cpp
         IndirectFitPlotView.cpp
@@ -477,6 +482,7 @@ set(
         Quasi.h
         ResNorm.h
         Stretch.h
+        FitStatusWidget.h
 )
 
 set(

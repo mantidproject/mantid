@@ -86,7 +86,7 @@ ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
   dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
-  return std::move(dialog);
+  return dialog;
 }
 
 void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(

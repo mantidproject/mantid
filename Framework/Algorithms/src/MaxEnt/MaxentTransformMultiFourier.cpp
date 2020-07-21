@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
 #include <gsl/gsl_fft_complex.h>
 
+#include <stdexcept>
 #include <utility>
 
 namespace Mantid {

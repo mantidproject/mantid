@@ -9,9 +9,11 @@
 //-----------------------------------------------------------------------------
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <json/value.h>
 
+#include <memory>
 #include <utility>
 
 namespace Mantid {

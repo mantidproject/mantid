@@ -31,6 +31,18 @@ Tuples
 -  Tuples are most useful when returning values from functions as they
    allow returns of more than 1 item as will be shown later.
 
+-  A meaning can be assigned to each position of the tuples through the use of the ``namedtuple`` type. This leads to unambiguous
+   tuple assignment and creates self-documenting code. For instance, consider a tuple representing a geometric point:
+
+.. code:: python
+
+   from collections import namedtuple
+   Point = namedtuple('Point', ['x', 'y', 'z'])
+   p = Point(x=2, y=3, z=4)
+   print(p.x, p[0]) # elements can be accessed using the field name or by index
+
+- The meaning of the import ``from collections import nametuple`` will be outlined further on in this tutorial.
+
 Dictionaries
 ============
 
