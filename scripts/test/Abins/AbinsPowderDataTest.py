@@ -59,12 +59,20 @@ class AbinsPowderDataTest(unittest.TestCase):
 
         extracted_data = good_powderdata.extract()
         for key in self.good_items:
-            for k_point in self.good_items[key]:
-                self.assertEqual(True, np.allclose(self.good_items[key][k_point],
-                                                   extracted_data[key][str(k_point)]))
+            for k_index in self.good_items[key]:
+                self.assertTrue(np.allclose(self.good_items[key][k_index],
+                                            extracted_data[key][str(k_index)]))
 
         # Should also work if num_atoms is not given
         PowderData(**self.good_items)
+
+    def test_roundtrip(self):
+        initial_powderdata = PowderData(**self.good_items, num_atoms=2)
+        roundtrip_data = PowderData.from_extracted(initial_powderdata.extract())
+        for attr in 'get_a_tensors', 'get_b_tensors', 'get_frequencies':
+            for k_index in self.good_items['a_tensors']:
+                self.assertTrue(np.allclose(getattr(initial_powderdata, attr)()[k_index],
+                                            getattr(roundtrip_data, attr)()[k_index]))
 
     def test_getters(self):
         good_powderdata = PowderData(**self.good_items, num_atoms=2)
