@@ -87,9 +87,9 @@ The resulting output file (Usage_Example.p2d) looks like this(2theta and lambda 
 
     Exporting: ...
 
-     0%
-    33%
-    67%
+       0%
+      33%
+      67%
 
 
     Exported: ...
