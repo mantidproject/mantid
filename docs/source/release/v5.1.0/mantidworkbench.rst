@@ -80,10 +80,14 @@ Improvements
 - Right-clicking a plot without dragging while using the zoom tool now resets the axes limits.
 - The Slice Viewer now starts with the zoom option selected by default.
 - The curves in the dropdown list in the Curves tab of the figure options are now listed in the same order as the plot legend.
+.. figure:: ../../images/instrument_view_sector.png
+   :align: right
+   :width: 400px
 - Added an option in the settings to specify the default legend size.
 - Added an option to the settings window to set the default colormap for image plots.
 - Improved loading of python plugins at startup on slow disks.
 - Added a circular sector shape in the Pick and Mask tab of the instrument view.
+
 
 Bugfixes
 ########
