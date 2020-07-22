@@ -179,7 +179,6 @@ def add_actions(target, actions):
             raise ValueError("Unexpected action type. "
                              "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
 
-
 def toQSettings(settings):
     '''Utility function to convert supplied settings object to a qtpy.QtCore.QSettings
     '''
