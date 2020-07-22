@@ -98,6 +98,8 @@ class FittingTabModel(object):
         fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
         if not data_ws_name:
             return
+        if isinstance(data_ws_name, List):
+            data_ws_name = data_ws_name[0]
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
             guess_ws_name = MUON_ANALYSIS_GUESS_WS + data_ws_name
         elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
