@@ -50,6 +50,14 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         pass
 
     @abstractmethod
+    def get_plot_mode(self):
+        """
+        Returns the current plot mode
+        :return: A string containing the plot mode
+        """
+        pass
+
+    @abstractmethod
     def is_tiled_plot(self) -> bool:
         """
         Checks if tiled plot is currently requested
@@ -74,6 +82,13 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         pass
 
     @abstractmethod
+    def set_is_tiled_plot(self, is_tiled : bool):
+        """
+        Sets whether a tiled plot should made
+        """
+        pass
+
+    @abstractmethod
     def on_rebin_options_changed(self, slot):
         """
         Connect the plot_rebin checkbox to the input slot
@@ -85,6 +100,14 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
     def on_plot_type_changed(self, slot):
         """
         Connect the plot_type combo box to the input slot
+        :param slot: call back function for the signal
+        """
+        pass
+
+    @abstractmethod
+    def on_plot_mode_changed(self, slot):
+        """
+        Connect the plot_mode combo box to the input slot
         :param slot: call back function for the signal
         """
         pass
@@ -124,5 +147,54 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
     def set_plot_type(self, plot_type: str):
         """
         Sets the plot type to the input string
+        """
+        pass
+
+    @abstractmethod
+    def set_plot_mode(self, plot_mode: str):
+        """
+        Sets the plot mode to the input string
+        """
+        pass
+
+    @abstractmethod
+    def enable_plot_type_combo(self):
+        """
+        Enable plot type selection
+        """
+        pass
+
+    @abstractmethod
+    def disable_plot_type_combo(self):
+        """
+        Disable plot type collection
+        """
+        pass
+
+    @abstractmethod
+    def enable_tile_plotting_options(self):
+        """
+        Enable tile plotting
+        """
+        pass
+
+    @abstractmethod
+    def disable_tile_plotting_options(self):
+        """
+        Disable tile plotting
+        """
+        pass
+
+    @abstractmethod
+    def disable_plot_raw_option(self):
+        """
+        Disable plot raw option
+        """
+        pass
+
+    @abstractmethod
+    def enable_plot_raw_option(self):
+        """
+        Enable plot raw option
         """
         pass

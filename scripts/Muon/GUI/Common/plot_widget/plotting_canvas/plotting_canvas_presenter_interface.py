@@ -88,3 +88,14 @@ class PlottingCanvasPresenterInterface(abc.ABC):
     def plot_guess_workspace(self, guess_ws_name: str):
         """Plots the guess workspace from a fit"""
         pass
+
+    @abc.abstractmethod
+    def get_plot_x_range(self):
+        """Returns the x range of the first plot
+        :return: a tuple contained the start and end ranges"""
+        pass
+
+    @abc.abstractmethod
+    def set_plot_range(self, range : List[float]):
+        """Sets the x range of all the plots"""
+        pass

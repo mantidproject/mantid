@@ -46,7 +46,7 @@ class FrequencyContext(object):
     def __init__(self):
         self._maxEnt_freq = {}
         self._FFT_freq = {}
-        self.plot_type = "None"
+        self.plot_type = "All"
 
     @property
     def window_title(self):

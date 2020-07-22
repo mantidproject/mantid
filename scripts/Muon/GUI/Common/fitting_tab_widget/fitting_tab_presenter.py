@@ -8,6 +8,7 @@ from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformat
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common import thread_model
 from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
@@ -434,8 +435,12 @@ class FittingTabPresenter(object):
         else:
             self.selected_data = self.get_workspace_selected_list()
 
+    def set_display_workspace(self, workspace_name):
+        self.view.display_workspace = workspace_name
+        self.handle_display_workspace_changed()
+
     def get_workspace_selected_list(self):
-        if self.context._frequency_context is not None:
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
             freq = self.context._frequency_context.plot_type
         else:
             freq = 'None'
