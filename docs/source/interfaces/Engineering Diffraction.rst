@@ -163,16 +163,14 @@ Fitting
 
 This tab will allow for single peak fitting of focused run files.
 
-Focused run files can be loaded from the file system into mantid from the interface, which will keep track of all the
-workspaces that it has created from these files.
+Focused run files can be loaded from the file system into mantid from the interface and converted to units TOF or d-sapcing. The interface will keep track of all the
+workspaces that it has created from these files. 
 
-The plan for the rest of the functionality is to allow for loaded workspaces to be plotted in the interface. Peaks
-could then be selected by clicking on the plot or by using a text field to enter peak centres in d-spacing.
-Once the peaks have been selected, they would be fitted using the :ref:`Pseudo-Voigt <func-PseudoVoigt>` and
-:ref:`BackToBackExponential <func-BackToBackExponential>` fit functions.
+Loaded workspaces can be plotted in the interface and the mantid fitting capability can be accessed from the 'Fit' button on the plot toolbar.
+This allows for the user to select peaks of any supported type (e.g. :ref:`Pseudo-Voigt <func-PseudoVoigt>` and
+:ref:`BackToBackExponential <func-BackToBackExponential>`) by right-clicking on the plot. The inital parameters can be varied interactively by dragging sliders (vertical lines on the plot).
 
-The output from the fitting functions will be stored in a multidimensional file format, along with the sample logs for
-the runs that have been fitted.
+The output from the fit is currently stored in a table workspace - in future the plan is to store the fit, metadata and run in a hdf5 file which can also be loaded to provide a guess for the fit to another run.
 
 Parameters
 ^^^^^^^^^^
