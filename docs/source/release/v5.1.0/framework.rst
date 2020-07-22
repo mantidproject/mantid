@@ -42,7 +42,7 @@ Algorithms
 - A form of reversible masking that could lead to misleading and incorrect results has been removed from Mantid,
   this means that ClearMaskedSpectra is no longer necessary after calling :ref:`MaskInstrument <algm-MaskInstrument>`
   and :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>`.
-  ClearMaskedSpectra has been Removed as it no longer has a use,
+  ClearMaskedSpectra has been removed as it no longer has a use,
   and :ref:`MaskInstrument <algm-MaskInstrument>` is now deprecated and you should use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
 - Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
 - Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
