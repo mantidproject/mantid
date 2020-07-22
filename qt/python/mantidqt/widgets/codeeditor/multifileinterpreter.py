@@ -9,6 +9,7 @@
 #
 # std imports
 import os.path as osp
+from os import linesep
 
 # 3rd party imports
 from qtpy.QtCore import Qt, Slot, Signal
@@ -146,6 +147,11 @@ class MultiPythonFileInterpreter(QWidget):
         tab_idx = self._tabs.addTab(interpreter, tab_title)
         self._tabs.setTabToolTip(tab_idx, tab_tooltip)
         self._tabs.setCurrentIndex(tab_idx)
+
+        # set the cursor to the last line and give the new editor focus
+        interpreter.editor.setFocus()
+        line_count = content.count(linesep)
+        interpreter.editor.setCursorPosition(line_count,0)
         return tab_idx
 
     def abort_current(self):
