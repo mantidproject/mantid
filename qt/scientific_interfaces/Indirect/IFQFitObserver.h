@@ -7,6 +7,7 @@
 #pragma once
 
 #include <map>
+#include <string>
 
 class IFQFitObserver {
 public:

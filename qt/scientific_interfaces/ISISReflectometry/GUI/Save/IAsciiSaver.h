@@ -8,6 +8,7 @@
 #include "Common/DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include <stdexcept>
 #include <string>
 #include <vector>
 namespace MantidQt {
