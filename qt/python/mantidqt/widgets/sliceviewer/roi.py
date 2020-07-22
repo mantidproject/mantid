@@ -36,20 +36,25 @@ def extract_matrix_cuts_spectra_axis(workspace: MatrixWorkspace,
     """
     # if the value is half way in a spectrum then include it
     tmp_crop_region = '__tmp_sv_region_extract'
-    extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, tmp_crop_region,
-                             log_algorithm_calls)
-    if xcut_name:
-        SumSpectra(InputWorkspace=tmp_crop_region,
-                   OutputWorkspace=xcut_name,
-                   EnableLogging=log_algorithm_calls)
+    roi = extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, tmp_crop_region,
+                                   log_algorithm_calls)
+    # perform ycut first so xcut can reuse tmp workspace for rebinning if necessary
     if ycut_name:
-        Rebin(InputWorkspace=tmp_crop_region,
-              OutputWorkspace=ycut_name,
-              Params=[xmin, xmax - xmin, xmax],
-              LOG_ALGORITHM_CALLS=log_algorithm_calls)
-        Transpose(InputWorkspace=ycut_name,
-                  OutputWorkspace=ycut_name,
-                  LOG_ALGORITHM_CALLS=log_algorithm_calls)
+        Rebin(
+            InputWorkspace=roi,
+            OutputWorkspace=ycut_name,
+            Params=[xmin, xmax - xmin, xmax],
+            EnableLogging=log_algorithm_calls)
+        Transpose(
+            InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
+
+    if xcut_name:
+        if not roi.isCommonBins():
+            # rebin to a common grid using the resolution from the spectrum
+            # with the lowest resolution to avoid overbinning
+            roi = _rebin_to_common_grid(roi, xmin, xmax, log_algorithm_calls)
+        SumSpectra(InputWorkspace=roi, OutputWorkspace=xcut_name, EnableLogging=log_algorithm_calls)
+
     try:
         DeleteWorkspace(tmp_crop_region)
     except ValueError:
@@ -77,36 +82,37 @@ def extract_matrix_cuts_numeric_axis(workspace: MatrixWorkspace,
     :param log_algorithm_calls: Log the algorithm call or be silent
     """
     if xcut_name:
-        ExtractSpectra(InputWorkspace=workspace,
-                       OutputWorkspace=xcut_name,
-                       XMin=xmin,
-                       XMax=xmax,
-                       EnableLogging=log_algorithm_calls)
+        ExtractSpectra(
+            InputWorkspace=workspace,
+            OutputWorkspace=xcut_name,
+            XMin=xmin,
+            XMax=xmax,
+            EnableLogging=log_algorithm_calls)
         # Rebin with nan/inf results in everything turning to NAN so
         # set them all to zero as this will effectively ignore them for us
-        ReplaceSpecialValues(InputWorkspace=xcut_name,
-                             OutputWorkspace=xcut_name,
-                             NanValue=0.0,
-                             InfinityValue=0.0,
-                             EnableLogging=log_algorithm_calls)
-        Transpose(InputWorkspace=xcut_name,
-                  OutputWorkspace=xcut_name,
-                  EnableLogging=log_algorithm_calls)
-        Rebin(InputWorkspace=xcut_name,
-              OutputWorkspace=xcut_name,
-              Params=[ymin, ymax - ymin, ymax],
-              EnableLogging=log_algorithm_calls)
-        Transpose(InputWorkspace=xcut_name,
-                  OutputWorkspace=xcut_name,
-                  EnableLogging=log_algorithm_calls)
+        ReplaceSpecialValues(
+            InputWorkspace=xcut_name,
+            OutputWorkspace=xcut_name,
+            NanValue=0.0,
+            InfinityValue=0.0,
+            EnableLogging=log_algorithm_calls)
+        Transpose(
+            InputWorkspace=xcut_name, OutputWorkspace=xcut_name, EnableLogging=log_algorithm_calls)
+        Rebin(
+            InputWorkspace=xcut_name,
+            OutputWorkspace=xcut_name,
+            Params=[ymin, ymax - ymin, ymax],
+            EnableLogging=log_algorithm_calls)
+        Transpose(
+            InputWorkspace=xcut_name, OutputWorkspace=xcut_name, EnableLogging=log_algorithm_calls)
     if ycut_name:
-        Rebin(InputWorkspace=workspace,
-              OutputWorkspace=ycut_name,
-              Params=[xmin, xmax - xmin, xmax],
-              EnableLogging=log_algorithm_calls)
-        Transpose(InputWorkspace=ycut_name,
-                  OutputWorkspace=ycut_name,
-                  EnableLogging=log_algorithm_calls)
+        Rebin(
+            InputWorkspace=workspace,
+            OutputWorkspace=ycut_name,
+            Params=[xmin, xmax - xmin, xmax],
+            EnableLogging=log_algorithm_calls)
+        Transpose(
+            InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
 
 
 def extract_roi_matrix(workspace: MatrixWorkspace,
@@ -163,7 +169,7 @@ def extract_roi_spectra_axis(workspace: MatrixWorkspace,
     :param log_algorithm_calls: Log the algorithm call or be silent
     """
     indexmin, indexmax = _index_range_spectraaxis(workspace, ymin, ymax)
-    _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
+    return _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
 
 
 def extract_roi_numeric_axis(workspace: MatrixWorkspace,
@@ -190,7 +196,7 @@ def extract_roi_numeric_axis(workspace: MatrixWorkspace,
     # data boundaries
     indexmin, indexmax = int(np.searchsorted(yaxis_values, ymin)), \
         int(np.searchsorted(yaxis_values, ymax) - 1)
-    _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
+    return _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
 
 
 def _extract_region(workspace: MatrixWorkspace,
@@ -209,13 +215,14 @@ def _extract_region(workspace: MatrixWorkspace,
     :param ymax: Y max for bounded region
     :param name: A name for the workspace
     """
-    ExtractSpectra(InputWorkspace=workspace,
-                   OutputWorkspace=name,
-                   XMin=xmin,
-                   XMax=xmax,
-                   StartWorkspaceIndex=indexmin,
-                   EndWorkspaceIndex=indexmax,
-                   EnableLogging=log_algorithm_calls)
+    return ExtractSpectra(
+        InputWorkspace=workspace,
+        OutputWorkspace=name,
+        XMin=xmin,
+        XMax=xmax,
+        StartWorkspaceIndex=indexmin,
+        EndWorkspaceIndex=indexmax,
+        EnableLogging=log_algorithm_calls)
 
 
 def _index_range_spectraaxis(workspace: MatrixWorkspace, ymin: float, ymax: float):
@@ -228,3 +235,21 @@ def _index_range_spectraaxis(workspace: MatrixWorkspace, ymin: float, ymax: floa
     indexmin = workspace.getIndexFromSpectrumNumber(math.floor(ymin + 0.5))
     indexmax = workspace.getIndexFromSpectrumNumber(math.floor(ymax + 0.5))
     return indexmin, indexmax
+
+
+def _rebin_to_common_grid(workspace: MatrixWorkspace, xmin: float, xmax: float,
+                          log_algorithm_calls: bool):
+    """
+    Assuming the workspace is ragged, rebin it to a common grid with the range
+    given. The resolution is computed by taking the largest bin size in the
+    region.
+    :param workspace: A MatrixWorkspace object
+    :param xmin: Minimum X value in range
+    :param xmax: Maximum X value in range
+    """
+    delta = np.max(np.diff(workspace.extractX()))
+    return Rebin(
+        InputWorkspace=workspace,
+        OutputWorkspace=workspace,
+        Params=[xmin, delta, xmax],
+        EnableLogging=log_algorithm_calls)
