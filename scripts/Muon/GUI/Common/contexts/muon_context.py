@@ -143,7 +143,7 @@ class MuonContext(object):
 
     def calculate_all_pairs(self):
         self._calculate_pairs(rebin=False)           
-        if(self._do_rebin):
+        if(self._do_rebin()):
             self._calculate_pairs(rebin=True)
 
     def _calculate_pairs(self, rebin):
@@ -160,7 +160,7 @@ class MuonContext(object):
 
     def calculate_all_groups(self):
         self._calculate_groups(rebin=False)
-        if self._do_rebin:
+        if self._do_rebin():
             self._calculate_groups(rebin=True)
     
     def _calculate_groups(self, rebin):

@@ -242,7 +242,6 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             indices += [0] * len(fit_information.input_workspaces) + fit_indices
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
 
-    # turn fit to raw off and on will cause a crash
     def match_raw_selection(self, workspace_names, plot_raw):
         ws_list = []
         workspace_list = workspace_names

@@ -274,6 +274,31 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.external_plotting_view.copy_axes_setup.assert_called_once()
         self.external_plotting_view.show.assert_called_once()
 
+    def test_match_raw_selection_True_True(self):
+        self.context.fitting_context.fit_raw = mock.Mock(return_value=True)
+        ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
+        self.assertEqual(self.presenter.match_raw_selection(ws_names, True), ws_names)
+
+
+    def test_match_raw_selection_True_False(self):
+        self.context.fitting_context.fit_raw = mock.Mock(return_value=True)
+        ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
+        ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
+        self.assertEqual(self.presenter.match_raw_selection(ws_names, False), ws_rebin_names)
+
+
+    def test_match_raw_selection_False_True(self):
+        self.context.fitting_context.fit_raw = mock.Mock(return_value=False)
+        ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
+        ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
+        self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, True), ws_names)
+
+
+    def test_match_raw_selection_False_False(self):
+        self.context.fitting_context.fit_raw = mock.Mock(return_value=False)
+        ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
+        self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, False), ws_rebin_names)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -8,6 +8,7 @@ import unittest
 
 from Muon.GUI.Common.calculate_pair_and_group import run_pre_processing
 from mantidqt.utils.qt.testing import start_qapplication
+from unittest import mock
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService
@@ -232,6 +233,40 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
                                   'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
+
+    def test_calculate_all_pairs(self):
+        self.context._calculate_pairs = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=False)
+
+        self.context.calculate_all_pairs()
+        self.context._calculate_pairs.assert_called_with(rebin=False)
+        self.assertEqual(self.context._calculate_pairs.call_count,1)
+
+    def test_calculate_all_groups(self):
+        self.context._calculate_groups = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=False)
+
+        self.context.calculate_all_groups()
+        self.context._calculate_groups.assert_called_with(rebin=False)
+        self.assertEqual(self.context._calculate_groups.call_count,1)
+
+    def test_calculate_all_pairs_rebin(self):
+        self.context._calculate_pairs = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=True)
+
+        self.context.calculate_all_pairs()
+        self.context._calculate_pairs.assert_any_call(rebin=False)
+        self.context._calculate_pairs.assert_called_with(rebin=True)
+        self.assertEqual(self.context._calculate_pairs.call_count,2)
+
+    def test_calculate_all_groups_rebin(self):
+        self.context._calculate_groups = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=True)
+
+        self.context.calculate_all_groups()
+        self.context._calculate_groups.assert_any_call(rebin=False)
+        self.context._calculate_groups.assert_called_with(rebin=True)
+        self.assertEqual(self.context._calculate_groups.call_count,2)
 
 
 if __name__ == '__main__':

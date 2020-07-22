@@ -241,7 +241,7 @@ def remove_rebin_from_name(name):
     if REBIN_STR not in name:
         return name
     index =  [ch.start() for ch in re.finditer(r";",name)]
-    return name[:index[3]]+name[index[4]:]
+    return name[:index[-2]]+name[index[-1]:]
 
 def add_rebin_to_name(name):
     if REBIN_STR in name:
