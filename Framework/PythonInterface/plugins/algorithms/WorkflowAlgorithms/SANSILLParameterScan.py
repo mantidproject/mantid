@@ -219,7 +219,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise)
         # even if the samples are provided as arguments, the SANSILLReduction won't use them and rather take the already
         # processed ws
-        SANSILLReduction(Run=self.sample,
+        SANSILLReduction(InputWorkspace="__" + sort_x_axis_output,
                          AbsorberInputWorkspace=absorber_name,
                          ContainerInputWorkspace=container_name,
                          SampleThickness=self.thickness,
