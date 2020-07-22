@@ -16,6 +16,7 @@
 
 #include <QMap>
 #include <boost/optional.hpp>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
