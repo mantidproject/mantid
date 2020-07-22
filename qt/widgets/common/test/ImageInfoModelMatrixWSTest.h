@@ -104,6 +104,17 @@ public:
     assertBlankInfo(model.info(15200, 4, dblmax));
   }
 
+  void test_info_for_monitor() {
+    auto noEfixed = [](MatrixWorkspace_sptr ws) { return ws; };
+
+    const double x(15200), y(9), signal(7);
+    const auto expectedInfo =
+        expectedTOFInfo("15200.0000", "9", "7.0000", "9", "-9.0000", "-", "-")
+        << expectedUnitsInfo("-", "-", "-", "-", "-");
+
+    assertInfoAsExpected(noEfixed, x, y, signal, expectedInfo);
+  }
+
   void test_info_without_efixed_defined() {
     auto noEfixed = [](MatrixWorkspace_sptr ws) { return ws; };
 

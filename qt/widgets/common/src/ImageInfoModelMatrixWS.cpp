@@ -76,14 +76,20 @@ ImageInfoModelMatrixWS::info(const double x, const double y,
     return info;
 
   // Everything else requires an instrument
-  if (m_spectrumInfo->hasDetectors(wsIndex))
+  if (m_spectrumInfo->hasDetectors(wsIndex)) {
     info.setValue(3, defaultFormat(*spectrum.getDetectorIDs().begin()));
-
-  info.setValue(4, defaultFormat(m_spectrumInfo->l2(wsIndex)));
-  info.setValue(
-      5, defaultFormat(m_spectrumInfo->signedTwoTheta(wsIndex) * rad2deg));
-  info.setValue(6, defaultFormat(m_spectrumInfo->azimuthal(wsIndex) * rad2deg));
-  setUnitsInfo(&info, 7, wsIndex, x);
+    info.setValue(4, defaultFormat(m_spectrumInfo->l2(wsIndex)));
+    try {
+      info.setValue(
+          5, defaultFormat(m_spectrumInfo->signedTwoTheta(wsIndex) * rad2deg));
+      info.setValue(
+          6, defaultFormat(m_spectrumInfo->azimuthal(wsIndex) * rad2deg));
+      setUnitsInfo(&info, 7, wsIndex, x);
+    } catch (const std::exception &exc) {
+      g_log.debug() << "Unable to fill in instrument angle-related value: "
+                    << exc.what() << "\n";
+    }
+  }
 
   return info;
 }
