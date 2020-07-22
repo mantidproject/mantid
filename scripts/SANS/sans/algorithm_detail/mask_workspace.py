@@ -137,7 +137,7 @@ def mask_with_mask_files(mask_info, workspace):
             load_alg.execute()
             masking_workspace = load_alg.getProperty("OutputWorkspace").value
             # Could use MaskDetectors directly with masking_workspace but it does not
-            # support MPI. Use a three step approach via a and  b instead.
+            # support MPI. Use a two step approach via a and b instead.
             # a) Extract detectors to mask from MaskWorkspace
             det_ids = masking_workspace.getMaskedDetectors()
             # b) Mask the detector ids on the instrument
