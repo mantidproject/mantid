@@ -179,6 +179,7 @@ def add_actions(target, actions):
             raise ValueError("Unexpected action type. "
                              "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
 
+
 def toQSettings(settings):
     '''Utility function to convert supplied settings object to a qtpy.QtCore.QSettings
     '''
@@ -187,13 +188,12 @@ def toQSettings(settings):
     else:  # must be a QSettings already
         return settings
 
+
 def ensure_widget_is_on_screen(widget):
     """If the supplied widget is off the screen it will be moved so it is on the screen.
     The widget must already be 'shown' """
-
-    # make sure the window is smaller than the desktop
-    desktop = QDesktopWidget()
     # this gives the maximum screen number if the position is off screen
+    desktop = QDesktopWidget()
     screen = desktop.screenNumber(widget.pos())
 
     # get the window size
