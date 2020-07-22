@@ -888,11 +888,21 @@ void Shape2DSector::computeScaling(const QPointF &BBoxCorner,
   yProj.setX(xPos);
   yProj.setY(yPos);
 
-  if (distanceBetween(xProj, QPointF(0, 0)) <
-      distanceBetween(yProj, QPointF(0, 0))) {
+  if (slope.x() != 0 && slope.y() != 0) {
+    if (distanceBetween(xProj, QPointF(0, 0)) <
+        distanceBetween(yProj, QPointF(0, 0))) {
+      proj = xProj;
+    } else {
+      proj = yProj;
+    }
+  } else if (slope.x() != 0) {
     proj = xProj;
-  } else {
+  } else if (slope.y() != 0) {
     proj = yProj;
+  } else {
+    // case that is not supposed to happen; it means the sector has been reduced
+    // to a point, which is not possible
+    return;
   }
   proj += BBoxCorner;
 
@@ -903,7 +913,7 @@ void Shape2DSector::computeScaling(const QPointF &BBoxCorner,
   m_boundingRect.setVertex(vertexIndex, proj);
 
   m_innerRadius *= ratio;
-  m_outerRadius *= ratio;
+  m_outerRadius = ratio != 0 ? m_outerRadius * ratio : 1e-4;
   m_center.setX((m_center.x() - BBoxOpposedCorner.x()) * ratio +
                 BBoxOpposedCorner.x());
   m_center.setY((m_center.y() - BBoxOpposedCorner.y()) * ratio +
@@ -932,7 +942,7 @@ void Shape2DSector::resetBoundingRect() {
   QRectF BBox = findSectorBoundingBox();
   // because of how Mantid's rectangles are defined, it is necessary to pass the
   // arguments in this precise order in order to have a smooth scaling when
-  // creating a shpae from top left corner
+  // creating a shape from top left corner
   m_boundingRect = RectF(BBox.bottomLeft(), BBox.topRight());
 }
 
@@ -985,7 +995,7 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
   case 0:
     m_outerRadius = distanceBetween(to_center, QPointF(0, 0));
     if (m_outerRadius < m_innerRadius) {
-      m_outerRadius = 1.01 * m_innerRadius;
+      m_outerRadius = m_innerRadius != 0 ? 1.01 * m_innerRadius : 1e-4;
     }
     break;
   case 1:
@@ -1121,7 +1131,10 @@ double Shape2DSector::getDouble(const QString &prop) const {
 void Shape2DSector::setDouble(const QString &prop, double value) {
   double to_radians = M_PI / 180;
   if (prop == "outerRadius") {
-    m_outerRadius = m_innerRadius < value ? value : 1.01 * m_innerRadius;
+    if (m_innerRadius < value)
+      m_outerRadius = value;
+    else
+      m_outerRadius = m_innerRadius != 0 ? 1.01 * m_innerRadius : 1e-4;
   } else if (prop == "innerRadius") {
     value = std::max(0.0, value);
     m_innerRadius = m_outerRadius >= value ? value : 0.99 * m_outerRadius;
