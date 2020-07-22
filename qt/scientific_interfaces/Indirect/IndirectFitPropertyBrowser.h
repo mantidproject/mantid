@@ -75,6 +75,7 @@ public:
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
   void setBackgroundA0(double value);
   void setHiddenProperties(std::vector<std::string>);
 

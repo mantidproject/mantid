@@ -41,8 +41,6 @@ public:
   QString getYAxisLabel() const override;
 
 protected:
-  // Assignment operator.
-  QwtWorkspaceBinData &operator=(const QwtWorkspaceBinData & /*rhs*/);
   /**
   Return the x value of data point i
   @param i :: Index

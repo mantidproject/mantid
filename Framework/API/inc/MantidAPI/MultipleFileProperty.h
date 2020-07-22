@@ -123,6 +123,9 @@ public:
       const std::string &name,
       const std::vector<std::string> &exts = std::vector<std::string>());
 
+  MultipleFileProperty(const MultipleFileProperty &) = default;
+  MultipleFileProperty &operator=(const MultipleFileProperty &) = default;
+
   MultipleFileProperty *clone() const override {
     return new MultipleFileProperty(*this);
   }

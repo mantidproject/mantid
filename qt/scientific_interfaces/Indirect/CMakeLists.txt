@@ -13,6 +13,7 @@ set(
         ConvFitModel.cpp
         DensityOfStates.cpp
         Elwin.cpp
+        IDAFunctionParameterEstimation.cpp
         FunctionTemplateBrowser.cpp
         ILLEnergyTransfer.cpp
         ISISCalibration.cpp
@@ -313,6 +314,7 @@ set(
         ConvFitModel.cpp
         DensityOfStates.cpp
         Elwin.cpp
+        IDAFunctionParameterEstimation.cpp
         FunctionTemplateBrowser.cpp
         ILLEnergyTransfer.cpp
         ISISCalibration.cpp

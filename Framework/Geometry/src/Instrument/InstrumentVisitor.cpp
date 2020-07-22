@@ -37,7 +37,7 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
   for (size_t i = 0; i < nDetIds; ++i) {
     (*detIdToIndex)[detIds[i]] = i;
   }
-  return std::move(detIdToIndex);
+  return detIdToIndex;
 }
 
 void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {

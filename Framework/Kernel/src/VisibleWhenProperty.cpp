@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/VisibleWhenProperty.h"
+
 #include <memory>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

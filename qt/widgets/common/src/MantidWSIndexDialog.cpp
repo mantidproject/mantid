@@ -1094,8 +1094,6 @@ IntervalList::IntervalList(const Interval &interval) {
   m_list.append(interval);
 }
 
-IntervalList::IntervalList(const IntervalList &copy) { m_list = copy.m_list; }
-
 const QList<Interval> &IntervalList::getList() const { return m_list; }
 
 int IntervalList::totalIntervalLength() const {

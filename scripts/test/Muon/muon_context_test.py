@@ -12,7 +12,6 @@ from unittest import mock
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService
-from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import CreateWorkspace
 from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename

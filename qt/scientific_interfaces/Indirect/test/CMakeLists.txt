@@ -24,6 +24,7 @@ set(
   IqtFitModelTest.h
   JumpFitDataPresenterTest.h
   JumpFitModelTest.h
+  IDAFunctionParameterEstimationTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE

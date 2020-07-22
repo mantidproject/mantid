@@ -166,7 +166,9 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         }
       }
     }
-    FunctionGenerator::setAttribute("FWHMs", Attribute(new_fwhm));
+    Attribute newVal = attr;
+    newVal.setVector(new_fwhm);
+    FunctionGenerator::setAttribute("FWHMs", newVal);
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       const auto suffix = std::to_string(iSpec);
       declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
@@ -392,7 +394,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     IFunction_sptr retval = IFunction_sptr(new CrystalFieldMagnetisation);
     auto &spectrum = dynamic_cast<CrystalFieldMagnetisation &>(*retval);
     spectrum.setHamiltonian(ham, nre);
-    spectrum.setAttribute("Temperature", Attribute(temperature));
+    spectrum.setAttributeValue("Temperature", temperature);
     const auto suffix = std::to_string(iSpec);
     spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
     spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));

@@ -74,11 +74,11 @@ void CrystalFieldControl::setAttribute(const std::string &name,
           m_fwhmY[i].clear();
           if (nSpec > 1) {
             auto &control = *getFunction(i);
-            control.setAttribute("FWHMX", Attribute(std::vector<double>()));
-            control.setAttribute("FWHMY", Attribute(std::vector<double>()));
+            control.setAttributeValue("FWHMX", std::vector<double>());
+            control.setAttributeValue("FWHMY", std::vector<double>());
           } else {
-            setAttribute("FWHMX", Attribute(std::vector<double>()));
-            setAttribute("FWHMY", Attribute(std::vector<double>()));
+            API::IFunction::setAttributeValue("FWHMX", std::vector<double>());
+            API::IFunction::setAttributeValue("FWHMY", std::vector<double>());
           }
         }
       }
@@ -94,7 +94,7 @@ void CrystalFieldControl::setAttribute(const std::string &name,
 /// Parse a comma-separated list attribute
 /// @param attName :: A name of the attribute to parse.
 /// @param value :: A value to parse.
-/// @param cache :: A vector to chache the parsed values.
+/// @param cache :: A vector to cache the parsed values.
 void CrystalFieldControl::parseStringListAttribute(
     const std::string &attName, const std::string &value,
     std::vector<std::string> &cache) {
@@ -104,8 +104,11 @@ void CrystalFieldControl::parseStringListAttribute(
   cache.clear();
   cache.insert(cache.end(), tokenizer.begin(), tokenizer.end());
   auto attrValue = Kernel::Strings::join(cache.begin(), cache.end(), ",");
-  // Store back the trimmed names
-  API::IFunction::setAttribute(attName, Attribute(attrValue));
+  // Store back the trimmed names - we can't use setAttributeValue as it will
+  // call this setAttribute
+  auto attrCopy = getAttribute(attName);
+  attrCopy.setString(attrValue);
+  API::IFunction::setAttribute(attName, attrCopy);
 }
 
 /// Cache function attributes.

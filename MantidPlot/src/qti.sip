@@ -1207,7 +1207,7 @@ public:
   MDIWindowList windowsList() /PyName=windows/;
 
   // Required for setting the IPython console
-  QDockWidget _getInterpreterDock();
+  QDockWidget* _getInterpreterDock();
 %MethodCode
   sipRes = sipCpp->m_interpreterDock;
 %End

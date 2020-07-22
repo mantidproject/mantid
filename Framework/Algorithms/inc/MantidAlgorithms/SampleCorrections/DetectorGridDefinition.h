@@ -9,6 +9,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 #include <array>
+#include <cstddef>
 
 namespace Mantid {
 namespace Algorithms {

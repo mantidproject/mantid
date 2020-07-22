@@ -70,13 +70,24 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
    brew unlink qscintilla2
    brew unlink qscintilla2qt4
 
-9. Check that ``which python`` returns a Python in ``/usr/local`` and not system Python.
-
-10. Install python requirements
+9. Python is now keg-only. Add the appropriate version to ``PATH`` in shell profile and restart the terminal:
 
 .. code-block:: sh
 
-   python -m pip install -r /usr/local/Homebrew/Library/Taps/mantidproject/homebrew-mantid/requirements.txt
+   # Assume we are using bash
+   echo 'export PATH="/usr/local/opt/python@3.8/bin:$PATH"' >> ~/.bash_profile
+
+10. Downgrade setuptools to 48.0.0 until https://github.com/mantidproject/mantid/issues/29010 is fixed.
+
+.. code-block:: sh
+
+   python3 -m pip install setuptools==48.0.0  
+
+11. Install python requirements
+
+.. code-block:: sh
+
+   python3 -m pip install -r /usr/local/Homebrew/Library/Taps/mantidproject/homebrew-mantid/requirements.txt
 
 
 Instructions for Historic Versions

@@ -179,7 +179,7 @@ class FFTPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.calculation_finished_notifier.notify_subscribers()
+        self.calculation_finished_notifier.notify_subscribers(self._output_workspace_name)
 
     def calculate_FFT(self):
         imaginary_workspace_index = 0
@@ -221,6 +221,7 @@ class FFTPresenter(object):
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
         spectra = {"_" + FREQUENCY_EXTENSIONS["RE"]: 0 + shift, "_" + FREQUENCY_EXTENSIONS["IM"]: 1 + shift,
                    "_" + FREQUENCY_EXTENSIONS["MOD"]: 2 + shift}
+
         for spec_type in list(spectra.keys()):
             extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type], fft_workspace_name + spec_type)
 
@@ -232,6 +233,10 @@ class FFTPresenter(object):
 
             muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws)
             muon_workspace_wrapper.show(directory + fft_workspace_name + spec_type)
+
+        # This is a small hack to get the output name to a location where it can be part of the calculation finished
+        # signal.
+        self._output_workspace_name = fft_workspace_name + '_mod'
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

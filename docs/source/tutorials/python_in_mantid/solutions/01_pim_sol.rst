@@ -1,7 +1,7 @@
 .. _01_pim_sol:
 
 ============================
-Python in Mantid: Exercise 1
+Python in Mantid: Solution 1
 ============================
 
 A - Using ISIS Data
@@ -126,7 +126,7 @@ C - ILL Data
     ws = ConvertUnits(scaled, Target = 'DeltaE', EFixed = 4.7728189558864003, EMode = 'Direct')
     wsCorrected = DetectorEfficiencyCorUser(ws)
 
-    print("The corrected value in spectrum with ws index {}, bin {} is {:.2f} compared to {:.2f}".format(6,4,wsCorrected.readY(6)[3],ws.readY(6)[4]))
+    print("The corrected value in spectrum with ws index {}, bin {} is {:.2f} compared to {:.2f}".format(6,4,wsCorrected.readY(6)[4],ws.readY(6)[4]))
 
 Output:
 
