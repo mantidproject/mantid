@@ -303,16 +303,21 @@ protected:
 };
 
 /**
- * A sector: area defined by an inner and an outer arcs of circle, interrupted
- * at angles startAngle and endAngle.
+ * A sector: area defined by two concentric arcs of circle, of radii innerRadius
+ * and outerRadius, interrupted at angles startAngle and endAngle.
+ * It is basically a slice of a circular ring.
  *
- * The constructor takes a center QPoint property, 2 angles, and 2 widths for
- * the two circles.
+ * The constructor takes a center QPointF property, representing the center of
+ * the circles, the 2 limit angles, and the 2 radii for the circles.
+ *
+ * startAngle and endAngle are expressed in radians within the object, ranging
+ * from 0 to 2*pi, and are only changed to degrees for the user.
+ *
  */
 class Shape2DSector : public Shape2D {
 public:
-  Shape2DSector(double inner_radius, double outer_radius, double start_angle,
-                double end_angle, const QPointF &center);
+  Shape2DSector(double innerRadius, double outerRadius, double startAngle,
+                double endAngle, const QPointF &center);
   Shape2DSector(const Shape2DSector &sector);
   Shape2D *clone() const override { return new Shape2DSector(*this); }
   bool selectAt(const QPointF &p) const override;
@@ -326,8 +331,8 @@ public:
   QPointF getPoint(const QString &prop) const override;
   void setPoint(const QString &prop, const QPointF &value) override;
 
-  /// Because setting the new bounding box makes no sense, this is just overrode
-  /// and does nothing at all
+  /// Because setting the new bounding box makes no sense, this is just
+  /// overridden and does nothing at all
   virtual void setBoundingRect(const RectF &rect) override { UNUSED_ARG(rect); }
 
   /// Load state for the shape from a project file
@@ -341,8 +346,6 @@ protected:
   void addToPath(QPainterPath & /*path*/) const override {}
   void refit() override;
   void resetBoundingRect() override;
-  void computeScaling(QPointF BBoxCorner, QPointF BBoxOpposedCorner,
-                      QPointF bRectCorner, int vertexIndex);
   size_t getShapeNControlPoints() const override { return 4; }
   QPointF getShapeControlPoint(size_t i) const override;
   void setShapeControlPoint(size_t i, const QPointF &pos) override;
@@ -351,10 +354,14 @@ protected:
   double m_startAngle;
   double m_endAngle;
   QPointF m_center;
-};
 
-QRectF findArcBoundingBox(double startAngle, double endAngle);
-double distanceBetween(const QPointF &, const QPointF &);
+private:
+  void computeScaling(const QPointF &BBoxCorner,
+                      const QPointF &BBoxOpposedCorner,
+                      const QPointF &bRectCorner, int vertexIndex);
+  QRectF findSectorBoundingBox();
+  double distanceBetween(const QPointF &, const QPointF &) const;
+};
 
 /**
  * An arbitrary shape. Implemented as a polygon.
