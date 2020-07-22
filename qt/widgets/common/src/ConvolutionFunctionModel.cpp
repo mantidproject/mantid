@@ -133,7 +133,6 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
     bool hasDeltaFunction, bool isQDependent, double qValue,
     bool hasTempCorrection, double tempValue) {
   CompositeFunction_sptr innerFunction = std::make_shared<CompositeFunction>();
-  std::cout << " Peak function is " << lorentzianPeaks << std::endl;
   if (!lorentzianPeaks.empty()) {
     auto lorentzianPeakFunction =
         FunctionFactory::Instance().createInitialized(lorentzianPeaks);
@@ -145,7 +144,6 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
       innerFunction->addFunction(lorentzianPeakFunction);
     }
   }
-  std::cout << " fit type function is " << fitType << std::endl;
 
   if (!fitType.empty()) {
     auto fitTypeFunction =
@@ -265,7 +263,6 @@ void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func,
 
 void ConvolutionFunctionModel::setPrefix(IFunction *func,
                                          const QString &prefix) {
-  std::cout << " PREFIX: " << prefix.toStdString() << std::endl;
   if (isBackground(func)) {
     if (m_backgroundPrefix) {
       throw std::runtime_error("Model cannot have more than one background.");

@@ -56,6 +56,7 @@ void ConvTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(true);
   m_boolManager->blockSignals(true);
   m_enumManager->blockSignals(true);
+  m_intManager->blockSignals(true);
 
   createFunctionParameterProperties();
   createDeltaFunctionProperties();
@@ -70,7 +71,6 @@ void ConvTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
   m_boolManager->blockSignals(false);
-  // updateState();
 }
 
 void ConvTemplateBrowser::setFunction(const QString &funStr) {

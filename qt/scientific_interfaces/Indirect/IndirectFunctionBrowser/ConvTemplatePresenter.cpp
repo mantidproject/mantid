@@ -97,11 +97,14 @@ void ConvTemplatePresenter::setFunction(const QString &funStr) {
   m_view->updateTemperatureCorrectionAndDelta(m_model.hasTempCorrection(),
                                               m_model.hasDeltaFunction());
 
-  m_view->setSubType(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
   m_view->setSubType(SubTypeIndex::Lorentzian,
                      static_cast<int>(m_model.getLorentzianType()));
+  m_view->setSubType(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
   m_view->setSubType(SubTypeIndex::Background,
                      static_cast<int>(m_model.getBackgroundType()));
+
+  m_view->setEnum(SubTypeIndex::Lorentzian,
+                  static_cast<int>(m_model.getLorentzianType()));
   m_view->setEnum(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
   m_view->setEnum(SubTypeIndex::Background,
                   static_cast<int>(m_model.getBackgroundType()));

@@ -136,7 +136,8 @@ private:
   QStringList makeGlobalList() const;
   int getNumberOfPeaks() const;
   void checkConvolution(const IFunction_sptr &fun);
-  void checkSingleFunction(const IFunction_sptr &fun, bool &isFitTypeSet);
+  void checkSingleFunction(const IFunction_sptr &fun, bool &isLorentzianTypeSet,
+                           bool &isFiTypeSet);
 
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;

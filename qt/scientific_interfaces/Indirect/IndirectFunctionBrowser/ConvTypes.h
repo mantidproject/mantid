@@ -111,7 +111,7 @@ inline void applyToParamIDRange(ParamID from, ParamID to,
 enum SubTypeIndex {
   Lorentzian = 0,
   Fit = 1,
-  Background = 1,
+  Background = 2,
 };
 
 struct TemplateSubType {

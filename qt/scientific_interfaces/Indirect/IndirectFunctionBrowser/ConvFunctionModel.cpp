@@ -73,6 +73,7 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
 void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
   bool isFitTypeSet = false;
   bool isResolutionSet = false;
+  bool isLorentzianTypeSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     auto innerFunction = fun->getFunction(i);
     auto const name = innerFunction->name();
@@ -92,31 +93,33 @@ void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
               innerFunction->getFunction(1)))
         checkConvolution(innerFunction->getFunction(1));
       else
-        checkSingleFunction(innerFunction->getFunction(1), isFitTypeSet);
+        checkSingleFunction(innerFunction->getFunction(1), isLorentzianTypeSet,
+                            isFitTypeSet);
     }
 
     else if (name == "CompositeFunction") {
       checkConvolution(innerFunction);
     } else {
-      checkSingleFunction(innerFunction, isFitTypeSet);
+      checkSingleFunction(innerFunction, isLorentzianTypeSet, isFitTypeSet);
     }
   }
 }
 
 void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
+                                            bool &isLorentzianTypeSet,
                                             bool &isFitTypeSet) {
   assert(fun->nFunctions() == 0);
   auto const name = fun->name();
   if (name == "Lorentzian") {
-    if (isFitTypeSet && m_lorentzianType != LorentzianType::OneLorentzian) {
+    if (isLorentzianTypeSet &&
+        m_lorentzianType != LorentzianType::OneLorentzian) {
       throw std::runtime_error("Function has wrong structure.");
     }
-    if (isFitTypeSet)
+    if (isLorentzianTypeSet)
       m_lorentzianType = LorentzianType::TwoLorentzians;
     else
       m_lorentzianType = LorentzianType::OneLorentzian;
-    m_isQDependentFunction = false;
-    isFitTypeSet = true;
+    isLorentzianTypeSet = true;
   }
 
   if (FitTypeStringToEnum.count(name) == 1) {
@@ -129,7 +132,7 @@ void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
     isFitTypeSet = true;
   } else if (name == "DeltaFunction") {
     m_hasDeltaFunction = true;
-  } else {
+  } else if (!isFitTypeSet && !isLorentzianTypeSet) {
     clear();
     throw std::runtime_error(
         "Function has wrong structure. Function not recognized");
@@ -157,7 +160,6 @@ bool ConvFunctionModel::hasFunction() const { return m_model.hasFunction(); }
 
 void ConvFunctionModel::addFunction(const QString &prefix,
                                     const QString &funStr) {
-  std::cout << " CALLINGA DD FUNCTION ADD FUNCTION" << std::endl;
   if (!prefix.isEmpty())
     throw std::runtime_error(
         "Function doesn't have member function with prefix " +
@@ -399,7 +401,6 @@ QStringList ConvFunctionModel::makeGlobalList() const {
 }
 
 void ConvFunctionModel::setFitType(FitType fitType) {
-  std::cout << "calling set fit type with";
   m_fitType = fitType;
   if (FitTypeQDepends[m_fitType])
     m_isQDependentFunction = true;
