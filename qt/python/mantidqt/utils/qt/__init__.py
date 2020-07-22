@@ -14,14 +14,16 @@ import os.path as osp
 from contextlib import contextmanager
 from importlib import import_module
 import warnings
+
 warnings.filterwarnings(action='ignore',
                         category=DeprecationWarning,
                         module='.*uic.*')
 
 # 3rd-party modules
 from qtpy import QT_VERSION # noqa
+from qtpy.QtCore import QPoint # noqa
 from qtpy.QtGui import QKeySequence # noqa
-from qtpy.QtWidgets import QAction, QMenu # noqa
+from qtpy.QtWidgets import QAction, QMenu, QDesktopWidget  # noqa
 from qtpy.uic import loadUi, loadUiType # noqa
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
@@ -185,3 +187,27 @@ def toQSettings(settings):
         return settings.qsettings
     else:  # must be a QSettings already
         return settings
+
+def ensure_widget_is_on_screen(widget):
+    """If the supplied widget is off the screen it will be moved so it is on the screen.
+    The widget must already be 'shown' """
+
+    # make sure the window is smaller than the desktop
+    desktop = QDesktopWidget()
+    # this gives the maximum screen number if the position is off screen
+    screen = desktop.screenNumber(widget.pos())
+
+    # get the window size
+    desktop_geom = desktop.availableGeometry(screen)
+    # get the widget dimensions with any os added extras
+    widget_geom = widget.frameGeometry()
+    # and position it on the supplied desktop screen
+    x = max(widget_geom.x(), desktop_geom.left())
+    y = max(widget_geom.y(), desktop_geom.top())
+
+    if x + widget_geom.width() > desktop_geom.right():
+        x = desktop_geom.right() - widget_geom.width()
+    if y + widget_geom.height() > desktop_geom.bottom():
+        y = desktop_geom.bottom() - widget_geom.height()
+    window_pos = QPoint(x, y)
+    widget.move(window_pos)

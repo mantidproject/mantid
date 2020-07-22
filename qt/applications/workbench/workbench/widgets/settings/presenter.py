@@ -10,6 +10,7 @@ from qtpy.QtWidgets import QFileDialog
 
 from mantid import ConfigService
 from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.utils.qt import ensure_widget_is_on_screen
 from workbench.widgets.settings.categories.presenter import CategoriesSettings, CategoryProperties
 from workbench.widgets.settings.fitting.presenter import FittingSettings, FittingProperties
 from workbench.widgets.settings.general.presenter import GeneralSettings, GeneralProperties
@@ -56,6 +57,7 @@ class SettingsPresenter(object):
             self.view.setWindowModality(Qt.WindowModal)
 
         self.view.show()
+        ensure_widget_is_on_screen(self.view)
         self.current.show()
 
     def hide(self):
