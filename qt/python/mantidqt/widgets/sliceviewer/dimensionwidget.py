@@ -7,7 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 #
-from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QDoubleSpinBox, QSpinBox
+from qtpy.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider,
+                            QDoubleSpinBox, QSpinBox)
 from qtpy.QtCore import Qt, Signal
 from enum import Enum
 
@@ -36,6 +37,7 @@ class DimensionWidget(QWidget):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dims_info, parent=None):
         super().__init__(parent)
 
@@ -118,8 +120,9 @@ class DimensionWidget(QWidget):
         dimension and are in the same positions as the list returned from get_slicepoint
         """
         return [
-            None if d.get_state() in (State.X, State.Y) else
-            (d.spinbox.minimum(), d.spinbox.maximum()) for d in self.dims
+            None if d.get_state() in (State.X, State.Y) else (d.spinbox.minimum(),
+                                                              d.spinbox.maximum())
+            for d in self.dims
         ]
 
     def get_bin_params(self):
@@ -158,6 +161,7 @@ class Dimension(QWidget):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
         super().__init__(parent)
 
@@ -173,14 +177,15 @@ class Dimension(QWidget):
         self.units = QLabel(dim_info['units'])
 
         self.x = QPushButton('X')
-        self.x.setFixedSize(26, 26)
         self.x.setCheckable(True)
         self.x.clicked.connect(self.x_clicked)
+        # square button based on height. Default sizeHint is too large
+        self.x.setFixedWidth(self.x.sizeHint().height())
 
         self.y = QPushButton('Y')
-        self.y.setFixedSize(26, 26)
         self.y.setCheckable(True)
         self.y.clicked.connect(self.y_clicked)
+        self.y.setFixedWidth(self.y.sizeHint().height())
 
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, self.nbins - 1)
@@ -296,6 +301,7 @@ class DimensionMDE(Dimension):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
 
         # hack in a number_of_bins for MDEventWorkspace

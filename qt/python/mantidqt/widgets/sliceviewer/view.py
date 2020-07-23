@@ -133,7 +133,7 @@ class SliceViewerDataView(QWidget):
         layout = QGridLayout(self)
         layout.setSpacing(1)
         layout.addLayout(self.dimensions_layout, 0, 0, 1, 2)
-        layout.addLayout(self.toolbar_layout, 1, 0, 1, 2)
+        layout.addLayout(self.toolbar_layout, 1, 0, 1, 1)
         layout.addLayout(self.colorbar_layout, 1, 1, 3, 1)
         layout.addWidget(self.canvas, 2, 0, 1, 1)
         layout.addWidget(self.status_bar, 3, 0, 1, 1)
