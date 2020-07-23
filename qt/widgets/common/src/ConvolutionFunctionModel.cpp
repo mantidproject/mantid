@@ -105,8 +105,8 @@ void ConvolutionFunctionModel::setModel(
   }
   // The two clones here are needed as the clone value of IFunction goes through
   // a string serialisation and deserialisation. This can lead to the function
-  // structure subtly changeing. For exmaple composite functions of only one
-  // member are removed and uneeded brackets are removed from user defined
+  // structure subtly changing. For example composite functions of only one
+  // member are removed and unneeded brackets are removed from user defined
   // functions. As function cloning is used later on in the workflow it seems
   // safer to clone twice here to get the function in it's final state early on
   // rather than have it change during the workflow.

@@ -41,6 +41,7 @@ public:
   }
   ~ScopedFalse() { m_ref = m_oldValue; }
 };
+
 } // namespace
 
 ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent)
@@ -71,6 +72,7 @@ void ConvTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
   m_boolManager->blockSignals(false);
+  m_intManager->blockSignals(false);
 }
 
 void ConvTemplateBrowser::setFunction(const QString &funStr) {
@@ -112,8 +114,6 @@ QStringList ConvTemplateBrowser::getLocalParameters() const {
 void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) {
   m_presenter.setGlobalParameters(globals);
 }
-
-void ConvTemplateBrowser::intChanged(QtProperty *) {}
 
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   if (!m_emitBoolChange)
@@ -292,16 +292,31 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
       }
       parameters[index] = props;
     }
-    auto subTypeProp = m_enumManager->addProperty(subType->name());
-    m_enumManager->setEnumNames(subTypeProp,
-                                m_templateSubTypes[isub]->getTypeNames());
-    m_subTypeProperties.push_back(subTypeProp);
+    if (isub == SubTypeIndex::Lorentzian) {
+      auto subtypeProp = m_intManager->addProperty(subType->name());
+      m_intManager->setMinimum(subtypeProp, 0);
+      m_intManager->setMaximum(subtypeProp, 2);
+      m_subTypeProperties.push_back(subtypeProp);
+
+    } else {
+      auto subTypeProp = m_enumManager->addProperty(subType->name());
+      m_enumManager->setEnumNames(subTypeProp,
+                                  m_templateSubTypes[isub]->getTypeNames());
+      m_enumManager->setEnumNames(subTypeProp,
+                                  m_templateSubTypes[isub]->getTypeNames());
+      m_subTypeProperties.push_back(subTypeProp);
+    }
   }
 }
 
 void ConvTemplateBrowser::setEnum(size_t subTypeIndex, int enumIndex) {
   ScopedFalse _false(m_emitEnumChange);
   m_enumManager->setValue(m_subTypeProperties[subTypeIndex], enumIndex);
+}
+
+void ConvTemplateBrowser::setInt(size_t subTypeIndex, int value) {
+  ScopedFalse _false(m_emitIntChange);
+  m_intManager->setValue(m_subTypeProperties[subTypeIndex], value);
 }
 
 void ConvTemplateBrowser::createDeltaFunctionProperties() {
@@ -372,6 +387,12 @@ void ConvTemplateBrowser::setResolution(
   m_presenter.setResolution(fitResolutions);
 }
 
+void ConvTemplateBrowser::intChanged(QtProperty *prop) {
+  if (prop == m_subTypeProperties[SubTypeIndex::Lorentzian] &&
+      m_emitIntChange) {
+    m_presenter.setSubType(SubTypeIndex::Lorentzian, m_intManager->value(prop));
+  }
+}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

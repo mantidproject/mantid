@@ -108,7 +108,6 @@ public:
 
   void test_background_after_convolution() {
     ConvolutionFunctionModel model;
-    int a = 3;
     TS_ASSERT_THROWS_NOTHING(
         model.setFunctionString("(composite=Convolution;name=Resolution;name="
                                 "Lorentzian);name=LinearBackground"));
