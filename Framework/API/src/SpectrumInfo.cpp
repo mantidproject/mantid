@@ -103,6 +103,20 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
   return signedTwoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
 
+/** Returns the signed scattering angle projected on horizontal plane 2 theta in
+ * radians (angle w.r.t. to beam direction).
+ *
+ * Throws an exception if the spectrum is a monitor.
+ */
+double SpectrumInfo::inPlaneTwoTheta(const size_t index) const {
+  double inPlaneTwoTheta{0.0};
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index)) {
+    inPlaneTwoTheta += m_detectorInfo.inPlaneTwoTheta(detIndex);
+  }
+  return inPlaneTwoTheta /
+         static_cast<double>(spectrumDefinition(index).size());
+}
+
 /** Returns the out-of-plane angle in radians (angle w.r.t. to
  * vecPointingHorizontal direction).
  *

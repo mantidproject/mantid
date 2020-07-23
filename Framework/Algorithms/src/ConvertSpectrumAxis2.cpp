@@ -51,12 +51,14 @@ void ConvertSpectrumAxis2::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
   std::vector<std::string> targetOptions{
-      "Theta", "SignedTheta",  "ElasticQ",       "ElasticQSquared",
-      "theta", "signed_theta", "ElasticDSpacing"};
+      "Theta",           "SignedTheta", "InPlane2Theta", "ElasticQ",
+      "ElasticQSquared", "theta",       "signed_theta",  "ElasticDSpacing"};
   declareProperty(
       "Target", "", std::make_shared<StringListValidator>(targetOptions),
       "The unit to which spectrum axis is converted to - \"theta\" (for the "
       "angle in degrees), Q or Q^2, where elastic Q is evaluated at EFixed. "
+      "InPlane2Theta is the angle when each point is projected on the "
+      "horizontal plane."
       "Note that 'theta' and 'signed_theta' are there for compatibility "
       "purposes; they are the same as 'Theta' and 'SignedTheta' respectively");
   std::vector<std::string> eModeOptions;
@@ -102,7 +104,8 @@ void ConvertSpectrumAxis2::exec() {
 
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
-      unitTarget == "signed_theta" || unitTarget == "SignedTheta") {
+      unitTarget == "signed_theta" || unitTarget == "SignedTheta" ||
+      unitTarget == "InPlane2Theta") {
     createThetaMap(progress, unitTarget, inputWS);
   } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared" ||
              unitTarget == "ElasticDSpacing") {
@@ -124,11 +127,14 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           const std::string &targetUnit,
                                           API::MatrixWorkspace_sptr &inputWS) {
   // Not sure about default, previously there was a call to a null function?
-  bool signedTheta = false;
+  enum thetaTypes { theta, signedTheta, inPlaneTheta };
+  thetaTypes thetaType = theta;
   if (targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    signedTheta = true;
+    thetaType = theta;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
-    signedTheta = false;
+    thetaType = signedTheta;
+  } else if (targetUnit == "InPlane2Theta") {
+    thetaType = inPlaneTheta;
   }
 
   bool warningGiven = false;
@@ -143,10 +149,14 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
       continue;
     }
     if (!spectrumInfo.isMonitor(i)) {
-      if (signedTheta)
+      switch (thetaType) {
+      case theta:
         emplaceIndexMap(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
-      else
+      case signedTheta:
         emplaceIndexMap(spectrumInfo.twoTheta(i) * rad2deg, i);
+      case inPlaneTheta:
+        emplaceIndexMap(spectrumInfo.inPlaneTwoTheta(i) * rad2deg, i);
+      }
     } else {
       emplaceIndexMap(0.0, i);
     }
@@ -251,7 +261,8 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
-      targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
+      targetUnit == "signed_theta" || targetUnit == "SignedTheta" ||
+      targetUnit == "InPlane2Theta") {
     newAxis->unit() = std::make_shared<Units::Degrees>();
   } else if (targetUnit == "ElasticQ") {
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");

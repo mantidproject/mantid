@@ -20,6 +20,8 @@ The new unit and duplicates will not be aggregated. Any spectrum for which a det
 not found (i.e. if the instrument definition is incomplete) will not
 appear in the output workspace.
 
+Inplane2Theta associates to each detector the 2theta value of its projection on the horizontal plane.
+
 Usage
 -----
 

@@ -236,6 +236,70 @@ DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
   return angle;
 }
 
+/// Returns the two theta of the detector when projected on the horizontal plane
+/// defined by the sample.
+double DetectorInfo::inPlaneTwoTheta(const size_t index) const {
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+  // Get the axis defining the sign
+  const auto &instrumentUpAxis =
+      m_instrument->getReferenceFrame()->vecThetaSign();
+
+  const auto sampleDetVec = position(index) - samplePos;
+  const auto inPlaneSampleDetVec =
+      V3D(sampleDetVec.X(), samplePos.Y(), sampleDetVec.Z());
+  double angle = inPlaneSampleDetVec.angle(beamLine);
+
+  const auto cross = beamLine.cross_prod(inPlaneSampleDetVec);
+  const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
+  if (normToSurface.scalar_prod(cross) < 0) {
+    angle *= -1;
+  }
+  return angle;
+}
+
+/// Returns the two theta of the detector when projected on the horizontal plane
+/// defined by the sample.
+double
+DetectorInfo::inPlaneTwoTheta(const std::pair<size_t, size_t> &index) const {
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+  // Get the axis defining the sign
+  const auto &instrumentUpAxis =
+      m_instrument->getReferenceFrame()->vecThetaSign();
+
+  const auto sampleDetVec = position(index) - samplePos;
+  // Project the detector on the horizontal plane
+  const auto inPlaneSampleDetVec =
+      V3D(sampleDetVec.X(), samplePos.Y(), sampleDetVec.Z());
+  double angle = inPlaneSampleDetVec.angle(beamLine);
+
+  const auto cross = beamLine.cross_prod(inPlaneSampleDetVec);
+  const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
+  if (normToSurface.scalar_prod(cross) < 0) {
+    angle *= -1;
+  }
+  return angle;
+}
+
 double DetectorInfo::azimuthal(const size_t index) const {
   if (isMonitor(index))
     throw std::logic_error("Azimuthal angle is not defined for monitors");
