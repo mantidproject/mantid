@@ -241,57 +241,22 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         else:
             raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
 
+
         self.checkPixelY(height)
         grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)
+
         GroupDetectors(InputWorkspace=sort_x_axis_output,
                        OutputWorkspace=self.output2D,
                        GroupingPattern=grouping,
                        Behaviour="Average")
-        Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
 
-        if instrument.getName() == 'D16':
-            ws = mtd[self.output2D]
-            convert_spectrum_to_theta(ws, detector)
-        else:
-            ConvertSpectrumAxis(InputWorkspace=self.output2D,
-                                OutputWorkspace=self.output2D,
-                                Target="theta")
+        ConvertSpectrumAxis(InputWorkspace=self.output2D,
+                            OutputWorkspace=self.output2D,
+                            Target="InPlane2Theta")
+        Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
 
         self.setProperty('Output2D', mtd[self.output2D])
         self.cleanUp()
-
-
-def convert_spectrum_to_theta(ws, detector):
-    """
-    Given a workspace with the X-axis in pixels, compute the 2 theta equivalent axis and set it as the new one,
-    in the case of a flat D16 detector
-
-    :param ws: the workspace to convert
-    :param detector: the detector object associated with the instrument
-    """
-    if "x-pixel-size" in detector.getParameterNames():
-        pixel_width = float(detector.getNumberParameter('x-pixel-size')[0])
-    else:
-        pixel_width = 1
-        logger.warning("Pixel width not found for the instrument. {0} assumed.".format(pixel_width))
-
-    run = ws.getRun()
-    if run.hasProperty("Gamma.value"):
-        theta_offset = run.getProperty("Gamma.value").value
-    else:
-        theta_offset = 0
-        logger.warning("Detector angle not found. {0} assumed.".format(theta_offset))
-
-    from numpy import arctan2, pi
-    l2 = run.getPropertyAsSingleValue("L2")
-    new_axis = [arctan2((i - 160) * pixel_width, 1000 * l2) * 180 / pi + theta_offset
-                for i in range(ws.extractY()[0].size)]
-
-    for i in range(ws.spectrumInfo().size()):
-        ws.setX(i, new_axis)
-
-    ws.getAxis(0).setUnit("degrees")
-
 
 def create_detector_grouping(y_min, y_max, detector_width, detector_height):
     """
