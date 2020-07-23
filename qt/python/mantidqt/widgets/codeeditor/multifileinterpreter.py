@@ -150,8 +150,9 @@ class MultiPythonFileInterpreter(QWidget):
 
         # set the cursor to the last line and give the new editor focus
         interpreter.editor.setFocus()
-        line_count = content.count(linesep)
-        interpreter.editor.setCursorPosition(line_count,0)
+        if content is not None:
+            line_count = content.count(linesep)
+            interpreter.editor.setCursorPosition(line_count,0)
         return tab_idx
 
     def abort_current(self):
