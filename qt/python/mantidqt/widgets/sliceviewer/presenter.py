@@ -81,9 +81,10 @@ class SliceViewer(object):
         if data_view.dimensions.transpose:
             limits = limits[1], limits[0]
         data_view.plot_MDH(
-            self.model.get_ws(slicepoint=self.get_slicepoint(),
-                              bin_params=data_view.dimensions.get_bin_params(),
-                              limits=limits))
+            self.model.get_ws(
+                slicepoint=self.get_slicepoint(),
+                bin_params=data_view.dimensions.get_bin_params(),
+                limits=limits))
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
@@ -94,8 +95,8 @@ class SliceViewer(object):
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
         self.view.data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose))
+            self.model.get_data(
+                self.get_slicepoint(), transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """
@@ -103,10 +104,11 @@ class SliceViewer(object):
         """
         data_view = self.view.data_view
         data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                bin_params=data_view.dimensions.get_bin_params(),
-                                limits=data_view.get_axes_limits(),
-                                transpose=self.view.data_view.dimensions.transpose))
+            self.model.get_data(
+                self.get_slicepoint(),
+                bin_params=data_view.dimensions.get_bin_params(),
+                limits=data_view.get_axes_limits(),
+                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -115,11 +117,12 @@ class SliceViewer(object):
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
         dimensions = self.view.data_view.dimensions
-        return SliceInfo(frame=self.model.get_frame(),
-                         point=dimensions.get_slicepoint(),
-                         transpose=dimensions.transpose,
-                         range=dimensions.get_slicerange(),
-                         qflags=dimensions.qflags)
+        return SliceInfo(
+            frame=self.model.get_frame(),
+            point=dimensions.get_slicepoint(),
+            transpose=dimensions.transpose,
+            range=dimensions.get_slicerange(),
+            qflags=dimensions.qflags)
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
@@ -168,22 +171,6 @@ class SliceViewer(object):
         else:
             data_view.draw_plot()
 
-    def export_region(self, limits, export_type):
-        """Notify that a cut region has been selected for export to a workspace
-        :param limits: 2-tuple of ((left, right), (bottom, top))
-        :param export_type: A str denoting the region to export
-        """
-        data_view = self.view.data_view
-        transpose = data_view.dimensions.transpose
-        if transpose:
-            limits = limits[1], limits[0]
-        help_message = self.model.export_region(self.get_slicepoint(),
-                                                bin_params=data_view.dimensions.get_bin_params(),
-                                                limits=limits,
-                                                transpose=transpose,
-                                                export_type=export_type)
-        data_view.show_temporary_status_message(help_message, self.TEMPORARY_STATUS_TIMEOUT)
-
     def show_all_data_requested(self):
         """Instructs the view to show all data"""
         self.set_axes_limits(*self.model.get_dim_limits(self.get_slicepoint(),
@@ -199,13 +186,11 @@ class SliceViewer(object):
         Toggle the attached line plots for the integrated signal over each dimension for the current cursor
         position
         :param state: If true a request is being made to turn them on, else they should be turned off
-        :param region_selection: If true the region selection rather than single pixel selection should
-                                 be enabled
         """
         tool = PixelLinePlot
         data_view = self.view.data_view
         if state:
-            data_view.add_line_plots(tool)
+            data_view.add_line_plots(tool, self)
         else:
             data_view.deactivate_tool(ToolItemText.REGIONSELECTION)
             data_view.remove_line_plots()
@@ -224,13 +209,67 @@ class SliceViewer(object):
             data_view.deactivate_and_disable_tool(ToolItemText.PAN)
             tool = RectangleSelectionLinePlot
             if data_view.line_plots_active:
-                data_view.switch_line_plots_tool(RectangleSelectionLinePlot)
+                data_view.switch_line_plots_tool(RectangleSelectionLinePlot, self)
             else:
-                data_view.add_line_plots(tool)
+                data_view.add_line_plots(tool, self)
         else:
             data_view.enable_tool_button(ToolItemText.ZOOM)
             data_view.enable_tool_button(ToolItemText.PAN)
-            data_view.switch_line_plots_tool(PixelLinePlot)
+            data_view.switch_line_plots_tool(PixelLinePlot, self)
+
+    def export_roi(self, limits):
+        """Notify that an roi has been selected for export to a workspace
+        :param limits: 2-tuple of ((left, right), (bottom, top)). These are in display order
+        """
+        data_view = self.view.data_view
+
+        try:
+            self._show_status_message(
+                self.model.export_roi_to_workspace(
+                    self.get_slicepoint(),
+                    bin_params=data_view.dimensions.get_bin_params(),
+                    limits=limits,
+                    transpose=data_view.dimensions.transpose))
+        except Exception as exc:
+            self._show_status_message(f"Error exporting ROI: {exc}")
+
+    def export_cut(self, limits, cut_type):
+        """Notify that an roi has been selected for export to a workspace
+        :param limits: 2-tuple of ((left, right), (bottom, top)). These are in display order
+        and could be transposed w.r.t to the data
+        :param cut: A string indicating the required cut type
+        """
+        data_view = self.view.data_view
+
+        try:
+            self._show_status_message(
+                self.model.export_cuts_to_workspace(
+                    self.get_slicepoint(),
+                    bin_params=data_view.dimensions.get_bin_params(),
+                    limits=limits,
+                    transpose=data_view.dimensions.transpose,
+                    cut=cut_type))
+        except Exception as exc:
+            self._show_status_message(f"Error exporting region cut: {exc}")
+
+    def export_pixel_cut(self, pos, axis):
+        """Notify a single pixel line plot has been requested from the
+        given position in data coordinates.
+        :param pos: Position on the image
+        :param axis: String indicating the axis the position relates to: 'x' or 'y'
+        """
+        data_view = self.view.data_view
+
+        try:
+            self._show_status_message(
+                self.model.export_pixel_cut_to_workspace(
+                    self.get_slicepoint(),
+                    bin_params=data_view.dimensions.get_bin_params(),
+                    pos=pos,
+                    transpose=data_view.dimensions.transpose,
+                    axis=axis))
+        except Exception as exc:
+            self._show_status_message(f"Error exporting region cut: {exc}")
 
     def nonorthogonal_axes(self, state: bool):
         """
@@ -297,6 +336,12 @@ class SliceViewer(object):
         """
         if self._peaks_presenter is not None:
             getattr(self._peaks_presenter, attr)(*args, **kwargs)
+
+    def _show_status_message(self, message: str):
+        """
+        Show a temporary message in the status of the view
+        """
+        self.view.data_view.show_temporary_status_message(message, self.TEMPORARY_STATUS_TIMEOUT)
 
     def _overlayed_peaks_workspaces(self):
         """

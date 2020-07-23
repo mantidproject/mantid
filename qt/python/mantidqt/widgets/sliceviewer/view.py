@@ -45,6 +45,7 @@ class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
 
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
+
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super().__init__(parent)
 
@@ -171,12 +172,12 @@ class SliceViewerDataView(QWidget):
     def create_axes_nonorthogonal(self, transform):
         self.clear_figure()
         self.set_nonorthogonal_transform(transform)
-        self.ax = CurveLinearSubPlot(self.fig,
-                                     1,
-                                     1,
-                                     1,
-                                     grid_helper=GridHelperCurveLinear(
-                                         (self.nonortho_tr, transform.inv_tr)))
+        self.ax = CurveLinearSubPlot(
+            self.fig,
+            1,
+            1,
+            1,
+            grid_helper=GridHelperCurveLinear((self.nonortho_tr, transform.inv_tr)))
         # don't redraw on zoom as the data is rebinned and has to be redrawn again anyway
         self.enable_zoom_on_mouse_scroll(redraw=False)
         self.set_grid_on()
@@ -189,25 +190,25 @@ class SliceViewerDataView(QWidget):
         """Enable zoom on scroll the mouse wheel for the created axes
         :param redraw: Pass through to redraw option in enable_zoom_on_scroll
         """
-        self.canvas.enable_zoom_on_scroll(self.ax,
-                                          redraw=redraw,
-                                          toolbar=self.mpl_toolbar,
-                                          callback=self.on_data_limits_changed)
+        self.canvas.enable_zoom_on_scroll(
+            self.ax, redraw=redraw, toolbar=self.mpl_toolbar, callback=self.on_data_limits_changed)
 
-    def add_line_plots(self, toolcls):
+    def add_line_plots(self, toolcls, exporter):
         """Assuming line plots are currently disabled, enable them on the current figure
         The image axes must have been created first.
         :param toolcls: Use this class to handle creating the plots
+        :param exporter: Object defining methods to export cuts/roi
         """
         if self.line_plots_active:
             return
 
         self.line_plots_active = True
-        self._line_plots = toolcls(LinePlots(self.ax, self.colorbar), self.export_region)
+        self._line_plots = toolcls(LinePlots(self.ax, self.colorbar), exporter)
         self.status_bar_label.setText(self._line_plots.status_message())
+        self.canvas.setFocus()
         self.mpl_toolbar.set_action_checked(ToolItemText.LINEPLOTS, True, trigger=False)
 
-    def switch_line_plots_tool(self, toolcls):
+    def switch_line_plots_tool(self, toolcls, exporter):
         """Assuming line plots are currently enabled then switch the tool used to
         generate the plot curves.
         :param toolcls: Use this class to handle creating the plots
@@ -219,7 +220,7 @@ class SliceViewerDataView(QWidget):
         plotter = self._line_plots.plotter
         plotter.delete_line_plot_lines()
         self._line_plots.disconnect()
-        self._line_plots = toolcls(plotter, self.export_region)
+        self._line_plots = toolcls(plotter, exporter)
         self.status_bar.showMessage(self._line_plots.status_message())
         self.canvas.setFocus()
         self.canvas.draw_idle()
@@ -240,12 +241,13 @@ class SliceViewerDataView(QWidget):
         clears the plot and creates a new one using a MDHistoWorkspace
         """
         self.clear_image()
-        self.image = self.ax.imshow(ws,
-                                    origin='lower',
-                                    aspect='auto',
-                                    transpose=self.dimensions.transpose,
-                                    norm=self.colorbar.get_norm(),
-                                    **kwargs)
+        self.image = self.ax.imshow(
+            ws,
+            origin='lower',
+            aspect='auto',
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            **kwargs)
         self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         # ensure the axes data limits are updated to match the
@@ -260,12 +262,13 @@ class SliceViewerDataView(QWidget):
 
     def plot_MDH_nonorthogonal(self, ws, **kwargs):
         self.clear_image()
-        self.image = pcolormesh_nonorthogonal(self.ax,
-                                              ws,
-                                              self.nonortho_tr,
-                                              transpose=self.dimensions.transpose,
-                                              norm=self.colorbar.get_norm(),
-                                              **kwargs)
+        self.image = pcolormesh_nonorthogonal(
+            self.ax,
+            ws,
+            self.nonortho_tr,
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            **kwargs)
         self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         # swapping dimensions in nonorthogonal mode currently resets back to the
@@ -291,15 +294,16 @@ class SliceViewerDataView(QWidget):
                 old_extent = e3, e4, e1, e2
 
         self.clear_image()
-        self.image = imshow_sampling(self.ax,
-                                     ws,
-                                     origin='lower',
-                                     aspect='auto',
-                                     interpolation='none',
-                                     transpose=self.dimensions.transpose,
-                                     norm=self.colorbar.get_norm(),
-                                     extent=old_extent,
-                                     **kwargs)
+        self.image = imshow_sampling(
+            self.ax,
+            ws,
+            origin='lower',
+            aspect='auto',
+            interpolation='none',
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            extent=old_extent,
+            **kwargs)
         self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         self.draw_plot()
@@ -359,9 +363,8 @@ class SliceViewerDataView(QWidget):
         if self._image_info_tracker is not None:
             self._image_info_tracker.disconnect()
 
-        self._image_info_tracker = ImageInfoTracker(image=self.image,
-                                                    transpose_xy=self.dimensions.transpose,
-                                                    widget=self.image_info_widget)
+        self._image_info_tracker = ImageInfoTracker(
+            image=self.image, transpose_xy=self.dimensions.transpose, widget=self.image_info_widget)
 
         if state:
             self._image_info_tracker.connect()
@@ -491,6 +494,7 @@ class SliceViewerDataView(QWidget):
 
 class SliceViewerView(QWidget):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
+
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super().__init__(parent)
 
@@ -525,8 +529,8 @@ class SliceViewerView(QWidget):
     def peaks_view(self):
         """Lazily instantiates PeaksViewer and returns it"""
         if self._peaks_view is None:
-            self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view.ax),
-                                                         self.presenter)
+            self._peaks_view = PeaksViewerCollectionView(
+                MplPainter(self.data_view.ax), self.presenter)
             self._splitter.addWidget(self._peaks_view)
 
         return self._peaks_view
@@ -547,8 +551,8 @@ class SliceViewerView(QWidget):
         :param current_overlayed_names: A list of names that are currently overlayed
         :returns: A list of workspace names to overlay on the display
         """
-        model = PeaksWorkspaceSelectorModel(mantid.api.AnalysisDataService.Instance(),
-                                            checked_names=current_overlayed_names)
+        model = PeaksWorkspaceSelectorModel(
+            mantid.api.AnalysisDataService.Instance(), checked_names=current_overlayed_names)
         view = PeaksWorkspaceSelectorView(self)
         presenter = PeaksWorkspaceSelectorPresenter(view, model)
         return presenter.select_peaks_workspaces()

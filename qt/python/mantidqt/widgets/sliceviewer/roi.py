@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt.
 #
-import math
-
 from mantid.api import MatrixWorkspace
 from mantid.simpleapi import (DeleteWorkspace, ExtractSpectra, Rebin, ReplaceSpecialValues,
                               SumSpectra, Transpose)
@@ -56,7 +54,7 @@ def extract_matrix_cuts_spectra_axis(workspace: MatrixWorkspace,
         SumSpectra(InputWorkspace=roi, OutputWorkspace=xcut_name, EnableLogging=log_algorithm_calls)
 
     try:
-        DeleteWorkspace(tmp_crop_region)
+        DeleteWorkspace(tmp_crop_region, EnableLogging=log_algorithm_calls)
     except ValueError:
         pass
 
@@ -134,9 +132,6 @@ def extract_roi_matrix(workspace: MatrixWorkspace,
     :param roi_name: Name of the result workspace
     :param log_algorithm_calls: Log the algorithm call or be silent
     """
-    if transpose:
-        xmin, xmax, ymin, ymax = ymin, ymax, xmin, xmax
-
     yaxis = workspace.getAxis(1)
     if yaxis.isSpectra():
         extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
@@ -183,20 +178,19 @@ def extract_roi_numeric_axis(workspace: MatrixWorkspace,
     Assuming a MatrixWorkspace with vertical spectra axis, extract 1D cuts from the region defined
     by the given parameters
     :param workspace: A MatrixWorkspace with a vertical SpectraAxis
-    :param xmin: X min for bounded region
-    :param xmax: X max for bounded region
-    :param ymin: Y min for bounded region
-    :param ymax: Y max for bounded region
+    :param xmin: X min for bounded region. Can be None indicating use data xmin
+    :param xmax: X max for bounded region. Can be None indicating use data xmax
+    :param ymin: Y min for bounded region.
+    :param ymax: Y max for bounded region.
     :param xcut_name: Name of the X cut. Empty indicates it should be skipped
     :param ycut_name: Name of the Y cut. Empty indicates it should be skipped
     :param log_algorithm_calls: Log the algorithm call or be silent
     """
-    yaxis_values = workspace.getAxis(1).extractValues()
-    # determine workspace indices for crop. We assume the region has been checked against the workspace
-    # data boundaries
-    indexmin, indexmax = int(np.searchsorted(yaxis_values, ymin)), \
-        int(np.searchsorted(yaxis_values, ymax) - 1)
+    indexmin, indexmax = _index_range_numericaxis(workspace, ymin, ymax)
     return _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
+
+
+# private api
 
 
 def _extract_region(workspace: MatrixWorkspace,
@@ -215,6 +209,10 @@ def _extract_region(workspace: MatrixWorkspace,
     :param ymax: Y max for bounded region
     :param name: A name for the workspace
     """
+    if not workspace.isCommonBins():
+        # rebin to a common grid using the resolution from the spectrum
+        # with the lowest resolution to avoid overbinning
+        workspace = _rebin_to_common_grid(workspace, None, None, log_algorithm_calls)
     return ExtractSpectra(
         InputWorkspace=workspace,
         OutputWorkspace=name,
@@ -228,13 +226,30 @@ def _extract_region(workspace: MatrixWorkspace,
 def _index_range_spectraaxis(workspace: MatrixWorkspace, ymin: float, ymax: float):
     """
     Return the workspace indicies for the given ymin/ymax values on the given workspace
-    :param workspace: A MatrixWorkspace object
+    :param workspace: A MatrixWorkspace object spectra Y Axis
     :param ymin: Minimum Y value in range
     :param ymax: Maximum Y value in range
     """
-    indexmin = workspace.getIndexFromSpectrumNumber(math.floor(ymin + 0.5))
-    indexmax = workspace.getIndexFromSpectrumNumber(math.floor(ymax + 0.5))
-    return indexmin, indexmax
+    if ymin is None or ymax is None:
+        return 0, workspace.getNumberHistograms() - 1
+    else:
+        spectra_axis = workspace.getAxis(1)
+        return spectra_axis.indexOfValue(ymin), spectra_axis.indexOfValue(ymax)
+
+
+def _index_range_numericaxis(workspace: MatrixWorkspace, ymin: float, ymax: float):
+    """
+    Return the workspace indices for the given ymin/ymax values on the given workspace
+    :param workspace: A MatrixWorkspace object with a numeric Y Axis
+    :param ymin: Minimum Y value in range
+    :param ymax: Maximum Y value in range
+    """
+    if ymin is None or ymax is None:
+        return 0, workspace.getNumberHistograms() - 1
+    else:
+        yaxis_values = workspace.getAxis(1).extractValues()
+        return int(np.searchsorted(yaxis_values, ymin)), \
+            int(np.searchsorted(yaxis_values, ymax))
 
 
 def _rebin_to_common_grid(workspace: MatrixWorkspace, xmin: float, xmax: float,
@@ -248,8 +263,12 @@ def _rebin_to_common_grid(workspace: MatrixWorkspace, xmin: float, xmax: float,
     :param xmax: Maximum X value in range
     """
     delta = np.max(np.diff(workspace.extractX()))
+    if xmin is None or xmax is None:
+        params = [delta]
+    else:
+        params = [xmin, delta, xmax]
     return Rebin(
         InputWorkspace=workspace,
         OutputWorkspace=workspace,
-        Params=[xmin, delta, xmax],
+        Params=params,
         EnableLogging=log_algorithm_calls)

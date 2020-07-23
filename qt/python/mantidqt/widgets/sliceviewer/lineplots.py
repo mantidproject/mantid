@@ -8,7 +8,7 @@
 # std imports
 from collections import namedtuple
 from functools import lru_cache
-from typing import Callable, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 # 3rd party imports
 from matplotlib.artist import setp as set_artist_property
@@ -194,29 +194,73 @@ class LinePlots:
         self._canvas.draw_idle()
 
 
-class PixelLinePlot(CursorTracker):
+class KeyHandler:
+    """Base-class for any lineplot tool that wants to allow export regions
+    with keypresses.
+    The derived class should implement to class attributes:
+      - STATUS_MESSAGE: str - A string defining the information message to display
+      - SELECTION_KEYS: tuple(str) - A tuple of strings defining keys to accept
     """
-    Draws X/Y line plots from single rows/columns of an image into a given
-    set of line plots.
-    :param plotter: A reference to the object holding the line plot axes.
-    """
-    def __init__(self, plotter: LinePlots, _=None):
+
+    def __init__(self, plotter: LinePlots, exporter: Any):
         """
-        :param plotter: A reference to the view this is attached to
-        :param _: Unused parameter for compatability with RectangleSelectionLinePlot
+        :param plotter: A reference to the object holding the line plot axes.
+        :param roi_export_cb: An optional callback when an export of a selected region is requested
         """
-        super().__init__(image_axes=plotter.image_axes)
         self._plotter = plotter
+        self.exporter = exporter
+        ax = plotter.image_axes
+        self._key_cid = ax.figure.canvas.mpl_connect('key_release_event', self._on_key_released)
+
+    def disconnect(self):
+        """Called to disconnect from the axes events"""
+        self.plotter.image_axes.figure.canvas.mpl_disconnect(self._key_cid)
+
+    def status_message(self):
+        """
+        Return a status message to display when this tool is active
+        """
+        return self.STATUS_MESSAGE
 
     @property
     def plotter(self):
         return self._plotter
 
-    def status_message(self):
+    # private api
+    def _on_key_released(self, event):
         """
-        Returns an empty string for a status bar message
+        Callback on key release event
+        :param event: KeyEvent defining release
         """
-        return ""
+        key = event.key
+        if key not in self.SELECTION_KEYS:
+            return
+
+        # defer implementation
+        try:
+            self.handle_key(key)
+        except Exception:
+            pass
+
+
+class PixelLinePlot(CursorTracker, KeyHandler):
+    """
+    Draws X/Y line plots from single rows/columns of an image into a given
+    set of line plots.
+    """
+
+    STATUS_MESSAGE = "Press key to send cuts to workspaces: c=both cuts, x=X, y=Y."
+    SELECTION_KEYS = ('c', 'x', 'y')
+
+    def __init__(self, plotter: LinePlots, exporter: Any):
+        """
+        See RegionExtractionTool for parameter descriptions
+        """
+        CursorTracker.__init__(self, image_axes=plotter.image_axes)
+        KeyHandler.__init__(self, plotter, exporter)
+
+        # cache most current cursor position
+        self._cursor_pos = None
 
     # CursorTracker interface
     def on_cursor_at(self, xdata: float, ydata: float):
@@ -232,6 +276,7 @@ class PixelLinePlot(CursorTracker):
             plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
             plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
             plotter.sync_plot_limits_with_colorbar()
+            self._cursor_pos = (xdata, ydata)
             plotter.redraw()
 
     def on_cursor_outside_axes(self):
@@ -239,9 +284,21 @@ class PixelLinePlot(CursorTracker):
         Called when the mouse moves outside of the image axes
         """
         self._plotter.delete_line_plot_lines()
+        self._cursor_pos = None
+
+    # RegionExtractionTool interface
+    def handle_key(self, key):
+        """
+        Called by RegionExtractionTool if a key was accepted to perform a region
+        extraction
+        """
+        if self._cursor_pos is None:
+            return None
+
+        self.exporter.export_pixel_cut(self._cursor_pos, key)
 
 
-class RectangleSelectionLinePlot:
+class RectangleSelectionLinePlot(KeyHandler):
     """
     Draws X/Y line plots from a rectangular selection by summing across
     the orthogonal direction.
@@ -250,16 +307,16 @@ class RectangleSelectionLinePlot:
     STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
     SELECTION_KEYS = ('r', 'c', 'x', 'y')
 
-    def __init__(self, plotter: LinePlots, roi_export_cb: Callable[[Limits, str], None] = None):
+    def __init__(self, plotter: LinePlots, exporter: Any):
         """
-        :param plotter: A reference to the object holding the line plot axes.
-        :param roi_export_cb: An optional callback when an export of a selected region is requested
+        See KeyHandler for parameter descriptions
         """
+        super().__init__(plotter, exporter)
+
         ax = plotter.image_axes
-        self._plotter = plotter
         self._selector = RectangleSelector(
             ax,
-            self._on_region_selected,
+            self._on_rectangle_selected,
             drawtype='box',
             useblit=False,  # rectangle persists on button release
             button=[1],
@@ -267,28 +324,40 @@ class RectangleSelectionLinePlot:
             minspany=5,
             spancoords='pixels',
             interactive=True)
-        if roi_export_cb:
-            self._roi_export_cb = roi_export_cb
-            self._key_cid = ax.figure.canvas.mpl_connect('key_release_event', self._on_key_released)
 
     def disconnect(self):
-        self._plotter.image_axes.figure.canvas.mpl_disconnect(self._key_cid)
+        super().disconnect()
         for artist in self._selector.artists:
             artist.remove()
         del self._selector
 
-    def status_message(self):
+    # RegionExtractionTool interface
+    def handle_key(self, key):
         """
-        Return a status message to display when this tool is active
+        Called if a keypress was accepted to export a region
+        :param key: str identifying key
+        :return: A string describing the result of the operation
         """
-        return self.STATUS_MESSAGE
+        # if the image has been moved and the selection is not visible then do nothing
+        if not self._selector.artists[0].get_visible():
+            return
 
-    @property
-    def plotter(self):
-        return self._plotter
+        rect = self._selector.to_draw
+        ll_x, ll_y = rect.get_xy()
+        limits = ((ll_x, ll_x + rect.get_width()), (ll_y, ll_y + rect.get_height()))
+
+        if key == 'r':
+            self.exporter.export_roi(limits)
+        if key in ('c', 'x', 'y'):
+            self.exporter.export_cut(limits, cut_type=key)
 
     # private api
-    def _on_region_selected(self, eclick, erelease):
+    def _on_rectangle_selected(self, eclick, erelease):
+        """
+        Callback when a rectangle has been draw on the axes
+        :param eclick: Event marking where the mouse was clicked
+        :param erelease: Event marking where the mouse was released
+        """
         plotter = self.plotter
         cinfo_click = cursor_info(plotter.image, eclick.xdata, eclick.ydata)
         if cinfo_click is None:
@@ -307,18 +376,6 @@ class RectangleSelectionLinePlot:
             np.sum(arr[imin:imax, jmin:jmax], axis=1))
         plotter.update_line_plot_limits()
         plotter.redraw()
-
-    def _on_key_released(self, event):
-        if not self._selector.artists[0].get_visible():
-            return
-
-        rect = self._selector.to_draw
-        key = event.key
-        if key in self.SELECTION_KEYS:
-            rect = self._selector.to_draw
-            ll_x, ll_y = rect.get_xy()
-            limits = ((ll_x, ll_x + rect.get_width()), (ll_y, ll_y + rect.get_height()))
-            self._roi_export_cb(limits, key)
 
 
 # Data type to store information related to a cursor over an image

@@ -31,6 +31,7 @@ class WS_TYPE(Enum):
 
 class SliceViewerModel:
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
+
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
         # For MDH the view will show the original NDE if possible
@@ -69,12 +70,15 @@ class SliceViewerModel:
         if self.get_ws_type() == WS_TYPE.MDE:
             self.export_roi_to_workspace = self.export_roi_to_workspace_mdevent
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_mdevent
+            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_md
         elif ws_type == WS_TYPE.MDH:
             self.export_roi_to_workspace = self.export_roi_to_workspace_mdhisto
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_mdhisto
+            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_md
         else:
             self.export_roi_to_workspace = self.export_roi_to_workspace_matrix
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_matrix
+            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_matrix
 
     def can_normalize_workspace(self) -> bool:
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
@@ -258,42 +262,10 @@ class SliceViewerModel:
             proj_matrix = np.diag([1., 1., 1.])
 
         display_indices = slice_info.transform([0, 1, 2])
-        return NonOrthogonalTransform.from_lattice(lattice,
-                                                   x_proj=proj_matrix[:, display_indices[0]],
-                                                   y_proj=proj_matrix[:, display_indices[1]])
-
-    def export_region(self, slicepoint: Sequence[Optional[float]], bin_params: Sequence[float],
-                      limits: tuple, transpose: bool, export_type: str):
-        """
-        Export a region to a workspace or workspaces depending on the type. Convenience wrapper
-        for other specific slice/cut type functions
-        :param slicepoint: ND sequence of either None or float. A float defines the point
-                           in that dimension for the slice.
-        :param bin_params: ND sequence containing the number of bins for each dimension
-        :param limits: An optional ND sequence containing limits for plotting dimensions. If
-                       not provided the full extent of each dimension is used. the limits
-                       should be provided in the same order as the workspace dimensions.
-        :param transpose: If true then transpose the data before returning
-        :param export_type: A string denoting which type to export. Options=s,c,x,y.
-        """
-        # see __init__ for 'export_roi_to_workspace'/'export_cuts_to_workspace' definitions
-        try:
-            if 'r' == export_type:
-                help_message = self.export_roi_to_workspace(slicepoint,
-                                                            bin_params=bin_params,
-                                                            limits=limits,
-                                                            transpose=transpose)
-            else:
-                help_message = self.export_cuts_to_workspace(slicepoint,
-                                                             bin_params=bin_params,
-                                                             limits=limits,
-                                                             transpose=transpose,
-                                                             cut=export_type)
-        except Exception as exc:
-            op = 'roi' if 'r' == export_type else 'cut'
-            help_message = f'Error occurred while creating {op}: {str(exc)}'
-
-        return help_message
+        return NonOrthogonalTransform.from_lattice(
+            lattice,
+            x_proj=proj_matrix[:, display_indices[0]],
+            y_proj=proj_matrix[:, display_indices[1]])
 
     def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,
@@ -308,6 +280,8 @@ class SliceViewerModel:
         :param transpose: If true the limits are transposed w.r.t the data
         """
         workspace = self._get_ws()
+        if transpose:
+            limits = limits[1], limits[0]
         params, xindex, yindex = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
         params['OutputWorkspace'] = self._roi_name
         roi_ws = BinMD(InputWorkspace=self._get_ws(), **params)
@@ -331,6 +305,9 @@ class SliceViewerModel:
         :param cut: A string denoting which type to export. Options=s,c,x,y.
         """
         workspace = self._get_ws()
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
         xcut_name, ycut_name, help_msg = self._cut_names(cut)
         params, xindex, yindex = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
         output_bins = params['OutputBins']
@@ -369,6 +346,9 @@ class SliceViewerModel:
         :param transpose: If true then the limits are transposed w.r.t to the data
         """
         workspace = self._get_ws()
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
         xindex, yindex = _display_indices(slicepoint)
         dim_limits = _dimension_limits(workspace, slicepoint, limits)
         # Construct paramters to integrate everything first and overrid per cut
@@ -397,9 +377,12 @@ class SliceViewerModel:
         :param limits: An optional ND sequence containing limits for plotting dimensions. If
                        not provided the full extent of each dimension is used
         :param transpose: If true then the limits are transposed w.r.t to the data
-        :param cut: A string denoting which type to export. Options=s,c,x,y.
+        :param cut: A string denoting which type to export. Options=c,x,y.
         """
         workspace = self._get_ws()
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
         dim_limits = _dimension_limits(workspace, slicepoint, limits)
         # Construct paramters to integrate everything first and overrid per cut
         params = {f'P{n+1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
@@ -434,6 +417,9 @@ class SliceViewerModel:
         :param cut: A string denoting which cut to export. Options=c,x,y.
         """
         workspace = self._get_ws()
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
         yaxis = workspace.getAxis(1)
         (xmin, xmax), (ymin, ymax) = limits[0], limits[1]
         xcut_name, ycut_name, help_msg = self._cut_names(cut)
@@ -460,9 +446,59 @@ class SliceViewerModel:
                        not provided the full extent of each dimension is used
         :param transpose:  If true then the limits are transposed .w.r.t. the data
         """
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
         extract_roi_matrix(self._get_ws(), *limits[0], *limits[1], transpose, self._roi_name,
                            LOG_ALGORITHM_CALLS)
         return f'ROI created: {self._roi_name}'
+
+    def export_pixel_cut_to_workspace_md(self, slicepoint, bin_params, pos: tuple, transpose: bool,
+                                         axis: str):
+        """
+        Export a single row/column as a workspace. Signature matches other export functions
+        slicepoint, bin_params are unused
+        :param pos: A 2-tuple containing the position of the pixel whose row/column should be exported
+        :param transpose:  If true then the limits are transposed .w.r.t. the data
+        :param axis: A string 'x' or 'y' identifying the axis to cut along
+        """
+        # Form single pixel limits for a cut
+        xindex, yindex = _display_indices(slicepoint, transpose)
+        workspace = self._get_ws()
+        deltax, deltay = workspace.getDimension(xindex).getBinWidth(), \
+            workspace.getDimension(yindex).getBinWidth()
+        xpos, ypos = pos
+        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay,
+                                                              ypos + 0.5 * deltay)
+        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose,
+                                                     axis)
+
+    def export_pixel_cut_to_workspace_matrix(self, slicepoint, bin_params, pos: tuple,
+                                             transpose: bool, axis: str):
+        """
+        Export a single row/column as a workspace. Signature matches other export functions
+        slicepoint, bin_params are unused
+        :param pos: A 2-tuple containing the position of the pixel whose row/column should be exported
+        :param transpose:  If true then the limits are transposed .w.r.t. the data
+        :param axis: A string 'x' or 'y' identifying the axis to cut along
+        """
+        workspace = self._get_ws()
+        xpos, ypos = pos
+        if transpose:
+            # swap back to model order
+            xpos, ypos = ypos, xpos
+
+        xcut_name, ycut_name, help_msg = self._cut_names(axis)
+        if transpose:
+            xcut_name, ycut_name = ycut_name, xcut_name
+        if xcut_name:
+            extract_roi_matrix(workspace, None, None, ypos, ypos, False, xcut_name,
+                               LOG_ALGORITHM_CALLS)
+        if ycut_name:
+            extract_roi_matrix(workspace, xpos, xpos, None, None, True, ycut_name,
+                               LOG_ALGORITHM_CALLS)
+
+        return help_msg
 
     # private api
     def _get_ws(self):
@@ -579,10 +615,11 @@ def _inplace_transposemd(workspace, axes):
     :param workspace: A reference to an MD workspace
     :param axes: The axes parameter for TransposeMD
     """
-    TransposeMD(InputWorkspace=workspace,
-                OutputWorkspace=workspace,
-                Axes=axes,
-                EnableLogging=LOG_ALGORITHM_CALLS)
+    TransposeMD(
+        InputWorkspace=workspace,
+        OutputWorkspace=workspace,
+        Axes=axes,
+        EnableLogging=LOG_ALGORITHM_CALLS)
 
 
 def _to_str(seq: Sequence):

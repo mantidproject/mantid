@@ -98,7 +98,7 @@ def _create_mock_matrixworkspace(x_axis: tuple,
     ]
     ws.getAxis.side_effect = lambda i: axes[i]
     if y_is_spectra:
-        ws.getIndexFromSpectrumNumber.side_effect = lambda i: i + 1
+        axes[1].indexOfValue.side_effect = lambda i: i + 1
     else:
         axes[1].extractValues.return_value = np.array(y_axis)
 
@@ -624,14 +624,14 @@ class SliceViewerModelTest(unittest.TestCase):
             model = SliceViewerModel(mock_ws)
             slicepoint, bin_params = MagicMock(), MagicMock()
 
-            help_msg = model.export_region(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)),
-                                           transpose, 'r')
+            help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
+                                                     ((xmin, xmax), (ymin, ymax)), transpose)
 
             self.assertEqual('ROI created: mock_ws_roi', help_msg)
             if is_spectra:
-                self.assertEqual(2, mock_ws.getIndexFromSpectrumNumber.call_count)
+                self.assertEqual(2, mock_ws.getAxis(1).indexOfValue.call_count)
             else:
-                mock_ws.getIndexFromSpectrumNumber.assert_not_called()
+                mock_ws.getAxis(1).extractValues.assert_called_once()
 
             mock_extract_spectra.assert_called_once_with(
                 InputWorkspace=mock_ws,
@@ -645,8 +645,8 @@ class SliceViewerModelTest(unittest.TestCase):
 
         assert_call_as_expected(xmin, xmax, 3, 5, transpose=False, is_spectra=True)
         assert_call_as_expected(2., 4., 0, 4, transpose=True, is_spectra=True)
-        assert_call_as_expected(xmin, xmax, 1, 2, transpose=False, is_spectra=False)
-        assert_call_as_expected(ymin, ymax, 0, 1, transpose=True, is_spectra=False)
+        assert_call_as_expected(xmin, xmax, 1, 3, transpose=False, is_spectra=False)
+        assert_call_as_expected(ymin, ymax, 0, 2, transpose=True, is_spectra=False)
 
     @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
     @patch('mantidqt.widgets.sliceviewer.roi.Rebin')
@@ -660,8 +660,8 @@ class SliceViewerModelTest(unittest.TestCase):
             model = SliceViewerModel(mock_ws)
             slicepoint, bin_params = MagicMock(), MagicMock()
 
-            help_msg = model.export_region(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)),
-                                           transpose, export_type)
+            help_msg = model.export_cuts_to_workspace(
+                slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)), transpose, export_type)
 
             if export_type == 'c':
                 mock_extract_spectra.assert_called_once()
@@ -741,16 +741,24 @@ class SliceViewerModelTest(unittest.TestCase):
         def assert_call_as_expected(transpose, export_type):
             model = SliceViewerModel(self.ws_MDE_3D)
 
-            help_msg = model.export_region(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)),
-                                           transpose, export_type)
+            if export_type == 'r':
+                help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
+                                                         ((xmin, xmax), (ymin, ymax)), transpose)
+            else:
+                help_msg = model.export_cuts_to_workspace(
+                    slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)), transpose, export_type)
 
+            if transpose:
+                extents = [ymin, ymax, xmin, xmax, zmin, zmax]
+            else:
+                extents = [xmin, xmax, ymin, ymax, zmin, zmax]
             common_call_params = dict(
                 InputWorkspace=self.ws_MDE_3D,
                 AxisAligned=False,
                 BasisVector0='h,rlu,1.0,0.0,0.0',
                 BasisVector1='k,rlu,0.0,1.0,0.0',
                 BasisVector2='l,rlu,0.0,0.0,1.0',
-                OutputExtents=[xmin, xmax, ymin, ymax, zmin, zmax],
+                OutputExtents=extents,
                 EnableLogging=False)
             xcut_name, ycut_name = 'ws_MDE_3D_cut_x', 'ws_MDE_3D_cut_y'
             if export_type == 'r':
@@ -834,15 +842,22 @@ class SliceViewerModelTest(unittest.TestCase):
 
     @patch('mantidqt.widgets.sliceviewer.model.BinMD')
     @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
-    def test_export_region_returns_error_in_help_string_if_operation_failed(
-            self, mock_extract_spectra, mock_binmd):
+    def test_export_region_raises_exception_if_operation_failed(self, mock_extract_spectra,
+                                                                mock_binmd):
         def assert_error_returned_in_help(workspace, export_type, mock_alg, err_msg):
             model = SliceViewerModel(workspace)
             slicepoint, bin_params = MagicMock(), MagicMock()
             mock_alg.side_effect = RuntimeError(err_msg)
 
-            help_msg = model.export_region(slicepoint, bin_params, ((1.0, 2.0), (-1, 2.0)), True,
-                                           export_type)
+            try:
+                if export_type == 'r':
+                    help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
+                                                             ((1.0, 2.0), (-1, 2.0)), True)
+                else:
+                    help_msg = model.export_cuts_to_workspace(
+                        slicepoint, bin_params, ((1.0, 2.0), (-1, 2.0)), True, export_type)
+            except Exception as exc:
+                help_msg = str(exc)
             mock_alg.reset_mock()
 
             self.assertTrue(err_msg in help_msg)
