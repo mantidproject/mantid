@@ -134,21 +134,6 @@ class SPowderSemiEmpiricalCalculator(object):
         :return:  object of type SData with 2D dynamical structure factors for the powder case
         """
 
-        # calculate 2D S for all incident energies
-        atoms_items = self._calculate_s_powder_2d_core()
-
-        # put 2D S into SData object
-        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set(items=atoms_items)
-
-        return s_data
-
-    def _calculate_s_powder_2d_core(self):
-        """
-        Helper function for _calculate_s_powder_2d. It calculates S for all incident energies, all q-point, all angles
-        and all atoms.
-        :return: dictionary with two dimensional S which correspond to all incident energies and all k-points.
-        """
         e_init = abins.parameters.instruments[self._instrument.get_name()]['e_init']
         indent = INCIDENT_ENERGY_MESSAGE_INDENTATION
 
@@ -163,9 +148,10 @@ class SPowderSemiEmpiricalCalculator(object):
             local_data = self._calculate_s_powder_over_k()
             self._sum_s(current_val=data, addition=local_data)
 
-        data.update({"frequencies": self._frequencies})
-
-        return data
+        # put 2D S into SData object
+        s_data = abins.SData(data=data, frequencies=self._frequencies,
+                             temperature=self._temperature, sample_form=self._sample_form)
+        return s_data
 
     def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None):
         """
