@@ -131,13 +131,12 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
   enum thetaTypes { theta, signedTheta, inPlaneTheta };
   thetaTypes thetaType = theta;
   if (targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    thetaType = theta;
-  } else if (targetUnit == "theta" || targetUnit == "Theta") {
     thetaType = signedTheta;
+  } else if (targetUnit == "theta" || targetUnit == "Theta") {
+    thetaType = theta;
   } else if (targetUnit == "InPlane2Theta") {
     thetaType = inPlaneTheta;
   }
-
   bool warningGiven = false;
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -151,12 +150,15 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
     }
     if (!spectrumInfo.isMonitor(i)) {
       switch (thetaType) {
-      case theta:
-        emplaceIndexMap(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
       case signedTheta:
+        emplaceIndexMap(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
+        break;
+      case theta:
         emplaceIndexMap(spectrumInfo.twoTheta(i) * rad2deg, i);
+        break;
       case inPlaneTheta:
         emplaceIndexMap(inPlane2Theta(i, inputWS) * rad2deg, i);
+        break;
       }
     } else {
       emplaceIndexMap(0.0, i);
