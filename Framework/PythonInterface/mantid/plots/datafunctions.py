@@ -584,6 +584,8 @@ def get_uneven_data(workspace, distribution):
     y = []
     nhist = workspace.getNumberHistograms()
     yvals = workspace.getAxis(1).extractValues()
+    if yvals == ['']:
+        yvals = np.array([0])
     if len(yvals) == nhist:
         yvals = boundaries_from_points(yvals)
     try:
@@ -599,7 +601,7 @@ def get_uneven_data(workspace, distribution):
         else:
             xvals = boundaries_from_points(xvals)
         if specInfo and specInfo.hasDetectors(index) and (specInfo.isMasked(index) or specInfo.isMonitor(index)):
-            zvals[:] = np.nan
+            zvals = np.full_like(zvals, np.nan, dtype=np.double)
         zvals = np.ma.masked_invalid(zvals)
         z.append(zvals)
         x.append(xvals)
