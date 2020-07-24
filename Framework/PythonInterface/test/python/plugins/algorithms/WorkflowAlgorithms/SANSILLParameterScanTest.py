@@ -30,11 +30,12 @@ class SANSILLIntegrationTest(unittest.TestCase):
     def test_D16_omega(self):
         SANSILLParameterScan(SampleRuns="023583:023585",
                              Output2D="output2d",
-                             SampleThickness=0.1,
+                             ReducedData="reduced",
                              Observable="Omega.value",
                              PixelYmin=3,
                              PixelYMax=317)
         self._check_output(mtd["output2d"], 3)
+        self.assertTrue(mtd["reduced"])
 
     def _check_output(self, ws, spectra=1):
         self.assertTrue(ws)

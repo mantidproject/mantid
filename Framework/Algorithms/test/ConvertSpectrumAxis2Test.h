@@ -102,6 +102,31 @@ private:
                      const Mantid::Kernel::Exception::IndexError &);
   }
 
+  void check_output_values_for_inPlane2Theta_conversion(
+      const std::string &inputWSTheta, const std::string &outputWSTheta) {
+    MatrixWorkspace_const_sptr input, output;
+    TS_ASSERT_THROWS_NOTHING(
+        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWSTheta));
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputWSTheta));
+    // Workspaces should now have a numeric axes up the side, with units of
+    // angle.
+    const Axis *thetaAxis = nullptr;
+    TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
+    TS_ASSERT(thetaAxis->isNumeric());
+    TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
+    TS_ASSERT_EQUALS(thetaAxis->unit()->label(), "degrees");
+    // the detectors are vertically aligned
+    TS_ASSERT_DELTA((*thetaAxis)(0), 0.0000, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(1), 0.0000, 0.0001);
+
+    // Check workspace axes are of correct length.
+    TS_ASSERT_THROWS((*thetaAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
+  }
+
   void clean_up_workspaces(const std::string &inputWS,
                            const std::string &outputWS) {
     AnalysisDataService::Instance().remove(inputWS);
@@ -177,6 +202,17 @@ public:
     // Check output values for the workspace then clean up.
     check_output_values_for_theta_conversion(inputWS, outputWS2);
     clean_up_workspaces(inputWS, outputWS2);
+  }
+
+  void test_Target_InPlane2Theta_Returns_Correct_Value() {
+    const std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+
+    do_algorithm_run("InPlane2Theta", inputWS, outputWS);
+
+    // Check output values for the workspace then clean up.
+    check_output_values_for_inPlane2Theta_conversion(inputWS, outputWS);
+    clean_up_workspaces(inputWS, outputWS);
   }
 
   void
