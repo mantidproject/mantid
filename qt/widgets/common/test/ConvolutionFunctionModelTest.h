@@ -227,6 +227,70 @@ public:
     TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f1.");
   }
 
+  void test_Lorentzian_can_be_combined_with_additional_fit_type() {
+    ConvolutionFunctionModel model;
+    TS_ASSERT_THROWS_NOTHING(model.setFunctionString(
+        "(composite=Convolution;name=Resolution;"
+        "name=Lorentzian;name=Lorentzian;name=TeixeiraWaterSQE);"
+        "name=LinearBackground"));
+
+    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
+    TS_ASSERT(model.peakPrefixes());
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f0.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1).toStdString(), "f0.f1.f1.");
+    TS_ASSERT_EQUALS(model.fitTypePrefix()->toStdString(), "f0.f1.f2.");
+  }
+
+  void test_Lorentzian_can_be_combined_with_additional_fit_type_and_delta() {
+    ConvolutionFunctionModel model;
+    TS_ASSERT_THROWS_NOTHING(
+        model.setFunctionString("(composite=Convolution;name=Resolution;name="
+                                "DeltaFunction;name=Lorentzian;name=Lorentzian;"
+                                "name=TeixeiraWaterSQE);"
+                                "name=LinearBackground"));
+
+    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
+    TS_ASSERT(model.peakPrefixes());
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix()->toStdString(), "f0.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f0.f1.f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1).toStdString(), "f0.f1.f2.");
+    TS_ASSERT_EQUALS(model.fitTypePrefix()->toStdString(), "f0.f1.f3.");
+  }
+  void
+  test_Lorentzian_can_be_combined_with_additional_fit_type_and_temp_correction() {
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions,
+                   "(name=Lorentzian;name=Lorentzian)",
+                   "(name=TeixeiraWaterSQE)", false, std::vector<double>(),
+                   false, true, 100.0);
+
+    TS_ASSERT(model.peakPrefixes());
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
+                     "f1.f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1].toStdString(),
+                     "f1.f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.fitTypePrefix()->toStdString(), "f1.f1.f1.f2.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
+                     "f1.f1.f0.");
+  }
+
   void test_resolution_workspace_index() {
     auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
