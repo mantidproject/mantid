@@ -7,11 +7,12 @@
 #  This file is part of the mantid workbench
 import unittest
 
-from unittest.mock import call, patch
+from unittest.mock import call, patch, MagicMock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.plots.presenter import PlotSettings, PlotProperties
 
+from matplotlib import font_manager
 from qtpy.QtCore import Qt
 
 
@@ -297,6 +298,21 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_default_colormap_changed()
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.COLORMAP.value, colormap+"_r")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_font_combo_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_font_combo_changed("Helvetica")
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.PLOT_FONT.value, "Helvetica")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_font_combo_changed("Something that is not a font")
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.PLOT_FONT.value,
+                                                             "Something that is not a font")
 
 
 if __name__ == "__main__":
