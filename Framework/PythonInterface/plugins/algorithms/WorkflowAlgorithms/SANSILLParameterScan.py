@@ -25,9 +25,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
     mask = None
     default_mask = None
     output = None
-    output_sens = None
     normalise = None
-    thickness = None
     output2D = None
     output_reduced = None
     observable = None
@@ -57,8 +55,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         if not (self.getPropertyValue('ReducedData') or self.getPropertyValue("Output2D")):
             issues["ReducedData"] = "Please provide at least one output: ReducedData or Output2D."
             issues["Output2D"] = "Please provide at least one output: ReducedData or Output2D."
-        if self.getPropertyValue('SampleRuns') == '':
-            issues['SampleRuns'] = 'Please provide at least one sample run.'
         if abs_dim != sample_dim and abs_dim != 0:
             issues['AbsorberRuns'] = message.format('Absorber', abs_dim, sample_dim)
         if can_dim != sample_dim and can_dim != 0:
@@ -76,7 +72,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.sensitivity = self.getPropertyValue('SensitivityMaps')
         self.default_mask = self.getPropertyValue('DefaultMaskFile')
         self.mask = self.getPropertyValue('MaskFiles')
-        self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
         self.output2D = self.getPropertyValue('Output2D')
         self.output_reduced = self.getPropertyValue('ReducedData')
@@ -111,7 +106,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              doc="The output workspace containing all the reduced data, before grouping.")
 
         self.declareProperty(MultipleFileProperty('SampleRuns',
-                                                  action=FileAction.OptionalLoad,
+                                                  action=FileAction.Load,
                                                   extensions=['nxs'],
                                                   allow_empty=False),
                              doc='Sample run(s).')
@@ -135,11 +130,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                                                   extensions=['nxs']),
                              doc='File containing the map of relative detector efficiencies.')
 
-        self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc='The output sensitivity map workspace.')
-
         self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the default mask to be applied to all the detector configurations.')
 
@@ -150,9 +140,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLReduction', ['NormaliseBy'])
 
-        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
-                             doc='Sample thickness [cm]')
-
         self.declareProperty('Observable', 'Omega.value',
                              doc='Parameter from the sample logs along which the scan is made')
 
@@ -162,11 +149,9 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              doc='Maximal y-index taken in the integration')
 
         self.setPropertyGroup('SensitivityMaps', 'Options')
-        self.setPropertyGroup('SensitivityOutputWorkspace', 'Options')
         self.setPropertyGroup('DefaultMaskFile', 'Options')
         self.setPropertyGroup('MaskFiles', 'Options')
         self.setPropertyGroup('NormaliseBy', 'Options')
-        self.setPropertyGroup('SampleThickness', 'Options')
         self.setPropertyGroup('Observable', 'Options')
         self.setPropertyGroup('PixelYMin', 'Options')
         self.setPropertyGroup('PixelYMax', 'Options')
@@ -182,7 +167,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         sort_x_axis_output = 'sorted' if not self.output_reduced else self.output_reduced
         SortXAxis(InputWorkspace="__joined", OutputWorkspace="__" + sort_x_axis_output)
-        mtd["__" + sort_x_axis_output].getAxis(0).setUnit("label").setLabel('Omega', 'degrees')
+        mtd["__" + sort_x_axis_output].getAxis(0).setUnit("label").setLabel(self.observable, 'degrees')
 
         load_sensitivity, sens_input = needs_loading(self.sensitivity, 'Sensitivity')
         self.progress.report('Loading sensitivity')
@@ -217,14 +202,11 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              AbsorberInputWorkspace=absorber_name,
                              CacheSolidAngle=True,
                              NormaliseBy=self.normalise)
-        # even if the samples are provided as arguments, the SANSILLReduction won't use them and rather take the already
-        # processed ws
+
         SANSILLReduction(InputWorkspace="__" + sort_x_axis_output,
                          AbsorberInputWorkspace=absorber_name,
                          ContainerInputWorkspace=container_name,
-                         SampleThickness=self.thickness,
                          SensitivityInputWorkspace=sens_input,
-                         SensitivityOutputWorkspace=self.output_sens,
                          MaskedInputWorkspace=mask_input,
                          DefaultMaskedInputWorkspace=default_mask_input,
                          NormaliseBy=self.normalise,
@@ -252,6 +234,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         ConvertSpectrumAxis(InputWorkspace=self.output2D,
                             OutputWorkspace=self.output2D,
                             Target="InPlane2Theta")
+
         Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
 
         self.setProperty('Output2D', mtd[self.output2D])
