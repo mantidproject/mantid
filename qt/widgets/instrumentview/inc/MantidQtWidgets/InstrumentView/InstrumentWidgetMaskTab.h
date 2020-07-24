@@ -66,6 +66,7 @@ public:
     DrawRectangle,
     DrawEllipticalRing,
     DrawRectangularRing,
+    DrawSector,
     DrawFree
   };
 
@@ -165,6 +166,7 @@ protected:
   QPushButton *m_rectangle;
   QPushButton *m_ring_ellipse;
   QPushButton *m_ring_rectangle;
+  QPushButton *m_sector;
   QPushButton *m_free_draw;
 
   QPushButton *m_applyToData;
