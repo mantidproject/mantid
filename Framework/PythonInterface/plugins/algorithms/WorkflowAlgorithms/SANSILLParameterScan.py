@@ -241,7 +241,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         else:
             raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
 
-
         self.checkPixelY(height)
         grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)
 
@@ -257,6 +256,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         self.setProperty('Output2D', mtd[self.output2D])
         self.cleanUp()
+
 
 def create_detector_grouping(y_min, y_max, detector_width, detector_height):
     """
