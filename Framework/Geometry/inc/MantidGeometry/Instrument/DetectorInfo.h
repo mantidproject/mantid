@@ -74,8 +74,6 @@ public:
   double twoTheta(const std::pair<size_t, size_t> &index) const;
   double signedTwoTheta(const size_t index) const;
   double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
-  double inPlaneTwoTheta(const size_t index) const;
-  double inPlaneTwoTheta(const std::pair<size_t, size_t> &index) const;
   double azimuthal(const size_t index) const;
   double azimuthal(const std::pair<size_t, size_t> &index) const;
   Kernel::V3D position(const size_t index) const;

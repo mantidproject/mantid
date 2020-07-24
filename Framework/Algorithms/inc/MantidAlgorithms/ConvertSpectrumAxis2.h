@@ -64,6 +64,10 @@ private:
   /// Converting to theta.
   void createThetaMap(API::Progress &progress, const std::string &targetUnit,
                       API::MatrixWorkspace_sptr &inputWS);
+  /// Compute InPlane2Theta
+  double inPlane2Theta(const size_t index,
+                       const API::MatrixWorkspace_sptr &inputWS) const;
+
   /// Converting to Q and QSquared
   void createElasticQMap(API::Progress &progress, const std::string &targetUnit,
                          API::MatrixWorkspace_sptr &inputWS);

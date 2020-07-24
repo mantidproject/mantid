@@ -14,6 +14,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -155,7 +156,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
       case signedTheta:
         emplaceIndexMap(spectrumInfo.twoTheta(i) * rad2deg, i);
       case inPlaneTheta:
-        emplaceIndexMap(spectrumInfo.inPlaneTwoTheta(i) * rad2deg, i);
+        emplaceIndexMap(inPlane2Theta(i, inputWS) * rad2deg, i);
       }
     } else {
       emplaceIndexMap(0.0, i);
@@ -163,6 +164,24 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
 
     progress.report("Converting to theta...");
   }
+}
+
+/** Returns the signed scattering angle projected on horizontal plane 2 theta in
+ * radians (angle w.r.t. to beam direction).
+ *
+ * Throws an exception if the spectrum is a monitor.
+ * @param index :: the index of the spectrum
+ * @param inputWS :: input workspace
+ */
+double ConvertSpectrumAxis2::inPlane2Theta(
+    const size_t index, const API::MatrixWorkspace_sptr &inputWS) const {
+  const auto spectrumInfo = inputWS->spectrumInfo();
+  const auto refFrame = inputWS->getInstrument()->getReferenceFrame();
+  V3D position = spectrumInfo.position(index) - spectrumInfo.samplePosition();
+
+  double angle = std::atan2(-position[refFrame->pointingHorizontal()],
+                            position[refFrame->pointingAlongBeam()]);
+  return angle;
 }
 
 /** Convert X axis to Elastic Q representation
