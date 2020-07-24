@@ -9,11 +9,11 @@ import numpy as np
 import re
 from typing import Dict
 
-from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceGroup
+from mantid.api import mtd, AlgorithmFactory, PythonAlgorithm, Progress, WorkspaceGroup
 from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
-from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load, Scale
+from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Scale
 from mantid.kernel import StringListValidator, Direction, Atom
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
@@ -61,13 +61,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         self.declareProperty(name="Angles",
                              direction=Direction.Input,
                              defaultValue="3.0, 140.0, 50")
-
-    # 'TwoDMap': {
-    #     'resolution': 0.1,  # Width of broadening function
-    #     'q_size': 200,  # Number of q slices
-    #     'e_init': [4100.0],  # Incident energies in cm-1
-    #     'angles': np.arange(3.0, 140.0, 1).tolist(), # All measurement angles for direct sweeps
-    #     },
 
     def validateInputs(self) -> Dict[str,str]:
         """
@@ -134,7 +127,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         else:  # case selected atoms
             # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
             # A regular expression match is used to make the underscore separator optional and check the index format
-            atom_symbols = [item for item in self._atoms if item[:len(prefix)] != ATOM_PREFIX]
+            atom_symbols = [item for item in self._atoms if item[:len(ATOM_PREFIX)] != ATOM_PREFIX]
             if len(atom_symbols) != len(set(atom_symbols)):  # only different types
                 raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
                                  "Abins cannot create multiple workspaces with the same name.")
