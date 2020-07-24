@@ -46,8 +46,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        message = 'Wrong number of {0} runs: {1}. Provide one or as many as sample runs: {2}.'
-        sample_dim = self.getPropertyValue('SampleRuns').count(',')
+        message = "Wrong number of {0} runs: {1}. Please provide none or exactly one."
         abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
         can_dim = self.getPropertyValue('ContainerRuns').count(',')
         mask_dim = self.getPropertyValue('MaskFiles').count(',')
@@ -55,14 +54,14 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         if not (self.getPropertyValue('ReducedData') or self.getPropertyValue("Output2D")):
             issues["ReducedData"] = "Please provide at least one output: ReducedData or Output2D."
             issues["Output2D"] = "Please provide at least one output: ReducedData or Output2D."
-        if abs_dim != sample_dim and abs_dim != 0:
-            issues['AbsorberRuns'] = message.format('Absorber', abs_dim, sample_dim)
-        if can_dim != sample_dim and can_dim != 0:
-            issues['ContainerRuns'] = message.format('Container', can_dim, sample_dim)
-        if mask_dim != sample_dim and mask_dim != 0:
-            issues['MaskFiles'] = message.format('Mask', mask_dim, sample_dim)
-        if sens_dim != sample_dim and sens_dim != 0:
-            issues['SensitivityMaps'] = message.format('Sensitivity', sens_dim, sample_dim)
+        if abs_dim != 0:
+            issues['AbsorberRuns'] = message.format('Absorber', abs_dim)
+        if can_dim != 0:
+            issues['ContainerRuns'] = message.format('Container', can_dim)
+        if mask_dim != 0:
+            issues['MaskFiles'] = message.format("mask", mask_dim)
+        if sens_dim != 0:
+            issues['SensitivityMaps'] = message.format("sensivity maps", sens_dim)
         return issues
 
     def setUp(self):
