@@ -8,19 +8,22 @@
 # Supporting functions for the Abins Algorithm that don't belong in
 # another part of AbinsModules.
 import os
+import re
+from typing import Tuple
 
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceProperty
-from mantid.kernel import Direction, StringListValidator, StringArrayProperty, logger
+from mantid.kernel import Atom, Direction, StringListValidator, StringArrayProperty, logger
+from mantid.simpleapi import SaveAscii, Scale
 
 import abins
-from abins.constants import ALL_INSTRUMENTS, ALL_SAMPLE_FORMS
+from abins.constants import ALL_INSTRUMENTS, ALL_SAMPLE_FORMS, ATOM_PREFIX
 from abins.instruments import get_instrument
 
 
 class AbinsAlgorithm:
     """Class providing shared utility for multiple inheritence by 1D, 2D implementations"""
 
-    def _get_common_properties(self) -> None:
+    def get_common_properties(self) -> None:
         """From user input, set properties common to Abins 1D and 2D versions"""
         self._ab_initio_program = self.getProperty("AbInitioProgram").value
         self._vibrational_or_phonon_data_file = self.getProperty("VibrationalOrPhononFile").value
@@ -32,6 +35,7 @@ class AbinsAlgorithm:
 
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
+        self._save_ascii = self.getProperty("SaveAscii").value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
 
         # conversion from str to int
@@ -72,7 +76,6 @@ class AbinsAlgorithm:
                              direction=Direction.Input,
                              defaultValue="Powder",
                              validator=StringListValidator(ALL_SAMPLE_FORMS),
-                             # doc="Form of the sample: SingleCrystal or Powder.")
                              doc="Form of the sample: Powder.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
@@ -84,6 +87,9 @@ class AbinsAlgorithm:
 
         self.declareProperty(name="SumContributions", defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
+
+        self.declareProperty(name="SaveAscii", defaultValue=False,
+                             doc="Write workspaces to .ascii files after computing them.")
 
         self.declareProperty(name="ScaleByCrossSection", defaultValue='Incoherent',
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
@@ -143,6 +149,124 @@ class AbinsAlgorithm:
             issues["BinWidthInWavenumber"] = ["Invalid bin width. Valid range is [1.0, 10.0] cm^-1"]
 
         return issues
+
+    @staticmethod
+    def get_atom_selection(*, atoms_data: abins.AtomsData, selection: list) -> Tuple[list, list]:
+        """Interpret the user 'Atoms' input as a set of elements and atom indices
+
+        (These atom indices match the user-facing convention and begin at 1.)"""
+
+        num_atoms = len(atoms_data)
+        all_atms_smbls = list(set([atoms_data[atom_index]["symbol"]
+                                   for atom_index in range(num_atoms)]))
+        all_atms_smbls.sort()
+
+        if len(selection) == 0:  # case: all atoms
+            atom_symbols = all_atms_smbls
+            atom_numbers = []
+        else:  # case selected atoms
+            # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
+            # A regular expression match is used to make the underscore separator optional and check the index format
+            atom_symbols = [item for item in selection if item[:len(ATOM_PREFIX)] != ATOM_PREFIX]
+            if len(atom_symbols) != len(set(atom_symbols)):  # only different types
+                raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
+                                 "Abins cannot create multiple workspaces with the same name.")
+
+            numbered_atom_test = re.compile('^' + ATOM_PREFIX + r'_?(\d+)$')
+            atom_numbers = [numbered_atom_test.findall(item) for item in selection]  # Matches will be lists of str
+            atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
+
+            if len(atom_numbers) != len(set(atom_numbers)):
+                raise ValueError("User atom selection (by number) contains repeated atom. This is not permitted as Abins"
+                                 " cannot create multiple workspaces with the same name.")
+
+            for atom_symbol in atom_symbols:
+                if atom_symbol not in all_atms_smbls:
+                    raise ValueError("User defined atom selection (by element) '%s': not present in the system." %
+                                     atom_symbol)
+
+            for atom_number in atom_numbers:
+                if atom_number < 1 or atom_number > num_atoms:
+                    raise ValueError("Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" %
+                                     (ATOM_PREFIX, atom_number, 1, num_atoms))
+
+            # Final sanity check that everything in "atoms" field was understood
+            if len(atom_symbols) + len(atom_numbers) < len(selection):
+                elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
+                numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
+                raise ValueError("Not all user atom selections ('atoms' option) were understood."
+                                 + elements_report + numbers_report)
+
+        return atom_numbers, atom_symbols
+
+    def get_masses_table(self, num_atoms):
+        """
+        Collect masses associated with each element in self._atoms_data
+
+        :param num_atoms: Number of atoms in the system. (Saves time working out iteration.)
+        :type: int
+
+        :returns: Mass data in form ``{el1: [m1, ...], ... }``
+        """
+        masses = {}
+        for i in range(num_atoms):
+            symbol = self._atoms_data[i]["symbol"]
+            mass = self._atoms_data[i]["mass"]
+            if symbol not in masses:
+                masses[symbol] = set()
+            masses[symbol].add(mass)
+
+        # convert set to list to fix order
+        for s in masses:
+            masses[s] = sorted(list(set(masses[s])))
+
+        return masses
+
+    def create_total_workspace(self, workspaces: list, force: bool = False) -> None:
+        """Sum together elemental totals to make an additional Total workspace
+
+        Nothing will be done if self._sum_contributions is False. This
+        can be overriden by setting force=True.
+        """
+        total_atom_workspaces = []
+        for ws in workspaces:
+            if "total" in ws:
+                total_atom_workspaces.append(ws)
+        total_workspace = self._create_total_workspace(partial_workspaces=total_atom_workspaces)
+        workspaces.insert(0, total_workspace)
+
+    def write_workspaces_to_ascii(self) -> None:
+        num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
+        for wrk_num in range(num_workspaces):
+            wrk = mtd[self._out_ws_name].getItem(wrk_num)
+            SaveAscii(InputWorkspace=Scale(wrk, 1.0 / self._bin_width, "Multiply"),
+                      Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
+
+    def get_cross_section(self, protons_number=None, nucleons_number=None):
+        """
+        Calculates cross section for the given element.
+        :param protons_number: number of protons in the given type fo atom
+        :param nucleons_number: number of nucleons in the given type of atom
+        :returns: cross section for that element
+        """
+        if nucleons_number is not None:
+            try:
+                atom = Atom(a_number=nucleons_number, z_number=protons_number)
+            # isotopes are not implemented for all elements so use different constructor in that cases
+            except RuntimeError:
+                atom = Atom(z_number=protons_number)
+        else:
+            atom = Atom(z_number=protons_number)
+
+        cross_section = None
+        if self._scale_by_cross_section == 'Incoherent':
+            cross_section = atom.neutron()["inc_scatt_xs"]
+        elif self._scale_by_cross_section == 'Coherent':
+            cross_section = atom.neutron()["coh_scatt_xs"]
+        elif self._scale_by_cross_section == 'Total':
+            cross_section = atom.neutron()["tot_scatt_xs"]
+
+        return cross_section
 
     @staticmethod
     def _validate_ab_initio_file_extension(*,
