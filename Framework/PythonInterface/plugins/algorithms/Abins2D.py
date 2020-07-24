@@ -6,14 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numpy as np
-import re
 from typing import Dict
 
 from mantid.api import mtd, AlgorithmFactory, PythonAlgorithm, Progress, WorkspaceGroup
 from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
-from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Scale
+from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
 from mantid.kernel import StringListValidator, Direction, Atom
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
@@ -29,11 +28,12 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
     _instrument_name = None
     _atoms = None
     _sum_contributions = None
+    _save_ascii = None
     _scale_by_cross_section = None
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
-    _extracted_ab_initio_data = None
+    _atoms_data = None
 
     def category(self) -> str:
         return "Simulation"
@@ -86,8 +86,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         return issues
 
     def PyExec(self):
-        from abins.constants import ATOM_PREFIX
-
         # 0) Create reporter to report progress
         steps = 9
         begin = 0
@@ -115,48 +113,10 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
-        self._extracted_ab_initio_data = ab_initio_data.get_atoms_data().extract()
-        num_atoms = len(self._extracted_ab_initio_data)
-        all_atms_smbls = list(set([self._extracted_ab_initio_data["atom_%s" % atom]["symbol"]
-                                   for atom in range(num_atoms)]))
-        all_atms_smbls.sort()
+        self._atoms_data = ab_initio_data.get_atoms_data()
 
-        if len(self._atoms) == 0:  # case: all atoms
-            atom_symbols = all_atms_smbls
-            atom_numbers = []
-        else:  # case selected atoms
-            # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
-            # A regular expression match is used to make the underscore separator optional and check the index format
-            atom_symbols = [item for item in self._atoms if item[:len(ATOM_PREFIX)] != ATOM_PREFIX]
-            if len(atom_symbols) != len(set(atom_symbols)):  # only different types
-                raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
-                                 "Abins cannot create multiple workspaces with the same name.")
-
-            numbered_atom_test = re.compile('^' + ATOM_PREFIX + r'_?(\d+)$')
-            atom_numbers = [numbered_atom_test.findall(item) for item in self._atoms]  # Matches will be lists of str
-            atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
-
-            if len(atom_numbers) != len(set(atom_numbers)):
-                raise ValueError("User atom selection (by number) contains repeated atom. This is not permitted as Abins"
-                                 " cannot create multiple workspaces with the same name.")
-
-            for atom_symbol in atom_symbols:
-                if atom_symbol not in all_atms_smbls:
-                    raise ValueError("User defined atom selection (by element) '%s': not present in the system." %
-                                     atom_symbol)
-
-            for atom_number in atom_numbers:
-                if atom_number < 1 or atom_number > num_atoms:
-                    raise ValueError("Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" %
-                                     (ATOM_PREFIX, atom_number, 1, num_atoms))
-
-            # Final sanity check that everything in "atoms" field was understood
-            if len(atom_symbols) + len(atom_numbers) < len(self._atoms):
-                elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
-                numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
-                raise ValueError("Not all user atom selections ('atoms' option) were understood."
-                                 + elements_report + numbers_report)
-
+        atom_numbers, atom_symbols = self.get_atom_selection(atoms_data=self._atoms_data,
+                                                             selection=self._atoms)
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
         # 5) create workspaces for atoms in interest
@@ -168,50 +128,19 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         # 6) Create a workspace with sum of all atoms if required
         if self._sum_contributions:
-            total_atom_workspaces = []
-            for ws in workspaces:
-                if "total" in ws:
-                    total_atom_workspaces.append(ws)
-            total_workspace = self._create_total_workspace(partial_workspaces=total_atom_workspaces)
-            workspaces.insert(0, total_workspace)
+            self.create_total_workspace(workspaces)
             prog_reporter.report("Workspace with total S has been constructed.")
 
         GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
 
         # 8) save workspaces to ascii_file
-        num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
-        for wrk_num in range(num_workspaces):
-            wrk = mtd[self._out_ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=Scale(wrk, 1.0 / self._bin_width, "Multiply"),
-                      Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
-        prog_reporter.report("All workspaces have been saved to ASCII files.")
+        if self._save_ascii:
+            self.write_workspaces_to_ascii()
+            prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
-
-    def _get_masses_table(self, num_atoms):
-        """
-        Collect masses associated with each element in self._extracted_ab_initio_data
-
-        :param num_atoms: Number of atoms in the system. (Saves time working out iteration.)
-        :type: int
-
-        :returns: Mass data in form ``{el1: [m1, ...], ... }``
-        """
-        masses = {}
-        for i in range(num_atoms):
-            symbol = self._extracted_ab_initio_data["atom_%s" % i]["symbol"]
-            mass = self._extracted_ab_initio_data["atom_%s" % i]["mass"]
-            if symbol not in masses:
-                masses[symbol] = set()
-            masses[symbol].add(mass)
-
-        # convert set to list to fix order
-        for s in masses:
-            masses[s] = sorted(list(set(masses[s])))
-
-        return masses
 
     def _create_workspaces(self, atoms_symbols=None, atom_numbers=None, s_data=None):
         """
@@ -240,7 +169,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         temp_s_atom_data = np.copy(s_atom_data)
 
         num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
-        masses = self._get_masses_table(num_atoms)
+        masses = self.get_masses_table(num_atoms)
 
         result = []
 
@@ -285,7 +214,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         s_atom_data.fill(0.0)
         internal_atom_label = "atom_%s" % (atom_number - 1)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
-        symbol = self._extracted_ab_initio_data[internal_atom_label]["symbol"]
+        symbol = self._atoms_data[atom_number - 1]["symbol"]
         z_number = Atom(symbol=symbol).z_number
 
         for i, order in enumerate(range(FUNDAMENTALS,
@@ -325,16 +254,16 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         element = Atom(symbol=element_symbol)
 
-        for atom in range(num_atoms):
-            if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == element_symbol
-                    and abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < MASS_EPS):
+        for atom_index in range(num_atoms):
+            if (self._atoms_data[atom_index]["symbol"] == element_symbol
+                    and abs(self._atoms_data[atom_index]["mass"] - mass) < MASS_EPS):
 
                 temp_s_atom_data.fill(0.0)
 
                 for order in range(FUNDAMENTALS,
                                    self._num_quantum_order_events + S_LAST_INDEX):
                     order_indx = order - PYTHON_INDEX_SHIFT
-                    temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
+                    temp_s_order = s_data_extracted["atom_%s" % atom_index]["s"]["order_%s" % order]
                     temp_s_atom_data[order_indx] = temp_s_order
 
                 s_atom_data += temp_s_atom_data  # sum S over the atoms of the same type
@@ -393,34 +322,33 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         :param protons_number: number of protons in the given type fo atom
         :param nucleons_number: number of nucleons in the given type of atom
         """
-        from abins.constants import FUNDAMENTALS, ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
-        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            raise NotImplementedError()
+        from abins.constants import FUNDAMENTALS, TWO_DIMENSIONAL_INSTRUMENTS
 
-        elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+        if self._instrument.get_name() not in TWO_DIMENSIONAL_INSTRUMENTS:
+            raise ValueError("Instrument {self._instrument_name} is not supported by this version of Abins")
 
-            # only FUNDAMENTALS [data is 3d with length 1 in axis 0]
-            if s_points.shape[0] == FUNDAMENTALS:
-                self._fill_s_2d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
+        # only FUNDAMENTALS [data is 3d with length 1 in axis 0]
+        if s_points.shape[0] == FUNDAMENTALS:
+            self._fill_s_2d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
+                                      nucleons_number=nucleons_number)
+
+        # total workspaces [data is 2d array of S]
+        elif s_points.shape[0] == abins.parameters.instruments[self._instrument.get_name()]['q_size']:
+            self._fill_s_2d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
+                                      nucleons_number=nucleons_number)
+
+        # Multiple quantum order events [data is 3d table of S using axis 0 for quantum orders]
+        else:
+            dim = s_points.shape[0]
+            partial_wrk_names = []
+
+            for n in range(dim):
+                seed = "quantum_event_%s" % (n + 1)
+                wrk_name = workspace + "_" + seed
+                partial_wrk_names.append(wrk_name)
+
+                self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
                                           nucleons_number=nucleons_number)
-
-            # total workspaces [data is 2d array of S]
-            elif s_points.shape[0] == abins.parameters.instruments[self._instrument.get_name()]['q_size']:
-                self._fill_s_2d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
-                                          nucleons_number=nucleons_number)
-
-            # Multiple quantum order events [data is 3d table of S using axis 0 for quantum orders]
-            else:
-                dim = s_points.shape[0]
-                partial_wrk_names = []
-
-                for n in range(dim):
-                    seed = "quantum_event_%s" % (n + 1)
-                    wrk_name = workspace + "_" + seed
-                    partial_wrk_names.append(wrk_name)
-
-                    self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
-                                              nucleons_number=nucleons_number)
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
 
@@ -429,8 +357,8 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         from mantid.api import NumericAxis
 
         if protons_number is not None:
-            s_points = s_points *  self._get_cross_section(protons_number=protons_number,
-                                                           nucleons_number=nucleons_number)
+            s_points = s_points *  self.get_cross_section(protons_number=protons_number,
+                                                          nucleons_number=nucleons_number)
 
         n_q_bins, n_freq_bins = s_points.shape
 
@@ -452,32 +380,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         AnalysisDataService.addOrReplace(workspace, wrk)
 
         self._set_workspace_units(wrk=workspace, layout="2D")
-
-    def _get_cross_section(self, protons_number=None, nucleons_number=None):
-        """
-        Calculates cross section for the given element.
-        :param protons_number: number of protons in the given type fo atom
-        :param nucleons_number: number of nucleons in the given type of atom
-        :returns: cross section for that element
-        """
-        if nucleons_number is not None:
-            try:
-                atom = Atom(a_number=nucleons_number, z_number=protons_number)
-            # isotopes are not implemented for all elements so use different constructor in that cases
-            except RuntimeError:
-                atom = Atom(z_number=protons_number)
-        else:
-            atom = Atom(z_number=protons_number)
-
-        cross_section = None
-        if self._scale_by_cross_section == 'Incoherent':
-            cross_section = atom.neutron()["inc_scatt_xs"]
-        elif self._scale_by_cross_section == 'Coherent':
-            cross_section = atom.neutron()["coh_scatt_xs"]
-        elif self._scale_by_cross_section == 'Total':
-            cross_section = atom.neutron()["tot_scatt_xs"]
-
-        return cross_section
 
     def _create_total_workspace(self, partial_workspaces=None):
         """
@@ -604,7 +506,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         """
         Loads all properties to object's attributes.
         """
-        self._get_common_properties()
+        self.get_common_properties()
 
         # Sampling mesh is determined by
         # abins.parameters.sampling['min_wavenumber']
