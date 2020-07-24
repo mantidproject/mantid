@@ -34,6 +34,11 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+^^^^^^^^^^^^
+- New algorithm for estimating background of powder spectra :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` using iterative smoothing.
+- Mantid fitting capability added to fitting tab of Engineering Diffraction UI.
+
 Improvements
 ^^^^^^^^^^^^
 - TOPAS files (`.abc`) have replaced the `.dat` files generated when focusing using the GUI.
