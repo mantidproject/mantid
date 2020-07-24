@@ -104,7 +104,7 @@ IOAuthTokenStore_uptr make_mock_token_store_already_logged_in() {
       "Bearer", 3600, "2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ",
       "api:read data:read settings:read",
       boost::make_optional<std::string>("eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb")));
-  return std::move(tokenStore);
+  return tokenStore;
 }
 
 } // namespace TestHelpers

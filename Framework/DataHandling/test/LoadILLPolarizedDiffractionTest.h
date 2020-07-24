@@ -213,7 +213,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[511], 3573.04, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[512], 3579.68, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(133)[512], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 0.00, 0.01)
   }
 
   void test_D7_multifile_sum() {

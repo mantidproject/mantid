@@ -36,6 +36,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.external_plotting_model = mock.Mock(spec=ExternalPlottingModel)
         self.external_plotting_view = mock.Mock(spec=ExternalPlottingView)
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
+        self.get_selected_fit_workspaces = mock.MagicMock()
 
         self.context.group_pair_context.selected_groups = ['bottom']
         self.context.group_pair_context.selected_pairs = []
@@ -44,6 +45,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.presenter = PlotWidgetPresenterCommon(view=self.view, model=self.model, context=self.context,
                                                    figure_presenter=self.figure_presenter,
+                                                   get_selected_fit_workspaces = self.get_selected_fit_workspaces(),
                                                    external_plotting_view=self.external_plotting_view,
                                                    external_plotting_model=self.external_plotting_model)
 

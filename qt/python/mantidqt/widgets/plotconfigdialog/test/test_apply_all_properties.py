@@ -169,7 +169,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
 
         # Mock images tab view
         cls.img_view_mock = Mock(
-            get_selected_image_name=lambda: '(0, 0) - _image0',
+            get_selected_image_name=lambda: '(0, 0) - image0',
             get_properties=lambda: ImageProperties(new_image_props))
         cls.img_view_patch = patch(IMAGE_VIEW, lambda x: cls.img_view_mock)
         cls.img_view_patch.start()

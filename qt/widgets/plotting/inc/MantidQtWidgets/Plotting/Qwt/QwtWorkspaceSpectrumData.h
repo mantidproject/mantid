@@ -66,11 +66,6 @@ public:
 
   bool setAsDistribution(bool on = true);
 
-protected:
-  // Assignment operator (virtualized). MSVC not happy with compiler generated
-  // one
-  QwtWorkspaceSpectrumData &operator=(const QwtWorkspaceSpectrumData & /*rhs*/);
-
 private:
   friend class MantidMatrixCurve;
 

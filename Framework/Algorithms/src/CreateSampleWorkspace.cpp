@@ -413,7 +413,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     workspaceIndex++;
   }
 
-  return std::move(retVal);
+  return retVal;
 }
 //----------------------------------------------------------------------------------------------
 /**

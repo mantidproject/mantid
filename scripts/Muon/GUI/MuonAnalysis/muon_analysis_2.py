@@ -11,12 +11,12 @@ from distutils.version import LooseVersion
 from mantid.kernel import ConfigServiceImpl
 
 import Muon.GUI.Common.message_box as message_box
-from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.data_analysis_context import DataAnalysisContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.fitting_context import FittingContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext, PlotMode
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
@@ -60,6 +60,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(MuonAnalysisGui, self).__init__(parent)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setObjectName("MuonAnalysis2")
         self.current_tab = ''
@@ -78,15 +79,15 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_context = PhaseTableContext()
         self.fitting_context = FittingContext()
 
-        self.context = MuonContext(muon_data_context=self.data_context,
-                                   muon_gui_context=self.gui_context,
-                                   muon_group_context=self.group_pair_context,
-                                   muon_phase_context=self.phase_context,
-                                   fitting_context=self.fitting_context,
-                                   workspace_suffix=' MA')
+        self.context = DataAnalysisContext(muon_data_context=self.data_context,
+                                           muon_gui_context=self.gui_context,
+                                           muon_group_context=self.group_pair_context,
+                                           fitting_context=self.fitting_context,
+                                           muon_phase_context=self.phase_context)
 
         # create the Dockable plot widget
-        self.plot_widget = PlotWidget(self.context, parent=self)
+        self.fitting_tab = FittingTabWidget(self.context, self)
+        self.plot_widget = PlotWidget(self.context, self.fitting_tab.fitting_tab_presenter.get_selected_fit_workspaces, parent=self)
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
                                                               plotting_widget=self.plot_widget.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)
@@ -103,7 +104,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.home_tab = HomeTabWidget(self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.phase_tab = PhaseTabWidget(self.context, self)
-        self.fitting_tab = FittingTabWidget(self.context, self)
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
@@ -161,17 +161,19 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
-        self.current_tab_observer = GenericObserver(self.update_plot_based_on_current_tab)
-        self.tabs.set_slot_for_tab_changed(self.update_plot_based_on_current_tab)
+        self.update_plot_observer = GenericObserver(self.plot_widget.presenter.update_plot)
+        self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
 
-    def update_plot_based_on_current_tab(self):
+    def handle_tab_changed(self):
         index = self.tabs.currentIndex()
         if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
-            self.plot_widget.presenter.handle_data_updated()
-        elif TAB_ORDER[index] == "Fitting":  # Plot the displayed workspace
-            self.plot_widget.presenter.handle_plot_selected_fits(
-                self.fitting_tab.fitting_tab_presenter.get_selected_fit_workspaces()
-            )
+            plot_mode = PlotMode.Data
+        elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting"]:  # Plot the displayed workspace
+            plot_mode = PlotMode.Fitting
+        else:
+            return
+
+        self.plot_widget.presenter.handle_plot_mode_changed(plot_mode)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -297,7 +299,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.current_tab_observer
+            self.update_plot_observer
         )
 
     def setup_phase_quad_changed_notifier(self):

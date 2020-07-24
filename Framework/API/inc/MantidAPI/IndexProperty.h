@@ -35,6 +35,9 @@ public:
                 const Kernel::IValidator_sptr &validator =
                     Kernel::IValidator_sptr(new Kernel::NullValidator));
 
+  IndexProperty(const IndexProperty &) = default;
+  IndexProperty &operator=(const IndexProperty &) = default;
+
   IndexProperty *clone() const override;
 
   using Kernel::ArrayProperty<int64_t>::operator=;

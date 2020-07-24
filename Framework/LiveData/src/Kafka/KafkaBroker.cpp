@@ -30,7 +30,7 @@ KafkaBroker::subscribe(std::vector<std::string> topics,
   auto subscriber = std::make_unique<KafkaTopicSubscriber>(m_address, topics,
                                                            subscribeOption);
   subscriber->subscribe();
-  return std::move(subscriber);
+  return subscriber;
 }
 
 std::unique_ptr<IKafkaStreamSubscriber>
@@ -39,7 +39,7 @@ KafkaBroker::subscribe(std::vector<std::string> topics, int64_t offset,
   auto subscriber = std::make_unique<KafkaTopicSubscriber>(m_address, topics,
                                                            subscribeOption);
   subscriber->subscribe(offset);
-  return std::move(subscriber);
+  return subscriber;
 }
 
 } // namespace LiveData

@@ -7,11 +7,20 @@
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_view import FittingTabView
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter import FittingTabPresenter
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FittingTabModel
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
+
+MUON_ANALYSIS_FITTING_OPTIONS = ["Run", "Group/Pair"]
+FREQUENCY_DOMAIN_ANALYSIS_FITTING_OPTIONS = []
 
 
 class FittingTabWidget(object):
     def __init__(self, context, parent):
-        self.fitting_tab_view = FittingTabView(parent)
+        fitting_options = FREQUENCY_DOMAIN_ANALYSIS_FITTING_OPTIONS if isinstance(context, FrequencyDomainAnalysisContext)\
+            else MUON_ANALYSIS_FITTING_OPTIONS
+        is_frequency_domain = isinstance(context, FrequencyDomainAnalysisContext)
+
+        self.fitting_tab_view = FittingTabView(simultaneous_item_list=fitting_options, is_frequency_domain=is_frequency_domain,
+                                               parent=parent)
         self.fitting_tab_model = FittingTabModel(context)
         self.fitting_tab_presenter = FittingTabPresenter(self.fitting_tab_view, self.fitting_tab_model, context)
 

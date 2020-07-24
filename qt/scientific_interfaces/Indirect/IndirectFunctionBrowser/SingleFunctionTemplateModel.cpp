@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SingleFunctionTemplateModel.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -20,6 +21,10 @@ using namespace MantidWidgets;
 using namespace Mantid::API;
 
 SingleFunctionTemplateModel::SingleFunctionTemplateModel() {}
+
+SingleFunctionTemplateModel::SingleFunctionTemplateModel(
+    std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation)
+    : m_parameterEstimation(std::move(parameterEstimation)) {}
 
 void SingleFunctionTemplateModel::updateAvailableFunctions(
     const std::map<std::string, std::string> &functionInitialisationStrings) {
@@ -78,6 +83,7 @@ void SingleFunctionTemplateModel::setFitType(const QString &name) {
   }
   setGlobalParameters(m_globalParameterStore[name]);
   FunctionModel::setFunction(m_functionStore[name]->clone());
+  estimateFunctionParameters();
 }
 
 QString SingleFunctionTemplateModel::getFitType() { return m_fitType; }
@@ -85,6 +91,18 @@ QString SingleFunctionTemplateModel::getFitType() { return m_fitType; }
 void SingleFunctionTemplateModel::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
+}
+
+void SingleFunctionTemplateModel::estimateFunctionParameters() {
+  if (m_estimationData.size() != static_cast<size_t>(getNumberDomains())) {
+    return;
+  }
+  // Estimate function parameters - parameters are updated in-place.
+  for (int i = 0; i < getNumberDomains(); ++i) {
+    auto function = getSingleFunction(i);
+    m_parameterEstimation->estimateFunctionParameters(function,
+                                                      m_estimationData[i]);
+  }
 }
 
 void SingleFunctionTemplateModel::setGlobal(const QString &name,

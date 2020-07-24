@@ -24,7 +24,11 @@ public:
   PropertyManagerProperty(const std::string &name,
                           const ValueType &defaultValue,
                           unsigned int direction = Direction::Input);
+
+  PropertyManagerProperty(const PropertyManagerProperty &) = default;
+  PropertyManagerProperty &operator=(const PropertyManagerProperty &) = default;
   using BaseClass::operator=;
+
   PropertyManagerProperty *clone() const override {
     return new PropertyManagerProperty(*this);
   }

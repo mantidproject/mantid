@@ -4,9 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import (Load, DeleteWorkspace, CalculateMonteCarloAbsorption)
+from mantid.simpleapi import (Load, DeleteWorkspace, CalculateMonteCarloAbsorption, mtd)
 
 import unittest
 
@@ -18,18 +16,21 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
     _indirect_elastic_ws = None
     _indirect_fws_ws = None
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         red_ws = Load('irs26176_graphite002_red.nxs')
         container_ws = Load('irs26173_graphite002_red.nxs')
         indirect_elastic_ws = Load('osi104367_elf.nxs')
         indirect_fws_ws = Load('ILL_IN16B_FWS_Reduced.nxs')
-        self._red_ws = red_ws
-        self._container_ws = container_ws
-        self._indirect_elastic_ws = indirect_elastic_ws
+
+    def setUp(self):
+        self._red_ws = mtd['red_ws']
+        self._container_ws = mtd['container_ws']
+        self._indirect_elastic_ws = mtd['indirect_elastic_ws']
         self._expected_unit = self._red_ws.getAxis(0).getUnit().unitID()
         self._expected_hist = 10
         self._expected_blocksize = 1905
-        self._indirect_fws_ws = indirect_fws_ws
+        self._indirect_fws_ws = mtd['indirect_fws_ws']
 
         self._arguments = {'SampleChemicalFormula': 'H2-O',
                            'SampleDensityType': 'Mass Density',
@@ -45,13 +46,9 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
                                 'ContainerDensity':1.0 }
         self._test_arguments = dict()
 
-    def tearDown(self):
-        DeleteWorkspace(self._red_ws)
-
-        if self._container_ws is not None:
-            DeleteWorkspace(self._container_ws)
-        if self._indirect_elastic_ws is not None:
-            DeleteWorkspace(self._indirect_elastic_ws)
+    @classmethod
+    def tearDownClass(cls):
+        mtd.clear()
 
     def _setup_flat_plate_container(self):
         self._test_arguments['ContainerFrontThickness'] = 1.5
@@ -196,6 +193,7 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
 
     def test_annulus_indirect_fws(self):
         self._annulus_test(self._run_indirect_fws_test_red)
+
 
 if __name__ == "__main__":
     unittest.main()

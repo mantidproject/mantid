@@ -117,7 +117,7 @@ private:
     const int failedTube(1);
     // Set a high value to tip that tube over the max count rate
     testWS->mutableY(failedTube * nPixelsPerTube + 1)[0] = 100.0;
-    return std::move(testWS);
+    return testWS;
   }
 
   Mantid::Algorithms::CreatePSDBleedMask diagnostic;

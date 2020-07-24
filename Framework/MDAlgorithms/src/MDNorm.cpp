@@ -795,8 +795,6 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
   size_t parametersIndex = 0;
   std::vector<size_t> dimensionIndex(
       numDimsTemp + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
-  std::vector<size_t>
-      nonDimensionIndex; // stores non-h,k,l or non-Qx,Qy,Qz dimensions
   for (auto const &p : parameters) {
     auto key = p.first;
     auto value = p.second;
@@ -891,7 +889,20 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
       }
 
     } else if ((key != "OutputBins") && (key != "OutputExtents")) {
-      nonDimensionIndex.emplace_back(parametersIndex);
+      // make sure the names of non-directional dimensions are the same
+      const std::string nameData =
+          tempDataWS->getDimension(parametersIndex)->getName();
+      if (value.find(nameData) != 0) {
+        g_log.error() << "Dimension " << nameData
+                      << " from the temporary workspace"
+                         " is not one of the binning dimensions, "
+                         " or dimensions are in the wrong order."
+                      << std::endl;
+        throw(
+            std::invalid_argument("Beside the Q dimensions, "
+                                  "TemporaryDataWorkspace does not have the "
+                                  "same dimension names as OutputWorkspace."));
+      }
     }
     parametersIndex++;
   }
@@ -899,20 +910,6 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
     if (idx > numDimsTemp)
       throw(std::invalid_argument("Cannot find at least one of QDimension0, "
                                   "QDimension1, or QDimension2"));
-  }
-
-  // make sure the names of non-directional dimensions are the same
-  if (!(nonDimensionIndex.empty())) {
-    for (auto &indexID : nonDimensionIndex) {
-      const std::string nameInput = m_inputWS->getDimension(indexID)->getName();
-      const std::string nameData = tempDataWS->getDimension(indexID)->getName();
-      if (nameInput != nameData) {
-        g_log.warning() << "Input: " << nameInput << " Temporary: " << nameData
-                        << std::endl;
-        throw(std::invalid_argument("TemporaryDataWorkspace does not have the "
-                                    "same dimension names as InputWorkspace."));
-      }
-    }
   }
 }
 

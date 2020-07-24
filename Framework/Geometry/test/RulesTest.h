@@ -138,6 +138,6 @@ private:
     Right->setLeaves(std::move(C), std::move(A));
 
     Root->setLeaves(std::move(Left), std::move(Right));
-    return std::move(Root);
+    return Root;
   }
 };

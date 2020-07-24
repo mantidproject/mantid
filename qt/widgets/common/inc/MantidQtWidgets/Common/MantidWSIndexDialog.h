@@ -117,8 +117,6 @@ public:
   explicit IntervalList(const QString & /*intervals*/);
   /// Constructor - with a list containing a single Interval
   explicit IntervalList(const Interval & /*interval*/);
-  /// Copy Constructor
-  IntervalList(const IntervalList & /*copy*/);
 
   /// Returns a reference to the list of Intervals.
   const QList<Interval> &getList() const;

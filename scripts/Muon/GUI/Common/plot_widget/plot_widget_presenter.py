@@ -11,8 +11,10 @@ from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model impor
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
 from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
+from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from mantid.dataobjects import Workspace2D
 
@@ -20,7 +22,7 @@ from mantid.dataobjects import Workspace2D
 class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
     def __init__(self, view: PlotWidgetViewInterface, model: PlotWidgetModel, context,
-                 figure_presenter: PlottingCanvasPresenterInterface,
+                 figure_presenter: PlottingCanvasPresenterInterface, get_selected_fit_workspaces,
                  external_plotting_view=None, external_plotting_model=None):
         """
         :param view: A reference to the QWidget object for plotting
@@ -36,6 +38,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view = view
         self._model = model
         self.context = context
+        self._get_selected_fit_workspaces = get_selected_fit_workspaces
         # figure presenter - the common presenter talks to this through an interface
         self._figure_presenter = figure_presenter
         self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
@@ -46,6 +49,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._setup_view_connections()
 
         self.update_view_from_model()
+
+        self.data_plot_range = self.context.default_data_plot_range
+        self.fitting_plot_range = self.context.default_fitting_plot_range
+        self.data_plot_tiled_state = None
 
     def update_view_from_model(self):
         """"Updates the view based on data in the model """
@@ -65,7 +72,6 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
         self.plot_type_changed_notifier = GenericObservable()
-        self.input_workspace_observer = GenericObserver(self.handle_data_updated)
 
     def _setup_view_connections(self):
         self._view.on_plot_tiled_checkbox_changed(self.handle_plot_tiled_state_changed)
@@ -73,8 +79,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view.on_plot_type_changed(self.handle_plot_type_changed)
         self._view.on_external_plot_pressed(self.handle_external_plot_requested)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
+        self._view.on_plot_mode_changed(self.handle_plot_mode_changed_by_user)
 
-    def handle_data_updated(self):
+    def handle_data_updated(self, autoscale=False):
         """
         Handles the group and pairs calculation finishing by plotting the loaded groups and pairs.
         """
@@ -83,7 +90,73 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys, tiled_by)
 
-        self.plot_all_selected_data(autoscale=False, hold_on=False)
+        self.plot_all_selected_data(autoscale=autoscale, hold_on=False)
+
+    def update_plot(self, autoscale=False):
+        if self.context.gui_context['PlotMode'] == PlotMode.Data:
+            self.handle_data_updated(autoscale=autoscale)
+        elif self.context.gui_context['PlotMode'] == PlotMode.Fitting:  # Plot the displayed workspace
+            self.handle_plot_selected_fits(
+                self._get_selected_fit_workspaces(), autoscale
+            )
+
+    def handle_plot_mode_changed(self, plot_mode : PlotMode):
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
+            self.handle_plot_mode_changed_for_frequency_domain_analysis(plot_mode)
+        else:
+            self.handle_plot_mode_changed_for_muon_analysis(plot_mode)
+
+    def handle_plot_mode_changed_for_muon_analysis(self, plot_mode : PlotMode):
+        if plot_mode == self.context.gui_context['PlotMode']:
+            return
+
+        self.context.gui_context['PlotMode'] = plot_mode
+
+        self._view.set_plot_mode(str(plot_mode))
+        if plot_mode == PlotMode.Data:
+            self._view.enable_plot_type_combo()
+            self.update_plot()
+            self.fitting_plot_range = self._figure_presenter.get_plot_x_range()
+            self._figure_presenter.set_plot_range(self.data_plot_range)
+        elif plot_mode == PlotMode.Fitting:
+            self._view.disable_plot_type_combo()
+            self.update_plot()
+            self.data_plot_range = self._figure_presenter.get_plot_x_range()
+            self._figure_presenter.set_plot_range(self.fitting_plot_range)
+
+        self._figure_presenter.autoscale_y_axes()
+
+    def handle_plot_mode_changed_for_frequency_domain_analysis(self, plot_mode : PlotMode):
+        if plot_mode == self.context.gui_context['PlotMode']:
+            return
+
+        self.context.gui_context['PlotMode'] = plot_mode
+
+        self._view.set_plot_mode(str(plot_mode))
+        if plot_mode == PlotMode.Data:
+            self._view.enable_plot_type_combo()
+            self._view.enable_tile_plotting_options()
+            self._view.enable_plot_raw_option()
+            self._view.set_is_tiled_plot(self.data_plot_tiled_state)
+            self.update_plot()
+            self.fitting_plot_range = self._figure_presenter.get_plot_x_range()
+            self._figure_presenter.set_plot_range(self.data_plot_range)
+        elif plot_mode == PlotMode.Fitting:
+            self._view.disable_plot_type_combo()
+            self._view.disable_tile_plotting_options()
+            self._view.disable_plot_raw_option()
+            self.data_plot_tiled_state = self._view.is_tiled_plot()
+            self._view.set_is_tiled_plot(False)
+            self.update_plot()
+            self.data_plot_range = self._figure_presenter.get_plot_x_range()
+            self._figure_presenter.set_plot_range(self.fitting_plot_range)
+
+        self._figure_presenter.autoscale_y_axes()
+
+    def handle_plot_mode_changed_by_user(self):
+        plot_mode = PlotMode.Data if str(PlotMode.Data) == self._view.get_plot_mode() else PlotMode.Fitting
+
+        self.handle_plot_mode_changed(plot_mode)
 
     def handle_workspace_deleted_from_ads(self, workspace: Workspace2D):
         """
@@ -225,21 +298,21 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         """
         self._figure_presenter.create_single_plot()
 
-    def handle_plot_selected_fits(self, fit_information_list: List[FitPlotInformation]):
+    def handle_plot_selected_fits(self, fit_information_list: List[FitPlotInformation], autoscale=False):
         """Plots a list of selected fit workspaces (obtained from fit and seq fit tabs).
         :param fit_information_list: List of named tuples each entry of the form (fit, input_workspaces)
         """
-        if not fit_information_list:
-            return
         workspace_list = []
         indices = []
-        for fit_information in fit_information_list:
-            fit = fit_information.fit
-            fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit)
-            workspace_list += fit_information.input_workspaces + fit_workspaces
-            indices += [0] * len(fit_information.input_workspaces) + fit_indices
 
-        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+        if fit_information_list:
+            for fit_information in fit_information_list:
+                fit = fit_information.fit
+                fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit)
+                workspace_list += fit_information.input_workspaces + fit_workspaces
+                indices += [0] * len(fit_information.input_workspaces) + fit_indices
+
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale)
 
     def handle_plot_guess_changed(self):
         if self.context.fitting_context.guess_ws is None:
