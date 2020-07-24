@@ -10,7 +10,6 @@
 from mantid.kernel import ConfigService
 from mantid.plots.utility import get_colormap_names
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
-from workbench.config import CONF
 from workbench.widgets.settings.plots.view import PlotsSettingsView
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
 
