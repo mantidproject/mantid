@@ -138,38 +138,34 @@ class MuonContext(object):
                             pair_name].show_rebin(run, directory + name)
 
     def calculate_all_pairs(self):
-        for run in self._data_context.current_runs:
-            run_pre_processing(context=self, run=run, rebin=self._do_rebin())
-            for pair_name in self._group_pair_context.pair_names:
-                pair_asymmetry_workspace = self.calculate_pair(pair_name, run)
-                self.group_pair_context[
-                    pair_name].update_asymmetry_workspace(
-                    pair_asymmetry_workspace,
-                    run)
+        self._calculate_pairs(rebin=False)
+        if(self._do_rebin()):
+            self._calculate_pairs(rebin=True)
 
-                if self._do_rebin():
-                    pair_asymmetry_workspace = self.calculate_pair(
-                        pair_name, run, rebin=True)
-                    self.group_pair_context[
-                        pair_name].update_asymmetry_workspace(
-                        pair_asymmetry_workspace,
-                        run,
-                        rebin=True)
+    def _calculate_pairs(self, rebin):
+        for run in self._data_context.current_runs:
+            run_pre_processing(context=self, run=run, rebin=rebin)
+            for pair_name in self._group_pair_context.pair_names:
+                pair_asymmetry_workspace = self.calculate_pair(
+                     pair_name, run, rebin=rebin)
+                self.group_pair_context[
+                     pair_name].update_asymmetry_workspace(
+                     pair_asymmetry_workspace,
+                     run,
+                     rebin=rebin)
 
     def calculate_all_groups(self):
-        for run in self._data_context.current_runs:
-            run_pre_processing(context=self, run=run, rebin=self._do_rebin())
-            for group_name in self._group_pair_context.group_names:
-                group_workspace, group_asymmetry, group_asymmetry_unormalised = self.calculate_group(group_name, run)
-                self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry,
-                                                                      group_asymmetry_unormalised, rebin=False)
+        self._calculate_groups(rebin=False)
+        if self._do_rebin():
+            self._calculate_groups(rebin=True)
 
-                if self._do_rebin():
-                    group_workspace, group_asymmetry, group_asymmetry_unormalised = self.calculate_group(group_name,
-                                                                                                         run,
-                                                                                                         rebin=True)
-                    self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry,
-                                                                          group_asymmetry_unormalised, rebin=True)
+    def _calculate_groups(self, rebin):
+        for run in self._data_context.current_runs:
+            run_pre_processing(context=self, run=run, rebin=rebin)
+            for group_name in self._group_pair_context.group_names:
+                group_workspace, group_asymmetry, group_asymmetry_unormalised = self.calculate_group(group_name, run, rebin=rebin)
+                self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry,
+                                                                      group_asymmetry_unormalised, rebin=rebin)
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their
