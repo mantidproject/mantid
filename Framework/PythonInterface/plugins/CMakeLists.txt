@@ -208,6 +208,7 @@ set(PYTHON_PLUGINS
   algorithms/VesuvioThickness.py
   algorithms/BASISCrystalDiffraction.py
   algorithms/Abins.py
+  algorithms/Abins2D.py
   algorithms/ExtractMonitors.py
   algorithms/SANSWideAngleCorrection.py
   algorithms/LoadVesuvio.py
