@@ -37,6 +37,7 @@ class PlotsSettingsTest(unittest.TestCase):
                                                        call(PlotProperties.SHOW_TITLE.value),
                                                        call(PlotProperties.SHOW_MINOR_TICKS.value),
                                                        call(PlotProperties.SHOW_MINOR_GRIDLINES.value),
+                                                       call(PlotProperties.PLOT_FONT.value),
                                                        call(PlotProperties.X_AXES_SCALE.value),
                                                        call(PlotProperties.Y_AXES_SCALE.value),
                                                        call(PlotProperties.LINE_STYLE.value),
