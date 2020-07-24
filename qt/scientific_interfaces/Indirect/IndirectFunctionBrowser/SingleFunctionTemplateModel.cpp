@@ -25,7 +25,6 @@ void sortFunctionList(QStringList &list) {
   if (ix == list.end() || ix == list.begin()) {
     return;
   } else {
-    int index = std::distance(list.begin(), ix);
     for (auto itr = ix; itr > list.begin(); --itr) {
       std::rotate(itr - 1, itr, itr + 1);
     }
