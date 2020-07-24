@@ -480,6 +480,13 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
             max_value = max(max_value, xtmp.max())
             diff = xtmp[1:] - xtmp[:-1]
             delta = min(delta, diff.min())
+    xtmp = workspace.readX(0)
+    if delta == np.finfo(np.float64).max:
+        delta = (xtmp[1:] - xtmp[:-1]).min()
+    if min_value == np.finfo(np.float64).max:
+        min_value = xtmp.min()
+    if max_value == np.finfo(np.float64).min:
+        max_value = xtmp.max()
     num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
     x_centers = np.linspace(min_value, max_value, num=num_edges)
     y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
