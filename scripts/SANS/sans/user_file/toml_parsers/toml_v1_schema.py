@@ -72,8 +72,8 @@ class TomlSchemaV1Validator(object):
                          "radius_limit": {"min", "max"}}
 
         binning_keys = {"wavelength": {"start", "step", "stop", "type"},
-                        "1d_reduction": {"binning"},
-                        "2d_reduction": {"step", "stop", "type"}}
+                        "1d_reduction": {"binning", "radius_cut", "wavelength_cut"},
+                        "2d_reduction": {"step", "stop", "type", "interpolate"}}
 
         reduction_keys = {"merged": {"rescale": {"min", "max", "use_fit"},
                                      "shift": {"min", "max", "use_fit"},
@@ -95,6 +95,7 @@ class TomlSchemaV1Validator(object):
         mask_keys = {"beamstop_shadow": {"angle", "width"},
                      "mask_files": None,
                      "mask_pixels": None,
+                     "phi": {"mirror", "start", "stop"},
                      "time": {"tof"},
                      "spatial": {"rear": {"detector_columns", "detector_rows",
                                           "detector_column_ranges", "detector_row_ranges"},

@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, ReductionMode, RangeStepType, FitModeForMerge, \
-    DataType, FitType
+    DataType, FitType, RebinType
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
 from sans.test_helper.file_information_mock import SANSFileInformationMock
@@ -110,22 +110,29 @@ class TomlV1ParserTest(unittest.TestCase):
         for bin_type in ["Lin", "Log"]:
             wavelength_dict = {"binning": {"wavelength": {"start": 1.1, "step": 0.1, "stop": 2.2, "type": bin_type}}}
             wavelength = self._setup_parser(wavelength_dict).get_state_wavelength()
-            self.assertEqual(1.1, wavelength.wavelength_low)
+            self.assertEqual([1.1], wavelength.wavelength_low)
+            self.assertEqual([2.2], wavelength.wavelength_high)
             self.assertEqual(0.1, wavelength.wavelength_step)
-            self.assertEqual(2.2, wavelength.wavelength_high)
             self.assertEqual(RangeStepType(bin_type), wavelength.wavelength_step_type)
 
-        one_d_reduction_q_dict = {"binning": {"1d_reduction": {"binning": "1.0, 0.1, 2.0, -0.2, 3.0"}}}
+        one_d_reduction_q_dict = {"binning": {"1d_reduction": {"binning": "1.0, 0.1, 2.0, -0.2, 3.0",
+                                                               "radius_cut": 12.3,
+                                                               "wavelength_cut": 23.4}}}
         one_d_convert_to_q = self._setup_parser(one_d_reduction_q_dict).get_state_convert_to_q()
         self.assertEqual(1.0, one_d_convert_to_q.q_min)
         self.assertEqual(3.0, one_d_convert_to_q.q_max)
-        self.assertEqual("0.1, 2.0, -0.2", one_d_convert_to_q.q_1d_rebin_string.strip())
+        self.assertEqual("1.0, 0.1, 2.0, -0.2, 3.0", one_d_convert_to_q.q_1d_rebin_string.strip())
+        self.assertEqual(12.3, one_d_convert_to_q.radius_cutoff)
+        self.assertEqual(23.4, one_d_convert_to_q.wavelength_cutoff)
 
-        two_d_reduction_q_dict = {"binning": {"2d_reduction": {"step": 1.0, "stop": 5.0, "type": "Lin"}}}
-        two_d_convert_to_q = self._setup_parser(two_d_reduction_q_dict).get_state_convert_to_q()
+        two_d_reduction_q_dict = {"binning": {"2d_reduction": {"step": 1.0, "stop": 5.0,
+                                                               "type": "Lin", "interpolate": True}}}
+        results = self._setup_parser(two_d_reduction_q_dict)
+        two_d_convert_to_q = results.get_state_convert_to_q()
         self.assertEqual(5.0, two_d_convert_to_q.q_xy_max)
         self.assertEqual(1.0, two_d_convert_to_q.q_xy_step)
         self.assertTrue(two_d_convert_to_q.q_xy_step_type is RangeStepType.LIN)
+        self.assertTrue(results.get_state_calculate_transmission().rebin_type is RebinType.INTERPOLATING_REBIN)
 
     def test_reduction_commands_parsed(self):
         top_level_dict = {"reduction": {"merged": {},
@@ -387,7 +394,8 @@ class TomlV1ParserTest(unittest.TestCase):
         top_level_dict = {"mask": {"beamstop_shadow": {},
                                    "mask_pixels": [],
                                    "mask_files": [],
-                                   "time": {"tof": []}}}
+                                   "time": {"tof": []}},
+                                   "phi": {}}
 
         top_level_dict["mask"]["beamstop_shadow"] = {"width": 10, "angle": 180}
 
@@ -401,6 +409,9 @@ class TomlV1ParserTest(unittest.TestCase):
         time_dict["tof"].extend([{"start": 100, "stop": 200},
                                  {"start": 300, "stop": 400}])
 
+        top_level_dict["mask"]["phi"] = {"mirror": False,
+                                         "start": -50, "stop": 50}
+
         masks = self._setup_parser(top_level_dict).get_state_mask()
 
         self.assertIsInstance(masks, StateMask)
@@ -413,6 +424,10 @@ class TomlV1ParserTest(unittest.TestCase):
 
         self.assertEqual([100, 300], masks.bin_mask_general_start)
         self.assertEqual([200, 400], masks.bin_mask_general_stop)
+
+        self.assertEqual(False, masks.use_mask_phi_mirror)
+        self.assertEqual(-50, masks.phi_min)
+        self.assertEqual(50, masks.phi_max)
 
 
 if __name__ == '__main__':

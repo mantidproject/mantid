@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, \
-    DataType, FitType
+    DataType, FitType, RebinType
 from sans.common.general_functions import get_bank_for_spectrum_number
 from sans.state.IStateParser import IStateParser
 from sans.state.StateObjects.StateAdjustment import StateAdjustment
@@ -133,6 +133,7 @@ class _TomlV1ParserImpl(object):
         inst_config_dict = self._get_val(["instrument", "configuration"])
 
         self.calculate_transmission.incident_monitor = self._get_val("norm_monitor", inst_config_dict)
+        self.normalize_to_monitor.incident_monitor = self._get_val("norm_monitor", inst_config_dict)
         self.calculate_transmission.transmission_monitor = self._get_val("trans_monitor", inst_config_dict)
 
         self.convert_to_q.q_resolution_collimation_length = self._get_val("collimation_length", inst_config_dict)
@@ -147,7 +148,8 @@ class _TomlV1ParserImpl(object):
         self.scale.scale = self._get_val("rear_scale", det_config_dict)
 
         reduction_mode_key = self._get_val(["detector", "configuration", "selected_detector"])
-        reduction_mode = ReductionMode(reduction_mode_key) if reduction_mode_key else ReductionMode.NOT_SET
+        # Low angle bank was set by default in user parser as it's the main detectors
+        reduction_mode = ReductionMode(reduction_mode_key) if reduction_mode_key else ReductionMode.LAB
         self.reduction_mode.reduction_mode = reduction_mode
 
         def update_translations(det_type, values: dict):
@@ -201,6 +203,8 @@ class _TomlV1ParserImpl(object):
 
         def set_wavelength(state_obj):
             wavelength_start = self._get_val(["wavelength", "start"], binning_dict)
+            # Weirdly start and stop in user file parser are lists whilst
+            # step is a float val?
             if wavelength_start:
                 state_obj.wavelength_low = [wavelength_start]
             wavelength_stop = self._get_val(["wavelength", "stop"], binning_dict)
@@ -219,14 +223,15 @@ class _TomlV1ParserImpl(object):
         set_wavelength(self.wavelength)
         set_wavelength(self.wavelength_and_pixel)
 
-        one_d_binning = self._get_val(["1d_reduction", "binning"], binning_dict)
-        if one_d_binning:
-            import pydevd_pycharm
-            pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
-            q_min, q_rebin, q_max = self._convert_1d_binning_string(one_d_binning)
+        one_d_dict = self._get_val("1d_reduction", binning_dict)
+        if one_d_dict:
+            one_d_binning = self._get_val(["1d_reduction", "binning"], binning_dict)
+            q_min, q_max = self._get_1d_min_max(one_d_binning)
             self.convert_to_q.q_min = q_min
-            self.convert_to_q.q_1d_rebin_string = q_rebin
+            self.convert_to_q.q_1d_rebin_string = one_d_binning
             self.convert_to_q.q_max = q_max
+            self.convert_to_q.radius_cutoff = self._get_val("radius_cut", one_d_dict, default=0.0)
+            self.convert_to_q.wavelength_cutoff = self._get_val("wavelength_cut", one_d_dict, default=0.0)
 
         self.convert_to_q.q_xy_max = self._get_val(["2d_reduction", "stop"], binning_dict)
         self.convert_to_q.q_xy_step = self._get_val(["2d_reduction", "step"], binning_dict)
@@ -234,15 +239,20 @@ class _TomlV1ParserImpl(object):
         if two_d_step_type:
             self.convert_to_q.q_xy_step_type = RangeStepType(two_d_step_type)
 
+        rebin_type = self._get_val(["2d_reduction", "interpolate"], binning_dict, default=False)
+        rebin_type = RebinType.INTERPOLATING_REBIN if rebin_type else RebinType.REBIN
+        self.calculate_transmission.rebin_type = rebin_type
+        self.normalize_to_monitor.rebin_type = rebin_type
+
     def _parse_reduction(self):
         reduction_dict = self._get_val(["reduction"])
 
-        self.compatibility.time_rebin_string = self._get_val(["events", "binning"], reduction_dict)
+        self.compatibility.time_rebin_string = self._get_val(["events", "binning"], reduction_dict, default="")
 
         merge_range_dict = self._get_val(["merged", "merge_range"], reduction_dict)
         self.reduction_mode.merge_min = self._get_val("min", merge_range_dict)
         self.reduction_mode.merge_max = self._get_val("max", merge_range_dict)
-        self.reduction_mode.merge_mask = self._get_val("use_fit", merge_range_dict)
+        self.reduction_mode.merge_mask = self._get_val("use_fit", merge_range_dict, default=False)
 
         # When two max and min values are provided we take the outer bounds
         min_q = []
@@ -272,13 +282,13 @@ class _TomlV1ParserImpl(object):
 
     def _parse_q_resolution(self):
         q_dict = self._get_val("q_resolution")
-        self.convert_to_q.use_q_resolution = self._get_val("enabled", q_dict)
+        self.convert_to_q.use_q_resolution = self._get_val("enabled", q_dict, default=False)
         self.convert_to_q.moderator_file = self._get_val("moderator_file", q_dict)
         self.convert_to_q.q_resolution_a1 = self._get_val("source_aperture", q_dict)
         self.convert_to_q.q_resolution_delta_r = self._get_val("delta_r", q_dict)
 
     def _parse_gravity(self):
-        self.convert_to_q.use_gravity = self._get_val(["gravity", "enabled"])
+        self.convert_to_q.use_gravity = self._get_val(["gravity", "enabled"], default=True)
 
     def _parse_transmission(self):
         transmission_dict = self._get_val("transmission")
@@ -293,19 +303,22 @@ class _TomlV1ParserImpl(object):
         # TODO this is a nasty data structure we should sort out properly by making the
         # monitor number agnostic
         if "M5" in monitor_name:
-            self.move.monitor_5_offset = self._get_val("shift", monitor_dict)
+            self.move.monitor_5_offset = self._get_val("shift", monitor_dict, default=0.0)
         else:
             # Instruments will use monitor 3/4/17788 (not making the last one up) here instead of 4
-            self.move.monitor_4_offset = self._get_val("shift", monitor_dict)
+            self.move.monitor_4_offset = self._get_val("shift", monitor_dict, default=0.0)
 
         monitor_spec_num = self._get_val("spectrum_number", monitor_dict)
         self.calculate_transmission.transmission_monitor = monitor_spec_num
 
         if self._get_val("use_own_background", monitor_dict):
             background = monitor_dict["background"]  # Mandatory field when use_own_background
-            assert len(background) == 2, "Two background values required"
+            if len(background) != 2:
+                raise ValueError("Two background values required")
             self.calculate_transmission.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
             self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+            self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
+            self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
 
     def _parse_transmission_fitting(self):
         fit_dict = self._get_val(["transmission", "fitting"])
@@ -348,9 +361,12 @@ class _TomlV1ParserImpl(object):
         # Mandatory as its subtle if missing
         monitor_spec_num = monitor_dict["spectrum_number"]
         background = monitor_dict["background"]
-        assert len(background) == 2, "Two background values required"
+        if len(background) != 2:
+            raise ValueError("Two background values required")
         self.calculate_transmission.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
         self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+        self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
+        self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
 
     def _parse_spatial_masks(self):
         mask_dict = self._get_val("mask")
@@ -367,8 +383,8 @@ class _TomlV1ParserImpl(object):
             if individual_rows:
                 mask_detectors.single_horizontal_strip_mask.extend(individual_rows)
 
-            col_ranges = self._get_val("detector_column_ranges", spatial_dict)
-            row_ranges = self._get_val("detector_row_ranges", spatial_dict)
+            col_ranges = self._get_val("detector_column_ranges", spatial_dict, default=[])
+            row_ranges = self._get_val("detector_row_ranges", spatial_dict, default=[])
             for pair in col_ranges:
                 assert isinstance(pair, list), "Ranges should be entered as lists of lists, e.g. [[1, 10]]"
                 assert len(pair) == 2, "A start and end value must exist for each pair"
@@ -411,21 +427,29 @@ class _TomlV1ParserImpl(object):
                 self.mask.bin_mask_general_start.append(mask_pair["start"])
                 self.mask.bin_mask_general_stop.append(mask_pair["stop"])
 
+        phi_mask = self._get_val(["phi"], mask_dict)
+        if phi_mask:
+            if "mirror" in phi_mask:
+                self.mask.use_mask_phi_mirror = phi_mask["mirror"]
+            if "start" in phi_mask:
+                self.mask.phi_min = phi_mask["start"]
+            if "stop" in phi_mask:
+                self.mask.phi_max = phi_mask["stop"]
+
     @staticmethod
-    def _convert_1d_binning_string(one_d_binning: str):
+    def _get_1d_min_max(one_d_binning: str):
         # TODO: We have to do some special parsing for this type on behalf of the sans codebase
         # TODO: which should do this instead of the parser
         bin_values = one_d_binning.split(",")
 
         if len(bin_values) == 3:
-            return float(bin_values[0]), bin_values[1], float(bin_values[-1])
+            return float(bin_values[0]), float(bin_values[-1])
         elif len(bin_values) == 5:
-            rebin_str = ','.join(bin_values[1:-1])
-            return float(bin_values[0]), rebin_str, float(bin_values[-1])
+            return float(bin_values[0]), float(bin_values[-1])
         else:
             raise ValueError("Three or five comma seperated binning values are needed, got {0}".format(one_d_binning))
 
-    def _get_val(self, keys, dict_to_parse=None, default_return=None):
+    def _get_val(self, keys, dict_to_parse=None, default=None):
         """
         Gets a nested value within the specified dictionary
         :param keys: A list of keys to iterate through the dictionary
@@ -438,13 +462,14 @@ class _TomlV1ParserImpl(object):
         try:
             return self._get_val_impl(keys=keys, dict_to_parse=dict_to_parse)
         except KeyError:
-            return default_return
+            return default
 
     def _get_val_impl(self, keys, dict_to_parse):
         if dict_to_parse is None:
             dict_to_parse = self._input
 
-        assert isinstance(dict_to_parse, dict)
+        assert isinstance(dict_to_parse, dict), \
+            "Expected a dict for get keys, got %r instead" % repr(dict_to_parse)
 
         val = dict_to_parse[keys[0]]
         if isinstance(val, dict) and len(keys) > 1:

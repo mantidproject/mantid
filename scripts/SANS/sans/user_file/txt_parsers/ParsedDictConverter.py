@@ -681,8 +681,6 @@ class ParsedDictConverter(IStateParser):
         # Tilt
         # ---------------------------
         if DetectorId.CORRECTION_X_TILT in self._input_dict:
-            import pydevd_pycharm
-            pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
             tilt_correction = self._input_dict[DetectorId.CORRECTION_X_TILT]
             tilt_correction = tilt_correction[-1]
             if tilt_correction.detector_type is DetectorType.HAB:
