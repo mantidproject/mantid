@@ -32,9 +32,9 @@ class PowderCalculator:
 
         # Populate data, removing imaginary modes
         for k, k_point_data in enumerate(k_data):
-            indx = k_point_data.frequencies > ACOUSTIC_PHONON_THRESHOLD
-            self._frequencies[k] = k_point_data.frequencies[indx]
-            self._displacements[k] = k_point_data.atomic_displacements[:, indx]
+            mask = k_point_data.frequencies > ACOUSTIC_PHONON_THRESHOLD
+            self._frequencies[k] = k_point_data.frequencies[mask]
+            self._displacements[k] = k_point_data.atomic_displacements[:, mask]
 
         self._masses = np.asarray([atoms_data[atom]["mass"] for atom in range(len(atoms_data))])
 
@@ -52,9 +52,9 @@ class PowderCalculator:
 
         tensors = [self._calculate_powder_k(k=k) for k in k_indices]
 
-        for indx, k_index in enumerate(k_indices):
-            a_tensors[k_index] = tensors[indx][0]
-            b_tensors[k_index] = tensors[indx][1]
+        for i, k_index in enumerate(k_indices):
+            a_tensors[k_index] = tensors[i][0]
+            b_tensors[k_index] = tensors[i][1]
 
         powder = abins.PowderData(a_tensors=a_tensors,
                                   b_tensors=b_tensors,

@@ -62,8 +62,8 @@ class AbinsData:
         data = self.extract()
         for k in data["k_points_data"]["atomic_displacements"]:
             if data["k_points_data"]["atomic_displacements"][k].shape[0] != len(data["atoms_data"]):
-                raise ValueError("Abins data is inconsistent: number of atoms in structure does not match "
-                                 "displacement data.")
+                raise ValueError("KpointsData and AtomsData are not consistent: number of atoms in structure "
+                                 "does not match displacement data.")
 
     def extract(self) -> Dict[str, Any]:
         """Get a dict with k-points data and atoms data"""
