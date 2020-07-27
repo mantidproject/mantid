@@ -174,6 +174,7 @@ void PreviewPlot::removeSpectrum(const QString &lineName) {
   auto axes = m_canvas->gca();
   axes.removeArtists("lines", lineName);
   m_lines.remove(lineName);
+  regenerateLegend();
 }
 
 /**
@@ -310,7 +311,6 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
     break;
   }
 }
-
 /**
  * Gets the range of the specified axis
  * @param axisID An enumeration defining the axis
@@ -328,14 +328,21 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
 }
 
 void PreviewPlot::replot() {
-  m_canvas->draw();
-  emit redraw();
+  if (m_allowRedraws) {
+    m_canvas->draw();
+    emit redraw();
+  }
 }
+
+void PreviewPlot::allowRedraws(bool state) { m_allowRedraws = state; }
 
 /**
  * Clear all lines from the plot
  */
-void PreviewPlot::clear() { m_canvas->gca().clear(); }
+void PreviewPlot::clear() {
+  m_canvas->gca().clear();
+  m_lines.clear();
+}
 
 /**
  * Resize the X axis to encompass all of the data
@@ -633,7 +640,9 @@ void PreviewPlot::onWorkspaceReplaced(
  */
 void PreviewPlot::regenerateLegend() {
   if (legendIsVisible()) {
-    m_canvas->gca().legend(DRAGGABLE_LEGEND);
+    if (!m_lines.isEmpty()) {
+      m_canvas->gca().legend(DRAGGABLE_LEGEND);
+    }
   }
 }
 

@@ -658,13 +658,6 @@ private:
 };
 } // namespace
 
-/// Copy assignment. Do not copy m_quoteValue flag.
-/// @param attr :: The attribute to copy from.
-IFunction::Attribute &IFunction::Attribute::operator=(const Attribute &attr) {
-  m_data = attr.m_data;
-  return *this;
-}
-
 std::string IFunction::Attribute::value() const {
   AttValue tmp(m_quoteValue);
   return apply(tmp);

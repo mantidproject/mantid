@@ -118,6 +118,7 @@ protected slots:
       const std::unordered_map<std::string, ParameterValue> &parameters);
   void updateFitBrowserParameterValues();
   void updateFitBrowserParameterValuesFromAlg();
+  void updateFitStatus();
   void updateDataReferences();
   void updateResultOptions();
   void respondToFunctionChanged();

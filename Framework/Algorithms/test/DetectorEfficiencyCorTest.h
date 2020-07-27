@@ -155,6 +155,6 @@ private:
       pmap.add("double", detector, "TubePressure", 10.0);
       pmap.add("double", detector, "TubeThickness", 0.0008);
     }
-    return std::move(space2D);
+    return space2D;
   }
 };

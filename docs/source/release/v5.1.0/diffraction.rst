@@ -26,6 +26,7 @@ Improvements
 - :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been updated to allow for the algorithm to be run on a PDF to obtain a spectrum density function.
 - :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` now accepts the crystalographic density of the sample to correct for the powder density.
 - Square beam profile of 5mm x 5mm added to the PEARL_Definition_new_lowangle instrument definition file
+- running `Polaris.create_total_scattering_pdf` with `debug=true` will preserve the `self_scattering_correction` workspace.
 
 Bugfixes
 ^^^^^^^^
@@ -33,6 +34,11 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+^^^^^^^^^^^^
+- New algorithm for estimating background of powder spectra :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` using iterative smoothing.
+- Mantid fitting capability added to fitting tab of Engineering Diffraction UI.
+
 Improvements
 ^^^^^^^^^^^^
 - TOPAS files (`.abc`) have replaced the `.dat` files generated when focusing using the GUI.

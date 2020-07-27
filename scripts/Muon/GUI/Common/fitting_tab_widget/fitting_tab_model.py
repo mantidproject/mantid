@@ -13,6 +13,8 @@ from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapp
 from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CalculateMuonAsymmetry,
                               CopyLogs, EvaluateFunction)
 from mantid.api import AnalysisDataService
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
+
 import mantid
 import math
 
@@ -442,13 +444,16 @@ class FittingTabModel(object):
 
     # This function creates a list of keys from a list of input workspace names
     def create_hashable_keys_for_workspace_names(self):
-        runs, group_and_pairs = self.get_runs_groups_and_pairs_for_fits()
         list_of_workspace_lists = []
-        for run, group_and_pair in zip(runs, group_and_pairs):
-            separated_runs, separated_groups_and_pairs = \
-                self.get_separated_runs_and_group_and_pairs(run, group_and_pair)
-            list_of_workspace_lists += [self.get_fit_workspace_names_from_groups_and_runs(separated_runs,
-                                                                                          separated_groups_and_pairs)]
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
+            list_of_workspace_lists = [[item ] for item in self.get_selected_workspace_list()]
+        else:
+            runs, group_and_pairs = self.get_runs_groups_and_pairs_for_fits()
+            for run, group_and_pair in zip(runs, group_and_pairs):
+                separated_runs, separated_groups_and_pairs = \
+                    self.get_separated_runs_and_group_and_pairs(run, group_and_pair)
+                list_of_workspace_lists += [self.get_fit_workspace_names_from_groups_and_runs(separated_runs,
+                                                                                              separated_groups_and_pairs)]
         workspace_key_list = []
         for workspace_list in list_of_workspace_lists:
             workspace_key_list += [self.create_workspace_key(workspace_list)]
@@ -506,7 +511,7 @@ class FittingTabModel(object):
         self.ws_fit_function_map = {}
 
     def freq_type(self):
-        if self.context._frequency_context is not None:
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
             freq = self.context._frequency_context.plot_type
         else:
             freq = 'None'

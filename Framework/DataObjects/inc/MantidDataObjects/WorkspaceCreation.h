@@ -198,7 +198,7 @@ create(const std::shared_ptr<const Geometry::Instrument> &instrument,
   auto ws = std::make_unique<T>();
   ws->setInstrument(std::move(instrument));
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  return std::move(ws);
+  return ws;
 }
 
 template <class T, class P,

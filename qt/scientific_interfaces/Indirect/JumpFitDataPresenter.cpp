@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitDataPresenter.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "JumpFitDataTablePresenter.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -249,7 +250,7 @@ JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
           this,
           SLOT(dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *,
                                           const std::string &)));
-  return std::move(dialog);
+  return dialog;
 }
 
 void JumpFitDataPresenter::setMultiInputResolutionFBSuffixes(

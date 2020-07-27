@@ -1,7 +1,7 @@
 .. _02_pim_sol:
 
 ============================
-Python in Mantid: Exercise 2
+Python in Mantid: Solution 2
 ============================
 
 A - Processing ISIS Data

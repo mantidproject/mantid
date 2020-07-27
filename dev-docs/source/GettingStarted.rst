@@ -71,12 +71,12 @@ Red Hat/Cent OS/Fedora
   # Install dependencies
   yum install mantid-developer
 
-Ubuntu
-~~~~~~
+Ubuntu 18.04
+~~~~~~~~~~~~
 - Setup the Kitware APT repository to get a recent version of CMake by
   following `these instructions <https://apt.kitware.com/>`_
 - Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_
-  to add the stable release repository and mantid ppa.
+  to add the stable release repository and mantid ppa and
 - Download the latest
   `mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
   package and install it:
@@ -89,6 +89,61 @@ Ubuntu
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
+
+Ubuntu 20.04
+~~~~~~~~~~~~
+- Mantid is not yet officially supported on Ubuntu 20.04 as Qt4 has been removed but Workbench can be built by installing:
+
+.. code-block:: sh
+
+   apt-get install -y git \
+     g++ \
+     clang-format-6.0 \
+     cmake \
+     dvipng \
+     libtbb-dev \
+     libgoogle-perftools-dev \
+     libboost-all-dev \
+     libpoco-dev \
+     libnexus-dev \
+     libhdf5-dev \
+     libhdf4-dev \
+     libgsl-dev \
+     liboce-visualization-dev \
+     libmuparser-dev \
+     libssl-dev \
+     libjsoncpp-dev \
+     librdkafka-dev \
+     qtbase5-dev \
+     qttools5-dev \
+     qttools5-dev-tools \
+     libqt5webkit5-dev \
+     libqt5x11extras5-dev \
+     libqt5opengl5-dev \
+     libqscintilla2-qt5-dev \
+     libpython3-dev \
+     ninja-build \
+     python3-setuptools \
+     python3-sip-dev \
+     python3-pyqt5 \
+     pyqt5-dev \
+     pyqt5-dev-tools \
+     python3-qtpy \
+     python3-numpy \
+     python3-scipy \
+     python3-sphinx \
+     python3-sphinx-bootstrap-theme \
+     python3-dateutil \
+     python3-matplotlib \
+     python3-qtconsole \
+     python3-h5py \
+     python3-mock \
+     python3-psutil \
+     python3-requests \
+     python3-toml \
+     python3-yaml
+
+and passing the `-DENABLE_MANTIDPLOT=OFF` option to the cmake command line or selecting this in the cmake GUI.
 
 OSX
 ---
@@ -120,7 +175,7 @@ There are a number of URLs via which the code can be checked out using various p
 
 Setting up GitHub
 #################
-Please install the ZenHub Browser extension from this `page <https://www.zenhub.com/extension>`_. 
+Please install the ZenHub Browser extension from this `page <https://www.zenhub.com/extension>`_.
 
 Building Mantid
 ###############

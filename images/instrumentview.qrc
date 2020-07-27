@@ -15,6 +15,7 @@
         <file>brush.png</file>
         <file>selection-peak-compare.png</file>
         <file>selection-peak-plane.png</file>
+        <file>selection-sector.png</file>
     </qresource>
     <qresource prefix="/MaskTools">
         <file>selection-circle.png</file>
@@ -23,5 +24,6 @@
         <file>selection-circle-ring.png</file>
         <file>selection-edit.png</file>
         <file>brush.png</file>
+        <file>selection-sector.png</file>
     </qresource>
 </RCC>

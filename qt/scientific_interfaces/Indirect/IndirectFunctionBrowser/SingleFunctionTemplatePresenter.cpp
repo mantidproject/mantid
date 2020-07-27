@@ -21,8 +21,9 @@ using namespace MantidWidgets;
  */
 SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(
     SingleFunctionTemplateBrowser *view,
-    const std::map<std::string, std::string> &functionInitialisationStrings)
-    : QObject(view), m_view(view), m_model() {
+    const std::map<std::string, std::string> &functionInitialisationStrings,
+    std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation)
+    : QObject(view), m_view(view), m_model(std::move(parameterEstimation)) {
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
           SLOT(editLocalParameter(const QString &)));
   connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this,
@@ -44,15 +45,14 @@ void SingleFunctionTemplatePresenter::updateAvailableFunctions(
 }
 
 void SingleFunctionTemplatePresenter::setFitType(const QString &name) {
-  m_view->clear();
-  m_model.setFitType(name);
   if (name == "None")
     return;
+  m_view->clear();
+  m_model.setFitType(name);
   auto functionParameters = m_model.getParameterNames();
   for (auto &parameter : functionParameters) {
     m_view->addParameter(parameter, m_model.getParameterDescription(parameter));
   }
-
   setErrorsEnabled(false);
   updateView();
   emit functionStructureChanged();
@@ -142,6 +142,11 @@ void SingleFunctionTemplatePresenter::setErrorsEnabled(bool enabled) {
 void SingleFunctionTemplatePresenter::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_model.updateParameterEstimationData(std::move(data));
+  updateView();
+}
+void SingleFunctionTemplatePresenter::estimateFunctionParameters() {
+  m_model.estimateFunctionParameters();
+  updateView();
 }
 
 QStringList SingleFunctionTemplatePresenter::getDatasetNames() const {
@@ -183,10 +188,10 @@ void SingleFunctionTemplatePresenter::setLocalParameterTie(
 void SingleFunctionTemplatePresenter::updateView() {
   if (m_model.getFitType() == "None")
     return;
-  for (auto parameterName : m_model.getParameterNames()) {
-    m_view->setParameterValue(parameterName,
-                              m_model.getParameter(parameterName),
-                              m_model.getParameterError(parameterName));
+  for (auto &parameterName : m_model.getParameterNames()) {
+    m_view->setParameterValueQuietly(parameterName,
+                                     m_model.getParameter(parameterName),
+                                     m_model.getParameterError(parameterName));
   }
 }
 

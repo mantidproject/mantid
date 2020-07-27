@@ -22,6 +22,8 @@ class ImageProperties(dict):
 
     @classmethod
     def from_image(cls, image):
+        if isinstance(image, list):
+            image = image[0]
         props = dict()
 
         props['label'] = ""

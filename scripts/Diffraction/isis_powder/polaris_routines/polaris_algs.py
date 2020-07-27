@@ -81,7 +81,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
                     sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
-                    freq_params=None):
+                    freq_params=None, debug=False):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -124,7 +124,8 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
                                                 rho0=sample_details.material_object.crystal_density)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
-    common.remove_intermediate_workspace('self_scattering_correction')
+    if not debug:
+        common.remove_intermediate_workspace('self_scattering_correction')
     # Rename output ws
     if 'merged_ws' in locals():
         mantid.RenameWorkspace(InputWorkspace='merged_ws', OutputWorkspace=run_number + '_merged_Q')

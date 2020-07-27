@@ -80,7 +80,7 @@ The algorithm proceeds as follows. For each spectrum:
      - accumulate this wavelength-specific factor across all `NEvents`
 
 #. average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
-   this :math:`\lambda_{step}`.
+   this :math:`\lambda_{step}`. Calculate the error as the standard deviation of the accumulated attenuation factors divided by :math:`\sqrt{NEvents}`
 
 #. finally, if `ResimulateTracksForDifferentWavelengths` = True, interpolate through the unsimulated wavelength points using the selected method
 
@@ -112,6 +112,7 @@ When the sparse instrument option is enabled, a sparse instrument corresponding 
 The interpolation is a two step process: first a spatial interpolation is done from the detector grid of the sparse instrument to the actual detector positions of the full instrument. Then, if `ResimulateTracksForDifferentWavelengths` = True the correction factors are interpolated over the missing wavelengths.
 
 .. note:: Currently, the sparse instrument mode does not support instruments with varying *EFixed*.
+.. note:: Errors are not currently provided for absorption correction factors calculated involving spatial interpolation
 
 Spatial interpolation
 ^^^^^^^^^^^^^^^^^^^^^

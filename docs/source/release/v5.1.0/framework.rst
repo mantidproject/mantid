@@ -29,6 +29,7 @@ Algorithms
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Bug fixed where setting ResimulateTracksForDifferentWavelengths parameter to True was being ignored
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections are not calculated anymore for masked spectra
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections can be calculated for a workspace without a sample eg container only
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now calculates the error on the absorption correction factors
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has received a number of updates:
 
   - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
@@ -39,6 +40,14 @@ Algorithms
    When such incomplete data is encountered, it is skipped until the next valid data is encountered and a
    warning is printed at algorithm completion of the total number of data bytes discarded.
 - A bug introduced in v5.0 causing error values to tend to zero on multiple instances of :ref:`Rebin2D <algm-Rebin2D>` on the same workspace has been fixed.
+- A form of reversible masking that could lead to misleading and incorrect results has been removed from Mantid,
+  this means that ClearMaskedSpectra is no longer necessary after calling :ref:`MaskInstrument <algm-MaskInstrument>`
+  and :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>`.
+  ClearMaskedSpectra has been removed as it no longer has a use,
+  and :ref:`MaskInstrument <algm-MaskInstrument>` is now deprecated and you should use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
+- Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
+- Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
+
 
 Data Handling
 -------------
@@ -76,6 +85,10 @@ Python
 - Documentation for manipulating :ref:`workspaces <02_scripting_workspaces>` and :ref:`plots <02_scripting_plots>` within a script have been produced.
 - Property.units now attempts to encode with windows-1252 if utf-8 fails.
 - Property.unitsAsBytes has been added to retrieve the raw bytes from the units string.
+
+Improvements
+------------
+- Updated the convolution function in the fitting framework to allow the convolution of two composite functions.
 
 Bugfixes
 --------

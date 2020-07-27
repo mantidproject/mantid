@@ -67,7 +67,8 @@ class Polaris(AbstractInst):
                                                   delta_q=self._inst_settings.delta_q,
                                                   pdf_type=self._inst_settings.pdf_type,
                                                   lorch_filter=self._inst_settings.lorch_filter,
-                                                  freq_params=self._inst_settings.freq_params)
+                                                  freq_params=self._inst_settings.freq_params,
+                                                  debug=self._inst_settings.debug)
         return pdf_output
 
     def set_sample_details(self, **kwargs):

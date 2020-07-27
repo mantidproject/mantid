@@ -16,6 +16,7 @@
 #include <QTableWidget>
 #include <QVariant>
 #include <boost/optional.hpp>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {

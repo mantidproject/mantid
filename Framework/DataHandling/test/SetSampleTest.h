@@ -929,7 +929,7 @@ private:
     if (inputWS) {
       alg->setProperty("InputWorkspace", inputWS);
     }
-    return std::move(alg);
+    return alg;
   }
 
   bool validateErrorProduced(Mantid::API::IAlgorithm &alg,

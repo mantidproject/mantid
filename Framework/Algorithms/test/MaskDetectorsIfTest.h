@@ -222,7 +222,11 @@ private:
     for (size_t i = 0; i < numHist; ++i) {
       TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), correctMasking(*inW, i))
       if (std::isfinite(mask->y(i).front())) {
-        TS_ASSERT_EQUALS(mask->y(i).front(), inW->y(i).front());
+        if (spectrumInfo.isMasked(i)) {
+          TS_ASSERT_EQUALS(mask->y(i).front(), 0.);
+        } else {
+          TS_ASSERT_EQUALS(mask->y(i).front(), inW->y(i).front());
+        }
       }
     }
   }

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SingleFunctionTemplateBrowser.h"
+#include "IDAFunctionParameterEstimation.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -38,9 +39,11 @@ namespace IDA {
  */
 SingleFunctionTemplateBrowser::SingleFunctionTemplateBrowser(
     const std::map<std::string, std::string> &functionInitialisationStrings,
+    std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation,
     QWidget *parent)
     : FunctionTemplateBrowser(parent),
-      m_presenter(this, functionInitialisationStrings) {
+      m_presenter(this, functionInitialisationStrings,
+                  std::move(parameterEstimation)) {
   connect(&m_presenter, SIGNAL(functionStructureChanged()), this,
           SIGNAL(functionStructureChanged()));
 }
@@ -83,6 +86,7 @@ void SingleFunctionTemplateBrowser::addParameter(
   m_parameterManager->setDescription(newParameter,
                                      parameterDescription.toStdString());
   m_parameterManager->setDecimals(newParameter, 6);
+
   m_fitType->addSubProperty(newParameter);
   m_parameterMap.insert(parameterName, newParameter);
   m_parameterNames.insert(newParameter, parameterName);
@@ -173,6 +177,14 @@ void SingleFunctionTemplateBrowser::setParameterValue(
   m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
 }
 
+void SingleFunctionTemplateBrowser::setParameterValueQuietly(
+    const QString &parameterName, double parameterValue,
+    double parameterError) {
+  ScopedFalse _(m_emitParameterValueChange);
+  m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
+  m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
+}
+
 void SingleFunctionTemplateBrowser::setCurrentDataset(int i) {
   m_presenter.setCurrentDataset(i);
 }
@@ -197,6 +209,9 @@ void SingleFunctionTemplateBrowser::clear() {
 void SingleFunctionTemplateBrowser::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_presenter.updateParameterEstimationData(std::move(data));
+}
+void SingleFunctionTemplateBrowser::estimateFunctionParameters() {
+  m_presenter.estimateFunctionParameters();
 }
 
 void SingleFunctionTemplateBrowser::popupMenu(const QPoint &) {}

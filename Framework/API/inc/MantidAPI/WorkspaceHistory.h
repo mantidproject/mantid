@@ -37,11 +37,11 @@ public:
   /// Default constructor
   WorkspaceHistory();
   /// Destructor
-  virtual ~WorkspaceHistory();
+  virtual ~WorkspaceHistory() = default;
   /// Copy constructor
-  WorkspaceHistory(const WorkspaceHistory &);
+  WorkspaceHistory(const WorkspaceHistory &) = default;
   /// Deleted copy assignment operator
-  WorkspaceHistory &operator=(const WorkspaceHistory &) = delete;
+  WorkspaceHistory &operator=(const WorkspaceHistory &) = default;
   /// Retrieve the algorithm history list
   const AlgorithmHistories &getAlgorithmHistories() const;
   /// Retrieve the environment history

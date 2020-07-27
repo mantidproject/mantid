@@ -181,7 +181,7 @@ public:
   std::shared_ptr<MeshObject> retrieveSavedMesh() {
     LoadBinaryStl loader = LoadBinaryStl(m_OutputFile, ScaleUnits::metres);
     TS_ASSERT(loader.isBinarySTL(m_OutputFile))
-    auto shape = loader.readStl();
+    auto shape = loader.readShape();
     return std::shared_ptr<MeshObject>(shape.release());
   }
 

@@ -329,14 +329,16 @@ void IndirectFitAnalysisTab::tableExcludeChanged(const std::string & /*unused*/,
 
 void IndirectFitAnalysisTab::startXChanged(double startX) {
   m_plotPresenter->setStartX(startX);
-  m_plotPresenter->updateGuess();
   m_fittingModel->setStartX(startX, m_plotPresenter->getSelectedDataIndex());
+  updateParameterEstimationData();
+  m_plotPresenter->updateGuess();
 }
 
 void IndirectFitAnalysisTab::endXChanged(double endX) {
   m_plotPresenter->setEndX(endX);
-  m_plotPresenter->updateGuess();
   m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex());
+  updateParameterEstimationData();
+  m_plotPresenter->updateGuess();
 }
 
 /**
@@ -355,8 +357,9 @@ void IndirectFitAnalysisTab::updateFitOutput(bool error) {
   if (error) {
     m_fittingModel->cleanFailedRun(m_fittingAlgorithm);
     m_fittingAlgorithm.reset();
-  } else
+  } else {
     m_fittingModel->addOutput(m_fittingAlgorithm);
+  }
 }
 
 void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
@@ -385,6 +388,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   m_fitPropertyBrowser->setErrorsEnabled(!error);
   if (!error) {
     updateFitBrowserParameterValuesFromAlg();
+    updateFitStatus();
     setModelFitFunction();
   }
   m_spectrumPresenter->enableView();
@@ -460,7 +464,27 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
         "Warning issue updating parameter values in fit property browser");
   }
 }
+/**
+ * Updates the fit output status
+ */
+void IndirectFitAnalysisTab::updateFitStatus() {
 
+  if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
+    std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
+    double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
+    const std::vector<std::string> status(m_fittingModel->getNumberOfDomains(),
+                                          fit_status);
+    const std::vector<double> chiSquared(m_fittingModel->getNumberOfDomains(),
+                                         chi2);
+    m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
+  } else {
+    const std::vector<std::string> status =
+        m_fittingAlgorithm->getProperty("OutputStatus");
+    const std::vector<double> chiSquared =
+        m_fittingAlgorithm->getProperty("OutputChiSquared");
+    m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
+  }
+}
 /**
  * Plots the spectra corresponding to the selected parameters
  */
@@ -631,6 +655,12 @@ void IndirectFitAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
       m_dataPresenter->getDataForParameterEstimation(
           getEstimationDataSelector()));
+  const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
+                                                     getSelectedSpectrum());
+  // If we haven't fit the data yet we may update the guess
+  if (!isFit) {
+    m_fitPropertyBrowser->estimateFunctionParameters();
+  }
 }
 
 /**
@@ -667,6 +697,7 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
   if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
     fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
   }
+  fitAlgorithm->setProperty("OutputFitStatus", true);
 }
 
 /*
@@ -813,8 +844,7 @@ void IndirectFitAnalysisTab::respondToBackgroundChanged(double value) {
 
 void IndirectFitAnalysisTab::respondToFunctionChanged() {
   setModelFitFunction();
-  m_plotPresenter->updatePlots();
-  m_plotPresenter->updateGuessAvailability();
+  m_plotPresenter->updateFit();
   emit functionChanged();
 }
 

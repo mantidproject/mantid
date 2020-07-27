@@ -20,7 +20,6 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
-#include <iostream>
 #include <limits>
 
 namespace MantidQt {
@@ -306,6 +305,7 @@ void ConvTemplateBrowser::createDeltaFunctionProperties() {
   m_deltaFunctionHeight =
       m_parameterManager->addProperty("DeltaFunctionHeight");
   m_parameterManager->setDecimals(m_deltaFunctionHeight, 6);
+  m_parameterManager->setMinimum(m_deltaFunctionHeight, 0.0);
   m_parameterManager->setDescription(m_deltaFunctionHeight,
                                      "Delta Function Height");
   m_parameterMap[m_deltaFunctionHeight] = ParamID::DELTA_HEIGHT;
@@ -352,6 +352,8 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value,
 
 void ConvTemplateBrowser::updateParameterEstimationData(
     DataForParameterEstimationCollection &&) {}
+
+void ConvTemplateBrowser::estimateFunctionParameters() {}
 
 void ConvTemplateBrowser::setBackgroundA0(double value) {
   m_presenter.setBackgroundA0(value);

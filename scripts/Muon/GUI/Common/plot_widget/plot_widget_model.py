@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
 from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
 
 COUNTS_PLOT_TYPE = 'Counts'
@@ -135,10 +134,6 @@ class PlotWidgetModel(object):
 
     def get_plot_types(self):
         plot_types = [ASYMMETRY_PLOT_TYPE, COUNTS_PLOT_TYPE]
-        if self.context._frequency_context:
-            for ext in FREQUENCY_EXTENSIONS.keys():
-                plot_types.append(FREQ_PLOT_TYPE + FREQUENCY_EXTENSIONS[ext])
-            plot_types.append(FREQ_PLOT_TYPE + "All")
         return plot_types
 
     @staticmethod
