@@ -22,9 +22,10 @@ range given set to zero.
 
 If an X value given for XMin/XMax does not match a bin boundary (within
 a small tolerance to account for rounding errors), then the closest bin
-boundary within the range will be used. Note that if none of the
+boundary on the left will be used. Note that if none of the
 optional properties are given, then the output workspace will be a copy
-of the input one.
+of the input one. If XMin==XMax the single bin that X falls into will
+be extracted.
 
 Usage
 -----
