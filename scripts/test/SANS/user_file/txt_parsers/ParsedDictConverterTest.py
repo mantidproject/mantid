@@ -9,7 +9,7 @@ import unittest
 
 from sans.common.configurations import Configurations
 from sans.common.enums import DetectorType, SANSInstrument, SANSFacility, ReductionMode, RangeStepType, RebinType, DataType, FitType
-from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateData import get_data_builder, StateData
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
@@ -26,7 +26,7 @@ class ParsedDictConverterTest(unittest.TestCase):
 
         user_file_path = create_user_file(sample_user_file)
 
-        parser = UserFileReaderAdapter(user_file_name=user_file_path, instrument=data_state.instrument)
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, data_info=data_state)
         state = parser.get_all_states()
 
         # Assert
@@ -44,8 +44,7 @@ class ParsedDictConverterTest(unittest.TestCase):
             os.remove(user_file_path)
 
     def _assert_data(self, state):
-        data = state.data
-        self.assertEqual(data.calibration,  "TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
+        self.assertIsInstance(state.data, StateData)
 
     def _assert_move(self, state):
         move = state.move
@@ -142,8 +141,6 @@ class ParsedDictConverterTest(unittest.TestCase):
         calculate_transmission = adjustment.calculate_transmission
         self.assertEqual(calculate_transmission.prompt_peak_correction_min,  1000)
         self.assertEqual(calculate_transmission.prompt_peak_correction_max,  2000)
-        self.assertEqual(calculate_transmission.default_transmission_monitor,  3)
-        self.assertEqual(calculate_transmission.default_incident_monitor,  2)
         self.assertEqual(calculate_transmission.incident_monitor,  1)
         self.assertEqual(calculate_transmission.transmission_radius_on_detector,  0.007)  # This is in mm
         self.assertEqual(calculate_transmission.transmission_roi_files,  ["test.xml", "test2.xml"])
@@ -191,10 +188,7 @@ class ParsedDictConverterTest(unittest.TestCase):
 
         # Assert wide angle correction
         self.assertTrue(state.adjustment.wide_angle_correction)
-
-
-
-
+        self.assertEqual("TUBE_SANS2D_BOTH_31681_25Sept15.nxs", state.adjustment.calibration)
 
 
 if __name__ == '__main__':

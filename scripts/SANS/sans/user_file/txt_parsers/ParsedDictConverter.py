@@ -104,7 +104,9 @@ class ParsedDictConverter(IStateParser):
                 rebin_type = RebinType.INTERPOLATING_REBIN if spec.interpolate else RebinType.REBIN
                 state.rebin_type = rebin_type
 
-                if not spec.is_trans:  # Ignore MON/TRANS as per past behaviour
+                # We have to check if the spectrum is None, this can be the case when the user wants to use the
+                # default incident monitor spectrum
+                if spec.spectrum:
                     state.incident_monitor = spec.spectrum
 
         # The general background settings
