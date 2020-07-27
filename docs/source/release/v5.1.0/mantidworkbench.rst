@@ -122,5 +122,6 @@ Bugfixes
 - Sub-plots in the sliceviewer now follow the scaling on the colorbar
 - Fixed a bug which prevented the double click axis editor menus from working for tiled plots.
 - Select image in the plot figure option contains each image rather than each spectra for colorfil plots of workspaces with a numeric vertical axis
+- A bug has been fixed that caused an error if a workspace containing only monitor spectra was attempted to be plotted as a colorfill plot
 
 :ref:`Release 5.1.0 <v5.1.0>`
