@@ -118,6 +118,15 @@ void LoadMuonNexusV2::init() {
                   "First good data in units of micro-seconds (default to 0.0)",
                   Direction::Output);
 
+  declareProperty(std::make_unique<ArrayProperty<double>>("TimeZeroList",
+                                                          Direction::Output),
+                  "A vector of time zero values");
+
+  declareProperty(
+      "CorrectTime", true,
+      "Boolean flag controlling whether time should be corrected by timezero.",
+      Direction::Input);
+
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>(
           "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
@@ -161,7 +170,10 @@ void LoadMuonNexusV2::execLoader() {
   }
   m_loadMuonStrategy->loadMuonLogData();
   m_loadMuonStrategy->loadGoodFrames();
-  m_loadMuonStrategy->applyTimeZeroCorrection();
+  auto correctTime = getProperty("CorrectTime");
+  if (correctTime) {
+    m_loadMuonStrategy->applyTimeZeroCorrection();
+  }
   // Grouping info should be returned if user has set the property
   if (!getPropertyValue("DetectorGroupingTable").empty()) {
     auto loadedGrouping = m_loadMuonStrategy->loadDetectorGrouping();
@@ -242,6 +254,10 @@ void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry) {
 
   auto firstGoodData = LoadMuonNexusV2Helper::loadFirstGoodDataFromNexus(entry);
   setProperty("FirstGoodData", firstGoodData);
+
+  auto timeZeroVector =
+      LoadMuonNexusV2Helper::loadTimeZeroListFromNexusFile(entry);
+  setProperty("TimeZeroList", timeZeroVector);
 }
 } // namespace DataHandling
 } // namespace Mantid
