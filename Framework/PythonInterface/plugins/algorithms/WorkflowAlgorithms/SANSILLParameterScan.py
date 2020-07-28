@@ -22,12 +22,11 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
     absorber = None
     container = None
     sensitivity = None
-    mask = None
     default_mask = None
     output = None
     normalise = None
     output2D = None
-    output_reduced = None
+    output_joined = None
     observable = None
     pixel_y_min = None
     pixel_y_max = None
@@ -47,60 +46,43 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = dict()
         message = "Wrong number of {0} runs: {1}. Please provide none or exactly one."
-        abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
-        can_dim = self.getPropertyValue('ContainerRuns').count(',')
-        mask_dim = self.getPropertyValue('MaskFiles').count(',')
-        sens_dim = self.getPropertyValue('SensitivityMaps').count(',')
-        if not (self.getPropertyValue('ReducedData') or self.getPropertyValue("Output2D")):
-            issues["ReducedData"] = "Please provide at least one output: ReducedData or Output2D."
-            issues["Output2D"] = "Please provide at least one output: ReducedData or Output2D."
-        if abs_dim != 0:
-            issues['AbsorberRuns'] = message.format('Absorber', abs_dim)
-        if can_dim != 0:
-            issues['ContainerRuns'] = message.format('Container', can_dim)
-        if mask_dim != 0:
-            issues['MaskFiles'] = message.format("mask", mask_dim)
+        sens_dim = self.getPropertyValue('SensitivityMap').count(',')
+        if not (self.getPropertyValue('OutputJoinedWorkspace') or self.getPropertyValue("OutputWorkspace")):
+            issues["OutputJoinedWorkspace"] = "Please provide either OutputJoinedWorkspace, OutputWorkspace or both."
+            issues["OutputWorkspace"] = "Please provide either OutputJoinedWorkspace, OutputWorkspace or both."
         if sens_dim != 0:
-            issues['SensitivityMaps'] = message.format("sensivity maps", sens_dim)
+            issues['SensitivityMap'] = message.format("sensivity map", sens_dim)
+        if self.getPropertyValue('PixelYmin') > self.getPropertyValue("PixelYmax"):
+            issues["PixelYMin"] = "YMin needs to be lesser than YMax"
+            issues["PixelYMax"] = "YMax needs to be greater than YMin"
         return issues
 
     def setUp(self):
         self.sample = self.getPropertyValue('SampleRuns')
-        self.absorber = self.getPropertyValue('AbsorberRuns')
-        self.container = self.getPropertyValue('ContainerRuns')
-        self.sensitivity = self.getPropertyValue('SensitivityMaps')
+        self.absorber = self.getPropertyValue('AbsorberRuns').replace('+', ',')
+        self.container = self.getPropertyValue('ContainerRuns').replace('+', ',')
+        self.sensitivity = self.getPropertyValue('SensitivityMap')
         self.default_mask = self.getPropertyValue('DefaultMaskFile')
-        self.mask = self.getPropertyValue('MaskFiles')
         self.normalise = self.getPropertyValue('NormaliseBy')
-        self.output2D = self.getPropertyValue('Output2D')
-        self.output_reduced = self.getPropertyValue('ReducedData')
+        self.output2D = self.getPropertyValue('OutputWorkspace')
+        self.output_joined = self.getPropertyValue('OutputJoinedWorkspace')
         self.observable = self.getPropertyValue('Observable')
         self.pixel_y_min = self.getProperty('PixelYMin').value
         self.pixel_y_max = self.getProperty('PixelYMax').value
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
-    def cleanUp(self):
-        mtd["__joined"].delete()
-        if mtd.doesExist("sorted"):
-            mtd["sorted"].delete()
-        if mtd.doesExist("masked"):
-            mtd["masked"].delete()
-
     def checkPixelY(self, height):
-        if self.pixel_y_min > self.pixel_y_max:
-            self.pixel_y_min, self.pixel_y_max = self.pixel_y_max, self.pixel_y_min
-
         if self.pixel_y_max > height:
             self.pixel_y_max = height
             logger.warning("PixelYMax value is too high. Reduced to {0}.".format(self.pixel_y_max))
 
     def PyInit(self):
 
-        self.declareProperty(WorkspaceProperty('Output2D', '', direction=Direction.Output,
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output,
                                                optional=PropertyMode.Optional),
                              doc="The output workspace containing the 2D reduced data.")
 
-        self.declareProperty(WorkspaceProperty('ReducedData', '', direction=Direction.Output,
+        self.declareProperty(WorkspaceProperty('OutputJoinedWorkspace', '', direction=Direction.Output,
                                                optional=PropertyMode.Optional),
                              doc="The output workspace containing all the reduced data, before grouping.")
 
@@ -124,32 +106,24 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.setPropertyGroup('AbsorberRuns', 'Numors')
         self.setPropertyGroup('ContainerRuns', 'Numors')
 
-        self.declareProperty(MultipleFileProperty('SensitivityMaps',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
+        self.declareProperty(FileProperty('SensitivityMap', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the map of relative detector efficiencies.')
 
         self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the default mask to be applied to all the detector configurations.')
-
-        self.declareProperty(MultipleFileProperty('MaskFiles',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
-                             doc='File(s) containing the beam stop and other detector mask.')
 
         self.copyProperties('SANSILLReduction', ['NormaliseBy'])
 
         self.declareProperty('Observable', 'Omega.value',
                              doc='Parameter from the sample logs along which the scan is made')
 
-        self.declareProperty('PixelYMin', 0, validator=IntBoundedValidator(lower=0),
+        self.declareProperty('PixelYMin', 140, validator=IntBoundedValidator(lower=0),
                              doc='Minimal y-index taken in the integration')
-        self.declareProperty('PixelYMax', 320, validator=IntBoundedValidator(lower=0),
+        self.declareProperty('PixelYMax', 180, validator=IntBoundedValidator(lower=0),
                              doc='Maximal y-index taken in the integration')
 
-        self.setPropertyGroup('SensitivityMaps', 'Options')
+        self.setPropertyGroup('SensitivityMap', 'Options')
         self.setPropertyGroup('DefaultMaskFile', 'Options')
-        self.setPropertyGroup('MaskFiles', 'Options')
         self.setPropertyGroup('NormaliseBy', 'Options')
         self.setPropertyGroup('Observable', 'Options')
         self.setPropertyGroup('PixelYMin', 'Options')
@@ -161,22 +135,21 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         _, load_ws_name = needs_loading(self.sample, "Load")
         Load(Filename=self.sample, OutputWorkspace=load_ws_name)
-        ConjoinXRuns(InputWorkspaces=load_ws_name, OutputWorkspace="__joined", SampleLogAsXAxis=self.observable)
+        ConjoinXRuns(InputWorkspaces=load_ws_name,
+                     OutputWorkspace=load_ws_name + "_joined",
+                     SampleLogAsXAxis=self.observable)
         mtd[load_ws_name].delete()
 
-        sort_x_axis_output = 'sorted' if not self.output_reduced else self.output_reduced
-        SortXAxis(InputWorkspace="__joined", OutputWorkspace="__" + sort_x_axis_output)
-        mtd["__" + sort_x_axis_output].getAxis(0).setUnit("label").setLabel(self.observable, 'degrees')
+        sort_x_axis_output = load_ws_name + '_sorted' if not self.output_joined else self.output_joined
+        SortXAxis(InputWorkspace=load_ws_name + "_joined", OutputWorkspace=sort_x_axis_output)
+
+        if self.observable == "Omega.value":
+            mtd[sort_x_axis_output].getAxis(0).setUnit("label").setLabel(self.observable, 'degrees')
 
         load_sensitivity, sens_input = needs_loading(self.sensitivity, 'Sensitivity')
         self.progress.report('Loading sensitivity')
         if load_sensitivity:
             LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sens_input)
-
-        load_mask, mask_input = needs_loading(self.mask, "Mask")
-        self.progress.report('Loading mask')
-        if load_mask:
-            LoadNexusProcessed(Filename=self.mask, OutputWorkspace=mask_input)
 
         load_default_mask, default_mask_input = needs_loading(self.default_mask, "DefaultMask")
         self.progress.report('Loading default mask')
@@ -202,25 +175,22 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              CacheSolidAngle=True,
                              NormaliseBy=self.normalise)
 
-        SANSILLReduction(InputWorkspace="__" + sort_x_axis_output,
+        SANSILLReduction(InputWorkspace=sort_x_axis_output,
                          AbsorberInputWorkspace=absorber_name,
                          ContainerInputWorkspace=container_name,
                          SensitivityInputWorkspace=sens_input,
-                         MaskedInputWorkspace=mask_input,
                          DefaultMaskedInputWorkspace=default_mask_input,
                          NormaliseBy=self.normalise,
                          OutputWorkspace=sort_x_axis_output)
 
-        if self.output_reduced:
-            self.setProperty('ReducedData', mtd[self.output_reduced])
-
-        instrument = mtd["__joined"].getInstrument()
+        instrument = mtd[load_ws_name + "_joined"].getInstrument()
         detector = instrument.getComponentByName("detector")
         if "detector-width" in detector.getParameterNames() and "detector-height" in detector.getParameterNames():
             width = int(detector.getNumberParameter("detector-width")[0])
             height = int(detector.getNumberParameter("detector-height")[0])
         else:
             raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
+        mtd[load_ws_name + "_joined"].delete()
 
         self.checkPixelY(height)
         grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)
@@ -230,14 +200,18 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                        GroupingPattern=grouping,
                        Behaviour="Average")
 
+        if not self.output_joined:
+            mtd[sort_x_axis_output].delete()
+        else:
+            self.setProperty('OutputJoinedWorkspace', mtd[self.output_joined])
+
         ConvertSpectrumAxis(InputWorkspace=self.output2D,
                             OutputWorkspace=self.output2D,
                             Target="InPlane2Theta")
 
         Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
 
-        self.setProperty('Output2D', mtd[self.output2D])
-        self.cleanUp()
+        self.setProperty('OutputWorkspace', mtd[self.output2D])
 
 
 def create_detector_grouping(y_min, y_max, detector_width, detector_height):

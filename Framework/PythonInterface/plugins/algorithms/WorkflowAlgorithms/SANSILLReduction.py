@@ -556,7 +556,8 @@ class SANSILLReduction(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
         else:
             ws = self.getPropertyValue('InputWorkspace')
-
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__" + self.getPropertyValue('OutputWorkspace'))
+            ws = "__" + self.getPropertyValue('OutputWorkspace')
         self._instrument = mtd[ws].getInstrument().getName()
         self._normalise(ws)
         run = mtd[ws].getRun()
