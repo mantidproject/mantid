@@ -78,6 +78,19 @@ class TomlV1ParserTest(unittest.TestCase):
 
         self._loop_over_supported_keys(supported_keys=supported_keys, top_level_keys=["instrument", "configuration"])
 
+    def test_missing_monitor_num_throws(self):
+        top_level_dict = {"instrument": {"configuration": {"norm_monitor": None,
+                                                           "trans_monitor": 123}}}
+
+        with self.assertRaises(ValueError):
+            self._setup_parser(dict_vals=top_level_dict)
+
+        top_level_dict["instrument"]["configuration"]["norm_monitor"] = 123
+        top_level_dict["instrument"]["configuration"]["trans_monitor"] = None
+
+        with self.assertRaises(ValueError):
+            self._setup_parser(dict_vals=top_level_dict)
+
     def test_detector_configuration_parsed(self):
         supported_keys = [
             ("rear_scale", lambda x: x.get_state_scale().scale),

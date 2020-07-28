@@ -132,9 +132,19 @@ class _TomlV1ParserImpl(object):
     def _parse_instrument_configuration(self):
         inst_config_dict = self._get_val(["instrument", "configuration"])
 
-        self.calculate_transmission.incident_monitor = self._get_val("norm_monitor", inst_config_dict)
-        self.normalize_to_monitor.incident_monitor = self._get_val("norm_monitor", inst_config_dict)
-        self.calculate_transmission.transmission_monitor = self._get_val("trans_monitor", inst_config_dict)
+        # The legacy user file would accept missing spec nums, we want to lock this down in the
+        # TOML parser without affecting backwards compatibility by doing this check upstream
+        norm_monitor = self._get_val("norm_monitor", inst_config_dict)
+        if not norm_monitor:
+            raise ValueError("The normalisation monitor spectrum is missing from [instrument.configuration]")
+
+        trans_monitor = self._get_val("trans_monitor", inst_config_dict)
+        if not trans_monitor:
+            raise ValueError("The transmission monitor spectrum is missing from [instrument.configuration]")
+
+        self.calculate_transmission.incident_monitor = norm_monitor
+        self.normalize_to_monitor.incident_monitor = norm_monitor
+        self.calculate_transmission.transmission_monitor = trans_monitor
 
         self.convert_to_q.q_resolution_collimation_length = self._get_val("collimation_length", inst_config_dict)
         self.convert_to_q.gravity_extra_length = self._get_val("gravity_extra_length", inst_config_dict, 0.0)

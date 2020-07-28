@@ -291,6 +291,9 @@ class StateCalculateTransmissionLOQ(StateCalculateTransmission):
         self.wavelength_full_range_low = Configurations.LOQ.wavelength_full_range_low
         self.wavelength_full_range_high = Configurations.LOQ.wavelength_full_range_high
 
+        self.incident_monitor = Configurations.LOQ.default_incident_monitor
+        self.transmission_monitor = Configurations.LOQ.default_transmission_monitor
+
         # Set the LOQ default range for prompt peak correction
         self.prompt_peak_correction_min = Configurations.LOQ.prompt_peak_correction_min
         self.prompt_peak_correction_max = Configurations.LOQ.prompt_peak_correction_max
@@ -306,6 +309,8 @@ class StateCalculateTransmissionSANS2D(StateCalculateTransmission):
         # Set the LOQ full wavelength range
         self.wavelength_full_range_low = Configurations.SANS2D.wavelength_full_range_low
         self.wavelength_full_range_high = Configurations.SANS2D.wavelength_full_range_high
+        self.incident_monitor = Configurations.SANS2D.default_incident_monitor
+        self.transmission_monitor = Configurations.SANS2D.default_transmission_monitor
 
     def validate(self):
         super(StateCalculateTransmissionSANS2D, self).validate()
@@ -317,6 +322,8 @@ class StateCalculateTransmissionLARMOR(StateCalculateTransmission):
         # Set the LOQ full wavelength range
         self.wavelength_full_range_low = Configurations.LARMOR.wavelength_full_range_low
         self.wavelength_full_range_high = Configurations.LARMOR.wavelength_full_range_high
+        self.incident_monitor = Configurations.LARMOR.default_incident_monitor
+        self.transmission_monitor = Configurations.LARMOR.default_transmission_monitor
 
     def validate(self):
         super(StateCalculateTransmissionLARMOR, self).validate()
@@ -328,6 +335,8 @@ class StateCalculateTransmissionZOOM(StateCalculateTransmission):
         # Set the LOQ full wavelength range
         self.wavelength_full_range_low = Configurations.ZOOM.wavelength_full_range_low
         self.wavelength_full_range_high = Configurations.ZOOM.wavelength_full_range_high
+        self.incident_monitor = Configurations.ZOOM.default_incident_monitor
+        self.transmission_monitor = Configurations.ZOOM.default_transmission_monitor
 
     def validate(self):
         super(StateCalculateTransmissionZOOM, self).validate()
