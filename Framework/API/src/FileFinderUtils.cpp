@@ -184,10 +184,12 @@ std::string FileFinderUtils::getFullPathParamIDF(std::string instName,
     // find the first beat file
     const std::string result = lookupFile(dirName, instName);
     if (!result.empty()) {
+      std::cout << "Found: " << result << '\n';
       return result;
     }
   }
 
+  std::cout << "Found Nothing \n";
   return "";
 }
 

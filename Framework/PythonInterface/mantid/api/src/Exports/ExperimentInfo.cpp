@@ -32,6 +32,9 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(ExperimentInfo)
 
 /// Converter from C++ signature to python signature
+// As we can't have two converters in the global namespace we will
+// keep the converter with ExperimentInfo despite the C++ impl moving to
+// FileFinderUtils for backwards compatibility and as there is a single user
 list getResourceFilenames(const std::string &prefix, const list &fileFormats,
                           const list &directoryNames, const std::string &date) {
   return Converters::ToPyList<std::string>()(
@@ -66,8 +69,8 @@ void export_ExperimentInfo() {
       .def("getInstrument", &ExperimentInfo::getInstrument,
            return_value_policy<RemoveConstSharedPtr>(), args("self"),
            "Returns the :class:`~mantid.geometry.Instrument` for this run.")
-      // FileFinderUtils binds Kept for backwards compat.
-      .def("getResourceFilenames", &FileFinderUtils::getResourceFilenames,
+      // FileFinderHelpers binds Kept for backwards compat.
+      .def("getResourceFilenames", &getResourceFilenames,
            (arg("prefix"), arg("fileFormats"), arg("directoryNames"),
             arg("date")),
            "Compile a list of files in compliance with name pattern-matching,\n"
