@@ -16,7 +16,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -100,6 +102,11 @@ void LoadILLSANS::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace");
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0);
+  declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
+                  "The wavelength of the experiment. Only for monochromatic "
+                  "data. Will override the nexus' value if there is one.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -692,13 +699,17 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     runDetails.addProperty<std::string>("tof_mode", "TOF");
   }
 
-  double wavelength;
-  if (m_instrumentName == "D16") {
-    wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
-  } else {
-    wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
+  double wavelength = getProperty("Wavelength");
+  if (wavelength == EMPTY_DBL()) {
+    if (m_instrumentName == "D16") {
+      wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
+    } else {
+      wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
+    }
+    g_log.debug() << "Wavelength found in the nexus file: " << wavelength
+                  << '\n';
   }
-  g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
+
   // round the wavelength to avoid unnecessary rebinning during merge runs
   wavelength = std::round(wavelength * 100) / 100.;
 
@@ -725,8 +736,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
                        << wavelengthRes << "%.\n";
       }
     }
-    // round also the wavelength res to avoid unnecessary rebinning during merge
-    // runs
+    // round also the wavelength res to avoid unnecessary rebinning during
+    // merge runs
     wavelengthRes = std::round(wavelengthRes * 100) / 100.;
     runDetails.addProperty<double>("wavelength", wavelength);
     double ei = m_loader.calculateEnergy(wavelength);
@@ -777,7 +788,8 @@ void LoadILLSANS::adjustTOF() {
 
   // Try to set sensible (but not strictly physical) wavelength axes for
   // monitors
-  // Normalisation is done by acquisition time, so these axes should not be used
+  // Normalisation is done by acquisition time, so these axes should not be
+  // used
   auto firstPixel = m_localWorkspace->histogram(0).dataX();
   const double l2 = specInfo.l2(0);
   const double monitor2 = -specInfo.position(nHist - 1).Z();
