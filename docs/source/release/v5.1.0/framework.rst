@@ -85,6 +85,11 @@ Python
 - Documentation for manipulating :ref:`workspaces <02_scripting_workspaces>` and :ref:`plots <02_scripting_plots>` within a script have been produced.
 - Property.units now attempts to encode with windows-1252 if utf-8 fails.
 - Property.unitsAsBytes has been added to retrieve the raw bytes from the units string.
+- Various file finding methods have been moved to ``mantid.api.FileFinderHelpers``. For compatibility
+  these still exist in ``ExperimentInfo`` but the helpers should be used instead in the future.
+- A new method for finding IPF files has been added to the ``FileFinderHelpers``
+  ``getIPFPath``, which will accept an instrument name and return the full path to the associated
+  IPF file.
 
 Improvements
 ------------
