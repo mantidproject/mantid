@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileFinderUtils.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -330,7 +331,7 @@ void LoadNXSPE::exec() {
   // NB. LoadParameterFile must be used on a workspace with an instrument
   if (!instrument_name.empty() && instrument_name != "NXSPE") {
     std::string IDF_filename =
-        ExperimentInfo::getInstrumentFilename(instrument_name);
+        FileFinderUtils::getInstrumentFilename(instrument_name);
     std::string instrument_parfile =
         IDF_filename.substr(0, IDF_filename.find("_Definition")) +
         "_Parameters.xml";

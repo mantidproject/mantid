@@ -39,6 +39,7 @@ set(SRC_FILES
     src/Expression.cpp
     src/FileBackedExperimentInfo.cpp
     src/FileFinder.cpp
+    src/FileFinderUtils.cpp
     src/FileLoaderRegistry.cpp
     src/FileProperty.cpp
     src/FrameworkManager.cpp
@@ -68,7 +69,7 @@ set(SRC_FILES
     src/IFunctionGeneral.cpp
     src/IFunctionMD.cpp
     src/IFunctionMW.cpp
-	src/IJournal.cpp
+    src/IJournal.cpp
     src/ILatticeFunction.cpp
     src/IMDEventWorkspace.cpp
     src/IMDHistoWorkspace.cpp
@@ -152,7 +153,8 @@ set(SRC_FILES
     src/WorkspaceNearestNeighbours.cpp
     src/WorkspaceOpOverloads.cpp
     src/WorkspaceProperty.cpp
-    src/WorkspaceUnitValidator.cpp)
+    src/WorkspaceUnitValidator.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES
     src/CompositeFunction.cpp
@@ -161,7 +163,8 @@ set(SRC_UNITY_IGNORE_FILES
     src/IEventWorkspace.cpp
     src/IFunctionMD.cpp
     src/IPeakFunction.cpp
-    src/IPowderDiffPeakFunction.cpp)
+    src/IPowderDiffPeakFunction.cpp
+)
 
 set(INC_FILES
     inc/MantidAPI/ADSValidator.h
@@ -208,6 +211,7 @@ set(INC_FILES
     inc/MantidAPI/Expression.h
     inc/MantidAPI/FileBackedExperimentInfo.h
     inc/MantidAPI/FileFinder.h
+    inc/MantidAPI/FileFinderUtils.h
     inc/MantidAPI/FileLoaderRegistry.h
     inc/MantidAPI/FileProperty.h
     inc/MantidAPI/FrameworkManager.h
@@ -360,14 +364,14 @@ set(INC_FILES
     inc/MantidAPI/WorkspaceProperty.h
     inc/MantidAPI/WorkspaceProperty.tcc
     inc/MantidAPI/WorkspaceUnitValidator.h
-    inc/MantidAPI/Workspace_fwd.h)
+    inc/MantidAPI/Workspace_fwd.h
+)
 
 option(PROFILE_ALGORITHM_LINUX "Profile algorithm execution on Linux" OFF)
 if(PROFILE_ALGORITHM_LINUX)
-  set(SRC_FILES
-      "${SRC_FILES}"
-      "src/AlgorithmExecuteProfile.cpp"
-      "src/AlgoTimeRegister.cpp")
+  set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecuteProfile.cpp"
+                "src/AlgoTimeRegister.cpp"
+  )
   set(INC_FILES "${INC_FILES}" "inc/MantidAPI/AlgoTimeRegister.h")
 else()
   set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecute.cpp")
@@ -403,6 +407,7 @@ set(TEST_FILES
     ExpressionTest.h
     FileBackedExperimentInfoTest.h
     FileFinderTest.h
+    FileFinderUtilsTest.h
     FilePropertyTest.h
     FrameworkManagerTest.h
     FuncMinimizerFactoryTest.h
@@ -484,18 +489,20 @@ set(TEST_FILES
     WorkspaceNearestNeighboursTest.h
     WorkspaceOpOverloadsTest.h
     WorkspacePropertyTest.h
-    WorkspaceUnitValidatorTest.h)
+    WorkspaceUnitValidatorTest.h
+)
 
 set(GMOCK_TEST_FILES
-    ImplicitFunctionFactoryTest.h
-    ImplicitFunctionParameterParserFactoryTest.h
-    MatrixWorkspaceTest.h)
+    ImplicitFunctionFactoryTest.h ImplicitFunctionParameterParserFactoryTest.h
+    MatrixWorkspaceTest.h
+)
 
 if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(
+      GLOBAL APPEND PROPERTY COVERAGE_SRCS
+                             "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}"
+    )
   endforeach(loop_var)
 endif()
 
@@ -515,14 +522,15 @@ enable_precompiled_headers(inc/MantidAPI/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties(API
-                      PROPERTIES OUTPUT_NAME
-                                 MantidAPI
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_API)
+set_target_properties(
+  API PROPERTIES OUTPUT_NAME MantidAPI COMPILE_DEFINITIONS IN_MANTID_API
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(
+    API PROPERTIES INSTALL_RPATH
+                   "@loader_path/../MacOS;@loader_path/../Frameworks"
+  )
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(API PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
@@ -530,17 +538,20 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET API PROPERTY FOLDER "MantidFramework")
 
-
-target_include_directories (API SYSTEM PUBLIC ${NEXUS_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
-target_link_libraries(API
-                      LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${JSONCPP_LIBRARIES}
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES}
-                      ${NEXUS_LIBRARIES}
-                      ${WINSOCK}
-                      ${BCRYPT})
+target_include_directories(
+  API SYSTEM PUBLIC ${NEXUS_INCLUDE_DIR} ${Boost_INCLUDE_DIRS}
+)
+target_link_libraries(
+  API
+  LINK_PRIVATE
+  ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${JSONCPP_LIBRARIES}
+  ${MANTIDLIBS}
+  ${GSL_LIBRARIES}
+  ${NEXUS_LIBRARIES}
+  ${WINSOCK}
+  ${BCRYPT}
+)
 
 # Add the unit tests directory
 add_subdirectory(test)

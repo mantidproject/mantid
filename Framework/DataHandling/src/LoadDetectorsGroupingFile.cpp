@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <sstream>
 
+#include "MantidAPI/FileFinderUtils.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -104,7 +105,7 @@ void LoadDetectorsGroupingFile::exec() {
       // empty -
       // the most recent will be used.
       const std::string instrumentFilename =
-          ExperimentInfo::getInstrumentFilename(instrumentName, date);
+          FileFinderUtils::getInstrumentFilename(instrumentName, date);
 
       // Load an instrument
       Algorithm_sptr childAlg = this->createChildAlgorithm("LoadInstrument");

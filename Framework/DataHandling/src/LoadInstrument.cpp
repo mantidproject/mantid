@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidAPI/FileFinderUtils.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -138,7 +139,7 @@ void LoadInstrument::exec() {
             "must be specified to load an instrument",
             filename);
       } else {
-        filename = ExperimentInfo::getInstrumentFilename(
+        filename = FileFinderUtils::getInstrumentFilename(
             instname, ws->getWorkspaceStartDate());
         setPropertyValue("Filename", filename);
       }
@@ -264,7 +265,7 @@ void LoadInstrument::runLoadParameterFile(
   std::string directoryName =
       filename.substr(0, dir_end + 1); // include final '/'.
   std::string fullPathParamIDF =
-      ExperimentInfo::getFullPathParamIDF(filename, directoryName);
+      FileFinderUtils::getFullPathParamIDF(filename, directoryName);
 
   if (!fullPathParamIDF.empty()) {
 

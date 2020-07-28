@@ -13,6 +13,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinderUtils.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -363,7 +364,7 @@ public:
     TS_ASSERT(source);
 
     std::string IDF_name =
-        API::ExperimentInfo::getInstrumentFilename("MARI", "");
+        API::FileFinderUtils::getInstrumentFilename("MARI", "");
 
     /*Fake export mask algorithm: */
     std::string mask_contents("4 10-12 100 110 120 130 140 200 300");
