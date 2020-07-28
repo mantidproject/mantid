@@ -179,7 +179,7 @@ class FittingTabModel(object):
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
-        if self.double_pulse_enanbled():
+        if self.double_pulse_enabled():
             alg = self._create_double_pulse_alg()
         else:
             alg = mantid.AlgorithmManager.create("Fit")
@@ -225,7 +225,7 @@ class FittingTabModel(object):
 
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
-        if self.double_pulse_enanbled():
+        if self.double_pulse_enabled():
             alg = self._create_double_pulse_alg()
         else:
             alg = mantid.AlgorithmManager.create("Fit")
@@ -580,7 +580,7 @@ class FittingTabModel(object):
             'Minimizer': self.fitting_options["minimiser"],
         }
 
-        if self.double_pulse_enanbled():
+        if self.double_pulse_enabled():
             offset = self.context.gui_context['DoublePulseTime']
             muon_halflife = 2.2
             decay = math.exp(-offset / muon_halflife)
@@ -604,7 +604,7 @@ class FittingTabModel(object):
             'EndX': self.fitting_options["endX"],
             'Minimizer': self.fitting_options["minimiser"],
         }
-        if self.double_pulse_enanbled():
+        if self.double_pulse_enabled():
             offset = self.context.gui_context['DoublePulseTime']
             muon_halflife = 2.2
             decay = math.exp(-offset / muon_halflife)
@@ -614,7 +614,7 @@ class FittingTabModel(object):
 
         return parameters
 
-    def double_pulse_enanbled(self):
+    def double_pulse_enabled(self):
         return 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']
 
     # get workspace information
