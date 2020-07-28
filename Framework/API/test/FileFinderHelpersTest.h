@@ -102,16 +102,16 @@ public:
     // Check that instrument dirs are searched correctly
     const std::string expectedFileName = "GEM_parameters.xml";
 
-    const auto result = FileFinderHelpers::getFullPathParamIDF("GEM");
+    const auto result = FileFinderHelpers::getIPFPath("GEM");
     TS_ASSERT(boost::icontains(result, expectedFileName));
 
     // Should be case insensitive
-    const auto mixedResult = FileFinderHelpers::getFullPathParamIDF("GeM");
+    const auto mixedResult = FileFinderHelpers::getIPFPath("GeM");
     TS_ASSERT_EQUALS(result, mixedResult);
   }
 
   void testFindIPFNonExistant() {
-    const auto result = FileFinderHelpers::getFullPathParamIDF("NotThere");
+    const auto result = FileFinderHelpers::getIPFPath("NotThere");
     TS_ASSERT_EQUALS("", result);
   }
 
@@ -124,7 +124,7 @@ public:
     Poco::File fileHandle(expectedPath);
     fileHandle.createFile();
 
-    const auto result = FileFinderHelpers::getFullPathParamIDF("test", tmpDir);
+    const auto result = FileFinderHelpers::getIPFPath("test", tmpDir);
     // Ensure file was found and it's in the tmp dir
     TS_ASSERT(result.find(filename) != std::string::npos);
     TS_ASSERT(result.find(tmpDir) != std::string::npos);
@@ -132,8 +132,7 @@ public:
 
   void testNonExistantIPFWithHint() {
     const auto tmpDir = Poco::Path::temp();
-    const auto result =
-        FileFinderHelpers::getFullPathParamIDF("notThere", tmpDir);
+    const auto result = FileFinderHelpers::getIPFPath("notThere", tmpDir);
     TS_ASSERT(result.empty());
   }
 

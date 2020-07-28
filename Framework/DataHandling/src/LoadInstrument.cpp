@@ -265,7 +265,7 @@ void LoadInstrument::runLoadParameterFile(
   std::string directoryName =
       filename.substr(0, dir_end + 1); // include final '/'.
   std::string fullPathParamIDF =
-      FileFinderHelpers::getFullPathParamIDF(filename, directoryName);
+      FileFinderHelpers::getIPFPath(filename, directoryName);
 
   if (!fullPathParamIDF.empty()) {
 

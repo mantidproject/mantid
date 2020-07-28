@@ -36,7 +36,7 @@ GNU_DIAG_OFF("conversion")
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload,
                                 FileFinderHelpers::getInstrumentFilename, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(getIPFPath_Overload,
-                                FileFinderHelpers::getFullPathParamIDF, 1, 2)
+                                FileFinderHelpers::getIPFPath, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -50,7 +50,7 @@ void exportFileFinderHelpers() {
                "Returns IDF filename", (arg("instrument"), arg("date") = "")))
       .staticmethod("getInstrumentFilename")
       // -
-      .def("getIPFPath", &FileFinderHelpers::getFullPathParamIDF,
+      .def("getIPFPath", &FileFinderHelpers::getIPFPath,
            getIPFPath_Overload(
                "Returns the full path to the given instrument parameter file "
                "for the named instrument if it exists in the instrument search "
