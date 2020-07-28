@@ -81,9 +81,9 @@ void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
       }
       isResolutionSet = true;
     } else if (name == "ProductFunction") {
-      if (innerFunction->getFunction(0)->name() != "UserFunction" ||
+      if (innerFunction->getFunction(0)->name() != "ConvTempCorrection" ||
           innerFunction->getFunction(0)->nParams() != 1 ||
-          !innerFunction->getFunction(0)->hasParameter("Temp")) {
+          !innerFunction->getFunction(0)->hasParameter("Temperature")) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_hasTempCorrection = true;

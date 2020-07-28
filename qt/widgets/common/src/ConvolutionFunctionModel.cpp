@@ -38,7 +38,7 @@ bool isDeltaFunction(const IFunction *fun) {
 }
 
 bool isTempFunction(const IFunction *fun) {
-  return fun->name() == "UserFunction";
+  return fun->name() == "ConvTempCorrection";
 }
 
 bool isBackground(const IFunction *fun) {
@@ -188,15 +188,10 @@ CompositeFunction_sptr ConvolutionFunctionModel::addTempCorrection(
 
 IFunction_sptr
 ConvolutionFunctionModel::createTemperatureCorrection(double correction) {
-  // create user function for the exponential correction
-  // (x/temp) / (1-exp(-(x/temp)))
-  auto tempFunc = FunctionFactory::Instance().createFunction("UserFunction");
-  // 11.606 is the conversion factor from meV to K
-  std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
-  IFunction::Attribute att(formula);
-  tempFunc->setAttribute("Formula", att);
-  tempFunc->setParameter("Temp", correction);
-  tempFunc->fixParameter("Temp", false);
+  auto tempFunc =
+      FunctionFactory::Instance().createInitialized("name=ConvTempCorrection");
+  tempFunc->setParameter("Temperature", correction);
+  tempFunc->fixParameter("Temperature", false);
   return tempFunc;
 }
 

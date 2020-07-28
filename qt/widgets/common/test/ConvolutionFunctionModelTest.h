@@ -292,7 +292,6 @@ public:
                    false, 100.0);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
-    std::cout << fitFunctionAsString << std::endl;
     TS_ASSERT_EQUALS(
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
@@ -324,7 +323,6 @@ public:
                    false, 100.0);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
-    std::cout << fitFunctionAsString << std::endl;
     TS_ASSERT_EQUALS(
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite="
@@ -408,18 +406,16 @@ public:
         "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name="
         "DeltaFunction,Height=1,Centre=0,constraints=(0<Height);(composite="
         "ProductFunction,NumDeriv="
-        "false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
-        "-(x*11.606/"
-        "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
+        "false;name=ConvTempCorrection,Temperature=100,ties=(Temperature=100);("
+        "name=Lorentzian,Amplitude=1,"
         "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0)))"
         "));(composite=CompositeFunction,NumDeriv=false,$domains=i;name="
         "FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
         "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
         ";(name=DeltaFunction,Height=1,Centre=0,constraints=(0<Height);("
         "composite=ProductFunction,"
-        "NumDeriv=false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
-        "-(x*11.606/"
-        "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
+        "NumDeriv=false;name=ConvTempCorrection,Temperature=100,ties=("
+        "Temperature=100);(name=Lorentzian,Amplitude=1,"
         "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0)))"
         "))");
   }
