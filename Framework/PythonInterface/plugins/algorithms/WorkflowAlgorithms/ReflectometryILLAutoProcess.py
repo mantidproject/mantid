@@ -771,8 +771,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.sum_foreground(reflectedBeamName, foregroundName, sum_type, angle_index, directForegroundName)
         if sum_type == 'SumInLambda':
             final_two_theta = mtd[foregroundName].spectrumInfo().twoTheta(0) * 180/math.pi
-            self.log().accumulate('Final 2theta of summed foreground [degree]: {0:.5f}\n'.
+            self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
                                   format(final_two_theta))
+        if sum_type == 'SumInQ':
+            # think how to report the foregroun 2theta in coherent case
+            isBent = mtd[foregroundName].run().getProperty('beam_stats.bent_sample').value
+            self.log().accumulate('Sample: {0}\n'.format('Bent' if isBent == 1 else 'Flat'))
         # think how to get the two theta for SumInQ ?
         self._autoCleanup.cleanupLater(reflectedBeamName)
         self._autoCleanup.cleanupLater(foregroundName)
