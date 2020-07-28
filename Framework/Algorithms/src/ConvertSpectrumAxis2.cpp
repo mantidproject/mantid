@@ -52,13 +52,13 @@ void ConvertSpectrumAxis2::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
   std::vector<std::string> targetOptions{
-      "Theta",           "SignedTheta", "InPlane2Theta", "ElasticQ",
-      "ElasticQSquared", "theta",       "signed_theta",  "ElasticDSpacing"};
+      "Theta",           "SignedTheta", "inPlaneTwoTheta", "ElasticQ",
+      "ElasticQSquared", "theta",       "signed_theta",    "ElasticDSpacing"};
   declareProperty(
       "Target", "", std::make_shared<StringListValidator>(targetOptions),
       "The unit to which spectrum axis is converted to - \"theta\" (for the "
       "angle in degrees), Q or Q^2, where elastic Q is evaluated at EFixed. "
-      "InPlane2Theta is the angle when each point is projected on the "
+      "inPlaneTwoTheta is the angle when each point is projected on the "
       "horizontal plane."
       "Note that 'theta' and 'signed_theta' are there for compatibility "
       "purposes; they are the same as 'Theta' and 'SignedTheta' respectively");
@@ -106,7 +106,7 @@ void ConvertSpectrumAxis2::exec() {
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
       unitTarget == "signed_theta" || unitTarget == "SignedTheta" ||
-      unitTarget == "InPlane2Theta") {
+      unitTarget == "inPlaneTwoTheta") {
     createThetaMap(progress, unitTarget, inputWS);
   } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared" ||
              unitTarget == "ElasticDSpacing") {
@@ -134,7 +134,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
     thetaType = signedTheta;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
     thetaType = theta;
-  } else if (targetUnit == "InPlane2Theta") {
+  } else if (targetUnit == "inPlaneTwoTheta") {
     thetaType = inPlaneTheta;
   }
   bool warningGiven = false;
@@ -157,7 +157,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
         emplaceIndexMap(spectrumInfo.twoTheta(i) * rad2deg, i);
         break;
       case inPlaneTheta:
-        emplaceIndexMap(inPlane2Theta(i, inputWS) * rad2deg, i);
+        emplaceIndexMap(inPlaneTwoTheta(i, inputWS) * rad2deg, i);
         break;
       }
     } else {
@@ -175,13 +175,13 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
  * @param index :: the index of the spectrum
  * @param inputWS :: input workspace
  */
-double ConvertSpectrumAxis2::inPlane2Theta(
+double ConvertSpectrumAxis2::inPlaneTwoTheta(
     const size_t index, const API::MatrixWorkspace_sptr &inputWS) const {
   const auto spectrumInfo = inputWS->spectrumInfo();
   const auto refFrame = inputWS->getInstrument()->getReferenceFrame();
   V3D position = spectrumInfo.position(index) - spectrumInfo.samplePosition();
 
-  double angle = std::atan2(-position[refFrame->pointingHorizontal()],
+  double angle = std::atan2(std::abs(position[refFrame->pointingHorizontal()]),
                             position[refFrame->pointingAlongBeam()]);
   return angle;
 }
@@ -283,7 +283,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
       targetUnit == "signed_theta" || targetUnit == "SignedTheta" ||
-      targetUnit == "InPlane2Theta") {
+      targetUnit == "inPlaneTwoTheta") {
     newAxis->unit() = std::make_shared<Units::Degrees>();
   } else if (targetUnit == "ElasticQ") {
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
