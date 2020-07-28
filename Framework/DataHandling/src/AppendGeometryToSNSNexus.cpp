@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/AppendGeometryToSNSNexus.h"
-#include "MantidAPI/FileFinderUtils.h"
+#include "MantidAPI/FileFinderHelpers.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -145,7 +145,7 @@ void AppendGeometryToSNSNexus::exec() {
   // Now what is the instrument definition filename ?
   // TODO: Modify to use /entry/instrument/instrument_xml/data after
   // establishing a way to maintain ADARA Geometry Packet
-  m_idf_filename = FileFinderUtils::getInstrumentFilename(m_instrument);
+  m_idf_filename = FileFinderHelpers::getInstrumentFilename(m_instrument);
   g_log.debug() << "Loading instrument definition from " << m_idf_filename
                 << ".\n";
 

@@ -8,7 +8,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/FileFinderUtils.h"
+#include "MantidAPI/FileFinderHelpers.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
@@ -212,7 +212,7 @@ getInstrumentName(const Mantid::API::MatrixWorkspace_sptr &workspace) {
 std::string getIDF(const Mantid::API::MatrixWorkspace_sptr &workspace) {
   auto date = workspace->getWorkspaceStartDate();
   auto instrumentName = getInstrumentName(workspace);
-  return FileFinderUtils::getInstrumentFilename(instrumentName, date);
+  return FileFinderHelpers::getInstrumentFilename(instrumentName, date);
 }
 
 void addDetectors(H5::Group &group,

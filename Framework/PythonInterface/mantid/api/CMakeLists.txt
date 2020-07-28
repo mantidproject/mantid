@@ -19,7 +19,7 @@ set(EXPORT_FILES
     src/Exports/AlgorithmManager.cpp
     src/Exports/AnalysisDataService.cpp
     src/Exports/FileProperty.cpp
-    src/Exports/FileFinderUtils.cpp
+    src/Exports/FileFinderHelpers.cpp
     src/Exports/MultipleFileProperty.cpp
     src/Exports/FrameworkManager.cpp
     src/Exports/ISpectrum.cpp

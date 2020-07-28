@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/VesuvioL1ThetaResolution.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FileFinderUtils.h"
+#include "MantidAPI/FileFinderHelpers.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -269,7 +269,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
   MatrixWorkspace_sptr tempWS =
       WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   const std::string vesuvioIPF =
-      FileFinderUtils::getInstrumentFilename("VESUVIO");
+      FileFinderHelpers::getInstrumentFilename("VESUVIO");
 
   // Load an empty VESUVIO instrument workspace
   IAlgorithm_sptr loadInst =

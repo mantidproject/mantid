@@ -1,4 +1,4 @@
-#include "MantidAPI/FileFinderUtils.h"
+#include "MantidAPI/FileFinderHelpers.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -23,7 +23,7 @@ using namespace Poco::XML;
 
 namespace {
 /// static logger object
-Mantid::Kernel::Logger g_log("FileFinderUtils");
+Mantid::Kernel::Logger g_log("FileFinderHelpers");
 
 // used to terminate SAX process
 class DummyException {
@@ -87,8 +87,8 @@ namespace Mantid::API {
  *is found
  */
 std::string
-FileFinderUtils::getInstrumentFilename(const std::string &instrumentName,
-                                       const std::string &date) {
+FileFinderHelpers::getInstrumentFilename(const std::string &instrumentName,
+                                         const std::string &date) {
   const std::vector<std::string> validFormats = {"xml", "nxs", "hdf5"};
   g_log.debug() << "Looking for instrument file for " << instrumentName
                 << " that is valid on '" << date << "'\n";
@@ -116,8 +116,8 @@ FileFinderUtils::getInstrumentFilename(const std::string &instrumentName,
 /// Search the directory for the Parameter IDF file and return full path name if
 /// found, else return "".
 //  directoryName must include a final '/'.
-std::string FileFinderUtils::getFullPathParamIDF(std::string instName,
-                                                 const std::string &dirHint) {
+std::string FileFinderHelpers::getFullPathParamIDF(std::string instName,
+                                                   const std::string &dirHint) {
 
   constexpr auto lookupFile = [](const std::string &dir,
                                  const std::string &filename) {
@@ -208,7 +208,7 @@ std::string FileFinderUtils::getFullPathParamIDF(std::string instName,
  * this date
  * @return list of absolute paths for each valid file
  */
-std::vector<std::string> FileFinderUtils::getResourceFilenames(
+std::vector<std::string> FileFinderHelpers::getResourceFilenames(
     const std::string &prefix, const std::vector<std::string> &fileFormats,
     const std::vector<std::string> &directoryNames, const std::string &date) {
 
@@ -218,8 +218,8 @@ std::vector<std::string> FileFinderUtils::getResourceFilenames(
     const std::string now =
         Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with all parameters.
-    return FileFinderUtils::getResourceFilenames(prefix, fileFormats,
-                                                 directoryNames, now);
+    return FileFinderHelpers::getResourceFilenames(prefix, fileFormats,
+                                                   directoryNames, now);
   }
 
   // Join all the file formats into a single string
@@ -314,9 +314,9 @@ std::vector<std::string> FileFinderUtils::getResourceFilenames(
  *  @param[out] outValidFrom :: Used to return valid-from date
  *  @param[out] outValidTo :: Used to return valid-to date
  */
-void FileFinderUtils::getValidFromTo(const std::string &IDFfilename,
-                                     std::string &outValidFrom,
-                                     std::string &outValidTo) {
+void FileFinderHelpers::getValidFromTo(const std::string &IDFfilename,
+                                       std::string &outValidFrom,
+                                       std::string &outValidTo) {
   SAXParser pParser;
   // Create on stack to ensure deletion. Relies on pParser also being local
   // variable.

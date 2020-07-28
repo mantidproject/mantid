@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAPI/FileFinderUtils.h"
+#include "MantidAPI/FileFinderHelpers.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -22,11 +22,11 @@
 
 #include <string>
 
-using Mantid::API::FileFinderUtils;
+using Mantid::API::FileFinderHelpers;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-GET_POINTER_SPECIALIZATION(FileFinderUtils)
+GET_POINTER_SPECIALIZATION(FileFinderHelpers)
 
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
@@ -34,23 +34,23 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 /// Overload generator for getInstrumentFilename
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload,
-                                FileFinderUtils::getInstrumentFilename, 1, 2)
+                                FileFinderHelpers::getInstrumentFilename, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(getIPFPath_Overload,
-                                FileFinderUtils::getFullPathParamIDF, 1, 2)
+                                FileFinderHelpers::getFullPathParamIDF, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
-void exportFileFinderUtils() {
-  register_ptr_to_python<std::shared_ptr<FileFinderUtils>>();
+void exportFileFinderHelpers() {
+  register_ptr_to_python<std::shared_ptr<FileFinderHelpers>>();
 
-  class_<FileFinderUtils>("FileFinderUtils", no_init)
+  class_<FileFinderHelpers>("FileFinderHelpers", no_init)
       // -
-      .def("getInstrumentFilename", &FileFinderUtils::getInstrumentFilename,
+      .def("getInstrumentFilename", &FileFinderHelpers::getInstrumentFilename,
            getInstrumentFilename_Overload(
                "Returns IDF filename", (arg("instrument"), arg("date") = "")))
       .staticmethod("getInstrumentFilename")
       // -
-      .def("getIPFPath", &FileFinderUtils::getFullPathParamIDF,
+      .def("getIPFPath", &FileFinderHelpers::getFullPathParamIDF,
            getIPFPath_Overload(
                "Returns the full path to the given instrument parameter file "
                "for the named instrument if it exists in the instrument search "

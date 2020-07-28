@@ -13,7 +13,7 @@
 
 namespace Mantid::API {
 
-class MANTID_API_DLL FileFinderUtils {
+class MANTID_API_DLL FileFinderHelpers {
 public:
   /// Search instrument directories for Parameter file,
   /// return full path name if found, else "".
