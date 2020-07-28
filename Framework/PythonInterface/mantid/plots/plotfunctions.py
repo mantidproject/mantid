@@ -110,10 +110,12 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
-    if len(mpl.rcParams['font.family']) > 1:
-        mpl.rcParams['font.family'][0] = ConfigService.getString('plots.font')
-    else:
-        mpl.rcParams['font.family'].insert(0, ConfigService.getString('plots.font'))
+    plot_font = ConfigService.getString('plots.font')
+    if plot_font:
+        if len(mpl.rcParams['font.family']) > 1:
+            mpl.rcParams['font.family'][0] = plot_font
+        else:
+            mpl.rcParams['font.family'].insert(0, plot_font)
 
     if plot_kwargs is None:
         plot_kwargs = {}

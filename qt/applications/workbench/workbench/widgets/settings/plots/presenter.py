@@ -249,16 +249,21 @@ class PlotSettings(object):
             except RuntimeError:
                 continue
             fonts.add(font_name)
+
+        if mpl.rcParams['font.family'][0] in ['sans-serif', 'serif', 'cursive', 'fantasy', 'monospace']:
+            current_mpl_font = mpl.rcParams['font.' + mpl.rcParams['font.family'][0]][0]
+        else:
+            current_mpl_font = mpl.rcParams['font.family'][0]
+        fonts.add(current_mpl_font)
         fonts = sorted(fonts)
+
         self.view.plot_font.addItems(fonts)
         current_font = ConfigService.getString(PlotProperties.PLOT_FONT.value)
         if current_font:
             self.view.plot_font.setCurrentText(current_font)
         else:
-            if mpl.rcParams['font.family'][0] in ['sans-serif', 'serif', 'cursive', 'fantasy', 'monospace']:
-                self.view.plot_font.setCurrentText(mpl.rcParams['font.' + mpl.rcParams['font.family'][0]][0])
-            else:
-                self.view.plot_font.setCurrentText(mpl.rcParams['font.family'][0])
+            self.view.plot_font.setCurrentText(current_mpl_font)
+            self.action_font_combo_changed(current_mpl_font)
 
     def update_properties(self):
         self.load_general_setting_values()
