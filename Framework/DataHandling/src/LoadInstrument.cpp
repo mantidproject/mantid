@@ -263,7 +263,8 @@ void LoadInstrument::runLoadParameterFile(
   const std::string::size_type dir_end = filename.find_last_of("\\/");
   std::string directoryName =
       filename.substr(0, dir_end + 1); // include final '/'.
-  std::string fullPathParamIDF = getFullPathParamIDF(filename, directoryName);
+  std::string fullPathParamIDF =
+      ExperimentInfo::getFullPathParamIDF(filename, directoryName);
 
   if (!fullPathParamIDF.empty()) {
 
@@ -289,81 +290,6 @@ void LoadInstrument::runLoadParameterFile(
   } else {
     g_log.information("No parameter file found for this instrument");
   }
-}
-
-//-----------------------------------------------------------------------------------------------------------------------
-/// Search the directory for the Parameter IDF file and return full path name if
-/// found, else return "".
-//  directoryName must include a final '/'.
-std::string LoadInstrument::getFullPathParamIDF(const std::string &filename,
-                                                const std::string &dirHint) {
-
-  constexpr auto lookupFile = [](const std::string &dir,
-                                 const std::string &filename) {
-    Poco::Path directoryPath(dir);
-    directoryPath.makeDirectory();
-    // Remove the path from the filename
-    Poco::Path filePath(filename);
-    const std::string &instrumentFile = filePath.getFileName();
-
-    // First check whether there is a parameter file whose name is the same as
-    // the IDF file, but with 'Parameters' instead of 'Definition'.
-    std::string definitionPart("_Definition");
-    const std::string::size_type prefix_end(
-        instrumentFile.find(definitionPart));
-    const std::string::size_type suffix_start =
-        prefix_end + definitionPart.length();
-    // Get prefix and leave case sensitive
-    std::string prefix = instrumentFile.substr(0, prefix_end);
-    // Make suffix ensuring it has positive length
-    std::string suffix = ".xml";
-    if (suffix_start < instrumentFile.length()) {
-      suffix = instrumentFile.substr(suffix_start, std::string::npos);
-    }
-
-    // Assemble parameter file name
-    std::string fullPathParamIDF =
-        directoryPath.setFileName(prefix + "_Parameters" + suffix).toString();
-    if (!Poco::File(fullPathParamIDF)
-             .exists()) { // No such file exists, so look
-                          // for file based on instrument
-                          // ID
-                          // given by the prefix
-      fullPathParamIDF =
-          directoryPath.setFileName(prefix + "_Parameters.xml").toString();
-    }
-
-    if (!Poco::File(fullPathParamIDF)
-             .exists()) { // No such file exists, indicate
-                          // none found in this directory.
-      fullPathParamIDF = "";
-    }
-
-    return fullPathParamIDF;
-  };
-
-  // Try the hinted dir first
-  if (!dirHint.empty()) {
-    const std::string result = lookupFile(dirHint, filename);
-    if (!result.empty()) {
-      return result;
-    }
-  }
-
-  Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
-  std::vector<std::string> directoryNames =
-      configService.getInstrumentDirectories();
-
-  for (const auto &dirName : directoryNames) {
-    // This will iterate around the directories from user ->etc ->install, and
-    // find the first beat file
-    const std::string result = lookupFile(dirName, filename);
-    if (!result.empty()) {
-      return result;
-    }
-  }
-
-  return "";
 }
 
 } // namespace DataHandling

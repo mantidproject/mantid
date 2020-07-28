@@ -84,11 +84,6 @@ private:
   void runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws,
                             const std::string &filename);
 
-  /// Search instrument directories for Parameter file,
-  /// return full path name if found, else "".
-  std::string getFullPathParamIDF(const std::string &filename,
-                                  const std::string &dirHint = "");
-
   /// Mutex to avoid simultaneous access
   static std::recursive_mutex m_mutex;
 };

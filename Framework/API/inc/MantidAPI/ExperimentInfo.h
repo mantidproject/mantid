@@ -158,6 +158,12 @@ public:
   /// Get the IDF using the instrument name and date
   static std::string getInstrumentFilename(const std::string &instrumentName,
                                            const std::string &date = "");
+
+  /// Search instrument directories for Parameter file,
+  /// return full path name if found, else "".
+  static std::string getFullPathParamIDF(std::string instName,
+                                         const std::string &dirHint = "");
+
   const Geometry::DetectorInfo &detectorInfo() const;
   Geometry::DetectorInfo &mutableDetectorInfo();
 

@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -25,14 +24,16 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
-// clang-format off
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-// clang-format on
+#include <nexus/NeXusFile.hpp>
 
-#include <cxxtest/TestSuite.h>
-#include <boost/regex.hpp>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
+#include <Poco/TemporaryFile.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+#include <cxxtest/TestSuite.h>
 
 #include <set>
 #include <unordered_map>
@@ -422,6 +423,44 @@ public:
         }
       }
     }
+  }
+
+  void testFindIPF() {
+    // Check that instrument dirs are searched correctly
+    const std::string expectedFileName = "GEM_parameters.xml";
+
+    const auto result = ExperimentInfo::getFullPathParamIDF("GEM");
+    TS_ASSERT(boost::icontains(result, expectedFileName));
+
+    // Should be case insensitive
+    const auto mixedResult = ExperimentInfo::getFullPathParamIDF("GeM");
+    TS_ASSERT_EQUALS(result, mixedResult);
+  }
+
+  void testFindIPFNonExistant() {
+    const auto result = ExperimentInfo::getFullPathParamIDF("NotThere");
+    TS_ASSERT_EQUALS("", result);
+  }
+
+  void testFindIPFWithHint() {
+    const auto tmpDir = Poco::Path::temp();
+    const std::string filename = "TEST_Parameters.xml";
+    const std::string expectedPath = tmpDir + filename;
+
+    Poco::TemporaryFile::registerForDeletion(expectedPath);
+    Poco::File fileHandle(expectedPath);
+    fileHandle.createFile();
+
+    const auto result = ExperimentInfo::getFullPathParamIDF("test", tmpDir);
+    // Ensure file was found and it's in the tmp dir
+    TS_ASSERT(result.find(filename) != std::string::npos);
+    TS_ASSERT(result.find(tmpDir) != std::string::npos);
+  }
+
+  void testNonExistantIPFWithHint() {
+    const auto tmpDir = Poco::Path::temp();
+    const auto result = ExperimentInfo::getFullPathParamIDF("notThere", tmpDir);
+    TS_ASSERT(result.empty());
   }
 
   //
