@@ -351,6 +351,12 @@ interpolateFromDetectorGrid(const double lat, const double lon,
   return h;
 }
 
+HistogramData::Histogram bilinearInterpolate(const double lat, const double lon,
+                                             const API::MatrixWorkspace &ws) {
+  auto h = ws.histogram(0);
+  return h;
+}
+
 /** Creates a detector grid definition for a sparse instrument.
  *  @param modelWS A workspace the sparse instrument approximates.
  *  @param rows Number of rows in the detector grid.
