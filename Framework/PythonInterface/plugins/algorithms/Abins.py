@@ -197,6 +197,7 @@ class Abins(PythonAlgorithm):
                                                      quantum_order_num=self._num_quantum_order_events,
                                                      bin_width=self._bin_width)
         s_data = s_calculator.get_formatted_data()
+
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
@@ -323,15 +324,13 @@ class Abins(PythonAlgorithm):
         """
         from abins.constants import FLOAT_TYPE, MASS_EPS, ONLY_ONE_MASS
 
-        s_data_extracted = s_data.extract()
-
         # Create appropriately-shaped arrays to be used in-place by _atom_type_s - avoid repeated slow instantiation
         shape = [self._num_quantum_order_events]
-        shape.extend(list(s_data_extracted["atom_0"]["s"]["order_1"].shape))
+        shape.extend(list(s_data[0]["order_1"].shape))
         s_atom_data = np.zeros(shape=tuple(shape), dtype=FLOAT_TYPE)
         temp_s_atom_data = np.copy(s_atom_data)
 
-        num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
+        num_atoms = len(s_data)
         masses = self._get_masses_table(num_atoms)
 
         result = []
@@ -341,25 +340,24 @@ class Abins(PythonAlgorithm):
                 sub = (len(masses[symbol]) > ONLY_ONE_MASS
                        or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS)
                 for m in masses[symbol]:
-                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
+                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data=s_data,
                                                     element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
                                                     s_atom_data=s_atom_data, substitution=sub))
         if atom_numbers is not None:
             for atom_number in atom_numbers:
-                result.extend(self._atom_number_s(atom_number=atom_number, s_data_extracted=s_data_extracted,
+                result.extend(self._atom_number_s(atom_number=atom_number, s_data=s_data,
                                                   s_atom_data=s_atom_data))
         return result
 
-    def _atom_number_s(self, atom_number=None, s_data_extracted=None, s_atom_data=None):
+    def _atom_number_s(self, atom_number=None, s_data=None, s_atom_data=None):
         """
         Helper function for calculating S for the given atomic index
 
         :param atom_number: One-based index of atom in s_data e.g. 1 to select first element 'atom_1'
         :type atom_number: int
 
-        :param s_data_extracted: Collection of precalculated S for all atoms and quantum orders, obtained from extract()
-            method of abins.SData object.
-        :type s_data: dict
+        :param s_data: Precalculated S for all atoms and quantum orders
+        :type s_data: abins.SData
 
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays. First dimension is quantum
@@ -381,7 +379,7 @@ class Abins(PythonAlgorithm):
         z_number = Atom(symbol=symbol).z_number
 
         for i, order in enumerate(range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX)):
-            s_atom_data[i] = s_data_extracted[internal_atom_label]["s"]["order_%s" % order]
+            s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
 
         total_s_atom_data = np.sum(s_atom_data, axis=0)
 
@@ -394,13 +392,14 @@ class Abins(PythonAlgorithm):
                                                       protons_number=z_number))
         return atom_workspaces
 
-    def _atom_type_s(self, num_atoms=None, mass=None, s_data_extracted=None, element_symbol=None, temp_s_atom_data=None,
+    def _atom_type_s(self, num_atoms=None, mass=None, s_data=None, element_symbol=None, temp_s_atom_data=None,
                      s_atom_data=None, substitution=None):
         """
         Helper function for calculating S for the given type of atom
 
         :param num_atoms: number of atoms in the system
-        :param s_data_extracted: data with all S
+        :param s_data: Precalculated S for all atoms and quantum orders
+        :type s_data: abins.SData
         :param element_symbol: label for the type of atom
         :param temp_s_atom_data: helper array to accumulate S (inner loop over quantum order); does not transport
             information but is used in-place to save on time instantiating large arrays.
@@ -423,7 +422,7 @@ class Abins(PythonAlgorithm):
 
                 for order in range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX):
                     order_indx = order - PYTHON_INDEX_SHIFT
-                    temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
+                    temp_s_order = s_data[atom]["order_%s" % order]
                     temp_s_atom_data[order_indx] = temp_s_order
 
                 s_atom_data += temp_s_atom_data  # sum S over the atoms of the same type
@@ -470,7 +469,6 @@ class Abins(PythonAlgorithm):
         :returns: workspaces for list of atoms types, each workspace contains  quantum order events of
                  S for the particular atom type
         """
-
         return self._create_workspaces(atoms_symbols=atoms_symbols, atom_numbers=atom_numbers, s_data=s_data)
 
     def _fill_s_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):

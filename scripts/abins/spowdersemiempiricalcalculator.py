@@ -4,21 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import gc
+import numpy as np
+
 import abins
-from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
+from abins.constants import (CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
                              HIGHER_ORDER_QUANTUM_EVENTS, MAX_ORDER, MIN_SIZE, ONE_DIMENSIONAL_INSTRUMENTS,
                              QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR,
                              S_LAST_INDEX)
 from abins.instruments import Instrument
-
-import gc
-try:
-    # noinspection PyUnresolvedReferences
-    from pathos.multiprocessing import ProcessingPool
-    PATHOS_FOUND = True
-except ImportError:
-    PATHOS_FOUND = False
-import numpy as np
 
 
 # noinspection PyMethodMayBeStatic
@@ -50,8 +44,7 @@ class SPowderSemiEmpiricalCalculator(object):
             self._abins_data = abins_data
         else:
             raise ValueError("Object of type AbinsData was expected.")
-        self._q2_indices = list(self._abins_data.get_kpoints_data().extract()["k_vectors"].keys())
-        self._atoms = self._abins_data.get_atoms_data().extract()
+        self._num_k = len(self._abins_data.get_kpoints_data())
 
         if isinstance(abins_data, abins.AbinsData):
             self._abins_data = abins_data
@@ -93,7 +86,6 @@ class SPowderSemiEmpiricalCalculator(object):
                                  QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        self._bin_width = bin_width  # This is only here to store in s_data. Is that necessary/useful?
         self._bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
                                stop=abins.parameters.sampling['max_wavenumber'] + bin_width,
                                step=bin_width,
@@ -101,12 +93,10 @@ class SPowderSemiEmpiricalCalculator(object):
         self._frequencies = self._bins[:-1] + (bin_width / 2)
         self._freq_size = self._bins.size - 1
 
-        self._num_atoms = len(self._abins_data.get_atoms_data().extract())
+        self._num_atoms = len(self._abins_data.get_atoms_data())
 
-        self._powder_atoms_data = None
         self._a_traces = None
         self._b_traces = None
-        self._atoms_data = None
         self._fundamentals_freq = None
 
     def _calculate_s(self):
@@ -156,10 +146,10 @@ class SPowderSemiEmpiricalCalculator(object):
         Helper function. It calculates S for all q points  and all atoms.
         :returns: dictionary with S
         """
-        data = self._calculate_s_powder_over_atoms(q_indx=self._q2_indices[0])
+        data = self._calculate_s_powder_over_atoms(q_indx=0)
 
         # iterate over remaining q-points
-        for q in self._q2_indices[1:]:
+        for q in range(1, self._num_k):
             local_data = self._calculate_s_powder_over_atoms(q_indx=q)
             self._sum_s(current_val=data, addition=local_data)
         return data
@@ -170,10 +160,11 @@ class SPowderSemiEmpiricalCalculator(object):
         :param current_val: S accumulated so far
         :param addition: S to be added
         """
-        for atom in range(self._num_atoms):
+
+        for atom_key in current_val:
             for order in range(FUNDAMENTALS, self._quantum_order_num + S_LAST_INDEX):
-                temp = addition["atom_%s" % atom]["s"]["order_%s" % order]
-                current_val["atom_%s" % atom]["s"]["order_%s" % order] += temp
+                temp = addition[atom_key]["s"]["order_%s" % order]
+                current_val[atom_key]["s"]["order_%s" % order] += temp
 
     def _calculate_s_powder_1d(self):
         """
@@ -181,15 +172,12 @@ class SPowderSemiEmpiricalCalculator(object):
 
         :returns: object of type SData with 1D dynamical structure factors for the powder case
         """
-        # calculate data
         data = self._calculate_s_powder_over_k()
-        data.update({"frequencies": self._frequencies})
 
-        # put data to SData object
-        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set_bin_width(width=self._bin_width)
-        s_data.set(items=data)
-
+        s_data = abins.SData(temperature=self._temperature,
+                             sample_form=self._sample_form,
+                             frequencies=self._frequencies,
+                             data=data)
         return s_data
 
     def _calculate_s_powder_over_atoms(self, q_indx=None):
@@ -197,29 +185,11 @@ class SPowderSemiEmpiricalCalculator(object):
         Evaluates S for all atoms for the given q-point and checks if S is consistent.
         :returns: Python dictionary with S data
         """
-
-        s_all_atoms = self._calculate_s_powder_over_atoms_core(q_indx=q_indx)
-        return s_all_atoms
-
-    def _calculate_s_powder_over_atoms_core(self, q_indx=None):
-        """
-        Helper function for _calculate_s_powder_1d.
-        :returns: Python dictionary with S data
-        """
-        atoms_items = {}
-        atoms = range(self._num_atoms)
         self._prepare_data(k_point=q_indx)
 
-        if PATHOS_FOUND:
-            p_local = ProcessingPool(nodes=abins.parameters.performance['threads'])
-            result = p_local.map(self._calculate_s_powder_one_atom, atoms)
-        else:
-            result = [self._calculate_s_powder_one_atom(atom=atom) for atom in atoms]
-
-        for atom in range(self._num_atoms):
-            atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
-            self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
-        return atoms_items
+        return {f"atom_{atom_index}":
+                {"s": self._calculate_s_powder_one_atom(atom=atom_index, report_progress=True)}
+                for atom_index in range(self._num_atoms)}
 
     def _prepare_data(self, k_point=None):
         """
@@ -229,22 +199,21 @@ class SPowderSemiEmpiricalCalculator(object):
         # load powder data for one k
         clerk = abins.IO(input_filename=self._input_filename,
                          group_name=abins.parameters.hdf_groups['powder_data'])
-        powder_data = clerk.load(list_of_datasets=["powder_data"])
-        self._a_tensors = powder_data["datasets"]["powder_data"]["a_tensors"][k_point]
-        self._b_tensors = powder_data["datasets"]["powder_data"]["b_tensors"][k_point]
+        powder_data = abins.PowderData.from_extracted(clerk.load(list_of_datasets=["powder_data"]
+                                                                 )["datasets"]["powder_data"])
+        self._a_tensors = powder_data.get_a_tensors()[k_point]
+        self._b_tensors = powder_data.get_b_tensors()[k_point]
+
         self._a_traces = np.trace(a=self._a_tensors, axis1=1, axis2=2)
         self._b_traces = np.trace(a=self._b_tensors, axis1=2, axis2=3)
 
-        # load dft data for one k point
+        self._fundamentals_freq = powder_data.get_frequencies()[k_point]
+
+        # load dft data to get k-point weighting
         clerk = abins.IO(input_filename=self._input_filename,
                          group_name=abins.parameters.hdf_groups['ab_initio_data'])
         dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
-
-        frequencies = dft_data["datasets"]["frequencies"][int(k_point)]
-        indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
-        self._fundamentals_freq = frequencies[indx]
-
-        self._weight = dft_data["datasets"]["weights"][int(k_point)]
+        self._weight = dft_data["datasets"]["weights"][k_point]
 
         # free memory
         gc.collect()
@@ -264,14 +233,11 @@ class SPowderSemiEmpiricalCalculator(object):
         from mantid.kernel import logger
         logger.notice(msg)
 
-    def _calculate_s_powder_one_atom(self, atom=None):
-        s = self._calculate_s_powder_one_atom_core(atom=atom)
-
-        return s
-
-    def _calculate_s_powder_one_atom_core(self, atom=None):
+    def _calculate_s_powder_one_atom(self, atom=None, report_progress=False):
         """
         :param atom: number of atom
+        :param report_progress: Write to logger after calculating data
+
         :returns: s, and corresponding frequencies for all quantum events taken into account
         """
         s = {}
@@ -310,6 +276,9 @@ class SPowderSemiEmpiricalCalculator(object):
                 local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(
                     atom=atom, local_freq=local_freq, local_coeff=local_coeff,
                     fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order)
+
+        if report_progress:
+            self._report_progress(msg=f"S for atom {atom} has been calculated.")
 
         return s
 
@@ -390,7 +359,6 @@ class SPowderSemiEmpiricalCalculator(object):
             rebinned_broad_spectrum = np.zeros_like(self._frequencies)
 
         # multiply by k-point weight and scaling constant
-        # factor = self._weight / self._bin_width
         factor = self._weight
         rebinned_broad_spectrum = rebinned_broad_spectrum * factor
         return local_freq, local_coeff, rebinned_broad_spectrum
@@ -541,6 +509,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :returns: object of type SData.
         """
         data = self._clerk.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
+        frequencies = data["datasets"]["data"]["frequencies"]
+
         if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
             raise ValueError("User requested a larger number of quantum events to be included in the simulation "
                              "then in the previous calculations. S cannot be loaded from the hdf file.")
@@ -551,23 +521,30 @@ class SPowderSemiEmpiricalCalculator(object):
                          S Data from hdf file which corresponds only to requested quantum order events will be
                          loaded.""")
 
-            temp_data = {"frequencies": data["datasets"]["data"]["frequencies"]}
+            atoms_s = {}
 
             # load atoms_data
             n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
             for i in range(n_atom):
-                temp_data["atom_%s" % i] = {"s": dict()}
+                atoms_s["atom_%s" % i] = {"s": dict()}
                 for j in range(FUNDAMENTALS, self._quantum_order_num + S_LAST_INDEX):
 
                     temp_val = data["datasets"]["data"]["atom_%s" % i]["s"]["order_%s" % j]
-                    temp_data["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
+                    atoms_s["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
 
             # reduce the data which is loaded to only this data which is required by the user
-            data["datasets"]["data"] = temp_data
 
-        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set_bin_width(width=self._bin_width)
-        s_data.set(items=data["datasets"]["data"])
+            data["datasets"]["data"] = atoms_s
+
+        else:
+            atoms_s = {key: value for key, value in data["datasets"]["data"].items()
+                       if key != "frequencies"}
+
+        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form,
+                             data=atoms_s, frequencies=frequencies)
+
+        if s_data.get_bin_width is None:
+            raise Exception("Loaded data does not have consistent frequency spacing")
 
         return s_data
 
@@ -589,5 +566,4 @@ class SPowderSemiEmpiricalCalculator(object):
             self._report_progress(str(data) + " has been calculated.")
 
         data.check_thresholds()
-
         return data

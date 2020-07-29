@@ -1,34 +1,61 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import collections.abc
+import numbers
+from typing import Any, Dict, List, Optional, overload, Union
+import re
 import numpy as np
 import abins
 
 
-class AtomsData(abins.GeneralData):
+class AtomsData(collections.abc.Sequence):
+    def __init__(self, atoms_data: Dict[str, Dict[str, Any]]) -> None:
 
-    def __init__(self, num_atoms=None):
-        super(AtomsData, self).__init__()
-        if not isinstance(num_atoms, int):
-            raise ValueError("Invalid number of atoms.")
-        if num_atoms < 0:
-            raise ValueError("Number of atoms cannot be negative.")
+        # Make a map matching int indices to atoms_data keys
+        test = re.compile(r'^atom_(\d+)$')
 
-        self._num_atoms = num_atoms
-        self._num_atom = 0
-        self._data = {}
+        def _get_index_if_atom(label: str) -> Union[int, None]:
+            match = test.match(label)
+            if match is None:
+                return None
+            else:
+                return int(match.groups()[0])
 
-    def _append(self, item=None):
+        all_labels = list(atoms_data.keys())
+        # Collect integer keys with corresponding string 'labels'
+        # i.e. {0: 'atom_0', 1: 'atom_1', ...}
+        atom_labels_by_index = {index: label
+                                for index, label in zip(map(_get_index_if_atom, all_labels),
+                                                        all_labels)
+                                if index is not None}
+
+        sorted_atom_keys = [atom_labels_by_index[index] for index in sorted(atom_labels_by_index)]
+        n_atoms = len(sorted_atom_keys)
+
+        # Check that indices run up from zero with no gaps
+        if set(atom_labels_by_index) != set(range(len(atom_labels_by_index))):
+            raise ValueError('Missing some atom data. Only these entries were found: \n'
+                             '{}. key format must be "atom_I" '
+                             'where I is count starting from zero.'.format('\n'.join(sorted_atom_keys)))
+
+        # Now we can drop these string keys and store as a list with usual indices [{Atom0}, {Atom1}, ...]
+        self._data = [self._check_item(atoms_data[key], n_atoms=n_atoms) for key in sorted_atom_keys]
+
+    @staticmethod
+    def _check_item(item: Dict[str, Any], n_atoms: Optional[int] = None) -> Dict[str, Any]:
         """
-        Adds one elements to the collection of atoms data.
+        Raise an error if Atoms data item is unsuitable
+
         :param item: element to be added
+        :param n_atoms: Number of atoms in data. If provided, check that "sort" value is not higher than expected.
         """
 
         if not isinstance(item, dict):
-            raise ValueError("Every element of AtomsData has  a form of the dictionary.")
+            raise ValueError("Every element of AtomsData should be a dictionary.")
 
         if not sorted(item.keys()) == sorted(abins.constants.ALL_KEYWORDS_ATOMS_DATA):
             raise ValueError("Invalid structure of the dictionary to be added.")
@@ -46,55 +73,46 @@ class AtomsData(abins.GeneralData):
         if coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
         if coord.dtype.num != abins.constants.FLOAT_ID:
-            raise ValueError("All coordinates should be real numbers.")
+            raise ValueError("Coordinates array should have real float dtype.")
 
         # "sort"
         sort = item["sort"]
-        if not (isinstance(sort, int) or np.issubdtype(sort.dtype, np.integer)):
-            raise ValueError("Parameter sort  should be integer.")
+
+        if not isinstance(sort, numbers.Integral):
+            raise ValueError("Parameter 'sort' should be integer.")
+
         if sort < 0:
-            raise ValueError("Parameter sort cannot be negative.")
-        if sort >= self._num_atoms:  # here = because we count from 0
-            raise ValueError("Parameter sort cannot be larger than the total number of atoms.")
+            raise ValueError("Parameter 'sort' cannot be negative.")
+
+        if n_atoms is not None and (sort + 1) > n_atoms:
+            raise ValueError("Parameter 'sort' should not exceed atom indices")
 
         # "mass"
         mass = item["mass"]
-        if not isinstance(mass, float):
+        if not isinstance(mass, numbers.Real):
             raise ValueError("Mass of atom should be a real number.")
         if mass < 0:
             raise ValueError("Mass of atom cannot be negative.")
 
-        if self._num_atom == self._num_atoms:
-            raise ValueError("Number of atom cannot be larger than total number of atoms in the system.")
+        return item
 
-        self._data.update({"atom_%s" % self._num_atom: item})
-        self._num_atom += 1
+    def __len__(self) -> int:
+        return len(self._data)
 
-    def set(self, items=None):
+    @overload  # noqa F811
+    def __getitem__(self, item: int) -> Dict[str, Any]:
+        ...
 
-        if len(items) != self._num_atoms:
-            raise ValueError("Inconsistent size of new data and number of atoms. (%s != %s)" %
-                             (len(items), self._num_atoms))
+    @overload  # noqa F811
+    def __getitem__(self, item: slice) -> List[Dict[str, Any]]:
+        ...
 
-        atoms_list = ["atom_%s" % atom for atom in range(self._num_atoms)]
-        for atom in atoms_list:
-            if atom not in items:
-                raise ValueError("Missing data for atom number %s." % atom)
-
-        if isinstance(items, dict):
-            self._data = {}
-            self._num_atom = 0
-            size = len(items)
-            for atom in range(size):
-                self._append(item=items["atom_%s" % atom])
-        else:
-            raise ValueError("Invalid type of data.")
+    def __getitem__(self, item):  # noqa F811
+        return self._data[item]
 
     def extract(self):
-        if len(self._data) == self._num_atoms:
-            return self._data
-        else:
-            raise ValueError("Size of AtomsData and number of atoms is inconsistent.")
+        # For compatibility, regenerate the dict format on-the-fly
+        return {f'atom_{i}': item for i, item in enumerate(self._data)}
 
     def __str__(self):
         return "Atoms data"

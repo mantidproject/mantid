@@ -4,78 +4,123 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import collections.abc
+from typing import Dict, List, Optional, overload, Union
 import numpy as np
+from numbers import Real
 
 from mantid.kernel import logger as mantid_logger
 import abins
 from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
 
+# Type annotation for atom items e.g. data['atom_1']
+OneAtomSData = Dict[str, np.ndarray]
 
-class SData(abins.GeneralData):
+
+class SData(collections.abc.Sequence):
     """
-    Class for storing S(Q, omega)
+    Class for storing S(Q, omega) with relevant metadata
+
+    indexing will return dict(s) of S by quantum order for atom(s)
+    corresponding to index/slice.
     """
 
-    def __init__(self, temperature=None, sample_form=None):
-        super(SData, self).__init__()
+    def __init__(self, *,
+                 data: dict, frequencies: np.ndarray,
+                 temperature: Optional[float] = None,
+                 sample_form: str = '',
+                 ) -> None:
+        super().__init__()
 
-        if not isinstance(temperature, (float, int)) and temperature > 0:
-            raise ValueError("Invalid value of temperature.")
-        self._temperature = float(temperature)
+        if temperature is None:
+            self._temperature = None
+        elif isinstance(temperature, Real):
+            self._temperature = float(temperature)
+        else:
+            raise TypeError("Temperature must be a real number or None")
 
-        if sample_form in ALL_SAMPLE_FORMS:
+        if isinstance(sample_form, str):
             self._sample_form = sample_form
         else:
-            raise ValueError("Invalid sample form %s" % sample_form)
+            raise TypeError("Sample form must be a string. Use '' (default) if unspecified.")
 
-        self._data = None  # dictionary which stores dynamical structure factor for all atoms
-        self._bin_width = None
+        self._frequencies = np.asarray(frequencies, dtype=FLOAT_TYPE)
+        self._check_frequencies()
 
-    def set_bin_width(self, width=None):
-        self._bin_width = width
+        self._data = data
+        self._check_data()
 
-    def set(self, items=None):
+    def get_frequencies(self) -> np.ndarray:
+        return self._frequencies.copy()
+
+    def get_temperature(self) -> Union[float, None]:
+        return self._temperature
+
+    def get_sample_form(self) -> str:
+        return self._sample_form
+
+    def get_bin_width(self) -> Union[float, None]:
+        """Check frequency series and return the bin size
+
+        If the frequency series does not have a consistent step size, return None
         """
-        Sets a new value for a collection of the data.
-        """
-        if not isinstance(items, dict):
+
+        self._check_frequencies()
+        step_size = (self._frequencies[-1] - self._frequencies[0]) / (self._frequencies.size - 1)
+
+        if np.allclose(step_size, self._frequencies[1:] - self._frequencies[:-1]):
+            return step_size
+        else:
+            return None
+
+    def check_finite_temperature(self):
+        """Raise an error if Temperature is not greater than zero"""
+        temperature = self.get_temperature()
+        if not (isinstance(temperature, (float, int)) and temperature > 0):
+            raise ValueError("Invalid value of temperature.")
+
+    def check_known_sample_form(self):
+        """Raise an error if sample form is not known to Abins"""
+        sample_form = self.get_sample_form()
+        if sample_form not in ALL_SAMPLE_FORMS:
+            raise ValueError(
+                f"Invalid sample form {sample_form}: known sample forms are {ALL_SAMPLE_FORMS}")
+
+    def _check_frequencies(self):
+        # Check frequencies are ordered low to high
+        if not np.allclose(np.sort(self._frequencies),
+                           self._frequencies):
+            raise ValueError("Frequencies not sorted low to high")
+
+    def _check_data(self):
+        """Check data set is consistent and has correct types"""
+        if not isinstance(self._data, dict):
             raise ValueError("New value of S  should have a form of a dict.")
 
-        for item in items:
-            if ATOM_LABEL in item:
-
-                if not isinstance(items[item], dict):
+        for key, item in self._data.items():
+            if ATOM_LABEL in key:
+                if not isinstance(item, dict):
                     raise ValueError("New value of item from S data should have a form of dictionary.")
 
-                if sorted(items[item].keys()) != sorted(ALL_KEYWORDS_ATOMS_S_DATA):
+                if sorted(item.keys()) != sorted(ALL_KEYWORDS_ATOMS_S_DATA):
                     raise ValueError("Invalid structure of the dictionary.")
 
-                for order in items[item][S_LABEL]:
-                    if not isinstance(items[item][S_LABEL][order], np.ndarray):
+                for order in item[S_LABEL]:
+                    if not isinstance(item[S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
-
-            elif "frequencies" == item:
-                step = self._bin_width
-                bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
-                                 stop=abins.parameters.sampling['max_wavenumber'] + step,
-                                 step=step,
-                                 dtype=FLOAT_TYPE)
-
-                freq_points = bins[:-1] + (step / 2)
-                if not np.array_equal(items[item], freq_points):
-                    raise ValueError("Invalid frequencies, these should correspond to the mid points of the resampled bins.")
 
             else:
                 raise ValueError("Invalid keyword " + item)
-
-        self._data = items
 
     def extract(self):
         """
         Returns the data.
         :returns: data
         """
-        return self._data
+        # Use a shallow copy so that 'frequencies' is not added to self._data
+        full_data = self._data.copy()
+        full_data.update({'frequencies': self._frequencies})
+        return full_data
 
     def check_thresholds(self, return_cases=False, logger=None):
         """
@@ -127,3 +172,23 @@ class SData(abins.GeneralData):
 
     def __str__(self):
         return "Dynamical structure factors data"
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    @overload  # noqa F811
+    def __getitem__(self, item: int) -> OneAtomSData:
+        ...
+
+    @overload  # noqa F811
+    def __getitem__(self, item: slice) -> List[OneAtomSData]:
+        ...
+
+    def __getitem__(self, item):  # noqa F811
+        if isinstance(item, int):
+            return self._data[f"atom_{item}"]['s']
+        elif isinstance(item, slice):
+            return [self[i] for i in range(len(self))[item]]
+        else:
+            raise TypeError(
+                "Indices must be integers or slices, not {}.".format(type(item)))
