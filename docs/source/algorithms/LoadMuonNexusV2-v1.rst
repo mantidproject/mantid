@@ -54,6 +54,11 @@ In the table below details of the information loaded is shown, for more informat
 | Time Zero                        | ``instrument/detector_1/time_zero``        | TimeZero property                      |
 |                                  | if found                                   |                                        |
 +----------------------------------+--------------------------------------------+----------------------------------------+
+| Time Zero Vector                 | ``instrument/detector_1/time_zero`` can be | TimeZeroList property                  |
+|                                  | a single value or an array. This contains  |                                        |
+|                                  | either the the values from the array or the|                                        |
+|                                  | single value expanded into a vector        |                                        |
++----------------------------------+--------------------------------------------+----------------------------------------+
 | First good time                  | ``instrument/detector_1/first_good_bin``   | FirstGoodData property                 |
 |                                  | and ``instrument/detector_1/resolution``   |                                        |
 +----------------------------------+--------------------------------------------+----------------------------------------+
@@ -127,7 +132,7 @@ Output:
 
 Output:
 
-.. testoutput:: ExLoadDeadTimeTable
+.. testoutput:: ExLoadDeadTimeTable''
 
    5 0.007265590131
    6 0.006881169975
@@ -136,6 +141,29 @@ Output:
    9 0.007483229972
    10 -0.010110599920
 
+.. testcode:: ExTimeZeroLoading
+
+   # Load some spectra
+   ws, main_field_direction, time_zero, first_good_data, time_zero_list, dead_time_table, detector_grouping_table = \
+      LoadMuonNexusV2(Filename="EMU00102347.nxs_v2",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
+  
+   print('Single time zero value is {:.2g}'.format(time_zero))
+   print("TimeZeroList values are:")
+   for timeZero in time_zero_list:
+      print(timeZero)
+
+Output:
+
+.. testoutput:: ExTimeZeroLoading
+
+   Single time zero value is 0.16
+   TimeZeroList values are:
+   0.16
+   0.16
+   0.16
+   0.16
+   0.16
+   0.16
 
 .. categories::
 
