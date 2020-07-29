@@ -478,11 +478,11 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
                 pass
             min_value = min(min_value, xtmp.min())
             max_value = max(max_value, xtmp.max())
-            diff = xtmp[1:] - xtmp[:-1]
+            diff = np.diff(xtmp)
             delta = min(delta, diff.min())
     xtmp = workspace.readX(0)
     if delta == np.finfo(np.float64).max:
-        delta = (xtmp[1:] - xtmp[:-1]).min()
+        delta = np.diff(xtmp).min()
     if min_value == np.finfo(np.float64).max:
         min_value = xtmp.min()
     if max_value == np.finfo(np.float64).min:
