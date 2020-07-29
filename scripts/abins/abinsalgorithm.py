@@ -17,7 +17,7 @@ from mantid.kernel import Atom, Direction, StringListValidator, StringArrayPrope
 from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
 import abins
-from abins.constants import ALL_INSTRUMENTS, ALL_SAMPLE_FORMS, ATOM_PREFIX
+from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ALL_SAMPLE_FORMS, ATOM_PREFIX
 from abins.instruments import get_instrument
 
 
@@ -54,13 +54,13 @@ class AbinsAlgorithm:
         self.declareProperty(FileProperty("VibrationalOrPhononFile", "",
                                           action=FileAction.Load,
                                           direction=Direction.Input,
-                                          extensions=["phonon", "out", "outmol", "log", "LOG"]),
+                                          extensions=AB_INITIO_FILE_EXTENSIONS),
                              doc="File with the data from a vibrational or phonon calculation.")
 
         self.declareProperty(name="AbInitioProgram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
-                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN"]),
+                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN", "VASP"]),
                              doc="An ab initio program which was used for vibrational or phonon calculation.")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
@@ -119,7 +119,8 @@ class AbinsAlgorithm:
         input_file_validators = {"CASTEP": self._validate_castep_input_file,
                                  "CRYSTAL": self._validate_crystal_input_file,
                                  "DMOL3": self._validate_dmol3_input_file,
-                                 "GAUSSIAN": self._validate_gaussian_input_file}
+                                 "GAUSSIAN": self._validate_gaussian_input_file,
+                                 "VASP": self._validate_vasp_input_file}
         ab_initio_program = self.getProperty("AbInitioProgram").value
         vibrational_or_phonon_data_filename = self.getProperty("VibrationalOrPhononFile").value
 
@@ -625,6 +626,22 @@ class AbinsAlgorithm:
 
                 return dict(Invalid=False, Comment="")
 
+    @classmethod
+    def _validate_vasp_input_file(cls, filename_full_path: str) -> dict:
+        logger.information("Validate VASP file with vibrational or phonon data.")
+
+        if 'OUTCAR' in os.path.basename(filename_full_path):
+            return dict(Invalid=False, Comment="")
+        else:
+            output = cls._validate_ab_initio_file_extension(ab_initio_program="VASP",
+                                                            filename_full_path=filename_full_path,
+                                                            expected_file_extension=".xml")
+            if output["Invalid"]:
+                output["Comment"] = ("Invalid filename {}. Expected OUTCAR, *.OUTCAR or"
+                                     " *.xml for VASP calculation output. Please rename your file and try again. "
+                                     .format(filename_full_path))
+        return output
+            
     @staticmethod
     def _get_one_line(file_obj=None):
         """
