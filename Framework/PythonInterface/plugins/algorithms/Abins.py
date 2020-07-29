@@ -133,7 +133,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         # 8) save workspaces to ascii_file
         if self._save_ascii:
-            self.write_workspaces_to_ascii()
+            self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._bin_width))
             prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -189,7 +189,8 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         :param workspace: workspace to be filled with S
         """
         if protons_number is not None:
-            s_points = s_points * self._scale * self.get_cross_section(protons_number=protons_number,
+            s_points = s_points * self._scale * self.get_cross_section(scattering=self._scale_by_cross_section,
+                                                                       protons_number=protons_number,
                                                                        nucleons_number=nucleons_number)
 
         dim = 1

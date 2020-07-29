@@ -9,7 +9,7 @@
 # another part of AbinsModules.
 import os
 import re
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
@@ -452,16 +452,27 @@ class AbinsAlgorithm:
 
         return total_workspace
 
-    def write_workspaces_to_ascii(self) -> None:
-        num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
+    @staticmethod
+    def write_workspaces_to_ascii(scale: float = 1., *, ws_name: str) -> None:
+        """Write all with given root name to ascii files
+
+        :param ws_name: Workspace name (to be searched for in Mantid context)
+        :param scale: Scale factor to apply to data (typically 1 / bin_width)
+        """
+        num_workspaces = mtd[ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
-            wrk = mtd[self._out_ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=Scale(wrk, 1.0 / self._bin_width, "Multiply"),
+            wrk = mtd[ws_name].getItem(wrk_num)
+            SaveAscii(InputWorkspace=Scale(wrk, scale, "Multiply"),
                       Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
 
-    def get_cross_section(self, protons_number=None, nucleons_number=None):
+    @staticmethod
+    def get_cross_section(scattering: str = 'Total',
+                          nucleons_number: Optional[int] = None,
+                          *,
+                          protons_number: int) -> float:
         """
         Calculates cross section for the given element.
+        :param scattering: Type of cross-section: 'Incoherent', 'Coherent' or 'Total'
         :param protons_number: number of protons in the given type fo atom
         :param nucleons_number: number of nucleons in the given type of atom
         :returns: cross section for that element
@@ -471,19 +482,16 @@ class AbinsAlgorithm:
                 atom = Atom(a_number=nucleons_number, z_number=protons_number)
             # isotopes are not implemented for all elements so use different constructor in that cases
             except RuntimeError:
+                logger.warning(f"Could not find data for isotope {nucleons_number}, "
+                               f"using default values for {protons_number} protons.")
                 atom = Atom(z_number=protons_number)
         else:
             atom = Atom(z_number=protons_number)
 
-        cross_section = None
-        if self._scale_by_cross_section == 'Incoherent':
-            cross_section = atom.neutron()["inc_scatt_xs"]
-        elif self._scale_by_cross_section == 'Coherent':
-            cross_section = atom.neutron()["coh_scatt_xs"]
-        elif self._scale_by_cross_section == 'Total':
-            cross_section = atom.neutron()["tot_scatt_xs"]
-
-        return cross_section
+        scattering_keys = {'Incoherent': 'inc_scatt_xs',
+                           'Coherent': 'coh_scatt_xs',
+                           'Total': 'tot_scatt_xs'}
+        return atom.neutron()[scattering_keys[scattering]]
 
     @staticmethod
     def set_workspace_units(wrk, layout='1D'):
