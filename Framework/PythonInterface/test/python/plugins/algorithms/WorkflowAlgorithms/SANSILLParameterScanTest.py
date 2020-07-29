@@ -29,8 +29,8 @@ class SANSILLIntegrationTest(unittest.TestCase):
 
     def test_D16_omega(self):
         SANSILLParameterScan(SampleRuns="023583:023585",
-                             Output2D="output2d",
-                             ReducedData="reduced",
+                             OutputWorkspace="output2d",
+                             OutputJoinedWorkspace="reduced",
                              Observable="Omega.value",
                              PixelYmin=3,
                              PixelYMax=317)
