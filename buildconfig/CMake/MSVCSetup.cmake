@@ -252,11 +252,13 @@ set_target_properties(
 # ##############################################################################
 set(BIN_DIR bin)
 set(LIB_DIR ${BIN_DIR})
+set(SITE_PACKAGES ${LIB_DIR})
 # This is the root of the plugins directory
 set(PLUGINS_DIR plugins)
 
 set(WORKBENCH_BIN_DIR ${BIN_DIR})
 set(WORKBENCH_LIB_DIR ${LIB_DIR})
+set(WORKBENCH_SITE_PACKAGES ${LIB_DIR})
 set(WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR})
 
 # Separate directory of plugins to be discovered by the ParaView framework These

@@ -147,21 +147,12 @@ target_link_libraries(
           ${TBB_MALLOC_LIBRARIES}
 )
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(
-    PythonKernelModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS"
-  )
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(
-    PythonKernelModule PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR}"
-  )
-endif()
-
 # Installation settings
+set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}")
 
 mtd_install_targets(
-  TARGETS PythonKernelModule INSTALL_DIRS ${LIB_DIR}/mantid/kernel
-  ${WORKBENCH_LIB_DIR}/mantid/kernel
+  TARGETS PythonKernelModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/kernel
+  ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
 )
 
 # packagesetup.py that will overwrite the ones from the built target
@@ -169,8 +160,8 @@ mtd_install_files(
   FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
   INSTALL_DIRS
-  ${LIB_DIR}/mantid/kernel
-  ${WORKBENCH_LIB_DIR}/mantid/kernel
+  ${SITE_PACKAGES}/mantid/kernel
+  ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
   RENAME
   ${PACKAGESETUP_PY}.py
 )
@@ -179,8 +170,8 @@ mtd_install_files(
   FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
   INSTALL_DIRS
-  ${LIB_DIR}/mantid/kernel
-  ${WORKBENCH_LIB_DIR}/mantid/kernel
+  ${SITE_PACKAGES}/mantid/kernel
+  ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
   RENAME
   ${MPISETUP_PY}.py
 )

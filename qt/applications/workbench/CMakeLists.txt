@@ -5,6 +5,7 @@ if(WIN32)
 else()
   set(_exclude_on_install "")
 endif()
+
 # egg link name has to match setup.py name or Visual Studio generates
 # a warning that the output filename of the target does not match
 # the output that is produced by setuptools
@@ -12,7 +13,7 @@ add_python_package(workbench
   EXECUTABLE
   EGGLINKNAME MantidWorkbench
   EXCLUDE_FROM_INSTALL ${_exclude_on_install}
-  INSTALL_LIB_DIRS "${WORKBENCH_LIB_DIR}"
+  INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
   INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
 )
 

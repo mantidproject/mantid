@@ -11,9 +11,9 @@ endif()
 # mantidqt
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   if(APPLE)
-    set(_install_lib_dirs "${LIB_DIR};${WORKBENCH_LIB_DIR}")
+    set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
   else()
-    set(_install_lib_dirs "${WORKBENCH_LIB_DIR}")
+    set(_install_lib_dirs "${WORKBENCH_SITE_PACKAGES}")
   endif()
   add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
 
