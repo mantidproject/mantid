@@ -106,8 +106,17 @@ public:
     TS_ASSERT(boost::icontains(result, expectedFileName));
 
     // Should be case insensitive
-    const auto mixedResult = FileFinderHelpers::getIPFPath("GeM");
+    const auto mixedResult =
+        FileFinderHelpers::getIPFPath("GEM_defINITION.xml");
     TS_ASSERT_EQUALS(result, mixedResult);
+  }
+
+  void testFindIPFWithDate() {
+    const std::string input = "D2B_Definition_2018-03-01.xml";
+
+    const auto result = FileFinderHelpers::getIPFPath(input);
+    const std::string expected = "D2B_Parameters_2018-03-01.xml";
+    TS_ASSERT(boost::icontains(result, expected));
   }
 
   void testFindIPFNonExistant() {
@@ -117,7 +126,7 @@ public:
 
   void testFindIPFWithHint() {
     const auto tmpDir = Poco::Path::temp();
-    const std::string filename = "TEST_Parameters.xml";
+    const std::string filename = "test_Parameters.xml";
     const std::string expectedPath = tmpDir + filename;
 
     Poco::TemporaryFile::registerForDeletion(expectedPath);

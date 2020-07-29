@@ -11,6 +11,7 @@
 #include <Poco/SAX/Attributes.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
+#include <boost/algorithm/string/find.hpp>
 #include <boost/regex.hpp>
 
 #include <string>
@@ -116,15 +117,16 @@ FileFinderHelpers::getInstrumentFilename(const std::string &instrumentName,
 /// Search the directory for the Parameter IDF file and return full path name if
 /// found, else return "".
 //  directoryName must include a final '/'.
-std::string FileFinderHelpers::getIPFPath(std::string instName,
+std::string FileFinderHelpers::getIPFPath(const std::string &instName,
                                           const std::string &dirHint) {
-  // All inst names are stored as capitals currently,
-  // so we need to also do this for case-sensitive filesystems
-  std::transform(instName.begin(), instName.end(), instName.begin(), ::toupper);
+  // Remove the path from the filename, some legacy callers will pass in
+  // a full path rather than a filename
+  Poco::Path filePath(instName);
+  const std::string filename = filePath.getFileName();
 
   // Try the hinted dir first
   if (!dirHint.empty()) {
-    const std::string result = lookupIPF(dirHint, instName);
+    const std::string result = lookupIPF(dirHint, filename);
     if (!result.empty()) {
       return result;
     }
@@ -137,7 +139,7 @@ std::string FileFinderHelpers::getIPFPath(std::string instName,
   for (const auto &dirName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first beat file
-    const std::string result = lookupIPF(dirName, instName);
+    const std::string result = lookupIPF(dirName, filename);
     if (!result.empty()) {
       std::cout << "Found: " << result << '\n';
       return result;
@@ -149,44 +151,42 @@ std::string FileFinderHelpers::getIPFPath(std::string instName,
 }
 
 std::string FileFinderHelpers::lookupIPF(const std::string &dir,
-                                         const std::string &filename) {
+                                         std::string filename) {
+  const std::string ext = ".xml";
+  // Remove .xml for example if abc.xml was passed
+  boost::algorithm::ierase_all(filename, ext);
+
+  const std::string suffixSeperator("_Definition");
+
+  std::string prefix;
+  std::string suffix;
+
+  if (auto sepPos = boost::algorithm::ifind_first(filename, suffixSeperator)) {
+    prefix = std::string(filename.begin(), sepPos.begin());
+    suffix = std::string(sepPos.end(), filename.end());
+  } else {
+    prefix = filename;
+  }
+
   Poco::Path directoryPath(dir);
   directoryPath.makeDirectory();
-  // Remove the path from the filename
-  Poco::Path filePath(filename);
-  const std::string &instrumentFile = filePath.getFileName();
-
-  // First check whether there is a parameter file whose name is the same as
-  // the IDF file, but with 'Parameters' instead of 'Definition'.
-  std::string definitionPart("_Definition");
-  const std::string::size_type prefix_end(instrumentFile.find(definitionPart));
-  const std::string::size_type suffix_start =
-      prefix_end + definitionPart.length();
-  // Get prefix and leave case sensitive
-  std::string prefix = instrumentFile.substr(0, prefix_end);
-  // Make suffix ensuring it has positive length
-  std::string suffix = ".xml";
-  if (suffix_start < instrumentFile.length()) {
-    suffix = instrumentFile.substr(suffix_start, std::string::npos);
-  }
 
   // Assemble parameter file name
   std::string fullPathParamIDF =
-      directoryPath.setFileName(prefix + "_Parameters" + suffix).toString();
-  if (!Poco::File(fullPathParamIDF).exists()) { // No such file exists, so look
-                                                // for file based on instrument
-                                                // ID
-                                                // given by the prefix
-    fullPathParamIDF =
-        directoryPath.setFileName(prefix + "_Parameters.xml").toString();
+      directoryPath.setFileName(prefix + "_Parameters" + suffix + ext)
+          .toString();
+
+  if (Poco::File(fullPathParamIDF).exists()) {
+    return fullPathParamIDF;
   }
 
-  if (!Poco::File(fullPathParamIDF).exists()) { // No such file exists, indicate
-                                                // none found in this directory.
-    fullPathParamIDF = "";
+  fullPathParamIDF =
+      directoryPath.setFileName(prefix + "_Parameters" + ext).toString();
+  if (Poco::File(fullPathParamIDF).exists()) {
+    return fullPathParamIDF;
   }
 
-  return fullPathParamIDF;
+  return "";
 }
 
 /** Compile a list of files in compliance with name pattern-matching, file

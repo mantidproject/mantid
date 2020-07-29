@@ -17,7 +17,7 @@ class MANTID_API_DLL FileFinderHelpers {
 public:
   /// Search instrument directories for Parameter file,
   /// return full path name if found, else "".
-  static std::string getIPFPath(std::string instName,
+  static std::string getIPFPath(const std::string &instName,
                                 const std::string &dirHint = "");
 
   /// Get the IDF using the instrument name and date
@@ -35,8 +35,7 @@ public:
                              std::string &outValidTo);
 
 private:
-  static std::string lookupIPF(const std::string &dir,
-                               const std::string &filename);
+  static std::string lookupIPF(const std::string &dir, std::string filename);
 };
 
 } // Namespace Mantid::API
