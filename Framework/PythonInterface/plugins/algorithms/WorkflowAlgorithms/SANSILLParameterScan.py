@@ -207,7 +207,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         ConvertSpectrumAxis(InputWorkspace=self.output2D,
                             OutputWorkspace=self.output2D,
-                            Target="InPlane2Theta")
+                            Target="SignedInPlaneTwoTheta")
 
         Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
 
