@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from os import path
+from mantidqt.utils.observer_pattern import Observable
 
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool}
 
@@ -21,6 +22,7 @@ class SettingsPresenter(object):
         self.model = model
         self.view = view
         self.settings = {}
+        self.savedir_notifier = self.SavedirNotifier(self)
 
         # Connect view signals
         self.view.set_on_apply_clicked(self.save_new_settings)
@@ -43,6 +45,7 @@ class SettingsPresenter(object):
 
     def save_new_settings(self):
         self._collect_new_settings_from_view()
+        self.savedir_notifier.notify_subscribers(self.settings["save_location"])
         self._save_settings_to_file()
 
     def _collect_new_settings_from_view(self):
@@ -81,3 +84,14 @@ class SettingsPresenter(object):
             return all_keys and save_valid and recalc_valid
         except KeyError:  # Settings contained invalid key.
             return False
+
+    # -----------------------
+    # Observers / Observables
+    # -----------------------
+    class SavedirNotifier(Observable):
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args)

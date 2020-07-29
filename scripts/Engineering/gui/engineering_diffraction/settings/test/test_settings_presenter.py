@@ -66,6 +66,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.get_save_location.return_value = "save"
         self.view.get_full_calibration.return_value = "cal"
         self.view.get_van_recalc.return_value = False
+        self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.save_new_settings()
 
@@ -80,11 +81,13 @@ class SettingsPresenterTest(unittest.TestCase):
             "recalc_vanadium": False
         })
         self.assertEqual(self.view.close.call_count, 0)
+        self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
     def test_save_settings_and_close(self):
         self.view.get_save_location.return_value = "save"
         self.view.get_full_calibration.return_value = "cal"
         self.view.get_van_recalc.return_value = False
+        self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.save_and_close_dialog()
 
@@ -99,6 +102,7 @@ class SettingsPresenterTest(unittest.TestCase):
             "recalc_vanadium": False
         })
         self.assertEqual(self.view.close.call_count, 1)
+        self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
 
 if __name__ == '__main__':
