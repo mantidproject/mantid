@@ -8,12 +8,12 @@
 import numpy as np
 from typing import Dict
 
-from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceGroup
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress
 from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
-from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, Load
-from mantid.kernel import StringListValidator, Direction, Atom
+from mantid.simpleapi import GroupWorkspaces, Load
+from mantid.kernel import StringListValidator, Direction
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -35,7 +35,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
-    _atoms_data = None
 
     def category(self) -> str:
         return "Simulation"
@@ -107,16 +106,16 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
-        self._atoms_data = ab_initio_data.get_atoms_data()
-        atom_numbers, atom_symbols = self.get_atom_selection(atoms_data=self._atoms_data,
+        atoms_data = ab_initio_data.get_atoms_data()
+        atom_numbers, atom_symbols = self.get_atom_selection(atoms_data=atoms_data,
                                                              selection=self._atoms)
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
         # 5) create workspaces for atoms in interest
         workspaces = []
-        workspaces.extend(self.create_workspaces(atoms_symbols=atom_symbols, s_data=s_data,
+        workspaces.extend(self.create_workspaces(atoms_symbols=atom_symbols, s_data=s_data, atoms_data=atoms_data,
                                                  max_quantum_order=self._num_quantum_order_events))
-        workspaces.extend(self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data,
+        workspaces.extend(self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data, atoms_data=atoms_data,
                                                  max_quantum_order=self._num_quantum_order_events))
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 

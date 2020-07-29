@@ -200,19 +200,20 @@ class AbinsAlgorithm:
 
         return atom_numbers, atom_symbols
 
-    def get_masses_table(self, num_atoms):
+    @staticmethod
+    def get_masses_table(atoms_data):
         """
-        Collect masses associated with each element in self._atoms_data
+        Collect masses associated with each element in atoms_data
 
         :param num_atoms: Number of atoms in the system. (Saves time working out iteration.)
-        :type: int
+        :type num_atoms: int
 
         :returns: Mass data in form ``{el1: [m1, ...], ... }``
         """
         masses = {}
-        for i in range(num_atoms):
-            symbol = self._atoms_data[i]["symbol"]
-            mass = self._atoms_data[i]["mass"]
+        for atom in atoms_data:
+            symbol = atom["symbol"]
+            mass = atom["mass"]
             if symbol not in masses:
                 masses[symbol] = set()
             masses[symbol].add(mass)
@@ -223,7 +224,7 @@ class AbinsAlgorithm:
 
         return masses
 
-    def create_workspaces(self, atoms_symbols=None, atom_numbers=None, *, s_data, max_quantum_order):
+    def create_workspaces(self, atoms_symbols=None, atom_numbers=None, *, s_data, atoms_data, max_quantum_order):
         """
         Creates workspaces for all types of atoms. Creates both partial and total workspaces for given types of atoms.
 
@@ -236,6 +237,9 @@ class AbinsAlgorithm:
 
         :param s_data: dynamical factor data
         :type abins.SData
+
+        :param atoms_data: atom positions/masses
+        :type abins.AtomsData:
 
         :param max_quantum_order: maximum quantum order to include
         :type int:
@@ -251,7 +255,7 @@ class AbinsAlgorithm:
         temp_s_atom_data = np.copy(s_atom_data)
 
         num_atoms = len(s_data)
-        masses = self.get_masses_table(num_atoms)
+        masses = self.get_masses_table(atoms_data)
 
         result = []
 
@@ -260,13 +264,13 @@ class AbinsAlgorithm:
                 sub = (len(masses[symbol]) > ONLY_ONE_MASS
                        or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS)
                 for m in masses[symbol]:
-                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data=s_data,
+                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data=s_data, atoms_data=atoms_data,
                                                     element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
                                                     s_atom_data=s_atom_data, substitution=sub))
         if atom_numbers is not None:
             for atom_number in atom_numbers:
                 result.extend(self._atom_number_s(atom_number=atom_number, s_data=s_data,
-                                                  s_atom_data=s_atom_data))
+                                                  s_atom_data=s_atom_data, atoms_data=atoms_data))
         return result
 
     def _create_workspace(self, atom_name=None, s_points=None, optional_name="", protons_number=None,
@@ -289,7 +293,7 @@ class AbinsAlgorithm:
                                nucleons_number=nucleons_number)
         return ws_name
 
-    def _atom_number_s(self, atom_number=None, s_data=None, s_atom_data=None):
+    def _atom_number_s(self, *, atom_number, s_data, s_atom_data, atoms_data):
         """
         Helper function for calculating S for the given atomic index
 
@@ -314,7 +318,7 @@ class AbinsAlgorithm:
         atom_workspaces = []
         s_atom_data.fill(0.0)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
-        symbol = self._atoms_data[atom_number - 1]["symbol"]
+        symbol = atoms_data[atom_number - 1]["symbol"]
         z_number = Atom(symbol=symbol).z_number
 
         for i, order in enumerate(range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX)):
@@ -331,14 +335,16 @@ class AbinsAlgorithm:
                                                       protons_number=z_number))
         return atom_workspaces
 
-    def _atom_type_s(self, num_atoms=None, mass=None, s_data=None, element_symbol=None, temp_s_atom_data=None,
-                     s_atom_data=None, substitution=None):
+    def _atom_type_s(self, num_atoms=None, mass=None, s_data=None, atoms_data=None,
+                     element_symbol=None, temp_s_atom_data=None, s_atom_data=None, substitution=None):
         """
         Helper function for calculating S for the given type of atom
 
         :param num_atoms: number of atoms in the system
         :param s_data: Precalculated S for all atoms and quantum orders
         :type s_data: abins.SData
+        :param atoms_data: Atomic position/mass data
+        :type atoms_data: abins.AtomsData
         :param element_symbol: label for the type of atom
         :param temp_s_atom_data: helper array to accumulate S (inner loop over quantum order); does not transport
             information but is used in-place to save on time instantiating large arrays.
@@ -354,8 +360,8 @@ class AbinsAlgorithm:
         element = Atom(symbol=element_symbol)
 
         for atom_index in range(num_atoms):
-            if (self._atoms_data[atom_index]["symbol"] == element_symbol
-                    and abs(self._atoms_data[atom_index]["mass"] - mass) < MASS_EPS):
+            if (atoms_data[atom_index]["symbol"] == element_symbol
+                    and abs(atoms_data[atom_index]["mass"] - mass) < MASS_EPS):
 
                 temp_s_atom_data.fill(0.0)
 
