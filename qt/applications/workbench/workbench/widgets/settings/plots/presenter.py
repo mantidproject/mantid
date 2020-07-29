@@ -11,11 +11,10 @@ from mantid.kernel import ConfigService
 from mantid.plots.utility import get_colormap_names
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
 from workbench.widgets.settings.plots.view import PlotsSettingsView
+from workbench.widgets.settings.plots.model import PlotsSettingsModel
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
 
 from qtpy.QtCore import Qt
-from matplotlib import font_manager
-import matplotlib as mpl
 
 from enum import Enum
 
@@ -47,8 +46,9 @@ class PlotSettings(object):
     LEGEND_LOCATION_LIST = ['best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left',
                             'center left', 'upper left', 'upper center']
 
-    def __init__(self, parent, view=None):
+    def __init__(self, parent, view=None, model=None):
         self.view = view if view else PlotsSettingsView(parent, self)
+        self.model = model if model else PlotsSettingsModel()
         self.parent = parent
         self.add_list_items()
         self.load_general_setting_values()
@@ -240,30 +240,13 @@ class PlotSettings(object):
         ConfigService.setString(PlotProperties.COLORMAP.value, colormap)
 
     def populate_font_combo_box(self):
-        font_list = font_manager.findSystemFonts()
-        fonts = set()
-        for font in font_list:
-            # This try-except is for a known matplotlib bug where get_name() causes an error for certain fonts.
-            try:
-                font_name = font_manager.FontProperties(fname=font).get_name()
-            except RuntimeError:
-                continue
-            fonts.add(font_name)
-
-        if mpl.rcParams['font.family'][0] in ['sans-serif', 'serif', 'cursive', 'fantasy', 'monospace']:
-            current_mpl_font = mpl.rcParams['font.' + mpl.rcParams['font.family'][0]][0]
-        else:
-            current_mpl_font = mpl.rcParams['font.family'][0]
-        fonts.add(current_mpl_font)
-        fonts = sorted(fonts)
-
+        fonts = self.model.get_font_names()
         self.view.plot_font.addItems(fonts)
         current_font = ConfigService.getString(PlotProperties.PLOT_FONT.value)
         if current_font:
             self.view.plot_font.setCurrentText(current_font)
         else:
-            self.view.plot_font.setCurrentText(current_mpl_font)
-            self.action_font_combo_changed(current_mpl_font)
+            self.view.plot_font.setCurrentText(self.model.get_current_mpl_font())
 
     def update_properties(self):
         self.load_general_setting_values()
