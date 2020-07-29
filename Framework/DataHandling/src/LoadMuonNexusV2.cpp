@@ -150,9 +150,8 @@ void LoadMuonNexusV2::execLoader() {
         "Multiperiod nexus files not yet supported by LoadMuonNexusV2");
   }
 
-  // Execute child algorithm LoadISISNexus2 and load Muon specific properties
+  // Execute child algorithm LoadISISNexus2
   auto outWS = runLoadISISNexus();
-  loadMuonProperties(entry);
 
   // Check if single or multi period file and create appropriate loading
   // strategy
@@ -164,6 +163,8 @@ void LoadMuonNexusV2::execLoader() {
     // we just have a single workspace
     Workspace2D_sptr workspace2D =
         std::dynamic_pointer_cast<Workspace2D>(outWS);
+    // Load Muon specific properties
+    loadMuonProperties(entry, workspace2D->getNumberHistograms());
     m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
         g_log, m_filename, entry, workspace2D, static_cast<int>(m_entrynumber),
         m_isFileMultiPeriod);
@@ -243,7 +244,8 @@ Workspace_sptr LoadMuonNexusV2::runLoadISISNexus() {
  * Loads Muon specific data from the nexus entry
  * and sets the appropriate output properties
  */
-void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry) {
+void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry,
+                                         size_t numSpectra) {
 
   std::string mainFieldDirection =
       LoadMuonNexusV2Helper::loadMainFieldDirectionFromNexus(entry);
@@ -256,7 +258,7 @@ void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry) {
   setProperty("FirstGoodData", firstGoodData);
 
   auto timeZeroVector =
-      LoadMuonNexusV2Helper::loadTimeZeroListFromNexusFile(entry);
+      LoadMuonNexusV2Helper::loadTimeZeroListFromNexusFile(entry, numSpectra);
   setProperty("TimeZeroList", timeZeroVector);
 }
 } // namespace DataHandling

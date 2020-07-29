@@ -154,18 +154,16 @@ double loadTimeZeroFromNexusFile(const NeXus::NXEntry &entry) {
   }
 }
 
-std::vector<double> loadTimeZeroListFromNexusFile(const NeXus::NXEntry &entry) {
+std::vector<double> loadTimeZeroListFromNexusFile(const NeXus::NXEntry &entry,
+                                                  size_t numSpectra) {
   NXClass det_class = entry.openNXGroup(NeXusEntry::DETECTOR);
-  NXInt spectrum_index = det_class.openNXInt("spectrum_index");
-  spectrum_index.load();
-  auto ndets = spectrum_index.dim0();
 
   NXDouble timeZeroClass = det_class.openNXDouble(NeXusEntry::TIMEZERO);
   std::vector<double> timeZeroVector = timeZeroClass.vecBuffer();
   if (timeZeroVector.size() == 0) {
     double timeZero =
         static_cast<double>(det_class.getFloat(NeXusEntry::TIMEZERO));
-    timeZeroVector = std::vector<double>(ndets, timeZero);
+    timeZeroVector = std::vector<double>(numSpectra, timeZero);
   }
   // We assume that this spectrum list increases monotonically
   return timeZeroVector;

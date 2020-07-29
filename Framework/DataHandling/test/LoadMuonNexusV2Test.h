@@ -298,6 +298,23 @@ public:
     TS_ASSERT_DELTA(output_ws->x(67)[0], 0.0, 1e-5);
     TS_ASSERT_DELTA(output_ws->x(81)[0], 0.0, 1e-5);
   }
+
+  void
+  test_time_zero_list_is_loaded_correctly_when_only_single_time_zero_in_file() {
+    LoadMuonNexusV2 ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
+    ld.setPropertyValue("OutputWorkspace", "outWS");
+
+    ld.execute();
+
+    std::vector<double> timeZeroVector = ld.getProperty("TimeZeroList");
+
+    TS_ASSERT_EQUALS(timeZeroVector.size(), 96);
+    for (auto value : timeZeroVector) {
+      TS_ASSERT_DELTA(value, 0.1599999, 1e-5);
+    }
+  }
 };
 
 //------------------------------------------------------------------------------
