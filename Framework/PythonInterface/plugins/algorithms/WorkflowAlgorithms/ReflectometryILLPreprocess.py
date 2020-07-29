@@ -358,6 +358,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         measurement_type = self.getPropertyValue('Measurement')
         load_options = {
             'Measurement': measurement_type,
+            'XUnit': 'TimeOfFlight',
             'FitStartWorkspaceIndex': self.getProperty(Prop.START_WS_INDEX).value,
             'FitEndWorkspaceIndex': self.getProperty(Prop.END_WS_INDEX).value,
             'FitRangeLower': self.getProperty(Prop.XMIN).value,

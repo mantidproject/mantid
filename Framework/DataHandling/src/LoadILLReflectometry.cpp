@@ -219,6 +219,10 @@ void LoadILLReflectometry::init() {
                   "Minimum wavelength used for peak fitting.");
   declareProperty("FitRangeUpper", -1.,
                   "Maximum wavelength used for peak fitting.");
+  const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
+  declareProperty("XUnit", "Wavelength",
+                   std::make_shared<StringListValidator>(availableUnits),
+                   "X unit of the OutputWorkspace");
 }
 
 /// Validate the inputs
@@ -258,6 +262,7 @@ void LoadILLReflectometry::exec() {
   placeSource();
   placeDetector();
   placeSlits();
+  convertTofToWavelength();
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 } // exec
@@ -330,6 +335,24 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   acqMode.load();
   m_acqMode = acqMode[0];
   m_acqMode ? g_log.debug("TOF mode") : g_log.debug("Monochromatic Mode");
+}
+
+/// Call child algorithm ConvertUnits for conversion from TOF to wavelength
+/// Note that DAN calibration is done in preprocess, since it needs information
+/// also from the direct beam so converting to wavelength in the loader will not
+/// be accurate
+void LoadILLReflectometry::convertTofToWavelength() {
+  if (m_acqMode && (getPropertyValue("XUnit") == "Wavelength")) {
+    auto convertToWavelength =
+        createChildAlgorithm("ConvertUnits", -1, -1, true);
+    convertToWavelength->initialize();
+    convertToWavelength->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
+                                                           m_localWorkspace);
+    convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
+                                                           m_localWorkspace);
+    convertToWavelength->setPropertyValue("Target", "Wavelength");
+    convertToWavelength->executeAsChildAlg();
+  }
 }
 
 /**
