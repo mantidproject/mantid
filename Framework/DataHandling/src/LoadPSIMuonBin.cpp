@@ -237,8 +237,8 @@ void LoadPSIMuonBin::exec() {
   if (correctTime) {
     for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
       auto &xData = outputWorkspace->mutableX(specNum);
-      auto spectraTimeZero =
-          correctedTimeZeroList[specNum] for (auto &xValue : xData) {
+      auto spectraTimeZero = correctedTimeZeroList[specNum];
+      for (auto &xValue : xData) {
         xValue -= spectraTimeZero;
       }
     }
@@ -302,9 +302,10 @@ void LoadPSIMuonBin::readSingleVariables(
 
   if (m_header.histogramBinWidth == 0) {
     // If no histogram bin width found calculate it
-    m_header.histogramBinWidth = static_cast<float>(
-        (625.E-6) / 8. * pow(static_cast<float>(2.),
-                             static_cast<float>(m_header.tdcResolution)));
+    m_header.histogramBinWidth =
+        static_cast<float>((625.E-6) / 8. *
+                           pow(static_cast<float>(2.),
+                               static_cast<float>(m_header.tdcResolution)));
   }
 
   streamReader.moveStreamToPosition(712);
@@ -515,8 +516,8 @@ void LoadPSIMuonBin::addToSampleLog(const std::string &logName,
 void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     DataObjects::Workspace2D_sptr &outputWorkspace) {
   // Sort some workspace particulars
-  outputWorkspace->setTitle(m_header.sample + " - Run:" +
-                            std::to_string(m_header.numberOfRuns));
+  outputWorkspace->setTitle(m_header.sample +
+                            " - Run:" + std::to_string(m_header.numberOfRuns));
 
   // Set Run Property goodfrm
   outputWorkspace->mutableRun().addProperty(
@@ -581,8 +582,9 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
 
   outputWorkspace->setComment(m_header.comment);
   addToSampleLog("Comment", m_header.comment, outputWorkspace);
-  addToSampleLog("Length of run", static_cast<double>(m_histograms[0].size()) *
-                                      m_header.histogramBinWidth,
+  addToSampleLog("Length of run",
+                 static_cast<double>(m_histograms[0].size()) *
+                     m_header.histogramBinWidth,
                  outputWorkspace);
 
   boost::trim_right(m_header.field);
