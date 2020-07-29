@@ -57,6 +57,7 @@ BUNDLED_PY_MODULES_WORKBENCH = [
 ]
 REQUIREMENTS_FILE = Pathname.new(__dir__) + 'requirements.txt'
 REQUIREMENTS_WORKBENCH_FILE = Pathname.new(__dir__) + 'requirements-workbench.txt'
+SITECUSTOMIZE_FILE = Pathname.new(__dir__) + 'sitecustomize.py'
 DEBUG = 1
 FRAMEWORK_IDENTIFIER = '.framework'
 HOMEBREW_PREFIX = '/usr/local'
@@ -197,6 +198,10 @@ def deploy_python_framework(destination, host_python_exe,
   mpltoolkit_init =
     FileUtils.touch "#{bundle_site_packages}/mpl_toolkits/__init__.py"
 
+  # add sitecustomize module
+  FileUtils.cp SITECUSTOMIZE_FILE, bundle_site_packages,
+               preserve: true
+  
   bundle_site_packages
 end
 
