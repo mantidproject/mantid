@@ -118,7 +118,7 @@ def python_version(py_exe)
   return version_number_str.split('.').map { |x| x.to_i }
 end
 
-# Deploy the embedded Python bundle
+# Deploy the embedded Python bundle to the Frameworks subdirectory
 # Params:
 # +destination+:: Destination directory for bundle
 # +host_python_exe+:: Executable of Python bundle to copy over
@@ -130,7 +130,7 @@ def deploy_python_framework(destination, host_python_exe,
                             requirements_files)
   host_py_home = host_python_exe.realpath.parent.parent
   py_ver = host_py_home.basename
-  bundle_python_framework = destination + 'Python.framework'
+  bundle_python_framework = destination + 'Frameworks/Python.framework'
   bundle_py_home = bundle_python_framework + "Versions/#{py_ver}"
   deployable_assets = [
     'Python', "bin/python#{py_ver}", "bin/2to3-#{py_ver}",
@@ -173,6 +173,13 @@ def deploy_python_framework(destination, host_python_exe,
   Dir.chdir(bundle_py_home + 'bin') do
     FileUtils.ln_s "python#{py_ver}", "python"
     FileUtils.ln_s "2to3-#{py_ver}", "2to3"
+  end
+
+  # add python symlink to MacOS for easier command-line access
+  contents_macos = destination + 'MacOS'
+  Dir.chdir(contents_macos) do
+    py_exe = Pathname.new("#{bundle_python_framework}/Versions/#{py_ver}/bin/python#{py_ver}")
+    FileUtils.ln_s "#{py_exe.relative_path_from(contents_macos)}", "python"
   end
 
   # remove Info.plist files so outer application controls app display name
@@ -562,6 +569,7 @@ end
 
 # Bundle paths
 bundle_path = Pathname.new(ARGV[0])
+contents = bundle_path + 'Contents'
 contents_macos = bundle_path + 'Contents/MacOS'
 contents_frameworks = bundle_path + 'Contents/Frameworks'
 # additional executables not detectable by dependency analysis
@@ -607,7 +615,7 @@ end
 
 # We start with the assumption CMake has installed all required target libraries/executables
 # into the bundle and the main layout exists.
-bundle_py_site_packages = deploy_python_framework(contents_frameworks, host_python_exe,
+bundle_py_site_packages = deploy_python_framework(contents, host_python_exe,
                                                   bundled_packages, requirements_files)
 if $PARAVIEW_BUILD_DIR.start_with?('/')
   pv_lib_dir = Pathname.new($PARAVIEW_BUILD_DIR) + 'lib'
