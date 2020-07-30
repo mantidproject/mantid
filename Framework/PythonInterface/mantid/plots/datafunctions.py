@@ -531,7 +531,11 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     except RuntimeError:
         raise ValueError('The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead')
     x = workspace.extractX()
-    y = workspace.getAxis(1).extractValues()
+    if workspace.getAxis(1).isText():
+        nhist = workspace.getNumberHistograms()
+        y = np.arange(nhist)
+    else:
+        y = workspace.getAxis(1).extractValues()
     z = workspace.extractY()
 
     try:
@@ -591,8 +595,8 @@ def get_uneven_data(workspace, distribution):
     y = []
     nhist = workspace.getNumberHistograms()
     yvals = workspace.getAxis(1).extractValues()
-    if yvals == ['']:
-        yvals = np.array([0])
+    if workspace.getAxis(1).isText():
+        yvals = np.arange(nhist)
     if len(yvals) == nhist:
         yvals = boundaries_from_points(yvals)
     try:
