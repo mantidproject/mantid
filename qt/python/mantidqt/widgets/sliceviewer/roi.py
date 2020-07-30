@@ -7,8 +7,7 @@
 #  This file is part of the mantidqt.
 #
 from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.simpleapi import (DeleteWorkspace, ExtractSpectra, Rebin, ReplaceSpecialValues,
-                              SumSpectra, Transpose)
+from mantid.simpleapi import (DeleteWorkspace, ExtractSpectra, Rebin, SumSpectra, Transpose)
 import numpy as np
 
 
@@ -82,14 +81,14 @@ def extract_matrix_cuts_spectra_axis(workspace: MatrixWorkspace,
 
 
 @on_except_leave_ads_unchanged
-def extract_matrix_cuts_numeric_axis(workspace: MatrixWorkspace,
-                                     xmin: float,
-                                     xmax: float,
-                                     ymin: float,
-                                     ymax: float,
-                                     xcut_name: str,
-                                     ycut_name: str,
-                                     log_algorithm_calls: bool = True):
+def extract_cuts_matrix(workspace: MatrixWorkspace,
+                        xmin: float,
+                        xmax: float,
+                        ymin: float,
+                        ymax: float,
+                        xcut_name: str,
+                        ycut_name: str,
+                        log_algorithm_calls: bool = True):
     """
     Assuming a MatrixWorkspace with vertical numeric axis, extract 1D cuts from the region defined
     by the given parameters
@@ -102,44 +101,32 @@ def extract_matrix_cuts_numeric_axis(workspace: MatrixWorkspace,
     :param ycut_name: Name of the Y cut. Empty indicates it should be skipped
     :param log_algorithm_calls: Log the algorithm call or be silent
     """
-    if xcut_name:
-        ExtractSpectra(
-            InputWorkspace=workspace,
-            OutputWorkspace=xcut_name,
-            XMin=xmin,
-            XMax=xmax,
-            EnableLogging=log_algorithm_calls)
-        # Rebin with nan/inf results in everything turning to NAN so
-        # set them all to zero as this will effectively ignore them for us
-        ReplaceSpecialValues(
-            InputWorkspace=xcut_name,
-            OutputWorkspace=xcut_name,
-            NanValue=0.0,
-            InfinityValue=0.0,
-            EnableLogging=log_algorithm_calls)
-        Transpose(
-            InputWorkspace=xcut_name, OutputWorkspace=xcut_name, EnableLogging=log_algorithm_calls)
-        Rebin(
-            InputWorkspace=xcut_name,
-            OutputWorkspace=xcut_name,
-            Params=[ymin, ymax - ymin, ymax],
-            EnableLogging=log_algorithm_calls)
-        Transpose(
-            InputWorkspace=xcut_name, OutputWorkspace=xcut_name, EnableLogging=log_algorithm_calls)
+    tmp_crop_region = '__tmp_sv_region_extract'
+    transpose = False
+    roi = extract_roi_matrix(workspace, xmin, xmax, ymin, ymax, transpose, tmp_crop_region,
+                             log_algorithm_calls)
+
+    # perform ycut first so xcut can reuse tmp workspace for rebinning if necessary
     if ycut_name:
         Rebin(
-            InputWorkspace=workspace,
+            InputWorkspace=roi,
             OutputWorkspace=ycut_name,
             Params=[xmin, xmax - xmin, xmax],
             EnableLogging=log_algorithm_calls)
         Transpose(
             InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
-        ExtractSpectra(
-            InputWorkspace=ycut_name,
-            OutputWorkspace=ycut_name,
-            XMin=ymin,
-            XMax=ymax,
-            EnableLogging=log_algorithm_calls)
+
+    if xcut_name:
+        if not roi.isCommonBins():
+            # rebin to a common grid using the resolution from the spectrum
+            # with the lowest resolution to avoid overbinning
+            roi = _rebin_to_common_grid(roi, xmin, xmax, log_algorithm_calls)
+        SumSpectra(InputWorkspace=roi, OutputWorkspace=xcut_name, EnableLogging=log_algorithm_calls)
+
+    try:
+        DeleteWorkspace(tmp_crop_region, EnableLogging=log_algorithm_calls)
+    except ValueError:
+        pass
 
 
 @on_except_leave_ads_unchanged
@@ -164,14 +151,18 @@ def extract_roi_matrix(workspace: MatrixWorkspace,
     """
     yaxis = workspace.getAxis(1)
     if yaxis.isSpectra():
-        _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
+        roi = _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, roi_name,
+                                        log_algorithm_calls)
     elif yaxis.isNumeric():
-        _extract_roi_numeric_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
+        roi = _extract_roi_numeric_axis(workspace, xmin, xmax, ymin, ymax, roi_name,
+                                        log_algorithm_calls)
     else:
         raise RuntimeError("Unknown vertical axis type")
 
     if transpose:
-        Transpose(InputWorkspace=roi_name, OutputWorkspace=roi_name)
+        roi = Transpose(InputWorkspace=roi_name, OutputWorkspace=roi_name)
+
+    return roi
 
 
 # private api

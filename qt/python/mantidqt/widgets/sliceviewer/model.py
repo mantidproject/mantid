@@ -14,7 +14,7 @@ from mantid.plots.datafunctions import get_indices
 from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 import numpy as np
 
-from .roi import extract_matrix_cuts_numeric_axis, extract_matrix_cuts_spectra_axis, extract_roi_matrix
+from .roi import extract_cuts_matrix, extract_roi_matrix
 from .sliceinfo import SliceInfo
 from .transform import NonOrthogonalTransform
 
@@ -424,12 +424,8 @@ class SliceViewerModel:
         if transpose:
             xcut_name, ycut_name = ycut_name, xcut_name
 
-        if yaxis.isSpectra():
-            extract_matrix_cuts_spectra_axis(workspace, xmin, xmax, ymin, ymax, xcut_name,
-                                             ycut_name)
-        elif yaxis.isNumeric():
-            extract_matrix_cuts_numeric_axis(workspace, xmin, xmax, ymin, ymax, xcut_name,
-                                             ycut_name)
+        if yaxis.isSpectra() or yaxis.isNumeric():
+            extract_cuts_matrix(workspace, xmin, xmax, ymin, ymax, xcut_name, ycut_name)
         else:
             help_msg = 'Unknown Y axis type. Unable to perform cuts'
 
@@ -610,10 +606,7 @@ def _inplace_transposemd(workspace, axes):
     :param workspace: A reference to an MD workspace
     :param axes: The axes parameter for TransposeMD
     """
-    TransposeMD(
-        InputWorkspace=workspace,
-        OutputWorkspace=workspace,
-        Axes=axes)
+    TransposeMD(InputWorkspace=workspace, OutputWorkspace=workspace, Axes=axes)
 
 
 def _to_str(seq: Sequence):

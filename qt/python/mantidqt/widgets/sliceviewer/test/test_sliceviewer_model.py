@@ -92,15 +92,15 @@ def _create_mock_matrixworkspace(x_axis: tuple,
     ws.getNumDims.return_value = 2
     ws.getNumberHistograms.return_value = len(y_axis)
     ws.isDistribution.return_value = distribution
+    ws.extractX.return_value = x_axis
     axes = [
         MagicMock(),
         MagicMock(isSpectra=lambda: y_is_spectra, isNumeric=lambda: not y_is_spectra)
     ]
     ws.getAxis.side_effect = lambda i: axes[i]
+    axes[1].extractValues.return_value = np.array(y_axis)
     if y_is_spectra:
         axes[1].indexOfValue.side_effect = lambda i: i + 1
-    else:
-        axes[1].extractValues.return_value = np.array(y_axis)
 
     if names is None:
         names = ('X', 'Y')
@@ -670,27 +670,29 @@ class SliceViewerModelTest(unittest.TestCase):
                         mock_rebin.assert_called_once()
                     mock_sum_spectra.assert_called_once()
                 else:
-                    self.assertEqual(2, mock_rebin.call_count)
-                    self.assertEqual(3, mock_transpose.call_count)
-                    self.assertEqual(2, mock_extract_spectra.call_count)
+                    if is_ragged:
+                        self.assertEqual(2, mock_rebin.call_count)
+                    else:
+                        mock_rebin.assert_called_once()
+                    self.assertEqual(1, mock_transpose.call_count)
+                    self.assertEqual(1, mock_extract_spectra.call_count)
                 self.assertEqual('Cuts along X/Y created: mock_ws_cut_x & mock_ws_cut_y', help_msg)
             elif export_type == 'x':
                 mock_extract_spectra.assert_called_once()
+                if is_ragged:
+                    self.assertEqual(1, mock_rebin.call_count)
                 if is_spectra:
                     mock_sum_spectra.assert_called_once()
                 else:
-                    self.assertEqual(1, mock_rebin.call_count)
-                    self.assertEqual(2, mock_transpose.call_count)
+                    mock_transpose.assert_not_called()
                 self.assertEqual('Cut along X created: mock_ws_cut_x', help_msg)
             elif export_type == 'y':
                 mock_extract_spectra.assert_called_once()
-                if is_spectra:
-                    self.assertEqual(1, mock_transpose.call_count)
-                    self.assertEqual(1, mock_rebin.call_count)
+                mock_transpose.assert_called_once()
+                if is_ragged:
+                    self.assertEqual(2, mock_rebin.call_count)
                 else:
                     self.assertEqual(1, mock_rebin.call_count)
-                    self.assertEqual(1, mock_transpose.call_count)
-
                 self.assertEqual('Cut along Y created: mock_ws_cut_y', help_msg)
 
             mock_transpose.reset_mock()
