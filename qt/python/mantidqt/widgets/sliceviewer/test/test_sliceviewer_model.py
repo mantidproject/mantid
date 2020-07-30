@@ -640,7 +640,7 @@ class SliceViewerModelTest(unittest.TestCase):
                 XMax=exp_xmax,
                 StartWorkspaceIndex=exp_start_index,
                 EndWorkspaceIndex=exp_end_index,
-                EnableLogging=False)
+                EnableLogging=True)
             mock_extract_spectra.reset_mock()
 
         assert_call_as_expected(xmin, xmax, 3, 5, transpose=False, is_spectra=True)
@@ -758,8 +758,7 @@ class SliceViewerModelTest(unittest.TestCase):
                 BasisVector0='h,rlu,1.0,0.0,0.0',
                 BasisVector1='k,rlu,0.0,1.0,0.0',
                 BasisVector2='l,rlu,0.0,0.0,1.0',
-                OutputExtents=extents,
-                EnableLogging=False)
+                OutputExtents=extents)
             xcut_name, ycut_name = 'ws_MDE_3D_cut_x', 'ws_MDE_3D_cut_y'
             if export_type == 'r':
                 expected_help_msg = 'ROI created: ws_MDE_3D_roi'
@@ -799,35 +798,19 @@ class SliceViewerModelTest(unittest.TestCase):
                 if export_type == 'x':
                     index = 1 if transpose else 0
                     expected_calls = [
-                        call(
-                            InputWorkspace=xcut_name,
-                            OutputWorkspace=xcut_name,
-                            Axes=[index],
-                            EnableLogging=False)
+                        call(InputWorkspace=xcut_name, OutputWorkspace=xcut_name, Axes=[index])
                     ]
                 elif export_type == 'y':
                     index = 0 if transpose else 1
                     expected_calls = [
-                        call(
-                            InputWorkspace=ycut_name,
-                            OutputWorkspace=ycut_name,
-                            Axes=[index],
-                            EnableLogging=False)
+                        call(InputWorkspace=ycut_name, OutputWorkspace=ycut_name, Axes=[index])
                     ]
                 elif export_type == 'c':
                     xindex = 1 if transpose else 0
                     yindex = 0 if transpose else 1
                     expected_calls = [
-                        call(
-                            InputWorkspace=xcut_name,
-                            OutputWorkspace=xcut_name,
-                            Axes=[xindex],
-                            EnableLogging=False),
-                        call(
-                            InputWorkspace=ycut_name,
-                            OutputWorkspace=ycut_name,
-                            Axes=[yindex],
-                            EnableLogging=False)
+                        call(InputWorkspace=xcut_name, OutputWorkspace=xcut_name, Axes=[xindex]),
+                        call(InputWorkspace=ycut_name, OutputWorkspace=ycut_name, Axes=[yindex])
                     ]
 
                 mock_transposemd.assert_has_calls(expected_calls, any_order=True)

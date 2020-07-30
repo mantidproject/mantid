@@ -5,11 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
 
 # 3rdparty imports
 import mantid.api
+import mantid.kernel
 
 # local imports
 from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
@@ -31,6 +30,7 @@ class SliceViewer(object):
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
+        self._logger = mantid.kernel.Logger("SliceViewer")
         self._peaks_presenter = None
         self.model = model if model else SliceViewerModel(ws)
 
@@ -231,7 +231,8 @@ class SliceViewer(object):
                     limits=limits,
                     transpose=data_view.dimensions.transpose))
         except Exception as exc:
-            self._show_status_message(f"Error exporting ROI: {exc}")
+            self._logger.error(str(exc))
+            self._show_status_message(f"Error exporting ROI")
 
     def export_cut(self, limits, cut_type):
         """Notify that an roi has been selected for export to a workspace
@@ -250,7 +251,8 @@ class SliceViewer(object):
                     transpose=data_view.dimensions.transpose,
                     cut=cut_type))
         except Exception as exc:
-            self._show_status_message(f"Error exporting region cut: {exc}")
+            self._logger.error(str(exc))
+            self._show_status_message(f"Error exporting roi cut")
 
     def export_pixel_cut(self, pos, axis):
         """Notify a single pixel line plot has been requested from the
@@ -269,7 +271,8 @@ class SliceViewer(object):
                     transpose=data_view.dimensions.transpose,
                     axis=axis))
         except Exception as exc:
-            self._show_status_message(f"Error exporting region cut: {exc}")
+            self._logger.error(str(exc))
+            self._show_status_message(f"Error exporting single-pixel cut")
 
     def nonorthogonal_axes(self, state: bool):
         """

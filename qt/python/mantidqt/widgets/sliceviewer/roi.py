@@ -6,12 +6,34 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt.
 #
-from mantid.api import MatrixWorkspace
+from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.simpleapi import (DeleteWorkspace, ExtractSpectra, Rebin, ReplaceSpecialValues,
                               SumSpectra, Transpose)
 import numpy as np
 
 
+def on_except_leave_ads_unchanged(func):
+    """
+    If the decorated function raises and exception the remove any workspaces
+    from from the ADS that were added during the wrapped function call.
+    The exception raised in the wrapper is reraised.
+    """
+
+    def wrapper(*args, **kwargs):
+        ads = AnalysisDataService.Instance()
+        names_before = set(ads.getObjectNames())
+        try:
+            return func(*args, **kwargs)
+        except Exception as exc:
+            added_names = set(ads.getObjectNames()) - names_before
+            for name in added_names:
+                ads.remove(name)
+            raise exc
+
+    return wrapper
+
+
+@on_except_leave_ads_unchanged
 def extract_matrix_cuts_spectra_axis(workspace: MatrixWorkspace,
                                      xmin: float,
                                      xmax: float,
@@ -19,7 +41,7 @@ def extract_matrix_cuts_spectra_axis(workspace: MatrixWorkspace,
                                      ymax: float,
                                      xcut_name: str,
                                      ycut_name: str,
-                                     log_algorithm_calls: bool = False):
+                                     log_algorithm_calls: bool = True):
     """
     Assuming a MatrixWorkspace with vertical spectra axis, extract 1D cuts from the region defined
     by the given parameters
@@ -34,8 +56,8 @@ def extract_matrix_cuts_spectra_axis(workspace: MatrixWorkspace,
     """
     # if the value is half way in a spectrum then include it
     tmp_crop_region = '__tmp_sv_region_extract'
-    roi = extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, tmp_crop_region,
-                                   log_algorithm_calls)
+    roi = _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, tmp_crop_region,
+                                    log_algorithm_calls)
     # perform ycut first so xcut can reuse tmp workspace for rebinning if necessary
     if ycut_name:
         Rebin(
@@ -59,6 +81,7 @@ def extract_matrix_cuts_spectra_axis(workspace: MatrixWorkspace,
         pass
 
 
+@on_except_leave_ads_unchanged
 def extract_matrix_cuts_numeric_axis(workspace: MatrixWorkspace,
                                      xmin: float,
                                      xmax: float,
@@ -66,7 +89,7 @@ def extract_matrix_cuts_numeric_axis(workspace: MatrixWorkspace,
                                      ymax: float,
                                      xcut_name: str,
                                      ycut_name: str,
-                                     log_algorithm_calls: bool = False):
+                                     log_algorithm_calls: bool = True):
     """
     Assuming a MatrixWorkspace with vertical numeric axis, extract 1D cuts from the region defined
     by the given parameters
@@ -119,6 +142,7 @@ def extract_matrix_cuts_numeric_axis(workspace: MatrixWorkspace,
             EnableLogging=log_algorithm_calls)
 
 
+@on_except_leave_ads_unchanged
 def extract_roi_matrix(workspace: MatrixWorkspace,
                        xmin: float,
                        xmax: float,
@@ -126,7 +150,7 @@ def extract_roi_matrix(workspace: MatrixWorkspace,
                        ymax: float,
                        transpose: bool,
                        roi_name: str,
-                       log_algorithm_calls: bool = False):
+                       log_algorithm_calls: bool = True):
     """
     Assuming a MatrixWorkspace extract a 2D region from it.
     :param workspace: A MatrixWorkspace
@@ -140,9 +164,9 @@ def extract_roi_matrix(workspace: MatrixWorkspace,
     """
     yaxis = workspace.getAxis(1)
     if yaxis.isSpectra():
-        extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
+        _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
     elif yaxis.isNumeric():
-        extract_roi_numeric_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
+        _extract_roi_numeric_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
     else:
         raise RuntimeError("Unknown vertical axis type")
 
@@ -150,13 +174,16 @@ def extract_roi_matrix(workspace: MatrixWorkspace,
         Transpose(InputWorkspace=roi_name, OutputWorkspace=roi_name)
 
 
-def extract_roi_spectra_axis(workspace: MatrixWorkspace,
-                             xmin: float,
-                             xmax: float,
-                             ymin: float,
-                             ymax: float,
-                             roi_name: str,
-                             log_algorithm_calls: bool = False):
+# private api
+
+
+def _extract_roi_spectra_axis(workspace: MatrixWorkspace,
+                              xmin: float,
+                              xmax: float,
+                              ymin: float,
+                              ymax: float,
+                              roi_name: str,
+                              log_algorithm_calls: bool = True):
     """
     Assuming a MatrixWorkspace with vertical spectra axis, extract 1D cuts from the region defined
     by the given parameters
@@ -173,13 +200,13 @@ def extract_roi_spectra_axis(workspace: MatrixWorkspace,
     return _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
 
 
-def extract_roi_numeric_axis(workspace: MatrixWorkspace,
-                             xmin: float,
-                             xmax: float,
-                             ymin: float,
-                             ymax: float,
-                             roi_name: str,
-                             log_algorithm_calls: bool = False):
+def _extract_roi_numeric_axis(workspace: MatrixWorkspace,
+                              xmin: float,
+                              xmax: float,
+                              ymin: float,
+                              ymax: float,
+                              roi_name: str,
+                              log_algorithm_calls: bool = True):
     """
     Assuming a MatrixWorkspace with vertical spectra axis, extract 1D cuts from the region defined
     by the given parameters
@@ -196,16 +223,13 @@ def extract_roi_numeric_axis(workspace: MatrixWorkspace,
     return _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
 
 
-# private api
-
-
 def _extract_region(workspace: MatrixWorkspace,
                     xmin: float,
                     xmax: float,
                     indexmin: int,
                     indexmax: int,
                     name: str,
-                    log_algorithm_calls: bool = False):
+                    log_algorithm_calls: bool = True):
     """
     Assuming a MatrixWorkspace crop a region with the given parameters
     :param workspace: A MatrixWorkspace with a vertical SpectraAxis

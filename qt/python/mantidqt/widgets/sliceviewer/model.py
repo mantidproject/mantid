@@ -20,7 +20,7 @@ from .transform import NonOrthogonalTransform
 
 # Constants
 PROJ_MATRIX_LOG_NAME = "W_MATRIX"
-LOG_ALGORITHM_CALLS = False
+LOG_GET_WS_MDE_ALGORITHM_CALLS = False
 
 
 class WS_TYPE(Enum):
@@ -160,7 +160,7 @@ class SliceViewerModel:
         """
         workspace = self._get_ws()
         dim_limits = _dimension_limits(workspace, slicepoint, limits)
-        params = {'EnableLogging': LOG_ALGORITHM_CALLS}
+        params = {'EnableLogging': LOG_GET_WS_MDE_ALGORITHM_CALLS}
         for n in range(workspace.getNumDims()):
             dimension = workspace.getDimension(n)
             slice_pt = slicepoint[n]
@@ -353,7 +353,6 @@ class SliceViewerModel:
         dim_limits = _dimension_limits(workspace, slicepoint, limits)
         # Construct paramters to integrate everything first and overrid per cut
         params = {f'P{n+1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
-        params['EnableLogging'] = LOG_ALGORITHM_CALLS
 
         xdim_min, xdim_max = dim_limits[xindex]
         ydim_min, ydim_max = dim_limits[yindex]
@@ -386,7 +385,6 @@ class SliceViewerModel:
         dim_limits = _dimension_limits(workspace, slicepoint, limits)
         # Construct paramters to integrate everything first and overrid per cut
         params = {f'P{n+1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
-        params['EnableLogging'] = LOG_ALGORITHM_CALLS
         xindex, yindex = _display_indices(slicepoint, transpose)
 
         xcut_name, ycut_name, help_msg = self._cut_names(cut)
@@ -428,10 +426,10 @@ class SliceViewerModel:
 
         if yaxis.isSpectra():
             extract_matrix_cuts_spectra_axis(workspace, xmin, xmax, ymin, ymax, xcut_name,
-                                             ycut_name, LOG_ALGORITHM_CALLS)
+                                             ycut_name)
         elif yaxis.isNumeric():
             extract_matrix_cuts_numeric_axis(workspace, xmin, xmax, ymin, ymax, xcut_name,
-                                             ycut_name, LOG_ALGORITHM_CALLS)
+                                             ycut_name)
         else:
             help_msg = 'Unknown Y axis type. Unable to perform cuts'
 
@@ -449,8 +447,7 @@ class SliceViewerModel:
         if transpose:
             # swap back to model order
             limits = limits[1], limits[0]
-        extract_roi_matrix(self._get_ws(), *limits[0], *limits[1], transpose, self._roi_name,
-                           LOG_ALGORITHM_CALLS)
+        extract_roi_matrix(self._get_ws(), *limits[0], *limits[1], transpose, self._roi_name)
         return f'ROI created: {self._roi_name}'
 
     def export_pixel_cut_to_workspace_md(self, slicepoint, bin_params, pos: tuple, transpose: bool,
@@ -492,11 +489,9 @@ class SliceViewerModel:
         if transpose:
             xcut_name, ycut_name = ycut_name, xcut_name
         if xcut_name:
-            extract_roi_matrix(workspace, None, None, ypos, ypos, False, xcut_name,
-                               LOG_ALGORITHM_CALLS)
+            extract_roi_matrix(workspace, None, None, ypos, ypos, False, xcut_name)
         if ycut_name:
-            extract_roi_matrix(workspace, xpos, xpos, None, None, True, ycut_name,
-                               LOG_ALGORITHM_CALLS)
+            extract_roi_matrix(workspace, xpos, xpos, None, None, True, ycut_name)
 
         return help_msg
 
@@ -542,7 +537,7 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     ndims = workspace.getNumDims()
     ws_basis = np.eye(ndims)
     output_extents, output_bins = [], []
-    params = {'AxisAligned': False, 'EnableLogging': LOG_ALGORITHM_CALLS}
+    params = {'AxisAligned': False}
     for n in range(ndims):
         dimension = workspace.getDimension(n)
         basis_vec_n = _to_str(ws_basis[:, n])
@@ -618,8 +613,7 @@ def _inplace_transposemd(workspace, axes):
     TransposeMD(
         InputWorkspace=workspace,
         OutputWorkspace=workspace,
-        Axes=axes,
-        EnableLogging=LOG_ALGORITHM_CALLS)
+        Axes=axes)
 
 
 def _to_str(seq: Sequence):
