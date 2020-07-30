@@ -44,31 +44,24 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
                                                                             self._options_presenter.get_errors())
         if not hold_on:
-            # Remove data which is currently plotted and not in the new workspace_plot_info
-            workspaces_info_to_remove = [plot_info for plot_info in self._view.plotted_workspace_information
-                                         if plot_info not in workspace_plot_info]
-            self._view.remove_workspace_info_from_plot(workspaces_info_to_remove)
+            self._view.clear_all_workspaces_from_plot()
 
         # Add workspace info which is currently not plotted
-        workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info
-                                 not in self._view.plotted_workspace_information]
+        workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info]
         self._view.add_workspaces_to_plot(workspace_info_to_add)
         self._set_axes_limits_and_titles(autoscale)
 
     def remove_workspace_names_from_plot(self, workspace_names: List[str]):
         """Removes the input workspace names from the plot"""
-        for workspace_name in workspace_names:
-            try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except RuntimeError:
-                continue
-            self._view.remove_workspace_from_plot(workspace)
-        self._view.redraw_figure()
+        workspace_plot_info = self._view.plotted_workspace_information
+        workspace_plot_info = [plot_info for plot_info in workspace_plot_info if plot_info.workspace_name not in workspace_names]
+        self._view.clear_all_workspaces_from_plot()
+        self._view.add_workspaces_to_plot(workspace_plot_info)
+        self._set_axes_limits_and_titles(False)
 
     def remove_workspace_from_plot(self, workspace):
         """Removes all references to the input workspace from the plot"""
-        self._view.remove_workspace_from_plot(workspace)
-        self._view.redraw_figure()
+        self.remove_workspace_names_from_plot([workspace])
 
     def replace_workspace_in_plot(self, workspace):
         """Replace specified workspace in the plot with a new and presumably updated instance"""
