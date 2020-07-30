@@ -104,9 +104,9 @@ void LoadILLSANS::init() {
                   "The name to use for the output workspace");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
-                  "The wavelength of the experiment. Only for monochromatic "
-                  "data. Will override the nexus' value if there is one.");
+  declareProperty("Wavelength", 0.0, mustBePositive,
+                  "The wavelength of the experiment. Used only for D16. Will "
+                  "override the nexus' value if there is one.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -255,14 +255,9 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   }
   createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
+
   size_t nextIndex;
-  if (m_isD16Omega) {
-    nextIndex =
-        loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
-  } else {
-    nextIndex =
-        loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
-  }
+  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
   nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
     m_resMode = "low";
@@ -699,8 +694,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     runDetails.addProperty<std::string>("tof_mode", "TOF");
   }
 
-  double wavelength = getProperty("Wavelength");
-  if (wavelength == EMPTY_DBL()) {
+  double wavelength;
+  if (getPointerToProperty("Wavelength")->isDefault()) {
     if (m_instrumentName == "D16") {
       wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
     } else {
@@ -708,6 +703,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     }
     g_log.debug() << "Wavelength found in the nexus file: " << wavelength
                   << '\n';
+  } else {
+    wavelength = getProperty("Wavelength");
   }
 
   // round the wavelength to avoid unnecessary rebinning during merge runs
@@ -732,8 +729,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
       } catch (const std::runtime_error &) {
         if (m_instrumentName == "D16")
           wavelengthRes = 1;
-        g_log.notice() << "Could not find wavelength resolution, assuming "
-                       << wavelengthRes << "%.\n";
+        g_log.information() << "Could not find wavelength resolution, assuming "
+                            << wavelengthRes << "%.\n";
       }
     }
     // round also the wavelength res to avoid unnecessary rebinning during

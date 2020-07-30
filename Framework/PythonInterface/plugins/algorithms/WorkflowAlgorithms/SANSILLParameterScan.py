@@ -30,6 +30,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
     observable = None
     pixel_y_min = None
     pixel_y_max = None
+    wavelength = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -45,13 +46,9 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        message = "Wrong number of {0} runs: {1}. Please provide none or exactly one."
-        sens_dim = self.getPropertyValue('SensitivityMap').count(',')
         if not (self.getPropertyValue('OutputJoinedWorkspace') or self.getPropertyValue("OutputWorkspace")):
             issues["OutputJoinedWorkspace"] = "Please provide either OutputJoinedWorkspace, OutputWorkspace or both."
             issues["OutputWorkspace"] = "Please provide either OutputJoinedWorkspace, OutputWorkspace or both."
-        if sens_dim != 0:
-            issues['SensitivityMap'] = message.format("sensivity map", sens_dim)
         if self.getPropertyValue('PixelYmin') > self.getPropertyValue("PixelYmax"):
             issues["PixelYMin"] = "YMin needs to be lesser than YMax"
             issues["PixelYMax"] = "YMax needs to be greater than YMin"
@@ -59,8 +56,8 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
     def setUp(self):
         self.sample = self.getPropertyValue('SampleRuns')
-        self.absorber = self.getPropertyValue('AbsorberRuns').replace('+', ',')
-        self.container = self.getPropertyValue('ContainerRuns').replace('+', ',')
+        self.absorber = self.getPropertyValue('AbsorberRuns').replace(',', '+')
+        self.container = self.getPropertyValue('ContainerRuns').replace(',', '+')
         self.sensitivity = self.getPropertyValue('SensitivityMap')
         self.default_mask = self.getPropertyValue('DefaultMaskFile')
         self.normalise = self.getPropertyValue('NormaliseBy')
@@ -69,6 +66,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.observable = self.getPropertyValue('Observable')
         self.pixel_y_min = self.getProperty('PixelYMin').value
         self.pixel_y_max = self.getProperty('PixelYMax').value
+        self.wavelength = self.getProperty('Wavelength').value
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
     def checkPixelY(self, height):
@@ -88,8 +86,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         self.declareProperty(MultipleFileProperty('SampleRuns',
                                                   action=FileAction.Load,
-                                                  extensions=['nxs'],
-                                                  allow_empty=False),
+                                                  extensions=['nxs']),
                              doc='Sample run(s).')
 
         self.declareProperty(MultipleFileProperty('AbsorberRuns',
@@ -122,6 +119,9 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.declareProperty('PixelYMax', 180, validator=IntBoundedValidator(lower=0),
                              doc='Maximal y-index taken in the integration')
 
+        self.declareProperty('Wavelength', 0., validator=FloatBoundedValidator(lower=0.),
+                             doc='Wavelength of the experiment. Will try to read Nexus files if not provided.')
+
         self.setPropertyGroup('SensitivityMap', 'Options')
         self.setPropertyGroup('DefaultMaskFile', 'Options')
         self.setPropertyGroup('NormaliseBy', 'Options')
@@ -134,11 +134,11 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.setUp()
 
         _, load_ws_name = needs_loading(self.sample, "Load")
-        Load(Filename=self.sample, OutputWorkspace=load_ws_name)
-        ConjoinXRuns(InputWorkspaces=load_ws_name,
+        LoadAndMerge(Filename=self.sample, OutputWorkspace=load_ws_name + "_grouped", LoaderOptions={"Wavelength": self.wavelength})
+        ConjoinXRuns(InputWorkspaces=load_ws_name + "_grouped",
                      OutputWorkspace=load_ws_name + "_joined",
                      SampleLogAsXAxis=self.observable)
-        mtd[load_ws_name].delete()
+        mtd[load_ws_name + '_grouped'].delete()
 
         sort_x_axis_output = load_ws_name + '_sorted' if not self.output_joined else self.output_joined
         SortXAxis(InputWorkspace=load_ws_name + "_joined", OutputWorkspace=sort_x_axis_output)
