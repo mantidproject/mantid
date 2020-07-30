@@ -41,10 +41,18 @@ class SANSILLIntegrationTest(unittest.TestCase):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, MatrixWorkspace))
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "Degrees")
+        self.assertEqual(ws.getAxis(0).getUnit().caption(), "Scattering Angle")
+        self.assertEqual(ws.getAxis(1).getUnit().unitID(), "Degrees")
+        self.assertEqual(ws.getAxis(1).getUnit().caption(), "Omega.value")
+        self.assertEqual(ws.getAxis(0).getValue(), 2.5, 0.001)
+        self.assertEqual(ws.getAxis(1).getValue(), 2.5, 0.001)
         self.assertEqual(ws.getNumberHistograms(), spectra)
         self.assertTrue(ws.getInstrument())
         self.assertTrue(ws.getRun())
         self.assertTrue(ws.getHistory())
+        self.assertTrue(ws.blocksize(), 320)
+        self.assertTrue(not ws.isHistogramData())
+        self.assertTrue(not ws.isDistribution())
 
 
 if __name__ == '__main__':
