@@ -102,6 +102,12 @@ class ColorbarWidget(QWidget):
         self.layout.addLayout(self.norm_layout)
         self.layout.addWidget(self.autoscale)
 
+        self.set_default_scale()
+
+    def closeEvent(self, event):
+        ConfigService.saveConfig(ConfigService.getUserFilename())
+        super().closeEvent(event)
+
     def set_mappable(self, mappable):
         """
         When a new plot is created this method should be called with the new mappable
@@ -161,14 +167,19 @@ class ColorbarWidget(QWidget):
         Called when a different normalization is selected
         """
         idx = self.norm.currentIndex()
+        scale = NORM_OPTS[idx]
         if NORM_OPTS[idx] == 'Power':
             self.powerscale.show()
             self.powerscale_label.show()
+            if self.powerscale.hasAcceptableInput():
+                scale += "," + self.powerscale.text()
         else:
             self.powerscale.hide()
             self.powerscale_label.hide()
         self.colorbar.mappable.set_norm(self.get_norm())
         self.set_mappable(self.colorbar.mappable)
+
+        ConfigService.setString("sliceviewer.colorbar.scale", scale)
 
     def get_norm(self):
         """
@@ -258,3 +269,23 @@ class ColorbarWidget(QWidget):
         self.colorbar.draw_all()
         self.canvas.draw_idle()
         self.colorbarChanged.emit()
+
+    def set_default_scale(self):
+        scale_setting = ConfigService.getString("sliceviewer.colorbar.scale")
+        scale_setting = scale_setting.split(",")
+        if scale_setting and scale_setting[0] in NORM_OPTS:
+            scale = scale_setting[0]
+        else:
+            scale = 'Linear'
+
+        self.norm.blockSignals(True)
+        self.norm.setCurrentText(scale)
+        self.norm.blockSignals(False)
+
+        if scale == 'Power':
+            self.powerscale.show()
+            self.powerscale_label.show()
+            if len(scale_setting) > 1:
+                self.powerscale.blockSignals(True)
+                self.powerscale.setText(scale_setting[1])
+                self.powerscale.blockSignals(False)

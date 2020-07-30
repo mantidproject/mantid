@@ -566,5 +566,6 @@ class SliceViewerView(QWidget):
 
     # event handlers
     def closeEvent(self, event):
+        self._data_view.colorbar.closeEvent(event)
         self.deleteLater()
         super().closeEvent(event)

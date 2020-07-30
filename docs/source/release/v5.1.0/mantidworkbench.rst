@@ -94,6 +94,7 @@ Improvements
 - Workbench will now spot if it is about to create the settings window off the available screen, and will move it so it is all visible. This is important as it is a modal dialog and could freeze the application in an unrecoverable way before.
 - Sliceviewer no longer lists the reversed colourmaps along with the regular, instead they are accessed with a reverse checkbox.
 - Sliceviewer colourmap uses the default colourmap from the settings.
+- Sliceviewer scale remains set when reopened
 - Code completions are now loaded when the code editor is first changed.
 
 Bugfixes
