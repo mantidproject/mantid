@@ -164,6 +164,9 @@ std::vector<double> loadTimeZeroListFromNexusFile(const NeXus::NXEntry &entry,
     double timeZero =
         static_cast<double>(det_class.getFloat(NeXusEntry::TIMEZERO));
     timeZeroVector = std::vector<double>(numSpectra, timeZero);
+  } else if (timeZeroVector.size() != numSpectra) {
+    throw std::runtime_error("Time zero list size does not match number of "
+                             "spectra, check Nexus file.");
   }
   // We assume that this spectrum list increases monotonically
   return timeZeroVector;
