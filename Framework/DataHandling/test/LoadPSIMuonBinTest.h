@@ -93,12 +93,9 @@ public:
     TS_ASSERT_EQUALS(ws->e(0).size(), 10240);
 
     // Check that each spectra is shifted by the correct time zero
-    TS_ASSERT_DELTA(ws->x(0)[0], -0.1582, 0.001);
-    TS_ASSERT_DELTA(ws->x(1)[0], -0.1553, 0.001);
-    TS_ASSERT_DELTA(ws->x(2)[0], -0.1592, 0.001);
-    TS_ASSERT_DELTA(ws->x(3)[0], -0.1602, 0.001);
+    TS_ASSERT_DELTA(ws->x(0)[0], -0.160, 0.001);
 
-    TS_ASSERT_DELTA(ws->x(0)[10240], 9.84, 0.001);
+    TS_ASSERT_DELTA(ws->x(0)[10240], 9.84, 0.01);
     TS_ASSERT_EQUALS(ws->y(0)[0], 24);
     TS_ASSERT_EQUALS(ws->y(0)[10239], 44);
     TS_ASSERT_EQUALS(ws->e(0)[0], std::sqrt(ws->y(0)[0]));

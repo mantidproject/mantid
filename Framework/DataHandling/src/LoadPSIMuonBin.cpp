@@ -237,9 +237,8 @@ void LoadPSIMuonBin::exec() {
   if (correctTime) {
     for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
       auto &xData = outputWorkspace->mutableX(specNum);
-      auto spectraTimeZero = correctedTimeZeroList[specNum];
       for (auto &xValue : xData) {
-        xValue -= spectraTimeZero;
+        xValue -= absTimeZero;
       }
     }
   }
