@@ -145,15 +145,9 @@ configure_file(
 # ##############################################################################
 set(PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging)
 # build version
-if(WITH_PYTHON3)
-  set(MANTIDPYTHON_PREAMBLE
-      "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
-  )
-else()
-  set(MANTIDPYTHON_PREAMBLE
-      "call %~dp0..\\..\\thirdpartypaths.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
-  )
-endif()
+set(MANTIDPYTHON_PREAMBLE
+    "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
+)
 
 if(MAKE_VATES)
   set(PARAVIEW_PYTHON_PATHS
