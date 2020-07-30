@@ -27,6 +27,9 @@ public:
   double longitudeAt(const size_t column) const;
   std::array<size_t, 4> nearestNeighbourIndices(const double latitude,
                                                 const double longitude) const;
+  std::vector<size_t> nearestNeighbourIndices(const double latitude,
+                                              const double longitude,
+                                              const int distance) const;
   size_t numberColumns() const;
   size_t numberRows() const;
 

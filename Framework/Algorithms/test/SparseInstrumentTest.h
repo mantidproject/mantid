@@ -231,6 +231,45 @@ public:
     }
   }
 
+  void test_bilinearInterpolateFromDetectorGrid() {
+    using namespace WorkspaceCreationHelper;
+    auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 7);
+    const size_t sparseRows = 3;
+    const size_t sparseCols = 6;
+    auto grid = createDetectorGridDefinition(*ws, sparseRows, sparseCols);
+    const size_t wavelengths = 3;
+    auto sparseWS = createSparseWS(*ws, *grid, wavelengths);
+    for (size_t i = 0; i < sparseWS->getNumberHistograms(); ++i) {
+      auto &ys = sparseWS->mutableY(i);
+      auto &es = sparseWS->mutableE(i);
+      for (size_t j = 0; j < ys.size(); ++j) {
+        ys[j] = static_cast<double>(i);
+        es[j] = std::sqrt(ys[j]);
+      }
+    }
+    double lat = grid->latitudeAt(0);
+    double lon = grid->longitudeAt(0);
+    auto indices = grid->nearestNeighbourIndices(lat, lon);
+    auto h = bilinearInterpolateFromDetectorGrid(lat, lon, *sparseWS, indices);
+    TS_ASSERT_EQUALS(h.size(), wavelengths)
+    for (size_t i = 0; i < h.size(); ++i) {
+      TS_ASSERT_EQUALS(h.y()[i], 0.0)
+      TS_ASSERT_EQUALS(h.e()[i], 0.0)
+    }
+    lat = (grid->latitudeAt(2) + grid->latitudeAt(1)) / 2.0;
+    lon = (grid->longitudeAt(3) + grid->longitudeAt(2)) / 2.0;
+    indices = grid->nearestNeighbourIndices(lat, lon);
+    double val =
+        static_cast<double>(indices[0] + indices[1] + indices[2] + indices[3]) /
+        4.0;
+    h = bilinearInterpolateFromDetectorGrid(lat, lon, *sparseWS, indices);
+    TS_ASSERT_EQUALS(h.size(), wavelengths)
+    for (size_t i = 0; i < h.size(); ++i) {
+      TS_ASSERT_DELTA(h.y()[i], val, 1e-7)
+      TS_ASSERT_EQUALS(h.e()[i], 0.0)
+    }
+  }
+
   void test_inverseDistanceWeights() {
     std::array<double, 4> ds{{0.3, 0.3, 0.0, 0.3}};
     auto weights = inverseDistanceWeights(ds);

@@ -351,9 +351,50 @@ interpolateFromDetectorGrid(const double lat, const double lon,
   return h;
 }
 
-HistogramData::Histogram bilinearInterpolate(const double lat, const double lon,
-                                             const API::MatrixWorkspace &ws) {
+HistogramData::Histogram
+bilinearInterpolateFromDetectorGrid(const double lat, const double lon,
+                                    const API::MatrixWorkspace &ws,
+                                    const std::array<size_t, 4> &indices) {
+  const auto &spectrumInfo = ws.spectrumInfo();
+  const auto refFrame = ws.getInstrument()->getReferenceFrame();
+  std::array<std::pair<double, double>, 4> detLatsLongs;
+  for (size_t i = 0; i < 4; i++) {
+    std::tie(detLatsLongs[i].first, detLatsLongs[i].second) =
+        geographicalAngles(spectrumInfo.position(indices[i]), *refFrame);
+  }
+  assert(std::abs(detLatsLongs[0].second - detLatsLongs[1].second) <
+         std::numeric_limits<double>::epsilon());
+  assert(std::abs(detLatsLongs[2].second - detLatsLongs[3].second) <
+         std::numeric_limits<double>::epsilon());
+  assert(std::abs(detLatsLongs[0].first - detLatsLongs[2].first) <
+         std::numeric_limits<double>::epsilon());
+  assert(std::abs(detLatsLongs[1].first - detLatsLongs[3].first) <
+         std::numeric_limits<double>::epsilon());
+
+  auto latLow = detLatsLongs[0].first;
+  auto latHigh = detLatsLongs[1].first;
+  auto longLow = detLatsLongs[0].second;
+  auto longHigh = detLatsLongs[2].second;
+
+  // interpolate across different longitudes
+  auto lat1 = ((longHigh - lon) * ws.y(indices[0]) +
+               (lon - longLow) * ws.y(indices[2])) /
+              (longHigh - longLow);
+  auto lat2 = ((longHigh - lon) * ws.y(indices[1]) +
+               (lon - longLow) * ws.y(indices[3])) /
+              (longHigh - longLow);
+  // interpolate across different latitudes
+  auto interpY =
+      ((latHigh - lat) * lat1 + (lat - latLow) * lat2) / (latHigh - latLow);
+
+  // calculate interpolation errors
+  // 2nd derivative in longitude
+
+
+  // 2nd derivative in latitude
+
   auto h = ws.histogram(0);
+  h.mutableY() = interpY;
   return h;
 }
 

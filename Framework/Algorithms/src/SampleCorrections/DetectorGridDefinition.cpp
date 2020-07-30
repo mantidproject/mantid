@@ -94,6 +94,32 @@ DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
   return is;
 }
 
+/** Return the indices to detector surrounding the given point.
+ *  @param latitude Latitude of a point.
+ *  @param longitude Longitude of a point.
+ *  @return Indices to 16 nearby detectors.
+ */
+std::vector<size_t> DetectorGridDefinition::nearestNeighbourIndices(
+    const double latitude, const double longitude, const int distance) const {
+  auto row = static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
+  // Check for points at the edges or outside the grid.
+  if (row == m_latitudePoints - 1) {
+    --row;
+  }
+  auto col =
+      static_cast<size_t>((longitude - m_minLongitude) / m_longitudeStep);
+  if (col == m_longitudePoints - 1) {
+    --col;
+  }
+  std::vector<size_t> is(distance * distance);
+  for (auto i = 0; i < distance; i++) {
+    for (auto j = 0; j < distance; j++) {
+      is.emplace_back((col - 1 + i) * m_latitudePoints + row - 1 + j);
+    }
+  }
+  return is;
+}
+
 /** Return the number of columns in the grid.
  *  @return Number of columns.
  */
