@@ -135,15 +135,9 @@ class _TomlV1ParserImpl(object):
         # The legacy user file would accept missing spec nums, we want to lock this down in the
         # TOML parser without affecting backwards compatibility by doing this check upstream
         norm_monitor = self._get_val("norm_monitor", inst_config_dict)
-        if not norm_monitor:
-            raise ValueError("The normalisation monitor spectrum is missing from [instrument.configuration]")
-
         trans_monitor = self._get_val("trans_monitor", inst_config_dict)
-        if not trans_monitor:
-            raise ValueError("The transmission monitor spectrum is missing from [instrument.configuration]")
 
         self.calculate_transmission.incident_monitor = norm_monitor
-        self.normalize_to_monitor.incident_monitor = norm_monitor
         self.calculate_transmission.transmission_monitor = trans_monitor
 
         self.convert_to_q.q_resolution_collimation_length = self._get_val("collimation_length", inst_config_dict)
@@ -167,8 +161,9 @@ class _TomlV1ParserImpl(object):
                 self.move.detectors[det_type.value].sample_centre_pos1 = values["x"]
                 self.move.detectors[det_type.value].sample_centre_pos2 = values["y"]
 
-        update_translations(DetectorType.HAB, self._get_val("front_centre", det_config_dict))
         update_translations(DetectorType.LAB, self._get_val("rear_centre", det_config_dict))
+        if DetectorType.HAB.value in self.move.detectors:
+            update_translations(DetectorType.HAB, self._get_val("front_centre", det_config_dict))
 
     def _parse_detector(self):
         detector_dict = self._get_val("detector")
@@ -200,13 +195,13 @@ class _TomlV1ParserImpl(object):
 
         position_dict = self._get_val("position", calibration_dict)
         lab_move = self.move.detectors[DetectorType.LAB.value]
-        hab_move = self.move.detectors[DetectorType.HAB.value]
+        # Some detectors do not have HAB
+        hab_move = self.move.detectors.get(DetectorType.HAB.value, None)
 
         for toml_suffix, attr_name in name_attr_pairs.items():
-            assert hasattr(lab_move, attr_name)
-            assert hasattr(hab_move, attr_name)
             setattr(lab_move, attr_name, self._get_val("rear" + toml_suffix, position_dict, 0.0))
-            setattr(hab_move, attr_name, self._get_val("front" + toml_suffix, position_dict, 0.0))
+            if hab_move:
+                setattr(hab_move, attr_name, self._get_val("front" + toml_suffix, position_dict, 0.0))
 
     def _parse_binning(self):
         binning_dict = self._get_val(["binning"])
@@ -353,11 +348,11 @@ class _TomlV1ParserImpl(object):
             raise KeyError(f"{function} is an unknown fit type")
 
         set_val_on_both("fit_type", fit_type)
+        parameters = self._get_val("parameters", fit_dict)
+        set_val_on_both("wavelength_low", self._get_val("lambda_min", parameters))
+        set_val_on_both("wavelength_high", self._get_val("lambda_max", parameters))
         if fit_type is FitType.POLYNOMIAL:
-            parameters = self._get_val("parameters", fit_dict)
             set_val_on_both("polynomial_order", self._get_val("polynomial_order", fit_dict))
-            set_val_on_both("wavelength_low", self._get_val("lambda_min", parameters))
-            set_val_on_both("wavelength_high", self._get_val("lambda_max", parameters))
 
     def _parse_normalisation(self):
         normalisation_dict = self._get_val("normalisation")
@@ -377,6 +372,7 @@ class _TomlV1ParserImpl(object):
         self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
         self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
         self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+        self.normalize_to_monitor.incident_monitor = monitor_spec_num
 
     def _parse_spatial_masks(self):
         mask_dict = self._get_val("mask")
@@ -419,6 +415,17 @@ class _TomlV1ParserImpl(object):
         mask_dict = self._get_val("mask")
         self.mask.beam_stop_arm_angle = self._get_val(["beamstop_shadow", "angle"], mask_dict)
         self.mask.beam_stop_arm_width = self._get_val(["beamstop_shadow", "width"], mask_dict)
+
+        prompt_peak_vals = self._get_val("prompt_peak", mask_dict)
+        self.calculate_transmission.prompt_peak_correction_enabled = bool(prompt_peak_vals)
+        self.normalize_to_monitor.prompt_peak_correction_enabled = bool(prompt_peak_vals)
+        if prompt_peak_vals:
+            pp_min = self._get_val("start", prompt_peak_vals)
+            pp_max = self._get_val("stop", prompt_peak_vals)
+            self.calculate_transmission.prompt_peak_correction_min = pp_min
+            self.calculate_transmission.prompt_peak_correction_max = pp_max
+            self.normalize_to_monitor.prompt_peak_correction_min = pp_min
+            self.normalize_to_monitor.prompt_peak_correction_max = pp_max
 
         mask_files = self._get_val("mask_files", mask_dict)
         if mask_files:

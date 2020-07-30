@@ -78,19 +78,6 @@ class TomlV1ParserTest(unittest.TestCase):
 
         self._loop_over_supported_keys(supported_keys=supported_keys, top_level_keys=["instrument", "configuration"])
 
-    def test_missing_monitor_num_throws(self):
-        top_level_dict = {"instrument": {"configuration": {"norm_monitor": None,
-                                                           "trans_monitor": 123}}}
-
-        with self.assertRaises(ValueError):
-            self._setup_parser(dict_vals=top_level_dict)
-
-        top_level_dict["instrument"]["configuration"]["norm_monitor"] = 123
-        top_level_dict["instrument"]["configuration"]["trans_monitor"] = None
-
-        with self.assertRaises(ValueError):
-            self._setup_parser(dict_vals=top_level_dict)
-
     def test_detector_configuration_parsed(self):
         supported_keys = [
             ("rear_scale", lambda x: x.get_state_scale().scale),
@@ -405,12 +392,14 @@ class TomlV1ParserTest(unittest.TestCase):
 
     def test_parse_mask(self):
         top_level_dict = {"mask": {"beamstop_shadow": {},
+                                   "prompt_peak" : {},
                                    "mask_pixels": [],
                                    "mask_files": [],
                                    "time": {"tof": []}},
                                    "phi": {}}
 
         top_level_dict["mask"]["beamstop_shadow"] = {"width": 10, "angle": 180}
+        top_level_dict["mask"]["prompt_peak"] = {"start": 101, "stop": 102}
 
         mask_files_mock = [mock.NonCallableMock()]
         mask_pixels_expected = [1, 2, 4, 17000]  # 17000 is in HAB on LOQ
@@ -425,7 +414,8 @@ class TomlV1ParserTest(unittest.TestCase):
         top_level_dict["mask"]["phi"] = {"mirror": False,
                                          "start": -50, "stop": 50}
 
-        masks = self._setup_parser(top_level_dict).get_state_mask()
+        parser_result = self._setup_parser(top_level_dict)
+        masks = parser_result.get_state_mask()
 
         self.assertIsInstance(masks, StateMask)
         self.assertEqual(180, masks.beam_stop_arm_angle)
@@ -441,6 +431,17 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(False, masks.use_mask_phi_mirror)
         self.assertEqual(-50, masks.phi_min)
         self.assertEqual(50, masks.phi_max)
+
+        # TODO split below into own test
+        transmission_state = parser_result.get_state_calculate_transmission()
+        self.assertEqual(101, transmission_state.prompt_peak_correction_min)
+        self.assertEqual(102, transmission_state.prompt_peak_correction_max)
+        self.assertTrue(transmission_state.prompt_peak_correction_enabled)
+
+        norm_state = parser_result.get_state_normalize_to_monitor()
+        self.assertEqual(101, norm_state.prompt_peak_correction_min)
+        self.assertEqual(102, norm_state.prompt_peak_correction_max)
+        self.assertTrue(norm_state.prompt_peak_correction_enabled)
 
 
 if __name__ == '__main__':

@@ -60,6 +60,16 @@ Are combined into the following when writing the TOML file:
         stop = 0.1
         type = "Lin"
 
+Tips for converting
+-------------------
+
+For converting existing files I recommend the following process:
+
+- Copy your existing user file
+- Remove any commented out lines (starting with ``!``)
+- Go line by line with this guide adding to a **blank** TOML file
+- Delete each line from the copied user file as it's converted
+
 BACK/MON/TIMES
 --------------
 
@@ -146,24 +156,7 @@ FIT/CENTRE x y
 ---------------
 
 **Replacement**
-
-..  code-block:: guess 
-
-    [normalization]
-    TODO
-
-**Existing Example**
-
-..  code-block:: none
-
-    FIT/CENTRE 19900 20500
-
-**Existing Replacement**
-
-..  code-block:: guess 
-
-    [normalization]
-    TODO
+Unsupported
 
 FIT/MID
 -------
@@ -174,12 +167,16 @@ Unsupported
 FIT/MONITOR x y 
 ---------------
 
+*Note:* This was only enabled for LOQ in source code, so
+if you are not converting a LOQ file this should not be copied
+as it will produce different results
+
 **Replacement**
 
 ..  code-block:: guess 
 
-    [normalization]
-    TODO
+  [mask]
+    prompt_peak = {start = x, stop = y}
 
 **Existing Example**
 
@@ -191,8 +188,8 @@ FIT/MONITOR x y
 
 ..  code-block:: guess 
 
-    [normalization]
-    TODO
+  [mask]
+    prompt_peak = {start = 19900.0, stop = 20500.0}
 
 
 FIT/TRANS/LIN x y
@@ -226,6 +223,30 @@ FIT/TRANS/LIN x y
         enabled = true
         parameters = {lambda_min = 3.0, lambda_max = 11.0}
         function = "Linear"
+
+L/EVENTSTIME str
+----------------
+
+**Replacement**
+
+..  code-block:: guess 
+
+  [reduction.events] 
+    binning = "str"
+
+**Existing Example**
+
+..  code-block:: none
+
+    L/EVENTSTIME 7000.0,500.0,60000.0
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+  [reduction.events]
+    # A negative step indicates Log
+    binning = "7000.0,500.0,60000.0"
 
 
 L/PHI [/NOMIRROR] x y
@@ -415,6 +436,57 @@ L/WAV min max step [/LIN]
       #type can only be "Lin", "Log"
       wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
 
+MASKFILE str
+------------
+
+**Replacement**
+
+..  code-block:: guess 
+  
+    [mask]
+    mask_files = ["a", "b", "c"]
+
+**Existing Example**
+
+..  code-block:: none
+
+    MASKFILE=a.xml,b.xml,c.xml
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+    [mask]
+    mask_files = ["a.xml", "b.xml", "c.xml"]
+
+
+MASK h
+------
+
+**Replacement**
+
+..  code-block:: guess 
+  
+    [mask]
+      [mask.spatial.rear]  # Or front
+        detector_rows = [h1, h2, h3, ...hn]
+
+**Existing Example**
+
+..  code-block:: none
+
+    mask/rear h100
+    mask/rear h200
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+    [mask]
+      [mask.spatial.rear]
+        # Masks horizontal 100 and 200
+        detector_rows = [100, 200]
+
 MASK hx>hy
 ----------
 
@@ -443,6 +515,33 @@ MASK hx>hy
         detector_row_ranges = [[126, 127], [130, 135]]
 
 
+MASK v
+------
+
+**Replacement**
+
+..  code-block:: guess 
+  
+    [mask]
+      [mask.spatial.rear]  # Or front
+        detector_rows = [v1, v2, v3, ...vn]
+
+**Existing Example**
+
+..  code-block:: none
+
+    mask/rear v100
+    mask/rear v200
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+    [mask]
+      [mask.spatial.rear]
+        # Masks vertical 100 and 200
+        detector_columns = [100, 200]
+
 MASK vx>vy
 ----------
 
@@ -469,6 +568,30 @@ MASK vx>vy
         # Masks vertical 126 AND 127
         # Also includes 130-135 to show multiple can be masked
         detector_column_ranges = [[126, 127], [130, 135]]
+
+MASK Sn
+-------
+
+**Replacement**
+
+..  code-block:: guess 
+  
+    [mask]
+      mask_pixels = [n1, n2, ...n]
+
+**Existing Example**
+
+..  code-block:: none
+
+    MASK S123
+    MASK S456
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+    [mask]
+      mask_pixels = [123, 456]
 
 MASK/T x y
 ----------
@@ -561,11 +684,75 @@ MON/DIRECT="filename"
         rear_file = "DIRECT_RUN524.dat"
         front_file = "DIRECT_RUN524.dat"
 
+MON/FLAT=str
+------------
+
+**Replacement**
+
+..  code-block:: guess 
+
+    [detector]
+      [detector.calibration.flat]
+        rear_file = "str"
+  
+
+**Existing Example:**
+
+..  code-block:: none
+
+    MON/FLAT="flat_file.091"
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+    [detector]
+      [detector.calibration.flat]
+        rear_file = "flat_file.091"
+
+
 MON/LENGTH
 ----------
 
 **Replacement**
 Unsupported
+
+MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
+---------------------------------------
+
+..  code-block:: guess 
+
+  [normalisation]
+    #Normalisation monitor
+
+    # This name is used below so if there was a monitor called FOO1
+    # this would work with it
+    selected_monitor = "M1"
+
+    [normalisation.monitor.M1]
+      spectrum_number = n
+
+
+**Existing Example:**
+
+..  code-block:: none
+
+    MON/SPECTRUM=1
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+  [normalisation]
+    #Normalisation monitor
+
+    # This name is used below so if there was a monitor called FOO1
+    # this would work with it
+    selected_monitor = "M1"
+
+    [normalisation.monitor.M1]
+      spectrum_number = 1
+
 
 set centre a b c d
 ------------------
@@ -589,8 +776,11 @@ set centre a b c d
 
     [detector]
       [detector.configuration]
+        # Note for identical results the values will
+        # only take a and b in the above example due to a bug
+        # with the legacy user file parser
         front_centre = {x=0.0842, y=-0.1965}
-        rear_centre = {x=0.0051, y=0.0051}
+        rear_centre = {x=0.0842, y=-0.1965}
 
 set scales a b c d
 ------------------
@@ -647,6 +837,33 @@ TRANS/TRANSSPEC=n
     
       [transmission.monitor.M3]
         spectrum_number = 3
+
+TUBECALIBFILE=str
+-----------------
+
+**Replacement**
+
+..  code-block:: guess 
+
+  [detector]
+
+  [detector.calibration.tube]
+    file = "str"
+
+**Existing Example:**
+
+..  code-block:: none
+
+  TUBECALIBFILE=Tube.nxs
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+  [detector]
+
+  [detector.calibration.tube]
+    file = "Tube.nxs"
 
 
 .. categories:: Techniques

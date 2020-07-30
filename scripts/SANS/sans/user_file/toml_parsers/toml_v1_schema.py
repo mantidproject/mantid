@@ -93,6 +93,7 @@ class TomlSchemaV1Validator(object):
                               "selected_monitor": None}
 
         mask_keys = {"beamstop_shadow": {"angle", "width"},
+                     "prompt_peak" : {"start", "stop"},
                      "mask_files": None,
                      "mask_pixels": None,
                      "phi": {"mirror", "start", "stop"},
