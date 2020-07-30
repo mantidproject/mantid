@@ -47,7 +47,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
     def tearDown(self):
         AnalysisDataService.Instance().clear()
 
-    def test_plot_workspaces_removes_workspaces_from_plot_if_hold_on_false(self):
+    def test_plot_workspaces_cleares_plot_if_hold_on_false(self):
         workspace_names = ["MUSR6220"]
         workspace_indices = [0]
         self.presenter._set_axes_limits_and_titles = mock.Mock()
@@ -60,9 +60,9 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.presenter.plot_workspaces(workspace_names=workspace_names, workspace_indices=workspace_indices,
                                        hold_on=False, autoscale=False)
 
-        self.view.remove_workspace_info_from_plot.assert_called_once_with([plotted_information])
+        self.view.clear_all_workspaces_from_plot.assert_called_once_with()
 
-    def test_plot_workspaces_does_not_replot_existing_workspaces(self):
+    def test_plot_workspaces_replots_existing_workspaces_if_hold_on_is_false(self):
         workspace_names = ["MUSR6220"]
         workspace_indices = [0]
         self.presenter._set_axes_limits_and_titles = mock.Mock()
@@ -75,7 +75,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.presenter.plot_workspaces(workspace_names=workspace_names, workspace_indices=workspace_indices,
                                        hold_on=False, autoscale=False)
 
-        self.view.add_workspaces_to_plot.assert_called_once_with([])
+        self.view.add_workspaces_to_plot.assert_called_once_with([plotted_information])
 
     def test_plot_workspaces_gets_workspace_info_from_model(self):
         workspace_names = ["MUSR6220"]
@@ -103,15 +103,15 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
         self.view.add_workspaces_to_plot.assert_called_once_with([plot_info])
 
-    def test_remove_workspace_names_from_plot_calls_passes_on_workspaces_to_view_correctly(self):
+    def test_remove_workspace_names_from_plot_calls_clears_plot_and_then_adds_workspaces_correctly(self):
         ws_names = ["MUSR62260;fwd", "MUSR62260;bkwd"]
-        workspaces = create_test_workspaces(ws_names)
+        create_test_workspaces(ws_names)
+        self.presenter._set_axes_limits_and_titles = mock.Mock()
 
         self.presenter.remove_workspace_names_from_plot(ws_names)
 
-        self.assertEqual(self.view.remove_workspace_from_plot.call_count, len(ws_names))
-        self.assertTrue(self.view.remove_workspace_from_plot.call_args_list[0][0][0].equals(workspaces[0], 1e-9))
-        self.assertTrue(self.view.remove_workspace_from_plot.call_args_list[1][0][0].equals(workspaces[1], 1e-9))
+        self.view.clear_all_workspaces_from_plot.assert_called_once_with()
+        self.view.add_workspaces_to_plot.assert_called_once_with([])
 
     def test_convert_to_single_plot_correctly_sets_up_new_plot(self):
         workspaces = ["MUSR62260;fwd", "MUSR62260;bkwd"]
