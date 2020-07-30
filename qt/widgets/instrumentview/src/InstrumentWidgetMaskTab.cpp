@@ -121,13 +121,13 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_pixel->setCheckable(true);
   m_pixel->setAutoExclusive(true);
   m_pixel->setIcon(QIcon(":/PickTools/selection-pointer.png"));
-  m_pixel->setToolTip("Mask a pixel");
+  m_pixel->setToolTip("Select a pixel");
 
   m_tube = new QPushButton();
   m_tube->setCheckable(true);
   m_tube->setAutoExclusive(true);
   m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
-  m_tube->setToolTip("Mask a tube/bank");
+  m_tube->setToolTip("Select a tube/bank");
 
   m_ring_ellipse = new QPushButton();
   m_ring_ellipse->setCheckable(true);
@@ -587,6 +587,22 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       } catch (...) {
       }
     }
+  } else if (m_grouping_on->isChecked()) {
+    if (m_pixel->isChecked()) {
+      Mantid::detid_t detId = actor.getDetID(pickID);
+      m_detectorsToGroup.clear();
+      m_detectorsToGroup.append(detId);
+
+    } else if (m_tube->isChecked()) {
+      if (!componentInfo.hasParent(pickID)) {
+        return;
+      }
+      auto parent = componentInfo.parent(pickID);
+      auto dets = actor.getDetIDs(componentInfo.detectorsInSubtree(parent));
+      m_detectorsToGroup.clear();
+      for (auto det : dets)
+        m_detectorsToGroup.append(det);
+    }
   }
   // update detector colours
   m_instrWidget->getInstrumentActor().updateColors();
@@ -864,7 +880,10 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   std::vector<size_t> dets;
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
   const auto &actor = m_instrWidget->getInstrumentActor();
-  DetXMLFile mapFile(actor.getDetIDs(dets));
+  QList<int> detectorIDs = actor.getDetIDs(dets);
+  if (m_pixel->isChecked() || m_tube->isChecked())
+    detectorIDs.append(m_detectorsToGroup);
+  DetXMLFile mapFile(detectorIDs);
   std::string fname = mapFile();
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
@@ -884,8 +903,10 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   std::vector<size_t> dets;
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
-  DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getDetIDs(dets),
-                     DetXMLFile::Sum);
+  QList<int> detectorIDs = m_instrWidget->getInstrumentActor().getDetIDs(dets);
+  if (m_pixel->isChecked() || m_tube->isChecked())
+    detectorIDs.append(m_detectorsToGroup);
+  DetXMLFile mapFile(detectorIDs, DetXMLFile::Sum);
   std::string fname = mapFile();
 
   if (!fname.empty()) {

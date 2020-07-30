@@ -154,6 +154,7 @@ protected:
   Activity m_activity;
   /// True if there is a mask not applied to the data workspace
   bool m_hasMaskToApply;
+  QList<Mantid::detid_t> m_detectorsToGroup;
 
   QRadioButton *m_masking_on;
   QRadioButton *m_grouping_on;
