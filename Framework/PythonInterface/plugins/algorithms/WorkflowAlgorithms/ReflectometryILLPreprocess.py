@@ -147,6 +147,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              'Whether to process as direct or reflected beam.')
         self.declareProperty('AngleOption', 'SampleAngle',
                              StringListValidator(['SampleAngle', 'DetectorAngle', 'UserAngle']))
+        self.setPropertySettings('AngleOption',
+                                 EnabledWhenProperty('Measurement', PropertyCriterion.IsEqualTo, 'ReflectedBeam'))
         self.declareProperty(Prop.THETA,
                              defaultValue=-1.,
                              doc='The bragg angle for reflected beam [Degree], used if angle option is UserAngle.')
