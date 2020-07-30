@@ -1,34 +1,33 @@
-# Create egg link to binary output directory
-if(WIN32)
-  # handled separately below
-  set(_exclude_on_install "resources\.pyc?")
-else()
-  set(_exclude_on_install "")
-endif()
-
-# egg link name has to match setup.py name or Visual Studio generates
+# First generate rules for the the workbench application itself
+# egg link name has to match that in setup.py name or Visual Studio generates
 # a warning that the output filename of the target does not match
-# the output that is produced by setuptools
-# Use setuptools bin launcher on Linux until ported to mantidworkbench.cpp
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+# the output that is produced by setuptools.
+if(APPLE OR WIN32)
+  if(WIN32)
+    # handled separately below
+    set(_exclude_on_install "resources\.pyc?")
+  endif()
   add_python_package(workbench
     EXECUTABLE
     EGGLINKNAME MantidWorkbench
     EXCLUDE_FROM_INSTALL ${_exclude_on_install}
+    INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
+  )
+  # Allow VS to start workbench for debugging
+  set_target_properties(workbench PROPERTIES
+                        VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
+                        VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
+                        VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
+else()
+  add_python_package(workbench
+    EXECUTABLE
+    EGGLINKNAME MantidWorkbench
     INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
     INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
   )
-else()
-  add_python_package(workbench
-    EXECUTABLE
-    EGGLINKNAME MantidWorkbench
-    EXCLUDE_FROM_INSTALL ${_exclude_on_install}
-    INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
-  )
 endif()
 
-# Launchers
-# Create wrapper executable/script to launch error reporter if main workbench process fails
+# Wrapper launchers: See mantidworkbench.cpp:main for their function
 if(APPLE OR WIN32)
   # development version
   add_executable(MantidWorkbench mantidworkbench.cpp)
@@ -36,6 +35,8 @@ if(APPLE OR WIN32)
     PRIVATE
     -DPYTHON_EXECUTABLE_PATH="${Python_EXECUTABLE}")
   target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
+  set_target_properties(MantidWorkbench PROPERTIES
+                        VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
 
   # packaged version - creates a GUI application on Windows without a console
   add_executable(MantidWorkbenchInstalled WIN32 mantidworkbench.cpp)
@@ -61,14 +62,6 @@ if(APPLE OR WIN32)
   install(TARGETS MantidWorkbenchInstalled
           DESTINATION ${WORKBENCH_BIN_DIR})
 endif()
-
-# Allow VS to start workbench for debugging
-set_target_properties(workbench PROPERTIES
-                      VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
-                      VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
-                      VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
-set_target_properties(MantidWorkbench PROPERTIES
-                      VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
 
 # process resources files 
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
@@ -120,7 +113,30 @@ endif()
 # Dependency chain
 add_dependencies(workbench workbench_resources mantidqt)
 
-# ctest targets
+# macOS package fixes
+if(APPLE)
+  # create Info.plist
+  set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
+  set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
+  set ( MAC_BUNDLE_ICON MantidWorkbench.icns )
+  set ( MAC_BUNDLE_NAME MantidWorkbench )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
+                   @ONLY )
+
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
+install (CODE "
+    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
+                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${Python_EXECUTABLE} ${ParaView_DIR}
+                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
+    if(NOT install_name_tool_result EQUAL 0)
+      message(\"\${_out}\")
+      message(FATAL_ERROR \"Package script failed!!!\n\")
+    endif()
+")
+endif()
+
+# Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
     workbench/test/test_import.py
@@ -166,26 +182,3 @@ set(PYUNITTEST_QT_API pyqt5)
 pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}
   workbench ${TEST_FILES}
 )
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  # create Info.plist
-  set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
-  set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
-  set ( MAC_BUNDLE_ICON MantidWorkbench.icns )
-  set ( MAC_BUNDLE_NAME MantidWorkbench )
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
-                   @ONLY )
-
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
-install (CODE "
-    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${Python_EXECUTABLE} ${ParaView_DIR}
-                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
-    if(NOT install_name_tool_result EQUAL 0)
-      message(\"\${_out}\")
-      message(FATAL_ERROR \"Package script failed!!!\n\")
-    endif()
-")
-
-endif()
