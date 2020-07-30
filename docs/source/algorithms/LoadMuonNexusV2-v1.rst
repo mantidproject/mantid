@@ -132,7 +132,7 @@ Output:
 
 Output:
 
-.. testoutput:: ExLoadDeadTimeTable''
+.. testoutput:: ExLoadDeadTimeTable
 
    5 0.007265590131
    6 0.006881169975
@@ -140,6 +140,8 @@ Output:
    8 0.006345409900
    9 0.007483229972
    10 -0.010110599920
+
+**Example -Time zero loading:**
 
 .. testcode:: ExTimeZeroLoading
 
@@ -150,7 +152,7 @@ Output:
    print('Single time zero value is {:.2g}'.format(time_zero))
    print("TimeZeroList values are:")
    for timeZero in time_zero_list:
-      print(timeZero)
+      print(round(timeZero, 2))
 
 Output:
 
