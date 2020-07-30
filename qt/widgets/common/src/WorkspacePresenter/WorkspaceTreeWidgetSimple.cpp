@@ -24,6 +24,16 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+namespace {
+bool singleValued(const MatrixWorkspace &ws) {
+  if (ws.getNumberHistograms() == 1 && ws.blocksize() == 1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -43,7 +53,10 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_showData(new QAction("Show Data", this)),
       m_showAlgorithmHistory(new QAction("Show History", this)),
       m_showDetectors(new QAction("Show Detectors", this)),
-      m_plotAdvanced(new QAction("Advanced...", this)) {
+      m_plotAdvanced(new QAction("Advanced...", this)),
+      m_plotSurface(new QAction("Surface", this)),
+      m_plotWireframe(new QAction("Wireframe", this)),
+      m_plotContour(new QAction("Contour", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) {
@@ -75,6 +88,12 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
           SLOT(onShowDetectorsClicked()));
   connect(m_plotAdvanced, SIGNAL(triggered()), this,
           SLOT(onPlotAdvancedClicked()));
+  connect(m_plotSurface, SIGNAL(triggered()), this,
+          SLOT(onPlotSurfaceClicked()));
+  connect(m_plotWireframe, SIGNAL(triggered()), this,
+          SLOT(onPlotWireframeClicked()));
+  connect(m_plotContour, SIGNAL(triggered()), this,
+          SLOT(onPlotContourClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -107,7 +126,6 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     }
     if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       QMenu *plotSubMenu(new QMenu("Plot", menu));
-
       // Don't plot 1D spectra if only one X value
       bool multipleBins = false;
       try {
@@ -121,7 +139,6 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           }
         }
       }
-
       if (multipleBins) {
         plotSubMenu->addAction(m_plotSpectrum);
         plotSubMenu->addAction(m_overplotSpectrum);
@@ -131,21 +148,34 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       } else {
         plotSubMenu->addAction(m_plotBin);
       }
-
       plotSubMenu->addSeparator();
       plotSubMenu->addAction(m_plotColorfill);
-      menu->addMenu(plotSubMenu);
-      menu->addSeparator();
-      menu->addAction(m_showData);
-      menu->addAction(m_showAlgorithmHistory);
-      menu->addAction(m_showInstrument);
-      m_showInstrument->setEnabled(
-          matrixWS->getInstrument() &&
-          !matrixWS->getInstrument()->getName().empty() &&
-          matrixWS->getAxis(1)->isSpectra());
-      menu->addAction(m_sampleLogs);
-      menu->addAction(m_sliceViewer);
-      menu->addAction(m_showDetectors);
+
+      if (multipleBins) {
+        QMenu *plot3DSubMenu(new QMenu("3D", menu));
+        plot3DSubMenu->addAction(m_plotSurface);
+        plot3DSubMenu->addAction(m_plotWireframe);
+        plot3DSubMenu->addAction(m_plotContour);
+
+        plotSubMenu->addMenu(plot3DSubMenu);
+      }
+      if (!singleValued(*matrixWS)) {
+        menu->addMenu(plotSubMenu);
+        menu->addSeparator();
+        menu->addAction(m_showData);
+        menu->addAction(m_showAlgorithmHistory);
+        menu->addAction(m_showInstrument);
+        m_showInstrument->setEnabled(
+            matrixWS->getInstrument() &&
+            !matrixWS->getInstrument()->getName().empty() &&
+            matrixWS->getAxis(1)->isSpectra());
+        menu->addAction(m_sampleLogs);
+        menu->addAction(m_sliceViewer);
+        menu->addAction(m_showDetectors);
+      } else {
+        menu->addAction(m_showData);
+      }
+
     } else if (std::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
@@ -257,6 +287,18 @@ void WorkspaceTreeWidgetSimple::onShowDetectorsClicked() {
 
 void WorkspaceTreeWidgetSimple::onPlotAdvancedClicked() {
   emit plotAdvancedClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotSurfaceClicked() {
+  emit plotSurfaceClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotWireframeClicked() {
+  emit plotWireframeClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotContourClicked() {
+  emit plotContourClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

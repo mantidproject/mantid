@@ -47,6 +47,9 @@ public:
   ///
   void resetFWHM();
 
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
+
 protected:
   void functionLocal(double *out, const double *xValues,
                      const size_t nData) const override;
@@ -70,8 +73,6 @@ private:
   void calHandEta(double sigma2, double gamma, double &H, double &eta) const;
 
   mutable double mFWHM;
-  mutable double mLowTOF;
-  mutable double mUpperTOF;
 };
 
 // typedef std::shared_ptr<TableWorkspace> TableWorkspace_sptr;

@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <utility>
 
+#include "ConvFitModel.h"
 #include "IndirectFitPlotModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -31,6 +32,10 @@ namespace {
 
 /// The name of the conjoined input and guess workspaces
 std::string const INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
+
+// Resolution
+const std::vector<std::pair<std::string, size_t>> exampleResolution(
+    1, std::make_pair<std::string, size_t>("irs26173_graphite_002_res", 0));
 
 std::string getFittingFunctionString(std::string const &workspaceName) {
   return "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
@@ -65,10 +70,37 @@ private:
     UNUSED_ARG(spectrum);
     return "";
   };
+};
+/// A dummy empty Conv class used to create a model to pass to
+/// IndirectFitPlotModel's constructor
+class DummyEmptyConvModel
+    : public MantidQt::CustomInterfaces::IDA::ConvFitModel {
+public:
+  ~DummyEmptyConvModel() {}
 
-  std::vector<std::string> getSpectrumDependentAttributes() const override {
-    return std::vector<std::string>();
-  }
+  std::vector<std::pair<std::string, size_t>>
+  getResolutionsForFit() const override {
+    return m_resolutions;
+  };
+
+private:
+  std::vector<std::pair<std::string, size_t>> m_resolutions;
+};
+
+/// A dummy Conv class (with resolution data) used to create a model to pass to
+/// IndirectFitPlotModel's constructor
+class DummyConvModel : public MantidQt::CustomInterfaces::IDA::ConvFitModel {
+public:
+  DummyConvModel() : m_resolutions(exampleResolution) {}
+  ~DummyConvModel() {}
+
+  std::vector<std::pair<std::string, size_t>>
+  getResolutionsForFit() const override {
+    return m_resolutions;
+  };
+
+private:
+  std::vector<std::pair<std::string, size_t>> m_resolutions;
 };
 
 void setFittingFunction(IndirectFittingModel *model,
@@ -87,11 +119,11 @@ void addWorkspaceToModel(IndirectFittingModel *model,
       workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
 }
-
+template <class FitModel>
 IndirectFittingModel *createModelWithMultipleWorkspaces(
     int const &numberOfSpectra, bool setFitFunction,
     const std::vector<std::string> &workspaceNames) {
-  auto model = getEmptyDummyModel();
+  auto model = new FitModel;
   for (auto name : workspaceNames) {
     addWorkspaceToModel(model, numberOfSpectra, name);
   }
@@ -154,8 +186,9 @@ IndirectFittingModel *getModelWithFitOutputData() {
   return model;
 }
 
+template <class FitModel = DummyModel>
 IndirectFitPlotModel getFitPlotModel(bool setFitFunction = true) {
-  return IndirectFitPlotModel(createModelWithMultipleWorkspaces(
+  return IndirectFitPlotModel(createModelWithMultipleWorkspaces<FitModel>(
       10, setFitFunction,
       std::vector<std::string>({"Workspace1", "Workspace2"})));
 }
@@ -195,6 +228,16 @@ public:
 
     TS_ASSERT(model.getGuessWorkspace());
     TS_ASSERT_EQUALS(model.getGuessWorkspace()->getNumberHistograms(), 1);
+  }
+
+  void
+  test_that_getGuessWorkspace_returns_a_workspace_with_the_correct_range() {
+    auto model = getFitPlotModel();
+    model.setStartX(3);
+    model.setEndX(8);
+
+    TS_ASSERT_EQUALS(model.getGuessWorkspace()->x(0)[0], 3);
+    TS_ASSERT_EQUALS(model.getGuessWorkspace()->x(0).back(), 8);
   }
 
   void
@@ -365,6 +408,18 @@ public:
   test_that_canCalculateGuess_returns_false_when_there_is_no_fitting_function() {
     auto const model = getFitPlotModel(false);
     TS_ASSERT(!model.canCalculateGuess());
+  }
+
+  void
+  test_that_canCalculateGuess_returns_false_when_required_resolution_not_loaded() {
+    auto const model = getFitPlotModel<DummyEmptyConvModel>();
+    TS_ASSERT(!model.canCalculateGuess());
+  }
+
+  void
+  test_that_canCalculateGuess_returns_true_when_required_resolution_loaded() {
+    auto const model = getFitPlotModel<DummyConvModel>();
+    TS_ASSERT(model.canCalculateGuess());
   }
 
   void

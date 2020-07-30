@@ -193,10 +193,10 @@ std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
     params.chemicalSymbol = getPropertyValue("ChemicalFormula");
     params.atomicNumber = getProperty("AtomicNumber");
     params.massNumber = getProperty("MassNumber");
-    params.sampleNumberDensity = getProperty("SampleNumberDensity");
+    params.numberDensity = getProperty("SampleNumberDensity");
     params.zParameter = getProperty("ZParameter");
     params.unitCellVolume = getProperty("UnitCellVolume");
-    params.sampleMassDensity = getProperty("SampleMassDensity");
+    params.massDensity = getProperty("SampleMassDensity");
     result = ReadMaterial::validateInputs(params);
   }
   return result;
@@ -239,10 +239,10 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
     params.chemicalSymbol = getPropertyValue("ChemicalFormula");
     params.atomicNumber = getProperty("AtomicNumber");
     params.massNumber = getProperty("MassNumber");
-    params.sampleNumberDensity = getProperty("SampleNumberDensity");
+    params.numberDensity = getProperty("SampleNumberDensity");
     params.zParameter = getProperty("ZParameter");
     params.unitCellVolume = getProperty("UnitCellVolume");
-    params.sampleMassDensity = getProperty("SampleMassDensity");
+    params.massDensity = getProperty("SampleMassDensity");
     params.coherentXSection = getProperty("CoherentXSection");
     params.incoherentXSection = getProperty("IncoherentXSection");
     params.attenuationXSection = getProperty("AttenuationXSection");
@@ -268,7 +268,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
     }
   }
 
-  environmentMesh = reader->readStl();
+  environmentMesh = reader->readShape();
 
   const double xRotation = DegreesToRadians(getProperty("xDegrees"));
   const double yRotation = DegreesToRadians(getProperty("yDegrees"));

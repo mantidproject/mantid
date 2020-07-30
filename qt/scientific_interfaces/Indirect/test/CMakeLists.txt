@@ -4,14 +4,14 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   ConvFunctionModelTest.h
-  IndirectDataTablePresenterTest.h
   IndirectDataValidationHelperTest.h
+  IndirectDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
+  IndirectFitDataModelTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
-  IndirectFitOutputTest.h
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h
   IndirectFittingModelTest.h
@@ -24,7 +24,11 @@ set(
   IqtFitModelTest.h
   JumpFitDataPresenterTest.h
   JumpFitModelTest.h
+  IDAFunctionParameterEstimationTest.h
 )
+
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesIndirectTest

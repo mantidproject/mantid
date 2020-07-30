@@ -517,6 +517,9 @@ void normaliseOutput(const MatrixWorkspace_sptr &outputWS,
     }
   }
   outputWS->setDistribution(inputWS->isDistribution());
+  auto rebinnedWS = std::dynamic_pointer_cast<RebinnedOutput>(outputWS);
+  if (rebinnedWS)
+    rebinnedWS->setSqrdErrors(false);
 }
 
 /**
@@ -669,7 +672,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     }
   }
 
-  const double variance = error * error;
+  auto sqrdError = (inputRB && inputRB->hasSqrdErrors());
+  const double variance = (sqrdError ? error : error * error);
   for (const auto &ai : areaInfos) {
     if (ai.weight == 0.) {
       continue;
@@ -688,12 +692,14 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
 /**
  * Called at the completion of the fractional rebinning loop
- * to the set the finalize flag in the output workspace.
+ * to the set the finalize and hasSqrdError flags in the output workspace.
  * @param outputWS Reference to the rebinned output workspace
  */
 void finalizeFractionalRebin(RebinnedOutput &outputWS) {
   // rebinToFractionalOutput() leaves the data in an unfinalized state
+  // with squared errors
   outputWS.setFinalized(false);
+  outputWS.setSqrdErrors(true);
 }
 
 } // namespace FractionalRebinning

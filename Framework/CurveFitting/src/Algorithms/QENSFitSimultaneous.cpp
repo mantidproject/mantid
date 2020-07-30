@@ -18,6 +18,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
@@ -214,6 +215,14 @@ TextAxis const *getTextAxis(const MatrixWorkspace &workspace,
   return dynamic_cast<TextAxis const *>(workspace.getAxis(axisIndex));
 }
 
+std::vector<std::string>
+getUniqueWorkspaceNames(std::vector<std::string> &&workspaceNames) {
+  std::set<std::string> uniqueNames(workspaceNames.begin(),
+                                    workspaceNames.end());
+  workspaceNames.assign(uniqueNames.begin(), uniqueNames.end());
+  return workspaceNames;
+}
+
 auto getNumericAxisValueReader(std::size_t axisIndex) {
   return [axisIndex](const MatrixWorkspace &workspace, std::size_t index) {
     if (auto const axis = getNumericAxis(workspace, axisIndex))
@@ -370,6 +379,9 @@ void QENSFitSimultaneous::initConcrete() {
                   "If true members of any "
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
+  declareProperty("OutputCompositeMembers", false,
+                  "If true and CreateOutput is true then the value of each "
+                  "member of a Composite Function is also output.");
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
@@ -390,11 +402,10 @@ void QENSFitSimultaneous::initConcrete() {
                       PropertyMode::Optional),
                   "The output group workspace");
 
-  declareProperty("OutputStatus", "", Kernel::Direction::Output);
-  getPointerToProperty("OutputStatus")
-      ->setDocumentation("Whether the fit was successful");
-  declareProperty("OutputChi2overDoF", 0.0, "Returns the goodness of the fit",
-                  Kernel::Direction::Output);
+  declareProperty(
+      "OutputFitStatus", true,
+      "Flag to output fit status information, which consists of the fit "
+      "OutputStatus and the OutputChiSquared");
 
   std::vector<std::string> costFuncOptions =
       API::CostFunctionFactory::Instance().getKeys();
@@ -439,10 +450,19 @@ void QENSFitSimultaneous::execConcrete() {
   const auto groupWs = makeGroup(fitResult.second);
   const auto resultWs = processIndirectFitParameters(
       parameterWs, createDatasetGrouping(workspaces));
+  AnalysisDataService::Instance().addOrReplace(
+      getPropertyValue("OutputWorkspace"), resultWs);
 
   if (containsMultipleData(workspaces)) {
     renameWorkspaces(groupWs, getWorkspaceIndices(), outputBaseName,
                      "_Workspace", getWorkspaceNames());
+    auto inputWorkspaceNames = getUniqueWorkspaceNames(getWorkspaceNames());
+    renameWorkspaces(resultWs,
+                     std::vector<std::string>(inputWorkspaceNames.size(), ""),
+                     outputBaseName, "_Result", inputWorkspaceNames);
+  } else {
+    renameWorkspaces(resultWs, std::vector<std::string>({""}), outputBaseName,
+                     "_Result");
   }
 
   copyLogs(resultWs, workspaces);
@@ -466,6 +486,7 @@ QENSFitSimultaneous::performFit(
     const std::string &output) {
   IFunction_sptr function = getProperty("Function");
   const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
   const bool calcErrors = getProperty("CalcErrors");
 
@@ -482,11 +503,22 @@ QENSFitSimultaneous::performFit(
   fit->setProperty("Minimizer", getPropertyValue("Minimizer"));
   fit->setProperty("CostFunction", getPropertyValue("CostFunction"));
   fit->setProperty("CalcErrors", calcErrors);
-  fit->setProperty("OutputCompositeMembers", true);
+  fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
   fit->setProperty("ConvolveMembers", convolveMembers);
   fit->setProperty("CreateOutput", true);
   fit->setProperty("Output", output);
   fit->executeAsChildAlg();
+
+  std::string status = fit->getProperty("OutputStatus");
+  double chiSquared = fit->getProperty("OutputChi2overDoF");
+
+  const bool outputFitStatus = getProperty("OutputFitStatus");
+  if (outputFitStatus) {
+    declareProperty("OutputStatus", "", Direction::Output);
+    declareProperty("OutputChiSquared", 0.0, Direction::Output);
+    setProperty("OutputStatus", status);
+    setProperty("OutputChiSquared", chiSquared);
+  }
 
   if (workspaces.size() == 1) {
     MatrixWorkspace_sptr outputWS = fit->getProperty("OutputWorkspace");
@@ -712,9 +744,18 @@ void QENSFitSimultaneous::renameWorkspaces(
         inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
     return workspaceName;
   };
-  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup),
-                                   outputBaseName, endOfSuffix + "s",
-                                   getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
+}
+
+void QENSFitSimultaneous::renameWorkspaces(
+    const API::WorkspaceGroup_sptr &outputGroup,
+    std::vector<std::string> const &spectra, std::string const &outputBaseName,
+    std::string const &endOfSuffix) {
+  auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
+  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
 }
 
 } // namespace Algorithms

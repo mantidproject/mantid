@@ -29,8 +29,8 @@ namespace IDA {
 
 ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model,
                                                      QTableWidget *dataTable)
-    : IndirectDataTablePresenter(model, dataTable, convFitHeaders()),
-      m_convFitModel(model) {
+    : IndirectDataTablePresenter(model->m_fitDataModel.get(), dataTable,
+                                 convFitHeaders()) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
@@ -48,31 +48,20 @@ int ConvFitDataTablePresenter::endXColumn() const { return 4; }
 int ConvFitDataTablePresenter::excludeColumn() const { return 5; }
 
 std::string
-ConvFitDataTablePresenter::getResolutionName(TableRowIndex row) const {
+ConvFitDataTablePresenter::getResolutionName(FitDomainIndex row) const {
   return getString(row, 1);
 }
 
-void ConvFitDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
-                                              WorkspaceIndex spectrum,
-                                              TableRowIndex row) {
-  IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
+void ConvFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
+  IndirectDataTablePresenter::addTableEntry(row);
 
-  const auto resolution = m_convFitModel->getResolution(dataIndex);
-  const auto name = resolution ? resolution->getName() : "";
+  auto resolutionVector = m_model->getResolutionsForFit();
+  const auto name = resolutionVector.at(row.value).first;
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);
   setCell(std::move(cell), row, 1);
-}
-
-void ConvFitDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
-                                                 WorkspaceIndex spectrum,
-                                                 TableRowIndex row) {
-  IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
-
-  const auto &name = m_convFitModel->getResolution(dataIndex)->getName();
-  setCellText(QString::fromStdString(name), row, 1);
 }
 
 } // namespace IDA

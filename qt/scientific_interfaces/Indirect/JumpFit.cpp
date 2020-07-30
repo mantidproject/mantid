@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFit.h"
 #include "FQFitConstants.h"
-#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "JumpFitDataPresenter.h"
 
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -30,34 +31,46 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+std::vector<std::string> FQFIT_HIDDEN_PROPS = std::vector<std::string>(
+    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+     "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
+     "PeakRadius", "PlotParameter"});
+
 JumpFit::JumpFit(QWidget *parent)
     : IndirectFitAnalysisTab(new JumpFitModel, parent),
-      m_uiForm(new Ui::JumpFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  auto templateBrowser = new SingleFunctionTemplateBrowser(widthFits);
-  setPlotView(m_uiForm->pvFitPlotView);
+  auto parameterEstimation = createParameterEstimation();
+  auto templateBrowser = new SingleFunctionTemplateBrowser(
+      widthFits,
+      std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
-      m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
-      m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter,
-      templateBrowser));
+      m_jumpFittingModel, m_uiForm->dockArea->m_fitDataView,
+      m_uiForm->dockArea->m_fitDataView->cbParameterType,
+      m_uiForm->dockArea->m_fitDataView->cbParameter,
+      m_uiForm->dockArea->m_fitDataView->lbParameter,
+      m_uiForm->dockArea->m_fitDataView->lbParameterType, templateBrowser));
 
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
+      templateBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(
+      FQFIT_HIDDEN_PROPS);
 
   setEditResultVisible(false);
-  m_uiForm->fitDataView->setStartAndEndHidden(false);
 }
 
 void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
-  m_uiForm->cbParameter->setEnabled(false);
+  m_uiForm->dockArea->m_fitDataView->cbParameter->setEnabled(false);
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,
@@ -93,10 +106,17 @@ void JumpFit::setRunEnabled(bool enable) {
 }
 
 EstimationDataSelector JumpFit::getEstimationDataSelector() const {
-  return [](const std::vector<double> &,
-            const std::vector<double> &) -> DataForParameterEstimation {
+  return [](const std::vector<double> &, const std::vector<double> &,
+            const std::pair<double, double>) -> DataForParameterEstimation {
     return DataForParameterEstimation{};
   };
+}
+// TODO: Implement parameter estimation for JumpFit functions
+IDAFunctionParameterEstimation JumpFit::createParameterEstimation() const {
+
+  IDAFunctionParameterEstimation parameterEstimation;
+
+  return parameterEstimation;
 }
 
 } // namespace IDA

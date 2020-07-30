@@ -41,20 +41,20 @@ Usage
    ConvertToDistribution(reflectedWS)
    directWS = LoadILLReflectometry('ILL/D17/317369.nxs', XUnit='TimeOfFlight')
    ConvertToDistribution(directWS)
-   
+
    # Extract some instrument parameters.
    chopperPairDistance = 1e-2 * reflectedWS.run().getProperty('Distance.ChopperGap').value
    chopperSpeed = reflectedWS.run().getProperty('VirtualChopper.chopper1_speed_average').value
    chopper1Phase = reflectedWS.run().getProperty('VirtualChopper.chopper1_phase_average').value
    chopper2Phase = reflectedWS.run().getProperty('VirtualChopper.chopper2_phase_average').value
    openoffset = reflectedWS.run().getProperty('VirtualChopper.open_offset').value
-   
+
    # Normalize to time.
    duration = reflectedWS.run().getProperty('duration').value
    reflectedWS /= duration
    duration = directWS.run().getProperty('duration').value
    directWS /= duration
-   
+
    # Write statistics to sample logs.
    ReflectometryBeamStatistics(
        reflectedWS,
@@ -67,14 +67,14 @@ Usage
        FirstSlitSizeSampleLog='VirtualSlitAxis.s2w_actual_width',
        SecondSlitName='slit3',
        SecondSlitSizeSampleLog='VirtualSlitAxis.s3w_actual_width',
-   )    
-   
+   )
+
    # Calculate reflectivity.
    refForeground = SumSpectra(reflectedWS, 198, 209)
    dirForeground = SumSpectra(directWS, 190, 210)
    refForeground = RebinToWorkspace(WorkspaceToRebin=refForeground, WorkspaceToMatch=dirForeground)
    R = refForeground / dirForeground
-   
+
    # Convert TOF to wavelength, crop.
    R = ConvertUnits(R, 'Wavelength')
    R = CropWorkspace(R, XMin=4.3, XMax=14.0, StoreInADS=False)
@@ -83,7 +83,7 @@ Usage
    reflectedWS = CropWorkspaceRagged(reflectedWS, XMin=n*[4.3], XMax=n*[14.0], StoreInADS=False)
    directWS = ConvertUnits(directWS, 'Wavelength')
    directWS = CropWorkspaceRagged(directWS, XMin=n*[4.3], XMax=n*[14.0])
-   
+
    outws = ReflectometryMomentumTransfer(
        R,
        ReflectedForeground=[198, 209],
@@ -111,7 +111,7 @@ Output:
 .. testoutput:: ReflectometryMomentumTransferExample
 
    First refectivity point Qz = 0.0118 +- 0.0001 A-1
-   and last Qz = 0.0381 +- 0.0005 A-1
+   and last Qz = 0.0381 +- 0.0004 A-1
 
 References
 ----------
@@ -122,4 +122,3 @@ References
 .. categories::
 
 .. sourcelink::
-

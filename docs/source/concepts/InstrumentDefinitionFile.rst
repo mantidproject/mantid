@@ -720,6 +720,8 @@ and so on. In the above example this results in a -20.6 degree rotation
 about the y-axis followed by a 102.8 degree rotation about the z-axis
 (of the frame which has just be rotated by -20.6 degrees) and finally
 followed by another rotation about the y-axis, this time by 50 degrees.
+Note that the z-axis for the second rotation is implicit since no other axis
+information provided for the second rotation. This is hard-coded.
 The ISIS NIMROD instrument (NIM\_Definition.xml) uses this feature.
 
 The translation part of a <location> element can like the rotation part also be

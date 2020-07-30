@@ -22,7 +22,9 @@ def draw_peaks(centers, fg_color, slice_value, slice_width, frame=SpecialCoordin
     model = create_peaks_viewer_model(centers, fg_color)
     slice_info = create_slice_info(centers, slice_value, slice_width, frame)
     mock_painter = MagicMock(spec=MplPainter)
-    mock_painter._axes = MagicMock()
+    mock_axes = MagicMock()
+    mock_axes.get_xlim.return_value = (-1, 1)
+    mock_painter.axes = mock_axes
 
     model.draw_peaks(slice_info, mock_painter)
 
@@ -62,6 +64,6 @@ def create_slice_info(transform_side_effect,
     slice_info = MagicMock()
     slice_info.frame = frame
     slice_info.transform.side_effect = transform_side_effect
-    slice_info.value = slice_value
-    slice_info.width = slice_width
+    slice_info.z_value = slice_value
+    slice_info.z_width = slice_width
     return slice_info

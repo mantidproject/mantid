@@ -31,6 +31,8 @@ Output:
     The variable myWS now points to the workspace called my_new_workspace
     myOtherWS now points to the workspace called myOtherWS
 
+.. _Workspace-Properties_Workspaces:
+
 Workspace Properties
 ####################
 

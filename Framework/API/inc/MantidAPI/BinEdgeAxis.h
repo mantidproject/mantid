@@ -29,10 +29,6 @@ public:
   std::vector<double> createBinBoundaries() const override;
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
-
-private:
-  /// Private, undefined copy assignment operator
-  const BinEdgeAxis &operator=(const BinEdgeAxis &);
 };
 
 } // namespace API

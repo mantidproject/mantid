@@ -66,6 +66,17 @@ way of processing a file.
 
 -  Note that you should always call the ``close()`` command on the file
    after it has been dealt with to ensure that its resources are freed.
+   This issue can be dealt with through the use of the ``with`` statement,
+   which encapsulates a set of preparation and cleanup tasks into a single
+   statement. This approach leads to the following code for printing out the
+   contents of a file:
+
+.. code:: python
+
+   with ('filename.txt', 'r') as file:
+       for line in file:
+           print(line)
+   # file leaves the scope, which initiates cleanup operations (i.e closing the file)
 
 -  In the above examples the lines that have been read from the file
    still contain a newline character as the last character on the line.
@@ -78,26 +89,23 @@ way of processing a file.
    # First we will write a file to read in
    import os
 
-   file = open('MyFile.txt', 'w')
-   file.write('ID WIDTH THICK HEIGHT\n')
-   file.write('a  1.0   2.0   3.0 \n')
-   file.write('b  2.0   3.6   1.2 \n')
-   file.close()
+   with open('MyFile.txt', 'w') as file:
+       file.write('ID WIDTH THICK HEIGHT\n')
+       file.write('a  1.0   2.0   3.0 \n')
+       file.write('b  2.0   3.6   1.2 \n')
 
    # Now read it in
-   file = open('MyFile.txt')
-   for line in file:
-       print(line)
-   file.close()
+   with open('MyFile.txt') as file:
+       for line in file:
+           print(line)
 
    #Second try
 
    #Reading agiain, but with rstrip
-   file = open('MyFile.txt')
-   for line in file:
-       line = line.rstrip()
-       print(line)
-   file.close()
+   with open('MyFile.txt') as file:
+       for line in file:
+           line = line.rstrip()
+           print(line)
 
 This should give:
 
@@ -128,12 +136,11 @@ Writing
 .. testcode:: writing_test1
 
    import os
-   file = open('NewFile.txt', 'w')
-   file.write('1 2 3 4 5 6\n')
-   file.write('7 8 9 10 11\n')
-   file.close()
-   file = open('NewFile.txt', 'r')
-   print(file.read())
+   with open('NewFile.txt', 'w') as file:
+       file.write('1 2 3 4 5 6\n')
+       file.write('7 8 9 10 11\n')
+   with open('NewFile.txt', 'r') as file:
+        print(file.read())
 
 
 Produces a file with the numbers on 2 separate lines

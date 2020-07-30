@@ -80,7 +80,7 @@ class CalibrationModel(object):
                 self._plot_tof_fit_single_bank_or_custom(bank)
             else:
                 self._plot_tof_fit_single_bank_or_custom("cropped")
-        difa = [i.DIFC for i in output]
+        difa = [i.DIFA for i in output]
         difc = [i.DIFC for i in output]
         tzero = [i.TZERO for i in output]
 

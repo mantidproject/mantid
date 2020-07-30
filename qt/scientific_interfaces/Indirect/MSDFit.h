@@ -8,13 +8,15 @@
 
 #include "IndirectFitAnalysisTab.h"
 #include "MSDFitModel.h"
-#include "ui_MSDFit.h"
+#include "ui_IndirectFitTab.h"
 
 #include "MantidAPI/IFunction.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+class IDAFunctionParameterEstimation;
+
 class DLLExport MSDFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
@@ -38,7 +40,8 @@ private:
   EstimationDataSelector getEstimationDataSelector() const override;
   std::string fitTypeString() const;
   MSDFitModel *m_msdFittingModel;
-  std::unique_ptr<Ui::MSDFit> m_uiForm;
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
+  IDAFunctionParameterEstimation createParameterEstimation() const;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

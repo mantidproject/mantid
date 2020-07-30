@@ -42,6 +42,18 @@
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
+namespace {
+/** Simple method which will accumulate a value as long as it is Finite */
+auto accumulate_if_finite = [](const double accumulator,
+                               const double newValue) {
+  if (std::isfinite(newValue)) {
+    return accumulator + newValue;
+  } else {
+    return accumulator;
+  }
+};
+} // namespace
+
 namespace Mantid {
 namespace API {
 using std::size_t;
@@ -731,6 +743,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
 }
 
 /** Integrate all the spectra in the matrix workspace within the range given.
+ * NaN and Infinite values are ignored.
  * Default implementation, can be overridden by base classes if they know
  *something smarter!
  *
@@ -782,7 +795,8 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out,
       double sum(0.0);
       if (distmin <= distmax) {
         // Integrate
-        sum = std::accumulate(y.begin() + distmin, y.begin() + distmax, 0.0);
+        sum = std::accumulate(y.begin() + distmin, y.begin() + distmax, 0.0,
+                              accumulate_if_finite);
       }
       // Save it in the vector
       out[wksp_index] = sum;

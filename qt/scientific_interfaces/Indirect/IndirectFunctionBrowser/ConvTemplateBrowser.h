@@ -50,11 +50,13 @@ public:
   void clear() override;
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
+
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &name,
                      TableDatasetIndex const &index) override;
-  void setResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions) override;
+  void setResolution(const std::vector<std::pair<std::string, size_t>>
+                         &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
   void addTempCorrection(double value);
@@ -92,6 +94,7 @@ private:
 
   QtProperty *m_deltaFunctionOn;
   QtProperty *m_deltaFunctionHeight;
+  QtProperty *m_deltaFunctionCenter;
 
   QtProperty *m_tempCorrectionOn;
   QtProperty *m_temperature;

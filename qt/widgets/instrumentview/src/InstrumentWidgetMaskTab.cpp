@@ -143,6 +143,13 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_ring_rectangle->setToolTip("Draw a rectangular ring (Shift+Alt+R)");
   m_ring_rectangle->setShortcut(QKeySequence("Shift+Alt+R"));
 
+  m_sector = new QPushButton();
+  m_sector->setCheckable(true);
+  m_sector->setAutoExclusive(true);
+  m_sector->setIcon(QIcon(":/MaskTools/selection-sector.png"));
+  m_sector->setToolTip("Draw a circle sector (Shift+Alt+S)");
+  m_sector->setShortcut(QKeySequence("Shift+Alt+S"));
+
   m_free_draw = new QPushButton();
   m_free_draw->setCheckable(true);
   m_free_draw->setAutoExclusive(true);
@@ -157,6 +164,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_rectangle);
   toolBox->addWidget(m_ring_ellipse);
   toolBox->addWidget(m_ring_rectangle);
+  toolBox->addWidget(m_sector);
   toolBox->addWidget(m_free_draw);
   toolBox->addWidget(m_pixel);
   toolBox->addWidget(m_tube);
@@ -168,6 +176,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_sector, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_tube, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_pixel, SIGNAL(clicked()), this, SLOT(setActivity()));
@@ -423,6 +432,9 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
   case DrawRectangularRing:
     m_ring_rectangle->setChecked(true);
     break;
+  case DrawSector:
+    m_sector->setChecked(true);
+    break;
   case DrawFree:
     m_free_draw->setChecked(true);
     break;
@@ -485,6 +497,14 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_instrWidget->getSurface()->setInteractionMode(
         ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Rectangular ring. " + whatIsBeingSelected);
+  } else if (m_sector->isChecked()) {
+    m_activity = DrawSector;
+    m_instrWidget->getSurface()->startCreatingShape2D("sector", borderColor,
+                                                      fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(
+        ProjectionSurface::DrawRegularMode);
+    m_activeTool->setText("Tool: Sector. " + whatIsBeingSelected);
+
   } else if (m_free_draw->isChecked()) {
     m_activity = DrawFree;
     m_instrWidget->getSurface()->startCreatingFreeShape(borderColor, fillColor);
@@ -772,6 +792,9 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
         m_instrWidget->getSurface()->setCurrentPoint(name, p);
       }
     }
+    // when the user validates the edit of the field, the view is immediatly
+    // updated this way
+    m_instrWidget->updateInstrumentView();
   }
   m_instrWidget->update();
 }

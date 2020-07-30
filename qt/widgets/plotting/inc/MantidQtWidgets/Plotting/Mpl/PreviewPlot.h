@@ -90,6 +90,8 @@ public:
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
   void disableContextMenu();
 
+  void allowRedraws(bool state);
+
 public slots:
   void clear();
   void resizeX();
@@ -141,6 +143,9 @@ private:
 
   boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);
   void setAxisLabel(AxisID const &axisID, char const *const label);
+
+  // Block redrawing from taking place
+  bool m_allowRedraws = true;
 
   // Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;

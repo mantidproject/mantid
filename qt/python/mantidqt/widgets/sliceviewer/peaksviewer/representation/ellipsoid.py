@@ -18,7 +18,6 @@ from .painter import Painted
 class EllipsoidalIntergratedPeakRepresentation(object):
     """Provide methods to display a representation of a slice through an
     Ellipsoidally intgerated region around a Peak"""
-
     @classmethod
     def draw(cls, peak_origin, peak_shape, slice_info, painter, fg_color, bg_color):
         """
@@ -37,11 +36,11 @@ class EllipsoidalIntergratedPeakRepresentation(object):
         peak_origin = slice_info.transform(peak_origin)
 
         slice_origin, major_radius, minor_radius, angle = slice_ellipsoid(
-            peak_origin, *axes, *signal_radii, slice_info.value)
+            peak_origin, *axes, *signal_radii, slice_info.z_value)
         if not np.any(np.isfinite((major_radius, minor_radius))):
             # slice not possible
             return None
-        alpha = compute_alpha(slice_origin[2], slice_info.value, slice_info.width)
+        alpha = compute_alpha(slice_origin[2], slice_info.z_value, slice_info.z_width)
         if alpha < 0.0:
             return None
 
@@ -49,7 +48,7 @@ class EllipsoidalIntergratedPeakRepresentation(object):
         # add background shell
         a, b, c, shell_thick = _bkgd_ellipsoid_info(shape_info, slice_info.transform)
         _, major_radius, minor_radius, angle = slice_ellipsoid(peak_origin, *axes, a, b, c,
-                                                               slice_info.value)
+                                                               slice_info.z_value)
         bkgd_width, bkgd_height = 2 * major_radius, 2 * minor_radius
 
         # yapf: disable
@@ -95,7 +94,6 @@ def _signal_ellipsoid_info(shape_info, transform):
     :param shape_info: A dictionary of ellipsoid properties
     :param transform: Transform function to move to the slice frame
     """
-
     def to_ndarray(axis_field):
         s = shape_info[axis_field]
         return np.array([float(x) for x in s.split()], dtype=float)
@@ -234,7 +232,7 @@ def slice_ellipsoid_matrix(origin, zp, ellipMatrix):
     major_axis = eigvectors[:, 1]
     angle = np.rad2deg(np.arctan2(major_axis[1], major_axis[0]))
     slice_origin_xy = -0.5 * linalg.inv(A) @ B
-    slice_origin = np.array((slice_origin_xy[0] + origin[0], slice_origin_xy[1] + origin[1],
-                             z + origin[2]))
+    slice_origin = np.array(
+        (slice_origin_xy[0] + origin[0], slice_origin_xy[1] + origin[1], z + origin[2]))
 
     return slice_origin, major_radius, minor_radius, angle

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
@@ -20,34 +20,58 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IBaseCustomInstrumentView {
+public:
+  IBaseCustomInstrumentView(){};
+  virtual ~IBaseCustomInstrumentView(){};
+  virtual std::string getFile() = 0;
+  virtual void setRunQuietly(const std::string &runNumber) = 0;
+  virtual void observeLoadRun(Observer *listener) = 0;
+  virtual void warningBox(const std::string &message) = 0;
+  virtual void
+  setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) = 0;
+  virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
+  virtual void
+  setUpInstrument(const std::string &fileName,
+                  std::vector<std::function<bool(std::map<std::string, bool>)>>
+                      &instrument) = 0;
+  virtual void addObserver(std::tuple<std::string, Observer *> &listener) = 0;
+  virtual void setupInstrumentAnalysisSplitters(QWidget *analysis) = 0;
+  virtual void setupHelp() = 0;
+};
+
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView
-    : public QSplitter {
+    : public QSplitter,
+      virtual IBaseCustomInstrumentView {
   Q_OBJECT
 
 public:
   explicit BaseCustomInstrumentView(const std::string &instrument,
                                     QWidget *parent = nullptr);
-  std::string getFile();
-  void setRunQuietly(const std::string &runNumber);
-  void observeLoadRun(Observer *listener) {
+  std::string getFile() override;
+  void setRunQuietly(const std::string &runNumber) override;
+  void observeLoadRun(Observer *listener) override {
     m_loadRunObservable->attach(listener);
   };
-  void warningBox(const std::string &message);
-  void setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) {
+  void warningBox(const std::string &message) override;
+  void
+  setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) override {
     m_instrumentWidget = instrument;
   };
-  MantidWidgets::InstrumentWidget *getInstrumentView() {
+  MantidWidgets::InstrumentWidget *getInstrumentView() override {
     return m_instrumentWidget;
   };
   virtual void
   setUpInstrument(const std::string &fileName,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
-                      &instrument);
-  virtual void addObserver(std::tuple<std::string, Observer *> &listener) {
+                      &instrument) override;
+  virtual void
+  addObserver(std::tuple<std::string, Observer *> &listener) override {
     (void)listener;
   };
-  void setupInstrumentAnalysisSplitters(QWidget *analysis);
-  void setupHelp();
+  void setupInstrumentAnalysisSplitters(QWidget *analysis) override;
+  void setupHelp() override;
+
 public slots:
   void fileLoaded();
   void openHelp();
@@ -59,7 +83,7 @@ private:
   QWidget *generateLoadWidget();
   void warningBox(const QString &message);
   Observable *m_loadRunObservable;
-  API::MWRunFiles *m_files;
+  API::FileFinderWidget *m_files;
   QString m_instrument;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QPushButton *m_help;

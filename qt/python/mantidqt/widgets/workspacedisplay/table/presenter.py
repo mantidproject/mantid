@@ -66,11 +66,9 @@ class TableWorkspaceDataPresenter(object):
         num_cols = self.model.get_number_of_columns()
         table.setColumnCount(num_cols)
 
-        # the table should be editable if the ws is not PeaksWS
-        editable = not self.model.is_peaks_workspace()
-
         for col in range(num_cols):
             column_data = self.model.get_column(col)
+            editable = self.model.is_editable_column(col)
             for row in range(num_rows):
                 item = WorkbenchTableWidgetItem(column_data[row], editable=editable)
                 table.setItem(row, col, item)

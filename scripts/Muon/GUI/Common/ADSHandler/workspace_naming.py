@@ -192,7 +192,8 @@ def get_fft_component_from_workspace_name(input_workspace):
 
 def get_run_number_from_workspace_name(workspace_name, instrument):
     run = re.findall(r'%s(\d+)' % instrument, workspace_name)
-    return run[0]
+    if run:
+        return run[0]
 
 
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
@@ -235,3 +236,17 @@ def create_parameter_table_name(input_workspace_name, function_name):
     name = input_workspace_name + '; Fitted Parameters;' + function_name
 
     return name, directory
+
+
+def remove_rebin_from_name(name):
+    if REBIN_STR not in name:
+        return name
+    index =  [ch.start() for ch in re.finditer(r";",name)]
+    return name[:index[-2]]+name[index[-1]:]
+
+
+def add_rebin_to_name(name):
+    if REBIN_STR in name:
+        return name
+    index =  [ch.start() for ch in re.finditer(r";",name)]
+    return name[:index[-1]]+"; "+REBIN_STR+name[index[-1]:]

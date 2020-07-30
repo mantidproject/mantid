@@ -186,6 +186,7 @@ void RunsPresenter::notifyReductionPaused() {
 bool RunsPresenter::resumeAutoreduction() {
   auto const searchString = m_view->getSearchString();
   auto const instrument = m_view->getSearchInstrument();
+  auto const cycle = m_view->getSearchCycle();
 
   if (searchString == "") {
     m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
@@ -194,7 +195,7 @@ bool RunsPresenter::resumeAutoreduction() {
 
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
-  if (m_searcher->searchSettingsChanged(searchString, instrument,
+  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle,
                                         ISearcher::SearchType::AUTO)) {
     // If there are unsaved changes, ask the user first
     if (isOverwritingTablePrevented()) {
@@ -267,8 +268,8 @@ bool RunsPresenter::search(ISearcher::SearchType searchType) {
     return false;
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
-                                    searchType)) {
-    m_messageHandler->giveUserCritical("Catalog login failed", "Error");
+                                    m_view->getSearchCycle(), searchType)) {
+    m_messageHandler->giveUserCritical("Error starting search", "Error");
     return false;
   }
 
@@ -395,14 +396,11 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
+      if (result.hasError())
+        continue;
       auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
-      if (row.is_initialized()) {
-        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
-                          result.groupName());
-      } else {
-        m_searcher->setSearchResultError(
-            rowIndex, "Theta was not specified in the description.");
-      }
+      assert(row.is_initialized());
+      mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, result.groupName());
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);

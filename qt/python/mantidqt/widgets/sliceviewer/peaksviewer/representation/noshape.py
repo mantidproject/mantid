@@ -29,11 +29,25 @@ class NonIntegratedPeakRepresentation(object):
         """
         peak_origin = slice_info.transform(peak_origin)
         x, y, z = peak_origin
-        alpha = compute_alpha(z, slice_info.value, slice_info.width)
+        alpha = compute_alpha(z, slice_info.z_value, slice_info.z_width)
         painted = None
         if alpha > 0.0:
-            effective_radius = slice_info.width * cls.VIEW_FRACTION
-            painted = Painted(
-                painter, (painter.cross(x, y, effective_radius, alpha=alpha, color=fg_color), ))
+            # Non-integrated peaks have no size in Q space so we create an
+            # effective size. It is scaled according to the current view limits
+            # so not to dominate the view
+            effective_radius = slice_info.z_width * cls.VIEW_FRACTION
+            # yapf: disable
+            effective_bbox = ((x - effective_radius, y - effective_radius),
+                              (x + effective_radius, y + effective_radius))
+            # yapf: enable
+            view_xlim = painter.axes.get_xlim()
+            deltax = view_xlim[1] - view_xlim[0]
+            view_radius = effective_radius
+            if effective_radius > cls.VIEW_FRACTION * deltax:
+                view_radius = cls.VIEW_FRACTION * deltax
+
+            painted = Painted(painter,
+                              (painter.cross(x, y, view_radius, alpha=alpha, color=fg_color), ),
+                              effective_bbox)
 
         return painted

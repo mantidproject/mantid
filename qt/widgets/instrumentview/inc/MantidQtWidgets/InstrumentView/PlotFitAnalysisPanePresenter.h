@@ -15,27 +15,43 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPanePresenter {
+
+public:
+  IPlotFitAnalysisPanePresenter(){};
+  virtual ~IPlotFitAnalysisPanePresenter(){};
+  virtual void destructor() = 0;
+  virtual IPlotFitAnalysisPaneView *getView() = 0;
+  virtual std::string getCurrentWS() = 0;
+  virtual void clearCurrentWS() = 0;
+  virtual void doFit() = 0;
+  virtual void addSpectrum(const std::string &wsName) = 0;
+  virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
+};
+
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter
-    : public QObject {
+    : public QObject,
+      public IPlotFitAnalysisPanePresenter {
   Q_OBJECT
 
 public:
-  PlotFitAnalysisPanePresenter(PlotFitAnalysisPaneView *m_view,
-                               PlotFitAnalysisPaneModel *m_model);
+  explicit PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view,
+                                        PlotFitAnalysisPaneModel *m_model);
   ~PlotFitAnalysisPanePresenter() {
     delete m_model;
     delete m_fitObserver;
   };
-  PlotFitAnalysisPaneView *getView() { return m_view; };
-  std::string getCurrentWS() { return m_currentName; };
-  void clearCurrentWS() { m_currentName = ""; };
-  void doFit();
-  void addSpectrum(const std::string &wsName);
-  void addFunction(Mantid::API::IFunction_sptr func);
+  void destructor() override { this->~PlotFitAnalysisPanePresenter(); };
+  IPlotFitAnalysisPaneView *getView() override { return m_view; };
+  std::string getCurrentWS() override { return m_currentName; };
+  void clearCurrentWS() override { m_currentName = ""; };
+  void doFit() override;
+  void addSpectrum(const std::string &wsName) override;
+  void addFunction(Mantid::API::IFunction_sptr func) override;
 
 private:
   VoidObserver *m_fitObserver;
-  PlotFitAnalysisPaneView *m_view;
+  IPlotFitAnalysisPaneView *m_view;
   PlotFitAnalysisPaneModel *m_model;
   std::string m_currentName;
 };

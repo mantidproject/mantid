@@ -64,6 +64,8 @@ void CalculatePlaczekSelfScattering::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "Workspace with the Self scattering correction");
+  declareProperty("CrystalDensity", EMPTY_DBL(),
+                  "The crystalographic density of the sample material.");
 }
 //----------------------------------------------------------------------------------------------
 /** Validate inputs.
@@ -103,10 +105,15 @@ void CalculatePlaczekSelfScattering::exec() {
     return sum + atom.second["concentration"] * atom.second["bSqrdBar"] *
                      neutronMass / atom.second["mass"];
   };
-
   double summationTerm =
       std::accumulate(atomSpecies.begin(), atomSpecies.end(), 0.0, sumLambda);
 
+  double numberDensity = inWS->sample().getMaterial().numberDensity();
+  double crystalDensity = getProperty("CrystalDensity");
+  double densityRatio = 1.0;
+  if (crystalDensity > 0) {
+    densityRatio = numberDensity / crystalDensity;
+  }
   // get incident spectrum and 1st derivative
   const MantidVec xLambda = incidentWS->readX(0);
   const MantidVec incident = incidentWS->readY(0);
@@ -169,7 +176,7 @@ void CalculatePlaczekSelfScattering::exec() {
             2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 *
             summationTerm;
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
-        y[xIndex] = 1 + inelasticPlaczekSelfCorrection;
+        y[xIndex] = (1 + inelasticPlaczekSelfCorrection) * densityRatio;
       }
       x.back() = wavelength.singleToTOF(xLambda.back());
     } else {

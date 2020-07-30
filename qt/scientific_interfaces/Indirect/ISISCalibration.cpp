@@ -357,7 +357,7 @@ void ISISCalibration::algorithmComplete(bool error) {
 bool ISISCalibration::validate() {
   MantidQt::CustomInterfaces::UserInputValidator uiv;
 
-  uiv.checkMWRunFilesIsValid("Run", m_uiForm.leRunNo);
+  uiv.checkFileFinderWidgetIsValid("Run", m_uiForm.leRunNo);
 
   auto rangeOfPeak = peakRange();
   auto rangeOfBackground = backgroundRange();

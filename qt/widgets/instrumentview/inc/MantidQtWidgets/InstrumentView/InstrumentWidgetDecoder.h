@@ -70,6 +70,7 @@ private:
   Shape2D *decodeEllipse(const QMap<QString, QVariant> &map);
   Shape2D *decodeRectangle(const QMap<QString, QVariant> &map);
   Shape2D *decodeRing(const QMap<QString, QVariant> &map);
+  Shape2D *decodeSector(const QMap<QString, QVariant> &map);
   Shape2D *decodeFree(const QMap<QString, QVariant> &map);
 
   void decodeAlignmentInfo(const QList<QVariant> &list,

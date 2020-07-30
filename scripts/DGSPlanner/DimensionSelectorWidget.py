@@ -255,11 +255,14 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
                 self.dimMax[senderIndex]=numpy.inf
                 color = '#ffffff'
             else:
-                tempvalue=float(sender.text())
-                self.dimMax[senderIndex]=tempvalue
-                if tempvalue>self.dimMin[senderIndex]:
-                    color = '#ffffff'
-                else:
+                try:
+                    tempvalue=float(sender.text())
+                    self.dimMax[senderIndex]=tempvalue
+                    if tempvalue>self.dimMin[senderIndex]:
+                        color = '#ffffff'
+                    else:
+                        color = '#ff0000'
+                except ValueError:
                     color = '#ff0000'
         minSenders[senderIndex].setStyleSheet('QLineEdit { background-color: %s }' % color)
         maxSenders[senderIndex].setStyleSheet('QLineEdit { background-color: %s }' % color)

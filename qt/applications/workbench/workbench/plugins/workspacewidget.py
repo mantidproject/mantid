@@ -11,6 +11,7 @@ from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
+from mantidqt.plotting import functions
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
@@ -59,6 +60,9 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.showDetectorsClicked.connect(self._do_show_detectors)
         self.workspacewidget.plotAdvancedClicked.connect(partial(self._do_plot_spectrum,
                                                                  errors=False, overplot=False, advanced=True))
+        self.workspacewidget.plotSurfaceClicked.connect(partial(self._do_plot_3D, plot_type='surface'))
+        self.workspacewidget.plotWireframeClicked.connect(partial(self._do_plot_3D, plot_type='wireframe'))
+        self.workspacewidget.plotContourClicked.connect(partial(self._do_plot_3D, plot_type='contour'))
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -122,12 +126,30 @@ class WorkspaceWidget(PluginWidget):
         Plot a colorfill from the selected workspaces
 
         :param names: A list of workspace names
+        :param contour: An optional bool for whether to draw contour lines.
         """
         try:
-            pcolormesh(self._ads.retrieveWorkspaces(names, unrollGroups=True))
+            pcolormesh(names)
         except BaseException:
             import traceback
             traceback.print_exc()
+
+    def _do_plot_3D(self, workspaces, plot_type):
+        """
+        Make a 3D plot from the selected workspace.
+
+        :param workspaces: A list of workspace names.
+        :param plot_type: The type of 3D plot, either 'surface', 'wireframe', or 'contour'.
+        """
+        plot_function = getattr(functions, f'plot_{plot_type}', None)
+
+        if plot_function is None:
+            return
+
+        try:
+            plot_function(workspaces)
+        except RuntimeError as re:
+            logger.error(str(re))
 
     def _do_sample_logs(self, names):
         """
@@ -157,8 +179,8 @@ class WorkspaceWidget(PluginWidget):
             except Exception as exception:
                 logger.warning("Could not open slice viewer for workspace '{}'."
                                "".format(ws.name()))
-                logger.debug("{}: {}".format(type(exception).__name__,
-                                             exception))
+                logger.warning("{}: {}".format(type(exception).__name__,
+                                               exception))
 
     def _do_show_instrument(self, names):
         """
@@ -173,7 +195,7 @@ class WorkspaceWidget(PluginWidget):
                     presenter.show_view()
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace "
-                                   "'{}':\n{}.\n".format(ws.name(), exception))
+                                   "'{}':\n{}\n".format(ws.name(), exception))
             else:
                 logger.warning("Could not show instrument for workspace '{}':"
                                "\nNo instrument available.\n"
@@ -236,9 +258,12 @@ class WorkspaceWidget(PluginWidget):
             self._do_show_data([name])
         except ValueError:
             if hasattr(ws, 'blocksize') and ws.blocksize() == 1:
-                #this is just single bin data, it makes more sense to plot the bin
-                plot_kwargs = {"axis": MantidAxType.BIN}
-                plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
+                #If this is ws is just a single value show the data, else plot the bin
+                if hasattr(ws, 'getNumberHistograms') and ws.getNumberHistograms() == 1:
+                    self._do_show_data([name])
+                else:
+                    plot_kwargs = {"axis": MantidAxType.BIN}
+                    plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
             else:
                 plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 

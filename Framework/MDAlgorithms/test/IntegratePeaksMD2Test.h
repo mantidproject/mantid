@@ -28,6 +28,7 @@
 #include <cxxtest/TestSuite.h>
 #include <random>
 
+#include <MantidDataObjects/PeakShapeEllipsoid.h>
 #include <Poco/File.h>
 
 using Mantid::API::AnalysisDataService;
@@ -51,11 +52,12 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD2 with the given peak radius integration param */
-  static void
-  doRun(double PeakRadius, double BackgroundRadius,
-        const std::string &OutputWorkspace = "IntegratePeaksMD2Test_peaks",
-        double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false,
-        const std::string &fnct = "NoFit", double adaptive = 0.0) {
+  static void doRun(double PeakRadius, double BackgroundRadius,
+                    std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
+                    double BackgroundStartRadius = 0.0, bool edge = true,
+                    bool cyl = false, std::string fnct = "NoFit",
+                    double adaptive = 0.0, bool ellip = false,
+                    bool fixQAxis = false) {
     IntegratePeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -71,6 +73,8 @@ public:
         alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMD2Test_peaks"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ellipsoid", ellip));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixQAxis", fixQAxis));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Cylinder", cyl));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CylinderLength", 4.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PercentBackground", 20.0));
@@ -123,6 +127,65 @@ public:
         algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(
         algF.setProperty("PeakParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.execute());
+    TS_ASSERT(algF.isExecuted());
+  }
+
+  //-------------------------------------------------------------------------------
+  /** Add a fake ellipsoid peak */
+  static void addEllipsoid(size_t num, double x, double y, double z,
+                           std::vector<std::vector<double>> eigvects,
+                           std::vector<double> eigvals, double doCounts) {
+
+    std::ostringstream mess;
+    mess << num << ", " << x << ", " << y << ", " << z << ", ";
+    // add in eigenvects
+    for (size_t ivect = 0; ivect < eigvects.size(); ivect++) {
+      std::copy(eigvects[ivect].begin(), eigvects[ivect].end(),
+                std::ostream_iterator<double>(mess, ", "));
+    }
+    // add in eigenvalues
+    std::copy(eigvals.begin(), eigvals.end(),
+              std::ostream_iterator<double>(mess, ", "));
+    // doCounts
+    mess << doCounts;
+
+    std::ostringstream seed;
+    seed << 77;
+
+    FakeMDEventData algF;
+    TS_ASSERT_THROWS_NOTHING(algF.initialize())
+    TS_ASSERT(algF.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("EllipsoidParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("RandomSeed", seed.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.execute());
+    TS_ASSERT(algF.isExecuted());
+  }
+
+  //-------------------------------------------------------------------------------
+  /** Add a fake uniform  background*/
+  static void addUniform(size_t num,
+                         std::vector<std::pair<double, double>> range) {
+    // each element of range is a pair min max
+
+    std::ostringstream mess;
+    mess << num;
+    // add in eigenvects
+    for (size_t d = 0; d < range.size(); d++) {
+      mess << ", " << range[d].first << ", " << range[d].second;
+    }
+
+    FakeMDEventData algF;
+    TS_ASSERT_THROWS_NOTHING(algF.initialize())
+    TS_ASSERT(algF.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("UniformParams", mess.str().c_str()));
     TS_ASSERT_THROWS_NOTHING(algF.execute());
     TS_ASSERT(algF.isExecuted());
   }
@@ -370,6 +433,158 @@ public:
     TSM_ASSERT_LESS_THAN("Peak intensity is lower if you do not include the "
                          "spacer shell (higher background)",
                          peakWS->getPeak(0).getIntensity(), 1500);
+  }
+
+  //-------------------------------------------------------------------------------
+  //// Tests of ellipsoidal integration
+
+  void test_exec_EllipsoidNoBackground_SingleCount() {
+    EllipsoidTestHelper(-1.0, false, false);
+  }
+  void test_exec_EllipsoidNoBackground_SingleCount_FixQAxis() {
+    EllipsoidTestHelper(-1.0, true, false);
+  }
+  void test_exec_EllipsoidNoBackground_NonSingleCount() {
+    EllipsoidTestHelper(1.0, false, false);
+  }
+  void test_exec_EllipsoidNoBackground_NonSingleCount_FixQAxis() {
+    EllipsoidTestHelper(1.0, true, false);
+  }
+  void test_exec_EllipsoidWithBackground_SingleCount() {
+    EllipsoidTestHelper(-1.0, false, true);
+  }
+
+  void EllipsoidTestHelper(double doCounts, bool fixQAxis, bool doBkgrd) {
+    // doCounts < 0 -> all events have a count of 1
+    // doCounts > 0 -> counts follow multivariate normal dist
+
+    createMDEW();
+
+    // peak Q
+    V3D Q(1.0, 0.0, 0.0);
+    // set eigenvectors and eigenvalues
+    std::vector<std::vector<double>> eigenvects;
+    std::vector<double> eigenvals;
+    eigenvects.push_back(std::vector<double>{Q[0], Q[1], Q[2]}); // para Q
+    eigenvals.push_back(0.05);
+    // other orthogonal axes
+    eigenvects.push_back(std::vector<double>{0.0, 1.0, 0.0});
+    eigenvals.push_back(0.03);
+    eigenvects.push_back(std::vector<double>{0.0, 0.0, 1.0});
+    eigenvals.push_back(0.02);
+    size_t numEvents = 20000;
+    addEllipsoid(numEvents, Q[0], Q[1], Q[2], eigenvects, eigenvals, doCounts);
+
+    // radius for integration (4 stdevs of principal axis)
+    auto peakRadius = 4 * sqrt(eigenvals[0]);
+    double bgInnerRadius = 0.0;
+    double bgOuterRadius = 0.0;
+
+    // background w
+    if (doBkgrd == true) {
+      // add random uniform
+      bgInnerRadius = peakRadius;
+      bgOuterRadius =
+          peakRadius * pow(2.0, 1.0 / 3.0); // twice vol of peak sphere
+      std::vector<std::pair<double, double>> range;
+      for (size_t d = 0; d < eigenvals.size(); d++) {
+        range.push_back(std::pair(Q[d] - bgOuterRadius, Q[d] + bgOuterRadius));
+      }
+      addUniform(static_cast<size_t>(numEvents), range);
+    }
+
+    // Make a fake instrument - doesn't matter, we won't use it really
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    peakWS->addPeak(Peak(inst, 1, 1.0, Q));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    // Integrate and copy to a new peaks workspace
+    doRun(peakRadius, bgOuterRadius, "IntegratePeaksMD2Test_peaks_out",
+          bgInnerRadius, false, /* edge correction */
+          false,                /* cylinder*/
+          "NoFit", 0.0,         /* adaptive*/
+          true,                 /* ellipsoid integration*/
+          fixQAxis);            /* fix Q axis of ellipsoid*/
+
+    // Old workspace is unchanged
+    TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
+
+    PeaksWorkspace_sptr newPW = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(newPW);
+
+    // test integrated counts
+    if (doCounts < 0) {
+      if (doBkgrd == true) {
+        // use slightly more lenient tolerance
+        TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
+                        static_cast<double>(numEvents),
+                        ceil(0.005 * static_cast<double>(numEvents)));
+      } else {
+        TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
+                        static_cast<double>(numEvents),
+                        ceil(0.002 * static_cast<double>(numEvents)));
+      }
+    } else {
+      // sum = 0.2175*Npts (for 3D from simulation regardless of covar etc.)
+      TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
+                      static_cast<double>(numEvents) * 0.2175,
+                      static_cast<double>(numEvents) * 0.0015);
+    }
+
+    // retrieve the peak
+    IPeak &iPeak = newPW->getPeak(0);
+    Peak *const peak = dynamic_cast<Peak *>(&iPeak);
+    TS_ASSERT(peak);
+
+    // Get the peak's shape
+    const PeakShape &shape = peak->getPeakShape();
+    PeakShapeEllipsoid const *const ellipsoidShape =
+        dynamic_cast<PeakShapeEllipsoid *>(const_cast<PeakShape *>(&shape));
+
+    // Check the shape is what we expect
+    TSM_ASSERT("Wrong sort of peak", ellipsoidShape);
+
+    // get radii
+    auto radii = ellipsoidShape->abcRadii();
+    auto axes = ellipsoidShape->directions();
+
+    // sort by radius (in descending order)
+    std::vector<size_t> isort(radii.size());
+    std::iota(isort.begin(), isort.end(), 0);
+    std::sort(isort.begin(), isort.end(),
+              [&](size_t ii, size_t jj) { return radii[ii] > radii[jj]; });
+
+    // loop over eigen vectors
+    for (size_t ivect = 0; ivect < eigenvals.size(); ivect++) {
+      auto rad = peakRadius * sqrt(eigenvals[ivect] / eigenvals[0]);
+      double angle = axes[isort[ivect]].angle(V3D(
+          eigenvects[ivect][0], eigenvects[ivect][1], eigenvects[ivect][2]));
+      if (angle > M_PI / 2) {
+        // axis is flipped
+        angle = M_PI - angle;
+      }
+      if ((fixQAxis == true) & (ivect == 0)) {
+        // first axis should be parallel to Q
+        TS_ASSERT_EQUALS(isort[ivect], 0)
+        TS_ASSERT_DELTA(radii[isort[ivect]], rad, 1E-10);
+        TS_ASSERT_DELTA(angle, 0, 1E-10);
+      } else {
+        // compare eigenvalue (radii propto sqrt eigenval)
+        if (doBkgrd == true) {
+          // use much more lenient tolerance
+          TS_ASSERT_DELTA(radii[isort[ivect]], rad, 0.15 * rad);
+        } else {
+          TS_ASSERT_DELTA(radii[isort[ivect]], rad, 0.05 * rad);
+        }
+        TS_ASSERT_DELTA(angle, 0, M_PI * (5.0 / 180.0));
+      }
+    }
   }
 
   void test_writes_out_selected_algorithm_parameters() {

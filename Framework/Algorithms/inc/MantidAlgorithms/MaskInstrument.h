@@ -6,25 +6,27 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** Mask specified detectors in an instrument. This is does NOT clear the data
-  in associated spectra in the workspace.  To clear the data manually
-  `ClearMaskedSpectra` can be called.
+/** Mask specified detectors in an instrument.
 
   @author Simon Heybrock
   @date 2017
 */
-class MANTID_ALGORITHMS_DLL MaskInstrument : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL MaskInstrument : public API::DistributedAlgorithm,
+                                             public API::DeprecatedAlgorithm {
 public:
+  MaskInstrument();
+
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"MaskDetectors", "ClearMaskedSpectra"};
+    return {"MaskDetectors"};
   }
   const std::string category() const override;
   const std::string summary() const override;

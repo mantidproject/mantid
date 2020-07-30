@@ -343,7 +343,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   m_sharedMenuBar = new QMenuBar(nullptr);
   m_sharedMenuBar->setNativeMenuBar(true);
 #endif
-  setWindowTitle(tr("MantidPlot - untitled")); // Mantid
+  setWindowTitle(
+      tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
   setObjectName("main application");
   initGlobalConstants();
   QPixmapCache::setCacheLimit(20 * QPixmapCache::cacheLimit());
@@ -487,8 +488,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
     }
 
     const QString scriptPath = scriptsDir + '/' + pyQtInterfaceFile;
-
-    if (QFileInfo(scriptPath).exists()) {
+    if (pyQtInterfaceFile.toStdString() ==
+        "Sample_Transmission_Calculator.py") {
+    } else if (QFileInfo(scriptPath).exists()) {
       const QString pyQtInterfaceName =
           QFileInfo(scriptPath).baseName().replace("_", " ");
       m_interfaceNameDataPairs.append(qMakePair(pyQtInterfaceName, scriptPath));
@@ -1081,7 +1083,8 @@ void ApplicationWindow::initToolBars() {
 
 void ApplicationWindow::insertTranslatedStrings() {
   if (projectname == "untitled")
-    setWindowTitle(tr("MantidPlot - untitled")); // Mantid
+    setWindowTitle(
+        tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
 
   QStringList labels;
   labels << "Name"
@@ -4629,7 +4632,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   cacheWorkingDirectory();
   projectname = filename;
-  setWindowTitle("MantidPlot - " + filename);
+  setWindowTitle("MantidPlot (End of Life, use Workbench) - " + filename);
 
   d_opening_file = true;
 
@@ -6017,7 +6020,7 @@ bool ApplicationWindow::saveProject(bool compress) {
   ProjectSerialiser serialiser(this);
   serialiser.save(projectname, compress);
 
-  setWindowTitle("MantidPlot - " + projectname);
+  setWindowTitle("MantidPlot (End of Life, use Workbench) - " + projectname);
   savedProject();
 
   if (autoSave) {
@@ -6085,7 +6088,7 @@ void ApplicationWindow::prepareSaveProject() { execSaveProjectDialog(); }
  * The project was just saved. Update the main window.
  */
 void ApplicationWindow::postSaveProject() {
-  setWindowTitle("MantidPlot - " + projectname);
+  setWindowTitle("MantidPlot (End of Life, use Workbench) - " + projectname);
 
   if (autoSave) {
     if (savingTimerId)
@@ -9713,7 +9716,8 @@ void ApplicationWindow::newProject(const bool doNotSave) {
   folders->blockSignals(false);
 
   // Reset everything else
-  setWindowTitle(tr("MantidPlot - untitled")); // Mantid
+  setWindowTitle(
+      tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
   projectname = "untitled";
 
   if (actionSaveProject)
@@ -13598,7 +13602,8 @@ ApplicationWindow *ApplicationWindow::importOPJ(const QString &filename,
     if (newProject)
       app = new ApplicationWindow(factorySettings);
 
-    app->setWindowTitle("MantidPlot - " + filename); // Mantid
+    app->setWindowTitle("MantidPlot (End of Life, use Workbench) - " +
+                        filename); // Mantid
     app->restoreApplicationGeometry();
     app->projectname = filename;
     app->recentProjects.removeAll(filename);

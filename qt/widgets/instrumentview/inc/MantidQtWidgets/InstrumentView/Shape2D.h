@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "RectF.h"
 
 #include <QColor>
+#include <QPainterPath>
 #include <QPointF>
-
 class QPainter;
-class QPainterPath;
 class QMouseEvent;
 class QWheelEvent;
 
@@ -299,6 +299,67 @@ protected:
   Shape2D *m_inner_shape;
   double m_xWidth;
   double m_yWidth;
+};
+
+/**
+ * A sector: area defined by two concentric arcs of circle, of radii innerRadius
+ * and outerRadius, interrupted at angles startAngle and endAngle.
+ * It is basically a slice of a circular ring.
+ *
+ * The constructor takes a center QPointF property, representing the center of
+ * the circles, the 2 limit angles, and the 2 radii for the circles.
+ *
+ * startAngle and endAngle are expressed in radians within the object, ranging
+ * from 0 to 2*pi, and are only changed to degrees for the user.
+ *
+ */
+class Shape2DSector : public Shape2D {
+public:
+  Shape2DSector(double innerRadius, double outerRadius, double startAngle,
+                double endAngle, const QPointF &center);
+  Shape2DSector(const Shape2DSector &sector);
+  Shape2D *clone() const override { return new Shape2DSector(*this); }
+  bool selectAt(const QPointF &p) const override;
+  bool contains(const QPointF &p) const override;
+  // double properties
+  QStringList getDoubleNames() const override;
+  double getDouble(const QString &prop) const override;
+  void setDouble(const QString &prop, double value) override;
+  // QPointF properties
+  QStringList getPointNames() const override { return QStringList("center"); }
+  QPointF getPoint(const QString &prop) const override;
+  void setPoint(const QString &prop, const QPointF &value) override;
+
+  /// Because setting the new bounding box makes no sense, this is just
+  /// overridden and does nothing at all
+  virtual void setBoundingRect(const RectF &rect) override { UNUSED_ARG(rect); }
+
+  /// Load state for the shape from a project file
+  static Shape2D *loadFromProject(const std::string &lines);
+  /// Save state for the shape to a project file
+  virtual std::string saveToProject() const override;
+  std::string type() const override { return "sector"; }
+
+protected:
+  void drawShape(QPainter &painter) const override;
+  void addToPath(QPainterPath & /*path*/) const override {}
+  void refit() override;
+  void resetBoundingRect() override;
+  size_t getShapeNControlPoints() const override { return 4; }
+  QPointF getShapeControlPoint(size_t i) const override;
+  void setShapeControlPoint(size_t i, const QPointF &pos) override;
+  double m_innerRadius;
+  double m_outerRadius;
+  double m_startAngle;
+  double m_endAngle;
+  QPointF m_center;
+
+private:
+  void computeScaling(const QPointF &BBoxCorner,
+                      const QPointF &BBoxOpposedCorner,
+                      const QPointF &bRectCorner, int vertexIndex);
+  QRectF findSectorBoundingBox();
+  double distanceBetween(const QPointF &, const QPointF &) const;
 };
 
 /**

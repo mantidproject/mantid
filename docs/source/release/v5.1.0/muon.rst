@@ -29,11 +29,29 @@ New Features
 - On the fitting tab, only one fit object (fit output and input workspaces) will be shown at a time.
 - Addition of background correction algorithm (PSIBackgroundCorrection) to remove the background present in
   PSI bin data loaded using LoadPSIMuonBin.
+- Addition of a LoadMuonNexusV2 algorithm to load the new Muon V2 files, see :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>`.
+- Updated rounding for time zero and first good data to be 3 decimal places.
+- Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
 
 Improvements
 -------------
 - Improved the plotting code the Muon Analysis interface, with a significant amount of redundant code removed.
   This code improvement will lead to more maintainable code, which will be more stable and
   easier to add new functionality in the future.
+- Improved the maintainability of the fitting code in the Muon Analysis interface by removing redundant and duplicated code.
+  These changes will make the addition of new functionality in the future easier.
+- The plot guess option within the fitting tab will now update when a parameter is changed.
+- Have updated the FDA GUI so that it functions correctly for frquency transforms and single fits.
+- Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
+- Updated :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` to allow double pulse fits.
+- Tf asymmetry mode can now be performed on double pulse fits from the muon analysis GUI.
+
+Bug fixes
+---------
+- Fixed an issue where ties set in Muon Analysis were not being respected.
+- The plot will always match the state of the `Plot raw` checkbox.
+- Fixed a bug that caused rebinned data to override non-binned data.
+- Fixed an issue where switching to simultaneous fit mode was occasionally throwing an exception.
+- Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
 
 :ref:`Release 5.1.0 <v5.1.0>`

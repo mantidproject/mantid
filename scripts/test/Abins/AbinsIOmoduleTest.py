@@ -7,17 +7,17 @@
 import unittest
 import numpy as np
 from mantid.simpleapi import logger
-from AbinsModules import IOmodule, AbinsTestHelpers
+from abins import IO, test_helpers
 
 
-class AbinsIOmoduleTest(unittest.TestCase):
+class IOTest(unittest.TestCase):
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=["Cars", "temphgfrt"])
+        test_helpers.remove_output_files(list_of_names=["Cars", "temphgfrt"])
 
     @staticmethod
     def _save_stuff():
-        saver = IOmodule(input_filename="Cars.foo", group_name="Volksvagen")
+        saver = IO(input_filename="Cars.foo", group_name="Volksvagen")
 
         # add some attributes
         saver.add_attribute("Fuel", 100)
@@ -41,23 +41,23 @@ class AbinsIOmoduleTest(unittest.TestCase):
         saver.save()
 
     def _save_wrong_attribute(self):
-        poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
+        poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
         poor_saver.add_attribute("BadPassengers", np.array([4]))
         self.assertRaises(ValueError, poor_saver.save)
 
     def _save_wrong_dataset(self):
-        poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
+        poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
         poor_saver.add_data("BadPassengers", 4)
         self.assertRaises(ValueError, poor_saver.save)
 
     def _wrong_filename(self):
-        self.assertRaises(ValueError, IOmodule, input_filename=1, group_name="goodgroup")
+        self.assertRaises(ValueError, IO, input_filename=1, group_name="goodgroup")
 
     def _wrong_groupname(self):
-        self.assertRaises(ValueError, IOmodule, input_filename="goodfile", group_name=1)
+        self.assertRaises(ValueError, IO, input_filename="goodfile", group_name=1)
 
     def _wrong_file(self):
-        poor_loader = IOmodule(input_filename="bumCars", group_name="nice_group")
+        poor_loader = IO(input_filename="bumCars", group_name="nice_group")
         self.assertRaises(IOError, poor_loader.load, list_of_attributes="one_attribute")
 
     def _loading_attributes(self):
@@ -106,7 +106,7 @@ class AbinsIOmoduleTest(unittest.TestCase):
         self._save_wrong_attribute()
         self._save_wrong_dataset()
 
-        self.loader = IOmodule(input_filename="Cars.foo", group_name="Volksvagen")
+        self.loader = IO(input_filename="Cars.foo", group_name="Volksvagen")
 
         self._wrong_filename()
         self._wrong_groupname()

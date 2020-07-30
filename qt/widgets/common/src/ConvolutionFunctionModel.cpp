@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
-#include <iostream>
+
 #include <utility>
 
 namespace {
@@ -76,7 +78,7 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
 
 void ConvolutionFunctionModel::setModel(
     const std::string &background,
-    const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
+    const std::vector<std::pair<std::string, size_t>> &resolutionWorkspaces,
     const std::string &peaks, bool hasDeltaFunction,
     const std::vector<double> &qValues, const bool isQDependent,
     bool hasTempCorrection, double tempValue) {
@@ -154,6 +156,11 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
   if (hasDeltaFunction) {
     auto deltaFunction =
         FunctionFactory::Instance().createFunction("DeltaFunction");
+    auto lowerBound = std::unique_ptr<IConstraint>(
+        ConstraintFactory::Instance().createInitialized(deltaFunction.get(),
+                                                        "0.0 < Height", false));
+    deltaFunction->addConstraint(std::move(lowerBound));
+
     if (!hasTempCorrection) {
       innerFunction->addFunction(deltaFunction);
     } else {
@@ -207,7 +214,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::createConvolutionFunction(
 }
 
 IFunction_sptr ConvolutionFunctionModel::createResolutionFunction(
-    const std::string &workspaceName, int workspaceIndex) {
+    const std::string &workspaceName, size_t workspaceIndex) {
   std::string resolution =
       workspaceName.empty()
           ? "name=Resolution"

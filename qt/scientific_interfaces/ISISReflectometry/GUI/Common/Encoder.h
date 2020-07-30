@@ -15,6 +15,7 @@
 #include <QString>
 #include <QTableWidget>
 #include <QVariant>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {

@@ -10,6 +10,7 @@ from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 
 ui_workspace_selector, _ = load_ui(__file__, "workspace_selector.ui")
 
@@ -49,7 +50,7 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["IM"])
 
         self.time_domain_combo.currentIndexChanged.connect(self.time_or_freq)
-        if self.context._frequency_context:
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
             index = self.time_domain_combo.findText(plot_type)
             if index == -1:
                 index = 0

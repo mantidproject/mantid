@@ -22,6 +22,7 @@ class State(Enum):
 class DimensionWidget(QWidget):
     dimensionsChanged = Signal()
     valueChanged = Signal()
+
     """
     Hold all the individual dimensions
 
@@ -36,13 +37,15 @@ class DimensionWidget(QWidget):
     window.show()
     app.exec_()
     """
-
     def __init__(self, dims_info, parent=None):
         super().__init__(parent)
 
-        self.layout = QVBoxLayout(self)
-        self.dims = []
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self.dims, self.qflags = [], []
         for n, dim in enumerate(dims_info):
+            self.qflags.append(dim['qdim'])
             if dim['type'] == 'MDE':
                 self.dims.append(DimensionMDE(dim, number=n, parent=self))
             else:
@@ -53,7 +56,7 @@ class DimensionWidget(QWidget):
             widget.valueChanged.connect(self.valueChanged)
             if hasattr(widget, 'binningChanged'):
                 widget.binningChanged.connect(self.dimensionsChanged)
-            self.layout.addWidget(widget)
+            layout.addWidget(widget)
 
         self.set_initial_states()
 
@@ -82,7 +85,6 @@ class DimensionWidget(QWidget):
                     d.set_state(State.NONE)
 
         self.check_transpose()
-
         self.dimensionsChanged.emit()
 
     def check_transpose(self):
@@ -105,33 +107,21 @@ class DimensionWidget(QWidget):
             d.name.setMinimumWidth(max_name_width)
             d.units.setMinimumWidth(max_unit_width)
 
-    def get_indices(self):
-        """
-        :return: a list of 3 elements, [X, Y, Z], where X,Y,Z give the index that is set as that dimension.
-        """
-        xdim, ydim, zdim = None, None, None
-        for index, dimension in enumerate(self.dims):
-            state = dimension.get_state()
-            if state == State.X:
-                xdim = index
-            elif state == State.Y:
-                ydim = index
-            elif state == State.NONE:
-                zdim = index
-
-        return [xdim, ydim, zdim]
-
     def get_slicepoint(self):
-        """:return: a list of 3 elements where None indicates a non-slice dimension and a
+        """:return: A list of elements where None indicates a non-slice dimension and a
           float indicates the current slice point in that dimension.
         """
         return [None if d.get_state() in (State.X, State.Y) else d.get_value() for d in self.dims]
 
     def get_slicerange(self):
-        for d in self.dims:
-            if d.get_state() == State.NONE:
-                spinbox = d.spinbox
-                return (spinbox.minimum(), spinbox.maximum())
+        """
+        :return: A list of enumerating the range in each slice dimension. None indicates a non-slice
+        dimension and are in the same positions as the list returned from get_slicepoint
+        """
+        return [
+            None if d.get_state() in (State.X, State.Y) else
+            (d.spinbox.minimum(), d.spinbox.maximum()) for d in self.dims
+        ]
 
     def get_bin_params(self):
         return [
@@ -139,13 +129,14 @@ class DimensionWidget(QWidget):
             for d in self.dims
         ]
 
-    def set_slicevalue(self, value):
+    def set_slicepoint(self, point):
         """
-        Set the value of the slice point in the slice dimension
+        Set the value of the slice point
+        :param point: New value of the slice point
         """
-        for d in self.dims:
-            if d.get_state() == State.NONE:
-                d.set_value(value)
+        for index, value in enumerate(point):
+            if value is not None:
+                self.dims[index].set_value(value)
 
 
 class Dimension(QWidget):
@@ -165,7 +156,6 @@ class Dimension(QWidget):
     window.show()
     app.exec_()
     """
-
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
         super().__init__(parent)
 
@@ -175,17 +165,18 @@ class Dimension(QWidget):
         self.number = number
 
         self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 2, 0, 0)
 
         self.name = QLabel(dim_info['name'])
         self.units = QLabel(dim_info['units'])
 
         self.x = QPushButton('X')
-        self.x.setFixedSize(32, 32)
+        self.x.setFixedSize(26, 26)
         self.x.setCheckable(True)
         self.x.clicked.connect(self.x_clicked)
 
         self.y = QPushButton('Y')
-        self.y.setFixedSize(32, 32)
+        self.y.setFixedSize(26, 26)
         self.y.setCheckable(True)
         self.y.clicked.connect(self.y_clicked)
 
@@ -200,8 +191,12 @@ class Dimension(QWidget):
         self.spinbox.editingFinished.connect(self.spinbox_changed)
 
         self.layout.addWidget(self.name)
-        self.layout.addWidget(self.x)
-        self.layout.addWidget(self.y)
+        self.button_layout = QHBoxLayout()
+        self.button_layout.setContentsMargins(0, 0, 0, 0)
+        self.button_layout.setSpacing(0)
+        self.button_layout.addWidget(self.x)
+        self.button_layout.addWidget(self.y)
+        self.layout.addLayout(self.button_layout)
         self.layout.addWidget(self.slider, stretch=1)
         self.layout.addStretch(0)
         self.layout.addWidget(self.spinbox)
@@ -299,7 +294,6 @@ class DimensionMDE(Dimension):
     window.show()
     app.exec_()
     """
-
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
 
         # hack in a number_of_bins for MDEventWorkspace

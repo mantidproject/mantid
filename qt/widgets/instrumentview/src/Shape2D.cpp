@@ -9,14 +9,15 @@
 
 #include <QMouseEvent>
 #include <QPainter>
-#include <QPainterPath>
 #include <QWheelEvent>
 
 #include <QLine>
 #include <QMap>
+#include <QVector2D>
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <stdexcept>
 
 namespace MantidQt {
@@ -102,6 +103,7 @@ void Shape2D::setControlPoint(size_t i, const QPointF &pos) {
 
   if (i < 4) {
     m_boundingRect.setVertex(i, pos);
+
     refit();
   }
   // else ?
@@ -620,6 +622,588 @@ std::string Shape2DRing::saveToProject() const {
   return tsv.outputLines();
 }
 
+// --- Shape2DSector --- //
+
+Shape2DSector::Shape2DSector(double innerRadius, double outerRadius,
+                             double startAngle, double endAngle,
+                             const QPointF &center) {
+  m_innerRadius = std::min(innerRadius, outerRadius);
+  m_outerRadius = std::max(innerRadius, outerRadius);
+
+  m_startAngle = std::fmod(startAngle, 2 * M_PI);
+  m_endAngle = std::fmod(endAngle, 2 * M_PI);
+  m_center = center;
+  resetBoundingRect();
+}
+
+Shape2DSector::Shape2DSector(const Shape2DSector &sector) {
+  Shape2DSector(sector.m_innerRadius, sector.m_outerRadius, sector.m_startAngle,
+                sector.m_endAngle, sector.m_center);
+}
+/**
+ * @brief Shape2DSector::selectAt
+ * Checks if the sector can be selected at a given point
+ * @param p :: the position to check
+ * @return
+ */
+bool Shape2DSector::selectAt(const QPointF &p) const { return contains(p); }
+
+/**
+ * @brief Shape2DSector::contains
+ * Checks if a given point is inside the sector
+ * @param p :: the position to check
+ * @return
+ */
+bool Shape2DSector::contains(const QPointF &p) const {
+  QPointF relPos = p - m_center;
+
+  double distance = distanceBetween(relPos, QPointF(0, 0));
+  if (distance < m_innerRadius || distance > m_outerRadius) {
+    return false;
+  }
+
+  double angle = std::atan2(relPos.y(), relPos.x());
+  if (angle < 0) {
+    angle += 2 * M_PI;
+  }
+
+  return ((m_startAngle <= angle && angle <= m_endAngle) ||
+          (m_startAngle > m_endAngle &&
+           (angle <= m_endAngle || angle >= m_startAngle)));
+}
+
+/**
+ * @brief Shape2DSector::drawShape
+ * Uses Qt to actually draw the sector shape.
+ * @param painter :: QPainter used for drawing.
+ */
+void Shape2DSector::drawShape(QPainter &painter) const {
+  QPainterPath path;
+  double to_degrees = 180 / M_PI;
+  double x_origin = m_center.x() + std::cos(m_startAngle) * m_innerRadius;
+  double y_origin = m_center.y() + std::sin(m_startAngle) * m_innerRadius;
+
+  double x_arcEnd = m_center.x() + std::cos(m_endAngle) * m_outerRadius;
+  double y_arcEnd = m_center.y() + std::sin(m_endAngle) * m_outerRadius;
+
+  double sweepLength = (m_endAngle - m_startAngle) * to_degrees;
+  if (sweepLength < 0) {
+    sweepLength += 360;
+  }
+
+  path.moveTo(x_origin, y_origin);
+  QRectF absoluteBBox(QPointF(-1, 1), QPointF(1, -1));
+
+  path.arcTo(QRectF(absoluteBBox.topLeft() * m_innerRadius + m_center,
+                    absoluteBBox.bottomRight() * m_innerRadius + m_center),
+             m_startAngle * to_degrees, sweepLength);
+  path.lineTo(x_arcEnd, y_arcEnd);
+  path.arcTo(QRectF(absoluteBBox.topLeft() * m_outerRadius + m_center,
+                    absoluteBBox.bottomRight() * m_outerRadius + m_center),
+             m_endAngle * to_degrees, -sweepLength);
+  path.closeSubpath();
+
+  painter.drawPath(path);
+  if (m_fill_color != QColor()) {
+    painter.fillPath(path, m_fill_color);
+  }
+}
+
+/**
+ * Compute the bounding box of the sector defined by the attributes m_center,
+ * m_startAngle, m_endAngle, m_innerRadius, m_outerRadius (and NOT using
+ * m_boundingBox)
+ **/
+QRectF Shape2DSector::findSectorBoundingBox() {
+  double xMin, xMax, yMin, yMax;
+
+  // checking in turns the limits of the bounding box
+
+  // the yMax value is the outerRaius if the sector reaches pi/2
+  if ((m_startAngle <= M_PI / 2 && m_endAngle >= M_PI / 2) ||
+      (m_startAngle > m_endAngle &&
+       !(m_startAngle >= M_PI / 2 && m_endAngle <= M_PI / 2))) {
+    yMax = m_outerRadius;
+    // else it has to be computed
+  } else {
+    yMax = std::max(std::sin(m_startAngle), std::sin(m_endAngle));
+    yMax = std::max(yMax * m_innerRadius, yMax * m_outerRadius);
+  }
+
+  // xMin is -outerRadius if the sector reaches pi
+  if ((m_startAngle <= M_PI && m_endAngle >= M_PI) ||
+      (m_startAngle > m_endAngle &&
+       !(m_startAngle >= M_PI && m_endAngle <= M_PI))) {
+    xMin = -m_outerRadius;
+  } else {
+    xMin = std::min(std::cos(m_startAngle), std::cos(m_endAngle));
+    xMin = std::min(xMin * m_innerRadius, xMin * m_outerRadius);
+  }
+
+  // yMin is -outerRadius if the sector reaches 3pi/2
+  if ((m_startAngle <= 3 * M_PI / 2 && m_endAngle >= 3 * M_PI / 2) ||
+      (m_startAngle > m_endAngle &&
+       !(m_startAngle >= 3 * M_PI / 2 && m_endAngle <= 3 * M_PI / 2))) {
+    yMin = -m_outerRadius;
+  } else {
+    yMin = std::min(std::sin(m_startAngle), std::sin(m_endAngle));
+    yMin = std::min(yMin * m_innerRadius, yMin * m_outerRadius);
+  }
+
+  // and xMax is outerRadius if the sector reaches 0 (which is equivalent to
+  // this condition, given the constraints on the angles)
+  if (m_startAngle > m_endAngle) {
+    xMax = m_outerRadius;
+  } else {
+    xMax = std::max(std::cos(m_startAngle), std::cos(m_endAngle));
+    xMax = std::max(xMax * m_innerRadius, xMax * m_outerRadius);
+  }
+
+  QPointF topLeft(xMin, yMax);
+  QPointF bottomRight(xMax, yMin);
+  return QRectF(topLeft + m_center, bottomRight + m_center);
+}
+
+/**
+ * @brief Shape2DSector::refit
+ * Enforce coherence between all the parameters defining the sector. Used when
+ * it is updated, mostly when moved or scaled.
+ */
+void Shape2DSector::refit() {
+  constexpr double epsilon = 1e-6;
+
+  // current real bounding box of the sector, based on the attributes, before
+  // the user's modifications take place
+  QRectF BBox = findSectorBoundingBox();
+
+  // corners of the user-modified bounding box
+  QPointF bRectTopLeft(
+      std::min(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
+      std::max(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
+  QPointF bRectBottomRight(
+      std::max(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
+      std::min(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
+
+  // check if the bounding box has been modified
+
+  // since the calculus are made on relatively small numbers, some errors can
+  // progressively appear and stack, so we have to take a range rather than a
+  // strict equality
+  if (BBox.topLeft().x() != bRectTopLeft.x() &&
+      BBox.topLeft().y() != bRectTopLeft.y() &&
+      std::abs(BBox.bottomRight().x() - bRectBottomRight.x()) < epsilon &&
+      std::abs(BBox.bottomRight().y() - bRectBottomRight.y()) < epsilon) {
+
+    // top left corner is moving
+    computeScaling(BBox.topLeft(), BBox.bottomRight(), bRectTopLeft, 0);
+
+  } else if (BBox.topLeft().x() != bRectTopLeft.x() &&
+             BBox.bottomRight().y() != bRectBottomRight.y() &&
+             std::abs(BBox.bottomRight().x() - bRectBottomRight.x()) <
+                 epsilon &&
+             std::abs(BBox.topLeft().y() - bRectTopLeft.y()) < epsilon) {
+
+    // bottom left corner is moving
+    computeScaling(BBox.bottomLeft(), BBox.topRight(),
+                   QPointF(bRectTopLeft.x(), bRectBottomRight.y()), 1);
+
+  } else if (BBox.bottomRight().x() != bRectBottomRight.x() &&
+             BBox.bottomRight().y() != bRectBottomRight.y() &&
+             std::abs(BBox.topLeft().x() - bRectTopLeft.x()) < epsilon &&
+             std::abs(BBox.topLeft().y() - bRectTopLeft.y()) < epsilon) {
+
+    // bottom right corner is moving
+    computeScaling(BBox.bottomRight(), BBox.topLeft(), bRectBottomRight, 2);
+
+  } else if (BBox.bottomRight().x() != bRectBottomRight.x() &&
+             BBox.topLeft().y() != bRectTopLeft.y() &&
+             std::abs(BBox.topLeft().x() - bRectTopLeft.x()) < epsilon &&
+             std::abs(BBox.bottomRight().y() - bRectBottomRight.y()) <
+                 epsilon) {
+
+    // top right corner is moving
+    computeScaling(BBox.topRight(), BBox.bottomLeft(),
+                   QPointF(bRectBottomRight.x(), bRectTopLeft.y()), 3);
+  }
+
+  // check if the shape has moved
+  if ((BBox.bottomRight().x() != bRectBottomRight.x() &&
+       BBox.topLeft().x() != bRectTopLeft.x() &&
+       std::abs((BBox.bottomRight().x() - bRectBottomRight.x()) -
+                (BBox.topLeft().x() - bRectTopLeft.x())) < epsilon) ||
+      (BBox.bottomRight().y() != bRectBottomRight.y() &&
+       BBox.topLeft().y() != bRectTopLeft.y() &&
+       std::abs((BBox.bottomRight().y() - bRectBottomRight.y()) -
+                (BBox.topLeft().y() - bRectTopLeft.y())) < epsilon)) {
+    // every corner has moved by the same distance -> the shape is being moved
+    qreal xDiff = bRectBottomRight.x() - BBox.bottomRight().x();
+    qreal yDiff = bRectBottomRight.y() - BBox.bottomRight().y();
+
+    m_center.setX(m_center.x() + xDiff);
+    m_center.setY(m_center.y() + yDiff);
+    resetBoundingRect();
+  }
+}
+
+/**
+ * @brief Shape2DSector::computeScaling
+ * Used when updating the bounding box after the user dragged a corner. Given
+ * the constraints of a circular sector, the new bounding box cannot be exactly
+ * the one drawed by the mouse of the user, and thus a number of corrections are
+ * needed.
+ * This method thus corrects this new value and then modifies the difining
+ * parameters of the sector accordingly.
+ *
+ * @param BBoxCorner :: the corner modified by the user, before it has been
+ * changed.
+ * @param BBoxOpposedCorner :: the corner diagonally opposed to the one the user
+ * modified, which has not changed
+ * @param bRectCorner :: the new position of the corner moved by the user,
+ * before any correction applies
+ * @param vertexIndex :: the index of the vertex corresponding to the one
+ * modified by the user in m_boundingRect
+ */
+void Shape2DSector::computeScaling(const QPointF &BBoxCorner,
+                                   const QPointF &BBoxOpposedCorner,
+                                   const QPointF &bRectCorner,
+                                   int vertexIndex) {
+
+  // first we need to find the best projection of the new corner on the
+  // diagonal line of the rectangle, so its shape won't be modified, only
+  // scaled.
+  QPointF xProj, yProj, proj;
+  qreal xPos, yPos;
+  QVector2D slope;
+
+  slope = QVector2D(BBoxCorner - BBoxOpposedCorner);
+  xPos = (bRectCorner - BBoxCorner).x();
+  yPos = slope.y() * xPos / slope.x(); // TODO : check if non zero
+  xProj.setX(xPos);
+  xProj.setY(yPos);
+
+  yPos = (bRectCorner - BBoxCorner).y();
+  xPos = slope.x() * yPos / slope.y();
+
+  yProj.setX(xPos);
+  yProj.setY(yPos);
+
+  if (slope.x() != 0 && slope.y() != 0) {
+    if (distanceBetween(xProj, QPointF(0, 0)) <
+        distanceBetween(yProj, QPointF(0, 0))) {
+      proj = xProj;
+    } else {
+      proj = yProj;
+    }
+  } else if (slope.x() != 0) {
+    proj = xProj;
+  } else if (slope.y() != 0) {
+    proj = yProj;
+  } else {
+    // case that is not supposed to happen; it means the sector has been reduced
+    // to a point, which is not possible
+    return;
+  }
+  proj += BBoxCorner;
+
+  // then we need to adapt the shape to the new size
+  qreal ratio = distanceBetween(proj, BBoxOpposedCorner) /
+                distanceBetween(slope.toPointF(), QPointF(0, 0));
+
+  m_boundingRect.setVertex(vertexIndex, proj);
+
+  m_innerRadius *= ratio;
+  m_outerRadius = ratio != 0 ? m_outerRadius * ratio : 1e-4;
+  m_center.setX((m_center.x() - BBoxOpposedCorner.x()) * ratio +
+                BBoxOpposedCorner.x());
+  m_center.setY((m_center.y() - BBoxOpposedCorner.y()) * ratio +
+                BBoxOpposedCorner.y());
+}
+
+/**
+ * @brief Shape2DSector::distanceBetween
+ * Helper method to calculate the distance between 2 QPointF points.
+ * @param p0 :: the first point
+ * @param p1 :: the second point
+ * @return  the distance
+ */
+double Shape2DSector::distanceBetween(const QPointF &p0,
+                                      const QPointF &p1) const {
+  return sqrt(pow(p0.x() - p1.x(), 2) + pow(p0.y() - p1.y(), 2));
+}
+
+/**
+ * @brief Shape2DSector::resetBoundingRect
+ * Compute m_boundingBox using the geometrical parameters of the sector (ie
+ * center, angles and radii)
+ **/
+void Shape2DSector::resetBoundingRect() {
+
+  QRectF BBox = findSectorBoundingBox();
+  // because of how Mantid's rectangles are defined, it is necessary to pass the
+  // arguments in this precise order in order to have a smooth scaling when
+  // creating a shape from top left corner
+  m_boundingRect = RectF(BBox.bottomLeft(), BBox.topRight());
+}
+
+/**
+ * Return coordinates of i-th control point.
+ * 0 controls the outer radius, 1 the inner, 2 the starting angle and 3 the
+ * ending one.
+ * @param i :: Index of a control point. 0 <= i < getNControlPoints().
+ */
+QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
+  double halfAngle =
+      m_startAngle < m_endAngle
+          ? std::fmod((m_startAngle + m_endAngle) / 2., 2 * M_PI)
+          : std::fmod((m_startAngle + m_endAngle + 2 * M_PI) / 2, 2 * M_PI);
+  double halfLength = (m_outerRadius + m_innerRadius) / 2;
+
+  switch (i) {
+  case 0:
+    return QPointF(m_center.x() + std::cos(halfAngle) * m_outerRadius,
+                   m_center.y() + std::sin(halfAngle) * m_outerRadius);
+  case 1:
+    return QPointF(m_center.x() + std::cos(halfAngle) * m_innerRadius,
+                   m_center.y() + std::sin(halfAngle) * m_innerRadius);
+  case 2:
+    return QPointF(m_center.x() + std::cos(m_startAngle) * halfLength,
+                   m_center.y() + std::sin(m_startAngle) * halfLength);
+  case 3:
+    return QPointF(m_center.x() + std::cos(m_endAngle) * halfLength,
+                   m_center.y() + std::sin(m_endAngle) * halfLength);
+  default:
+    return QPointF();
+  }
+}
+
+/**
+ * @brief Shape2DSector::setShapeControlPoint
+ * Modify the sector when the i-th control point is moved.
+ * 0 is outer radius, 1 is inner, 2 is starting angle, 3 is ending.
+ * @param i :: index of the control point changed
+ * @param pos :: the new position of the control point (might not be where it is
+ * palced at the end of the update though, since there are constraints to take
+ * into account)
+ */
+void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
+  QPointF to_center = pos - m_center;
+  constexpr double epsilon = 1e-6;
+  double newAngle;
+
+  switch (i) {
+  case 0:
+    m_outerRadius = distanceBetween(to_center, QPointF(0, 0));
+    if (m_outerRadius < m_innerRadius) {
+      m_outerRadius = m_innerRadius != 0 ? 1.01 * m_innerRadius : 1e-4;
+    }
+    break;
+  case 1:
+    m_innerRadius = distanceBetween(to_center, QPointF(0, 0));
+    if (m_outerRadius < m_innerRadius) {
+      m_innerRadius = 0.99 * m_outerRadius;
+    }
+    break;
+  case 2:
+    newAngle = std::atan2(to_center.y(), to_center.x());
+    if (newAngle < 0)
+      newAngle += 2 * M_PI;
+
+    // conditions to prevent the startAngle from going over the endAngle
+    // this one is in case of trigonometrical rotation
+    if ((m_startAngle < m_endAngle && newAngle >= m_endAngle &&
+         std::abs(newAngle - m_startAngle) < M_PI) ||
+        (newAngle < m_endAngle && m_startAngle < m_endAngle &&
+         std::abs(newAngle - m_startAngle) > M_PI && newAngle < m_startAngle) ||
+        (newAngle > m_endAngle && m_startAngle > m_endAngle &&
+         std::abs(newAngle - m_startAngle) > M_PI && newAngle < m_startAngle)) {
+
+      newAngle = m_endAngle - epsilon;
+
+      if (newAngle < 0) {
+        newAngle += 2 * M_PI;
+      }
+
+      // and this one is in case of clockwise rotation
+    } else if ((m_startAngle > m_endAngle && newAngle <= m_endAngle &&
+                std::abs(newAngle - m_startAngle) < M_PI) ||
+               (newAngle > m_endAngle && m_startAngle > m_endAngle &&
+                std::abs(newAngle - m_startAngle) > M_PI &&
+                newAngle > m_startAngle) ||
+               (newAngle < m_endAngle && m_startAngle < m_endAngle &&
+                std::abs(newAngle - m_startAngle) > M_PI &&
+                newAngle > m_startAngle)) {
+
+      newAngle = m_endAngle + epsilon;
+
+      if (newAngle >= 2 * M_PI) {
+        newAngle -= 2 * M_PI;
+      }
+    }
+
+    m_startAngle = newAngle;
+    break;
+
+  case 3:
+    newAngle = std::atan2(to_center.y(), to_center.x());
+    if (newAngle < 0)
+      newAngle += 2 * M_PI;
+
+    // and conditions to prevent the endAngle from going over the startAngle
+    // trigonometrical rotation
+    if ((m_endAngle < m_startAngle && newAngle >= m_startAngle &&
+         std::abs(newAngle - m_endAngle) < M_PI) ||
+        (newAngle < m_startAngle && m_endAngle < m_startAngle &&
+         std::abs(newAngle - m_endAngle) > M_PI && newAngle < m_endAngle) ||
+        (newAngle > m_startAngle && m_endAngle > m_startAngle &&
+         std::abs(newAngle - m_endAngle) > M_PI && newAngle < m_endAngle)) {
+
+      newAngle = m_startAngle - epsilon;
+
+      if (newAngle < 0) {
+        newAngle += 2 * M_PI;
+      }
+      // clockwise rotation
+    } else if ((m_endAngle >= m_startAngle && newAngle <= m_startAngle &&
+                std::abs(newAngle - m_endAngle) < M_PI) ||
+               (newAngle >= m_startAngle && m_endAngle >= m_startAngle &&
+                std::abs(newAngle - m_endAngle) > M_PI &&
+                newAngle > m_endAngle) ||
+               (newAngle < m_startAngle && m_endAngle < m_startAngle &&
+                std::abs(newAngle - m_endAngle) > M_PI &&
+                newAngle > m_endAngle)) {
+
+      newAngle = m_startAngle + epsilon;
+      if (newAngle >= 2 * M_PI) {
+        newAngle -= 2 * M_PI;
+      }
+    }
+
+    m_endAngle = newAngle;
+    break;
+  default:
+    return;
+  }
+  resetBoundingRect();
+}
+
+/**
+ * @brief Shape2DSector::getDoubleNames
+ * Getter method to access the names of the double attributes
+ * @return
+ */
+QStringList Shape2DSector::getDoubleNames() const {
+  QStringList res;
+  res << "outerRadius"
+      << "innerRadius"
+      << "startAngle"
+      << "endAngle";
+  return res;
+}
+
+/**
+ * @brief Shape2DSector::getDouble
+ * Getter method to access the value of double attributes
+ * @param prop :: the name of the sought attribute
+ * @return
+ */
+double Shape2DSector::getDouble(const QString &prop) const {
+  double to_degrees = 180 / M_PI;
+  if (prop == "outerRadius")
+    return m_outerRadius;
+  if (prop == "innerRadius")
+    return m_innerRadius;
+  if (prop == "startAngle")
+    return m_startAngle * to_degrees;
+  if (prop == "endAngle")
+    return m_endAngle * to_degrees;
+
+  return 0.0;
+}
+
+/**
+ * @brief Shape2DSector::setDouble
+ * Set the value of a double attribute, after some checks, and update the
+ * sector.
+ * @param prop :: the name of the attribute to change
+ * @param value :: the new value
+ */
+void Shape2DSector::setDouble(const QString &prop, double value) {
+  double to_radians = M_PI / 180;
+  if (prop == "outerRadius") {
+    if (m_innerRadius < value)
+      m_outerRadius = value;
+    else
+      m_outerRadius = m_innerRadius != 0 ? 1.01 * m_innerRadius : 1e-4;
+  } else if (prop == "innerRadius") {
+    value = std::max(0.0, value);
+    m_innerRadius = m_outerRadius >= value ? value : 0.99 * m_outerRadius;
+  } else if (prop == "startAngle") {
+    m_startAngle = std::fmod(value, 360);
+    m_startAngle = m_startAngle >= 0 ? m_startAngle : m_startAngle + 360;
+    m_startAngle *= to_radians;
+  } else if (prop == "endAngle") {
+    m_endAngle = std::fmod(value, 360);
+    m_endAngle = m_endAngle >= 0 ? m_endAngle : m_endAngle + 360;
+    m_endAngle *= to_radians;
+  } else
+    return;
+  resetBoundingRect();
+}
+
+/**
+ * @brief Shape2DSector::getPoint
+ * Getter method to access the value of point attributes (ie m_center).
+ * @param prop :: the name of the sought attribute
+ * @return
+ */
+QPointF Shape2DSector::getPoint(const QString &prop) const {
+  if (prop == "center") {
+    return m_center;
+  }
+  return QPointF();
+}
+
+/**
+ * @brief Shape2DSector::setPoint
+ * Set the value of a point attribute, after some checks, and update the
+ * sector.
+ * @param prop :: the name of the point to change
+ * @param value :: the new value
+ */
+void Shape2DSector::setPoint(const QString &prop, const QPointF &value) {
+  if (prop == "center") {
+    m_center = value;
+    resetBoundingRect();
+  }
+}
+
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D with old state applied
+ */
+Shape2D *Shape2DSector::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+  tsv.selectLine("Parameters");
+  double innerRadius, outerRadius, startAngle, endAngle, xCenter, yCenter;
+  tsv >> innerRadius >> outerRadius >> startAngle >> endAngle >> xCenter >>
+      yCenter;
+
+  return new Shape2DSector(innerRadius, outerRadius, startAngle, endAngle,
+                           QPointF(xCenter, yCenter));
+}
+
+/** Save the state of the sector to a Mantid project file
+ * @return a string representing the state of the sector
+ */
+std::string Shape2DSector::saveToProject() const {
+  API::TSVSerialiser tsv;
+
+  tsv.writeLine("Type") << "sector";
+  tsv.writeLine("Parameters") << m_innerRadius << m_outerRadius << m_startAngle
+                              << m_endAngle << m_center.x() << m_center.y();
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
+}
 //------------------------------------------------------------------------------
 
 /// Construct a zero-sized shape.

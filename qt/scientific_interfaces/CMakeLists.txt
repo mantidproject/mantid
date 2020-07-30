@@ -56,6 +56,7 @@ set(TEST_FILES
     test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
     test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
     test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
+    test/ISISReflectometry/Runs/QtCatalogSearcherTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
     test/ISISReflectometry/Options/OptionsDialogPresenterTest.h
@@ -69,8 +70,6 @@ set(TEST_FILES
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     ${CMAKE_CURRENT_LIST_DIR}/test/ScientificInterfacesTestInitialization.h)
-
-find_package(BoostPython REQUIRED)
 
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 4
@@ -93,10 +92,8 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ${CORE_MANTIDLIBS}
                    DataObjects
                    PythonInterfaceCore
-                   ${PYTHON_LIBRARIES}
                    gmock
                    ${POCO_LIBRARIES}
-                   ${Boost_LIBRARIES}
                  QT4_LINK_LIBS
                    Qwt5
                  MTD_QT_LINK_LIBS
@@ -109,7 +106,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  PARENT_DEPENDENCIES
                    GUITests)
 
-set(QT5_TEST_FILES     
+set(QT5_TEST_FILES
     test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h

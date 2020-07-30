@@ -14,17 +14,12 @@ our custom window.
 # std imports
 import numpy as np
 
-# 3rd party imports
-try:
-    from matplotlib.cm import viridis as DEFAULT_CMAP
-except ImportError:
-    from matplotlib.cm import jet as DEFAULT_CMAP
-
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
-                                       create_subplots,raise_if_not_sequence
-from mantid.kernel import Logger
+                                       create_subplots, raise_if_not_sequence
+from mantid.kernel import Logger, ConfigService
+from mantid.plots.datafunctions import add_colorbar_label
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -38,6 +33,9 @@ SUBPLOT_HSPACE = 0.5
 COLORPLOT_MIN_WIDTH = 8
 COLORPLOT_MIN_HEIGHT = 7
 LOGGER = Logger("workspace.plotting.functions")
+DEFAULT_CONTOUR_LEVELS = 2
+DEFAULT_CONTOUR_COLOUR = 'k'
+DEFAULT_CONTOUR_WIDTH = 0.5
 
 # -----------------------------------------------------------------------------
 # 'Public' Functions
@@ -59,7 +57,7 @@ def can_overplot():
     fig = current_figure_or_none()
     if fig is not None:
         figtype = figure_type(fig)
-        if figtype is FigureType.Line or figtype is FigureType.Errorbar:
+        if figtype in [FigureType.Line, FigureType.Errorbar, FigureType.Waterfall]:
             compatible, msg = True, None
 
     return compatible, msg
@@ -192,28 +190,42 @@ def pcolormesh(workspaces, fig=None):
     workspaces_len = len(workspaces)
     fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig)
 
+    plots = []
     row_idx, col_idx = 0, 0
     for subplot_idx in range(nrows * ncols):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             pcm = pcolormesh_on_axis(ax, ws)
-            if pcm:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
-                colorbar_min = np.nanmin(pcm.get_array())
-                colorbar_max = np.nanmax(pcm.get_array())
-                pcm.set_clim(colorbar_min, colorbar_max)
+            plots.append(pcm)
             if col_idx < ncols - 1:
                 col_idx += 1
             else:
                 row_idx += 1
                 col_idx = 0
+
+            if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
+                ax.minorticks_on()
+
+            ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
         else:
             # nothing here
             ax.axis('off')
 
+    # Colour bar limits are wrong if workspace is ragged. Set them manually.
+    # If there are multiple plots limits are the min and max of all the plots
+    colorbar_min = min(np.nanmin(pt.get_array()) for pt in plots)
+    colorbar_max = max(np.nanmax(pt.get_array()) for pt in plots)
+    for pt in plots:
+        pt.set_clim(colorbar_min, colorbar_max)
+
     # Adjust locations to ensure the plots don't overlap
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
-    fig.colorbar(pcm, ax=axes.ravel().tolist(), pad=0.06)
+
+    axes = axes.ravel()
+    colorbar = fig.colorbar(pcm, ax=axes.tolist(), pad=0.06)
+    add_colorbar_label(colorbar, axes)
+
     fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     #assert a minimum size, otherwise we can lose axis labels
     size = fig.get_size_inches()
@@ -234,11 +246,9 @@ def pcolormesh_on_axis(ax, ws):
     ax.clear()
     ax.set_title(ws.name())
     if use_imshow(ws):
-        pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
+        pcm = ax.imshow(ws, cmap=ConfigService.getString("plots.images.Colormap"), aspect='auto', origin='lower')
     else:
-        pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
-    for lbl in ax.get_xticklabels():
-        lbl.set_rotation(45)
+        pcm = ax.pcolormesh(ws, cmap=ConfigService.getString("plots.images.Colormap"))
 
     return pcm
 
@@ -246,3 +256,54 @@ def pcolormesh_on_axis(ax, ws):
 def _validate_pcolormesh_inputs(workspaces):
     """Raises a ValueError if any arguments have the incorrect types"""
     raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
+
+
+@manage_workspace_names
+def plot_surface(workspaces, fig=None):
+    # Imported here to prevent pyplot being imported before matplotlib.use() is called when Workbench is opened.
+    import matplotlib.pyplot as plt
+    for ws in workspaces:
+        if fig:
+            fig.clf()
+            ax = fig.add_subplot(111, projection='mantid3d')
+        else:
+            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+
+        surface = ax.plot_surface(ws, cmap=ConfigService.getString("plots.images.Colormap"))
+        ax.set_title(ws.name())
+        fig.colorbar(surface, ax=[ax])
+        fig.show()
+
+    return fig
+
+
+@manage_workspace_names
+def plot_wireframe(workspaces, fig=None):
+    import matplotlib.pyplot as plt
+    for ws in workspaces:
+        if fig:
+            fig.clf()
+            ax = fig.add_subplot(111, projection='mantid3d')
+        else:
+            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+
+        ax.plot_wireframe(ws)
+        ax.set_title(ws.name())
+        fig.show()
+
+    return fig
+
+
+@manage_workspace_names
+def plot_contour(workspaces, fig=None):
+    for ws in workspaces:
+        fig = pcolormesh(workspaces, fig)
+        ax = fig.get_axes()[0]
+
+        ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
+                   colors=DEFAULT_CONTOUR_COLOUR,
+                   linewidths=DEFAULT_CONTOUR_WIDTH)
+
+        fig.show()
+
+    return fig

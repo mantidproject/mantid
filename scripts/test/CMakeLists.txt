@@ -1,11 +1,13 @@
 set(TEST_PY_FILES
-    AbsorptionShapesTest.py 	
+    AbsorptionShapesTest.py
+    CalculateMuonAsymmetryTest.py
     ConvertToWavelengthTest.py
     CrystalFieldMultiSiteTest.py
     CrystalFieldTest.py
     DirectEnergyConversionTest.py
     DirectPropertyManagerTest.py
     DirectReductionHelpersTest.py
+    DoublePulseFitTest.py
     ErrorReportPresenterTest.py
     IndirectCommonTests.py
     InelasticDirectDetpackmapTest.py
@@ -49,5 +51,6 @@ add_subdirectory(Abins)
 add_subdirectory(directtools)
 add_subdirectory(MultiPlotting)
 add_subdirectory(Muon)
+add_subdirectory(sample_transmission_calculator)
 add_subdirectory(SANS)
 add_subdirectory(TOFTOF)

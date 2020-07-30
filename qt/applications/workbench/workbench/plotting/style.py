@@ -8,7 +8,9 @@
 #
 #
 
-VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot']
+VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot', 'None']
+
+VALID_DRAW_STYLE = ['default', 'steps', 'steps-pre', 'steps-mid', 'steps-post']
 
 VALID_COLORS = {
     'blue': '#1f77b4',

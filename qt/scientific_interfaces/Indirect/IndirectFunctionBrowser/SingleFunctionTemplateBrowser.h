@@ -21,6 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class IDAFunctionParameterEstimation;
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
@@ -33,6 +34,7 @@ class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateBrowser
 public:
   explicit SingleFunctionTemplateBrowser(
       const std::map<std::string, std::string> &functionInitialisationStrings,
+      std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation,
       QWidget *parent = nullptr);
   virtual ~SingleFunctionTemplateBrowser() = default;
   void updateAvailableFunctions(const std::map<std::string, std::string>
@@ -57,15 +59,19 @@ public:
   void clear() override;
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
   void setBackgroundA0(double) override;
   void setResolution(std::string const &, TableDatasetIndex const &) override;
-  void setResolution(const std::vector<std::pair<std::string, int>> &) override;
+  void
+  setResolution(const std::vector<std::pair<std::string, size_t>> &) override;
   void setQValues(const std::vector<double> &) override;
   int getCurrentDataset() override;
   void addParameter(const QString &parameterName,
                     const QString &parameterDescription);
   void setParameterValue(const QString &parameterName, double parameterValue,
                          double parameterError);
+  void setParameterValueQuietly(const QString &parameterName,
+                                double parameterValue, double parameterError);
   void setDataType(const QStringList &allowedFunctionsList);
   void setEnumValue(int enumIndex);
 

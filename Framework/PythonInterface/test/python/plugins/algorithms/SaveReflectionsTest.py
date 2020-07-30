@@ -57,8 +57,8 @@ class SaveReflectionsTest(unittest.TestCase):
             peak.setIntensity(100)
             peak.setSigmaIntensity(10)
             peak.setHKL(1, 1, 1)
+            peak.setAbsorptionWeightedPathLength(1.0)
             ws.addPeak(peak)
-
         return ws
 
     def _create_modulated_peak_table(self):

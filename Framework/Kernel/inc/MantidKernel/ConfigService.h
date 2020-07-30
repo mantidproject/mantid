@@ -15,7 +15,6 @@
 #include <boost/optional/optional.hpp>
 
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -120,13 +119,13 @@ public:
   void saveConfig(const std::string &filename) const;
   /// Searches for a configuration property
   std::string getString(const std::string &keyName,
-                        bool use_cache = true) const;
+                        bool pathAbsolute = true) const;
   /// Searches for a key in the configuration property
   std::vector<std::string> getKeys(const std::string &keyName) const;
   /// Returns a list of all full keys in the config
   std::vector<std::string> keys() const;
   /// Removes the value from a selected keyName
-  void remove(const std::string &rootName) const;
+  void remove(const std::string &rootName);
   /// Checks to see whether a key has a value assigned to it
   bool hasProperty(const std::string &rootName) const;
   /// Checks to see whether the target passed is an executable file
@@ -193,8 +192,6 @@ public:
   void appendDataSearchDir(const std::string &path);
   /// Appends subdirectory to each of the specified data search directories
   void appendDataSearchSubDir(const std::string &subdir);
-  /// Get the list of user search paths
-  const std::vector<std::string> &getUserSearchDirs() const;
   /// Sets instrument directories
   void setInstrumentDirectories(const std::vector<std::string> &directories);
   /// Get instrument search directories
@@ -258,16 +255,11 @@ private:
 
   /// Writes out a fresh user properties file
   void createUserPropertiesFile() const;
-  /// Convert any relative paths to absolute ones and store them locally so that
-  /// if the working directory is altered the paths will not be affected
-  void convertRelativeToAbsolute();
   /// Make a relative path or a list of relative paths into an absolute one.
   std::string makeAbsolute(const std::string &dir,
                            const std::string &key) const;
   /// Create the storage of the data search directories
   void cacheDataSearchPaths();
-  /// Create the storage of the user search directories
-  void cacheUserSearchPaths();
   /// Create the storage of the instrument directories
   void cacheInstrumentPaths();
   /// Returns true if the path is in the data search list
@@ -285,39 +277,32 @@ private:
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
 
-  // Forward declaration of inner class
-  template <class T> class WrappedObject;
   /// the POCO file config object
-  std::unique_ptr<WrappedObject<Poco::Util::PropertyFileConfiguration>> m_pConf;
+  Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> m_pConf;
   /// the POCO system Config Object
-  std::unique_ptr<WrappedObject<Poco::Util::SystemConfiguration>> m_pSysConfig;
+  Poco::AutoPtr<Poco::Util::SystemConfiguration> m_pSysConfig;
 
   /// A set of property keys that have been changed
   mutable std::set<std::string> m_changed_keys;
 
-  /// A map storing string/key pairs where the string denotes a path
-  /// that could be relative in the user properties file
-  /// The boolean indicates whether the path needs to exist or not
-  std::map<std::string, bool> m_ConfigPaths;
-  /// Local storage for the relative path key/values that have been changed
-  std::map<std::string, std::string> m_AbsolutePaths;
   /// The directory that is considered to be the base directory
   std::string m_strBaseDir;
   /// The configuration properties in string format
-  std::string m_PropertyString;
+  std::string m_propertyString;
   /// The filename of the Mantid properties file
   const std::string m_properties_file_name;
   /// The filename of the Mantid user properties file
   const std::string m_user_properties_file_name;
   /// Store a list of data search paths
-  std::vector<std::string> m_DataSearchDirs;
-  /// Store a list of user search paths
-  std::vector<std::string> m_UserSearchDirs;
+  std::vector<std::string> m_dataSearchDirs;
   /// Store a list of instrument directory paths
-  std::vector<std::string> m_InstrumentDirs;
+  std::vector<std::string> m_instrumentDirs;
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;
+
+  /// List of config paths that may be relative
+  std::set<std::string> m_configPaths;
 
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;

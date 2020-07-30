@@ -217,6 +217,12 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_ring_rectangle->setIcon(QIcon(":/PickTools/selection-box-ring.png"));
   m_ring_rectangle->setToolTip("Draw a rectangular ring");
 
+  m_sector = new QPushButton();
+  m_sector->setCheckable(true);
+  m_sector->setAutoExclusive(true);
+  m_sector->setIcon(QIcon(":/PickTools/selection-sector.png"));
+  m_sector->setToolTip("Draw a circular sector");
+
   m_free_draw = new QPushButton();
   m_free_draw->setCheckable(true);
   m_free_draw->setAutoExclusive(true);
@@ -260,7 +266,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_rectangle, 0, 3);
   toolBox->addWidget(m_ring_ellipse, 0, 4);
   toolBox->addWidget(m_ring_rectangle, 0, 5);
-  toolBox->addWidget(m_free_draw, 0, 6);
+  toolBox->addWidget(m_sector, 0, 6);
+  toolBox->addWidget(m_free_draw, 0, 7);
   toolBox->addWidget(m_one, 1, 0);
   toolBox->addWidget(m_tube, 1, 1);
   toolBox->addWidget(m_peak, 1, 2);
@@ -280,6 +287,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_sector, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_edit, SIGNAL(clicked()), this, SLOT(setSelectionType()));
 
@@ -479,6 +487,13 @@ void InstrumentWidgetPickTab::setSelectionType() {
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D(
         "ring rectangle", Qt::green, QColor(255, 255, 255, 80));
+  } else if (m_sector->isChecked()) {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Circular sector");
+    surfaceMode = ProjectionSurface::DrawRegularMode;
+    plotType = DetectorPlotController::Single;
+    m_instrWidget->getSurface()->startCreatingShape2D(
+        "sector", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_free_draw->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Arbitrary shape");
@@ -944,8 +959,9 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
             QString::fromStdString(componentInfo.name(index)) + '\n';
 
     const double integrated = actor.getIntegratedCounts(index);
-    const QString counts =
-        integrated == -1.0 ? "N/A" : QString::number(integrated);
+    const QString counts = integrated == InstrumentActor::INVALID_VALUE
+                               ? "N/A"
+                               : QString::number(integrated);
     text += "Counts: " + counts + '\n';
     // display info about peak overlays
     text += actor.getParameterInfo(index);

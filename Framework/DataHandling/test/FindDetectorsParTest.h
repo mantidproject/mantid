@@ -467,7 +467,7 @@ private:
     spInst->add(source);
     spInst->markAsSource(source);
 
-    Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
+    Geometry::Component *sample = new Geometry::Component("sample");
     sample->setPos(0.0, 0.0, -2);
     spInst->add(sample);
     spInst->markAsSamplePos(sample);

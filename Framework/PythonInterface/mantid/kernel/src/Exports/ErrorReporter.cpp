@@ -24,5 +24,8 @@ void export_ErrorReporter() {
                 bool, std::string, std::string, std::string, std::string>())
 
       .def("sendErrorReport", &ErrorReporter::sendErrorReport, arg("self"),
-           "Sends an error report");
+           "Sends an error report")
+
+      .def("generateErrorMessage", &ErrorReporter::generateErrorMessage,
+           arg("self"), "Generates an error report as a json string");
 }

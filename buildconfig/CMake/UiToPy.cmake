@@ -4,7 +4,7 @@
 
 
 function(UiToPy ui_files target_name)
-  set(py_exec ${PYTHON_EXECUTABLE})
+  set(py_exec ${Python_EXECUTABLE})
   set(py_uic_py ${PYQT4_PYUIC} ) # From FindPyQt4
   set(ui_dir ${CMAKE_CURRENT_SOURCE_DIR})
   set(_outputs "")

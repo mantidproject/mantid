@@ -11,7 +11,7 @@ import sys
 from unittest.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
-from workbench.widgets.settings.general.presenter import GeneralSettings
+from workbench.widgets.settings.general.presenter import GeneralSettings, GeneralProperties
 from qtpy.QtCore import Qt
 
 
@@ -148,12 +148,12 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.action_prompt_save_on_close(True)
 
-        mock_conf.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_ON_CLOSE, True)
+        mock_conf.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, True)
         mock_conf.set.reset_mock()
 
         presenter.action_prompt_save_on_close(False)
 
-        mock_conf.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_ON_CLOSE, False)
+        mock_conf.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, False)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_action_prompt_save_editor_modified(self, mock_CONF):
@@ -161,12 +161,12 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.action_prompt_save_editor_modified(True)
 
-        mock_CONF.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED, True)
+        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, True)
         mock_CONF.set.reset_mock()
 
         presenter.action_prompt_save_editor_modified(False)
 
-        mock_CONF.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED, False)
+        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, False)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
@@ -177,22 +177,22 @@ class GeneralSettingsTest(unittest.TestCase):
         # calls().__bool__() are the calls to bool() on the retrieved value from ConfigService.getString
         # In python 3 it __bool__ is called otherwise __nonzero__ is used
         if sys.version_info < (3,):
-            mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
+            mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
                                             call().__nonzero__(),
-                                            call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
+                                            call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
                                             call().__nonzero__()])
         else:
-            mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
+            mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
                                             call().__bool__(),
-                                            call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
+                                            call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
                                             call().__bool__()])
 
-        mock_ConfigService.getString.assert_has_calls([call(GeneralSettings.PR_RECOVERY_ENABLED),
-                                                       call(GeneralSettings.PR_TIME_BETWEEN_RECOVERY),
-                                                       call(GeneralSettings.PR_NUMBER_OF_CHECKPOINTS),
-                                                       call(GeneralSettings.USE_NOTIFICATIONS),
-                                                       call(GeneralSettings.CRYSTALLOGRAPY_CONV),
-                                                       call(GeneralSettings.OPENGL)])
+        mock_ConfigService.getString.assert_has_calls([call(GeneralProperties.PR_RECOVERY_ENABLED.value),
+                                                       call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
+                                                       call(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value),
+                                                       call(GeneralProperties.USE_NOTIFICATIONS.value),
+                                                       call(GeneralProperties.CRYSTALLOGRAPY_CONV.value),
+                                                       call(GeneralProperties.OPENGL.value)])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_project_recovery_enabled(self, mock_ConfigService):
@@ -201,12 +201,12 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_project_recovery_enabled(True)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.PR_RECOVERY_ENABLED, "True")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_RECOVERY_ENABLED.value, "True")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_project_recovery_enabled(False)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.PR_RECOVERY_ENABLED, "False")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_RECOVERY_ENABLED.value, "False")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_time_between_recovery(self, mock_ConfigService):
@@ -216,7 +216,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         time = "6000"
         presenter.action_time_between_recovery(time)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.PR_TIME_BETWEEN_RECOVERY, time)
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value, time)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_total_number_checkpoints(self, mock_ConfigService):
@@ -226,7 +226,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         num_checkpoints = "532532"
         presenter.action_total_number_checkpoints(num_checkpoints)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.PR_NUMBER_OF_CHECKPOINTS, num_checkpoints)
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value, num_checkpoints)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_instrument_changed(self, mock_ConfigService):
@@ -236,7 +236,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         new_instr = "apples"
         presenter.action_instrument_changed(new_instr)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.INSTRUMENT, new_instr)
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.INSTRUMENT.value, new_instr)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_crystallography_convention(self, mock_ConfigService):
@@ -245,12 +245,12 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_crystallography_convention(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.CRYSTALLOGRAPY_CONV, "Crystallography")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_crystallography_convention(Qt.Unchecked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.CRYSTALLOGRAPY_CONV, "Inelastic")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Inelastic")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_use_open_gl(self, mock_ConfigService):
@@ -259,12 +259,12 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_use_open_gl(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.OPENGL, "On")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.OPENGL.value, "On")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_use_open_gl(Qt.Unchecked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.OPENGL, "Off")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.OPENGL.value, "Off")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_use_notifications_modified(self, mock_ConfigService):
@@ -273,12 +273,12 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.action_use_notifications_modified(Qt.Checked)
 
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.USE_NOTIFICATIONS, "On")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.USE_NOTIFICATIONS.value, "On")
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_use_notifications_modified(Qt.Unchecked)
 
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.USE_NOTIFICATIONS, "Off")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.USE_NOTIFICATIONS.value, "Off")
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_action_font_selected(self, mock_conf):
@@ -288,7 +288,7 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_font = Mock()
         mock_font.toString.return_value = "Serif"
         presenter.action_font_selected(mock_font)
-        mock_conf.set.assert_called_once_with(GeneralSettings.FONT, "Serif")
+        mock_conf.set.assert_called_once_with(GeneralProperties.FONT.value, "Serif")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_show_invisible_workspaces(self, mock_ConfigService):
@@ -297,12 +297,12 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_show_invisible_workspaces(True)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.SHOW_INVISIBLE_WORKSPACES, "True")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, "True")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_show_invisible_workspaces(False)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.SHOW_INVISIBLE_WORKSPACES, "False")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, "False")
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_fill_layout_display(self, mock_CONF):
@@ -351,7 +351,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.save_layout()
 
-        calls = [call(presenter.USER_LAYOUT), call(presenter.USER_LAYOUT)]
+        calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
         mock_CONF.get.assert_has_calls(calls)
         mock_parent.saveState.assert_called_once_with()
         mock_parent.populate_layout_menu.assert_called_once_with()
@@ -372,7 +372,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.load_layout()
 
-        mock_CONF.get.assert_called_once_with(presenter.USER_LAYOUT)
+        mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value)
         mock_parent.restoreState.assert_called_once_with(test_dict['a'])
 
     @patch(WORKBENCH_CONF_CLASSPATH)
@@ -391,7 +391,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.delete_layout()
 
-        calls = [call(presenter.USER_LAYOUT), call(presenter.USER_LAYOUT)]
+        calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
         mock_CONF.get.assert_has_calls(calls)
-        mock_CONF.set.assert_called_once_with(presenter.USER_LAYOUT, {})
+        mock_CONF.set.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, {})
         mock_parent.populate_layout_menu.assert_called_once_with()

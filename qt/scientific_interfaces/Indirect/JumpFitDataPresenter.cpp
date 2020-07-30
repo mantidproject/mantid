@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitDataPresenter.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "JumpFitDataTablePresenter.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -40,6 +41,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
   updateParameterSelectionEnabled();
   m_notifier = Notifier<IFQFitObserver>();
   m_notifier.subscribe(SingleFunctionTemplateBrowser);
+  showParameterComboBoxes();
 }
 
 void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
@@ -55,14 +57,12 @@ void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
 }
 
 void JumpFitDataPresenter::handleMultipleInputSelected() {
-  hideParameterComboBoxes();
   m_notifier.notify([](IFQFitObserver &obs) {
     obs.updateAvailableFunctions(availableFits.at(DataType::ALL));
   });
 }
 
 void JumpFitDataPresenter::handleSingleInputSelected() {
-  showParameterComboBoxes();
   m_dataIndex = TableDatasetIndex{0};
   std::string currentText = m_cbParameterType->currentText().toStdString();
   auto dataType = m_cbParameterType->currentText() == QString("Width")
@@ -250,7 +250,7 @@ JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
           this,
           SLOT(dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *,
                                           const std::string &)));
-  return std::move(dialog);
+  return dialog;
 }
 
 void JumpFitDataPresenter::setMultiInputResolutionFBSuffixes(

@@ -11,6 +11,7 @@
 #include "MantidDataHandling/LoadISISPolarizationEfficiencies.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -38,6 +39,11 @@ public:
   }
   static void destroySuite(LoadISISPolarizationEfficienciesTest *suite) {
     delete suite;
+  }
+
+  LoadISISPolarizationEfficienciesTest() {
+    // To make sure API is initialized properly
+    Mantid::API::FrameworkManager::Instance();
   }
 
   void test_initialization() {

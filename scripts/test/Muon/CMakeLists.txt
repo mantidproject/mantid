@@ -20,6 +20,7 @@ set ( TEST_PY_FILES
    plotting_canvas/plotting_canvas_model_test.py
    external_plotting_model_test.py
    home_runinfo_presenter_test.py
+   home_tab_widget/home_instrument_widget_presenter_test.py
    list_selector/list_selector_view_test.py
    list_selector/list_selector_presenter_test.py
    load_run_widget/loadrun_model_test.py
@@ -135,9 +136,11 @@ set ( TEST_PY_FILES_QT4
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonAlgorithms
-set(PYUNITTEST_QT_API pyqt) # force to use qt4
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt4
-${TEST_PY_FILES_QT4} ${})
+if(ENABLE_MANTIDPLOT)
+    set(PYUNITTEST_QT_API pyqt) # force to use qt4
+    pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt4
+    ${TEST_PY_FILES_QT4} ${})
+endif()
 
 set(PYUNITTEST_QT_API pyqt5) # force to use qt5
 pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt5

@@ -14,7 +14,7 @@ ExternalProject_Add(extern-pyqt4-sip
   INSTALL_DIR ${_SIP_PYQT_INSTALL_DIR}
   URL https://www.riverbankcomputing.com/static/Downloads/sip/4.19.7/sip-4.19.7.tar.gz
   URL_HASH MD5=ae4f2db79713046d61b2a44e5ee1e3ab
-  CONFIGURE_COMMAND "${PYTHON_EXECUTABLE}" "<SOURCE_DIR>/configure.py"
+  CONFIGURE_COMMAND "${Python_EXECUTABLE}" "<SOURCE_DIR>/configure.py"
     --sip-module=PyQt4.sip
     --bindir=<INSTALL_DIR>/bin
     --destdir=<INSTALL_DIR>/lib/site-packages
@@ -51,7 +51,7 @@ ExternalProject_Add(extern-pyqt4
     COMMAND patch -p0 --input ${CMAKE_SOURCE_DIR}/buildconfig/CMake/pyqt4_disable_unnecessary_modules.patch
     # patch configure to pick up sipconfig built above
     COMMAND sed -i -e "/^import sipconfig/i sys.path.insert(0, \"${_pyqt4_lib_site_packages}\")" "<SOURCE_DIR>/configure.py"
-  CONFIGURE_COMMAND "${PYTHON_EXECUTABLE}" "<SOURCE_DIR>/configure.py"
+  CONFIGURE_COMMAND "${Python_EXECUTABLE}" "<SOURCE_DIR>/configure.py"
     --assume-shared
     --confirm-license
     --bindir=<INSTALL_DIR>/bin

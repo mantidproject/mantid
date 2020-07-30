@@ -30,6 +30,7 @@ set(SRC_FILES
     src/H5Util.cpp
     src/ISISDataArchive.cpp
     src/ISISJournal.cpp
+    src/ISISJournalGetExperimentRuns.cpp
     src/ISISRunLogs.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
@@ -43,6 +44,7 @@ set(SRC_FILES
     src/LoadCalFile.cpp
     src/LoadCanSAS1D.cpp
     src/LoadCanSAS1D2.cpp
+    src/LoadCSNSNexus.cpp
     src/LoadDaveGrp.cpp
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
@@ -64,6 +66,7 @@ set(SRC_FILES
     src/LoadILLDiffraction.cpp
     src/LoadILLIndirect2.cpp
     src/LoadILLPolarizationFactors.cpp
+    src/LoadILLPolarizedDiffraction.cpp
     src/LoadILLReflectometry.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
@@ -85,6 +88,10 @@ set(SRC_FILES
     src/LoadMuonNexus.cpp
     src/LoadMuonNexus1.cpp
     src/LoadMuonNexus2.cpp
+    src/LoadMuonNexusV2.cpp
+    src/LoadMuonNexusV2Helper.cpp
+    src/LoadMuonStrategy.cpp
+    src/SinglePeriodLoadMuonStrategy.cpp
     src/LoadNXSPE.cpp
     src/LoadNXcanSAS.cpp
     src/LoadNexus.cpp
@@ -120,6 +127,7 @@ set(SRC_FILES
     src/LoadSampleEnvironment.cpp
     src/LoadSampleShape.cpp
     src/LoadSassena.cpp
+    src/LoadSingleMesh.cpp
     src/LoadSpec.cpp
     src/LoadSpice2D.cpp
     src/LoadSpiceAscii.cpp
@@ -238,6 +246,7 @@ set(INC_FILES
     inc/MantidDataHandling/H5Util.h
     inc/MantidDataHandling/ISISDataArchive.h
     inc/MantidDataHandling/ISISJournal.h
+    inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
     inc/MantidDataHandling/ISISRunLogs.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
@@ -252,6 +261,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadCalFile.h
     inc/MantidDataHandling/LoadCanSAS1D.h
     inc/MantidDataHandling/LoadCanSAS1D2.h
+    inc/MantidDataHandling/LoadCSNSNexus.h
     inc/MantidDataHandling/LoadDaveGrp.h
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
@@ -273,6 +283,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLDiffraction.h
     inc/MantidDataHandling/LoadILLIndirect2.h
     inc/MantidDataHandling/LoadILLPolarizationFactors.h
+    inc/MantidDataHandling/LoadILLPolarizedDiffraction.h
     inc/MantidDataHandling/LoadILLReflectometry.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
@@ -294,6 +305,10 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMuonNexus.h
     inc/MantidDataHandling/LoadMuonNexus1.h
     inc/MantidDataHandling/LoadMuonNexus2.h
+    inc/MantidDataHandling/LoadMuonNexusV2.h
+    inc/MantidDataHandling/LoadMuonNexusV2Helper.h
+    inc/MantidDataHandling/LoadMuonStrategy.h
+    inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
     inc/MantidDataHandling/LoadNXSPE.h
     inc/MantidDataHandling/LoadNXcanSAS.h
     inc/MantidDataHandling/LoadNexus.h
@@ -324,6 +339,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSampleEnvironment.h
     inc/MantidDataHandling/LoadSampleShape.h
     inc/MantidDataHandling/LoadSassena.h
+    inc/MantidDataHandling/LoadSingleMesh.h
     inc/MantidDataHandling/LoadSpec.h
     inc/MantidDataHandling/LoadSpice2D.h
     inc/MantidDataHandling/LoadSpiceAscii.h
@@ -445,6 +461,7 @@ set(TEST_FILES
     H5UtilTest.h
     ISISDataArchiveTest.h
     ISISJournalTest.h
+    ISISJournalGetExperimentRunsTest.h
     InstrumentRayTracerTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
@@ -454,6 +471,7 @@ set(TEST_FILES
     LoadBinaryStlTest.h
     LoadCalFileTest.h
     LoadCanSAS1dTest.h
+    LoadCSNSNexusTest.h
     LoadDaveGrpTest.h
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
@@ -473,6 +491,7 @@ set(TEST_FILES
     LoadILLDiffractionTest.h
     LoadILLIndirect2Test.h
     LoadILLPolarizationFactorsTest.h
+    LoadILLPolarizedDiffractionTest.h
     LoadILLReflectometryTest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
@@ -493,6 +512,7 @@ set(TEST_FILES
     LoadMuonLogTest.h
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
+    LoadMuonNexusV2Test.h
     LoadNGEMTest.h
     LoadNXSPETest.h
     LoadNXcanSASTest.h

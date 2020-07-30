@@ -150,6 +150,9 @@ class PythonFileInterpreter(QWidget):
         # Re-populate the completion API after execution success
         self._presenter.model.sig_exec_success.connect(self.code_completer.update_completion_api)
 
+        # Only load the simpleapi completions if the code editor starts being modified.
+        self.sig_editor_modified.connect(self.code_completer.add_simpleapi_to_completions_if_required)
+
     def closeEvent(self, event):
         self.deleteLater()
         if self.find_replace_dialog:
@@ -325,6 +328,7 @@ class PythonFileInterpreterPresenter(QObject):
             line_from, _, _, _ = editor.getSelection()
         else:
             # run everything in the file
+            self.model.reset_context()
             code_str = editor.text()
             line_from = 0
         return code_str, line_from

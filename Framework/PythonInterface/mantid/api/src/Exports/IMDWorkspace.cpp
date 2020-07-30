@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
@@ -26,7 +26,7 @@ void export_IMDWorkspace() {
 
   boost::python::enum_<Mantid::Kernel::SpecialCoordinateSystem>(
       "SpecialCoordinateSystem")
-      .value("None", Mantid::Kernel::None)
+      .value("NONE", Mantid::Kernel::None)
       .value("QLab", Mantid::Kernel::QLab)
       .value("QSample", Mantid::Kernel::QSample)
       .value("HKL", Mantid::Kernel::HKL);

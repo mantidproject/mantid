@@ -8,6 +8,7 @@
 
 #include <utility>
 
+#include "ConvFitModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -117,7 +118,12 @@ void setFirstBackground(IFunction_sptr function, double value) {
 MatrixWorkspace_sptr castToMatrixWorkspace(const Workspace_sptr &workspace) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
-
+// Need to adjust the guess range so the first data point isn't thrown away
+constexpr double RANGEADJUSTMENT = 1e-5;
+inline void adjustRange(std::pair<double, double> &range) {
+  range.first = (1 - RANGEADJUSTMENT) * range.first;
+  range.second = (1 + RANGEADJUSTMENT) * range.second;
+}
 } // namespace
 
 namespace MantidQt {
@@ -201,11 +207,11 @@ TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
   return m_fittingModel->numberOfWorkspaces();
 }
 
-TableRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
-  TableRowIndex index{0};
+FitDomainIndex IndirectFitPlotModel::getActiveDomainIndex() const {
+  FitDomainIndex index{0};
   for (TableDatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
     if (iws < m_activeIndex) {
-      index += TableRowIndex{m_fittingModel->getNumberOfSpectra(iws)};
+      index += FitDomainIndex{m_fittingModel->getNumberOfSpectra(iws)};
     } else {
       auto const spectra = m_fittingModel->getSpectra(iws);
       try {
@@ -223,7 +229,7 @@ TableRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
 std::string
 IndirectFitPlotModel::getFitDataName(TableDatasetIndex index) const {
   if (m_fittingModel->getWorkspace(index))
-    return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
+    return m_fittingModel->createDisplayName(index);
   return "";
 }
 
@@ -276,8 +282,18 @@ bool IndirectFitPlotModel::canCalculateGuess() const {
     return false;
 
   const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto resolutionLoaded = isResolutionLoaded();
   const auto isEmptyModel = composite && composite->nFunctions() == 0;
-  return getWorkspace() && !isEmptyModel;
+  return getWorkspace() && !isEmptyModel && resolutionLoaded;
+}
+
+bool IndirectFitPlotModel::isResolutionLoaded() const {
+  const auto model = dynamic_cast<ConvFitModel *>(m_fittingModel);
+  if (model) {
+    return m_fittingModel->getResolutionsForFit().size() != 0;
+  }
+  // If its not a ConvFitModel it doesn't require a resolution, so return true
+  return true;
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
@@ -304,14 +320,17 @@ MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
     const MatrixWorkspace_sptr &guessWorkspace) const {
   const auto range = getGuessRange();
   return createInputAndGuessWorkspace(getWorkspace(), std::move(guessWorkspace),
-                                      m_activeSpectrum.value, range.first,
-                                      range.second);
+                                      static_cast<int>(m_activeSpectrum.value),
+                                      range.first, range.second);
 }
 
 std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
+  std::pair<double, double> range;
   if (getResultWorkspace())
-    return getResultRange();
-  return getRange();
+    range = getResultRange();
+  range = getRange();
+  adjustRange(range);
+  return range;
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(

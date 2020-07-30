@@ -43,6 +43,9 @@ public:
   /// Returns the integral intensity of the peak
   double intensity() const override;
 
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
+
 protected:
   void functionLocal(double *out, const double *xValues,
                      const size_t nData) const override;

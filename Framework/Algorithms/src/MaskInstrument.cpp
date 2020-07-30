@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaskInstrument.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -17,6 +19,13 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaskInstrument)
+
+/** Constructor
+ */
+MaskInstrument::MaskInstrument() {
+  useAlgorithm("MaskDetectors");
+  deprecatedDate("2020-07-16");
+}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MaskInstrument::name() const { return "MaskInstrument"; }
@@ -31,8 +40,7 @@ const std::string MaskInstrument::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MaskInstrument::summary() const {
-  return "Mask detectors in the instrument WITHOUT clearing data in associated "
-         "spectra.";
+  return "Mask detectors in the instrument";
 }
 
 void MaskInstrument::init() {
@@ -58,6 +66,15 @@ void MaskInstrument::exec() {
   auto &detectorInfo = outputWS->mutableDetectorInfo();
   for (const auto &id : detectorIds)
     detectorInfo.setMasked(detectorInfo.indexOf(id), true);
+
+  const auto &spectrumInfo = outputWS->spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i))
+      outputWS->getSpectrum(i).clearData();
+  }
+
+  if (auto event = dynamic_cast<DataObjects::EventWorkspace *>(outputWS.get()))
+    event->clearMRU();
 }
 
 } // namespace Algorithms

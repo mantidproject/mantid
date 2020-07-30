@@ -256,7 +256,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -284,7 +284,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -297,10 +297,12 @@ public:
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
         "FixResolution=true,NumDeriv=true,$domains=i;name=Resolution,Workspace="
-        "abc,WorkspaceIndex=1,X=(),Y=();name=DeltaFunction,Height=1,Centre=0);("
+        "abc,WorkspaceIndex=1,X=(),Y=();name=DeltaFunction,Height=1,Centre=0,"
+        "constraints=(0<Height));("
         "composite=Convolution,FixResolution="
         "true,NumDeriv=true,$domains=i;name=Resolution,Workspace=abc,"
-        "WorkspaceIndex=2,X=(),Y=();name=DeltaFunction,Height=1,Centre=0)");
+        "WorkspaceIndex=2,X=(),Y=();name=DeltaFunction,Height=1,Centre=0,"
+        "constraints=(0<Height))");
   }
 
   void test_setModel_with_delta_function_TeixeiraWaterSQE_correct() {
@@ -313,7 +315,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -331,12 +333,13 @@ public:
         "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name="
         "TeixeiraWaterSQE,Q=8.9884656743115785e+307,WorkspaceIndex=2147483647,"
         "Height=1,DiffCoeff=2.3,Tau=1.25,Centre=0;name=DeltaFunction,Height=1,"
-        "Centre=0)));(composite=CompositeFunction,NumDeriv=false,$domains=i;"
+        "Centre=0,constraints=(0<Height))));(composite=CompositeFunction,"
+        "NumDeriv=false,$domains=i;"
         "name=FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
         "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
         ";(name=TeixeiraWaterSQE,Q=8.9884656743115785e+307,WorkspaceIndex="
         "2147483647,Height=1,DiffCoeff=2.3,Tau=1.25,Centre=0;name="
-        "DeltaFunction,Height=1,Centre=0)))");
+        "DeltaFunction,Height=1,Centre=0,constraints=(0<Height))))");
   }
 
   void test_setModel_with_delta_function_TwoLorenztian_correct() {
@@ -350,7 +353,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -366,12 +369,14 @@ public:
         "composite=Convolution,FixResolution=true,NumDeriv=true;name="
         "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name=Lorentzian,"
         "Amplitude=1,PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,"
-        "PeakCentre=0,FWHM=0;name=DeltaFunction,Height=1,Centre=0)));("
+        "PeakCentre=0,FWHM=0;name=DeltaFunction,Height=1,Centre=0,constraints=("
+        "0<Height))));("
         "composite=CompositeFunction,NumDeriv=false,$domains=i;name="
         "FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
         "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
         ";(name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;name=Lorentzian,"
-        "Amplitude=1,PeakCentre=0,FWHM=0;name=DeltaFunction,Height=1,Centre=0))"
+        "Amplitude=1,PeakCentre=0,FWHM=0;name=DeltaFunction,Height=1,Centre=0,"
+        "constraints=(0<Height)))"
         ")");
   }
 
@@ -386,7 +391,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -401,7 +406,8 @@ public:
         "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
         "composite=Convolution,FixResolution=true,NumDeriv=true;name="
         "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name="
-        "DeltaFunction,Height=1,Centre=0;(composite=ProductFunction,NumDeriv="
+        "DeltaFunction,Height=1,Centre=0,constraints=(0<Height);(composite="
+        "ProductFunction,NumDeriv="
         "false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
         "-(x*11.606/"
         "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
@@ -409,7 +415,8 @@ public:
         "));(composite=CompositeFunction,NumDeriv=false,$domains=i;name="
         "FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
         "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
-        ";(name=DeltaFunction,Height=1,Centre=0;(composite=ProductFunction,"
+        ";(name=DeltaFunction,Height=1,Centre=0,constraints=(0<Height);("
+        "composite=ProductFunction,"
         "NumDeriv=false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
         "-(x*11.606/"
         "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
@@ -428,7 +435,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -457,7 +464,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -486,7 +493,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -509,7 +516,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -534,7 +541,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 

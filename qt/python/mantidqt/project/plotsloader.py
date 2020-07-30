@@ -244,6 +244,7 @@ class PlotsLoader(object):
         ax.set_yscale(properties["yAxisScale"])
         ax.set_xlim(properties["xLim"])
         ax.set_ylim(properties["yLim"])
+        ax.show_minor_gridlines = properties["showMinorGrid"]
 
     def update_axis(self, axis_, properties):
         if isinstance(axis_, matplotlib.axis.XAxis):
@@ -276,7 +277,8 @@ class PlotsLoader(object):
         grid_dict = properties["gridStyle"]
         grid_lines = axis_.get_gridlines()
         if grid_dict["gridOn"]:
-            axis_._gridOnMajor = True
+            which = 'both' if grid_dict["minorGridOn"] else "major"
+            axis_.axes.grid(True, axis=axis_.axis_name, which=which)
             for grid_line in grid_lines:
                 grid_line.set_alpha(grid_dict["alpha"])
                 grid_line.set_color(grid_dict["color"])
@@ -289,6 +291,8 @@ class PlotsLoader(object):
 
         if properties["minorTickLocator"] == "FixedLocator":
             axis_.set_minor_locator(ticker.FixedLocator(properties["minorTickLocatorValues"]))
+        elif properties["minorTickLocator"] == "AutoMinorLocator":
+            axis_.set_minor_locator(ticker.AutoMinorLocator())
 
         # Update Major and Minor Formatter
         if properties["majorTickFormatter"] == "FixedFormatter":

@@ -268,6 +268,8 @@ InstrumentWidgetDecoder::decodeShape(const QMap<QString, QVariant> &map) {
       return this->decodeRectangle(map[QString("subShapeMap")].toMap());
     } else if (type == "ring") {
       return this->decodeRing(map[QString("subShapeMap")].toMap());
+    } else if (type == "sector") {
+      return this->decodeSector(map[QString("subShapeMap")].toMap());
     } else if (type == "free") {
       return this->decodeFree(map[QString("subShapeMap")].toMap());
     } else {
@@ -327,6 +329,18 @@ InstrumentWidgetDecoder::decodeRing(const QMap<QString, QVariant> &map) {
 
   const auto baseShape = this->decodeShape(map[QString("shape")].toMap());
   return new Shape2DRing(baseShape, xWidth, yWidth);
+}
+Shape2D *
+InstrumentWidgetDecoder::decodeSector(const QMap<QString, QVariant> &map) {
+  const double outerRadius = map[QString("outerRadius")].toDouble();
+  const double innerRadius = map[QString("innerRadius")].toDouble();
+  const double startAngle = map[QString("startAngle")].toDouble();
+  const double endAngle = map[QString("endAngle")].toDouble();
+  const double centerX = map[QString("centerX")].toDouble();
+  const double centerY = map[QString("centerY")].toDouble();
+
+  return new Shape2DSector(innerRadius, outerRadius, startAngle, endAngle,
+                           QPointF(centerX, centerY));
 }
 
 Shape2D *

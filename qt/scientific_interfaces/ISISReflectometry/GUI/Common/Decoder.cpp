@@ -187,6 +187,7 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
   gui->m_ui.comboSearchInstrument->setCurrentIndex(
       map[QString("comboSearchInstrument")].toInt());
   gui->m_ui.textSearch->setText(map[QString("textSearch")].toString());
+  gui->m_ui.textCycle->setText(map[QString("textCycle")].toString());
 }
 
 namespace HIDDEN_LOCAL {

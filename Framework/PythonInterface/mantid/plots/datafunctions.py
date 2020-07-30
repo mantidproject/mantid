@@ -10,11 +10,11 @@
 import datetime
 
 import numpy as np
-from matplotlib.collections import PolyCollection
+from matplotlib.collections import PolyCollection, QuadMesh
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
-from mpl_toolkits.mplot3d.axes3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -342,6 +342,46 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
     return x, y, dy, dx
 
 
+def get_bin_indices(workspace):
+    """
+    Find the bins' indices, without these of the monitors if there is some.
+    (ie every detector which is not a monitor)
+
+    :param workspace: a Workspace2D or an EventWorkspace
+    :return : the bins' indices as a range if possible, else as a numpy array
+    """
+    total_range = workspace.getNumberHistograms()
+    try:
+        spectrum_info = workspace.spectrumInfo()
+    except:
+        return range(total_range)
+
+    monitors_indices = [index for index in range(total_range)
+                        if spectrum_info.hasDetectors(index) and spectrum_info.isMonitor(index)]
+    monitor_count = len(monitors_indices)
+
+    # If possible, ie the detectors' indices are continuous, we return a range.
+    # If not, we return a numpy array
+    range_start = -1
+    range_end = total_range
+    is_range = True
+    for index, monitor_index in enumerate(monitors_indices):
+        if index == monitor_index:
+            range_start = monitor_index
+        else:
+            if monitor_count - index == total_range - monitor_index and monitors_indices[-1] == total_range - 1:
+                range_end = monitor_index
+            else:
+                is_range = False
+            break
+
+    if is_range:
+        return range(range_start + 1, range_end)
+    else:
+        indices = np.where(np.isin(range(total_range), monitors_indices, invert=True))
+        return indices
+
+
 def get_bins(workspace, wkspIndex, withDy=False):
     """
     Extract all the bins for a spectrum
@@ -351,17 +391,16 @@ def get_bins(workspace, wkspIndex, withDy=False):
     :param withDy: if True, it will return the error in the "counts", otherwise None
 
     """
-    num_hist = workspace.getNumberHistograms()
-    x = range(0, num_hist)
-    y = []
+    bins = get_bin_indices(workspace)
+    y_values = []
     dy = [] if withDy else None
-    for i in x:
-        y.append(workspace.readY(i)[wkspIndex])
+    for bin_index in bins:
+        y_values.append(workspace.readY(int(bin_index))[wkspIndex])
         if withDy:
-            dy.append(workspace.readE(i)[wkspIndex])
+            dy.append(workspace.readE(int(bin_index))[wkspIndex])
 
     dx = None
-    return x, y, dy, dx
+    return bins, y_values, dy, dx
 
 
 def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=False):
@@ -423,35 +462,46 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
     delta = np.finfo(np.float64).max
     min_value = np.finfo(np.float64).max
     max_value = np.finfo(np.float64).min
-    for i in range(num_hist):
-        xtmp = workspace.readX(i)
-        if workspace.isHistogramData():
-            # input x is edges
-            xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
-        else:
-            # input x is centers
-            pass
-        min_value = min(min_value, xtmp.min())
-        max_value = max(max_value, xtmp.max())
-        diff = xtmp[1:] - xtmp[:-1]
-        delta = min(delta, diff.min())
+    try:
+        sp_info = workspace.spectrumInfo()
+    except:
+        sp_info = None
+
+    for spectrum_index in range(num_hist):
+        if not(sp_info and sp_info.hasDetectors(spectrum_index) and sp_info.isMonitor(spectrum_index)):
+            xtmp = workspace.readX(spectrum_index)
+            if workspace.isHistogramData():
+                # input x is edges
+                xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
+            else:
+                # input x is centers
+                pass
+            min_value = min(min_value, xtmp.min())
+            max_value = max(max_value, xtmp.max())
+            diff = xtmp[1:] - xtmp[:-1]
+            delta = min(delta, diff.min())
     num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
     x_centers = np.linspace(min_value, max_value, num=num_edges)
     y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
-    z = np.empty([num_hist, num_edges], dtype=np.float64)
-    for i in range(num_hist):
+    counts = np.empty([num_hist, num_edges], dtype=np.float64)
+
+    for spectrum_index in range(num_hist):
         centers, ztmp, _, _ = mantid.plots.datafunctions.get_spectrum(
-            workspace, i, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
-        f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
-        z[i] = f(x_centers)
+            workspace, spectrum_index, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
+        interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
+        if not (sp_info and sp_info.hasDetectors(spectrum_index) and sp_info.isMonitor(spectrum_index)):
+            counts[spectrum_index] = interpolation_function(x_centers)
+        else:
+            counts[spectrum_index, :] = np.nan
+
     if histogram2D:
         x = mantid.plots.datafunctions.boundaries_from_points(x_centers)
     else:
         x = x_centers
     if transpose:
-        return y.T, x.T, z.T
+        return y.T, x.T, counts.T
     else:
-        return x, y, z
+        return x, y, counts
 
 
 def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=False):
@@ -480,7 +530,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     try:
         specInfo = workspace.spectrumInfo()
         for index in range(workspace.getNumberHistograms()):
-            if specInfo.isMasked(index):
+            if specInfo.isMasked(index) or specInfo.isMonitor(index):
                 z[index,:] = np.nan
     except:
         pass
@@ -548,7 +598,7 @@ def get_uneven_data(workspace, distribution):
                 zvals = zvals/(xvals[1:] - xvals[0:-1])
         else:
             xvals = boundaries_from_points(xvals)
-        if specInfo and specInfo.hasDetectors(index) and specInfo.isMasked(index):
+        if specInfo and specInfo.hasDetectors(index) and (specInfo.isMasked(index) or specInfo.isMonitor(index)):
             zvals[:] = np.nan
         zvals = np.ma.masked_invalid(zvals)
         z.append(zvals)
@@ -1028,7 +1078,9 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
         mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive max value has been changed to 1.")
 
     image.set_norm(scale(vmin=vmin, vmax=vmax))
+
     if image.colorbar:
+        label = image.colorbar._label
         image.colorbar.remove()
         locator = None
         if scale == LogNorm:
@@ -1038,8 +1090,58 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
                                              "as the range between min value and max value is too large")
         figure.subplots_adjust(wspace=0.5, hspace=0.5)
-        figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar.set_label(label)
 
 
-def figure_contains_only_3d_plots(fig) -> bool:
-    return all(isinstance(ax, Axes3D) for ax in fig.get_axes())
+def add_colorbar_label(colorbar, axes):
+    """
+    Adds a label to the colorbar if every axis on the figure has the same label.
+    :param colorbar: the colorbar to label.
+    :param axes: the axes that the colorbar belongs to.
+    """
+    colorbar_labels = [ax.colorbar_label for ax in axes if hasattr(ax, 'colorbar_label')]
+    if colorbar_labels and colorbar_labels.count(colorbar_labels[0]) == len(colorbar_labels):
+        colorbar.set_label(colorbar_labels[0])
+
+
+def get_images_from_figure(figure):
+    """Return a list of images in the given figure excluding any colorbar images"""
+    axes = figure.get_axes()
+
+    all_images = []
+    for ax in axes:
+        all_images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
+                                   or isinstance(col, Poly3DCollection)]
+
+    # remove any colorbar images
+    colorbars = [img.colorbar.solids for img in all_images if img.colorbar]
+    images = [img for img in all_images if img not in colorbars]
+    return images
+
+
+def get_axes_from_figure(figure):
+    """Return a list of axes in the given figure excluding any colorbar axes"""
+    images = get_images_from_figure(figure)
+    axes = [img.axes for img in images]
+
+    return axes
+
+
+def get_legend_handles(ax):
+    """
+    Get a list of the Line2D and ErrorbarContainer objects to be
+    included in the legend so that the order is always the same.
+    """
+    handles = []
+    for line in ax.lines:
+        if line.get_label() == "_nolegend_":
+            # If the line has no label find the ErrorbarContainer that corresponds to it (if one exists)
+            for container in ax.containers:
+                if isinstance(container, ErrorbarContainer) and container[0] == line:
+                    handles.append(container)
+                    break
+        else:
+            handles.append(line)
+
+    return handles

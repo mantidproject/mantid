@@ -120,10 +120,12 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def autoscale_y_axes(self):
         """Autoscales all y-axes in the figure using the existing x axis"""
         self._view.autoscale_y_axes()
+        self._view.redraw_figure()
 
     def autoscale_selected_y_axis(self, axis_num):
         """Autoscales a selected y-axis in the figure using the existing x axis"""
         self._view.autoscale_selected_y_axis(axis_num)
+        self._view.redraw_figure()
 
     def set_axis_limits(self, ax_num, xlims, ylims):
         """Sets the x and y limits for a specified axis in the figure"""
@@ -133,6 +135,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def set_axis_title(self, ax_num, title):
         """Sets the title for a specified axis in the figure"""
         self._view.set_title(ax_num, title)
+
+    def get_plot_x_range(self):
+        """Returns the x range of the first plot
+        :return: a tuple contained the start and end ranges"""
+        return self._options_presenter.get_plot_x_range()
+
+    def set_plot_range(self, range):
+        """Sets the x range of all the plots"""
+        self._options_presenter.set_plot_x_range(range)
+        self._handle_xlim_changed_in_quick_edit_options(range)
 
     # Implementation of QuickEdit widget
     def _update_quickedit_widget(self):
@@ -170,7 +182,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         else:
             self.autoscale_y_axes()
 
-        self._view.redraw_figure()
         xmin, xmax, ymin, ymax = self._view.get_axis_limits(selected_subplots[0])
         self._options_presenter.set_plot_x_range([xmin, xmax])
         self._options_presenter.set_plot_y_range([ymin, ymax])

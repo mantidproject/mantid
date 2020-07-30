@@ -17,6 +17,7 @@ from numpy import linspace, random
 from mantid.plots import MantidAxes  # register mantid projection  # noqa
 from unittest.mock import Mock
 from mantid.simpleapi import CreateWorkspace
+from mantidqt.plotting.functions import pcolormesh
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
 
@@ -62,34 +63,22 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
 
     def test_image_dict_names_populated_on_init(self):
         presenter = self._generate_presenter()
-        expected = {'(0, 1) - {}'.format(self.img0_label): self.img0,
-                    'Second Axes: (1, 1) - {}'.format(self.img1_label): self.img1}
+        expected = {'(0, 1) - {}'.format(self.img0_label): [self.img0],
+                    'Second Axes: (1, 1) - {}'.format(self.img1_label): [self.img1]}
         self.assertEqual(presenter.image_names_dict, expected)
 
-    def test_set_selected_image_label_updates_select_image_combo_box(self):
-        presenter = self._generate_presenter()
-        presenter.set_selected_image_label('New Label')
-        presenter.view.replace_selected_image_name.assert_called_once_with(
-            'Second Axes: (1, 1) - New Label')
-
-    def test_set_selected_image_label_updates_image_names_dict(self):
-        presenter = self._generate_presenter()
-        try:
-            presenter.set_selected_image_label('New Label')
-            new_img_name = 'Second Axes: (1, 1) - New Label'
-            self.assertIn(new_img_name, presenter.image_names_dict.keys())
-            self.assertEqual(self.img1, presenter.image_names_dict[new_img_name])
-        finally:
-            self.img1.set_label(self.img1_label)
-
-    def test_set_selected_image_label_removes_old_label_from_image_names_dict(self):
-        presenter = self._generate_presenter()
-        try:
-            presenter.set_selected_image_label('New Label')
-            old_img_name = 'Second Axes: (1, 1) - Im2 label'
-            self.assertNotIn(old_img_name, presenter.image_names_dict)
-        finally:
-            self.img1.set_label(self.img1_label)
+    def test_image_dict_names_populated_correctly_for_plot_done_per_spectra(self):
+        ws = CreateWorkspace(DataX=list([0, 1, 1.5, 1.75, 1.83])*4, DataY=range(20), NSpec=4, OutputWorkspace='test_ws',
+                             VerticalAxisUnit='TOF', VerticalAxisValues=[1, 2, 4, 10])
+        fig = figure()
+        axes = fig.add_subplot(111, projection='mantid')
+        label = 'Test_Label'
+        img = axes.pcolormesh(ws, label=label)
+        fig.colorbar(img)
+        mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - {}'.format(label))
+        presenter = self._generate_presenter(fig=fig, view=mock_view)
+        expected = {'(0, 0) - {}'.format(label): axes.collections}
+        self.assertEqual(presenter.image_names_dict, expected)
 
     def test_generate_image_name(self):
         generated_name = ImagesTabWidgetPresenter.generate_image_name(self.img0)
@@ -107,6 +96,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        fig.colorbar(img)
         props = {'title': '(0, 0) - img label',
                  'label': 'New Label',
                  'colormap': 'jet',
@@ -118,7 +108,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.get_label())
+        self.assertEqual("New Label", img.colorbar._label)
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0, img.norm.vmin)
         self.assertEqual(2, img.norm.vmax)
@@ -128,6 +118,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        fig.colorbar(img)
         props = {'title': '(0, 0) - img label',
                  'label': 'New Label',
                  'colormap': 'jet',
@@ -139,7 +130,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.get_label())
+        self.assertEqual("New Label", img.colorbar._label)
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0.0001, img.norm.vmin)
         self.assertEqual(4, img.norm.vmax)
@@ -149,6 +140,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        fig.colorbar(img)
         props = {'title': '(0, 0) - img label',
                  'label': 'New Label',
                  'colormap': 'jet',
@@ -160,7 +152,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.get_label())
+        self.assertEqual("New Label", img.colorbar._label)
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0.0001, img.norm.vmin)
         self.assertEqual(1, img.norm.vmax)
@@ -170,7 +162,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         ax.pcolormesh([[0, 2], [2, 0]])
-        view = Mock(get_selected_image_name=lambda: '(0, 0) - _collection0')
+        view = Mock(get_selected_image_name=lambda: '(0, 0) - collection0')
         presenter = self._generate_presenter(view, fig)
         presenter.view.enable_interpolation.assert_called_once_with(False)
 
@@ -185,6 +177,30 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         self.assertTrue(1, len(presenter.image_names_dict))
         presenter.view.populate_select_image_combo_box.assert_called_once_with(
             [img_name])
+
+    def test_apply_properties_applies_to_all_images_if_multiple_colorfill_plots_and_one_colorbar(self):
+        fig = pcolormesh([self.ws, self.ws])
+        props = {'label': 'New Label',
+                 'colormap': 'jet',
+                 'vmin': 0,
+                 'vmax': 2,
+                 'scale': 'Linear',
+                 'interpolation': 'None'}
+        mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0)',
+                         get_properties=lambda: ImageProperties(props))
+        presenter = self._generate_presenter(fig=fig, view=mock_view)
+        presenter.apply_properties()
+
+        for ax in range(2):
+            image = fig.axes[ax].images[0]
+
+            if image.colorbar:
+                self.assertEqual('New Label', image.colorbar._label)
+
+            self.assertEqual('jet', image.cmap.name)
+            self.assertEqual(0, image.norm.vmin)
+            self.assertEqual(2, image.norm.vmax)
+            self.assertTrue(isinstance(image.norm, Normalize))
 
 
 if __name__ == '__main__':

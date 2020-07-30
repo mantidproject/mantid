@@ -69,7 +69,7 @@ public:
   void watchADS(bool watch) override;
 
   WorkspaceIndex getSelectedSpectrum() const override;
-  TableRowIndex getSelectedSpectrumIndex() const override;
+  FitDomainIndex getSelectedSpectrumIndex() const override;
   TableDatasetIndex getSelectedDataIndex() const override;
   TableDatasetIndex dataSelectionSize() const override;
   bool isPlotGuessChecked() const override;
@@ -121,6 +121,9 @@ public:
 
   void displayMessage(const std::string &message) const override;
   void disableSpectrumPlotSelection() override;
+
+  void allowRedraws(bool state) override;
+  void redrawPlots() override;
 
 public slots:
   void clearTopPreview() override;

@@ -84,11 +84,12 @@ void ALFCustomInstrumentView::addObserver(
 }
 
 void ALFCustomInstrumentView::setupAnalysisPane(
-    MantidWidgets::PlotFitAnalysisPaneView *analysis) {
+    MantidWidgets::IPlotFitAnalysisPaneView *analysis) {
   // keep a copy here so we can use a custom class
   m_analysisPane = analysis;
   // just adds it to the view
-  BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(analysis);
+  BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(
+      analysis->getQWidget());
 }
 
 void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) {
