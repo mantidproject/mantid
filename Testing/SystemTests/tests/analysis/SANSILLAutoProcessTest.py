@@ -8,6 +8,7 @@ from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, SaveNexusProce
 import systemtesting
 from tempfile import gettempdir
 import os
+import threading
 
 
 class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
@@ -48,20 +49,28 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
         # reduce samples
         # this also tests that already loaded workspace can be passed instead of a file
         LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
+        tList = list()
         for i in range(len(samples)):
-            SANSILLAutoProcess(
-                SampleRuns=samples[i],
-                BeamRuns=beams,
-                ContainerRuns=containers,
-                MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
-                SensitivityMaps='sens-lamp',
-                SampleTransmissionRuns=sample_tr[i],
-                ContainerTransmissionRuns=container_tr,
-                TransmissionBeamRuns=beam_tr,
-                SampleThickness=thick[i],
-                CalculateResolution='MildnerCarpenter',
-                OutputWorkspace='iq_s' + str(i + 1)
-            )
+            t = threading.Thread(
+                    target=SANSILLAutoProcess(
+                        SampleRuns=samples[i],
+                        BeamRuns=beams,
+                        ContainerRuns=containers,
+                        MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
+                        SensitivityMaps='sens-lamp',
+                        SampleTransmissionRuns=sample_tr[i],
+                        ContainerTransmissionRuns=container_tr,
+                        TransmissionBeamRuns=beam_tr,
+                        SampleThickness=thick[i],
+                        CalculateResolution='MildnerCarpenter',
+                        OutputWorkspace='iq_s' + str(i + 1)
+                        )
+                    )
+            tList.append(t)
+            t.start()
+
+        for t in tList:
+            t.join()
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
 

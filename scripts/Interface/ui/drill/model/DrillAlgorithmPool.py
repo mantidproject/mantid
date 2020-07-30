@@ -35,8 +35,8 @@ class DrillAlgorithmPool(QThreadPool):
         self._progresses = dict()
         # if the threadpool is currently running
         self._running = False
-        # for now, processing can not be shared amond different threads
-        self.setMaxThreadCount(1)
+        # to limit the number of threads
+        # self.setMaxThreadCount(1)
 
     def addProcesses(self, tasks):
         """
