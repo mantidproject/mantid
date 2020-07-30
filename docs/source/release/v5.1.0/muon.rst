@@ -45,6 +45,7 @@ Improvements
 - Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
 - Updated :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` to allow double pulse fits.
 - Tf asymmetry mode can now be performed on double pulse fits from the muon analysis GUI.
+- Updated line colouring in Muon Analysis plots to be more consistent.
 
 Bug fixes
 ---------

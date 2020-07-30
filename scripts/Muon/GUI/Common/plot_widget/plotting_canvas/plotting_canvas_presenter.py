@@ -10,7 +10,6 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import Pl
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
-from mantid import AnalysisDataService
 
 DEFAULT_X_LIMITS = [0, 15]
 DEFAULT_Y_LIMITS = [-1, 1]
