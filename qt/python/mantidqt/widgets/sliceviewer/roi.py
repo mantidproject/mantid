@@ -111,6 +111,12 @@ def extract_matrix_cuts_numeric_axis(workspace: MatrixWorkspace,
             EnableLogging=log_algorithm_calls)
         Transpose(
             InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
+        ExtractSpectra(
+            InputWorkspace=ycut_name,
+            OutputWorkspace=ycut_name,
+            XMin=ymin,
+            XMax=ymax,
+            EnableLogging=log_algorithm_calls)
 
 
 def extract_roi_matrix(workspace: MatrixWorkspace,

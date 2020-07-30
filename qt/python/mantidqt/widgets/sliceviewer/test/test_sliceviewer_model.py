@@ -664,14 +664,15 @@ class SliceViewerModelTest(unittest.TestCase):
                 slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)), transpose, export_type)
 
             if export_type == 'c':
-                mock_extract_spectra.assert_called_once()
                 if is_spectra:
+                    mock_extract_spectra.assert_called_once()
                     if is_ragged:
                         mock_rebin.assert_called_once()
                     mock_sum_spectra.assert_called_once()
                 else:
                     self.assertEqual(2, mock_rebin.call_count)
                     self.assertEqual(3, mock_transpose.call_count)
+                    self.assertEqual(2, mock_extract_spectra.call_count)
                 self.assertEqual('Cuts along X/Y created: mock_ws_cut_x & mock_ws_cut_y', help_msg)
             elif export_type == 'x':
                 mock_extract_spectra.assert_called_once()
@@ -682,12 +683,11 @@ class SliceViewerModelTest(unittest.TestCase):
                     self.assertEqual(2, mock_transpose.call_count)
                 self.assertEqual('Cut along X created: mock_ws_cut_x', help_msg)
             elif export_type == 'y':
+                mock_extract_spectra.assert_called_once()
                 if is_spectra:
-                    mock_extract_spectra.assert_called_once()
                     self.assertEqual(1, mock_transpose.call_count)
                     self.assertEqual(1, mock_rebin.call_count)
                 else:
-                    mock_extract_spectra.assert_not_called()
                     self.assertEqual(1, mock_rebin.call_count)
                     self.assertEqual(1, mock_transpose.call_count)
 
