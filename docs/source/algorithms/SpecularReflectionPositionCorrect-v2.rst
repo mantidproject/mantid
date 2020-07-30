@@ -34,16 +34,6 @@ detector angle to a fitted line position. The figure below illustrates this opti
    :alt: Schematic representation of angle correction when TwoTheta and LinePosition are given.
    :scale: 100%
 
-The last possible detector position correction is calibration by a separate direct beam
-measurement. The idea is to correct the detector angle by difference between the
-nominal beam axis and the measured direct beam as shown in the figure below. In this mode
-``TwoTheta`` is omitted but ``DirectLinePosition``, ``DirectLineWorkspace`` and ``PixelSize``
-have to be specified. 
-
-.. figure:: ../images/SpecularReflectionCorrection_figure3.png
-   :alt: Schematic representation of angle correction when direct beam reference is used.
-   :scale: 100%
-
 .. note::
    The line positions can be acquired by using, for instance,
    :ref:`FindReflectometryLines <algm-FindReflectometryLines>`.
@@ -76,12 +66,12 @@ Usage
    polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='point-detector', DetectorCorrectionType='RotateAroundSample')
    instr = polref_rot.getInstrument()
    print('Rotated:           ' + str(instr.getComponentByName('point-detector').getPos()))
-   
+
 Output:
 
 Note that in this case the difference between shifting the detectors vertically or rotating them is negligible.
 
-.. testoutput:: SpecularReflectionPositionCorrectPointDetector 
+.. testoutput:: SpecularReflectionPositionCorrectPointDetector
 
    point-detector
    Original position: [25.6,0,0.0444961]
@@ -106,10 +96,10 @@ Note that in this case the difference between shifting the detectors vertically 
    polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='lineardetector', DetectorCorrectionType='RotateAroundSample')
    instr = polref_rot.getInstrument()
    print('Rotated:           ' + str(instr.getComponentByName('lineardetector').getPos()))
-   
+
 Output:
 
-.. testoutput:: SpecularReflectionPositionCorrectLinearDetector 
+.. testoutput:: SpecularReflectionPositionCorrectLinearDetector
 
    lineardetector
    Original position: [26,0,0]
@@ -134,10 +124,10 @@ Output:
    polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='OSMOND', DetectorCorrectionType='RotateAroundSample')
    instr = polref_rot.getInstrument()
    print('Rotated:           ' + str(instr.getComponentByName('OSMOND').getPos()))
-   
+
 Output:
 
-.. testoutput:: SpecularReflectionPositionCorrectOSMONDDetector 
+.. testoutput:: SpecularReflectionPositionCorrectOSMONDDetector
 
    OSMOND
    Original position: [26,0,0]
@@ -178,46 +168,6 @@ Output:
    Pixel 22 2theta
    before angle correction: 2.33
    after angle correction: 1.5
-
-**Example - Use direct beam for angle calibration**
-
-.. testcode:: SpecularReflectionPositionCorrectDirectBeamCalibration
-
-   import numpy
-   # We'll just use empty workspaces here.
-   reflected = LoadEmptyInstrument(InstrumentName='Figaro')
-   direct = LoadEmptyInstrument(InstrumentName='Figaro')
-   # Get rid of monitors
-   ExtractMonitors(reflected, DetectorWorkspace='reflected')
-   reflected = mtd['reflected']
-   ExtractMonitors(direct, DetectorWorkspace='direct')
-   direct = mtd['direct']
-   line_position = 202.
-   spectrum_info = reflected.spectrumInfo()
-   two_theta = numpy.rad2deg(spectrum_info.twoTheta(int(line_position)))
-   print('Pixel {} 2theta'.format(int(line_position)))
-   print('before angle correction: {:.3}'.format(two_theta))
-   direct_line_position = 130.7  # This could come from some fitting procedure
-   reflected = SpecularReflectionPositionCorrect(
-       reflected,
-       DetectorCorrectionType='RotateAroundSample',
-       DetectorComponentName='detector',
-       DetectorFacesSample=True,
-       PixelSize=0.001195,
-       DirectLineWorkspace=direct,
-       DirectLinePosition=direct_line_position)
-   spectrum_info = reflected.spectrumInfo()
-   two_theta = numpy.rad2deg(spectrum_info.twoTheta(int(line_position)))
-   print('after angle correction: {:.3}'.format(two_theta))
-
-
-Output:
-
-.. testoutput:: SpecularReflectionPositionCorrectDirectBeamCalibration
-
-   Pixel 202 2theta
-   before angle correction: 5.11
-   after angle correction: 4.89
 
 .. categories::
 

@@ -346,36 +346,4 @@ public:
                                                     pixelSize);
   }
 
-  void test_correct_direct_beam_calibration() {
-    constexpr double directLinePos{202};
-    SpecularReflectionPositionCorrect2 alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.setProperty("InputWorkspace", m_d17WS);
-    alg.setProperty("DetectorCorrectionType", "RotateAroundSample");
-    alg.setProperty("DetectorComponentName", "detector");
-    alg.setProperty("DetectorFacesSample", true);
-    alg.setProperty("DirectLinePosition", directLinePos);
-    alg.setProperty("PixelSize", 0.001195);
-    // Pretend the we have a separate direct beam workspace.
-    alg.setProperty("DirectLineWorkspace", m_d17WS);
-    alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    MatrixWorkspace_const_sptr outWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outWS);
-    const auto &spectrumInfoIn = m_d17WS->spectrumInfo();
-    const auto twoThetaIn =
-        spectrumInfoIn.twoTheta(static_cast<size_t>(directLinePos));
-    auto instrOut = outWS->getInstrument();
-    auto detOut = instrOut->getComponentByName("detector");
-    const auto posOut = detOut->getPos();
-    const auto l2 = posOut.norm();
-    const auto x = l2 * std::sin(twoThetaIn);
-    const auto y = 0.;
-    const auto z = l2 * std::cos(twoThetaIn);
-    TS_ASSERT_DELTA(posOut.X(), x, 1e-10)
-    TS_ASSERT_DELTA(posOut.Y(), y, 1e-10)
-    TS_ASSERT_DELTA(posOut.Z(), z, 1e-10)
-  }
 };
