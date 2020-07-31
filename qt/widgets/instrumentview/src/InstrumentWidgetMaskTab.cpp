@@ -117,18 +117,6 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_rectangle->setToolTip("Draw a rectangle (Ctrl+Alt+R)");
   m_rectangle->setShortcut(QKeySequence("Ctrl+Alt+R"));
 
-  m_pixel = new QPushButton();
-  m_pixel->setCheckable(true);
-  m_pixel->setAutoExclusive(true);
-  m_pixel->setIcon(QIcon(":/PickTools/selection-pointer.png"));
-  m_pixel->setToolTip("Select a pixel");
-
-  m_tube = new QPushButton();
-  m_tube->setCheckable(true);
-  m_tube->setAutoExclusive(true);
-  m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
-  m_tube->setToolTip("Select a tube/bank");
-
   m_ring_ellipse = new QPushButton();
   m_ring_ellipse->setCheckable(true);
   m_ring_ellipse->setAutoExclusive(true);
@@ -150,6 +138,18 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_sector->setToolTip("Draw a circle sector (Shift+Alt+S)");
   m_sector->setShortcut(QKeySequence("Shift+Alt+S"));
 
+  m_pixel = new QPushButton();
+  m_pixel->setCheckable(true);
+  m_pixel->setAutoExclusive(true);
+  m_pixel->setIcon(QIcon(":/PickTools/selection-pointer.png"));
+  m_pixel->setToolTip("Select a pixel");
+
+  m_tube = new QPushButton();
+  m_tube->setCheckable(true);
+  m_tube->setAutoExclusive(true);
+  m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
+  m_tube->setToolTip("Select a tube/bank");
+
   m_free_draw = new QPushButton();
   m_free_draw->setCheckable(true);
   m_free_draw->setAutoExclusive(true);
@@ -157,18 +157,21 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_free_draw->setToolTip("Draw an arbitrary shape (Shift+Alt+A)");
   m_free_draw->setShortcut(QKeySequence("Shift+Alt+A"));
 
-  auto *toolBox = new QHBoxLayout();
-  toolBox->addWidget(m_move);
-  toolBox->addWidget(m_pointer);
-  toolBox->addWidget(m_ellipse);
-  toolBox->addWidget(m_rectangle);
-  toolBox->addWidget(m_ring_ellipse);
-  toolBox->addWidget(m_ring_rectangle);
-  toolBox->addWidget(m_sector);
-  toolBox->addWidget(m_free_draw);
-  toolBox->addWidget(m_pixel);
-  toolBox->addWidget(m_tube);
-  toolBox->setMargin(0);
+  auto *toolBox = new QGridLayout();
+  layout->addLayout(toolBox);
+
+  toolBox->addWidget(m_move, 0, 0);
+  toolBox->addWidget(m_pointer, 0, 1);
+  toolBox->addWidget(m_ellipse, 0, 2);
+  toolBox->addWidget(m_rectangle, 0, 3);
+  toolBox->addWidget(m_ring_ellipse, 0, 4);
+  toolBox->addWidget(m_ring_rectangle, 0, 5);
+  toolBox->addWidget(m_sector, 0, 6);
+  toolBox->addWidget(m_free_draw, 0, 7);
+  toolBox->addWidget(m_pixel, 1, 0);
+  toolBox->addWidget(m_tube, 1, 1);
+  toolBox->setColumnStretch(1, 1);
+  toolBox->setSpacing(2);
 
   connect(m_move, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_pointer, SIGNAL(clicked()), this, SLOT(setActivity()));
@@ -177,14 +180,10 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_sector, SIGNAL(clicked()), this, SLOT(setActivity()));
-  connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_tube, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_pixel, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
   m_move->setChecked(true);
-  auto *toolGroup = new QFrame();
-  toolGroup->setLayout(toolBox);
-
-  layout->addWidget(toolGroup);
 
   // create mask/group switch
   m_masking_on = new QRadioButton("Mask");
