@@ -581,8 +581,11 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
 
     if (m_pixel->isChecked()) {
       // remove the picked pixel from the list of detectors to mask
-      std::remove(detectorsToMask.begin(), detectorsToMask.end(), pickID);
+      std::vector<size_t>::iterator newEnd;
 
+      newEnd =
+          std::remove(detectorsToMask.begin(), detectorsToMask.end(), pickID);
+      detectorsToMask.erase(newEnd, detectorsToMask.end());
     } else if (m_tube->isChecked()) {
       if (!componentInfo.hasParent(pickID)) {
         return;
@@ -592,9 +595,11 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
 
       // remove all the detectors from the picked tube from the list of
       // detectors to mask
+      std::vector<size_t>::iterator newEnd = detectorsToMask.end();
       for (auto toKeep : detectorsToKeep) {
-        std::remove(detectorsToMask.begin(), detectorsToMask.end(), toKeep);
+        newEnd = std::remove(detectorsToMask.begin(), newEnd, toKeep);
       }
+      detectorsToMask.erase(newEnd, detectorsToMask.end());
     }
     // then mask selected detectors
     actor.addMaskBinsData(detectorsToMask);
