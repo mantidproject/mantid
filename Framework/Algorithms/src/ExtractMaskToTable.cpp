@@ -54,7 +54,8 @@ void ExtractMaskToTable::exec() {
   // Get input properties
   m_dataWS = getProperty("InputWorkspace");
   if (!m_dataWS)
-    throw std::runtime_error("InputWorkspace cannot be cast to a MatrixWorkspace.");
+    throw std::runtime_error(
+        "InputWorkspace cannot be cast to a MatrixWorkspace.");
   MaskWorkspace_const_sptr maskws =
       std::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
 
@@ -308,9 +309,9 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
  * @param xmax :: maximum x
  * @param prevmaskedids :: vector of previous masked detector IDs
  */
-void ExtractMaskToTable::addToTableWorkspace(const TableWorkspace_sptr &outws,
-                                             std::vector<detid_t> maskeddetids,
-                                             double xmin, double xmax, std::vector<detid_t> prevmaskedids) {
+void ExtractMaskToTable::addToTableWorkspace(
+    const TableWorkspace_sptr &outws, std::vector<detid_t> maskeddetids,
+    double xmin, double xmax, std::vector<detid_t> prevmaskedids) {
   // Sort vector of detectors ID
   size_t numdetids = maskeddetids.size();
   if (numdetids == 0) {
