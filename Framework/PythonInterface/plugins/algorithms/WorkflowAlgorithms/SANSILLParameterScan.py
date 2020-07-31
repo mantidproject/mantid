@@ -134,14 +134,17 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.setUp()
 
         _, load_ws_name = needs_loading(self.sample, "Load")
-        LoadAndMerge(Filename=self.sample, OutputWorkspace=load_ws_name + "_grouped", LoaderOptions={"Wavelength": self.wavelength})
+        self.progress.report(7, 'Loading samples')
+        LoadAndMerge(Filename=self.sample, OutputWorkspace=load_ws_name + "_grouped",
+                     LoaderOptions={"Wavelength": self.wavelength}, startProgress=0, endProgress=0.7)
         ConjoinXRuns(InputWorkspaces=load_ws_name + "_grouped",
                      OutputWorkspace=load_ws_name + "_joined",
-                     SampleLogAsXAxis=self.observable)
+                     SampleLogAsXAxis=self.observable, startProgress=0.7, endProgress=0.75)
         mtd[load_ws_name + '_grouped'].delete()
 
         sort_x_axis_output = load_ws_name + '_sorted' if not self.output_joined else self.output_joined
-        SortXAxis(InputWorkspace=load_ws_name + "_joined", OutputWorkspace=sort_x_axis_output)
+        SortXAxis(InputWorkspace=load_ws_name + "_joined", OutputWorkspace=sort_x_axis_output,
+                  startProgress=0.75, endProgress=0.8)
 
         if self.observable == "Omega.value":
             mtd[sort_x_axis_output].getAxis(0).setUnit("label").setLabel(self.observable, 'degrees')
@@ -175,13 +178,16 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              CacheSolidAngle=True,
                              NormaliseBy=self.normalise)
 
+        self.progress.report("Reducing data.")
         SANSILLReduction(InputWorkspace=sort_x_axis_output,
                          AbsorberInputWorkspace=absorber_name,
                          ContainerInputWorkspace=container_name,
                          SensitivityInputWorkspace=sens_input,
                          DefaultMaskedInputWorkspace=default_mask_input,
                          NormaliseBy=self.normalise,
-                         OutputWorkspace=sort_x_axis_output)
+                         OutputWorkspace=sort_x_axis_output,
+                         startProgress=0.8,
+                         endProgress=0.95)
 
         instrument = mtd[load_ws_name + "_joined"].getInstrument()
         detector = instrument.getComponentByName("detector")
@@ -205,9 +211,12 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         else:
             self.setProperty('OutputJoinedWorkspace', mtd[self.output_joined])
 
+        self.progress.report("Convert axis.")
         ConvertSpectrumAxis(InputWorkspace=self.output2D,
                             OutputWorkspace=self.output2D,
-                            Target="SignedInPlaneTwoTheta")
+                            Target="SignedInPlaneTwoTheta",
+                            startProgress=0.9,
+                            endProgress=1)
 
         Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
 
