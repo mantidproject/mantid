@@ -668,8 +668,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Logs the fractional foreground centres for direct and reflected beams"""
         db_frg_centre = mtd[directBeamName].run().getLogData(SampleLogs.LINE_POSITION).value
         rb_frg_centre = mtd[reflectedBeamName].run().getLogData(SampleLogs.LINE_POSITION).value
-        self.log().accumulate('Direct beam foreground centre: {0:.5f}\n'.format(db_frg_centre))
-        self.log().accumulate('Reflected beam foreground centre: {0:.5f}\n'.format(rb_frg_centre))
+        self.log().accumulate('Direct beam foreground centre [pixel]: {0:.5f}\n'.format(db_frg_centre))
+        self.log().accumulate('Reflected beam foreground centre [pixel]: {0:.5f}\n'.format(rb_frg_centre))
 
     def preprocess_reflected_beam(self, run, out_ws, directBeamName, angle_index):
         """Runs preprocess for the reflected beam"""
@@ -774,10 +774,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
                                   format(final_two_theta))
         if sum_type == 'SumInQ':
-            # think how to report the foregroun 2theta in coherent case
+            final_two_theta = mtd[foregroundName].run().getProperty('CoherentReference2Theta').value
+            self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
+                                  format(final_two_theta))
             isBent = mtd[foregroundName].run().getProperty('beam_stats.bent_sample').value
             self.log().accumulate('Sample: {0}\n'.format('Bent' if isBent == 1 else 'Flat'))
-        # think how to get the two theta for SumInQ ?
         self._autoCleanup.cleanupLater(reflectedBeamName)
         self._autoCleanup.cleanupLater(foregroundName)
         return foregroundName
