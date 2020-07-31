@@ -7,7 +7,7 @@
 
 import json
 
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Signal, QThread
 
 import mantid.simpleapi as sapi
 from mantid.kernel import *
@@ -167,6 +167,11 @@ class DrillModel(QObject):
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
+        if self.algorithm in RundexSettings.THREADS_NUMBER:
+            nThreads = RundexSettings.THREADS_NUMBER[self.algorithm]
+        else:
+            nThreads = QThread.idealThreadCount()
+        self.tasksPool.setMaxThreadCount(nThreads)
         self.settings = dict()
         self.settings.update(RundexSettings.SETTINGS[self.acquisitionMode])
         self._initController()

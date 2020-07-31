@@ -105,6 +105,11 @@ class RundexSettings(object):
             REFL_NPOL:  "ReflectometryILLAutoProcess"
             }
 
+    # ideal number of threads for each acquisition mode (optional).
+    # If not provided, Qt will decide
+    THREADS_NUMBER = {
+            }
+
     # settings for each acquisition mode
     SETTINGS = {
             SANS_ACQ : {
