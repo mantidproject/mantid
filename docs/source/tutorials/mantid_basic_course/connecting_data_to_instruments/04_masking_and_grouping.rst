@@ -32,6 +32,10 @@ The shapes ready for grouping have blue border
 
 |GroupBlueRing.png|
 
+*Note* : The pixel and tube selections work differently than the shapes: once the tool is selected, the masking or grouping
+is immediately applied on click on the instrument, while for the grouping, the selected option (Sum to workspace or Extract to workspace)
+is applied to the last selected pixel / tube *only*.
+
 Grouping
 ========
 
