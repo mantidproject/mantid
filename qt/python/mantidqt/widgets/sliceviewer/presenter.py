@@ -5,20 +5,23 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
 
 # 3rdparty imports
 import mantid.api
+import mantid.kernel
 
 # local imports
+from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
 from .model import SliceViewerModel, WS_TYPE
 from .sliceinfo import SliceInfo
+from .toolbar import ToolItemText
 from .view import SliceViewerView
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 
 
 class SliceViewer(object):
+    TEMPORARY_STATUS_TIMEOUT = 2000
+
     def __init__(self, ws, parent=None, model=None, view=None):
         """
         Create a presenter for controlling the slice display for a workspace
@@ -27,6 +30,7 @@ class SliceViewer(object):
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
+        self._logger = mantid.kernel.Logger("SliceViewer")
         self._peaks_presenter = None
         self.model = model if model else SliceViewerModel(ws)
 
@@ -46,24 +50,21 @@ class SliceViewer(object):
                                                       self.model.can_normalize_workspace(), parent)
         self.view.data_view.create_axes_orthogonal(
             redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
+        self.view.data_view.image_info_widget.setWorkspace(ws)
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
         if not self.model.can_support_peaks_overlays():
-            self.view.data_view.disable_peaks_button()
+            self.view.data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
         if not self.model.can_support_nonorthogonal_axes():
-            self.view.data_view.disable_nonorthogonal_axes_button()
-
-        if self.model.get_ws_type() == WS_TYPE.MATRIX:
-            self.view.data_view.image_info_widget.setWorkspace(ws)
+            self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
         self.view.setWindowTitle(self.model.get_title())
-
         self.new_plot()
 
         # Start the GUI with zoom selected.
-        self.view.data_view.select_zoom()
+        self.view.data_view.activate_tool(ToolItemText.ZOOM)
 
     def new_plot_MDH(self):
         """
@@ -76,10 +77,14 @@ class SliceViewer(object):
         Tell the view to display a new plot of an MDEventWorkspace
         """
         data_view = self.view.data_view
+        limits = data_view.get_axes_limits()
+        if data_view.dimensions.transpose:
+            limits = limits[1], limits[0]
         data_view.plot_MDH(
-            self.model.get_ws(slicepoint=self.get_slicepoint(),
-                              bin_params=data_view.dimensions.get_bin_params(),
-                              limits=data_view.get_axes_limits()))
+            self.model.get_ws(
+                slicepoint=self.get_slicepoint(),
+                bin_params=data_view.dimensions.get_bin_params(),
+                limits=limits))
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
@@ -90,8 +95,8 @@ class SliceViewer(object):
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
         self.view.data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose))
+            self.model.get_data(
+                self.get_slicepoint(), transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """
@@ -99,10 +104,11 @@ class SliceViewer(object):
         """
         data_view = self.view.data_view
         data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                bin_params=data_view.dimensions.get_bin_params(),
-                                limits=data_view.get_axes_limits(),
-                                transpose=self.view.data_view.dimensions.transpose))
+            self.model.get_data(
+                self.get_slicepoint(),
+                bin_params=data_view.dimensions.get_bin_params(),
+                limits=data_view.get_axes_limits(),
+                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -111,11 +117,12 @@ class SliceViewer(object):
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
         dimensions = self.view.data_view.dimensions
-        return SliceInfo(frame=self.model.get_frame(),
-                         point=dimensions.get_slicepoint(),
-                         transpose=dimensions.transpose,
-                         range=dimensions.get_slicerange(),
-                         qflags=dimensions.qflags)
+        return SliceInfo(
+            frame=self.model.get_frame(),
+            point=dimensions.get_slicepoint(),
+            transpose=dimensions.transpose,
+            range=dimensions.get_slicerange(),
+            qflags=dimensions.qflags)
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
@@ -138,13 +145,13 @@ class SliceViewer(object):
                 data_view.create_axes_nonorthogonal(
                     self.model.create_nonorthogonal_transform(sliceinfo))
             else:
-                data_view.disable_nonorthogonal_axes_button()
+                data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
                 data_view.create_axes_orthogonal()
         else:
             if sliceinfo.can_support_nonorthogonal_axes():
-                data_view.enable_nonorthogonal_axes_button()
+                data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
             else:
-                data_view.disable_nonorthogonal_axes_button()
+                data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
         self.new_plot()
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
@@ -159,8 +166,7 @@ class SliceViewer(object):
         """Notify data limits on image axes have changed"""
         data_view = self.view.data_view
         if self.model.can_support_dynamic_rebinning():
-            self.model.rebin(slicepoint=self.get_slicepoint(), limits=data_view.get_axes_limits())
-            self.new_plot()
+            self.new_plot()  # automatically uses current display limits
             self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
         else:
             data_view.draw_plot()
@@ -179,11 +185,94 @@ class SliceViewer(object):
         """
         Toggle the attached line plots for the integrated signal over each dimension for the current cursor
         position
+        :param state: If true a request is being made to turn them on, else they should be turned off
         """
+        tool = PixelLinePlot
+        data_view = self.view.data_view
         if state:
-            self.view.data_view.add_line_plots()
+            data_view.add_line_plots(tool, self)
         else:
-            self.view.data_view.remove_line_plots()
+            data_view.deactivate_tool(ToolItemText.REGIONSELECTION)
+            data_view.remove_line_plots()
+
+    def region_selection(self, state):
+        """
+        Toggle the region selection tool. If the line plots are disabled then they are enabled.
+        :param state: If true a request is being made to turn them on, else they should be turned off
+        :param region_selection: If true the region selection rather than single pixel selection should
+                                 be enabled.
+        """
+        data_view = self.view.data_view
+        if state:
+            # incompatible with drag zooming/panning as they both require drag selection
+            data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
+            data_view.deactivate_and_disable_tool(ToolItemText.PAN)
+            tool = RectangleSelectionLinePlot
+            if data_view.line_plots_active:
+                data_view.switch_line_plots_tool(RectangleSelectionLinePlot, self)
+            else:
+                data_view.add_line_plots(tool, self)
+        else:
+            data_view.enable_tool_button(ToolItemText.ZOOM)
+            data_view.enable_tool_button(ToolItemText.PAN)
+            data_view.switch_line_plots_tool(PixelLinePlot, self)
+
+    def export_roi(self, limits):
+        """Notify that an roi has been selected for export to a workspace
+        :param limits: 2-tuple of ((left, right), (bottom, top)). These are in display order
+        """
+        data_view = self.view.data_view
+
+        try:
+            self._show_status_message(
+                self.model.export_roi_to_workspace(
+                    self.get_slicepoint(),
+                    bin_params=data_view.dimensions.get_bin_params(),
+                    limits=limits,
+                    transpose=data_view.dimensions.transpose))
+        except Exception as exc:
+            self._logger.error(str(exc))
+            self._show_status_message(f"Error exporting ROI")
+
+    def export_cut(self, limits, cut_type):
+        """Notify that an roi has been selected for export to a workspace
+        :param limits: 2-tuple of ((left, right), (bottom, top)). These are in display order
+        and could be transposed w.r.t to the data
+        :param cut: A string indicating the required cut type
+        """
+        data_view = self.view.data_view
+
+        try:
+            self._show_status_message(
+                self.model.export_cuts_to_workspace(
+                    self.get_slicepoint(),
+                    bin_params=data_view.dimensions.get_bin_params(),
+                    limits=limits,
+                    transpose=data_view.dimensions.transpose,
+                    cut=cut_type))
+        except Exception as exc:
+            self._logger.error(str(exc))
+            self._show_status_message(f"Error exporting roi cut")
+
+    def export_pixel_cut(self, pos, axis):
+        """Notify a single pixel line plot has been requested from the
+        given position in data coordinates.
+        :param pos: Position on the image
+        :param axis: String indicating the axis the position relates to: 'x' or 'y'
+        """
+        data_view = self.view.data_view
+
+        try:
+            self._show_status_message(
+                self.model.export_pixel_cut_to_workspace(
+                    self.get_slicepoint(),
+                    bin_params=data_view.dimensions.get_bin_params(),
+                    pos=pos,
+                    transpose=data_view.dimensions.transpose,
+                    axis=axis))
+        except Exception as exc:
+            self._logger.error(str(exc))
+            self._show_status_message(f"Error exporting single-pixel cut")
 
     def nonorthogonal_axes(self, state: bool):
         """
@@ -191,17 +280,18 @@ class SliceViewer(object):
         :param state: If true a request is being made to turn them on, else they should be turned off
         """
         data_view = self.view.data_view
-        data_view.remove_line_plots()
         if state:
-            data_view.disable_lineplots_button()
-            data_view.disable_peaks_button()
+            data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
+            data_view.disable_tool_button(ToolItemText.LINEPLOTS)
+            data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
             data_view.create_axes_nonorthogonal(
                 self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
             self.new_plot()
         else:
             data_view.create_axes_orthogonal()
-            data_view.enable_lineplots_button()
-            data_view.enable_peaks_button()
+            data_view.enable_tool_button(ToolItemText.LINEPLOTS)
+            data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
+            data_view.enable_tool_button(ToolItemText.OVERLAY_PEAKS)
             self.new_plot()
 
     def normalization_changed(self, norm_type):
@@ -249,6 +339,12 @@ class SliceViewer(object):
         """
         if self._peaks_presenter is not None:
             getattr(self._peaks_presenter, attr)(*args, **kwargs)
+
+    def _show_status_message(self, message: str):
+        """
+        Show a temporary message in the status of the view
+        """
+        self.view.data_view.show_temporary_status_message(message, self.TEMPORARY_STATUS_TIMEOUT)
 
     def _overlayed_peaks_workspaces(self):
         """

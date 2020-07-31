@@ -11,8 +11,6 @@
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoPresenter.h"
 
-#include <QTableWidget>
-
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -24,12 +22,11 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public IImageInfoWidget {
   Q_OBJECT
 
 public:
-  ImageInfoWidget(const std::string &workspace_type, QWidget *parent = nullptr);
+  ImageInfoWidget(QWidget *parent = nullptr);
 
-  void updateTable(const double x = DBL_MAX, const double y = DBL_MAX,
-                   const double z = DBL_MAX) override;
-
+  void cursorAt(const double x, const double y, const double signal) override;
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
+  void showInfo(const ImageInfoModel::ImageInfo &info) override;
 
 private:
   std::unique_ptr<ImageInfoPresenter> m_presenter;
