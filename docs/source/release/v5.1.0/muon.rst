@@ -45,6 +45,8 @@ Improvements
 - Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
 - Updated :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` to allow double pulse fits.
 - Tf asymmetry mode can now be performed on double pulse fits from the muon analysis GUI.
+- Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to load a list of time zeros into a new property TimZeroList.
+- Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to add an option to not auto-correct the time by loaded timezero.
 
 Bug fixes
 ---------
