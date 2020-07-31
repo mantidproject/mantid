@@ -258,6 +258,11 @@ std::shared_ptr<IMCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
 
 /**
  * Factory method to return an instance of the required SparseInstrument class
+ * @param modelWS The full workspace that the sparse one will be based on
+ * @param wavelengthPoints The number of wavelength points to include in the
+ * histograms in the sparse workspace
+ * @param rows The number of rows of detectors to create
+ * @param columns The number of columns of detectors to create
  * @return a pointer to an SparseInstrument object
  */
 std::shared_ptr<SparseWorkspace> MonteCarloAbsorption::createSparseWorkspace(

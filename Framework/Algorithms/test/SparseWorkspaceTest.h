@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
+#include "MantidAlgorithms/SampleCorrections/SparseWorkspace.h"
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
@@ -26,11 +26,11 @@ using namespace Mantid::Geometry;
 // allow testing of protected methods. This is in part to provide some
 // continuity from previous versions where all of the methods were free
 // functions
-class SparseWorkspaceTest : public SparseWorkspace {
+class SparseWorkspaceWrapper : public SparseWorkspace {
 public:
-  SparseWorkspaceTest(const Mantid::API::MatrixWorkspace &modelWS,
-                      const size_t wavelengthPoints, const size_t rows,
-                      const size_t columns)
+  SparseWorkspaceWrapper(const Mantid::API::MatrixWorkspace &modelWS,
+                         const size_t wavelengthPoints, const size_t rows,
+                         const size_t columns)
       : SparseWorkspace(modelWS, wavelengthPoints, rows, columns){};
   static std::array<double, 4>
   inverseDistanceWeights(const std::array<double, 4> &distances) {
@@ -56,22 +56,22 @@ public:
   }
 };
 
-class SparseInstrumentTest : public CxxTest::TestSuite {
+class SparseWorkspaceTest : public CxxTest::TestSuite {
 public:
-  static SparseInstrumentTest *createSuite() {
-    return new SparseInstrumentTest();
+  static SparseWorkspaceTest *createSuite() {
+    return new SparseWorkspaceTest();
   }
 
-  static void destroySuite(SparseInstrumentTest *suite) { delete suite; }
+  static void destroySuite(SparseWorkspaceTest *suite) { delete suite; }
 
-  SparseInstrumentTest() {}
+  SparseWorkspaceTest() {}
 
   void test_createSparseWS() {
     using namespace WorkspaceCreationHelper;
     auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 10);
-    const size_t gridRows = 5;
-    const size_t gridCols = 3;
-    const size_t wavelengths = 3;
+    constexpr size_t gridRows = 5;
+    constexpr size_t gridCols = 3;
+    constexpr size_t wavelengths = 3;
     auto sparseWS =
         std::make_unique<SparseWorkspace>(*ws, wavelengths, gridRows, gridCols);
     TS_ASSERT_EQUALS(sparseWS->getNumberHistograms(), gridRows * gridCols)
@@ -87,13 +87,13 @@ public:
     double minLon;
     double maxLon;
     std::tie(minLat, maxLat, minLon, maxLon) =
-        SparseWorkspaceTest::extremeAngles(*ws);
+        SparseWorkspaceWrapper::extremeAngles(*ws);
     double sparseMinLat;
     double sparseMaxLat;
     double sparseMinLon;
     double sparseMaxLon;
     std::tie(sparseMinLat, sparseMaxLat, sparseMinLon, sparseMaxLon) =
-        SparseWorkspaceTest::extremeAngles(*ws);
+        SparseWorkspaceWrapper::extremeAngles(*ws);
     TS_ASSERT_EQUALS(sparseMinLat, minLat)
     TS_ASSERT_DELTA(sparseMaxLat, maxLat, 1e-8)
     TS_ASSERT_EQUALS(sparseMinLon, minLon)
@@ -109,7 +109,7 @@ public:
     double maxLat;
     double maxLon;
     std::tie(minLat, maxLat, minLon, maxLon) =
-        SparseWorkspaceTest::extremeAngles(*ws);
+        SparseWorkspaceWrapper::extremeAngles(*ws);
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       double lat;
       double lon;
@@ -129,7 +129,7 @@ public:
     double maxLat;
     double maxLon;
     std::tie(minLat, maxLat, minLon, maxLon) =
-        SparseWorkspaceTest::extremeAngles(*ws);
+        SparseWorkspaceWrapper::extremeAngles(*ws);
     TS_ASSERT_EQUALS(minLat, 0)
     TS_ASSERT_EQUALS(minLon, 0)
     TS_ASSERT_EQUALS(maxLat, 0)
@@ -145,7 +145,7 @@ public:
     ws->mutableX(1) = {-3.0, -1.0, 1.0};
     double minWavelength, maxWavelength;
     std::tie(minWavelength, maxWavelength) =
-        SparseWorkspaceTest::extremeWavelengths(*ws);
+        SparseWorkspaceWrapper::extremeWavelengths(*ws);
     TS_ASSERT_EQUALS(minWavelength, -2.0)
     TS_ASSERT_EQUALS(maxWavelength, 3.0)
   }
@@ -159,7 +159,7 @@ public:
     ws->mutableX(1) = {-3.0, -1.0, 1.0};
     double minWavelength, maxWavelength;
     std::tie(minWavelength, maxWavelength) =
-        SparseWorkspaceTest::extremeWavelengths(*ws);
+        SparseWorkspaceWrapper::extremeWavelengths(*ws);
     TS_ASSERT_EQUALS(minWavelength, -3.0)
     TS_ASSERT_EQUALS(maxWavelength, 4.0)
   }
@@ -167,8 +167,8 @@ public:
   void test_createDetectorGridDefinition_multipleDetectors() {
     using namespace WorkspaceCreationHelper;
     auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 1);
-    const size_t gridRows = 3;
-    const size_t gridCols = 4;
+    constexpr size_t gridRows = 3;
+    constexpr size_t gridCols = 4;
     auto sparseWS =
         std::make_unique<SparseWorkspace>(*ws, 1, gridRows, gridCols);
 
@@ -221,7 +221,7 @@ public:
     auto ws = create<Workspace2D>(2, Histogram(edges, counts));
     const auto points = ws->points(0);
     for (size_t nCounts = 2; nCounts < counts.size(); ++nCounts) {
-      const auto histo = SparseWorkspaceTest::modelHistogram(*ws, nCounts);
+      const auto histo = SparseWorkspaceWrapper::modelHistogram(*ws, nCounts);
 
       // Check the stepping inside modelHistogram retains the final wavelength
       // point as returned by extremeWavelengths w/o rounding errors
@@ -232,12 +232,13 @@ public:
   }
 
   void test_greatCircleDistance() {
-    double d = SparseWorkspaceTest::greatCircleDistance(0, 0, 0, 0);
+    double d = SparseWorkspaceWrapper::greatCircleDistance(0, 0, 0, 0);
     TS_ASSERT_EQUALS(d, 0.0);
-    d = SparseWorkspaceTest::greatCircleDistance(M_PI / 2, 0.0, -M_PI / 2, 0.0);
+    d = SparseWorkspaceWrapper::greatCircleDistance(M_PI / 2, 0.0, -M_PI / 2,
+                                                    0.0);
     TS_ASSERT_EQUALS(d, M_PI)
-    d = SparseWorkspaceTest::greatCircleDistance(M_PI / 4, M_PI / 4, -M_PI / 4,
-                                                 -M_PI / 4);
+    d = SparseWorkspaceWrapper::greatCircleDistance(M_PI / 4, M_PI / 4,
+                                                    -M_PI / 4, -M_PI / 4);
     TS_ASSERT_DELTA(d, 2 * M_PI / 3, 1e-8)
   }
 
@@ -247,7 +248,7 @@ public:
     const size_t sparseRows = 3;
     const size_t sparseCols = 6;
     const size_t wavelengths = 3;
-    auto sparseWS = std::make_unique<SparseWorkspaceTest>(
+    auto sparseWS = std::make_unique<SparseWorkspaceWrapper>(
         *ws, wavelengths, sparseRows, sparseCols);
     for (size_t i = 0; i < sparseWS->getNumberHistograms(); ++i) {
       auto &ys = sparseWS->mutableY(i);
@@ -299,13 +300,13 @@ public:
 
   void test_inverseDistanceWeights() {
     std::array<double, 4> ds{{0.3, 0.3, 0.0, 0.3}};
-    auto weights = SparseWorkspaceTest::inverseDistanceWeights(ds);
+    auto weights = SparseWorkspaceWrapper::inverseDistanceWeights(ds);
     TS_ASSERT_EQUALS(weights[0], 0.0)
     TS_ASSERT_EQUALS(weights[1], 0.0)
     TS_ASSERT_EQUALS(weights[2], 1.0)
     TS_ASSERT_EQUALS(weights[3], 0.0)
     ds = {{0.2, 0.3, 0.1, 0.4}};
-    weights = SparseWorkspaceTest::inverseDistanceWeights(ds);
+    weights = SparseWorkspaceWrapper::inverseDistanceWeights(ds);
     TS_ASSERT_EQUALS(weights[0], 1 / 0.2 / 0.2)
     TS_ASSERT_EQUALS(weights[1], 1 / 0.3 / 0.3)
     TS_ASSERT_EQUALS(weights[2], 1 / 0.1 / 0.1)

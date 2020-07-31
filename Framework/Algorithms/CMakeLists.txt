@@ -271,7 +271,7 @@ set(SRC_FILES
     src/SampleCorrections/MayersSampleCorrection.cpp
     src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
     src/SampleCorrections/RectangularBeamProfile.cpp
-    src/SampleCorrections/SparseInstrument.cpp
+    src/SampleCorrections/SparseWorkspace.cpp
     src/SassenaFFT.cpp
     src/Scale.cpp
     src/ScaleX.cpp
@@ -605,7 +605,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
     inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
-    inc/MantidAlgorithms/SampleCorrections/SparseInstrument.h
+    inc/MantidAlgorithms/SampleCorrections/SparseWorkspace.h
     inc/MantidAlgorithms/SassenaFFT.h
     inc/MantidAlgorithms/Scale.h
     inc/MantidAlgorithms/ScaleX.h
@@ -949,7 +949,7 @@ set(TEST_FILES
     SolidAngleTest.h
     SortEventsTest.h
     SortXAxisTest.h
-    SparseInstrumentTest.h
+    SparseWorkspaceTest.h
     SpatialGroupingTest.h
     SphericalAbsorptionTest.h
     Stitch1DManyTest.h

@@ -77,11 +77,8 @@ const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
 const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
   if (m_env) {
-    try {
-      const auto &envBox = m_env->boundingBox();
-      sampleBox.grow(envBox);
-    } catch (std::runtime_error &) {
-    }
+    const auto &envBox = m_env->boundingBox();
+    sampleBox.grow(envBox);
   }
   return sampleBox;
 }

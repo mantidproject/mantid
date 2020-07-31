@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
+#include "MantidAlgorithms/SampleCorrections/SparseWorkspace.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -68,7 +68,7 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
   sample->setPos(samplePos);
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());
-  const double R = 1.0; // This will be the default L2 distance.
+  constexpr double R = 1.0; // This will be the default L2 distance.
   // Add source behind the sample.
   const Kernel::V3D sourcePos = [&]() {
     Kernel::V3D p;

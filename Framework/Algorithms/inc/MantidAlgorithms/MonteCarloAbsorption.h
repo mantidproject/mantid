@@ -15,7 +15,7 @@
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
-#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
+#include "MantidAlgorithms/SampleCorrections/SparseWorkspace.h"
 
 namespace Mantid {
 namespace API {

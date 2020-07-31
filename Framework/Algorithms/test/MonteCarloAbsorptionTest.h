@@ -192,7 +192,7 @@ setUpWS(const TestWorkspaceDescriptor &wsProps) {
         "pixel-shape");
 
     // source and detector are at +/-100m so tracks approx parallel to beam
-    const double distance = 100.0;
+    constexpr double distance = 100.0;
     Detector *det = new Detector("det", 1, pixelShape, nullptr);
     det->setPos(0, 0, distance);
     testInst->add(det);
@@ -250,7 +250,7 @@ public:
     // E(att^2) = (1 - exp(-4*mu)*(4*mu+1))/8*mu^2
 
     auto mcAbsorb = createAlgorithm();
-    const int NEVENTS = 500000;
+    constexpr int NEVENTS = 500000;
     mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
 
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
@@ -263,7 +263,7 @@ public:
     // recreate the sd of the set of simulated paths from the sd on the mean
     double attenuationFactorsSD1 = eData[0] * sqrt(NEVENTS);
 
-    const double delta(1e-03);
+    constexpr double delta(1e-03);
     const double calculatedAttFactor1 = (1 - 3 * exp(-2)) / 2;
     const double calculatedAttFactorSq1 = (1 - 5 * exp(-4)) / 8;
     TS_ASSERT_DELTA(calculatedAttFactor1, yData[0], delta);
@@ -306,7 +306,7 @@ public:
     // exp(-2*mu2))*mu1)/(2*mu1*mu2*(mu2-mu1))
 
     auto mcAbsorb = createAlgorithm();
-    const int NEVENTS = 500000;
+    constexpr int NEVENTS = 500000;
     mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
 
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
@@ -317,7 +317,7 @@ public:
     auto yData = outputWS->getSpectrum(0).dataY();
     auto eData = outputWS->getSpectrum(0).dataE();
 
-    const double delta(1e-03);
+    constexpr double delta(1e-03);
     const double calculatedAttFactor = (1 - 2 * exp(-2) + exp(-4)) / 4;
     TS_ASSERT_DELTA(calculatedAttFactor, yData[1], delta);
   }
@@ -348,7 +348,7 @@ public:
     // exp(-2*mu2))*mu1)/(2*mu1*mu2*(mu2-mu1))
 
     auto mcAbsorb = createAlgorithm();
-    const int NEVENTS = 500000;
+    constexpr int NEVENTS = 500000;
     mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
 
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
@@ -359,7 +359,7 @@ public:
     auto yData = outputWS->getSpectrum(0).dataY();
     auto eData = outputWS->getSpectrum(0).dataE();
 
-    const double delta(1e-03);
+    constexpr double delta(1e-03);
     const double calculatedAttFactor = (1 - 2 * exp(-2) + exp(-4)) / 4;
     TS_ASSERT_DELTA(calculatedAttFactor, yData[1], delta);
   }
@@ -374,7 +374,7 @@ public:
     auto testWS = setUpWS(wsProps);
 
     auto mcAbsorb = createAlgorithm();
-    const int NEVENTS = 1000;
+    constexpr int NEVENTS = 1000;
     mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
 
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
@@ -384,7 +384,7 @@ public:
     verifyDimensions(wsProps, outputWS);
     auto yData = outputWS->getSpectrum(0).dataY();
 
-    const double delta(1e-03);
+    constexpr double delta(1e-03);
     const double calculatedAttFactor = exp(-2);
     TS_ASSERT_DELTA(calculatedAttFactor, yData[0], delta);
   }
@@ -409,7 +409,7 @@ public:
     // E(att) = 2*(exp(-mu)*(mu+1) - exp(-2*mu)*(2*mu+1))/3*mu^2
 
     auto mcAbsorb = createAlgorithm();
-    const int NEVENTS = 500000;
+    constexpr int NEVENTS = 500000;
     mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
 
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
@@ -419,7 +419,7 @@ public:
     verifyDimensions(wsProps, outputWS);
     auto yData = outputWS->getSpectrum(0).dataY();
 
-    const double delta(1e-03);
+    constexpr double delta(1e-03);
     const double calculatedAttFactor1 = 2 * (2 * exp(-1) - 3 * exp(-2)) / 3;
     TS_ASSERT_DELTA(calculatedAttFactor1, yData[0], delta);
   }
@@ -690,8 +690,8 @@ public:
 
   void test_Sparse_Workspace() {
     using Mantid::Kernel::DeltaEMode;
-    const int nspectra = 25;
-    const int nbins = 10;
+    constexpr int nspectra = 25;
+    constexpr int nbins = 10;
     TestWorkspaceDescriptor wsProps = {nspectra,
                                        nbins,
                                        true,
