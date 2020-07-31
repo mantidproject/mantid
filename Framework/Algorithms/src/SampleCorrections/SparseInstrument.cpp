@@ -351,16 +351,17 @@ interpolateFromDetectorGrid(const double lat, const double lon,
   return h;
 }
 
-HistogramData::Histogram
-bilinearInterpolateFromDetectorGrid(const double lat, const double lon,
-                                    const API::MatrixWorkspace &ws,
-                                    const std::array<size_t, 4> &indices) {
+HistogramData::Histogram bilinearInterpolateFromDetectorGrid(
+    const double lat, const double lon, const API::MatrixWorkspace &ws,
+    const std::vector<std::vector<int>> &indices) {
   const auto &spectrumInfo = ws.spectrumInfo();
   const auto refFrame = ws.getInstrument()->getReferenceFrame();
   std::array<std::pair<double, double>, 4> detLatsLongs;
-  for (size_t i = 0; i < 4; i++) {
-    std::tie(detLatsLongs[i].first, detLatsLongs[i].second) =
-        geographicalAngles(spectrumInfo.position(indices[i]), *refFrame);
+  for (size_t i = 1; i < 3; i++) {
+    for (size_t j = 1; j < 3; j++) {
+      std::tie(detLatsLongs[i].first, detLatsLongs[i].second) =
+          geographicalAngles(spectrumInfo.position(indices[i][j]), *refFrame);
+    }
   }
   assert(std::abs(detLatsLongs[0].second - detLatsLongs[1].second) <
          std::numeric_limits<double>::epsilon());
@@ -377,11 +378,11 @@ bilinearInterpolateFromDetectorGrid(const double lat, const double lon,
   auto longHigh = detLatsLongs[2].second;
 
   // interpolate across different longitudes
-  auto lat1 = ((longHigh - lon) * ws.y(indices[0]) +
-               (lon - longLow) * ws.y(indices[2])) /
+  auto lat1 = ((longHigh - lon) * ws.y(indices[1][1]) +
+               (lon - longLow) * ws.y(indices[2][1])) /
               (longHigh - longLow);
-  auto lat2 = ((longHigh - lon) * ws.y(indices[1]) +
-               (lon - longLow) * ws.y(indices[3])) /
+  auto lat2 = ((longHigh - lon) * ws.y(indices[1][2]) +
+               (lon - longLow) * ws.y(indices[2][2])) /
               (longHigh - longLow);
   // interpolate across different latitudes
   auto interpY =
@@ -389,7 +390,6 @@ bilinearInterpolateFromDetectorGrid(const double lat, const double lon,
 
   // calculate interpolation errors
   // 2nd derivative in longitude
-
 
   // 2nd derivative in latitude
 

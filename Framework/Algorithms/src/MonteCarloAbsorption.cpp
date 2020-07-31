@@ -430,10 +430,14 @@ void MonteCarloAbsorption::interpolateFromSparse(
     double lat, lon;
     std::tie(lat, lon) =
         SparseInstrument::geographicalAngles(detPos, *refFrame);
-    const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
+    /*const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
     const auto spatiallyInterpHisto =
         SparseInstrument::interpolateFromDetectorGrid(lat, lon, sparseWS,
-                                                      nearestIndices);
+                                                      nearestIndices);*/
+    const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon, 2);
+    const auto spatiallyInterpHisto =
+        SparseInstrument::bilinearInterpolateFromDetectorGrid(
+            lat, lon, sparseWS, nearestIndices);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);

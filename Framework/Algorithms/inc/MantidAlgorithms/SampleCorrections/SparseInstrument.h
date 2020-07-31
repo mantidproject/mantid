@@ -57,9 +57,9 @@ interpolateFromDetectorGrid(const double lat, const double lon,
                             const API::MatrixWorkspace &ws,
                             const std::array<size_t, 4> &indices);
 MANTID_ALGORITHMS_DLL HistogramData::Histogram
-bilinearInterpolateFromDetectorGrid(const double lat, const double lon,
-                                    const API::MatrixWorkspace &ws,
-                                    const std::array<size_t, 4> &indices);
+bilinearInterpolateFromDetectorGrid(
+    const double lat, const double lon, const API::MatrixWorkspace &ws,
+    const std::vector<std::vector<int>> &indices);
 MANTID_ALGORITHMS_DLL std::unique_ptr<const Algorithms::DetectorGridDefinition>
 createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
                              const size_t rows, const size_t columns);
