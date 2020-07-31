@@ -64,6 +64,7 @@ class DrillAlgorithmPool(QThreadPool):
         self._running = False
         self.clear()
         for task in self._tasks:
+            task.signals.progress.disconnect()
             task.cancel()
         self._tasks.clear()
         self._tasksDone.clear()
