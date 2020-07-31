@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace API {
 class Sample;
-}
+} // namespace API
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
