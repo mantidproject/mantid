@@ -12,7 +12,7 @@ from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValid
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
                            StringListValidator)
 from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, RebinToWorkspace,
-                              ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
+                              ReflectometryBeamStatistics, ReflectometrySumInQ)
 import numpy
 import ReflectometryILL_common as common
 
@@ -309,11 +309,35 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             foregroundEs += es**2
             self._cleanup.cleanup(addeeWS)
         numpy.sqrt(foregroundEs, out=foregroundEs)
+        foregroundWS = self._correctForFractionalForegroundCentre(ws, foregroundWS)
+        self._cleanup.cleanup(ws)
+        return foregroundWS
 
-        # Move the detector to the fractional linePosition
+    def _correctForFractionalForegroundCentre(self, ws, summedForeground):
+        """
+        This needs to be called after having summed the foreground but before transfering to momentum transfer.
+        This needs to be called in both coherent and incoherent cases, regardless the angle calibration option.
+        The reason for this is that up to this point is the fractional workspace index that correponds to the calibrated 2theta.
+        However the momentum transfer calculation, which normally comes after summing the foreground,
+        takes the 2theta from the spectrumInfo of the summed foreground workspace.
+        Hence this code below translated the detector by the difference of the
+        fractional and integer foreground centre along the detector plane.
+        Ideally there should also be a corresponding rotation afterwards, such that the detector still faces the sample.
+        However, since at this point the workspace is already in wavelength,
+        the second order correction in the sample-to-foreground centre distance no longer matters.
+        All that matters is the angle for subsequent Q calculation.
+        Note that this translation has nothing to do with the difference of foreground centres in direct and reflected beams,
+        which is hanled already in pre-process algorithm.
+        Here it's only about the difference of the fractional and integer foreground centre of the reflected beam
+        with already calibrated angle no matter the option."""
+        foreground = self._foregroundIndices(ws)
+        # integer foreground centre
+        beamPosIndex = foreground[1]
+        # fractional foreground centre
         linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
         instr = common.instrumentName(ws)
         pixelSize = common.pixelSize(instr)
+        # the distance between the fractional and integer foreground centres along the detector plane
         dist = pixelSize * (linePosition - beamPosIndex)
         if dist != 0.:
             detPoint1 = ws.spectrumInfo().position(0)
@@ -324,31 +348,18 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             if instr == 'D17':
                 mx = xvsy
                 my = 0.0
-                rotationAxis = [0, 1, 0]
             else:
                 mx = 0.0
                 my = xvsy
-                rotationAxis = [-1, 0, 0]
             MoveInstrumentComponent(
-                Workspace=foregroundWS,
+                Workspace=summedForeground,
                 ComponentName='detector',
                 X=mx,
                 Y=my,
                 Z=mz,
                 RelativePosition=True
             )
-            theta = foregroundWS.spectrumInfo().twoTheta(0) / 2.
-            RotateInstrumentComponent(
-                Workspace=foregroundWS,
-                ComponentName='detector',
-                X=rotationAxis[0],
-                Y=rotationAxis[1],
-                Z=rotationAxis[2],
-                Angle=theta,
-                RelativeRotation=True
-            )
-        self._cleanup.cleanup(ws)
-        return foregroundWS
+        return summedForeground
 
     def _sumForegroundInQ(self, ws):
         """Sum the foreground region into a single histogram using the coherent method."""
@@ -364,46 +375,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             BeamCentre=linePosition,
             FlatSample=isFlatSample,
             EnableLogging=self._subalgLogging)
-
-        # Move the detector to the fractional linePosition
-        beamPosIndex = foreground[1]
-        linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
-        instr = common.instrumentName(ws)
-        pixelSize = common.pixelSize(instr)
-        dist = pixelSize * (linePosition - beamPosIndex)
-        if dist != 0.:
-            detPoint1 = ws.spectrumInfo().position(0)
-            detPoint2 = ws.spectrumInfo().position(20)
-            beta = numpy.math.atan2((detPoint2[0] - detPoint1[0]), (detPoint2[2] - detPoint1[2]))
-            xvsy = numpy.math.sin(beta) * dist
-            mz = numpy.math.cos(beta) * dist
-            if instr == 'D17':
-                mx = xvsy
-                my = 0.0
-                rotationAxis = [0, 1, 0]
-            else:
-                mx = 0.0
-                my = xvsy
-                rotationAxis = [-1, 0, 0]
-            MoveInstrumentComponent(
-                Workspace=sumWS,
-                ComponentName='detector',
-                X=mx,
-                Y=my,
-                Z=mz,
-                RelativePosition=True
-            )
-            theta = sumWS.spectrumInfo().twoTheta(0) / 2.
-            RotateInstrumentComponent(
-                Workspace=sumWS,
-                ComponentName='detector',
-                X=rotationAxis[0],
-                Y=rotationAxis[1],
-                Z=rotationAxis[2],
-                Angle=theta,
-                RelativeRotation=True
-            )
-
+        sumWS = self._correctForFractionalForegroundCentre(ws, sumWS)
         self._cleanup.cleanup(ws)
         return sumWS
 
