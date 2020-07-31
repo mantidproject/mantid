@@ -252,7 +252,8 @@ class FittingTabPresenter(object):
             if self.view.is_simul_fit():
                 self._fit_function = [None]
             else:
-                self._fit_function = [None] * len(self.selected_data)
+                self._fit_function = [None] * len(self.selected_data)\
+                    if self.selected_data else [None]
             self.model.clear_fit_information()
             self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
         else:

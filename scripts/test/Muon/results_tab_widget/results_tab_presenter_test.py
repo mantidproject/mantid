@@ -140,6 +140,15 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(0, self.mock_model.create_results_table.call_count)
 
+    def test_that_updates_function_name_in_model_when_new_fit_performed(self):
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter._update_fit_results_view_on_new_fit = mock.MagicMock()
+
+        # Calling private method to avoid event loop
+        presenter._on_new_fit_performed_impl()
+
+        self.mock_model.on_new_fit_performed.assert_called_once_with()
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
