@@ -85,9 +85,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMax", "1"));
     TS_ASSERT_THROWS_NOTHING(crop.execute());
     TS_ASSERT(!crop.isExecuted());
-    TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMax", "2.5"));
-    TS_ASSERT_THROWS_NOTHING(crop.execute());
-    TS_ASSERT(!crop.isExecuted());
     TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMax", "5"));
     TS_ASSERT_THROWS_NOTHING(
         crop.setPropertyValue("StartWorkspaceIndex", "10"));

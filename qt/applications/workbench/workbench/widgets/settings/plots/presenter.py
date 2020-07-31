@@ -11,9 +11,11 @@ from mantid.kernel import ConfigService
 from mantid.plots.utility import get_colormap_names
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
 from workbench.widgets.settings.plots.view import PlotsSettingsView
+from workbench.widgets.settings.plots.model import PlotsSettingsModel
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
 
 from qtpy.QtCore import Qt
+
 from enum import Enum
 
 
@@ -31,6 +33,7 @@ class PlotProperties(Enum):
     MARKER_SIZE = "plots.marker.Size"
     NORMALIZATION = "graph1d.autodistribution"
     SHOW_TITLE = "plots.ShowTitle"
+    PLOT_FONT = "plots.font"
     LEGEND_FONT_SIZE = "plots.legend.FontSize"
     LEGEND_LOCATION = "plots.legend.Location"
     SHOW_MINOR_TICKS = "plots.ShowMinorTicks"
@@ -43,8 +46,9 @@ class PlotSettings(object):
     LEGEND_LOCATION_LIST = ['best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left',
                             'center left', 'upper left', 'upper center']
 
-    def __init__(self, parent, view=None):
+    def __init__(self, parent, view=None, model=None):
         self.view = view if view else PlotsSettingsView(parent, self)
+        self.model = model if model else PlotsSettingsModel()
         self.parent = parent
         self.add_list_items()
         self.load_general_setting_values()
@@ -75,6 +79,7 @@ class PlotSettings(object):
         self.view.show_minor_ticks.setChecked(show_minor_ticks)
         self.view.show_minor_gridlines.setEnabled(show_minor_ticks)
         self.view.show_minor_gridlines.setChecked(show_minor_gridlines)
+        self.populate_font_combo_box()
 
     def setup_axes_group(self):
         x_axes_scale = ConfigService.getString(PlotProperties.X_AXES_SCALE.value)
@@ -167,6 +172,7 @@ class PlotSettings(object):
         self.view.legend_font_size.valueChanged.connect(self.action_legend_size_changed)
         self.view.default_colormap_combo_box.currentTextChanged.connect(self.action_default_colormap_changed)
         self.view.reverse_colormap_check_box.stateChanged.connect(self.action_default_colormap_changed)
+        self.view.plot_font.currentTextChanged.connect(self.action_font_combo_changed)
 
     def action_normalization_changed(self, state):
         ConfigService.setString(PlotProperties.NORMALIZATION.value, "On" if state == Qt.Checked else "Off")
@@ -183,6 +189,9 @@ class PlotSettings(object):
 
     def action_show_minor_gridlines_changed(self, state):
         ConfigService.setString(PlotProperties.SHOW_MINOR_GRIDLINES.value, "On" if state == Qt.Checked else "Off")
+
+    def action_font_combo_changed(self, font_name):
+        ConfigService.setString(PlotProperties.PLOT_FONT.value, font_name)
 
     def action_default_x_axes_changed(self, axes_scale):
         ConfigService.setString(PlotProperties.X_AXES_SCALE.value, axes_scale)
@@ -229,6 +238,15 @@ class PlotSettings(object):
             colormap += '_r'
 
         ConfigService.setString(PlotProperties.COLORMAP.value, colormap)
+
+    def populate_font_combo_box(self):
+        fonts = self.model.get_font_names()
+        self.view.plot_font.addItems(fonts)
+        current_font = ConfigService.getString(PlotProperties.PLOT_FONT.value)
+        if current_font:
+            self.view.plot_font.setCurrentText(current_font)
+        else:
+            self.view.plot_font.setCurrentText(self.model.get_current_mpl_font())
 
     def update_properties(self):
         self.load_general_setting_values()

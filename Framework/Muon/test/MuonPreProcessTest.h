@@ -178,7 +178,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void test_that_TimeMin_and_TimeMax_both_in_same_bin_throws_logic_error() {
+  void test_that_TimeMin_and_TimeMax_both_in_same_bin_produces_single_bin() {
     // bins : 0.0 , 0.1 , 0.2 , ... , 1.0 (bin edges)
     auto ws = createCountsWorkspace(2, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
@@ -190,8 +190,15 @@ public:
     alg->setProperty("TimeMin", 0.55);
     alg->setProperty("TimeMax", 0.58);
 
-    // Expect runtime error as alg is set to rethrow
-    TS_ASSERT_THROWS(alg->execute(), const std::logic_error &);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
+    const auto item0 =
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+    TS_ASSERT(item0->isCommonBins());
+    TS_ASSERT_EQUALS(2, item0->x(0).size());
+    TS_ASSERT_EQUALS(1, item0->y(0).size());
+    TS_ASSERT_DELTA(0.5, item0->x(0)[0], 1e-08);
+    TS_ASSERT_DELTA(0.6, item0->x(0)[1], 1e-08);
   }
 
   // --------------------------------------------------------------------------

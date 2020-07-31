@@ -164,6 +164,9 @@ def pcolormesh_from_names(names, fig=None, ax=None):
 
 def use_imshow(ws):
     y = ws.getAxis(1).extractValues()
+    if ws.getAxis(1).isText():
+        nhist = ws.getNumberHistograms()
+        y = np.arange(nhist)
     difference = np.diff(y)
     try:
         commonLogBins = hasattr(ws, 'isCommonLogBins') and ws.isCommonLogBins()

@@ -18,7 +18,8 @@ class ToolItemText:
     ZOOM = 'Zoom'
     GRID = 'Grid'
     LINEPLOTS = 'LinePlots'
-    OVERLAYPEAKS = 'OverlayPeaks'
+    REGIONSELECTION = 'RegionSelection'
+    OVERLAY_PEAKS = 'OverlayPeaks'
     NONORTHOGONAL_AXES = 'NonOrthogonalAxes'
     SAVE = 'Save'
     CUSTOMIZE = 'Customize'
@@ -29,6 +30,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     gridClicked = Signal(bool)
     homeClicked = Signal()
     linePlotsClicked = Signal(bool)
+    regionSelectionClicked = Signal(bool)
     nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
     plotOptionsChanged = Signal()
@@ -41,9 +43,13 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
         (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', False),
+        (None, None, None, None, None),
         (ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
          'linePlotsClicked', False),
-        (ToolItemText.OVERLAYPEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
+        (ToolItemText.REGIONSELECTION, 'Toggle region selection on/off', 'mdi.vector-rectangle',
+         'regionSelectionClicked', False),
+        (None, None, None, None, None),
+        (ToolItemText.OVERLAY_PEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
          'peaksOverlayClicked', None),
         (ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
          'nonOrthogonalClicked', False),
@@ -124,14 +130,19 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                     action.trigger()  # ensure view reacts appropriately
                 action.setEnabled(state)
 
-    def set_action_checked(self, text: str, state: bool):
+    def set_action_checked(self, text: str, state: bool, trigger: bool = True):
         """
         Sets the checked/unchecked state of toggle button with the given text
         :param text: Text on the action
         :param state: checked if True else it is disabled
+        :param trigger: If true the action is triggered if the state changes,
+                        else the state changes only
         """
         actions = self.actions()
         for action in actions:
             if action.text() == text:
                 if action.isChecked() != state:
-                    action.trigger()  # ensure view reacts appropriately
+                    if trigger:
+                        action.trigger()  # ensure view reacts appropriately
+                    else:
+                        action.setChecked(state)
