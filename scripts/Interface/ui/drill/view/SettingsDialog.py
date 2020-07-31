@@ -55,6 +55,7 @@ class Setting(QObject):
 
         if (settingType == "workspace"):
             self._widget = WorkspaceSelector()
+            self._widget.setOptional(True)
             self._widget.currentTextChanged.connect(
                     lambda t : self.valueChanged.emit(name)
                     )
