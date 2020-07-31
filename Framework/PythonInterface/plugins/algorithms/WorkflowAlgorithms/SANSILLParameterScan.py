@@ -12,7 +12,7 @@ from mantid.simpleapi import *
 from SANSILLAutoProcess import needs_loading, needs_processing
 
 
-class SANSILLParameterScan(DataProcessorAlgorithm):
+class SANSILLParameterScan(PythonAlgorithm):
     """
     Performs treatment for scans along a parameter for D16.
     """
@@ -109,7 +109,10 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the default mask to be applied to all the detector configurations.')
 
-        self.copyProperties('SANSILLReduction', ['NormaliseBy'])
+        self.declareProperty(name='NormaliseBy',
+                             defaultValue='Timer',
+                             validator=StringListValidator(['None', 'Timer', 'Monitor']),
+                             doc='Choose the normalisation type.')
 
         self.declareProperty('Observable', 'Omega.value',
                              doc='Parameter from the sample logs along which the scan is made')
@@ -134,7 +137,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.setUp()
 
         _, load_ws_name = needs_loading(self.sample, "Load")
-        self.progress.report(7, 'Loading samples')
         LoadAndMerge(Filename=self.sample, OutputWorkspace=load_ws_name + "_grouped",
                      LoaderOptions={"Wavelength": self.wavelength}, startProgress=0, endProgress=0.7)
         ConjoinXRuns(InputWorkspaces=load_ws_name + "_grouped",
@@ -150,17 +152,17 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             mtd[sort_x_axis_output].getAxis(0).setUnit("label").setLabel(self.observable, 'degrees')
 
         load_sensitivity, sens_input = needs_loading(self.sensitivity, 'Sensitivity')
-        self.progress.report('Loading sensitivity')
+        self.progress.report(8, 'Loading sensitivity')
         if load_sensitivity:
             LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sens_input)
 
         load_default_mask, default_mask_input = needs_loading(self.default_mask, "DefaultMask")
-        self.progress.report('Loading default mask')
+        self.progress.report(0, 'Loading default mask')
         if load_default_mask:
             LoadNexusProcessed(Filename=self.default_mask, OutputWorkspace=default_mask_input)
 
         process_absorber, absorber_name = needs_processing(self.absorber, 'Absorber')
-        self.progress.report('Processing absorber')
+        self.progress.report(0, 'Processing absorber')
         if process_absorber:
             SANSILLReduction(Run=self.absorber,
                              ProcessAs='Absorber',
@@ -169,7 +171,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         process_container, container_name = needs_processing(self.container, 'Container')
 
-        self.progress.report('Processing container')
+        self.progress.report(0, 'Processing container')
         if process_container:
             SANSILLReduction(Run=self.container,
                              ProcessAs='Container',
@@ -178,7 +180,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                              CacheSolidAngle=True,
                              NormaliseBy=self.normalise)
 
-        self.progress.report("Reducing data.")
+        self.progress.report(0, "Reducing data.")
         SANSILLReduction(InputWorkspace=sort_x_axis_output,
                          AbsorberInputWorkspace=absorber_name,
                          ContainerInputWorkspace=container_name,
@@ -215,7 +217,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         ConvertSpectrumAxis(InputWorkspace=self.output2D,
                             OutputWorkspace=self.output2D,
                             Target="SignedInPlaneTwoTheta",
-                            startProgress=0.9,
+                            startProgress=0.95,
                             endProgress=1)
 
         Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)

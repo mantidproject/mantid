@@ -34,7 +34,7 @@ The OutputJoinedWorkspace contains, if asked for, the reduced data on one worksp
                          PixelYmin=3,
                          PixelYMax=317)
 
-.. testcleanup:: ExSANSILLReduction
+.. testcleanup:: ExSANSILLParameterScan
 
     mtd.clear()
 
