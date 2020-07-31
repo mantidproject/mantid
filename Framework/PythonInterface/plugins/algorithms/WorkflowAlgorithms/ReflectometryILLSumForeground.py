@@ -308,8 +308,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             es = addeeWS.readE(0)
             foregroundEs += es**2
             self._cleanup.cleanup(addeeWS)
-        self._cleanup.cleanup(ws)
         numpy.sqrt(foregroundEs, out=foregroundEs)
+
         # Move the detector to the fractional linePosition
         linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
         instr = common.instrumentName(ws)
@@ -347,6 +347,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 Angle=theta,
                 RelativeRotation=True
             )
+        self._cleanup.cleanup(ws)
         return foregroundWS
 
     def _sumForegroundInQ(self, ws):
@@ -363,6 +364,46 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             BeamCentre=linePosition,
             FlatSample=isFlatSample,
             EnableLogging=self._subalgLogging)
+
+        # Move the detector to the fractional linePosition
+        beamPosIndex = foreground[1]
+        linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
+        instr = common.instrumentName(ws)
+        pixelSize = common.pixelSize(instr)
+        dist = pixelSize * (linePosition - beamPosIndex)
+        if dist != 0.:
+            detPoint1 = ws.spectrumInfo().position(0)
+            detPoint2 = ws.spectrumInfo().position(20)
+            beta = numpy.math.atan2((detPoint2[0] - detPoint1[0]), (detPoint2[2] - detPoint1[2]))
+            xvsy = numpy.math.sin(beta) * dist
+            mz = numpy.math.cos(beta) * dist
+            if instr == 'D17':
+                mx = xvsy
+                my = 0.0
+                rotationAxis = [0, 1, 0]
+            else:
+                mx = 0.0
+                my = xvsy
+                rotationAxis = [-1, 0, 0]
+            MoveInstrumentComponent(
+                Workspace=sumWS,
+                ComponentName='detector',
+                X=mx,
+                Y=my,
+                Z=mz,
+                RelativePosition=True
+            )
+            theta = sumWS.spectrumInfo().twoTheta(0) / 2.
+            RotateInstrumentComponent(
+                Workspace=sumWS,
+                ComponentName='detector',
+                X=rotationAxis[0],
+                Y=rotationAxis[1],
+                Z=rotationAxis[2],
+                Angle=theta,
+                RelativeRotation=True
+            )
+
         self._cleanup.cleanup(ws)
         return sumWS
 
