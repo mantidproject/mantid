@@ -807,7 +807,6 @@ set scales a b c d
         front_scale = 1.0
         rear_scale = 1.497
 
-
 TRANS/TRANSSPEC=n
 -----------------
 
@@ -865,5 +864,27 @@ TUBECALIBFILE=str
   [detector.calibration.tube]
     file = "Tube.nxs"
 
+QRESOL[/ON][/OFF]
+-----------------
+
+**Replacement**
+
+..  code-block:: guess 
+
+  [q_resolution]
+    enabled = true  # Or false
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/ON
+
+**Existing Replacement**
+
+..  code-block:: guess 
+
+  [q_resolution]
+    enabled = true  # Or false
 
 .. categories:: Techniques
