@@ -10,12 +10,17 @@ from mantid.api import AlgorithmFactoryObserver
 
 
 class AlgorithmSelectorFactoryObserver(AlgorithmFactoryObserver):
-
+    """
+    Observe updates to the AlgorithmFactory and refresh the held widget
+    """
     def __init__(self, widget):
-        super(AlgorithmSelectorFactoryObserver, self).__init__()
-        self.widget = widget
-
+        """
+        :param widget: Widget with a refresh attribute
+        """
+        super().__init__()
+        self._widget = widget
         self.observeUpdate(True)
 
     def updateHandle(self):
-        self.widget.refresh()
+        """Called when the algorithm factory has been updated"""
+        self._widget.refresh()

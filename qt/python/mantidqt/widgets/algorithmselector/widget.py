@@ -5,11 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
+from typing import Callable, Sequence
 
 import qtpy
 from qtpy.QtCore import QModelIndex, Qt
-from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout,
-                            QHBoxLayout, QCompleter, QTreeWidgetItem)
+from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout,
+                            QCompleter, QTreeWidgetItem)
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import block_signals
@@ -36,25 +37,10 @@ def get_name_and_version_from_item_label(item_label):
     return None
 
 
-class AlgorithmTreeWidget(QTreeWidget):
-
-    def __init__(self, parent=None):
-        super(AlgorithmTreeWidget, self).__init__(parent)
-        self.parent = parent
-
-    def mouseDoubleClickEvent(self, mouse_event):
-        if mouse_event.button() == Qt.LeftButton:
-            if self.selectedItems() and get_name_and_version_from_item_label(self.selectedItems()[0].text(0)):
-                self.parent.execute_algorithm()
-            else:
-                super(AlgorithmTreeWidget, self).mouseDoubleClickEvent(mouse_event)
-
-
 class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
     """
     An algorithm selector view implemented with qtpy.
     """
-
     def __init__(self, parent=None, include_hidden=False):
         """
         Initialise a new instance of AlgorithmSelectorWidget
@@ -65,21 +51,27 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         self.search_box = None
         self.tree = None
         self.algorithm_progress_widget = None
-        self.get_selected_workspace_fn = None
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self, include_hidden)
 
-        self.afo = AlgorithmSelectorFactoryObserver(self)
+        self._observer = AlgorithmSelectorFactoryObserver(self)
+        self._selected_workspaces_fn = None
 
-    def set_get_selected_workspace_fn(self, get_selected_workspace_fn):
-        self.get_selected_workspace_fn = get_selected_workspace_fn
+    def set_get_selected_workspace_fn(self, selected_workspaces: Callable[[], Sequence[str]]):
+        """
+        Set a callable to be used to retrieve selected workspaces
+        when an algorithm is executed.
+        :param selected_workspaces: Callable to allow retrieving any selected
+        workspaces in an external widget
+        """
+        self._selected_workspaces_fn = selected_workspaces
 
     def observeUpdate(self, toggle):
         """
         Set whether or not to update AlgorithmSelector if AlgorithmFactory changes
         :param toggle: A bool. If true, we update AlgorithmSelector
         """
-        self.afo.observeUpdate(toggle)
+        self._observer.observeUpdate(toggle)
 
     def refresh(self):
         """Update the algorithms list"""
@@ -102,7 +94,8 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         search_box = QComboBox(self)
         search_box.setEditable(True)
         search_box.completer().setCompletionMode(QCompleter.PopupCompletion)
-        # setFilterMode behaviour changing is only available on Qt5, if this check is not present the Qt4 tests fail
+        # setFilterMode behaviour changing is only available on Qt5,
+        # if this check is not present the Qt4 tests fail
         if qtpy.PYQT5:
             search_box.completer().setFilterMode(Qt.MatchContains)
         search_box.setInsertPolicy(QComboBox.NoInsert)
@@ -115,7 +108,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Make a tree widget for displaying algorithms in their categories.
         :return: A QTreeWidget
         """
-        tree = AlgorithmTreeWidget(self)
+        tree = _AlgorithmTreeWidget(self)
         tree.setColumnCount(1)
         tree.setHeaderHidden(True)
         tree.itemSelectionChanged.connect(self._on_tree_selection_changed)
@@ -134,11 +127,11 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
             if key == self.algorithm_key:
                 for name, versions in sorted(sub_tree.items()):
                     versions = sorted(versions)
-                    default_version_item = QTreeWidgetItem(['{0} v.{1}'.format(name, versions[-1])])
+                    default_version_item = QTreeWidgetItem([f'{name} v.{versions[-1]}'])
                     item_list.append(default_version_item)
                     if len(versions) > 1:
                         for v in versions[:-1]:
-                            default_version_item.addChild(QTreeWidgetItem(['{0} v.{1}'.format(name, v)]))
+                            default_version_item.addChild(QTreeWidgetItem([f'{name} v.{v}']))
             else:
                 cat_item = QTreeWidgetItem([key])
                 item_list.append(cat_item)
@@ -258,8 +251,8 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         presets = {}
         enabled = []
         if algorithm is not None:
-            if self.get_selected_workspace_fn:
-                selected_ws_names = self.get_selected_workspace_fn()
+            if self._selected_workspaces_fn:
+                selected_ws_names = self._selected_workspaces_fn()
                 if selected_ws_names:
                     property_name = self.presenter.find_input_workspace_property(algorithm)
                     if property_name:
@@ -268,6 +261,24 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
                         enabled.append(property_name)
 
             manager = InterfaceManager()
-            dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None,
-                                                  False, presets, "", enabled)
+            dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None, False,
+                                                  presets, "", enabled)
             dialog.show()
+
+
+# Private API
+
+
+class _AlgorithmTreeWidget(QTreeWidget):
+    """Specialised QTreeWidget that executes the selected algorithm on double clicking
+    """
+    def __init__(self, parent: AlgorithmSelectorWidget):
+        super().__init__(parent)
+
+    def mouseDoubleClickEvent(self, mouse_event):
+        if mouse_event.button() == Qt.LeftButton:
+            if self.selectedItems() and get_name_and_version_from_item_label(
+                    self.selectedItems()[0].text(0)):
+                self.parent().execute_algorithm()
+            else:
+                super().mouseDoubleClickEvent(mouse_event)
