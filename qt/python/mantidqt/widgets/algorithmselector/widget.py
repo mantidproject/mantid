@@ -266,9 +266,6 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
             dialog.show()
 
 
-# Private API
-
-
 class _AlgorithmTreeWidget(QTreeWidget):
     """Specialised QTreeWidget that executes the selected algorithm on double clicking
     """
