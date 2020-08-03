@@ -30,8 +30,9 @@ void ConvFunctionModel::clearData() {
 
 void ConvFunctionModel::setModel() {
   m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions,
-                   buildPeaksFunctionString(), m_hasDeltaFunction, m_qValues,
-                   m_isQDependentFunction, m_hasTempCorrection, m_tempValue);
+                   buildLorentzianPeaksString(), buildFitTypeString(),
+                   m_hasDeltaFunction, m_qValues, m_isQDependentFunction,
+                   m_hasTempCorrection, m_tempValue);
   if (m_hasTempCorrection && !m_globals.contains(ParamID::TEMPERATURE)) {
     m_globals.push_back(ParamID::TEMPERATURE);
   }
@@ -72,6 +73,7 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
 void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
   bool isFitTypeSet = false;
   bool isResolutionSet = false;
+  bool isLorentzianTypeSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     auto innerFunction = fun->getFunction(i);
     auto const name = innerFunction->name();
@@ -91,33 +93,36 @@ void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
               innerFunction->getFunction(1)))
         checkConvolution(innerFunction->getFunction(1));
       else
-        checkSingleFunction(innerFunction->getFunction(1), isFitTypeSet);
+        checkSingleFunction(innerFunction->getFunction(1), isLorentzianTypeSet,
+                            isFitTypeSet);
     }
 
     else if (name == "CompositeFunction") {
       checkConvolution(innerFunction);
     } else {
-      checkSingleFunction(innerFunction, isFitTypeSet);
+      checkSingleFunction(innerFunction, isLorentzianTypeSet, isFitTypeSet);
     }
   }
 }
 
 void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
+                                            bool &isLorentzianTypeSet,
                                             bool &isFitTypeSet) {
   assert(fun->nFunctions() == 0);
   auto const name = fun->name();
   if (name == "Lorentzian") {
-    if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
+    if (isLorentzianTypeSet &&
+        m_lorentzianType != LorentzianType::OneLorentzian) {
       throw std::runtime_error("Function has wrong structure.");
     }
-    if (isFitTypeSet)
-      m_fitType = FitType::TwoLorentzians;
+    if (isLorentzianTypeSet)
+      m_lorentzianType = LorentzianType::TwoLorentzians;
     else
-      m_fitType = FitType::OneLorentzian;
-    m_isQDependentFunction = false;
-    isFitTypeSet = true;
+      m_lorentzianType = LorentzianType::OneLorentzian;
+    isLorentzianTypeSet = true;
+  }
 
-  } else if (FitTypeStringToEnum.count(name) == 1) {
+  if (FitTypeStringToEnum.count(name) == 1) {
     if (isFitTypeSet) {
       throw std::runtime_error(
           "Function has wrong structure. More than one fit type set");
@@ -127,7 +132,7 @@ void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
     isFitTypeSet = true;
   } else if (name == "DeltaFunction") {
     m_hasDeltaFunction = true;
-  } else {
+  } else if (!isFitTypeSet && !isLorentzianTypeSet) {
     clear();
     throw std::runtime_error(
         "Function has wrong structure. Function not recognized");
@@ -147,6 +152,10 @@ BackgroundType ConvFunctionModel::getBackgroundType() const {
   return m_backgroundType;
 }
 
+LorentzianType ConvFunctionModel::getLorentzianType() const {
+  return m_lorentzianType;
+}
+
 bool ConvFunctionModel::hasFunction() const { return m_model.hasFunction(); }
 
 void ConvFunctionModel::addFunction(const QString &prefix,
@@ -160,13 +169,13 @@ void ConvFunctionModel::addFunction(const QString &prefix,
   auto const name = fun->name();
   QString newPrefix;
   if (name == "Lorentzian") {
-    if (m_fitType == FitType::TwoLorentzians) {
+    if (m_lorentzianType == LorentzianType::TwoLorentzians) {
       throw std::runtime_error("Cannot add more Lorentzians.");
-    } else if (m_fitType == FitType::OneLorentzian) {
-      m_fitType = FitType::TwoLorentzians;
+    } else if (m_lorentzianType == LorentzianType::OneLorentzian) {
+      m_lorentzianType = LorentzianType::TwoLorentzians;
       newPrefix = *getLor2Prefix();
-    } else if (m_fitType == FitType::None) {
-      m_fitType = FitType::OneLorentzian;
+    } else if (m_lorentzianType == LorentzianType::None) {
+      m_lorentzianType = LorentzianType::OneLorentzian;
       newPrefix = *getLor1Prefix();
     } else {
       throw std::runtime_error("Cannot add more Lorentzians.");
@@ -202,12 +211,12 @@ void ConvFunctionModel::removeFunction(const QString &prefix) {
   }
   auto prefix1 = getLor1Prefix();
   if (prefix1 && *prefix1 == prefix) {
-    setFitType(FitType::None);
+    setLorentzianType(LorentzianType::None);
     return;
   }
   prefix1 = getLor2Prefix();
   if (prefix1 && *prefix1 == prefix) {
-    setFitType(FitType::OneLorentzian);
+    setLorentzianType(LorentzianType::OneLorentzian);
     return;
   }
   prefix1 = getDeltaPrefix();
@@ -400,10 +409,15 @@ void ConvFunctionModel::setFitType(FitType fitType) {
   setModel();
 }
 
+void ConvFunctionModel::setLorentzianType(LorentzianType lorentzianType) {
+  m_lorentzianType = lorentzianType;
+  setModel();
+}
+
 int ConvFunctionModel::getNumberOfPeaks() const {
-  if (m_fitType == FitType::None)
+  if (m_lorentzianType == LorentzianType::None)
     return 0;
-  if (m_fitType == FitType::TwoLorentzians)
+  if (m_lorentzianType == LorentzianType::TwoLorentzians)
     return 2;
   return 1;
 }
@@ -565,6 +579,8 @@ boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
     return m_model.deltaFunctionPrefix();
   } else if (name == ParamID::TEMPERATURE) {
     return m_model.tempFunctionPrefix();
+  } else if (name >= ParamID::TW_HEIGHT && name < ParamID::FLAT_BG_A0) {
+    return m_model.fitTypePrefix();
   } else {
     auto const prefixes = m_model.peakPrefixes();
     if (!prefixes)
@@ -610,6 +626,7 @@ void ConvFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 
 void ConvFunctionModel::applyParameterFunction(
     const std::function<void(ParamID)> &paramFun) const {
+  applyToLorentzianType(m_lorentzianType, paramFun);
   applyToFitType(m_fitType, paramFun);
   applyToBackground(m_backgroundType, paramFun);
   applyToDelta(m_hasDeltaFunction, paramFun);
@@ -668,14 +685,15 @@ ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString() const {
 
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
   std::string functions;
-  if (m_fitType == FitType::OneLorentzian) {
+  if (m_lorentzianType == LorentzianType::OneLorentzian) {
     functions.append(buildLorentzianFunctionString());
-  } else if (m_fitType == FitType::TwoLorentzians) {
+  } else if (m_lorentzianType == LorentzianType::TwoLorentzians) {
     auto const lorentzian = buildLorentzianFunctionString();
     functions.append(lorentzian);
     functions.append(";");
     functions.append(lorentzian);
-  } else if (m_fitType == FitType::TeixeiraWater) {
+  }
+  if (m_fitType == FitType::TeixeiraWater) {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
@@ -689,7 +707,38 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildElasticDiffRotDiscreteCircleFunctionString());
   }
   return functions;
-} // namespace IDA
+}
+
+std::string ConvFunctionModel::buildLorentzianPeaksString() const {
+  std::string functions;
+  if (m_lorentzianType == LorentzianType::OneLorentzian) {
+    functions.append(buildLorentzianFunctionString());
+  } else if (m_lorentzianType == LorentzianType::TwoLorentzians) {
+    auto const lorentzian = buildLorentzianFunctionString();
+    functions.append(lorentzian);
+    functions.append(";");
+    functions.append(lorentzian);
+  }
+  return functions;
+}
+
+std::string ConvFunctionModel::buildFitTypeString() const {
+  std::string functions;
+  if (m_fitType == FitType::TeixeiraWater) {
+    functions.append(buildTeixeiraFunctionString());
+  } else if (m_fitType == FitType::StretchedExpFT) {
+    functions.append(buildStretchExpFTFunctionString());
+  } else if (m_fitType == FitType::ElasticDiffSphere) {
+    functions.append(buildElasticDiffSphereFunctionString());
+  } else if (m_fitType == FitType::InelasticDiffSphere) {
+    functions.append(buildInelasticDiffSphereFunctionString());
+  } else if (m_fitType == FitType::InelasticDiffRotDiscreteCircle) {
+    functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
+  } else if (m_fitType == FitType::ElasticDiffRotDiscreteCircle) {
+    functions.append(buildElasticDiffRotDiscreteCircleFunctionString());
+  }
+  return functions;
+}
 
 std::string ConvFunctionModel::buildBackgroundFunctionString() const {
   if (m_backgroundType == BackgroundType::None)
@@ -704,6 +753,10 @@ boost::optional<QString> ConvFunctionModel::getLor1Prefix() const {
 
 boost::optional<QString> ConvFunctionModel::getLor2Prefix() const {
   return m_model.peakPrefixes()->at(1);
+}
+
+boost::optional<QString> ConvFunctionModel::getFitTypePrefix() const {
+  return m_model.fitTypePrefix();
 }
 
 boost::optional<QString> ConvFunctionModel::getDeltaPrefix() const {

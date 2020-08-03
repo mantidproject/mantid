@@ -15,14 +15,19 @@ allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletch
                       'Conjugate gradient (Polak-Ribiere imp.)',
                       'Damped GaussNewton', 'Levenberg-MarquardtMD', 'Simplex',
                       'SteepestDescent', 'Trust Region']
+FIT_START_TABLE_ROW = 0
+FIT_END_TABLE_ROW = 1
+RAW_DATA_TABLE_ROW = 3
+TF_ASYMMETRY_MODE_TABLE_ROW = 4
+DEFAULT_FREQUENCY_FIT_END_X = 250
 
 
 class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
-    def __init__(self, parent=None):
+    def __init__(self, simultaneous_item_list, is_frequency_domain=False, parent=None):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
         self.setup_fit_options_table()
-        self.setup_simul_fit_combo_box()
+        self.setup_simul_fit_combo_box(simultaneous_item_list)
         self.undo_fit_button.setEnabled(False)
 
         self.function_browser = FunctionBrowser(self, True)
@@ -34,6 +39,14 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
 
         self.disable_simul_fit_options()
+
+        if is_frequency_domain:
+            self.hide_simultaneous_fit_options()
+            self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
+            self.fit_options_table.hideRow(TF_ASYMMETRY_MODE_TABLE_ROW)
+            table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Start X")
+            table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "End X")
+            self.end_time = DEFAULT_FREQUENCY_FIT_END_X
 
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)
@@ -68,9 +81,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         else:
             self.parameter_display_combo.setCurrentIndex(count - 1)
 
-    def setup_simul_fit_combo_box(self):
-        self.simul_fit_by_combo.addItem("Run")
-        self.simul_fit_by_combo.addItem("Group/Pair")
+    def setup_simul_fit_combo_box(self, item_list):
+        for item in item_list:
+            self.simul_fit_by_combo.addItem(item)
 
     def set_datasets_in_function_browser(self, data_set_name_list):
         number_of_data_sets = self.function_browser.getNumberOfDatasets()
@@ -162,6 +175,13 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     @property
     def display_workspace(self):
         return str(self.parameter_display_combo.currentText())
+
+    @display_workspace.setter
+    def display_workspace(self, value):
+        self.parameter_display_combo.blockSignals(True)
+        index = self.parameter_display_combo.findText(value)
+        self.parameter_display_combo.setCurrentIndex(index)
+        self.parameter_display_combo.blockSignals(False)
 
     @property
     def fit_object(self):
@@ -266,6 +286,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.simul_fit_by_specifier.setEnabled(False)
         self.select_workspaces_to_fit_button.setEnabled(False)
 
+    def hide_simultaneous_fit_options(self):
+        self.simul_fit_checkbox.hide()
+        self.simul_fit_by_combo.hide()
+        self.simul_fit_by_specifier.hide()
+        self.select_workspaces_to_fit_button.hide()
+
     def enable_simul_fit_options(self):
         self.simul_fit_by_combo.setEnabled(True)
         self.simul_fit_by_specifier.setEnabled(True)
@@ -290,23 +316,23 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_options_table.setHorizontalHeaderLabels(
             ("Property;Value").split(";"))
 
-        table_utils.setRowName(self.fit_options_table, 0, "Time Start")
-        self.time_start = table_utils.addDoubleToTable(self.fit_options_table, 0.0, 0, 1)
+        table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Time Start")
+        self.time_start = table_utils.addDoubleToTable(self.fit_options_table, 0.0, FIT_START_TABLE_ROW, 1)
 
-        table_utils.setRowName(self.fit_options_table, 1, "Time End")
-        self.time_end = table_utils.addDoubleToTable(self.fit_options_table, 15.0, 1, 1)
+        table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "Time End")
+        self.time_end = table_utils.addDoubleToTable(self.fit_options_table, 15.0, FIT_END_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, 2, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 2, [])
         self.minimizer_combo.addItems(allowed_minimizers)
 
-        table_utils.setRowName(self.fit_options_table, 3, "Fit To Raw Data")
+        table_utils.setRowName(self.fit_options_table, RAW_DATA_TABLE_ROW, "Fit To Raw Data")
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, 3)
+            self.fit_options_table, True, RAW_DATA_TABLE_ROW)
 
-        table_utils.setRowName(self.fit_options_table, 4, "TF Asymmetry Mode")
+        table_utils.setRowName(self.fit_options_table, TF_ASYMMETRY_MODE_TABLE_ROW, "TF Asymmetry Mode")
         self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, False, 4)
+            self.fit_options_table, False, TF_ASYMMETRY_MODE_TABLE_ROW)
 
         table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
         self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 5, ['CentrePoint', 'Histogram'])

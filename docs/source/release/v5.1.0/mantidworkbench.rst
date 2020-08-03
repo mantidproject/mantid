@@ -14,6 +14,7 @@ New
 - The Sample Transmission Calculator is now implemented in workbench.
 - The axis tick markers in a plot can be switched between Log and decimal formats independently of the axes scale.
 - Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
+- A default font for plots can now be set in the workbench settings.
 
 Improvements
 ############
@@ -81,9 +82,16 @@ Improvements
 - Right-clicking a plot without dragging while using the zoom tool now resets the axes limits.
 - The Slice Viewer now starts with the zoom option selected by default.
 - The curves in the dropdown list in the Curves tab of the figure options are now listed in the same order as the plot legend.
+
+.. figure:: ../../images/instrument_view_sector.png
+   :align: right
+   :width: 400px
+
 - Added an option in the settings to specify the default legend size.
 - Added an option to the settings window to set the default colormap for image plots.
 - Improved loading of python plugins at startup on slow disks.
+- Added a circular sector shape in the Pick and Mask tab of the instrument view.
+- Workbench will now spot if it is about to create the settings window off the available screen, and will move it so it is all visible. This is important as it is a modal dialog and could freeze the application in an unrecoverable way before.
 - Sliceviewer no longer lists the reversed colourmaps along with the regular, instead they are accessed with a reverse checkbox.
 - Sliceviewer colourmap uses the default colourmap from the settings.
 - Code completions are now loaded when the code editor is first changed.
@@ -122,5 +130,6 @@ Bugfixes
 - Sub-plots in the sliceviewer now follow the scaling on the colorbar
 - Fixed a bug which prevented the double click axis editor menus from working for tiled plots.
 - Select image in the plot figure option contains each image rather than each spectra for colorfil plots of workspaces with a numeric vertical axis
+- A bug has been fixed that caused an error if a workspace containing only monitor spectra was attempted to be plotted as a colorfill plot
 
 :ref:`Release 5.1.0 <v5.1.0>`

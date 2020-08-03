@@ -93,6 +93,13 @@ void CalculateMuonAsymmetry::init() {
   declareProperty(std::make_unique<API::FunctionProperty>(
                       "OutputFunction", Kernel::Direction::Output),
                   "The fitting function after fit.");
+  declareProperty(
+      "EnableDoublePulse", false,
+      "Controls whether to perform a double pulse or single pulse fit.");
+  declareProperty("PulseOffset", 0.0, "The time offset between the two pulses");
+  declareProperty("FirstPulseWeight", 0.5,
+                  "Weighting of first pulse (w_1)."
+                  "The second pulse weighting (w_1) is set as w_2 = 1 - w_1.");
 }
 /*
  * Validate the input parameters
@@ -173,6 +180,7 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
                                                " name columns";
     }
   }
+
   return validationOutput;
 }
 /** Executes the algorithm
@@ -285,9 +293,20 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   double endX = getProperty("EndX");
   int maxIterations = getProperty("MaxIterations");
   auto minimizer = getProperty("Minimizer");
-  API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
-
-  fit->initialize();
+  API::IAlgorithm_sptr fit;
+  auto doublePulseEnabled = getProperty("EnableDoublePulse");
+  if (doublePulseEnabled) {
+    double pulseOffset = getProperty("PulseOffset");
+    double firstPulseWeight = getProperty("FirstPulseWeight");
+    fit = createChildAlgorithm("DoublePulseFit");
+    fit->initialize();
+    fit->setProperty("PulseOffset", pulseOffset);
+    fit->setProperty("FirstPulseWeight", firstPulseWeight);
+    fit->setProperty("SecondPulseWeight", 1.0 - firstPulseWeight);
+  } else {
+    fit = createChildAlgorithm("Fit");
+    fit->initialize();
+  }
 
   API::IFunction_sptr function = getProperty("InputFunction");
 

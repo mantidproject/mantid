@@ -40,7 +40,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 auto msdFunctionStrings = std::map<std::string, std::string>(
-    {{"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
+    {{"None", ""},
+     {"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
      {"Peters",
       "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0, "
       "Msd>0, Beta>0)"},

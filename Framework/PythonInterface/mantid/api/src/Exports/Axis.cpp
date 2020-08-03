@@ -113,6 +113,8 @@ void export_Axis() {
                          "The vertical axis index [default=0]"))
       .def("extractValues", &extractAxisValues, arg("self"),
            "Return a numpy array of the axis values")
+      .def("indexOfValue", &Axis::indexOfValue, (arg("value")),
+           "Returns the index of the closest to the given value on the axis")
       .def("setUnit", &Axis::setUnit, (arg("self"), arg("unit_name")),
            return_value_policy<copy_const_reference>(),
            "Set the unit for this axis by name.")

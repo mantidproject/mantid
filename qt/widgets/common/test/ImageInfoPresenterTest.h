@@ -16,26 +16,21 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-using namespace MantidQt::MantidWidgets;
-using namespace Mantid::DataObjects;
+using Mantid::DataObjects::MDEventsTestHelper::makeFakeMDEventWorkspace;
+using MantidQt::MantidWidgets::IImageInfoWidget;
+using MantidQt::MantidWidgets::ImageInfoModel;
+using MantidQt::MantidWidgets::ImageInfoModelMatrixWS;
+using MantidQt::MantidWidgets::ImageInfoModelMD;
+using MantidQt::MantidWidgets::ImageInfoPresenter;
 using namespace testing;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockImageInfoView : public IImageInfoWidget {
 public:
-  MockImageInfoView() {
-    m_presenter = std::make_shared<ImageInfoPresenter>(this);
-  }
-
-  MOCK_METHOD3(updateTable,
-               void(const double x, const double y, const double z));
+  MOCK_METHOD3(cursorAt, void(const double x, const double y, const double z));
+  MOCK_METHOD1(showInfo, void(const ImageInfoModel::ImageInfo &info));
   MOCK_METHOD1(setWorkspace, void(const Mantid::API::Workspace_sptr &ws));
-
-  std::shared_ptr<ImageInfoPresenter> getPresenter() { return m_presenter; }
-
-private:
-  std::shared_ptr<ImageInfoPresenter> m_presenter;
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -49,19 +44,41 @@ public:
   }
   static void destroySuite(ImageInfoPresenterTest *suite) { delete suite; }
 
-  void test_createImageInfoModel_creates_matrix_ws_model_with_matrix_ws() {
-    auto mockView = std::make_shared<NiceMock<MockImageInfoView>>();
-    auto presenter = mockView->getPresenter();
-    presenter->createImageInfoModel("MATRIX");
-    auto model = presenter->getModel();
-    TS_ASSERT(std::dynamic_pointer_cast<ImageInfoModelMatrixWS>(model) != NULL);
+  void test_cursorAt_calls_view_showInfo() {
+    auto mockView = std::make_unique<StrictMock<MockImageInfoView>>();
+    ImageInfoPresenter presenter(mockView.get());
+    presenter.setWorkspace(
+        WorkspaceCreationHelper::create2DWorkspace123(10, 10));
+
+    EXPECT_CALL(*mockView, showInfo(_)).Times(1);
+    presenter.cursorAt(1, 2, 1);
+
+    TS_ASSERT(Mock::VerifyAndClear(mockView.get()));
   }
 
-  void test_createImageInfoModel_creates_MD_model_with_md_ws() {
-    auto mockView = std::make_shared<NiceMock<MockImageInfoView>>();
-    auto presenter = mockView->getPresenter();
-    presenter->createImageInfoModel("MDH");
-    auto model = presenter->getModel();
-    TS_ASSERT(std::dynamic_pointer_cast<ImageInfoModelMD>(model) != NULL);
+  void test_setWorkspace_creates_matrix_ws_model_with_matrix_ws() {
+    auto mockView = std::make_unique<MockImageInfoView>();
+    ImageInfoPresenter presenter(mockView.get());
+    auto matrixWS = WorkspaceCreationHelper::create1DWorkspaceRand(1, true);
+    EXPECT_CALL(*mockView, showInfo(_)).Times(1);
+
+    presenter.setWorkspace(matrixWS);
+
+    const auto &model = presenter.model();
+    TS_ASSERT(dynamic_cast<const ImageInfoModelMatrixWS *>(&model));
+    TS_ASSERT(Mock::VerifyAndClear(mockView.get()));
+  }
+
+  void test_setWorkspace_creates_MD_model_with_md_ws() {
+    auto mockView = std::make_unique<MockImageInfoView>();
+    ImageInfoPresenter presenter(mockView.get());
+    const auto mdWS = makeFakeMDEventWorkspace("dummyName", 100);
+    EXPECT_CALL(*mockView, showInfo(_)).Times(1);
+
+    presenter.setWorkspace(mdWS);
+
+    const auto &model = presenter.model();
+    TS_ASSERT(dynamic_cast<const ImageInfoModelMD *>(&model));
+    TS_ASSERT(Mock::VerifyAndClear(mockView.get()));
   }
 };

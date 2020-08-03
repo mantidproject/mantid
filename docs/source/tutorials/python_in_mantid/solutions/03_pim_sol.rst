@@ -1,7 +1,7 @@
 .. _03_pim_sol:
 
 ============================
-Python in Mantid: Exercise 3
+Python in Mantid: Solution 3
 ============================
 
 A - Direct Matplotlib with SNS Data

@@ -52,15 +52,24 @@ class Tester(object):
 
         return correct_data
 
+    @staticmethod
+    def _cull_imaginary_modes(frequencies, displacements):
+        from abins.constants import ACOUSTIC_PHONON_THRESHOLD
+        finite_mode_indices = frequencies > ACOUSTIC_PHONON_THRESHOLD
+        return (frequencies[finite_mode_indices], displacements[:, finite_mode_indices])
+
     def _check_reader_data(self, correct_data=None, data=None, filename=None, extension=None):
         # check data
         correct_k_points = correct_data["datasets"]["k_points_data"]
         items = data["datasets"]["k_points_data"]
 
         for k in correct_k_points["frequencies"]:
-            self.assertEqual(True, np.allclose(correct_k_points["frequencies"][k], items["frequencies"][k]))
-            self.assertEqual(True, np.allclose(correct_k_points["atomic_displacements"][k],
-                                               items["atomic_displacements"][k]))
+            correct_frequencies, correct_displacements = self._cull_imaginary_modes(
+                correct_k_points["frequencies"][k], correct_k_points["atomic_displacements"][k])
+            calc_frequencies, calc_displacements = self._cull_imaginary_modes(
+                items["frequencies"][k], items["atomic_displacements"][k])
+            self.assertEqual(True, np.allclose(correct_frequencies, calc_frequencies))
+            self.assertEqual(True, np.allclose(correct_displacements, calc_displacements))
             self.assertEqual(True, np.allclose(correct_k_points["k_vectors"][k], items["k_vectors"][k]))
             self.assertEqual(correct_k_points["weights"][k], items["weights"][k])
 
@@ -103,9 +112,13 @@ class Tester(object):
         items = loaded_data["k_points_data"]
 
         for k in correct_items["frequencies"]:
-            self.assertEqual(True, np.allclose(correct_items["frequencies"][k], items["frequencies"][k]))
-            self.assertEqual(True, np.allclose(correct_items["atomic_displacements"][k],
-                                               items["atomic_displacements"][k]))
+            correct_frequencies, correct_displacements = self._cull_imaginary_modes(
+                correct_items["frequencies"][k], correct_items["atomic_displacements"][k])
+            calc_frequencies, calc_displacements = self._cull_imaginary_modes(
+                items["frequencies"][k], items["atomic_displacements"][k])
+
+            self.assertEqual(True, np.allclose(correct_frequencies, calc_frequencies))
+            self.assertEqual(True, np.allclose(correct_displacements, calc_displacements))
             self.assertEqual(True, np.allclose(correct_items["k_vectors"][k], items["k_vectors"][k]))
             self.assertEqual(correct_items["weights"][k], items["weights"][k])
 

@@ -10,12 +10,10 @@
 from qtpy.QtCore import Qt, Signal, Slot
 
 import matplotlib.pyplot
-
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
-
 from .interactive_tool import FitInteractiveTool
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
@@ -132,7 +130,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
-        import matplotlib.pyplot as plt
         """
         Override the base class method. Initialise the peak editing tool.
         """
@@ -166,13 +163,19 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.setPeakToolOn(True)
         self.canvas.draw()
+        self.set_output_window_names()
 
-        # change the output name if more than one plot of the same workspace
+    def set_output_window_names(self):
+        import matplotlib.pyplot as plt  # unfortunately need to import again
+        """
+        Change the output name if more than one plot of the same workspace
+        """
         window_title = self.canvas.get_window_title()
         workspace_name = window_title.rsplit('-', 1)[0]
         for open_figures in plt.get_figlabels():
             if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
                 self.setOutputName(window_title)
+        return None
 
     def get_fit_bounds(self):
         """
@@ -366,7 +369,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                   other_names=self.registeredOthers())
         return menu
 
-    def do_plot(self, ws, plot_diff = False, **plot_kwargs):
+    def do_plot(self, ws, plot_diff=False, **plot_kwargs):
         ax = self.get_axes()
 
         self.clear_fit_result_lines()
@@ -526,7 +529,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 if prefix is None:
                     need_update_markers = True
                     break
-                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or\
+                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or \
                         self.getPeakFwhmOf(prefix) != w:
                     need_update_markers = True
                     break

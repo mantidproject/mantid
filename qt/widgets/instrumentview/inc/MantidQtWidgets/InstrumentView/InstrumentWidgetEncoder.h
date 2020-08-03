@@ -62,6 +62,7 @@ private:
   QMap<QString, QVariant> encodeEllipse(const Shape2DEllipse *obj);
   QMap<QString, QVariant> encodeRectangle(const Shape2DRectangle *obj);
   QMap<QString, QVariant> encodeRing(const Shape2DRing *obj);
+  QMap<QString, QVariant> encodeSector(const Shape2DSector *obj);
   QMap<QString, QVariant> encodeFree(const Shape2DFree *obj);
 
   QList<QVariant> encodeMaskShapes(const Shape2DCollection &obj);

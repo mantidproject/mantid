@@ -13,6 +13,7 @@ from collections.abc import Sequence
 # 3rd party imports
 from matplotlib.gridspec import GridSpec
 from matplotlib.legend import Legend
+import matplotlib as mpl
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
@@ -109,6 +110,13 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
+    plot_font = ConfigService.getString('plots.font')
+    if plot_font:
+        if len(mpl.rcParams['font.family']) > 1:
+            mpl.rcParams['font.family'][0] = plot_font
+        else:
+            mpl.rcParams['font.family'].insert(0, plot_font)
+
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)

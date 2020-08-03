@@ -229,6 +229,7 @@ set(PYTHON_PLUGINS
   algorithms/OptimizeCrystalPlacementByRun.py
   algorithms/ComputeIncoherentDOS.py
   algorithms/EnggFocus.py
+  algorithms/EnggEstimateFocussedBackground.py
   algorithms/LRReductionWithReference.py
   algorithms/NMoldyn4Interpolation.py
   algorithms/ExaminePowderDiffProfile.py
@@ -288,6 +289,7 @@ set(PYTHON_PLUGINS
   algorithms/SelectNexusFilesByMetadata.py
   algorithms/CompareSampleLogs.py
   algorithms/MuonMaxent.py
+  algorithms/SaveP2D.py
   functions/AFMZF.py
   functions/PCRmagnetZFKT.py
   functions/StretchedExpFTHelper.py
@@ -370,3 +372,4 @@ install(
     DESTINATION ${PLUGINS_DIR}/python
     RENAME "python-plugin-manifest.txt"
 )
+

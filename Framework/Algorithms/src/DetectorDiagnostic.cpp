@@ -532,7 +532,7 @@ DataObjects::MaskWorkspace_sptr DetectorDiagnostic::generateEmptyMask(
       create<DataObjects::MaskWorkspace>(*inputWS, HistogramData::Points(1));
   maskWS->setTitle(inputWS->getTitle());
 
-  return std::move(maskWS);
+  return maskWS;
 }
 
 std::vector<std::vector<size_t>>

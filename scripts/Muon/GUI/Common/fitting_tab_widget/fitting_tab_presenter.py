@@ -8,6 +8,7 @@ from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformat
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common import thread_model
 from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
@@ -97,6 +98,7 @@ class FittingTabPresenter(object):
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
         self.update_selected_workspace_list_for_fit()
+        self.model.create_ws_fit_function_map()
 
     def handle_gui_changes_made(self, changed_values):
         for key in changed_values.keys():
@@ -132,8 +134,8 @@ class FittingTabPresenter(object):
         else:
             self.selected_data = self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(
                 self.selected_data)
+        self.context.fitting_context.fit_raw = self.view.fit_to_raw
         self.update_model_from_view(fit_to_raw=self.view.fit_to_raw)
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_type_changed(self):
         self.view.undo_fit_button.setEnabled(False)
@@ -285,12 +287,6 @@ class FittingTabPresenter(object):
         if self._tf_asymmetry_mode == self.view.tf_asymmetry_mode:
             return
 
-        if 'DoublePulseEnabled' in self.model.context.gui_context and self.model.context.gui_context['DoublePulseEnabled'] \
-                and self.view.tf_asymmetry_mode:
-            self.view.tf_asymmetry_mode = False
-            self.view.warning_popup('Tf asymmetry mode incompatible with double pulse analysis.')
-            return
-
         self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
         global_parameters = self.view.get_global_parameters()
         if self._tf_asymmetry_mode:
@@ -431,11 +427,15 @@ class FittingTabPresenter(object):
             if self.manual_selection_made:
                 return  # if it is a manual selection then the data should not change
             self.update_fit_specifier_list()
-        else:
-            self.selected_data = self.get_workspace_selected_list()
+
+        self.selected_data = self.get_workspace_selected_list()
+
+    def set_display_workspace(self, workspace_name):
+        self.view.display_workspace = workspace_name
+        self.handle_display_workspace_changed()
 
     def get_workspace_selected_list(self):
-        if self.context._frequency_context is not None:
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
             freq = self.context._frequency_context.plot_type
         else:
             freq = 'None'
@@ -464,7 +464,7 @@ class FittingTabPresenter(object):
         elif self.view.simultaneous_fit_by == "Group/Pair":
             simul_choices = self._get_selected_groups_and_pairs()
         else:
-            simul_choices = self.selected_data
+            simul_choices = []
 
         self.view.setup_fit_by_specifier(simul_choices)
 

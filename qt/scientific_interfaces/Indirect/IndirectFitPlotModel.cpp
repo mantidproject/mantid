@@ -8,6 +8,7 @@
 
 #include <utility>
 
+#include "ConvFitModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -281,8 +282,18 @@ bool IndirectFitPlotModel::canCalculateGuess() const {
     return false;
 
   const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto resolutionLoaded = isResolutionLoaded();
   const auto isEmptyModel = composite && composite->nFunctions() == 0;
-  return getWorkspace() && !isEmptyModel;
+  return getWorkspace() && !isEmptyModel && resolutionLoaded;
+}
+
+bool IndirectFitPlotModel::isResolutionLoaded() const {
+  const auto model = dynamic_cast<ConvFitModel *>(m_fittingModel);
+  if (model) {
+    return m_fittingModel->getResolutionsForFit().size() != 0;
+  }
+  // If its not a ConvFitModel it doesn't require a resolution, so return true
+  return true;
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {

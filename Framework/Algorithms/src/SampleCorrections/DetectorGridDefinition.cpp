@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 
 #include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Algorithms {

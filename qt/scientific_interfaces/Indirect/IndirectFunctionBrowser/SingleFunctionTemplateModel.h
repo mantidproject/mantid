@@ -16,6 +16,7 @@
 
 #include <QMap>
 #include <boost/optional.hpp>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -50,10 +51,13 @@ public:
 private:
   QString m_fitType;
   DataForParameterEstimationCollection m_estimationData;
-  QMap<QString, IFunction_sptr> m_functionStore;
+  QMap<QString, IFunction_sptr> m_fitTypeToFunctionStore;
   QMap<QString, QStringList> m_globalParameterStore;
+  QStringList m_fitTypeList;
   std::string m_resolutionName;
   TableDatasetIndex m_resolutionIndex;
+  boost::optional<QString>
+  findFitTypeForFunctionName(const QString &name) const;
   // Parameter estimation
   std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
 };

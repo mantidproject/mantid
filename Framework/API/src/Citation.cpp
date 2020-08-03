@@ -8,6 +8,8 @@
 
 #include <nexus/NeXusFile.hpp>
 
+#include <stdexcept>
+
 namespace Mantid {
 namespace API {
 

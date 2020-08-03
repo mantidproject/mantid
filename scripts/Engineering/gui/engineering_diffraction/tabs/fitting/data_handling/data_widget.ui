@@ -70,7 +70,21 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="2">
+		<item row="2" column="1">
+         <widget class="QComboBox" name="combo_xunit">
+          <item>
+           <property name="text">
+            <string>TOF</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>dSpacing</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="1">
          <widget class="QCheckBox" name="check_addToPlot">
           <property name="text">
            <string>Add to Plot</string>
@@ -122,7 +136,7 @@ QGroupBox:title {
          <number>0</number>
         </property>
         <property name="columnCount">
-         <number>3</number>
+         <number>7</number>
         </property>
         <attribute name="horizontalHeaderVisible">
          <bool>true</bool>
@@ -146,6 +160,26 @@ QGroupBox:title {
         <column>
          <property name="text">
           <string>Plot</string>
+         </property>
+        </column>
+		<column>
+         <property name="text">
+          <string>Subtract BG</string>
+         </property>
+        </column>
+		<column>
+         <property name="text">
+          <string>Niter</string>
+         </property>
+        </column>
+		<column>
+         <property name="text">
+          <string>Xwindow</string>
+         </property>
+        </column>
+		<column>
+         <property name="text">
+          <string>SG</string>
          </property>
         </column>
        </widget>
@@ -175,6 +209,13 @@ QGroupBox:title {
          <widget class="QPushButton" name="button_removeSelected">
           <property name="text">
            <string>Remove Selected</string>
+          </property>
+         </widget>
+        </item>
+		<item row="0" column="2">
+         <widget class="QPushButton" name="button_plotBG">
+          <property name="text">
+           <string>Inspect Background</string>
           </property>
          </widget>
         </item>

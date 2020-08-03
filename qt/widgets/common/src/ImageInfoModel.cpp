@@ -8,32 +8,23 @@
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
 #include "MantidQtWidgets/Common/QStringUtils.h"
 
-#include <QRegExp>
-#include <iomanip>
 #include <sstream>
+
+namespace {}
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-void ImageInfoModel::addNameAndValue(const std::string &label,
-                                     std::vector<QString> &list,
-                                     const double value, const int precision,
-                                     bool includeValue,
-                                     Mantid::Kernel::Unit_sptr units) {
-  std::wstring unit;
-  auto headerLabel = QString::fromStdString(label);
-  if (units && !(unit = units->label().utf8()).empty()) {
-    headerLabel += "(" + MantidQt::API::toQStringInternal(unit) + ")";
-  }
-  list.emplace_back(headerLabel);
+// ImageInfo
 
-  if (includeValue) {
-    QString valueString = QString::number(value, 'f', precision);
-    // remove any trailing zeros after decimal place
-    valueString.replace(QRegExp("(\\.\\d*[1-9])(0+)$|\\.0+$"), "\\1");
-    list.emplace_back(valueString);
-  } else
-    list.emplace_back(QString("-"));
+/**
+ * Construct an ImageInfo to store name/value pairs
+ * @param names The names of the name/value pairs in the table
+ */
+ImageInfoModel::ImageInfo::ImageInfo(
+    ImageInfoModel::ImageInfo::StringItems names)
+    : m_names(std::move(names)) {
+  m_values.resize(m_names.size(), MissingValue);
 }
 
 } // namespace MantidWidgets

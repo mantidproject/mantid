@@ -65,8 +65,8 @@ class FittingTabModelTest(unittest.TestCase):
         parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
 
-        output_workspace, parameter_table_name, fitting_function, fit_status, fit_chi_squared, covariance_matrix = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
-            parameter_dict)
+        output_workspace, parameter_table_name, fitting_function, fit_status, fit_chi_squared, covariance_matrix = \
+            self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
         parameter_table = AnalysisDataService.retrieve(parameter_table_name)
 
@@ -134,7 +134,7 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEqual(1, len(fit_context))
 
     def test_get_function_name_returns_correctly_for_composite_functions(self):
-        function_string = 'name=FlatBackground,A0=22.5129;name=Polynomial,n=0,A0=-22.5221;name=ExpDecayOsc,A=-0.172352,Lambda=0.111109,Frequency=-0.280031,Phi=-3.03983'
+        function_string = 'name=FlatBackground,A0=22.5129;name=Polynomial,n=0,A0=-22.5221;name=ExpDecayOsc,A=-0.172352,Lambda=0.111109, Frequency=-0.280031,Phi=-3.03983'
         function_object = FunctionFactory.createInitialized(function_string)
 
         name_as_string = self.model.get_function_name(function_object)
@@ -454,12 +454,36 @@ class FittingTabModelTest(unittest.TestCase):
 
     def test_create_double_pulse_alg_initialses_algorithm_with_correct_values(self):
         self.model.context.gui_context['DoublePulseTime'] = 2.0
-        
+
         double_pulse_alg = self.model._create_double_pulse_alg()
 
         self.assertEquals(double_pulse_alg.getProperty("PulseOffset").value, 2.0)
         self.assertAlmostEquals(double_pulse_alg.getProperty("FirstPulseWeight").value, 0.287, places=3)
         self.assertAlmostEquals(double_pulse_alg.getProperty("SecondPulseWeight").value, 0.713, places=3)
+
+    def test_that_single_fit_initialises_algorithm_with_correct_values_for_tf_asymmetry_double_pulse_mode(self):
+        workspace_name = 'MUSR62260; Group; fwd;'
+        pulse_offset = 2.0
+        self.model.context.gui_context['DoublePulseTime'] = pulse_offset
+        self.model.context.gui_context['DoublePulseEnabled'] = True
+
+        parameters = self.model.get_parameters_for_single_tf_fit(workspace_name)
+
+        self.assertEquals(parameters['PulseOffset'], pulse_offset)
+        self.assertEquals(parameters['EnableDoublePulse'], True)
+        self.assertAlmostEquals(parameters['FirstPulseWeight'], 0.287, places=3)
+
+    def test_that_single_fit_initialises_algorithm_with_correct_values_for_simultaneous_tf_asymmetry_double_pulse_mode(self):
+        workspace_name = 'MUSR62260; Group; fwd;'
+        pulse_offset = 2.0
+        self.model.context.gui_context['DoublePulseTime'] = pulse_offset
+        self.model.context.gui_context['DoublePulseEnabled'] = True
+
+        parameters = self.model.get_parameters_for_simultaneous_tf_fit(workspace_name)
+
+        self.assertEquals(parameters['PulseOffset'], pulse_offset)
+        self.assertEquals(parameters['EnableDoublePulse'], True)
+        self.assertAlmostEquals(parameters['FirstPulseWeight'], 0.287, places=3)
 
 
 if __name__ == '__main__':

@@ -77,6 +77,7 @@ public:
     PeakAlign,
     DrawEllipse,
     DrawRectangle,
+    DrawSector,
     DrawFree,
     EditShape
   };
@@ -143,6 +144,7 @@ private:
   /// ring selection region
   QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular
   /// ring selection region
+  QPushButton *m_sector; ///< Button switching on drawing a circular sector
   QPushButton
       *m_free_draw; ///< Button switching on drawing a region of arbitrary shape
   QPushButton *m_edit; ///< Button switching on edditing the selection region

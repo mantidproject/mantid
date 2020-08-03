@@ -66,7 +66,7 @@ private:
   // Run child algorithm LoadISISNexus2
   API::Workspace_sptr runLoadISISNexus();
   // Load Muon specific properties
-  void loadMuonProperties(const NeXus::NXEntry &entry);
+  void loadMuonProperties(const NeXus::NXEntry &entry, size_t numSpectra);
   /// The name and path of the input file
   std::string m_filename;
   /// The number of the input entry

@@ -16,6 +16,7 @@ else:
 
 class FittingPlotToolbar(NavigationToolbar2QT):
     sig_home_clicked = QtCore.Signal()
+    sig_toggle_fit_triggered = QtCore.Signal()
 
     toolitems = (
         ('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
@@ -23,7 +24,8 @@ class FittingPlotToolbar(NavigationToolbar2QT):
         ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
         (None, None, None, None, None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False)
+        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
+        ('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
     )
 
     def _init_toolbar(self):
@@ -31,7 +33,10 @@ class FittingPlotToolbar(NavigationToolbar2QT):
             if text is None:
                 self.addSeparator()
             else:
-                action = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
+                if mdi_icon:
+                    action = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
+                else:
+                    action = self.addAction(text, getattr(self, callback))
                 self._actions[callback] = action
                 if checked is not None:
                     action.setCheckable(True)
@@ -45,3 +50,17 @@ class FittingPlotToolbar(NavigationToolbar2QT):
     def on_home_clicked(self):
         self.sig_home_clicked.emit()
         self.push_current()
+
+    def toggle_fit(self):
+        self._actions['toggle_fit']
+        self.sig_toggle_fit_triggered.emit()
+
+    def handle_fit_browser_close(self):
+        """
+        Respond to a signal that user closed self.fit_browser by
+        clicking the [x] button.
+        """
+        self._actions['toggle_fit'].trigger()
+
+    def trigger_fit_toggle_action(self):
+        self._actions['toggle_fit'].trigger()

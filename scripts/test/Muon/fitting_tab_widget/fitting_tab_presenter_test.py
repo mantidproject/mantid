@@ -262,7 +262,6 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                                         'MUSR22725; Group; fwd; Asymmetry']
         self.view.is_simul_fit = mock.MagicMock(return_value=True)
-        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.parameter_display_combo.setCurrentIndex(1)
         self.view.function_browser.setParameter('A', 3)
@@ -680,6 +679,13 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.fit_to_raw_data_checkbox.setChecked(False)
 
         self.presenter.model.update_model_fit_options.assert_called_once_with(fit_to_raw=True)
+
+    def test_that_model_is_updated_when_new_data_is_loaded_in_simultaneous_mode(self):
+        self.view.is_simul_fit = mock.MagicMock(return_value=True)
+
+        self.presenter.handle_new_data_loaded()
+
+        self.presenter.model.create_ws_fit_function_map.assert_called_once_with()
 
 
 if __name__ == '__main__':
