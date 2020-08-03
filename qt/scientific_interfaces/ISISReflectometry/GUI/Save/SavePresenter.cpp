@@ -78,10 +78,11 @@ bool SavePresenter::isAutoreducing() const {
  */
 void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
   auto const fileFormat = formatFromIndex(m_view->getFileFormatIndex());
-  // Enable/disable the log list. Note that at the moment the log list is used
-  // in SaveReflectometryAscii for ILLCosmos (MFT) but I'm not sure if it should
-  // be.
-  if (fileFormat == NamedFormat::Custom || fileFormat == NamedFormat::ILLCosmos)
+  // Enable/disable the log list for formats that include the header.
+  // Note that at the moment the log list is used in SaveReflectometryAscii for
+  // ILLCosmos (MFT) but I'm not sure if it should be.
+  if ((fileFormat == NamedFormat::Custom && m_view->getHeaderCheck()) ||
+      fileFormat == NamedFormat::ILLCosmos)
     m_view->enableLogList();
   else
     m_view->disableLogList();

@@ -338,10 +338,20 @@ public:
     verifyAndClear();
   }
 
-  void testLogListEnabledForCustomFormat() {
+  void testLogListEnabledForCustomFormatIfHeaderEnabled() {
     auto presenter = makePresenter();
     expectFileFormat(NamedFormat::Custom);
+    expectHeaderOptionEnabled();
     expectLogListEnabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListDisabledForCustomFormatIfHeaderDisabled() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::Custom);
+    expectHeaderOptionDisabled();
+    expectLogListDisabled();
     presenter.notifySettingsChanged();
     verifyAndClear();
   }
@@ -557,6 +567,18 @@ private:
     EXPECT_CALL(m_view, getFileFormatIndex())
         .Times(AtLeast(1))
         .WillOnce(Return(static_cast<int>(fileFormat)));
+  }
+
+  void expectHeaderOptionEnabled() {
+    EXPECT_CALL(m_view, getHeaderCheck())
+        .Times(AtLeast(1))
+        .WillOnce(Return(true));
+  }
+
+  void expectHeaderOptionDisabled() {
+    EXPECT_CALL(m_view, getHeaderCheck())
+        .Times(AtLeast(1))
+        .WillOnce(Return(false));
   }
 
   void expectLogListEnabled() { EXPECT_CALL(m_view, enableLogList()).Times(1); }
