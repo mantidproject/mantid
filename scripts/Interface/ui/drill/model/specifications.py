@@ -65,7 +65,6 @@ class RundexSettings(object):
                 "CustomOptions"
                 ],
             REFL_POL: [
-                "Run",
                 "Run00",
                 "Run01",
                 "Run10",
