@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import json
+import os
+import sys
 
 from qtpy.QtCore import QObject, Signal, QThread
 
@@ -20,6 +22,31 @@ from .ParameterController import Parameter, ParameterController
 
 
 class DrillModel(QObject):
+
+    """
+    Data directory on Linux.
+    """
+    LINUX_BASE_DATA_PATH = "/net/serdon/illdata/"
+
+    """
+    Data directory on MacOS.
+    """
+    MACOS_BASE_DATA_PATH = "/Volumes/illdata/"
+
+    """
+    Raw data directory name.
+    """
+    RAW_DATA_DIR = "rawdata"
+
+    """
+    Processed data directory name.
+    """
+    PROCESSED_DATA_DIR = "processed"
+
+    """
+    Experiment ID directory prefix.
+    """
+    EXP_PREFIX = "exp_"
 
     ###########################################################################
     # signals                                                                 #
@@ -195,7 +222,8 @@ class DrillModel(QObject):
 
     def setCycleAndExperiment(self, cycle, experiment):
         """
-        Set the cycle number and the experiment ID.
+        Set the cycle number and the experiment ID. This method tries to add the
+        usual data directory to the user directories list if it exists.
 
         Args:
             cycle (str): cycle number
@@ -203,6 +231,38 @@ class DrillModel(QObject):
         """
         self.cycleNumber = cycle
         self.experimentId = experiment
+
+        # platform
+        if sys.platform.startswith("linux"):
+            baseDir = self.LINUX_BASE_DATA_PATH
+        elif sys.platform.startswith("darwin"):
+            baseDir = self.MACOS_BASE_DATA_PATH
+        else:
+            return
+
+        if not os.path.isdir(baseDir):
+            return
+
+        # data
+        dataDir = baseDir + "{0}/{1}/{2}".format(cycle,
+                                                 self.instrument.lower(),
+                                                 self.EXP_PREFIX + experiment)
+        rawDataDir = dataDir + self.RAW_DATA_DIR
+        processedDataDir = dataDir + self.PROCESSED_DATA_DIR
+        if not os.path.isdir(dataDir):
+            logger.warning("Cycle number and experiment ID do not lead to a "
+                           "valid directory in the usual data directory ({0}): "
+                           "{1} does not exist."
+                           .format(baseDir, dataDir))
+            return
+
+        # add in user directories if needed
+        userDirs = ConfigService.getDataSearchDirs()
+        if ((os.path.isdir(rawDataDir)) and (rawDataDir not in userDirs)):
+            ConfigService.appendDataSearchDir(rawDataDir)
+        if ((os.path.isdir(processedDataDir))
+                and (processedDataDir not in userDirs)):
+            ConfigService.appendDataSearchDir(processedDataDir)
 
     def getCycleAndExperiment(self):
         """

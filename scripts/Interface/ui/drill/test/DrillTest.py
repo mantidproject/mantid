@@ -209,14 +209,10 @@ class DrillTest(unittest.TestCase):
         # both cycle and exp set
         self.view.cycleNumber.setText("test1")
         self.view.experimentId.setText("test2")
-        self.assertIsNone(self.model.cycleNumber)
-        self.assertIsNone(self.model.experimentId)
-        self.view.cycleNumber.editingFinished.emit()
         self.assertEqual(self.model.cycleNumber, "test1")
         self.assertEqual(self.model.experimentId, "test2")
         self.view.cycleNumber.setText("test2")
         self.view.experimentId.setText("test1")
-        self.view.experimentId.editingFinished.emit()
         self.assertEqual(self.model.cycleNumber, "test2")
         self.assertEqual(self.model.experimentId, "test1")
 
