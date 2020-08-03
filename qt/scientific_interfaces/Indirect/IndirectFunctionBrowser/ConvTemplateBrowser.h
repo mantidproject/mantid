@@ -63,6 +63,8 @@ public:
   void removeTempCorrection();
   void setQValues(const std::vector<double> &qValues) override;
   void setEnum(size_t subTypeIndex, int fitType);
+  void setInt(size_t subTypeIndex, int val);
+
   void updateTemperatureCorrectionAndDelta(bool tempCorrection,
                                            bool deltaFunction);
 
@@ -80,6 +82,7 @@ private:
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();
+  void createLorentzianFunctionProperties();
   void createDeltaFunctionProperties();
   void createTempCorrectionProperties();
   void setSubType(size_t subTypeIndex, int typeIndex);
@@ -109,6 +112,7 @@ private:
   bool m_emitParameterValueChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
+  bool m_emitIntChange = true;
   friend class ConvTemplatePresenter;
 };
 

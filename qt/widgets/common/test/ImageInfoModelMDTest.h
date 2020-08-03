@@ -20,27 +20,30 @@ public:
   }
   static void destroySuite(ImageInfoModelMDTest *suite) { delete suite; }
 
-  void test_getInfoList_with_md_ws() {
+  void test_info_with_md_ws() {
     ImageInfoModelMD model;
 
-    auto list = model.getInfoList(2, 4, 7);
+    auto info = model.info(2, 4, 7.5);
 
-    const std::array<QString, 6> expectList{"x", "2", "y", "4", "Signal", "7"};
-    TS_ASSERT_EQUALS(expectList.size(), list.size())
-    for (size_t i = 0; i < list.size(); ++i) {
-      TS_ASSERT_EQUALS(expectList[i], list[i]);
-    }
+    assertInfoMatches(info, {"2.0000", "4.0000", "7.5000"});
   }
 
-  void test_getInfoList_returns_dashes_when_getValues_is_false() {
+  void test_info_returns_dashes_when_given_double_max() {
     ImageInfoModelMD model;
 
-    auto list = model.getInfoList(2, 4, 7, false);
+    auto info = model.info(2, std::numeric_limits<double>::max(), 7);
 
-    const std::array<QString, 6> expectList{"x", "-", "y", "-", "Signal", "-"};
-    TS_ASSERT_EQUALS(expectList.size(), list.size())
-    for (size_t i = 0; i < list.size(); ++i) {
-      TS_ASSERT_EQUALS(expectList[i], list[i]);
+    assertInfoMatches(info, {"2.0000", "-", "7.0000"});
+  }
+
+private:
+  void assertInfoMatches(const ImageInfoModel::ImageInfo &info,
+                         const std::vector<std::string> &expectedValues) {
+    constexpr std::array<const char *, 3> expectedHeaders{"x", "y", "Signal"};
+    TS_ASSERT_EQUALS(expectedHeaders.size(), info.size())
+    for (int i = 0; i < info.size(); ++i) {
+      TS_ASSERT_EQUALS(expectedHeaders[i], info.name(i).toStdString());
+      TS_ASSERT_EQUALS(expectedValues[i], info.value(i).toLatin1().constData());
     }
   }
 };

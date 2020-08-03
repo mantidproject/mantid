@@ -33,6 +33,8 @@ public:
                           const size_t distance) const;
   size_t numberColumns() const;
   size_t numberRows() const;
+  double latitudeStep() const { return m_latitudeStep; };
+  double longitudeStep() const { return m_longitudeStep; };
 
 private:
   double m_minLatitude;

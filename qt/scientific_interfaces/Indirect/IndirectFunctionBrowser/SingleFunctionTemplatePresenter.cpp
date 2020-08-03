@@ -45,8 +45,6 @@ void SingleFunctionTemplatePresenter::updateAvailableFunctions(
 }
 
 void SingleFunctionTemplatePresenter::setFitType(const QString &name) {
-  if (name == "None")
-    return;
   m_view->clear();
   m_model.setFitType(name);
   auto functionParameters = m_model.getParameterNames();

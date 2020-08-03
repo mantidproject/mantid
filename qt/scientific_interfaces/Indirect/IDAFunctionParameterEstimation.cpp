@@ -23,9 +23,11 @@ void IDAFunctionParameterEstimation::addParameterEstimationFunction(
 void IDAFunctionParameterEstimation::estimateFunctionParameters(
     ::Mantid::API::IFunction_sptr &function,
     const DataForParameterEstimation &estimationData) {
-  std::string functionName = function->name();
-  if (m_funcMap.find(functionName) != m_funcMap.end()) {
-    m_funcMap[functionName](function, estimationData);
+  if (function) {
+    std::string functionName = function->name();
+    if (m_funcMap.find(functionName) != m_funcMap.end()) {
+      m_funcMap[functionName](function, estimationData);
+    }
   }
 }
 

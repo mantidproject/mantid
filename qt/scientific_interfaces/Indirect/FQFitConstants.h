@@ -21,7 +21,8 @@ enum class DataType {
 };
 
 static const std::map<std::string, std::string> widthFits{
-    {{std::string("ChudleyElliot"),
+    {{"None", ""},
+     {std::string("ChudleyElliot"),
       std::string(
           "name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)")},
      {std::string("HallRoss"),
