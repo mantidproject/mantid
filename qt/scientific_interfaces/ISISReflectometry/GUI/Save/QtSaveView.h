@@ -51,7 +51,7 @@ public:
   /// Returns the index of selected file format
   int getFileFormatIndex() const override;
   /// Returns the title check
-  bool getTitleCheck() const override;
+  bool getHeaderCheck() const override;
   /// Returns the Q resolution check
   bool getQResolutionCheck() const override;
   /// Returns the separator type

@@ -27,7 +27,7 @@ public:
   MOCK_CONST_METHOD0(getSelectedWorkspaces, std::vector<std::string>());
   MOCK_CONST_METHOD0(getSelectedParameters, std::vector<std::string>());
   MOCK_CONST_METHOD0(getFileFormatIndex, int());
-  MOCK_CONST_METHOD0(getTitleCheck, bool());
+  MOCK_CONST_METHOD0(getHeaderCheck, bool());
   MOCK_CONST_METHOD0(getQResolutionCheck, bool());
   MOCK_CONST_METHOD0(getSeparator, std::string());
 

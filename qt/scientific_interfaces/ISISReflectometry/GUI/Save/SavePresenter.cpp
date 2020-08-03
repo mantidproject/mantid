@@ -209,7 +209,7 @@ FileFormatOptions SavePresenter::getSaveParametersFromView() const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
       /*prefix=*/m_view->getPrefix(),
-      /*includeTitle=*/m_view->getTitleCheck(),
+      /*includeHeader=*/m_view->getHeaderCheck(),
       /*separator=*/m_view->getSeparator(),
       /*includeQResolution=*/m_view->getQResolutionCheck());
 }

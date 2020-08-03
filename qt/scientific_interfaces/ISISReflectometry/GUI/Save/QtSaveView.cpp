@@ -76,7 +76,7 @@ void QtSaveView::connectSaveSettingsWidgets() {
   connectSettingsChange(*m_ui.filterEdit);
   connectSettingsChange(*m_ui.regexCheckBox);
   connectSettingsChange(*m_ui.saveReductionResultsCheckBox);
-  connectSettingsChange(*m_ui.titleCheckBox);
+  connectSettingsChange(*m_ui.headerCheckBox);
   connectSettingsChange(*m_ui.qResolutionCheckBox);
   connectSettingsChange(*m_ui.commaRadioButton);
   connectSettingsChange(*m_ui.spaceRadioButton);
@@ -205,11 +205,11 @@ int QtSaveView::getFileFormatIndex() const {
   return m_ui.fileFormatComboBox->currentIndex();
 }
 
-/** Returns the title check value
- * @return :: The title check
+/** Returns the header check value
+ * @return :: The header check
  */
-bool QtSaveView::getTitleCheck() const {
-  return m_ui.titleCheckBox->isChecked();
+bool QtSaveView::getHeaderCheck() const {
+  return m_ui.headerCheckBox->isChecked();
 }
 
 /** Returns the Q resolution check value

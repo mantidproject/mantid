@@ -38,7 +38,7 @@ public:
 
   SavePresenterTest()
       : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom),
-        m_prefix("testoutput_"), m_includeTitle(true), m_separator(","),
+        m_prefix("testoutput_"), m_includeHeader(true), m_separator(","),
         m_includeQResolution(true) {}
 
   void testPresenterSubscribesToView() {
@@ -433,9 +433,9 @@ private:
         .Times(1)
         .WillOnce(Return(static_cast<int>(m_fileFormat)));
     EXPECT_CALL(m_view, getPrefix()).Times(1).WillOnce(Return(m_prefix));
-    EXPECT_CALL(m_view, getTitleCheck())
+    EXPECT_CALL(m_view, getHeaderCheck())
         .Times(1)
-        .WillOnce(Return(m_includeTitle));
+        .WillOnce(Return(m_includeHeader));
     EXPECT_CALL(m_view, getSeparator()).Times(1).WillOnce(Return(m_separator));
     EXPECT_CALL(m_view, getQResolutionCheck())
         .Times(1)
@@ -451,7 +451,7 @@ private:
     expectGetValidSaveDirectory();
     expectGetSaveParametersFromView();
     auto fileFormatOptions =
-        FileFormatOptions(m_fileFormat, m_prefix, m_includeTitle, m_separator,
+        FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator,
                           m_includeQResolution);
     EXPECT_CALL(*m_asciiSaver,
                 save(m_savePath, workspaceNames, logs, fileFormatOptions))
@@ -486,7 +486,7 @@ private:
   // file format options for ascii saver
   NamedFormat m_fileFormat;
   std::string m_prefix;
-  bool m_includeTitle;
+  bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;
 };
