@@ -127,7 +127,6 @@ def mask_with_mask_files(mask_info, workspace):
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         dummy_params = {"OutputWorkspace": EMPTY_NAME}
         mask_alg = create_unmanaged_algorithm("MaskInstrument", **dummy_params)
-        clear_alg = create_unmanaged_algorithm("ClearMaskedSpectra", **dummy_params)
 
         # Masker
         for mask_file in mask_files:
@@ -138,7 +137,7 @@ def mask_with_mask_files(mask_info, workspace):
             load_alg.execute()
             masking_workspace = load_alg.getProperty("OutputWorkspace").value
             # Could use MaskDetectors directly with masking_workspace but it does not
-            # support MPI. Use a three step approach via a, b, and c instead.
+            # support MPI. Use a two step approach via a and b instead.
             # a) Extract detectors to mask from MaskWorkspace
             det_ids = masking_workspace.getMaskedDetectors()
             # b) Mask the detector ids on the instrument
@@ -147,11 +146,6 @@ def mask_with_mask_files(mask_info, workspace):
             mask_alg.setProperty("DetectorIDs", det_ids)
             mask_alg.execute()
             workspace = mask_alg.getProperty("OutputWorkspace").value
-        # c) Clear data in all spectra associated with masked detectors
-        clear_alg.setProperty("InputWorkspace", workspace)
-        clear_alg.setProperty("OutputWorkspace", workspace)
-        clear_alg.execute()
-        workspace = clear_alg.getProperty("OutputWorkspace").value
     return workspace
 
 

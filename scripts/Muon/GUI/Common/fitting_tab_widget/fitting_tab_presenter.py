@@ -286,12 +286,6 @@ class FittingTabPresenter(object):
         if self._tf_asymmetry_mode == self.view.tf_asymmetry_mode:
             return
 
-        if 'DoublePulseEnabled' in self.model.context.gui_context and self.model.context.gui_context['DoublePulseEnabled'] \
-                and self.view.tf_asymmetry_mode:
-            self.view.tf_asymmetry_mode = False
-            self.view.warning_popup('Tf asymmetry mode incompatible with double pulse analysis.')
-            return
-
         self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
         global_parameters = self.view.get_global_parameters()
         if self._tf_asymmetry_mode:

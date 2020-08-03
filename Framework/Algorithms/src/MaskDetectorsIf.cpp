@@ -8,6 +8,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -132,7 +133,6 @@ void MaskDetectorsIf::exec() {
 
 /**
  * Create an output workspace masking/unmasking the selected/deselected spectra
- * This only flips the detector masked flags and does NOT clear the data.
  */
 void MaskDetectorsIf::outputToWorkspace() {
   API::MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
@@ -143,21 +143,16 @@ void MaskDetectorsIf::outputToWorkspace() {
     detectorInfo.setMasked(detectorInfo.indexOf(selection.first),
                            selection.second);
   }
-  /* This only flips the detector masked flags and does NOT clear the data.
-   * Subsequent algorithms may not respect the flag and process the values
-   * incorrectly. The algorithm ClearMaskedSpectra can clear the masked data.
-   * This is probably a mistake but will be left in for compatability for now.
-   *
-   * The following lines would clear the data properly:
-   * (Other algorithms to look into that do this are MaskInstrument and
-   * clearMaskedSpectra.)
-   *
-   *  const auto &spectrumInfo = workspace->spectrumInfo();
-   *  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-   *  if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i))
-   *     workspace->getSpectrum(i).clearData();
-   *  }
-   */
+
+  const auto &spectrumInfo = outputW->spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i))
+      outputW->getSpectrum(i).clearData();
+  }
+
+  if (auto event = dynamic_cast<DataObjects::EventWorkspace *>(outputW.get()))
+    event->clearMRU();
+
   setProperty("OutputWorkspace", outputW);
 }
 /**

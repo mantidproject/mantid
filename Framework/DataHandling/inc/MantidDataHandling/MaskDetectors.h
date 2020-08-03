@@ -52,7 +52,6 @@ public:
   const std::vector<std::string> seeAlso() const override {
     return {"MaskDetectorsInShape",
             "MaskDetectorsIf",
-            "MaskInstrument",
             "MaskSpectra",
             "MaskBTP",
             "MaskAngle",
