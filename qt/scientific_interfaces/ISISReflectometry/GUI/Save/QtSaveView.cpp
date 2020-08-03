@@ -122,13 +122,19 @@ void QtSaveView::enableAutosaveControls() {
   m_ui.autosaveGroup->setEnabled(true);
 }
 
-void QtSaveView::enableFileFormatAndLocationControls() {
+void QtSaveView::enableFileFormatControls() {
   m_ui.fileFormatGroup->setEnabled(true);
+}
+
+void QtSaveView::disableFileFormatControls() {
+  m_ui.fileFormatGroup->setEnabled(false);
+}
+
+void QtSaveView::enableLocationControls() {
   m_ui.fileLocationGroup->setEnabled(true);
 }
 
-void QtSaveView::disableFileFormatAndLocationControls() {
-  m_ui.fileFormatGroup->setEnabled(false);
+void QtSaveView::disableLocationControls() {
   m_ui.fileLocationGroup->setEnabled(false);
 }
 

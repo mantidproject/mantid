@@ -242,7 +242,7 @@ public:
     expectSetWorkspaceListFromADS(workspaceNames);
     expectNotProcessingOrAutoreducing();
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
-    EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsEnabled();
     presenter.notifyReductionPaused();
     verifyAndClear();
   }
@@ -260,7 +260,7 @@ public:
     auto presenter = makePresenter();
     enableAutosave(presenter);
     expectProcessing();
-    EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsDisabled();
     presenter.notifyReductionResumed();
     verifyAndClear();
   }
@@ -269,7 +269,7 @@ public:
     auto presenter = makePresenter();
     disableAutosave(presenter);
     expectProcessing();
-    EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsEnabled();
     presenter.notifyReductionResumed();
     verifyAndClear();
   }
@@ -296,7 +296,7 @@ public:
     auto presenter = makePresenter();
     enableAutosave(presenter);
     expectAutoreducing();
-    EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsDisabled();
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
@@ -305,7 +305,7 @@ public:
     auto presenter = makePresenter();
     disableAutosave(presenter);
     expectAutoreducing();
-    EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsEnabled();
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
@@ -477,6 +477,16 @@ private:
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(1)
         .WillOnce(Return(false));
+  }
+
+  void expectFileFormatAndLocationControlsEnabled() {
+    EXPECT_CALL(m_view, enableFileFormatControls()).Times(1);
+    EXPECT_CALL(m_view, enableLocationControls()).Times(1);
+  }
+
+  void expectFileFormatAndLocationControlsDisabled() {
+    EXPECT_CALL(m_view, disableFileFormatControls()).Times(1);
+    EXPECT_CALL(m_view, disableLocationControls()).Times(1);
   }
 
   NiceMock<MockSaveView> m_view;

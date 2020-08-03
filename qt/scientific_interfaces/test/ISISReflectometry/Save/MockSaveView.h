@@ -40,8 +40,10 @@ public:
   MOCK_METHOD0(disableAutosaveControls, void());
   MOCK_METHOD0(enableAutosaveControls, void());
 
-  MOCK_METHOD0(enableFileFormatAndLocationControls, void());
-  MOCK_METHOD0(disableFileFormatAndLocationControls, void());
+  MOCK_METHOD0(enableFileFormatControls, void());
+  MOCK_METHOD0(disableFileFormatControls, void());
+  MOCK_METHOD0(enableLocationControls, void());
+  MOCK_METHOD0(disableLocationControls, void());
 
   MOCK_METHOD0(showFilterEditValid, void());
   MOCK_METHOD0(showFilterEditInvalid, void());

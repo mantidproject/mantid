@@ -73,8 +73,10 @@ public:
   void disableAutosaveControls() override;
   void enableAutosaveControls() override;
 
-  void enableFileFormatAndLocationControls() override;
-  void disableFileFormatAndLocationControls() override;
+  void enableFileFormatControls() override;
+  void disableFileFormatControls() override;
+  void enableLocationControls() override;
+  void disableLocationControls() override;
 
   void error(const std::string &title, const std::string &prompt);
   void warning(const std::string &title, const std::string &prompt);

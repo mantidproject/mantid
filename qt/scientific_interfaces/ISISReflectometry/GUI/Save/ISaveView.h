@@ -61,8 +61,10 @@ public:
   virtual void disableAutosaveControls() = 0;
   virtual void enableAutosaveControls() = 0;
 
-  virtual void enableFileFormatAndLocationControls() = 0;
-  virtual void disableFileFormatAndLocationControls() = 0;
+  virtual void enableFileFormatControls() = 0;
+  virtual void disableFileFormatControls() = 0;
+  virtual void enableLocationControls() = 0;
+  virtual void disableLocationControls() = 0;
 
   virtual void showFilterEditValid() = 0;
   virtual void showFilterEditInvalid() = 0;

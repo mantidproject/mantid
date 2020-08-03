@@ -78,13 +78,17 @@ bool SavePresenter::isAutoreducing() const {
 void SavePresenter::updateWidgetEnabledState() const {
   if (isProcessing() || isAutoreducing()) {
     m_view->disableAutosaveControls();
-    if (shouldAutosave())
-      m_view->disableFileFormatAndLocationControls();
-    else
-      m_view->enableFileFormatAndLocationControls();
+    if (shouldAutosave()) {
+      m_view->disableFileFormatControls();
+      m_view->disableLocationControls();
+    } else {
+      m_view->enableFileFormatControls();
+      m_view->enableLocationControls();
+    }
   } else {
     m_view->enableAutosaveControls();
-    m_view->enableFileFormatAndLocationControls();
+    m_view->enableFileFormatControls();
+    m_view->enableLocationControls();
   }
 }
 
