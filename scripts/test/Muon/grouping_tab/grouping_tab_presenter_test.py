@@ -166,6 +166,66 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.assertEqual(self.grouping_table_view.num_rows(), 1)
             self.assertEqual(self.pairing_table_view.num_rows(), 0)
 
+    def test_loading_selects_all_pairs_if_any_pairs_exist_and_no_default_set(self):
+        self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
+        groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
+                  MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
+        pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
+
+        with mock.patch(
+                "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
+            # mock the loading to return set groups/pairs
+            mock_load.return_value = (groups, pairs, 'description', '')
+            self.presenter.handle_load_grouping_from_file()
+
+        self.assertEqual(self.model.selected_pairs, ["pair1"])
+        self.assertEqual(self.model.selected_groups, [])
+
+    def test_loading_selects_groups_if_no_pairs_exist_and_no_default_set(self):
+        self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
+        groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
+                  MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
+        pairs = []
+
+        with mock.patch(
+                "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
+            # mock the loading to return set groups/pairs
+            mock_load.return_value = (groups, pairs, 'description', '')
+            self.view.load_grouping_button.clicked.emit(True)
+
+        self.assertEqual(self.model.selected_pairs, [])
+        self.assertEqual(self.model.selected_groups, ["grp1", "grp2"])
+
+    def test_loading_selects_default_pairs_and_groups_correctly(self):
+        self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
+        groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
+                  MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
+        pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
+
+        with mock.patch(
+                "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
+            # mock the loading to return set groups/pairs
+            mock_load.return_value = (groups, pairs, 'description', 'grp2')
+            self.presenter.handle_load_grouping_from_file()
+
+        self.assertEqual(self.model.selected_pairs, [])
+        self.assertEqual(self.model.selected_groups, ["grp2"])
+
+    def test_loading_selects_correctly_when_default_is_invalid(self):
+        self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
+        groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
+                  MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
+        pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
+
+        with mock.patch(
+                "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
+            # mock the loading to return set groups/pairs
+            mock_load.return_value = (groups, pairs, 'description', 'grp3')
+            self.presenter.handle_load_grouping_from_file()
+
+        self.assertEqual(self.model.selected_pairs, ["pair1"])
+        self.assertEqual(self.model.selected_groups, [])
+
     def test_that_save_grouping_triggers_the_correct_function(self):
         # Save functionality is tested elsewhere
         self.view.show_file_save_browser_and_return_selection = mock.Mock(return_value="grouping.xml")

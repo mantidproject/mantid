@@ -154,10 +154,16 @@ class GroupingTabPresenter(object):
             if pair.forward_group in self._model.group_names and pair.backward_group in self._model.group_names:
                 self._model.add_pair(pair)
 
+        if default:
+            if default in self._model.group_names:
+                self._model.add_group_to_analysis(default)
+            elif default in self._model.pair_names:
+                self._model.add_pair_to_analysis(default)
+
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text(description)
-        self._model._context.group_pair_context.selected = default
+        self.plot_default_groups_or_pairs()
         self.groupingNotifier.notify_subscribers()
 
         self.handle_update_all_clicked()
