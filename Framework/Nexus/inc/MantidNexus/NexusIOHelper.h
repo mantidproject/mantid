@@ -46,7 +46,7 @@ namespace {
   case ::NeXus::UINT64:                                                        \
     return func_name<T, uint64_t>(__VA_ARGS__);                                \
   default:                                                                     \
-    throw std::runtime_error("Unknown type in Nexus file");                    \
+    throw std::runtime_error("NeXusIOHelper: Unknown type in Nexus file");     \
   }
 
 std::pair<::NeXus::Info, bool>
@@ -64,7 +64,7 @@ checkIfOpenAndGetInfo(::NeXus::File &file, const std::string &&entry) {
 /// Use the getData function to read the buffer into vector and close file if
 /// needed
 template <typename T>
-void callGetData(::NeXus::File &file, std::vector<T> &buf, bool close_file) {
+void callGetData(::NeXus::File &file, std::vector<T> &buf, const bool close_file) {
   file.getData(buf);
   if (close_file)
     file.closeData();
@@ -72,7 +72,7 @@ void callGetData(::NeXus::File &file, std::vector<T> &buf, bool close_file) {
 
 /// Use the getData function to read the buffer and close file if needed
 template <typename T>
-void callGetData(::NeXus::File &file, T &buf, bool close_file) {
+void callGetData(::NeXus::File &file, T &buf, const bool close_file) {
   file.getData(&buf);
   if (close_file)
     file.closeData();
@@ -82,72 +82,101 @@ void callGetData(::NeXus::File &file, T &buf, bool close_file) {
 template <typename T>
 void callGetSlab(::NeXus::File &file, std::vector<T> &buf,
                  const std::vector<int64_t> &start,
-                 const std::vector<int64_t> &size, bool close_file) {
+                 const std::vector<int64_t> &size, const bool close_file) {
   file.getSlab(buf.data(), start, size);
   if (close_file)
     file.closeData();
 }
 
-/** Templated function to read any type of data and store it into another vector
- * type. If the two types are the same, the conversion is skipped.
+/** Templated function to read any type of vector and (potentially) convert it to
+ * another type. If the two types are the same, the conversion is skipped.
  */
 template <typename T, typename U>
-std::vector<T> readNexusAnyVector(::NeXus::File &file, size_t size,
-                                  bool close_file) {
-  if constexpr (sizeof(T) < sizeof(U)) {
+void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t size,
+                                  const bool close_file, const bool allow_downcasting) {
+  if (sizeof(T) < sizeof(U) && !allow_downcasting) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
   } else if constexpr (std::is_same<T, U>::value) {
-    std::vector<T> buf(size);
     if (size > 0)
-      callGetData(file, buf, close_file);
-    return buf;
+      callGetData(file, out, close_file);
   } else {
-    std::vector<T> vec(size);
     if (size > 0) {
       std::vector<U> buf(size);
       callGetData(file, buf, close_file);
-      std::transform(buf.begin(), buf.end(), vec.begin(),
+      std::transform(buf.begin(), buf.end(), out.begin(),
                      [](U a) -> T { return static_cast<T>(a); });
     }
-    return vec;
   }
 }
 
-/** Templated function to read any type of slab and store it into another vector
- * type. If the two types are the same, the conversion is skipped.
+/// Read any type of vector and return it as a new vector.
+template <typename T, typename U>
+std::vector<T> readNexusAnyVector(::NeXus::File &file, const size_t size,
+                                  const bool close_file, const bool allow_downcasting) {
+  std::vector<T> vec(size);
+  doReadNexusAnyVector<T, U>(vec, file, size, close_file, allow_downcasting);
+  return vec;
+}
+
+/// Read any type of vector and store it into the provided buffer vector.
+template <typename T, typename U>
+void readNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t size,
+                                  const bool close_file, const bool allow_downcasting) {
+    doReadNexusAnyVector<T, U>(out, file, size, close_file, allow_downcasting);
+}
+
+/** Templated function to read any type of slab and (potentially) convert it to
+ * another type. If the two types are the same, the conversion is skipped.
  */
 template <typename T, typename U>
-std::vector<T>
-readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
-                 const std::vector<int64_t> &size, bool close_file) {
-  if constexpr (sizeof(T) < sizeof(U)) {
+void
+doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const std::vector<int64_t> &start,
+                 const std::vector<int64_t> &size, const bool close_file, const bool allow_downcasting) {
+  if (sizeof(T) < sizeof(U) && !allow_downcasting) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
   } else if constexpr (std::is_same<T, U>::value) {
-    std::vector<T> buf(size[0]);
     if (size[0] > 0)
-      callGetSlab(file, buf, start, size, close_file);
-    return buf;
+      callGetSlab(file, out, start, size, close_file);
   } else {
-    std::vector<T> vec(size[0]);
     if (size[0] > 0) {
       std::vector<U> buf(size[0]);
       callGetSlab(file, buf, start, size, close_file);
-      std::transform(buf.begin(), buf.end(), vec.begin(),
+      std::transform(buf.begin(), buf.end(), out.begin(),
                      [](U a) -> T { return static_cast<T>(a); });
     }
-    return vec;
   }
 }
 
+/// Read any type of slab and return it as a new vector.
 template <typename T, typename U>
-T readNexusAnyVariable(::NeXus::File &file, bool close_file) {
-  if constexpr (sizeof(T) < sizeof(U)) {
+std::vector<T>
+readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
+                 const std::vector<int64_t> &size, const bool close_file, const bool allow_downcasting) {
+  std::vector<T> vec(size[0]);
+  doReadNexusAnySlab<T, U>(vec, file, start, size, close_file, allow_downcasting);
+  return vec;
+}
+
+/// Read any type of slab and store it into the provided buffer vector.
+template <typename T, typename U>
+void
+readNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const std::vector<int64_t> &start,
+                 const std::vector<int64_t> &size, const bool close_file, const bool allow_downcasting) {
+    doReadNexusAnySlab<T, U>(out, file, start, size, close_file, allow_downcasting);
+}
+
+/** Templated function to read any type of variable and (potentially) convert it
+ * to another type. If the two types are the same, the conversion is skipped.
+ */
+template <typename T, typename U>
+T readNexusAnyVariable(::NeXus::File &file, const bool close_file, const bool allow_downcasting) {
+  if (sizeof(T) < sizeof(U) && !allow_downcasting) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
@@ -170,15 +199,38 @@ T readNexusAnyVariable(::NeXus::File &file, bool close_file) {
  */
 template <typename T>
 std::vector<T> readNexusVector(::NeXus::File &file,
-                               const std::string &entry = "") {
-  auto info_and_close =
+                               const std::string &entry = "",
+                               const bool allow_downcasting = false) {
+  const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  auto dims = (info_and_close.first).dims;
-  auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
+  const auto dims = (info_and_close.first).dims;
+  const auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
                                     std::multiplies<>());
   RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVector,
-                             file, total_size, info_and_close.second);
+                             file, total_size, info_and_close.second,
+                             allow_downcasting);
 }
+
+
+/** Opens the data group if needed, finds the data type, computes the data size,
+ * and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
+ * The provided output buffer is filled.
+ */
+template <typename T>
+std::vector<T> readNexusVector(std::vector<T> &out, ::NeXus::File &file,
+                               const std::string &entry = "",
+                               const bool allow_downcasting = false) {
+  const auto info_and_close =
+      checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
+  const auto dims = (info_and_close.first).dims;
+  const auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
+                                    std::multiplies<>());
+  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVector,
+                             out,
+                             file, total_size, info_and_close.second,
+                             allow_downcasting);
+}
+
 
 /** Opens the data group if needed, finds the data type, and calls
  * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
@@ -186,19 +238,37 @@ std::vector<T> readNexusVector(::NeXus::File &file,
 template <typename T>
 std::vector<T> readNexusSlab(::NeXus::File &file, const std::string &entry,
                              const std::vector<int64_t> &start,
-                             const std::vector<int64_t> &size) {
-  auto info_and_close =
+                             const std::vector<int64_t> &size,
+                             const bool allow_downcasting = false) {
+  const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnySlab,
-                             file, start, size, info_and_close.second);
+                             file, start, size, info_and_close.second, allow_downcasting);
 }
 
+/** Opens the data group if needed, finds the data type, and calls
+ * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
+ * The provided output buffer is filled.
+ */
 template <typename T>
-T readNexusValue(::NeXus::File &file, const std::string &entry = "") {
-  auto info_and_close =
+void readNexusSlab(std::vector<T> &out, ::NeXus::File &file, const std::string &entry,
+                             const std::vector<int64_t> &start,
+                             const std::vector<int64_t> &size,
+                             const bool allow_downcasting = false) {
+  const auto info_and_close =
+      checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
+  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnySlab, out,
+                             file, start, size, info_and_close.second, allow_downcasting);
+}
+
+
+template <typename T>
+T readNexusValue(::NeXus::File &file, const std::string &entry = "",
+                 const bool allow_downcasting = false) {
+  const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVariable,
-                             file, info_and_close.second);
+                             file, info_and_close.second, allow_downcasting);
 }
 
 } // namespace NeXusIOHelper

@@ -459,44 +459,66 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   std::string units; // time units
   if (file.hasAttr("units"))
     file.getAttr("units", units);
+
+  auto pulse_times = NeXus::NeXusIOHelper::readNexusSlab<double>(
+      file, key, m_loadStart, m_loadSize);
+
   file.closeData();
 
-  // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
-  if (heldTimeZeroType == ::NeXus::UINT64) {
-    if (units != "ns")
-      logger.warning(
-          "event_time_zero is uint64_t, but units not in ns. Found to be: " +
-          units);
-    std::vector<uint64_t> nanoseconds;
-    file.readData("event_time_zero", nanoseconds);
-    if (nanoseconds.empty())
-      throw std::runtime_error(
-          "No event time zeros. Cannot establish run start or end");
-    auto absoluteFirst = DateAndTime(int64_t(0), int64_t(nanoseconds.front())) +
-                         offset.totalNanoseconds();
-    auto absoluteLast = DateAndTime(int64_t(0), int64_t(nanoseconds.back())) +
-                        offset.totalNanoseconds();
-    return std::make_pair(absoluteFirst, absoluteLast);
-  } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
-    if (units != "second")
-      logger.warning("event_time_zero is double_t, but units not in seconds. "
-                     "Found to be: " +
-                     units);
-    std::vector<double> seconds;
-    file.readData("event_time_zero", seconds);
-    if (seconds.empty())
-      throw std::runtime_error(
-          "No event time zeros. Cannot establish run start or end");
-    auto absoluteFirst =
-        DateAndTime(seconds.front(), double(0)) + offset.totalNanoseconds();
-    auto absoluteLast =
-        DateAndTime(seconds.back(), double(0)) + offset.totalNanoseconds();
-    return std::make_pair(absoluteFirst, absoluteLast);
-  }
+  // Convert to seconds
+  auto absoluteFirst = Kernel::Units::timeConversionValue(
+    pulse_times.front(), units, "s");
+  auto absoluteFirst = Kernel::Units::timeConversionValue(
+    pulse_times.back(), units, "s");
 
-  else {
-    throw std::runtime_error("Unrecognised type for event_time_zero");
-  }
+  return std::make_pair(DateAndTime(absoluteFirst, 0.0) + offset.totalNanoseconds(),
+                        DateAndTime(absoluteLast, 0.0)  + offset.totalNanoseconds());
+  // // Convert to nanoseconds
+  // // Kernel::Units::timeConversionValue(vec, units, "ns");
+  // // std::copy(vec.begin(), vec.end(), event_time_of_flight->data());
+
+
+
+
+
+
+
+  // // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
+  // if (heldTimeZeroType == ::NeXus::UINT64) {
+  //   if (units != "ns")
+  //     logger.warning(
+  //         "event_time_zero is uint64_t, but units not in ns. Found to be: " +
+  //         units);
+  //   std::vector<uint64_t> nanoseconds;
+  //   file.readData("event_time_zero", nanoseconds);
+  //   if (nanoseconds.empty())
+  //     throw std::runtime_error(
+  //         "No event time zeros. Cannot establish run start or end");
+  //   auto absoluteFirst = DateAndTime(int64_t(0), int64_t(nanoseconds.front())) +
+  //                        offset.totalNanoseconds();
+  //   auto absoluteLast = DateAndTime(int64_t(0), int64_t(nanoseconds.back())) +
+  //                       offset.totalNanoseconds();
+  //   return std::make_pair(absoluteFirst, absoluteLast);
+  // } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
+  //   if (units != "second")
+  //     logger.warning("event_time_zero is double_t, but units not in seconds. "
+  //                    "Found to be: " +
+  //                    units);
+  //   std::vector<double> seconds;
+  //   file.readData("event_time_zero", seconds);
+  //   if (seconds.empty())
+  //     throw std::runtime_error(
+  //         "No event time zeros. Cannot establish run start or end");
+  //   auto absoluteFirst =
+  //       DateAndTime(seconds.front(), double(0)) + offset.totalNanoseconds();
+  //   auto absoluteLast =
+  //       DateAndTime(seconds.back(), double(0)) + offset.totalNanoseconds();
+  //   return std::make_pair(absoluteFirst, absoluteLast);
+  // }
+
+  // else {
+  //   throw std::runtime_error("Unrecognised type for event_time_zero");
+  // }
 } // namespace DataHandling
 
 /**
