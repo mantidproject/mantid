@@ -100,8 +100,10 @@ LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
   // the event list for that pulse) as a uint64 vector.
   // The Nexus standard does not specify if this is to be 32-bit or 64-bit
   // integers, so we use the NeXusIOHelper to do the conversion on the fly.
+  // auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(
+  //     file, "event_index", m_loader.alg->getLogger());
   auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(
-      file, "event_index", m_loader.alg->getLogger());
+      file, "event_index");
 
   // Look for the sign that the bank is empty
   if (event_index.size() == 1) {
@@ -282,12 +284,55 @@ LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     m_loadError = true;
   }
 
-  // The Nexus standard does not specify if event_time_offset should be float or
-  // integer, so we use the NeXusIOHelper to perform the conversion to float on
-  // the fly. If the data field already contains floats, the conversion is
-  // skipped.
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(
-      file, key, m_loadStart, m_loadSize, m_loader.alg->getLogger());
+
+  // Mantid assumes event_time_offset to be float.
+  // Nexus only requires event_time_offset to be a NXNumber.
+  // We thus have to consider 32-bit or 64-bit options.
+  std::vector<float> vec(m_loadSize[0]);
+  auto heldTimeOffsetType = tof_info.type;
+  // file.getAttr("units", tof_unit);
+  std::cout << "gLoadBankFromDiskTask::loadTof 0" << std::endl;
+
+  if (heldTimeOffsetType == ::NeXus::UINT64 || heldTimeOffsetType == ::NeXus::FLOAT64) {
+    std::cout << "gLoadBankFromDiskTask::loadTof 1" << std::endl;
+    auto buf = NeXus::NeXusIOHelper::readNexusSlab<double>(
+      file, key, m_loadStart, m_loadSize);
+    std::cout << "gLoadBankFromDiskTask::loadTof 2" << std::endl;
+    // Perform explicit downcasting
+    std::transform(buf.begin(), buf.end(), vec.begin(),
+                     [](double a) { return static_cast<float>(a); });
+    std::cout << "gLoadBankFromDiskTask::loadTof 3" << std::endl;
+    m_loader.alg->getLogger().warning() <<
+      "In loadTof: downcasting performed while reading " << key;
+    std::cout << "gLoadBankFromDiskTask::loadTof 4" << std::endl;
+  } else if (heldTimeOffsetType == ::NeXus::UINT32 || heldTimeOffsetType == ::NeXus::FLOAT32) {
+    vec = NeXus::NeXusIOHelper::readNexusSlab<float>(
+      file, key, m_loadStart, m_loadSize);
+  } else {
+    throw std::invalid_argument(std::string("In loadTof: Unsupported type for ") + key);
+  }
+
+  // auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(
+  //     file, key, m_loadStart, m_loadSize);
+
+  // file.closeData();
+  // // Convert Tof to microseconds
+  // Kernel::Units::timeConversionVector(vec, tof_unit, "microseconds");
+  // std::copy(vec.begin(), vec.end(), event_time_of_flight->data());
+
+  // // The Nexus standard does not specify if event_time_offset should be float or
+  // // integer, so we use the NeXusIOHelper to perform the conversion to float on
+  // // the fly. If the data field already contains floats, the conversion is
+  // // skipped.
+  // // auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(
+  // //     file, key, m_loadStart, m_loadSize, m_loader.alg->getLogger());
+  // if (tof_info.type == ::NeXus::UINT64) {
+  //   std::cout << "This is ::NeXus::UINT64" << std::endl;
+  // } else if (tof_info.type == ::NeXus::FLOAT64) {
+  //   std::cout << "This is ::NeXus::FLOAT64" << std::endl;
+  // }
+  // auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(
+  //     file, key, m_loadStart, m_loadSize);
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds
