@@ -78,6 +78,15 @@ public:
   void enableLocationControls() override;
   void disableLocationControls() override;
 
+  void enableLogList() override;
+  void disableLogList() override;
+  void enableHeaderCheckBox() override;
+  void disableHeaderCheckBox() override;
+  void enableQResolutionCheckBox() override;
+  void disableQResolutionCheckBox() override;
+  void enableSeparatorButtonGroup() override;
+  void disableSeparatorButtonGroup() override;
+
   void error(const std::string &title, const std::string &prompt);
   void warning(const std::string &title, const std::string &prompt);
 

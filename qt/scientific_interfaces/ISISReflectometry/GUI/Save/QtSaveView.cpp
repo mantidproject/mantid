@@ -138,6 +138,42 @@ void QtSaveView::disableLocationControls() {
   m_ui.fileLocationGroup->setEnabled(false);
 }
 
+void QtSaveView::enableLogList() {
+  m_ui.listOfLoggedParameters->setEnabled(true);
+}
+
+void QtSaveView::disableLogList() {
+  m_ui.listOfLoggedParameters->setEnabled(false);
+}
+
+void QtSaveView::enableHeaderCheckBox() {
+  m_ui.headerCheckBox->setEnabled(true);
+}
+
+void QtSaveView::disableHeaderCheckBox() {
+  m_ui.headerCheckBox->setEnabled(false);
+}
+
+void QtSaveView::enableQResolutionCheckBox() {
+  m_ui.qResolutionCheckBox->setEnabled(true);
+}
+
+void QtSaveView::disableQResolutionCheckBox() {
+  m_ui.qResolutionCheckBox->setEnabled(false);
+}
+
+void QtSaveView::enableSeparatorButtonGroup() {
+  m_ui.commaRadioButton->setEnabled(true);
+  m_ui.spaceRadioButton->setEnabled(true);
+  m_ui.tabRadioButton->setEnabled(true);
+}
+
+void QtSaveView::disableSeparatorButtonGroup() {
+  m_ui.commaRadioButton->setEnabled(false);
+  m_ui.spaceRadioButton->setEnabled(false);
+  m_ui.tabRadioButton->setEnabled(false);
+}
+
 /** Returns the save path
  * @return :: The save path
  */

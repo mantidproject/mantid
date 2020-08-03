@@ -45,6 +45,15 @@ public:
   MOCK_METHOD0(enableLocationControls, void());
   MOCK_METHOD0(disableLocationControls, void());
 
+  MOCK_METHOD0(enableLogList, void());
+  MOCK_METHOD0(disableLogList, void());
+  MOCK_METHOD0(enableHeaderCheckBox, void());
+  MOCK_METHOD0(disableHeaderCheckBox, void());
+  MOCK_METHOD0(enableQResolutionCheckBox, void());
+  MOCK_METHOD0(disableQResolutionCheckBox, void());
+  MOCK_METHOD0(enableSeparatorButtonGroup, void());
+  MOCK_METHOD0(disableSeparatorButtonGroup, void());
+
   MOCK_METHOD0(showFilterEditValid, void());
   MOCK_METHOD0(showFilterEditInvalid, void());
   MOCK_METHOD0(errorInvalidSaveDirectory, void());

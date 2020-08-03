@@ -338,6 +338,70 @@ public:
     verifyAndClear();
   }
 
+  void testLogListEnabledForCustomFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::Custom);
+    expectLogListEnabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testCustomOptionsEnabledForCustomFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::Custom);
+    expectCustomOptionsEnabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListEnabledForILLCosmosFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ILLCosmos);
+    expectLogListEnabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testCustomOptionsDisabledForILLCosmosFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ILLCosmos);
+    expectCustomOptionsDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListDisabledForANSTOFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ANSTO);
+    expectLogListDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testCustomOptionsDisabledForANSTOFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ANSTO);
+    expectCustomOptionsDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListDisabledForThreeColumnFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ThreeColumn);
+    expectLogListDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testCustomOptionsDisabledForThreeColumnFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ThreeColumn);
+    expectCustomOptionsDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
 private:
   SavePresenter makePresenter() {
     auto asciiSaver = std::make_unique<NiceMock<MockAsciiSaver>>();
@@ -487,6 +551,30 @@ private:
   void expectFileFormatAndLocationControlsDisabled() {
     EXPECT_CALL(m_view, disableFileFormatControls()).Times(1);
     EXPECT_CALL(m_view, disableLocationControls()).Times(1);
+  }
+
+  void expectFileFormat(NamedFormat fileFormat) {
+    EXPECT_CALL(m_view, getFileFormatIndex())
+        .Times(AtLeast(1))
+        .WillOnce(Return(static_cast<int>(fileFormat)));
+  }
+
+  void expectLogListEnabled() { EXPECT_CALL(m_view, enableLogList()).Times(1); }
+
+  void expectLogListDisabled() {
+    EXPECT_CALL(m_view, disableLogList()).Times(1);
+  }
+
+  void expectCustomOptionsEnabled() {
+    EXPECT_CALL(m_view, enableHeaderCheckBox()).Times(1);
+    EXPECT_CALL(m_view, enableQResolutionCheckBox()).Times(1);
+    EXPECT_CALL(m_view, enableSeparatorButtonGroup()).Times(1);
+  }
+
+  void expectCustomOptionsDisabled() {
+    EXPECT_CALL(m_view, disableHeaderCheckBox()).Times(1);
+    EXPECT_CALL(m_view, disableQResolutionCheckBox()).Times(1);
+    EXPECT_CALL(m_view, disableSeparatorButtonGroup()).Times(1);
   }
 
   NiceMock<MockSaveView> m_view;
