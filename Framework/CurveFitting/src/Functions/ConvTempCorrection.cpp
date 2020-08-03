@@ -10,6 +10,7 @@
 #include <cmath>
 
 namespace {
+// Conversion factor from meV to K
 constexpr double CONVERSIONFACTOR = 11.606;
 } // namespace
 
@@ -20,7 +21,7 @@ namespace Functions {
 DECLARE_FUNCTION(ConvTempCorrection)
 
 void ConvTempCorrection::init() {
-  declareParameter("Temperature", 300.0, "Temperature correction value");
+  declareParameter("Temperature", 300.0, "Temperature correction value (K)");
 }
 
 void ConvTempCorrection::function1D(double *out, const double *xValues,
