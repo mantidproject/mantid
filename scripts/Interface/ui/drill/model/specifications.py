@@ -22,7 +22,6 @@ class RundexSettings(object):
 
     # acquisition modes
     SANS_ACQ =   "SANS"
-    OMEGA_SCAN = "Omega Scan"
     REFL_POL =   "Polarized"
     REFL_NPOL =  "Unpolarized"
 
@@ -39,7 +38,7 @@ class RundexSettings(object):
     # correspondance between instrument and acquisition mode
     ACQUISITION_MODES = {
             D11:    [SANS_ACQ],
-            D16:    [SANS_ACQ, OMEGA_SCAN],
+            D16:    [SANS_ACQ],
             D22:    [SANS_ACQ],
             D33:    [SANS_ACQ],
             D17:    [REFL_POL, REFL_NPOL],
@@ -64,8 +63,6 @@ class RundexSettings(object):
                 "WedgeWorkspace",
                 "SampleThickness",
                 "CustomOptions"
-                ],
-            OMEGA_SCAN: [
                 ],
             REFL_POL: [
                 "Run",
@@ -100,7 +97,6 @@ class RundexSettings(object):
     # algo name for each acquisition mode
     ALGORITHM = {
             SANS_ACQ:   "SANSILLAutoProcess",
-            OMEGA_SCAN: None,
             REFL_POL:   "ReflectometryILLAutoProcess",
             REFL_NPOL:  "ReflectometryILLAutoProcess"
             }
@@ -133,8 +129,6 @@ class RundexSettings(object):
                 "MaxQxy": "0",
                 "DeltaQ": "0",
                 "IQxQyLogBinning": False
-                },
-            OMEGA_SCAN : {
                 },
             REFL_POL : {
                 "PolarizationEfficiencyFile": "",
