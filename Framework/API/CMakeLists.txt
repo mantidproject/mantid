@@ -39,7 +39,7 @@ set(SRC_FILES
     src/Expression.cpp
     src/FileBackedExperimentInfo.cpp
     src/FileFinder.cpp
-    src/FileFinderHelpers.cpp
+    src/InstrumentFileFinder.cpp
     src/FileLoaderRegistry.cpp
     src/FileProperty.cpp
     src/FrameworkManager.cpp
@@ -211,7 +211,7 @@ set(INC_FILES
     inc/MantidAPI/Expression.h
     inc/MantidAPI/FileBackedExperimentInfo.h
     inc/MantidAPI/FileFinder.h
-    inc/MantidAPI/FileFinderHelpers.h
+    inc/MantidAPI/InstrumentFileFinder.h
     inc/MantidAPI/FileLoaderRegistry.h
     inc/MantidAPI/FileProperty.h
     inc/MantidAPI/FrameworkManager.h
@@ -407,7 +407,7 @@ set(TEST_FILES
     ExpressionTest.h
     FileBackedExperimentInfoTest.h
     FileFinderTest.h
-    FileFinderHelpersTest.h
+    InstrumentFileFinderTest.h
     FilePropertyTest.h
     FrameworkManagerTest.h
     FuncMinimizerFactoryTest.h

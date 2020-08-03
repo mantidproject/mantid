@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/FileFinderHelpers.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -25,7 +25,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
-class FileFinderHelpersTest : public CxxTest::TestSuite {
+class InstrumentFileFinderTest : public CxxTest::TestSuite {
 public:
   struct fromToEntry {
     std::string path;
@@ -54,7 +54,8 @@ public:
 
       if (boost::regex_match(l_filenamePart, regex)) {
         std::string validFrom, validTo;
-        FileFinderHelpers::getValidFromTo(dir_itr->path(), validFrom, validTo);
+        InstrumentFileFinder::getValidFromTo(dir_itr->path(), validFrom,
+                                             validTo);
 
         size_t found;
         found = l_filenamePart.find("_Definition");
@@ -102,25 +103,25 @@ public:
     // Check that instrument dirs are searched correctly
     const std::string expectedFileName = "GEM_parameters.xml";
 
-    const auto result = FileFinderHelpers::getIPFPath("GEM");
+    const auto result = InstrumentFileFinder::getParameterPath("GEM");
     TS_ASSERT(boost::icontains(result, expectedFileName));
 
     // Should be case insensitive
     const auto mixedResult =
-        FileFinderHelpers::getIPFPath("GEM_defINITION.xml");
+        InstrumentFileFinder::getParameterPath("GEM_defINITION.xml");
     TS_ASSERT_EQUALS(result, mixedResult);
   }
 
   void testFindIPFWithDate() {
     const std::string input = "D2B_Definition_2018-03-01.xml";
 
-    const auto result = FileFinderHelpers::getIPFPath(input);
+    const auto result = InstrumentFileFinder::getParameterPath(input);
     const std::string expected = "D2B_Parameters_2018-03-01.xml";
     TS_ASSERT(boost::icontains(result, expected));
   }
 
   void testFindIPFNonExistant() {
-    const auto result = FileFinderHelpers::getIPFPath("NotThere");
+    const auto result = InstrumentFileFinder::getParameterPath("NotThere");
     TS_ASSERT_EQUALS("", result);
   }
 
@@ -133,7 +134,7 @@ public:
     Poco::File fileHandle(expectedPath);
     fileHandle.createFile();
 
-    const auto result = FileFinderHelpers::getIPFPath("test", tmpDir);
+    const auto result = InstrumentFileFinder::getParameterPath("test", tmpDir);
     // Ensure file was found and it's in the tmp dir
     TS_ASSERT(result.find(filename) != std::string::npos);
     TS_ASSERT(result.find(tmpDir) != std::string::npos);
@@ -141,14 +142,15 @@ public:
 
   void testNonExistantIPFWithHint() {
     const auto tmpDir = Poco::Path::temp();
-    const auto result = FileFinderHelpers::getIPFPath("notThere", tmpDir);
+    const auto result =
+        InstrumentFileFinder::getParameterPath("notThere", tmpDir);
     TS_ASSERT(result.empty());
   }
 
   //
   void testHelperFunctions() {
     ConfigService::Instance().updateFacilities();
-    FileFinderHelpers helper;
+    InstrumentFileFinder helper;
     std::string boevs =
         helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());
@@ -156,7 +158,7 @@ public:
 
   //
   void testHelper_TOPAZ_No_To_Date() {
-    FileFinderHelpers helper;
+    InstrumentFileFinder helper;
     std::string boevs =
         helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());
@@ -168,7 +170,7 @@ public:
     const std::string testDir = instDir + "unit_testing";
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         testDir);
-    FileFinderHelpers helper;
+    InstrumentFileFinder helper;
     std::string boevs =
         helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
@@ -202,7 +204,7 @@ public:
 
   void test_nexus_geometry_getInstrumentFilename() {
     const std::string instrumentName = "LOKI";
-    FileFinderHelpers info;
+    InstrumentFileFinder info;
     const auto path = info.getInstrumentFilename(instrumentName, "");
     TS_ASSERT(!path.empty());
     TS_ASSERT(

@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/FileFinderHelpers.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/Strings.h"
@@ -39,7 +39,7 @@ void SlitCalculator::setInstrument(const std::string &instrumentName) {
   auto date =
       Mantid::Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   // find the full path to the definition file
-  auto filename = Mantid::API::FileFinderHelpers::getInstrumentFilename(
+  auto filename = Mantid::API::InstrumentFileFinder::getInstrumentFilename(
       instrumentName, date);
   // parse the XML that we have found for the definition
   Mantid::Geometry::InstrumentDefinitionParser parser =

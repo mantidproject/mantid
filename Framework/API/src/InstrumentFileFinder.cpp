@@ -1,4 +1,4 @@
-#include "MantidAPI/FileFinderHelpers.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -24,7 +24,7 @@ using namespace Poco::XML;
 
 namespace {
 /// static logger object
-Mantid::Kernel::Logger g_log("FileFinderHelpers");
+Mantid::Kernel::Logger g_log("InstrumentFileFinder");
 
 // used to terminate SAX process
 class DummyException {
@@ -88,8 +88,8 @@ namespace Mantid::API {
  *is found
  */
 std::string
-FileFinderHelpers::getInstrumentFilename(const std::string &instrumentName,
-                                         const std::string &date) {
+InstrumentFileFinder::getInstrumentFilename(const std::string &instrumentName,
+                                            const std::string &date) {
   const std::vector<std::string> validFormats = {"xml", "nxs", "hdf5"};
   g_log.debug() << "Looking for instrument file for " << instrumentName
                 << " that is valid on '" << date << "'\n";
@@ -117,8 +117,8 @@ FileFinderHelpers::getInstrumentFilename(const std::string &instrumentName,
 /// Search the directory for the Parameter IDF file and return full path name if
 /// found, else return "".
 //  directoryName must include a final '/'.
-std::string FileFinderHelpers::getIPFPath(const std::string &instName,
-                                          const std::string &dirHint) {
+std::string InstrumentFileFinder::getParameterPath(const std::string &instName,
+                                                   const std::string &dirHint) {
   // Remove the path from the filename, some legacy callers will pass in
   // a full path rather than a filename
   Poco::Path filePath(instName);
@@ -150,8 +150,8 @@ std::string FileFinderHelpers::getIPFPath(const std::string &instName,
   return "";
 }
 
-std::string FileFinderHelpers::lookupIPF(const std::string &dir,
-                                         std::string filename) {
+std::string InstrumentFileFinder::lookupIPF(const std::string &dir,
+                                            std::string filename) {
   const std::string ext = ".xml";
   // Remove .xml for example if abc.xml was passed
   boost::algorithm::ierase_all(filename, ext);
@@ -204,7 +204,7 @@ std::string FileFinderHelpers::lookupIPF(const std::string &dir,
  * this date
  * @return list of absolute paths for each valid file
  */
-std::vector<std::string> FileFinderHelpers::getResourceFilenames(
+std::vector<std::string> InstrumentFileFinder::getResourceFilenames(
     const std::string &prefix, const std::vector<std::string> &fileFormats,
     const std::vector<std::string> &directoryNames, const std::string &date) {
 
@@ -214,8 +214,8 @@ std::vector<std::string> FileFinderHelpers::getResourceFilenames(
     const std::string now =
         Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with all parameters.
-    return FileFinderHelpers::getResourceFilenames(prefix, fileFormats,
-                                                   directoryNames, now);
+    return InstrumentFileFinder::getResourceFilenames(prefix, fileFormats,
+                                                      directoryNames, now);
   }
 
   // Join all the file formats into a single string
@@ -310,9 +310,9 @@ std::vector<std::string> FileFinderHelpers::getResourceFilenames(
  *  @param[out] outValidFrom :: Used to return valid-from date
  *  @param[out] outValidTo :: Used to return valid-to date
  */
-void FileFinderHelpers::getValidFromTo(const std::string &IDFfilename,
-                                       std::string &outValidFrom,
-                                       std::string &outValidTo) {
+void InstrumentFileFinder::getValidFromTo(const std::string &IDFfilename,
+                                          std::string &outValidFrom,
+                                          std::string &outValidTo) {
   SAXParser pParser;
   // Create on stack to ensure deletion. Relies on pParser also being local
   // variable.

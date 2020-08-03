@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAPI/FileFinderHelpers.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -22,11 +22,11 @@
 
 #include <string>
 
-using Mantid::API::FileFinderHelpers;
+using Mantid::API::InstrumentFileFinder;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-GET_POINTER_SPECIALIZATION(FileFinderHelpers)
+GET_POINTER_SPECIALIZATION(InstrumentFileFinder)
 
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
@@ -34,24 +34,26 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 /// Overload generator for getInstrumentFilename
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload,
-                                FileFinderHelpers::getInstrumentFilename, 1, 2)
-BOOST_PYTHON_FUNCTION_OVERLOADS(getIPFPath_Overload,
-                                FileFinderHelpers::getIPFPath, 1, 2)
+                                InstrumentFileFinder::getInstrumentFilename, 1,
+                                2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(getParameterPath_Overload,
+                                InstrumentFileFinder::getParameterPath, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
-void exportFileFinderHelpers() {
-  register_ptr_to_python<std::shared_ptr<FileFinderHelpers>>();
+void exportInstrumentFileFinder() {
+  register_ptr_to_python<std::shared_ptr<InstrumentFileFinder>>();
 
-  class_<FileFinderHelpers>("FileFinderHelpers", no_init)
+  class_<InstrumentFileFinder>("InstrumentFileFinder", no_init)
       // -
-      .def("getInstrumentFilename", &FileFinderHelpers::getInstrumentFilename,
+      .def("getInstrumentFilename",
+           &InstrumentFileFinder::getInstrumentFilename,
            getInstrumentFilename_Overload(
                "Returns IDF filename", (arg("instrument"), arg("date") = "")))
       .staticmethod("getInstrumentFilename")
       // -
-      .def("getIPFPath", &FileFinderHelpers::getIPFPath,
-           getIPFPath_Overload(
+      .def("getParameterPath", &InstrumentFileFinder::getParameterPath,
+           getParameterPath_Overload(
                "Returns the full path to the given instrument parameter file "
                "for the named instrument if it exists in the instrument search "
                "directories, or the optional user provided path.\n"
@@ -63,5 +65,5 @@ void exportFileFinderHelpers() {
                "returns:       The full path as a string if found, else an "
                "empty string",
                (arg("instName"), arg("directoryHint") = "")))
-      .staticmethod("getIPFPath");
+      .staticmethod("getParameterPath");
 }

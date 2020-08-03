@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/FileFinderHelpers.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -1099,7 +1099,7 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
   } else {
     // XML was not included or was empty
     // Use the instrument name to find the file
-    instrumentFilename = FileFinderHelpers::getInstrumentFilename(
+    instrumentFilename = InstrumentFileFinder::getInstrumentFilename(
         instrumentName, getWorkspaceStartDate());
     // And now load the contents
     instrumentXml = loadInstrumentXML(instrumentFilename);
