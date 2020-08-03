@@ -259,9 +259,9 @@ public:
     lat = (grid->latitudeAt(2) + grid->latitudeAt(1)) / 2.0;
     lon = (grid->longitudeAt(3) + grid->longitudeAt(2)) / 2.0;
     indices = grid->nearestNeighbourIndices(lat, lon, 2);
-    double val =
-        static_cast<double>(indices[0] + indices[1] + indices[2] + indices[3]) /
-        4.0;
+    double val = static_cast<double>(*indices[1][1] + *indices[1][2] +
+                                     *indices[2][1] + *indices[2][2]) /
+                 4.0;
     h = bilinearInterpolateFromDetectorGrid(lat, lon, *sparseWS, indices);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
     for (size_t i = 0; i < h.size(); ++i) {

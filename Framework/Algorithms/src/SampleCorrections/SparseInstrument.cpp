@@ -353,14 +353,15 @@ interpolateFromDetectorGrid(const double lat, const double lon,
 
 HistogramData::Histogram bilinearInterpolateFromDetectorGrid(
     const double lat, const double lon, const API::MatrixWorkspace &ws,
-    const std::vector<std::vector<int>> &indices) {
+    const std::vector<std::vector<boost::optional<size_t>>> &indices) {
   const auto &spectrumInfo = ws.spectrumInfo();
   const auto refFrame = ws.getInstrument()->getReferenceFrame();
   std::array<std::pair<double, double>, 4> detLatsLongs;
   for (size_t i = 1; i < 3; i++) {
     for (size_t j = 1; j < 3; j++) {
-      std::tie(detLatsLongs[i].first, detLatsLongs[i].second) =
-          geographicalAngles(spectrumInfo.position(indices[i][j]), *refFrame);
+      std::tie(detLatsLongs[2 * (i - 1) + j - 1].first,
+               detLatsLongs[2 * (i - 1) + j - 1].second) =
+          geographicalAngles(spectrumInfo.position(*indices[i][j]), *refFrame);
     }
   }
   assert(std::abs(detLatsLongs[0].second - detLatsLongs[1].second) <
@@ -378,11 +379,11 @@ HistogramData::Histogram bilinearInterpolateFromDetectorGrid(
   auto longHigh = detLatsLongs[2].second;
 
   // interpolate across different longitudes
-  auto lat1 = ((longHigh - lon) * ws.y(indices[1][1]) +
-               (lon - longLow) * ws.y(indices[2][1])) /
+  auto lat1 = ((longHigh - lon) * ws.y(*indices[1][1]) +
+               (lon - longLow) * ws.y(*indices[2][1])) /
               (longHigh - longLow);
-  auto lat2 = ((longHigh - lon) * ws.y(indices[1][2]) +
-               (lon - longLow) * ws.y(indices[2][2])) /
+  auto lat2 = ((longHigh - lon) * ws.y(*indices[1][2]) +
+               (lon - longLow) * ws.y(*indices[2][2])) /
               (longHigh - longLow);
   // interpolate across different latitudes
   auto interpY =
@@ -390,6 +391,12 @@ HistogramData::Histogram bilinearInterpolateFromDetectorGrid(
 
   // calculate interpolation errors
   // 2nd derivative in longitude
+  auto firstDerivA = ws.y(*indices[1][1]) - ws.y(*indices[0][1]) / ();
+  auto firstDerivB = ws.y(*indices[2][1]) - ws.y(*indices[1][1]);
+  auto firstDerivC = ws.y(*indices[3][1]) - ws.y(*indices[2][1]);
+
+  auto secondDerivA = firstDerivB - firstDerivA;
+  auto secondDerivB = firstDerivC - firstDerivC;
 
   // 2nd derivative in latitude
 

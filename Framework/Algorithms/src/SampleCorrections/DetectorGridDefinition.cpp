@@ -97,33 +97,35 @@ DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
 /** Return the indices to detector surrounding the given point.
  *  @param latitude Latitude of a point.
  *  @param longitude Longitude of a point.
- *  @return Indices to 16 nearby detectors.
+ *  @distance number of rings to consider around given point
+ *  @return Indices to nearby detectors (or empty if off the grid)
  */
-std::vector<std::vector<int>> DetectorGridDefinition::nearestNeighbourIndices(
-    const double latitude, const double longitude, const int distance) const {
-  auto row = static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
-  // Check for points at the edges or outside the grid.
-  if (row == m_latitudePoints - 1) {
-    --row;
-  }
-  auto col =
-      static_cast<size_t>((longitude - m_minLongitude) / m_longitudeStep);
-  if (col == m_longitudePoints - 1) {
-    --col;
-  }
-  std::vector<size_t> is(distance * distance);
-  for (auto i = 0; i < distance; i++) {
-    for (auto j = 0; j < distance; j++) {
-      is.emplace_back((col - 1 + i) * m_latitudePoints + row - 1 + j);
+std::vector<std::vector<boost::optional<size_t>>>
+DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
+                                                const double longitude,
+                                                const size_t distance) const {
+  auto topLeftRow =
+      static_cast<int>((latitude - m_minLatitude) / m_latitudeStep) -
+      static_cast<int>(distance - 1);
+
+  auto topLeftCol =
+      static_cast<int>((longitude - m_minLongitude) / m_longitudeStep) -
+      static_cast<int>(distance - 1);
+
+  std::vector<std::vector<boost::optional<size_t>>> is(
+      distance * 2, std::vector<boost::optional<size_t>>(distance * 2));
+  for (auto col = 0; col < distance * 2; col++) {
+    for (auto row = 0; row < distance * 2; row++) {
+      auto colNumber = topLeftCol + static_cast<int>(col);
+      auto rowNumber = topLeftRow + static_cast<int>(row);
+      if ((colNumber >= 0) && (colNumber < m_longitudePoints) &&
+          (rowNumber >= 0) && (rowNumber < m_latitudePoints)) {
+        is[col][row] =
+            (colNumber * static_cast<int>(m_latitudePoints) + rowNumber);
+      };
     }
   }
-  std::vector<std::vector<int>> is2(distance);
-  for (auto i = 0; i < distance; i++) {
-    for (auto j = 0; j < distance; j++) {
-      is2[i].emplace_back((col - 1 + i) * m_latitudePoints + row - 1 + j);
-    }
-  }
-  return is2;
+  return is;
 }
 
 /** Return the number of columns in the grid.
