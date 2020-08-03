@@ -1,8 +1,14 @@
-# import mantid algorithms, numpy and matplotlib
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
 from mantid.simpleapi import *
 from mantid.kernel import Direction, StringListValidator
-from mantid.api import FileAction, MatrixWorkspaceProperty, MultipleFileProperty, NumericAxis, \
-    Progress, PropertyMode, PythonAlgorithm 
+from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
+    NumericAxis, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from datetime import date
 import math
 import numpy as np
@@ -10,7 +16,7 @@ import os
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 
-class ILLD7Calibration(PythonAlgorithm):
+class ILLYIGPositionCalibration(PythonAlgorithm):
 
     # helper conversions
     _RAD_2_DEG = 180.0 / np.pi
@@ -48,18 +54,28 @@ class ILLD7Calibration(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty("Filenames",
                                                   action=FileAction.OptionalLoad),
-                             doc="Files with a single YIG scan.")
+                             doc="The file names (including full or relative path) with a single YIG scan.")
         self.declareProperty(MatrixWorkspaceProperty('ScanWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='Workspace containing the entire YIG scan.')
-                             
+                             doc='The name of the workspace containing the entire YIG scan.')
+        
+        self.declareProperty(WorkspaceProperty('DetectorFitOutput', '',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='The table workspace name that will be used to store all of the calibration parameters.')
+        
         self.declareProperty(name="ApproximateWavelength", 
                              defaultValue="3.1",
                              validator=StringListValidator(["3.1", "4.8", "5.7"]),
                              direction=Direction.Input, 
-                             doc="Initial guess for the neutrons' wavelength")
-                                       
+                             doc="The initial guess for the neutrons' wavelength")
+
+        self.declareProperty(name='CalibrationFilename',
+                                          defaultValue='',
+                                          direction=Direction.Input,
+                             doc="The output YIG calibration Instrument Parameter File name.")
+            
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=5)
         # load the chosen YIG scan
@@ -82,7 +98,13 @@ class ILLD7Calibration(PythonAlgorithm):
         progress.report()
         # print the Instrument Parameter File that can be used in the ILLPolarizedDiffraction loader
         self._print_parameter_file(offsets)
+        progress.report()
 
+        if self.getProperty('DetectorFitOutput').isDefault:
+            pass #will clean up the remaining workspaces
+        else:
+            self.setProperty('DetectorFitOutput', mtd['det_out_Parameters'])    
+            
     def _get_scan_data(self):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""    
@@ -100,8 +122,9 @@ class ILLD7Calibration(PythonAlgorithm):
         # Fill the intensity and position tables with all the data from scans
         for scan in range(nfiles):
             workspace = outGroup.getItem(scan)
-            # normalize to monitor:
-            workspace /= workspace.readY(workspace.getNumberHistograms()-1)[0]
+#             # normalize to monitor1 as monitor2 is sometimes empty:
+            if workspace.readY(workspace.getNumberHistograms()-2)[0] != 0:
+                workspace /= workspace.readY(workspace.getNumberHistograms()-2)[0]
             # remove Monitors:
             workspace = RemoveSpectra(workspace, MONITOR_INDICES)
             # prepare proper label for the axes
@@ -115,7 +138,9 @@ class ILLD7Calibration(PythonAlgorithm):
             workspace = MaskBinsIf(workspace, Criterion='x<15.0 && x>-35.0')
             # append the new row to a new MatrixWorkspace   
             workspace = ConvertToPointData(InputWorkspace=workspace)
-            if scan == 0: 
+            try:
+                intensityWS
+            except NameError:
                 intensityWS = workspace.clone()
             else:
                 list = [intensityWS, workspace]
@@ -171,7 +196,7 @@ class ILLD7Calibration(PythonAlgorithm):
                             peak_intensity = intensity[pixel_no]
                             if (peak_intensity != 0): # exclude masked peaks
                                 single_spectrum_peaks.append((peak_intensity, twoTheta))
-                            break 
+                            break   
             peak_list.append(single_spectrum_peaks)   
         return peak_list    
 
@@ -185,14 +210,14 @@ class ILLD7Calibration(PythonAlgorithm):
                 continue               
             single_spectrum_peaks = yig_peaks[scan]
             # fit all functions simultaneously:
-            function="name=FlatBackground, A0=120;\n"
-            constraints = "f0.A0 > 0"
+            function="name=FlatBackground, A0=0;\n"
+            constraints = "f0.A0 >= 0"
             function_no = 1            
             for peak_intensity, peak_centre in single_spectrum_peaks:
                 function += "name=Gaussian, PeakCentre="+str(peak_centre)+", Height="+str(peak_intensity)+", Sigma="+str(0.5*self._PeakWidth)+";\n"
                 constraints += ",f"+str(function_no)+".Height > 0.0"
                 constraints += ",f"+str(function_no)+".Sigma < 2.0"
-                constraints += ","+str(peak_centre-self._PeakWidth*2)+" < f"+str(function_no)+".PeakCentre <"+str(peak_centre+self._PeakWidth*2)
+#                 constraints += ","+str(peak_centre-self._PeakWidth*2)+" < f"+str(function_no)+".PeakCentre <"+str(peak_centre+self._PeakWidth*2)
                 function_no += 1
             fit_output = Fit(Function=function, 
                              InputWorkspace=ws, 
@@ -210,7 +235,7 @@ class ILLD7Calibration(PythonAlgorithm):
                 row_data = param_table.row(row_no)
                 if 'PeakCentre' in row_data['Name']:
                     intensity, peak_position = single_spectrum_peaks[peak_no]
-                    if (param_table.row(row_no-1)['Value'] > 1):
+                    if (param_table.row(row_no-1)['Value'] > 0):
                         results_x[peak_no] = peak_position                          
                         results_y[peak_no] = row_data['Value']
                         results_e[peak_no] = row_data['Error']
@@ -267,10 +292,10 @@ class ILLD7Calibration(PythonAlgorithm):
         for pixel_no in range(ws.getNumberHistograms()):
             pixel_in_bank = pixel_no % self._D7NumberPixelsBank
             # fitting function where m = 1 / slope, lambda = wavelength / wavelength_guessed, and offset is relative to the guessed offset for a pixel
-           function = 'name=UserFunction, \
+            function = 'name=UserFunction, \
             Formula = {0} * m * ( asin( lambda * sin( {1}*x ) ) + offset), \
             lambda= 1.0, m = 1.0, offset = {2}, $domains=i'.format(self._RAD_2_DEG, self._DEG_2_RAD, 0)
-           function_list.append(function)
+            function_list.append(function)
             constraint_list.append('-{0} < f{1}.offset < {0}'.format(offset_constr, 
                                                                      pixel_no))
             constraint_list.append('{0} < f{1}.m < {2}'.format(1-gradient_constr, 
@@ -348,12 +373,12 @@ class ILLD7Calibration(PythonAlgorithm):
     
     def _calibrate_detectors(self, parameter_table):
         pixel_offsets = self._calculate_pixel_positions(parameter_table)
-        bank2_pixels = pixel_offsets[:43]
+        bank2_pixels = pixel_offsets[:44]
         pos_bank2 = CreateWorkspace(DataX=range(44), DataY=bank2_pixels, NSpec=1)
         bank3_pixels = pixel_offsets[44:87]
         pos_bank3 = CreateWorkspace(DataX=range(44, 88), DataY=bank3_pixels, NSpec=1)        
-        bank4_pixels = pixel_offsets[88:131]
-        pos_bank4 = CreateWorkspace(DataX=range(88, 132), DataY=bank4_pixels, NSpec=1)
+        bank4_pixels = pixel_offsets[89:132]
+        pos_bank4 = CreateWorkspace(DataX=range(89, 132), DataY=bank4_pixels, NSpec=1)
 
         return pixel_offsets
     
@@ -380,7 +405,11 @@ class ILLD7Calibration(PythonAlgorithm):
                 value = ET.SubElement(pixel, 'value')
                 value.set('val', str(pixel_offsets[bank_no*self._D7NumberPixelsBank + pixel_no]))
     
-        outfile = open(os.path.join(os.getcwd() ,"d7_{0}.xml".format(date_today)), "w")
+        if self.getProperty("CalibrationFilename").isDefault:
+            filename = "d7_{0}.xml".format(date_today)
+        else:
+            filename = self.getPropertyValue("CalibrationFilename")
+        outfile = open(os.path.join(os.getcwd(), filename), "w")
         outfile.write(self._prettify(param_file))
 
-AlgorithmFactory.subscribe(ILLD7Calibration)
+AlgorithmFactory.subscribe(ILLYIGPositionCalibration)
