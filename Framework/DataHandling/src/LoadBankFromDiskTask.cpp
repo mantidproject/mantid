@@ -60,15 +60,12 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   }
   std::string thisStartTime;
   size_t thisNumPulses = 0;
-  // According to the Nexus standard, if the offset is not present, it implies
-  // the offset is and absolute timestamp, which is relative to the start of
-  // Unix epoch (https://manual.nexusformat.org/classes/base_classes/NXlog.html)
+  // If the offset is not present, use Unix epoch
   if (!file.hasAttr("offset")) {
     thisStartTime = "1970-01-01T00:00:00Z";
     m_loader.alg->getLogger().warning()
-        << "LoadBankFromDiskTask::loadPulseTimes: no ISO8601 offset attribute "
-           "provided for event_time_zero, "
-           "Using UNIX epoch instead\n";
+        << "In loadPulseTimes: no ISO8601 offset attribute provided for "
+           "event_time_zero, using UNIX epoch instead\n";
   } else {
     file.getAttr("offset", thisStartTime);
   }
@@ -103,8 +100,8 @@ LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
   // the event list for that pulse) as a uint64 vector.
   // The Nexus standard does not specify if this is to be 32-bit or 64-bit
   // integers, so we use the NeXusIOHelper to do the conversion on the fly.
-  auto event_index =
-      NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index", m_loader.alg->getLogger());
+  auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(
+      file, "event_index", m_loader.alg->getLogger());
 
   // Look for the sign that the bank is empty
   if (event_index.size() == 1) {
@@ -289,8 +286,8 @@ LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // integer, so we use the NeXusIOHelper to perform the conversion to float on
   // the fly. If the data field already contains floats, the conversion is
   // skipped.
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart,
-                                                        m_loadSize, m_loader.alg->getLogger());
+  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(
+      file, key, m_loadStart, m_loadSize, m_loader.alg->getLogger());
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds
@@ -370,17 +367,13 @@ void LoadBankFromDiskTask::run() {
     file.openGroup(m_loader.alg->m_top_entry_name, "NXentry");
     // Open the bankN_event group
     file.openGroup(entry_name, entry_type);
-    std::cout << "LoadBankFromDiskTask::run 1" << std::endl;
 
     // Load the event_index field.
     event_index = this->loadEventIndex(file);
-    std::cout << "LoadBankFromDiskTask::run 2" << std::endl;
 
     if (!m_loadError) {
       // Load and validate the pulse times
       this->loadPulseTimes(file);
-          std::cout << "LoadBankFromDiskTask::run 3" << std::endl;
-
 
       // The event_index should be the same length as the pulse times from DAS
       // logs.
@@ -394,8 +387,6 @@ void LoadBankFromDiskTask::run() {
       int64_t start_event = 0;
       int64_t stop_event = 0;
       this->prepareEventId(file, start_event, stop_event, event_index);
-          std::cout << "LoadBankFromDiskTask::run 4" << std::endl;
-
 
       // These are the arguments to getSlab()
       m_loadStart[0] = start_event;
@@ -403,8 +394,6 @@ void LoadBankFromDiskTask::run() {
 
       if ((m_loadSize[0] > 0) && (m_loadStart[0] >= 0)) {
         // Load pixel IDs
-        std::cout << "before loadEventId" << std::endl;
-
         event_id = this->loadEventId(file);
         if (m_loader.alg->getCancel()) {
           m_loader.alg->getLogger().error()
@@ -413,10 +402,8 @@ void LoadBankFromDiskTask::run() {
         }
 
         // And TOF.
-        std::cout << "before loadTof" << std::endl;
         if (!m_loadError) {
           event_time_of_flight = this->loadTof(file);
-          std::cout << "before loadEvntWeights" << std::endl;
           if (m_have_weight) {
             event_weight = this->loadEventWeights(file);
           }
@@ -433,7 +420,6 @@ void LoadBankFromDiskTask::run() {
       }
 
     } // no error
-          std::cout << "LoadBankFromDiskTask::run 5" << std::endl;
 
   } // try block
   catch (std::exception &e) {
@@ -446,18 +432,15 @@ void LoadBankFromDiskTask::run() {
         << "Unspecified error while loading bank " << entry_name << '\n';
     m_loadError = true;
   }
-          std::cout << "LoadBankFromDiskTask::run 6" << std::endl;
 
   // Close up the file even if errors occured.
   file.closeGroup();
   file.close();
-          std::cout << "LoadBankFromDiskTask::run 7" << std::endl;
 
   // Abort if anything failed
   if (m_loadError) {
     return;
   }
-          std::cout << "LoadBankFromDiskTask::run 8" << std::endl;
 
   const auto bank_size = m_max_id - m_min_id;
   const auto minSpectraToLoad = static_cast<uint32_t>(m_loader.alg->m_specMin);
@@ -486,7 +469,6 @@ void LoadBankFromDiskTask::run() {
     // spectra to load is outside this bank
     return;
   }
-          std::cout << "LoadBankFromDiskTask::run 9" << std::endl;
 
   // schedule the job to generate the event lists
   auto mid_id = m_max_id;
@@ -506,7 +488,6 @@ void LoadBankFromDiskTask::run() {
   std::shared_ptr<std::vector<float>> event_weight_shrd(event_weight.release());
   auto event_index_shrd =
       std::make_shared<std::vector<uint64_t>>(std::move(event_index));
-          std::cout << "LoadBankFromDiskTask::run 10" << std::endl;
 
   std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankData>(
       m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
@@ -520,7 +501,6 @@ void LoadBankFromDiskTask::run() {
         event_weight_shrd, (mid_id + 1), m_max_id);
     scheduler.push(newTask2);
   }
-          std::cout << "LoadBankFromDiskTask::run 11" << std::endl;
 }
 
 /**

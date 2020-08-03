@@ -25,10 +25,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
     : periodNumbers(pNumbers) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
-  std::cerr << "BankPulseTimes" << std::endl;
-  // According to the Nexus standard, if the offset is not present, it implies
-  // the offset is and absolute timestamp, which is relative to the start of
-  // Unix epoch (https://manual.nexusformat.org/classes/base_classes/NXlog.html)
+  // If the offset is not present, use Unix epoch
   if (!file.hasAttr("offset"))
     startTime = "1970-01-01T00:00:00Z";
   else
