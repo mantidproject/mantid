@@ -225,14 +225,13 @@ class DrillTest(unittest.TestCase):
         self.view.actionManageDirectories.trigger()
         mDirectoriesManager.ManageUserDirectories.assert_called_once()
 
-    def test_settingsWindow(self):
-        self.view.showSettings = mock.Mock()
-        self.view.setup_header()
+    @mock.patch('Interface.ui.drill.presenter.DrillPresenter.DrillSettingsDialog')
+    def test_settingsWindow(self, mSettings):
         QTest.mouseClick(self.view.settings, Qt.LeftButton)
-        self.view.showSettings.emit.assert_called_once()
-        self.view.showSettings.reset_mock()
+        mSettings.assert_called_once()
+        mSettings.reset_mock()
         self.view.actionSettings.trigger()
-        self.view.showSettings.emit.assert_called_once()
+        mSettings.assert_called_once()
 
     @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
     @mock.patch('Interface.ui.drill.model.DrillModel.json')
