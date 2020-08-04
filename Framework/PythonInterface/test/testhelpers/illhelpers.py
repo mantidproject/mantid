@@ -207,38 +207,6 @@ def refl_add_line_position(ws, linePosition):
     return ws
 
 
-def refl_preprocess(outputWSName, ws):
-    args = {
-        'InputWorkspace': ws,
-        'OutputWorkspace': outputWSName,
-    }
-    alg = create_algorithm('ReflectometryILLPreprocess', **args)
-    alg.execute()
-    return mtd[outputWSName]
-
-
-def refl_preprocess_lineposition(outputWSName, ws, linePosition):
-    args = {
-        'InputWorkspace': ws,
-        'OutputWorkspace': outputWSName,
-        'linePosition': linePosition,
-    }
-    alg = create_algorithm('ReflectometryILLPreprocess', **args)
-    alg.execute()
-    return mtd[outputWSName]
-
-
-def refl_preprocess_with_calibration(outputWSName, ws, directLineWS):
-    args = {
-        'InputWorkspace': ws,
-        'DirectLineWorkspace': directLineWS,
-        'OutputWorkspace': outputWSName,
-    }
-    alg = create_algorithm('ReflectometryILLPreprocess', **args)
-    alg.execute()
-    return mtd[outputWSName]
-
-
 def refl_rotate_detector(ws, angle):
     r = ws.run().getProperty('det.value').value * 1e-3
     angle = numpy.deg2rad(angle)
