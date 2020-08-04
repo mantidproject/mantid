@@ -12,6 +12,7 @@ from mantid.api import (
     FileProperty,
     MultipleFileProperty,
     Progress,
+    WorkspaceGroup,
     WorkspaceGroupProperty
 )
 from mantid.kernel import (
@@ -546,6 +547,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
         RB = self.getProperty(PropertyNames.RB).value
+        if not RB:
+            RB = self.getProperty(PropertyNames.RB00).value
         dimensionality = len(RB)
         for property_name in PropertyNames.PROPETIES_TO_SIZE_MATCH:
             value = self.getProperty(property_name).value
@@ -582,12 +585,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self._autoCleanup = utils.Cleanup(self._cleanup, self._subalgLogging == SubalgLogging.ON)
         self._outWS = self.getPropertyValue(Prop.OUTPUT_WS)
         self._db = self.getProperty(PropertyNames.DB).value
-        self._dimensionality = len(self._db)
         self._rb = self.getProperty(PropertyNames.RB).value
         self._rb00 = self.getProperty(PropertyNames.RB00).value
         self._rb01 = self.getProperty(PropertyNames.RB01).value
         self._rb10 = self.getProperty(PropertyNames.RB10).value
         self._rb11 = self.getProperty(PropertyNames.RB11).value
+        self._dimensionality = len(self._rb) if self._rb else len(self._rb00)
 
     def get_value(self, propertyName, angle_index):
         """Return the value of the property at given angle index."""
@@ -648,7 +651,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def detector_angle_from_logs(self, ws):
         """Returns the detector angle from sample logs"""
-        run = mtd[ws].run()
+        run = mtd[ws].run() if not isinstance(mtd[ws], WorkspaceGroup) else mtd[ws][0].run()
         if run.hasProperty('DAN.value'):
             return run.getLogData('DAN.value').value
         elif run.hasProperty('dan.value'):
@@ -658,7 +661,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def foreground_centre_from_logs(self, ws):
         """Returns the foreground centre from sample logs"""
-        run = mtd[ws].run()
+        run = mtd[ws].run() if not isinstance(mtd[ws], WorkspaceGroup) else mtd[ws][0].run()
         if run.hasProperty(SampleLogs.LINE_POSITION):
             return run.getLogData(SampleLogs.LINE_POSITION).value
         else:
@@ -666,7 +669,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def log_foreground_centres(self, reflectedBeamName, directBeamName):
         """Logs the fractional foreground centres for direct and reflected beams"""
-        db_frg_centre = mtd[directBeamName].run().getLogData(SampleLogs.LINE_POSITION).value
+        db = mtd[directBeamName] if not isinstance(mtd[directBeamName], WorkspaceGroup) else mtd[directBeamName][0]
+        db_frg_centre = db.run().getLogData(SampleLogs.LINE_POSITION).value
         rb_frg_centre = mtd[reflectedBeamName].run().getLogData(SampleLogs.LINE_POSITION).value
         self.log().accumulate('Direct beam foreground centre [pixel]: {0:.5f}\n'.format(db_frg_centre))
         self.log().accumulate('Reflected beam foreground centre [pixel]: {0:.5f}\n'.format(rb_frg_centre))
@@ -759,6 +763,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self._autoCleanup.cleanupLater(directForegroundName)
         if self.is_polarized():
             self.polarization_correction(directForegroundName, directForegroundName)
+            frg_ws_name = mtd[directForegroundName][0].getName()
+            RenameWorkspace(InputWorkspace=frg_ws_name, OutputWorkspace=directForegroundName)
 
     def process_reflected_beam(self, reflectedInput, reflectedBeamName, directBeamName, angle_index):
         """Processes the reflected beam for the given angle."""
@@ -770,14 +776,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.log().accumulate('Summation method: {0}\n'.format(sum_type))
         sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
         self.sum_foreground(reflectedBeamName, foregroundName, sum_type, angle_index, directForegroundName)
-        if sum_type == 'SumInLambda':
-            final_two_theta = mtd[foregroundName].spectrumInfo().twoTheta(0) * 180/math.pi
-            self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
-                                  format(final_two_theta))
+        final_two_theta = mtd[foregroundName].spectrumInfo().twoTheta(0) * 180/math.pi
+        self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
+                              format(final_two_theta))
         if sum_type == 'SumInQ':
-            final_two_theta = mtd[foregroundName].run().getProperty('CoherentReference2Theta').value
-            self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
-                                  format(final_two_theta))
             isBent = mtd[foregroundName].run().getProperty('beam_stats.bent_sample').value
             self.log().accumulate('Sample: {0}\n'.format('Bent' if isBent == 1 else 'Flat'))
         self._autoCleanup.cleanupLater(reflectedBeamName)
@@ -820,7 +822,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 run_inputs = [run00_input, run01_input, run10_input, run11_input]
                 foreground_names = []
                 for (run, name) in zip(run_inputs, run_names):
-                    reflectedPolForegroundWSName = self.process_reflected_beam(run, name, directForegroundName, angle_index)
+                    reflectedPolForegroundWSName = self.process_reflected_beam(run, name, directBeamName, angle_index)
                     foreground_names.append(reflectedPolForegroundWSName)
                 to_convert_to_q = self._outWS + '_pol_' + str(angle_index)
                 self.polarization_correction(','.join(foreground_names), to_convert_to_q)

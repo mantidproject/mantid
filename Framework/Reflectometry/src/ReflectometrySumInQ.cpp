@@ -512,7 +512,7 @@ ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
   const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
   const double twoTheta = centreTwoTheta(beamCentre, spectrumInfo);
   a.referenceWSIndex = static_cast<size_t>(beamCentre);
-  a.twoTheta = twoTheta; //spectrumInfo.twoTheta(a.referenceWSIndex);
+  a.twoTheta = twoTheta;
   if (isFlat) {
     a.horizon = twoTheta / 2.;
   } else {
@@ -539,8 +539,6 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
   // Construct the output workspace in virtual lambda
   API::MatrixWorkspace_sptr IvsLam =
       constructIvsLamWS(detectorWS, indices, refAngles);
-  IvsLam->mutableRun().addProperty("CoherentReference2Theta",
-                                   refAngles.twoTheta * 180 / M_PI, true);
   auto &outputE = IvsLam->mutableE(0);
   // Loop through each spectrum in the detector group
   for (const auto spIdx : indices) {

@@ -184,10 +184,10 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
             wss[1] = flippers[presentFlipper]
             wss[2] = flippers[1, 1]
             if missingFlipper == (0, 1):
-                self.log().notice('Performing polarization corrections with missin 01 intensity.')
+                self.log().notice('Performing polarization corrections with missing 01 intensity.')
                 return '00, 10, 11'
             else:
-                self.log().notice('Performing polarization corrections with missin 10 intensity.')
+                self.log().notice('Performing polarization corrections with missing 10 intensity.')
                 return '00, 01, 11'
         # Full corrections.
         self.log().notice('Performing full polarization corrections.')
