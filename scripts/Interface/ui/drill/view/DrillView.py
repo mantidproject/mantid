@@ -154,8 +154,8 @@ class DrillView(QMainWindow):
         self.modeSelector.currentTextChanged.connect(
                 self._changeAcquisitionMode)
 
-        self.cycleNumber.textChanged.connect(self._changeCycleOrExperiment)
-        self.experimentId.textChanged.connect(self._changeCycleOrExperiment)
+        self.cycleNumber.editingFinished.connect(self._changeCycleOrExperiment)
+        self.experimentId.editingFinished.connect(self._changeCycleOrExperiment)
 
         self.datadirs.setIcon(icons.get_icon("mdi.folder"))
         self.datadirs.clicked.connect(self.show_directory_manager)
@@ -259,7 +259,7 @@ class DrillView(QMainWindow):
             self._saveDataQuestion()
         self.acquisitionModeChanged.emit(acquisitionMode)
 
-    def _changeCycleOrExperiment(self, text):
+    def _changeCycleOrExperiment(self):
         """
         Triggered when editing cycle number or experiment ID field.
         """
@@ -622,6 +622,7 @@ class DrillView(QMainWindow):
         """
         self.cycleNumber.setText(cycle)
         self.experimentId.setText(experiment)
+        self._changeCycleOrExperiment()
 
     def set_table(self, columns, tooltips=None):
         """
