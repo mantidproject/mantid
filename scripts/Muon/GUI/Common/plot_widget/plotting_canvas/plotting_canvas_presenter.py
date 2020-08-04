@@ -41,6 +41,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
         # Create workspace information named tuple from input list
+        import pydevd
+        pydevd.settrace('localhost', port=5555, stdoutToServer=True, stderrToServer=True)
         workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
                                                                             self._options_presenter.get_errors())
         if not hold_on:

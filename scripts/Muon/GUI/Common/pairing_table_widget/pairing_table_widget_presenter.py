@@ -118,6 +118,9 @@ class PairingTablePresenter(object):
 
     def to_analyse_data_checkbox_changed(self, state, row, pair_name):
         pair_added = True if state == 2 else False
+        if(not pair_added and len(self._model.selected_groups + self._model.selected_pairs) == 1):
+            self._view.set_to_analyse_state_quietly(row, True)
+            return
         if pair_added:
             self._model.add_pair_to_analysis(pair_name)
         else:

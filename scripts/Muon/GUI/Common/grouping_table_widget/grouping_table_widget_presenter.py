@@ -188,6 +188,10 @@ class GroupingTablePresenter(object):
 
     def to_analyse_data_checkbox_changed(self, state, row, group_name):
         group_added = True if state == 2 else False
+        if(not group_added and len(self._model.selected_groups + self._model.selected_pairs) == 1):
+            self._view.set_to_analyse_state_quietly(row, True)
+            return
+
         if group_added:
             self._model.add_group_to_analysis(group_name)
         else:
