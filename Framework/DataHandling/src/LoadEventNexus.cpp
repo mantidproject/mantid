@@ -461,32 +461,27 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   if (file.hasAttr("units"))
     file.getAttr("units", units);
 
-  auto pulse_times = NeXus::NeXusIOHelper::readNexusVector<double>(
-      file, "event_time_zero");
+  auto pulse_times =
+      NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
 
   file.closeData();
 
   // Convert to seconds
   auto conv = Kernel::Units::timeConversionValue(units, "s");
-  // auto absoluteFirst = 
+  // auto absoluteFirst =
   //   pulse_times.front(), units, "s");
   // auto absoluteFirst = Kernel::Units::timeConversionValue(
   //   pulse_times.back(), units, "s");
 
-  return std::make_pair(DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
-                        DateAndTime(pulse_times.back() * conv, 0.0)  + offset.totalNanoseconds());
+  return std::make_pair(
+      DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
+      DateAndTime(pulse_times.back() * conv, 0.0) + offset.totalNanoseconds());
   // // Convert to nanoseconds
   // // Kernel::Units::timeConversionValue(vec, units, "ns");
   // // std::copy(vec.begin(), vec.end(), event_time_of_flight->data());
 
-
-
-
-
-
-
-  // // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
-  // if (heldTimeZeroType == ::NeXus::UINT64) {
+  // // TODO. Logic here is similar to BankPulseTimes (ctor) should be
+  // consolidated if (heldTimeZeroType == ::NeXus::UINT64) {
   //   if (units != "ns")
   //     logger.warning(
   //         "event_time_zero is uint64_t, but units not in ns. Found to be: " +
@@ -496,14 +491,17 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   //   if (nanoseconds.empty())
   //     throw std::runtime_error(
   //         "No event time zeros. Cannot establish run start or end");
-  //   auto absoluteFirst = DateAndTime(int64_t(0), int64_t(nanoseconds.front())) +
+  //   auto absoluteFirst = DateAndTime(int64_t(0),
+  //   int64_t(nanoseconds.front())) +
   //                        offset.totalNanoseconds();
-  //   auto absoluteLast = DateAndTime(int64_t(0), int64_t(nanoseconds.back())) +
+  //   auto absoluteLast = DateAndTime(int64_t(0), int64_t(nanoseconds.back()))
+  //   +
   //                       offset.totalNanoseconds();
   //   return std::make_pair(absoluteFirst, absoluteLast);
   // } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
   //   if (units != "second")
-  //     logger.warning("event_time_zero is double_t, but units not in seconds. "
+  //     logger.warning("event_time_zero is double_t, but units not in seconds.
+  //     "
   //                    "Found to be: " +
   //                    units);
   //   std::vector<double> seconds;

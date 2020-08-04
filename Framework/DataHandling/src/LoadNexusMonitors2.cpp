@@ -695,8 +695,8 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
   // read in the data
   // auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(
   //     file, "event_index", g_log);
-  auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(
-      file, "event_index");
+  auto event_index =
+      NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
 
   file.openData("event_time_offset"); // time of flight
   // MantidVec time_of_flight =
@@ -711,8 +711,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
   file.openData("event_time_zero"); // pulse time
   // MantidVec seconds =
   //     NeXus::NeXusIOHelper::readNexusVector<double>(file, "", g_log);
-  MantidVec seconds =
-      NeXus::NeXusIOHelper::readNexusVector<double>(file);
+  MantidVec seconds = NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", event_time_zero_units);
   Kernel::Units::timeConversionVector(seconds, event_time_zero_units,
                                       "seconds");
