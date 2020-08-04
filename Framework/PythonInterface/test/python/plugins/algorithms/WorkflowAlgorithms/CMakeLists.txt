@@ -59,6 +59,7 @@ set(TEST_PY_FILES
     SANSFitShiftScaleTest.py
     SANSILLIntegrationTest.py
     SANSILLReductionTest.py
+    SANSILLParameterScanTest.py
     SANSMaskTest.py
     SANSStitchTest.py
     SavePlot1DTest.py

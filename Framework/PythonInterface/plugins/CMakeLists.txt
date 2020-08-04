@@ -2,7 +2,7 @@
 # to remove the need for searching for all of the algorithms and fit functions 
 # on startup.
 
-# List of python alforithms and fit functions
+# List of python algorithms and fit functions
 set(PYTHON_PLUGINS
   algorithms/Abins.py
   algorithms/AlignAndFocusPowderFromFiles.py

@@ -23,11 +23,12 @@ Improvements
 - Sample waviness term is removed from resolution calculation in incoherent mode in :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 - Flag to enable / disable apply scaling factor from `ScalingFactorFile`, called `ApplyScalingFactor`, added to :ref:`algm-LiquidsReflectometryReduction`.
 - Modified :ref:`algm-LRAutoReduction` to allow the option to autoreduce data with a reference measurement for normalization (instead of only direct beam) using the new :ref:`algm-LRReductionWithReference` algorithm of this release
-
+  
 Bug fixes
 ---------
 
 - :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` has been fixed to update the sample logs of chopper gap and chopper position with correct units regardless the wrong setting in nexus files.
+- The history for :ref:`algm-ReflectometryReductionOne` has been fixed so that the conversion to Q is now always included in the history.
 
 ISIS Reflectometry Interface
 ############################

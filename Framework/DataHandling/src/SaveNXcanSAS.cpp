@@ -9,6 +9,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -211,7 +212,7 @@ getInstrumentName(const Mantid::API::MatrixWorkspace_sptr &workspace) {
 std::string getIDF(const Mantid::API::MatrixWorkspace_sptr &workspace) {
   auto date = workspace->getWorkspaceStartDate();
   auto instrumentName = getInstrumentName(workspace);
-  return workspace->getInstrumentFilename(instrumentName, date);
+  return InstrumentFileFinder::getInstrumentFilename(instrumentName, date);
 }
 
 void addDetectors(H5::Group &group,

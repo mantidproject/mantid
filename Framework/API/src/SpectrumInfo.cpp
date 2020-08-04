@@ -115,6 +115,23 @@ double SpectrumInfo::azimuthal(const size_t index) const {
   return phi / static_cast<double>(spectrumDefinition(index).size());
 }
 
+/** Calculate latitude and longitude for given spectrum index.
+ *  @param index Index of the spectrum that lat/long are required for
+ *  @return A pair containing the latitude and longitude values.
+ */
+std::pair<double, double>
+SpectrumInfo::geographicalAngles(const size_t index) const {
+  double lat{0.0}, lon{0.0};
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index)) {
+    auto latlong = m_detectorInfo.geographicalAngles(detIndex);
+    lat += latlong.first;
+    lon += latlong.second;
+  }
+  return std::pair<double, double>(
+      lat / static_cast<double>(spectrumDefinition(index).size()),
+      lon / static_cast<double>(spectrumDefinition(index).size()));
+}
+
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;

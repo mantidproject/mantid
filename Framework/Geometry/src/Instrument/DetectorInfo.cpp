@@ -308,6 +308,36 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   return atan2(dotVertical, dotHorizontal);
 }
 
+std::pair<double, double>
+DetectorInfo::geographicalAngles(const size_t index) const {
+  const auto samplePos = samplePosition();
+  const auto sampleDetVec = position(index) - samplePos;
+  const double upCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
+  const double beamCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
+  const double leftoverCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
+  const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
+  const double lon = std::atan2(leftoverCoord, beamCoord);
+  return std::pair<double, double>(lat, lon);
+}
+
+std::pair<double, double>
+DetectorInfo::geographicalAngles(const std::pair<size_t, size_t> &index) const {
+  const auto samplePos = samplePosition();
+  const auto sampleDetVec = position(index) - samplePos;
+  const double upCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
+  const double beamCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
+  const double leftoverCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
+  const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
+  const double lon = std::atan2(leftoverCoord, beamCoord);
+  return std::pair<double, double>(lat, lon);
+}
+
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
   return Kernel::toV3D(m_detectorInfo->position(index));
