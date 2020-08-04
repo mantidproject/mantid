@@ -16,8 +16,8 @@ import os
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 
-class ILLYIGPositionCalibration(PythonAlgorithm):
 
+class ILLYIGPositionCalibration(PythonAlgorithm):
 
     # helper conversions
     _RAD_2_DEG = 180.0 / np.pi
@@ -177,8 +177,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         return peak_list
 
     def _get_yig_peaks_positions(self, ws, YIG_D):
-        """Returns a list o tuples with peak centre positions and peak height 
-        used for further fitting. Removes all peaks that would require scattering 
+        """Returns a list o tuples with peak centre positions and peak height
+        used for further fitting. Removes all peaks that would require scattering
         angle above 180 degrees and returns the peak positions in degrees"""
         yig2theta = self._remove_invisible_yig_peaks(YIG_D)
 
@@ -216,8 +216,10 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             constraints = "f0.A0 >= 0"
             function_no = 1
             for peak_intensity, peak_centre in single_spectrum_peaks:
-                function += "name=Gaussian, PeakCentre={0}, Height={1}, \
-                             Sigma={2};\n".format(peak_centre, peak_intensity, 0.5*self._PeakWidth)
+                function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
+                                                                                             peak_centre, 
+                                                                                             peak_intensity, 
+                                                                                             0.5*self._PeakWidth)
                 constraints += ",f{0}.Height > 0.0".format(function_no)
                 constraints += ",f{0}.Sigma < 2.0".format(function_no)
                 constraints += ",{0} < f{1}.PeakCentre < {2}".format(float(peak_centre)-self._PeakWidth*2,
