@@ -71,13 +71,13 @@ class RundexSettings(object):
                 "Run11",
                 "DirectRun",
                 "OutputWorkspace",
-                "GlobalScaleFactor",
-                "UseManualScaleFactors",
-                "ManualScaleFactors",
                 "AngleOption",
                 "Theta",
                 "SummationType",
-                "CustomOptions"
+                "CustomOptions",
+                "GlobalScaleFactor",
+                "UseManualScaleFactors",
+                "ManualScaleFactors"
                 ],
             REFL_NPOL: [
                 "Run",
@@ -131,7 +131,7 @@ class RundexSettings(object):
                 },
             REFL_POL : {
                 "PolarizationEfficiencyFile": "",
-                "DirectFlatBackground": "Background Constant Fit",
+                "DirectFlatBackground": "Background Average",
                 "ReflFlatBackground": "Background Constant Fit",
                 "SubalgorithmLogging": "Logging OFF",
                 "Cleanup": "Cleanup ON",
