@@ -34,6 +34,11 @@ class DrillModel(QObject):
     MACOS_BASE_DATA_PATH = "/Volumes/illdata/"
 
     """
+    Data directory on Windows.
+    """
+    WIN_BASE_DATA_PATH = "Z:\\"
+
+    """
     Raw data directory name.
     """
     RAW_DATA_DIR = "rawdata"
@@ -237,6 +242,8 @@ class DrillModel(QObject):
             baseDir = self.LINUX_BASE_DATA_PATH
         elif sys.platform.startswith("darwin"):
             baseDir = self.MACOS_BASE_DATA_PATH
+        elif sys.platform.startswith("win32"):
+            baseDir = self.WIN_BASE_DATA_PATH
         else:
             return
 
@@ -244,11 +251,12 @@ class DrillModel(QObject):
             return
 
         # data
-        dataDir = baseDir + "{0}/{1}/{2}".format(cycle,
-                                                 self.instrument.lower(),
-                                                 self.EXP_PREFIX + experiment)
-        rawDataDir = dataDir + self.RAW_DATA_DIR
-        processedDataDir = dataDir + self.PROCESSED_DATA_DIR
+        dataDir = os.path.join(baseDir, "{0}/{1}/{2}"
+                                        .format(cycle,
+                                                self.instrument.lower(),
+                                                self.EXP_PREFIX + experiment))
+        rawDataDir = os.path.join(dataDir, self.RAW_DATA_DIR)
+        processedDataDir = os.path.join(dataDir, self.PROCESSED_DATA_DIR)
         if not os.path.isdir(dataDir):
             logger.warning("Cycle number and experiment ID do not lead to a "
                            "valid directory in the usual data directory ({0}): "
@@ -257,6 +265,8 @@ class DrillModel(QObject):
             return
 
         # add in user directories if needed
+        print(rawDataDir, processedDataDir)
+        return
         userDirs = ConfigService.getDataSearchDirs()
         if ((os.path.isdir(rawDataDir)) and (rawDataDir not in userDirs)):
             ConfigService.appendDataSearchDir(rawDataDir)
