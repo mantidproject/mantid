@@ -117,9 +117,6 @@ class StateDataBuilder(object):
         self._file_information = file_information
 
     def build(self):
-        # Make sure that the product is in a valid state, ie not incomplete
-        self.state.validate()
-
         # There are some elements which need to be read from the file information object.
         #  This is currently:
         # 1. instrument

@@ -165,6 +165,22 @@ class StateMoveZOOM(StateMove):
         super(StateMoveZOOM, self).validate()
 
 
+class StateMoveNoInst(StateMove):
+    def __init__(self):
+        super(StateMoveNoInst, self).__init__()
+        self.lab_detector_default_sd_m = 0.0  # : Float
+        # Set the monitor names
+        self.monitor_names = {}
+        self.monitor_4_offset = 0.0  # : Float
+
+        # Setup the detectors
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                          DetectorType.HAB.value: StateMoveDetectors()}
+
+    def validate(self):
+        pass
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
@@ -174,9 +190,11 @@ def setup_idf_and_ipf_content(move_info, data_info, invalid_detector_types=None,
     ipf_file_path = data_info.ipf_file_path
 
     # Set the detector names
-    set_detector_names(move_info, ipf_file_path, invalid_detector_types)
+    if ipf_file_path:
+        set_detector_names(move_info, ipf_file_path, invalid_detector_types)
     # Set the monitor names
-    set_monitor_names(move_info, idf_file_path, invalid_monitor_names)
+    if idf_file_path:
+        set_monitor_names(move_info, idf_file_path, invalid_monitor_names)
 
 
 class StateMoveLOQBuilder(object):
@@ -187,7 +205,6 @@ class StateMoveLOQBuilder(object):
         setup_idf_and_ipf_content(self.state, data_info)
 
     def build(self):
-        self.state.validate()
         return copy.copy(self.state)
 
     def convert_pos1(self, value):
@@ -208,7 +225,6 @@ class StateMoveSANS2DBuilder(object):
         setup_idf_and_ipf_content(self.state, data_info, invalid_monitor_names=invalid_monitor_names)
 
     def build(self):
-        self.state.validate()
         return copy.copy(self.state)
 
     def convert_pos1(self, value):
@@ -232,7 +248,6 @@ class StateMoveZOOMBuilder(object):
                                   invalid_monitor_names=invalid_monitor_names)
 
     def build(self):
-        self.state.validate()
         return copy.copy(self.state)
 
     def convert_pos1(self, value):
@@ -264,11 +279,25 @@ class StateMoveLARMORBuilder(object):
         self.conversion_value = 1000. if run_number <= 2217 else 1.
 
     def build(self):
-        self.state.validate()
         return copy.copy(self.state)
 
     def convert_pos1(self, value):
         return value / self.conversion_value
+
+    def convert_pos2(self, value):
+        return value / 1000.
+
+
+class StateMoveNoInstBuilder(object):
+    @automatic_setters(StateMoveNoInst, exclusions=["detector_name", "detector_name_short", "monitor_names"])
+    def __init__(self):
+        self.state = StateMoveNoInst()
+
+    def build(self):
+        return self.state
+
+    def convert_pos1(self, value):
+        return value / 1000.
 
     def convert_pos2(self, value):
         return value / 1000.
@@ -287,6 +316,8 @@ def get_move_builder(data_info):
         return StateMoveLARMORBuilder(data_info)
     elif instrument is SANSInstrument.ZOOM:
         return StateMoveZOOMBuilder(data_info)
+    elif instrument is SANSInstrument.NO_INSTRUMENT:
+        return StateMoveNoInstBuilder()
     else:
         raise NotImplementedError("StateMoveBuilder: Could not find any valid move builder for the "
                                   "specified StateData object {0}".format(str(data_info)))

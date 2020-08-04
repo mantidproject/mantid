@@ -189,10 +189,10 @@ class StateMask(metaclass=JsonSerializable):
         self.use_mask_phi_mirror = True
 
         # Beam stop
-        self.beam_stop_arm_width: float = 0.0
-        self.beam_stop_arm_angle: float = 0.0
-        self.beam_stop_arm_pos1: float = 0.0
-        self.beam_stop_arm_pos2: float = 0.0
+        self.beam_stop_arm_width: float = None
+        self.beam_stop_arm_angle: float = None
+        self.beam_stop_arm_pos1: float = None
+        self.beam_stop_arm_pos2: float = None
 
         # Clear commands
         self.clear = None  # : Bool
@@ -291,15 +291,28 @@ class StateMaskZOOM(StateMask):
         super(StateMaskZOOM, self).validate()
 
 
+class StateMaskNoInst(StateMask):
+    def __init__(self):
+        super(StateMaskNoInst, self).__init__()
+        # Setup the detectors
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(),
+                          DetectorType.HAB.value: StateMaskDetectors()}
+
+    def validate(self):
+        pass
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
+
+
 def setup_idf_and_ipf_content(move_info, data_info):
     # Get the IDF and IPF path since they contain most of the import information
     idf_file_path = data_info.idf_file_path
     ipf_file_path = data_info.ipf_file_path
     # Set the detector names
-    set_detector_names(move_info, ipf_file_path)
+    if ipf_file_path:
+        set_detector_names(move_info, ipf_file_path)
     # Set the idf path
     move_info.idf_path = idf_file_path
 
@@ -310,7 +323,8 @@ class StateMaskBuilder(object):
         super(StateMaskBuilder, self).__init__()
         self._data = data_info
         self.state = state
-        setup_idf_and_ipf_content(self.state, data_info)
+        if data_info.instrument is not SANSInstrument.NO_INSTRUMENT:
+            setup_idf_and_ipf_content(self.state, data_info)
 
     def set_single_spectra_on_detector(self, single_spectra):
         """
@@ -361,7 +375,6 @@ class StateMaskBuilder(object):
                     self.state.detectors[detector_bank_start.value].spectrum_range_stop = [stop]
 
     def build(self):
-        self.state.validate()
         return copy.copy(self.state)
 
 
@@ -378,6 +391,8 @@ def get_mask_builder(data_info):
         return StateMaskBuilder(data_info, StateMaskLARMOR())
     elif instrument is SANSInstrument.ZOOM:
         return StateMaskBuilder(data_info, StateMaskZOOM())
+    elif instrument is SANSInstrument.NO_INSTRUMENT:
+        return StateMaskBuilder(data_info, StateMaskNoInst())
     else:
         raise NotImplementedError("StateMaskBuilder: Could not find any valid mask builder for the "
                                   "specified StateData object {0}".format(str(instrument)))

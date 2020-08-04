@@ -22,10 +22,19 @@ class StateTransmissionFit(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
-        self.fit_type = FitType.LOGARITHMIC
-        self.polynomial_order = 0  # : Int (Positive)
+        self.fit_type = FitType.NO_FIT
+        self.polynomial_order = 2  # : Int (Positive)
         self.wavelength_low = None  # : Float (Optional)
         self.wavelength_high = None  # : Float (Optional)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        else:
+            return False
+
+    def __hash__(self):
+        return hash((self.fit_type, self.polynomial_order, self.wavelength_low, self.wavelength_high))
 
     def validate(self):
         is_invalid = {}
@@ -356,6 +365,8 @@ def get_calculate_transmission(instrument):
         return StateCalculateTransmissionLOQ()
     elif instrument is SANSInstrument.ZOOM:
         return StateCalculateTransmissionZOOM()
+    elif instrument is SANSInstrument.NO_INSTRUMENT:
+        return StateCalculateTransmission()
     else:
         raise NotImplementedError("StateCalculateTransmissionBuilder: Could not find any valid transmission "
                                   "builder for the specified StateData object {0}".format(str(instrument)))

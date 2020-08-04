@@ -35,17 +35,17 @@ class AllStates(metaclass=JsonSerializable):
     def __init__(self):
 
         super(AllStates, self).__init__()
-        self.data : StateData = None
-        self.move: StateMove = None
-        self.reduction: StateReductionMode = None
-        self.slice: StateSliceEvent = None
-        self.mask: StateMask = None
-        self.wavelength: StateWavelength = None
-        self.save: StateSave = None
-        self.scale: StateScale = None
-        self.adjustment: StateAdjustment = None
-        self.convert_to_q: StateConvertToQ = None
-        self.compatibility: StateCompatibility = None
+        self.data : StateData = StateData()
+        self.move: StateMove = StateMove()
+        self.reduction: StateReductionMode = StateReductionMode()
+        self.slice: StateSliceEvent = StateSliceEvent()
+        self.mask: StateMask = StateMask()
+        self.wavelength: StateWavelength = StateWavelength()
+        self.save: StateSave = StateSave()
+        self.scale: StateScale = StateScale()
+        self.adjustment: StateAdjustment = StateAdjustment()
+        self.convert_to_q: StateConvertToQ = StateConvertToQ()
+        self.compatibility: StateCompatibility = StateCompatibility()
 
     def validate(self):
         is_invalid = dict()

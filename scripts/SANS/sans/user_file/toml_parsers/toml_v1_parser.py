@@ -13,23 +13,26 @@ from sans.state.StateObjects.StateAdjustment import StateAdjustment
 from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
 from sans.state.StateObjects.StateCompatibility import StateCompatibility
 from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
+from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.state.StateObjects.StateScale import StateScale
 from sans.state.StateObjects.StateSave import StateSave
+from sans.state.StateObjects.StateScale import StateScale
 from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
 from sans.state.StateObjects.StateWavelength import StateWavelength
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
+from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
 from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator
 
 
 class TomlV1Parser(IStateParser):
-    def __init__(self, dict_to_parse, data_info, schema_validator=None):
+    def __init__(self, dict_to_parse, file_information, schema_validator=None):
         self._validator = schema_validator if schema_validator else TomlSchemaV1Validator(dict_to_parse)
         self._validator.validate()
 
+        self._implementation = None
+        data_info = self.get_state_data(file_information)
         self._implementation = self._get_impl(dict_to_parse, data_info)
         self._implementation.parse_all()
 
@@ -38,7 +41,14 @@ class TomlV1Parser(IStateParser):
         # Wrapper which can replaced with a mock
         return _TomlV1ParserImpl(*args)
 
-    def get_state_adjustment(self):
+    def get_state_data(self, file_information):
+        state_data = super().get_state_data(file_information)
+        if self._implementation:
+            # Always take the instrument from the TOML file rather than guessing in the new parser
+            state_data.instrument = self._implementation.instrument
+        return state_data
+
+    def get_state_adjustment(self, _):
         return self._implementation.adjustment
 
     def get_state_calculate_transmission(self):
@@ -50,16 +60,13 @@ class TomlV1Parser(IStateParser):
     def get_state_convert_to_q(self):
         return self._implementation.convert_to_q
 
-    def get_state_data(self):
-        return self._implementation.data_info
-
-    def get_state_mask(self):
+    def get_state_mask(self, _):
         return self._implementation.mask
 
-    def get_state_move(self):
+    def get_state_move(self, _):
         return self._implementation.move
 
-    def get_state_normalize_to_monitor(self):
+    def get_state_normalize_to_monitor(self, _):
         return self._implementation.normalize_to_monitor
 
     def get_state_reduction_mode(self):
@@ -68,8 +75,11 @@ class TomlV1Parser(IStateParser):
     def get_state_save(self):
         return StateSave()
 
-    def get_state_scale(self):
-        return self._implementation.scale
+    def get_state_scale(self, file_information):
+        scale = self._implementation.scale
+        if file_information:
+            scale.set_geometry_from_file(file_information)
+        return scale
 
     def get_state_slice_event(self):
         return StateSliceEvent()
@@ -83,10 +93,11 @@ class TomlV1Parser(IStateParser):
 
 class _TomlV1ParserImpl(object):
     # TODO this should not be in the TOML parser so we should unpick it at a later stage
-    def __init__(self, input_dict, data_info):
+    def __init__(self, input_dict, data_info: StateData):
         self._input = input_dict
-        self.data_info = data_info
-        self._create_state_objs()
+        # Always take the instrument from the TOML file rather than guessing in the new parser
+        data_info.instrument = self.instrument
+        self._create_state_objs(data_info=data_info)
 
     def parse_all(self):
         self._parse_binning()
@@ -111,18 +122,18 @@ class _TomlV1ParserImpl(object):
             raise RuntimeError("instrument.name is missing")
         return SANSInstrument(instrument)
 
-    def _create_state_objs(self):
+    def _create_state_objs(self, data_info):
         self.adjustment = StateAdjustment()
         self.compatibility = StateCompatibility()
         self.convert_to_q = StateConvertToQ()
         self.calculate_transmission = get_calculate_transmission(instrument=self.instrument)
-        self.mask = get_mask_builder(data_info=self.data_info).build()
-        self.move = get_move_builder(data_info=self.data_info).build()
-        self.normalize_to_monitor = get_normalize_to_monitor_builder(data_info=self.data_info).build()
+        self.mask = get_mask_builder(data_info=data_info).build()
+        self.move = get_move_builder(data_info=data_info).build()
+        self.normalize_to_monitor = get_normalize_to_monitor_builder(data_info=data_info).build()
         self.reduction_mode = StateReductionMode()
         self.scale = StateScale()
         self.wavelength = StateWavelength()
-        self.wavelength_and_pixel = StateWavelengthAndPixelAdjustment()
+        self.wavelength_and_pixel = get_wavelength_and_pixel_adjustment_builder(data_info=data_info).build()
 
         # Ensure they are linked up correctly
         self.adjustment.calculate_transmission = self.calculate_transmission

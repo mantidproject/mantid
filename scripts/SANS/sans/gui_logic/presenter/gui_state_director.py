@@ -13,26 +13,27 @@ the main part of the work to an StateDirectorISIS object.
 import copy
 
 from sans.common.file_information import SANSFileInformationBlank
-from sans.state.StateRunDataBuilder import StateRunDataBuilder
-from sans.state.StateBuilder import StateBuilder
+from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
 
 
 class GuiStateDirector(object):
-    def __init__(self, state_gui_model, facility):
+    def __init__(self, state_gui_model: StateGuiModel, facility):
         self._state_gui_model = state_gui_model
         self._facility = facility
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def create_state(self, row_entry, file_lookup=True, user_file=""):
+    def create_state(self, row_entry, file_lookup=True):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         if file_lookup:
             file_information = row_entry.file_information
         else:
             file_information = SANSFileInformationBlank()
+
+        # We want to copy our master GUI state to set any row options (see prototype pattern)
+        gui_state = copy.deepcopy(self._state_gui_model)
 
         data_builder = get_data_builder(self._facility, file_information)
 
@@ -52,30 +53,25 @@ class GuiStateDirector(object):
         data = data_builder.build()
 
         # 2. Add elements from the options column
-        state_gui_model = copy.deepcopy(self._state_gui_model)
-        self._apply_column_options_to_state(row_entry, state_gui_model)
+        self._apply_column_options_to_state(row_entry, gui_state)
 
         # 3. Add other columns
         output_name = row_entry.output_name
         if output_name:
-            state_gui_model.output_name = output_name
+            gui_state.output_name = output_name
 
         if row_entry.sample_thickness:
-            state_gui_model.sample_thickness = float(row_entry.sample_thickness)
+            gui_state.sample_thickness = float(row_entry.sample_thickness)
         if row_entry.sample_height:
-            state_gui_model.sample_height = float(row_entry.sample_height)
+            gui_state.sample_height = float(row_entry.sample_height)
         if row_entry.sample_width:
-            state_gui_model.sample_width = float(row_entry.sample_width)
+            gui_state.sample_width = float(row_entry.sample_width)
         if row_entry.sample_shape:
-            state_gui_model.sample_shape = row_entry.sample_shape
+            gui_state.sample_shape = row_entry.sample_shape
 
         # 4. Create the rest of the state based on the builder.
-        settings = copy.deepcopy(state_gui_model.settings)
-        command_interface = CommandInterfaceAdapter(data_info=data, processed_state=settings)
-        run_data_builder = StateRunDataBuilder(file_information=file_information)
-
-        state = StateBuilder(run_data_builder=run_data_builder, i_state_parser=command_interface).get_all_states()
-        return state
+        gui_state.all_states.data = data
+        return gui_state
 
     @staticmethod
     def _set_data_entry(func, entry):

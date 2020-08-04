@@ -6,31 +6,33 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import unittest
+from unittest import mock
 
 from sans.common.configurations import Configurations
-from sans.common.enums import DetectorType, SANSInstrument, SANSFacility, ReductionMode, RangeStepType, RebinType, DataType, FitType
-from sans.state.StateObjects.StateData import get_data_builder, StateData
-from sans.test_helper.file_information_mock import SANSFileInformationMock
+from sans.common.enums import DetectorType, SANSInstrument, ReductionMode, RangeStepType, RebinType, DataType, FitType
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 class ParsedDictConverterTest(unittest.TestCase):
-    def test_state_can_be_created_from_valid_user_file_with_data_information(self):
-        # Arrange
-        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00022024")
-        data_builder.set_sample_scatter_period(3)
-        data_state = data_builder.build()
+    @staticmethod
+    def create_mock_inst_file_information(inst):
+        mocked = mock.Mock()
+        mocked.get_instrument.return_value = inst
+        mocked.get_number_of_periods.return_value = 0
+        mocked.get_idf_file_path.return_value = None
+        mocked.get_ipf_file_path.return_value = None
+        return mocked
 
+    def test_state_can_be_created_from_valid_user_file_with_data_information(self):
         user_file_path = create_user_file(sample_user_file)
 
-        parser = UserFileReaderAdapter(user_file_name=user_file_path, data_info=data_state)
-        state = parser.get_all_states()
+        mocked_sans = self.create_mock_inst_file_information(SANSInstrument.SANS2D)
+
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, file_information=mocked_sans)
+        state = parser.get_all_states(file_information=mocked_sans)
 
         # Assert
-        self._assert_data(state)
         self._assert_move(state)
         self._assert_mask(state)
         self._assert_reduction(state)
@@ -42,9 +44,6 @@ class ParsedDictConverterTest(unittest.TestCase):
         # clean up
         if os.path.exists(user_file_path):
             os.remove(user_file_path)
-
-    def _assert_data(self, state):
-        self.assertIsInstance(state.data, StateData)
 
     def _assert_move(self, state):
         move = state.move

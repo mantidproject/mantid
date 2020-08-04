@@ -386,8 +386,10 @@ L/QXY start stop step [/LIN]
         stop = 0.1
         type = "Lin"
 
-L/R x y
--------
+L/R x y [step]
+--------------
+
+Note step was ignored previously.
 
 ..  code-block:: guess 
 

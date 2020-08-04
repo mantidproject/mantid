@@ -34,7 +34,7 @@ class TomlV1ParserTest(unittest.TestCase):
         if "name" not in dict_vals["instrument"]:
             dict_vals["instrument"]["name"] = "LOQ"
 
-        return TomlV1Parser(dict_vals, data_info=self._mocked_data_info)
+        return TomlV1Parser(dict_vals)
 
     def test_instrument(self):
         parser = self._setup_parser(dict_vals={"instrument": {"name": SANSInstrument.SANS2D.value}})
@@ -46,7 +46,7 @@ class TomlV1ParserTest(unittest.TestCase):
 
         # No implementation needed
         with mock.patch("sans.user_file.toml_parsers.toml_v1_parser.TomlV1Parser._get_impl"):
-            TomlV1Parser(dict_to_parse=None, data_info=mock.NonCallableMock(), schema_validator=schema_validator)
+            TomlV1Parser(dict_to_parse=None, schema_validator=schema_validator)
             self.assertTrue(schema_validator.validate.called)
 
     def _loop_over_supported_keys(self, supported_keys, top_level_keys):

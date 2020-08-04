@@ -58,7 +58,7 @@ class Configurations(object):
         wavelength_full_range_high = 10.0
 
         default_incident_monitor = 2
-        default_transmission_monitor = 17788
+        default_transmission_monitor = 3
 
         # The default prompt peak range for LOQ
         prompt_peak_correction_min = 19000.0

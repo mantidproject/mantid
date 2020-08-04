@@ -11,7 +11,6 @@ import os
 import systemtesting
 
 import mantid
-from sans.state.StateBuilder import StateBuilder
 
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.common.enums import (DetectorType, SANSFacility, IntegralEnum)
@@ -25,6 +24,9 @@ from sans.common.file_information import SANSFileInformationFactory
 # -----------------------------------------------
 # Tests for the SANSDiagnosticPage
 # -----------------------------------------------
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+
+
 class SANSDiagnosticPageTest(unittest.TestCase):
     def _compare_workspace(self, workspace, reference_file_name):
         # Load the reference file
@@ -88,12 +90,12 @@ class SANSDiagnosticPageTest(unittest.TestCase):
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_info=data_state,
-                                                       user_filename=user_file)
-        state = user_file_director.get_all_states()
+        user_file_director = UserFileReaderAdapter(file_information=file_information,
+                                                   user_file_name=user_file)
+        state = user_file_director.get_all_states(file_information=file_information)
         state.compatibility.use_compatibility_mode = True
         state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
+        state.data = data_state
 
         # Act
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
@@ -114,12 +116,11 @@ class SANSDiagnosticPageTest(unittest.TestCase):
 
         # Get the rest of the state from the user file
         user_file = "USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt"
-        user_file_director = StateBuilder.new_instance(data_info=data_state,
-                                                       file_information=file_information,
-                                                       user_filename=user_file)
-        # Construct the final state
-        state = user_file_director.get_all_states()
+        user_file_director = UserFileReaderAdapter(file_information=file_information,
+                                                   user_file_name=user_file)
+        state = user_file_director.get_all_states(file_information=file_information)
         state.adjustment.calibration = "80tubeCalibration_1-05-2015_r3157-3160.nxs"
+        state.data = data_state
 
         # Act
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)

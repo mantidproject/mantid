@@ -16,7 +16,6 @@ from sans.state.StateObjects.StateAdjustment import StateAdjustment
 from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
 from sans.state.StateObjects.StateCompatibility import StateCompatibility
 from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
-from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
@@ -32,13 +31,12 @@ from sans.user_file.settings_tags import TubeCalibrationFileId, MaskId, LimitsId
 
 
 class ParsedDictConverter(IStateParser):
-    def __init__(self, data_info, existing_all_states: AllStates = None):
+    def __init__(self, file_information, existing_all_states: AllStates = None):
         super(ParsedDictConverter, self).__init__()
-        assert isinstance(data_info, StateData), \
-            "Expected StateData, got %r" % data_info
 
         self._cached_result = None
-        self._data_info = data_info
+        data = self.get_state_data(file_information)
+        self._instrument = data.instrument
         self._all_states = existing_all_states
 
     @property
@@ -57,23 +55,31 @@ class ParsedDictConverter(IStateParser):
         """
         pass
 
-    def get_state_adjustment(self):
+    def get_state_data(self, file_information):
+        data = super().get_state_data(file_information)
+        if DetectorId.INSTRUMENT in self._input_dict:
+            data.instrument = self._input_dict[DetectorId.INSTRUMENT][0]
+        return data
+
+    def get_state_adjustment(self, file_information):
         state = self._all_states.adjustment if self._all_states else StateAdjustment()
         # Get the wide angle correction setting
         self._set_single_entry(state, "wide_angle_correction", SampleId.PATH)
 
         state.calculate_transmission = self.get_state_calculate_transmission()
-        state.normalize_to_monitor = self.get_state_normalize_to_monitor()
+        state.normalize_to_monitor = self.get_state_normalize_to_monitor(file_information=file_information)
         state.wavelength_and_pixel_adjustment = self.get_state_wavelength_and_pixel_adjustment()
 
         if TubeCalibrationFileId.FILE in self._input_dict:
             state.calibration = _get_last_element(self._input_dict.get(TubeCalibrationFileId.FILE))
 
+        state.wavelength_and_pixel_adjustment.idf_path = self.get_state_data(file_information).idf_file_path
+
         return state
 
     def get_state_calculate_transmission(self):
         state = self._all_states.adjustment.calculate_transmission if self._all_states else\
-            get_calculate_transmission(instrument=self._data_info.instrument)
+            get_calculate_transmission(instrument=self._instrument)
 
         self._set_single_entry(state, "transmission_radius_on_detector", TransId.RADIUS,
                                apply_to_value=_convert_mm_to_m)
@@ -100,6 +106,7 @@ class ParsedDictConverter(IStateParser):
         # The incident monitor spectrum for transmission calculation
         if MonId.SPECTRUM in self._input_dict:
             mon_spectrum = self._input_dict[MonId.SPECTRUM]
+            mon_spectrum = [spec for spec in mon_spectrum if spec.is_trans]
             for spec in mon_spectrum:
                 rebin_type = RebinType.INTERPOLATING_REBIN if spec.interpolate else RebinType.REBIN
                 state.rebin_type = rebin_type
@@ -262,13 +269,9 @@ class ParsedDictConverter(IStateParser):
         self._set_single_entry(state, "reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY)
         return state
 
-    def get_state_data(self):
-        assert isinstance(self._data_info, StateData)
-        return self._data_info
-
     # We have taken the implementation originally provided, so we can't help the complexity
-    def get_state_mask(self):  # noqa: C901
-        state_builder = get_mask_builder(data_info=self._data_info)
+    def get_state_mask(self, file_information):  # noqa: C901
+        state_builder = get_mask_builder(data_info=self.get_state_data(file_information=file_information))
 
         # We have to inject an existing state object here, this is wrong but legacy code *shrug*
         if self._all_states:
@@ -598,8 +601,8 @@ class ParsedDictConverter(IStateParser):
         return state_builder.build()
 
     # We have taken the implementation originally provided, so we can't help the complexity
-    def get_state_move(self):  # noqa : C901
-        state_builder = get_move_builder(data_info=self._data_info)
+    def get_state_move(self, file_information):  # noqa : C901
+        state_builder = get_move_builder(data_info=self.get_state_data(file_information=file_information))
 
         if self._all_states:
             state_builder.state = self._all_states.move
@@ -760,8 +763,8 @@ class ParsedDictConverter(IStateParser):
 
         return state_builder.build()
 
-    def get_state_normalize_to_monitor(self):  # -> StateNormalizeToMonitor:
-        builder = get_normalize_to_monitor_builder(self._data_info)
+    def get_state_normalize_to_monitor(self, file_information):  # -> StateNormalizeToMonitor:
+        builder = get_normalize_to_monitor_builder(self.get_state_data(file_information=file_information))
 
         if self._all_states:
             builder.state = self._all_states.adjustment.normalize_to_monitor
@@ -926,7 +929,7 @@ class ParsedDictConverter(IStateParser):
             state.use_reduction_mode_as_suffix = use_reduction_mode_as_suffix
         return state
 
-    def get_state_scale(self):
+    def get_state_scale(self, file_information):
         state = self._all_states.scale if self._all_states else StateScale()
 
         # We only extract the first entry here, ie the s entry. Although there are other entries which a user can
@@ -957,6 +960,10 @@ class ParsedDictConverter(IStateParser):
             sample_thickness = self._input_dict[OtherId.SAMPLE_THICKNESS]
             sample_thickness = sample_thickness[-1]
             state.thickness = sample_thickness
+
+        if file_information:
+            state.set_geometry_from_file(file_information)
+
         return state
 
     def get_state_slice_event(self):  # -> StateSliceEvent:
@@ -1019,7 +1026,6 @@ class ParsedDictConverter(IStateParser):
                 state.adjustment_files[DetectorType.LAB.value].wavelength_adjustment_file = lab_direct_entry.file_path
 
         _set_wavelength_limits(state, self._input_dict)
-        state.idf_path = self._data_info.idf_file_path
         return state
 
     def _set_single_entry(self, state_obj, attr_name, tag, apply_to_value=None):

@@ -9,9 +9,10 @@ from sans.user_file.txt_parsers.ParsedDictConverter import ParsedDictConverter
 
 
 class CommandInterfaceAdapter(ParsedDictConverter):
-    def __init__(self, data_info, processed_state, existing_state_obj : AllStates = None):
-        super(CommandInterfaceAdapter, self).__init__(data_info=data_info, existing_all_states=existing_state_obj)
+    def __init__(self, file_information, processed_state, existing_state_obj: AllStates = None):
         self._processed_state = processed_state
+        super(CommandInterfaceAdapter, self).__init__(file_information=file_information,
+                                                      existing_all_states=existing_state_obj)
 
     def _get_input_dict(self):
         return self._processed_state

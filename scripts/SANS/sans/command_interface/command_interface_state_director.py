@@ -8,8 +8,6 @@ from enum import Enum
 from sans.common.enums import DataType
 from sans.common.file_information import SANSFileInformationFactory
 from sans.state.AllStates import AllStates
-from sans.state.StateRunDataBuilder import StateRunDataBuilder
-from sans.state.StateBuilder import StateBuilder
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
                                           fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
@@ -275,14 +273,12 @@ class CommandInterfaceStateDirector(object):
             process_function = self._method_map[command_id]
             process_function(command)
 
-        state_builder_adapter = CommandInterfaceAdapter(data_info=self._data_info,
+        state_builder_adapter = CommandInterfaceAdapter(file_information=file_information,
                                                         processed_state=self._processed_state_settings,
                                                         existing_state_obj=self._processed_state_obj)
-        run_data_parser = StateRunDataBuilder(file_information=file_information)
-        self._state_director = StateBuilder(i_state_parser=state_builder_adapter,
-                                            run_data_builder=run_data_parser)
-
-        return self._state_director.get_all_states()
+        states = state_builder_adapter.get_all_states(file_information=file_information)
+        states.data = self._data_info
+        return states
 
     def _set_up_method_map(self):
         """
@@ -371,16 +367,17 @@ class CommandInterfaceStateDirector(object):
 
         if file_name.casefold().endswith(".toml".casefold()):
             toml_file_reader = TomlParser()
-            new_state_entries = toml_file_reader.parse_toml_file(toml_file_path=file_name, data_info=self._data_info)
+            new_state_entries = toml_file_reader.parse_toml_file(toml_file_path=file_name,
+                                                                 file_information=file_information)
         else:
             # Now comes the fun part where we try to coerce this to put out a State* object
             user_file_reader = UserFileReader(file_name)
             old_param_mapping = user_file_reader.read_user_file()
-            command_adapter = CommandInterfaceAdapter(data_info=self._data_info, processed_state=old_param_mapping)
-            run_data_parser = StateRunDataBuilder(file_information=file_information)
-            builder = StateBuilder(i_state_parser=command_adapter, run_data_builder=run_data_parser)
-            new_state_entries = builder.get_all_states()
+            command_adapter = CommandInterfaceAdapter(processed_state=old_param_mapping,
+                                                      file_information=file_information)
+            new_state_entries = command_adapter.get_all_states(file_information=file_information)
 
+        new_state_entries.data = self._data_info
         return new_state_entries
 
     def _process_mask(self, command):

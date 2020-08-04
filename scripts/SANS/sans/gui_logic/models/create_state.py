@@ -4,13 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import os
-from mantid.api import FileFinder
+from mantid.kernel import Logger
+from sans.gui_logic.models.file_loading import FileLoading
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
-from sans.user_file.user_file_reader import UserFileReader
-from mantid.kernel import Logger
-from sans.state.AllStates import AllStates
 
 sans_logger = Logger("SANS")
 
@@ -30,12 +27,13 @@ def create_states(state_model, facility, row_entries=None, file_lookup=True, use
     for row in row_entries:
         _get_thickness_for_row(row)
 
-        state = _create_row_state(row, state_model, facility, file_lookup,
-                                  gui_state_director, user_file)
-        if isinstance(state, AllStates):
+        state = _create_row_state(row, state_model, file_lookup, gui_state_director)
+        if isinstance(state, StateGuiModel):
             states.update({row: state})
         elif isinstance(state, str):
             errors.update({row: state})
+        else:
+            raise RuntimeError("Unknown return type, got %r" % repr(state))
     return states, errors
 
 
@@ -66,8 +64,7 @@ def _get_thickness_for_row(row):
         row.sample_shape = file_info.get_shape()
 
 
-def _create_row_state(row_entry, state_model, facility, file_lookup,
-                      gui_state_director, user_file):
+def _create_row_state(row_entry, state_model, file_lookup, gui_state_director):
     sans_logger.information("Generating state for row {}".format(row_entry))
     state = None
 
@@ -80,12 +77,10 @@ def _create_row_state(row_entry, state_model, facility, file_lookup,
         if not row_entry.is_empty():
             row_user_file = row_entry.user_file
             if row_user_file:
-                row_state_model = create_gui_state_from_userfile(row_user_file, state_model)
-                row_gui_state_director = GuiStateDirector(row_state_model, facility)
-                state = row_gui_state_director.create_state(row_entry, file_lookup=file_lookup,
-                                                            user_file=row_user_file)
+                state = create_state_from_userfile(row_user_file, existing_state=state_model,
+                                                   file_information=row_entry.file_information)
             else:
-                state = gui_state_director.create_state(row_entry, file_lookup=file_lookup, user_file=user_file)
+                state = gui_state_director.create_state(row_entry, file_lookup=file_lookup)
         return state
     except (ValueError, RuntimeError) as e:
         return "{}".format(str(e))
@@ -98,14 +93,7 @@ def __is_empty_row(row, table):
     return True
 
 
-def create_gui_state_from_userfile(row_user_file, state_model):
-    user_file_path = FileFinder.getFullPath(row_user_file)
-    if not os.path.exists(user_file_path):
-        raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
-                           " has been specified.".format(user_file_path))
-
-    user_file_reader = UserFileReader(user_file_path)
-    user_file_items = user_file_reader.read_user_file()
-    state_gui_model = StateGuiModel(user_file_items)
-    state_gui_model.save_types = state_model.save_types
-    return state_gui_model
+def create_state_from_userfile(row_user_file, existing_state, file_information):
+    state = FileLoading.load_user_file(row_user_file, file_information=file_information)
+    state.save_types = existing_state.save_types
+    return state

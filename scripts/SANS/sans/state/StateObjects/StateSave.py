@@ -19,7 +19,7 @@ class StateSave(metaclass=JsonSerializable):
     def __init__(self):
         super(StateSave, self).__init__()
         self.zero_free_correction = True  # : Bool
-        self.file_format = SaveType.NO_TYPE
+        self.file_format : SaveType = None
 
         # Settings for the output name
         self.user_specified_output_name = None  # : Str
