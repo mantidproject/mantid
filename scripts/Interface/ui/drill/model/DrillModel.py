@@ -265,8 +265,6 @@ class DrillModel(QObject):
             return
 
         # add in user directories if needed
-        print(rawDataDir, processedDataDir)
-        return
         userDirs = ConfigService.getDataSearchDirs()
         if ((os.path.isdir(rawDataDir)) and (rawDataDir not in userDirs)):
             ConfigService.appendDataSearchDir(rawDataDir)
