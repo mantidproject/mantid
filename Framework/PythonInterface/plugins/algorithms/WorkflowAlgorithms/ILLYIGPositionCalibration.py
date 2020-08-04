@@ -82,7 +82,6 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                                                optional=PropertyMode.Optional),
                              doc='The table workspace name that will be used to store all of the calibration parameters.')
 
-
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=5)
         # load the chosen YIG scan
@@ -91,7 +90,6 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         else:
             intensityWS = self.getProperty('ScanWorkspace').value
         progress.report()
-        
         # load the YIG peaks from an IPF
         yig_d = self._load_yig_peaks(intensityWS)
         # check how many and which peaks can be fitted in each row
