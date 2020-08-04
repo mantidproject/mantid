@@ -14,6 +14,7 @@ currently supported instruments:
 
 The interface is accessible through the Workbench menu bar: *Interfaces* ->
 *ILL* -> *DrILL*.
+
 n.b. To be able to use the interface, one has to set the default facility to ILL first.
 Open the settings through the workbench menu (*File* -> *Settings*). In the *General* tab,
 set the facility to ILL.
