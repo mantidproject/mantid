@@ -427,7 +427,6 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
  */
 std::vector<double>
 LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
-  std::cout << "prepare axes" << std::endl;
   // check the mode of measurement and prepare axes for data
   std::vector<double> axes;
 

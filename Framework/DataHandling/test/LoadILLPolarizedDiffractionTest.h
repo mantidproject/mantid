@@ -472,7 +472,7 @@ public:
     for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
          ++entry_no) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
               outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
@@ -489,6 +489,10 @@ public:
       TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG,
                       144.17, 0.01)
     }
+    // check for the correct wavelength value from the IPF
+    MatrixWorkspace_sptr ws = std::static_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
+    double wavelength = stod(ws->mutableRun().getLogData("monochromator.wavelength")->value());
+    TS_ASSERT_DELTA(wavelength, 3.09, 0.01)
   }
 
   void test_D7_transpose() {
