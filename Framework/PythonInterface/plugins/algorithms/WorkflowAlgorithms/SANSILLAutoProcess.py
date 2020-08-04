@@ -14,7 +14,7 @@ import threading
 EMPTY_TOKEN = '000000'
 
 
-def get_run_number(self, value):
+def get_run_number(value):
     """
     Extracts the run number from the first run out of the string value of a
     multiple file property of numors
@@ -22,7 +22,7 @@ def get_run_number(self, value):
     return path.splitext(path.basename(value.split(',')[0].split('+')[0]))[0]
 
 
-def needs_processing(self, property_value, process_reduction_type):
+def needs_processing(property_value, process_reduction_type):
     """
     Checks whether a given unary reduction needs processing or is already cached
     in ADS with expected name.
@@ -57,7 +57,7 @@ def needs_processing(self, property_value, process_reduction_type):
     return [do_process, ws_name]
 
 
-def needs_loading(self, property_value, loading_reduction_type):
+def needs_loading(property_value, loading_reduction_type):
     """
     Checks whether a given unary input needs loading or is already loaded in
     ADS.
