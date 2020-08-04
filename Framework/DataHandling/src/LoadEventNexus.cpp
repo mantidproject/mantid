@@ -27,6 +27,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidNexus/NexusIOHelper.h"
 
 #include <H5Cpp.h>
 #include <memory>
@@ -439,7 +440,7 @@ std::pair<DateAndTime, DateAndTime>
 firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
 
-  const auto heldTimeZeroType = file.getInfo().type;
+  // const auto heldTimeZeroType = file.getInfo().type;
   // Nexus only requires event_time_zero to be a NXNumber, we support two
   // possibilities for held type
 
@@ -460,19 +461,20 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   if (file.hasAttr("units"))
     file.getAttr("units", units);
 
-  auto pulse_times = NeXus::NeXusIOHelper::readNexusSlab<double>(
-      file, key, m_loadStart, m_loadSize);
+  auto pulse_times = NeXus::NeXusIOHelper::readNexusVector<double>(
+      file, "event_time_zero");
 
   file.closeData();
 
   // Convert to seconds
-  auto absoluteFirst = Kernel::Units::timeConversionValue(
-    pulse_times.front(), units, "s");
-  auto absoluteFirst = Kernel::Units::timeConversionValue(
-    pulse_times.back(), units, "s");
+  auto conv = Kernel::Units::timeConversionValue(units, "s");
+  // auto absoluteFirst = 
+  //   pulse_times.front(), units, "s");
+  // auto absoluteFirst = Kernel::Units::timeConversionValue(
+  //   pulse_times.back(), units, "s");
 
-  return std::make_pair(DateAndTime(absoluteFirst, 0.0) + offset.totalNanoseconds(),
-                        DateAndTime(absoluteLast, 0.0)  + offset.totalNanoseconds());
+  return std::make_pair(DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
+                        DateAndTime(pulse_times.back() * conv, 0.0)  + offset.totalNanoseconds());
   // // Convert to nanoseconds
   // // Kernel::Units::timeConversionValue(vec, units, "ns");
   // // std::copy(vec.begin(), vec.end(), event_time_of_flight->data());
@@ -544,7 +546,7 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
         file.openData("total_counts");
         auto info = file.getInfo();
         file.closeData();
-        if (info.type == NeXus::UINT64) {
+        if (info.type == ::NeXus::UINT64) {
           uint64_t eventCount;
           file.readData("total_counts", eventCount);
           hasTotalCounts = true;

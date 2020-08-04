@@ -10,9 +10,8 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidKernel/Unit.h"
-#include <algorithm>
-
 #include "MantidNexus/NexusIOHelper.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace DataHandling {
