@@ -16,7 +16,6 @@ import os
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 
-
 class ILLYIGPositionCalibration(PythonAlgorithm):
 
     # helper conversions
@@ -29,8 +28,9 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     # an approximate universal peak width:
     _PeakWidth = 2.0 # in degrees
     # positions of YIG peaks i d-spacing (Geller_59)
-    _YIG_D = np.array([5.0521,4.3752,3.3074,3.0938,2.9168,2.7671,2.6384,2.526,2.4269,2.2594,\
-        2.1876,2.0075,1.9567,1.9095,1.8656,1.8246,1.7862,1.7501,1.7161,1.684,1.6537,1.5716])
+    _YIG_D = np.array([5.0521,4.3752,3.3074,3.0938,2.9168,2.7671,2.6384,2.526,2.4269,2.2594,
+                       2.1876,2.0075,1.9567,1.9095,1.8656,1.8246,1.7862,1.7501,1.7161,1.684,
+                       1.6537,1.5716])
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -47,8 +47,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         if (self.getProperty('Filenames').isDefault
-            and self.getProperty('ScanWorkspace').isDefault):
-                
+                and self.getProperty('ScanWorkspace').isDefault):
             issues['Filenames'] = 'Either a list of filenames containing YIG scan \
                 or the workspace with the loaded scan is required for calibration.'
             issues['ScanWorkspace'] = issues['Filenames']
@@ -94,7 +93,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         # fit gaussian to peaks for each pixel, returns peaks as a function of their expected position
         peaks_positions = self._fit_bragg_peaks(intensityWS, yig_peaks_positions)
         progress.report()
-        # fit the wavelegnth, bank gradients and individual 
+        # fit the wavelegnth, bank gradients and individual
         detector_parameters = self._fit_detector_positions(peaks_positions)
         progress.report()
         # fit the even and odd detectors to get position distributions in banks
@@ -217,13 +216,13 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             function_no = 1
             for peak_intensity, peak_centre in single_spectrum_peaks:
                 function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
-                                                                                             peak_centre, 
-                                                                                             peak_intensity, 
+                                                                                             peak_centre,
+                                                                                             peak_intensity,
                                                                                              0.5*self._PeakWidth)
                 constraints += ",f{0}.Height > 0.0".format(function_no)
                 constraints += ",f{0}.Sigma < 2.0".format(function_no)
                 constraints += ",{0} < f{1}.PeakCentre < {2}".format(float(peak_centre)-self._PeakWidth*2,
-                                                                     function_no, 
+                                                                     function_no,
                                                                      float(peak_centre)+self._PeakWidth*2)
                 function_no += 1
             fit_output = Fit(Function=function,
