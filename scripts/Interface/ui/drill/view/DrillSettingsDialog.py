@@ -16,7 +16,7 @@ from mantidqt.widgets.filefinderwidget import FileFinderWidget
 from mantidqt.widgets.workspaceselector import WorkspaceSelector
 
 
-class Setting(QObject):
+class DrillSetting(QObject):
     """
     Class that groups needed data of a single setting that will be displayed
     on the dialog.
@@ -38,7 +38,7 @@ class Setting(QObject):
             settingType (str): a str that represents the setting type
             doc (str): setting documentation
         """
-        super(Setting, self).__init__()
+        super(DrillSetting, self).__init__()
         self._doc = doc
 
         if ((settingType == "file") or (settingType == "files")):
@@ -128,7 +128,7 @@ class Setting(QObject):
         return self._getter
 
 
-class SettingsDialog(QDialog):
+class DrillSettingsDialog(QDialog):
     """
     Class that automatically create a dialog containing widgets for each
     provided settings.
@@ -142,7 +142,7 @@ class SettingsDialog(QDialog):
         """
         Initialize ths dialog. Connect the static buttons.
         """
-        super(SettingsDialog, self).__init__(parent)
+        super(DrillSettingsDialog, self).__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
 
         # setup ui
@@ -171,7 +171,7 @@ class SettingsDialog(QDialog):
         """
         for (n, t) in types.items():
             label = QLabel(n, self)
-            self.settings[n] = Setting(n, values[n], types[n], doc[n])
+            self.settings[n] = DrillSetting(n, values[n], types[n], doc[n])
             self.settings[n].valueChanged.connect(
                     lambda p : self.valueChanged.emit(p)
                     )

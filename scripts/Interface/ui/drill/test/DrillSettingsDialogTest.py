@@ -11,20 +11,21 @@ import sys
 
 from qtpy.QtWidgets import QApplication
 
-from Interface.ui.drill.view.SettingsDialog import SettingsDialog
+from Interface.ui.drill.view.DrillSettingsDialog import DrillSettingsDialog
 
 
 app = QApplication(sys.argv)
 
 
-class SettingsDialogTest(unittest.TestCase):
+class DrillSettingsDialogTest(unittest.TestCase):
 
     def setUp(self):
-        patch = mock.patch('Interface.ui.drill.view.SettingsDialog.Setting')
+        patch = mock.patch(
+                'Interface.ui.drill.view.DrillSettingsDialog.DrillSetting')
         self.mSetting = patch.start()
         self.addCleanup(patch.stop)
 
-        self.dialog = SettingsDialog()
+        self.dialog = DrillSettingsDialog()
         self.dialog.formLayout = mock.Mock()
 
     def test_init(self):

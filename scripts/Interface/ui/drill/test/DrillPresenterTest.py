@@ -14,8 +14,8 @@ from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
 class DrillPresenterTest(unittest.TestCase):
 
     def setUp(self):
-        patch = mock.patch(
-                'Interface.ui.drill.presenter.DrillPresenter.SettingsDialog')
+        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter'
+                           '.DrillSettingsDialog')
         self.mSettings = patch.start()
         self.addCleanup(patch.stop)
 

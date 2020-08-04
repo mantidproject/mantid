@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from ..view.SettingsDialog import SettingsDialog
+from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
 
 
@@ -131,7 +131,7 @@ class DrillPresenter:
         generates automatically its fields on the basis of settings types. It
         also connects the differents signals to get validation of user inputs.
         """
-        sw = SettingsDialog(self.view)
+        sw = DrillSettingsDialog(self.view)
         types, values, doc = self.model.getSettingsTypes()
         sw.initWidgets(types, values, doc)
         sw.setSettings(self.model.getSettings())
