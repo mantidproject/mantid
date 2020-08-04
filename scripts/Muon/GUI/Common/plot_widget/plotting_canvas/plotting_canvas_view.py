@@ -87,9 +87,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         """Creates a new blank plotting canvas"""
         self._plot_information_list = []
         self._number_of_axes = num_axes
-        self._color_queue = [ColorQueue()]
-        for i in range(num_axes):
-            self._color_queue.append(ColorQueue())
+        self._color_queue = [ColorQueue() for _ in range(num_axes) ]
         self.fig.clf()
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
                                       fig=self.fig)
