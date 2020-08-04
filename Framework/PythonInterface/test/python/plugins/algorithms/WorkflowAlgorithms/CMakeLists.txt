@@ -51,7 +51,6 @@ set(TEST_PY_FILES
     ReflectometryILLConvertToQTest.py
     ReflectometryILLPolarizationCorTest.py
     ReflectometryILLPreprocessTest.py
-    ReflectometryILLSumForegroundTest.py
     ReflectometryISISLoadAndProcessTest.py
     ResNorm2Test.py
     SANSDarkRunBackgroundCorrectionTest.py

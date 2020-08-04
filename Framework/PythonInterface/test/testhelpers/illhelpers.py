@@ -207,11 +207,6 @@ def refl_add_line_position(ws, linePosition):
     return ws
 
 
-def refl_add_two_theta(ws, twoTheta):
-    ws.run().addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
-    return ws
-
-
 def refl_preprocess(outputWSName, ws):
     args = {
         'InputWorkspace': ws,
