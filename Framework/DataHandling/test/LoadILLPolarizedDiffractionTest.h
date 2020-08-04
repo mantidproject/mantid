@@ -490,8 +490,11 @@ public:
                       144.17, 0.01)
     }
     // check for the correct wavelength value from the IPF
-    MatrixWorkspace_sptr ws = std::static_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
-    double wavelength = stod(ws->mutableRun().getLogData("monochromator.wavelength")->value());
+    MatrixWorkspace_sptr ws =
+        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
+    double wavelength =
+        stod(ws->mutableRun().getLogData("monochromator.wavelength")->value());
     TS_ASSERT_DELTA(wavelength, 3.09, 0.01)
   }
 
