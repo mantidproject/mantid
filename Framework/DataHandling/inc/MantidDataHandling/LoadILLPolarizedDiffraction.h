@@ -62,6 +62,8 @@ private:
   std::string m_instName; ///< instrument name to load the IDF
   std::string m_fileName; ///< file name to load
 
+  double m_wavelength; // wavelength value is read from the YIG IPF
+
   LoadHelper m_loadHelper;                         ///< a helper for metadata
   API::WorkspaceGroup_sptr m_outputWorkspaceGroup; ///< output workspace
 };

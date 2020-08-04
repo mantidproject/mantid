@@ -143,6 +143,7 @@ void LoadILLPolarizedDiffraction::exec() {
 
   m_fileName = getPropertyValue("Filename");
   m_outputWorkspaceGroup = std::make_shared<API::WorkspaceGroup>();
+  m_wavelength = 0;
 
   progress.report("Loading the detector polarization analysis data");
   loadData();
@@ -172,12 +173,18 @@ void LoadILLPolarizedDiffraction::loadData() {
     std::string start_time = entry.getString("start_time");
     start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
 
-    // prepare axes for data
-    std::vector<double> axis = prepareAxes(entry);
-
     // init the workspace with proper number of histograms and number of
     // channels
     auto workspace = initStaticWorkspace(entry);
+
+    // load the instrument
+    loadInstrument(workspace);
+
+    // rotate detectors to their position during measurement
+    moveTwoTheta(entry, workspace);
+
+    // prepare axes for data
+    std::vector<double> axis = prepareAxes(entry);
 
     // load data from file
     std::string dataName = "data/Detector_data";
@@ -219,12 +226,6 @@ void LoadILLPolarizedDiffraction::loadData() {
       workspace->mutableX(monitor_no) = axis;
     }
 
-    // load the instrument
-    loadInstrument(workspace);
-
-    // rotate detectors to their position during measurement
-    moveTwoTheta(entry, workspace);
-
     // convert the spectrum axis to scattering angle
     if (getProperty("ConvertToScatteringAngle")) {
       workspace = convertSpectrumAxis(workspace);
@@ -261,6 +262,11 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
       auto const entryName = std::string("entry" + std::to_string(workspaceId));
       m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(),
                                          entryName);
+      if (m_wavelength != 0) {
+        workspace->mutableRun().removeLogData("monochromator.wavelength");
+        workspace->mutableRun().addProperty("monochromator.wavelength",
+                                            m_wavelength);
+      }
     }
     NXclose(&nxHandle);
   }
@@ -278,13 +284,22 @@ API::MatrixWorkspace_sptr
 LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   const size_t nSpectra = D7_NUMBER_PIXELS + NUMBER_MONITORS;
 
+  // Set number of channels
+  NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
+  acquisitionMode.load();
+  m_acquisitionMode = acquisitionMode[0];
+  if (m_acquisitionMode == TOF_MODE_ON) {
+    NXFloat timeOfFlightInfo = entry.openNXFloat("D7/Detector/time_of_flight");
+    timeOfFlightInfo.load();
+    m_numberOfChannels = size_t(timeOfFlightInfo[1]);
+  } else {
+    m_numberOfChannels = 1;
+  }
+
   API::MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
 
   // Set x axis units
-  NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
-  acquisitionMode.load();
-  m_acquisitionMode = acquisitionMode[0];
   if (m_acquisitionMode == TOF_MODE_ON) {
     auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
         UnitFactory::Instance().create("Label"));
@@ -345,10 +360,11 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
     loadInst->setProperty("Workspace", workspace);
     loadInst->execute();
 
-    auto instrumentMap = workspace->instrumentParameters();
     Instrument_const_sptr instrument = workspace->getInstrument();
     IComponent_const_sptr currentBank = instrument->getComponentByName(
         std::string("bank" + std::to_string(bankId)));
+
+    m_wavelength = stod(currentBank->getParameterAsString("wavelength"));
 
     for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK);
          pixel_no++) {
@@ -411,26 +427,31 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
  */
 std::vector<double>
 LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
+  std::cout << "prepare axes" << std::endl;
   // check the mode of measurement and prepare axes for data
   std::vector<double> axes;
-  NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
-  acquisitionMode.load();
-  if (acquisitionMode[0] == TOF_MODE_ON) {
+
+  if (m_acquisitionMode == TOF_MODE_ON) {
     NXFloat timeOfFlightInfo = entry.openNXFloat("D7/Detector/time_of_flight");
     timeOfFlightInfo.load();
     auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
-    m_numberOfChannels = size_t(timeOfFlightInfo[1]);
     auto tofDelay = timeOfFlightInfo[2];
     for (auto channel_no = 0;
          channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
       axes.push_back(static_cast<double>(tofDelay + channel_no * channelWidth));
     }
   } else {
-    m_numberOfChannels = 1;
-    NXFloat wavelength = entry.openNXFloat("D7/monochromator/wavelength");
-    wavelength.load();
-    axes.push_back(static_cast<double>(wavelength[0] * 0.99));
-    axes.push_back(static_cast<double>(wavelength[0] * 1.01));
+    double wavelength = 0;
+    if (m_wavelength != 0) {
+      wavelength = m_wavelength;
+    } else {
+      NXFloat wavelengthNexus =
+          entry.openNXFloat("D7/monochromator/wavelength");
+      wavelengthNexus.load();
+      wavelength = wavelengthNexus[0];
+    }
+    axes.push_back(static_cast<double>(wavelength * 0.99));
+    axes.push_back(static_cast<double>(wavelength * 1.01));
   }
   return axes;
 }
