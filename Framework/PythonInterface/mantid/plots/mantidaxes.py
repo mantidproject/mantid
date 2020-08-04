@@ -14,6 +14,7 @@ import copy
 import numpy as np
 
 from matplotlib.axes import Axes
+from matplotlib.cbook import safe_masked_invalid
 from matplotlib.collections import Collection, PolyCollection
 from matplotlib.colors import Colormap
 from matplotlib.container import Container, ErrorbarContainer
@@ -1374,9 +1375,9 @@ class MantidAxes3D(Axes3D):
         else:
             polyc = Axes3D.plot_surface(self, *args, **kwargs)
 
-        # This is a bit of a hack, should be able to remove
-        # when matplotlib supports plotting masked arrays
-        polyc._A = np.ma.masked_invalid(polyc._A)
+            # This is a bit of a hack, should be able to remove
+            # when matplotlib supports plotting masked arrays
+            polyc._A = safe_masked_invalid(polyc._A)
 
         # Create a copy of the original data points because data are set to nan when the axis limits are changed.
         self.original_data = copy.deepcopy(polyc._vec)
