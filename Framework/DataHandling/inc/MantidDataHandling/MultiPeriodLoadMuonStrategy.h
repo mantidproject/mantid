@@ -5,20 +5,18 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/LoadMuonStrategy.h"
-#include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
-class SinglePeriodLoadMuonStrategy : public LoadMuonStrategy {
+class MultiPeriodLoadMuonStrategy : public LoadMuonStrategy {
 public:
   // Constructor
-  SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log,
-                               const std::string filename,
-                               NeXus::NXEntry &entry,
-                               DataObjects::Workspace2D_sptr workspace,
-                               int entryNumber, bool isFileMultiPeriod);
+  MultiPeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string filename,
+                              NeXus::NXEntry &entry,
+                              API::WorkspaceGroup_sptr workspaceGroup);
   // Loads the muon log data
   void loadMuonLogData() override;
   // Returns the good frames from the nexus entry
@@ -32,9 +30,7 @@ public:
 
 private:
   NeXus::NXEntry &m_entry;
-  DataObjects::Workspace2D_sptr m_workspace;
-  int m_entryNumber;
-  bool m_isFileMultiPeriod;
+  API::WorkspaceGroup_sptr m_workspaceGroup;
   std::vector<detid_t> m_detectors;
   std::vector<detid_t> getLoadedDetectors();
 };

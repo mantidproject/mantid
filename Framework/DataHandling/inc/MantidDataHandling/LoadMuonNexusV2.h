@@ -77,7 +77,8 @@ private:
   bool m_multiPeriodsLoaded;
   // The loading strategy used
   std::unique_ptr<LoadMuonStrategy> m_loadMuonStrategy;
-}; // namespace DataHandling
-
+  // Change the time axis unit as LoadISISNexus has the wrong one
+  void applyTimeAxisUnitCorrection(API::Workspace_sptr &workspace);
+};
 } // namespace DataHandling
 } // namespace Mantid

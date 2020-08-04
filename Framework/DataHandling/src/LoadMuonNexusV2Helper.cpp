@@ -5,8 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexusV2Helper.h"
+#include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid {
@@ -24,6 +27,9 @@ const std::string DEADTIME{"dead_time"};
 const std::string COUNTS{"counts"};
 const std::string FIRSTGOODBIN{"first_good_bin"};
 const std::string TIMEZERO{"time_zero"};
+const std::string SAMPLE{"sample"};
+const std::string TEMPERATURE{"temperature"};
+const std::string MAGNETICFIELD{"magnetic_field"};
 } // namespace NeXusEntry
 
 using namespace NeXus;
@@ -64,18 +70,22 @@ NXInt loadGoodFramesDataFromNexus(const NXEntry &entry,
 std::vector<detid_t>
 loadDetectorGroupingFromNexus(const NXEntry &entry,
                               const std::vector<detid_t> &detectorsLoaded,
-                              bool isFileMultiPeriod) {
-
+                              bool isFileMultiPeriod, const int periodNumber) {
+  // We cast the numLoadedDetectors to an int, which is the index type used for
+  // Nexus Data sets. As detectorsLoaded is derived from a nexus entry we
+  // can be certain we won't overflow the integer type.
+  int numLoadedDetectors = static_cast<int>(detectorsLoaded.size());
   std::vector<detid_t> grouping;
+  grouping.reserve(numLoadedDetectors);
   // Open nexus entry
   NXClass detectorGroup = entry.openNXGroup(NeXusEntry::DETECTOR);
   if (detectorGroup.containsDataSet(NeXusEntry::GROUPING)) {
     NXInt groupingData = detectorGroup.openNXInt(NeXusEntry::GROUPING);
     groupingData.load();
-    if (!isFileMultiPeriod) {
-      for (const auto &detectorNumber : detectorsLoaded) {
-        grouping.emplace_back(groupingData[detectorNumber - 1]);
-      }
+    int groupingOffset =
+        !isFileMultiPeriod ? 0 : (numLoadedDetectors) * (periodNumber - 1);
+    for (const auto &detectorNumber : detectorsLoaded) {
+      grouping.emplace_back(groupingData[detectorNumber - 1 + groupingOffset]);
     }
   }
   return grouping;
@@ -94,22 +104,27 @@ std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   }
   return mainFieldDirection;
 }
+// Loads dead times from the nexus file
+// Assumes one grouping entry per detector
 std::vector<double>
 loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
                        const std::vector<detid_t> &loadedDetectors,
-                       const bool isFileMultiPeriod) {
-
+                       const bool isFileMultiPeriod, const int periodNumber) {
+  // We cast the numLoadedDetectors to an int, which is the index type used for
+  // Nexus Data sets. As loadedDectors is derived from a nexus entry we
+  // can be certain we won't overflow the integer type.
+  int numLoadedDetectors = static_cast<int>(loadedDetectors.size());
   std::vector<double> deadTimes;
-  // Open detector nexus entry
+  deadTimes.reserve(numLoadedDetectors);
   NXClass detectorGroup = entry.openNXGroup(NeXusEntry::DETECTOR);
   if (detectorGroup.containsDataSet(NeXusEntry::DEADTIME)) {
     NXFloat deadTimesData = detectorGroup.openNXFloat(NeXusEntry::DEADTIME);
     deadTimesData.load();
-    if (!isFileMultiPeriod) {
-      // Simplest case - one grouping entry per detector
-      for (const auto &detectorNumber : loadedDetectors) {
-        deadTimes.emplace_back(deadTimesData[detectorNumber - 1]);
-      }
+    int deadTimeOffset =
+        !isFileMultiPeriod ? 0 : (numLoadedDetectors) * (periodNumber - 1);
+    for (const auto &detectorNumber : loadedDetectors) {
+      deadTimes.emplace_back(
+          deadTimesData[detectorNumber - 1 + deadTimeOffset]);
     }
   }
   return deadTimes;
@@ -178,6 +193,66 @@ getLoadedDetectors(const DataObjects::Workspace2D_sptr &localWorkspace) {
   std::vector<detid_t> loadedDetectors;
   size_t numberOfSpectra = localWorkspace->getNumberHistograms();
 
+  for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra;
+       spectraIndex++) {
+    const auto detIdSet =
+        localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
+    // each spectrum should only point to one detector in the Muon file
+    loadedDetectors.emplace_back(*detIdSet.begin());
+  }
+  return loadedDetectors;
+}
+
+MuonNexus::SampleInformation
+loadSampleInformationFromNexus(const NeXus::NXEntry &entry) {
+  auto runSample = entry.openNXGroup(NeXusEntry::SAMPLE);
+  MuonNexus::SampleInformation sampleInformation;
+  try {
+    sampleInformation.magneticField =
+        runSample.getFloat(NeXusEntry::MAGNETICFIELD);
+    sampleInformation.temperature = runSample.getFloat(NeXusEntry::TEMPERATURE);
+  } catch (std::runtime_error) {
+    throw std::runtime_error("Could not load sample information (temperature "
+                             "and magnetic field) from nexus entry");
+  }
+  return sampleInformation;
+}
+/**
+ * Loads default detector grouping, if this isn't present
+ * return dummy grouping
+ * @returns :: Grouping table
+ */
+Workspace_sptr loadDefaultDetectorGrouping(
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
+
+  auto instrument = localWorkspace->getInstrument();
+  auto &run = localWorkspace->run();
+  std::string mainFieldDirection =
+      run.getLogData("main_field_direction")->value();
+  API::GroupingLoader groupLoader(instrument, mainFieldDirection);
+  try {
+    const auto idfGrouping = groupLoader.getGroupingFromIDF();
+    return idfGrouping->toTable();
+  } catch (const std::runtime_error &) {
+    auto dummyGrouping = std::make_shared<Grouping>();
+    if (instrument->getNumberDetectors() != 0) {
+      dummyGrouping = groupLoader.getDummyGrouping();
+    } else {
+      // Make sure it uses the right number of detectors
+      std::ostringstream oss;
+      oss << "1-" << localWorkspace->getNumberHistograms();
+      dummyGrouping->groups.emplace_back(oss.str());
+      dummyGrouping->groupNames.emplace_back("all");
+    }
+    return dummyGrouping->toTable();
+  }
+}
+
+std::vector<detid_t> getLoadedDetectorsFromWorkspace(
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
+  size_t numberOfSpectra = localWorkspace->getNumberHistograms();
+  std::vector<detid_t> loadedDetectors;
+  loadedDetectors.reserve(numberOfSpectra);
   for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra;
        spectraIndex++) {
     const auto detIdSet =

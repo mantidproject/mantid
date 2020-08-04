@@ -5,17 +5,22 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexusV2.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadMuonNexusV2Helper.h"
+#include "MantidDataHandling/MultiPeriodLoadMuonStrategy.h"
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 #include <vector>
 
@@ -145,20 +150,16 @@ void LoadMuonNexusV2::execLoader() {
   NXRoot root(m_filename);
   NXEntry entry = root.openEntry(NeXusEntry::RAWDATA);
   isEntryMultiPeriod(entry);
-  if (m_isFileMultiPeriod) {
-    throw std::invalid_argument(
-        "Multiperiod nexus files not yet supported by LoadMuonNexusV2");
-  }
-
   // Execute child algorithm LoadISISNexus2
   auto outWS = runLoadISISNexus();
 
   // Check if single or multi period file and create appropriate loading
   // strategy
   if (m_multiPeriodsLoaded) {
-    // Currently not implemented
-    throw std::invalid_argument(
-        "Multiperiod nexus files not yet supported by LoadMuonNexusV2");
+    WorkspaceGroup_sptr workspaceGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+    m_loadMuonStrategy = std::make_unique<MultiPeriodLoadMuonStrategy>(
+        g_log, m_filename, entry, workspaceGroup);
   } else {
     // we just have a single workspace
     Workspace2D_sptr workspace2D =
@@ -238,6 +239,7 @@ Workspace_sptr LoadMuonNexusV2::runLoadISISNexus() {
   ISISLoader->execute();
   this->copyPropertiesFrom(*ISISLoader);
   Workspace_sptr outWS = getProperty("OutputWorkspace");
+  applyTimeAxisUnitCorrection(outWS);
   return outWS;
 }
 /**
@@ -260,6 +262,27 @@ void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry,
   auto timeZeroVector =
       LoadMuonNexusV2Helper::loadTimeZeroListFromNexusFile(entry, numSpectra);
   setProperty("TimeZeroList", timeZeroVector);
+}
+
+/*
+Changes the unit of the time axis, which is incorrect due to being loaded using
+LoadISISNexus
+*/
+void LoadMuonNexusV2::applyTimeAxisUnitCorrection(Workspace_sptr &workspace) {
+  auto newUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
+      Kernel::UnitFactory::Instance().create("Label"));
+  newUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
+  auto workspaceGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  if (workspaceGroup) {
+    for (int i = 0; i < workspaceGroup->getNumberOfEntries(); ++i) {
+      auto workspace2D =
+          std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(i));
+      workspace2D->getAxis(0)->unit() = newUnit;
+    }
+  } else {
+    auto workspace2D = std::dynamic_pointer_cast<Workspace2D>(workspace);
+    workspace2D->getAxis(0)->unit() = newUnit;
+  }
 }
 } // namespace DataHandling
 } // namespace Mantid
