@@ -54,4 +54,11 @@ Bug fixes
 - Fixed an issue where switching to simultaneous fit mode was occasionally throwing an exception.
 - Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
 
+Elemental Analysis 
+##################
+
+New Features
+------------
+- Added a deselect all elements button.
+
 :ref:`Release 5.1.0 <v5.1.0>`
