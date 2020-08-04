@@ -53,6 +53,7 @@ Bug fixes
 - Fixed a bug that caused rebinned data to override non-binned data.
 - Fixed an issue where switching to simultaneous fit mode was occasionally throwing an exception.
 - Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
+- Fixed a bug in that caused mantid to crash when plotting window in muon analysis gui was resized to the minimum. 
 
 Elemental Analysis 
 ##################
