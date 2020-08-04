@@ -14,6 +14,68 @@ import threading
 EMPTY_TOKEN = '000000'
 
 
+def get_run_number(self, value):
+    """
+    Extracts the run number from the first run out of the string value of a
+    multiple file property of numors
+    """
+    return path.splitext(path.basename(value.split(',')[0].split('+')[0]))[0]
+
+
+def needs_processing(self, property_value, process_reduction_type):
+    """
+    Checks whether a given unary reduction needs processing or is already cached
+    in ADS with expected name.
+    @param property_value: the string value of the corresponding MultipleFile
+                           input property
+    @param process_reduction_type: the reduction_type of process
+    """
+    do_process = False
+    ws_name = ''
+    if property_value:
+        run_number = get_run_number(property_value)
+        ws_name = run_number + '_' + process_reduction_type
+        if mtd.doesExist(ws_name):
+            run = mtd[ws_name].getRun()
+            if run.hasProperty('ProcessedAs'):
+                process = run.getLogData('ProcessedAs').value
+                if process == process_reduction_type:
+                    logger.notice('Reusing {0} workspace: {1}'
+                                  .format(process_reduction_type, ws_name))
+                else:
+                    logger.warning('{0} workspace found, but processed '
+                                   'differently: {1}'
+                                   .format(process_reduction_type, ws_name))
+                    do_process = True
+            else:
+                logger.warning('{0} workspace found, but missing the '
+                               'ProcessedAs flag: {1}'
+                               .format(process_reduction_type, ws_name))
+                do_process = True
+        else:
+            do_process = True
+    return [do_process, ws_name]
+
+
+def needs_loading(self, property_value, loading_reduction_type):
+    """
+    Checks whether a given unary input needs loading or is already loaded in
+    ADS.
+    @param property_value: the string value of the corresponding FileProperty
+    @param loading_reduction_type : the reduction_type of input to load
+    """
+    loading = False
+    ws_name = ''
+    if property_value:
+        ws_name = path.splitext(path.basename(property_value))[0]
+        if mtd.doesExist(ws_name):
+            logger.notice('Reusing {0} workspace: {1}'
+                          .format(loading_reduction_type, ws_name))
+        else:
+            loading = True
+    return [loading, ws_name]
+
+
 class AutoProcessContext:
     """
     Static lock for the access to the shared dictionnary of events.
@@ -33,68 +95,6 @@ class AutoProcessContext:
         self.loading = only_loading
         self.name = None
 
-    def _get_run_number(self, value):
-        """
-        Extracts the run number from the first run out of the string value of a
-        multiple file property of numors
-        """
-        return path.splitext(
-                path.basename(value.split(',')[0].split('+')[0])
-                )[0]
-
-    def _needs_processing(self, property_value, process_reduction_type):
-        """
-        Checks whether a given unary reduction needs processing or is already
-        cached in ADS with expected name.
-        @param property_value: the string value of the corresponding
-                               MultipleFile input property
-        @param process_reduction_type: the reduction_type of process
-        """
-        do_process = False
-        ws_name = ''
-        if property_value:
-            run_number = self._get_run_number(property_value)
-            ws_name = run_number + '_' + process_reduction_type
-            if mtd.doesExist(ws_name):
-                run = mtd[ws_name].getRun()
-                if run.hasProperty('ProcessedAs'):
-                    process = run.getLogData('ProcessedAs').value
-                    if process == process_reduction_type:
-                        logger.notice('Reusing {0} workspace: {1}'
-                                      .format(process_reduction_type, ws_name))
-                    else:
-                        logger.warning('{0} workspace found, but processed '
-                                       'differently: {1}'
-                                       .format(process_reduction_type, ws_name))
-                        do_process = True
-                else:
-                    logger.warning('{0} workspace found, but missing the '
-                                   'ProcessedAs flag: {1}'
-                                   .format(process_reduction_type, ws_name))
-                    do_process = True
-            else:
-                do_process = True
-        return [do_process, ws_name]
-
-    def _needs_loading(self, property_value, loading_reduction_type):
-        """
-        Checks whether a given unary input needs loading or is already loaded in
-        ADS.
-        @param property_value: the string value of the corresponding
-                               FileProperty
-        @param loading_reduction_type : the reduction_type of input to load
-        """
-        loading = False
-        ws_name = ''
-        if property_value:
-            ws_name = path.splitext(path.basename(property_value))[0]
-            if mtd.doesExist(ws_name):
-                logger.notice('Reusing {0} workspace: {1}'
-                              .format(loading_reduction_type, ws_name))
-            else:
-                loading = True
-        return [loading, ws_name]
-
     def __enter__(self):
         """
         Enter the context. This method checks if the processing is needed and
@@ -102,9 +102,9 @@ class AutoProcessContext:
         """
         self.__class__.AUTO_PROCESS_LOCK.acquire()
         if self.loading:
-            [needed, self.name] = self._needs_loading(self.value, self.type)
+            [needed, self.name] = needs_loading(self.value, self.type)
         else:
-            [needed, self.name] = self._needs_processing(self.value, self.type)
+            [needed, self.name] = needs_processing(self.value, self.type)
         if needed:
             if self.name in self.__class__.AUTO_PROCESS_EVENTS:
                 event = self.__class__.AUTO_PROCESS_EVENTS[self.name]
