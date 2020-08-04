@@ -13,7 +13,10 @@ currently supported instruments:
     * FIGARO: Reflectometry
 
 The interface is accessible through the Workbench menu bar: *Interfaces* ->
-*ILL* -> *DrILL*
+*ILL* -> *DrILL*.
+n.b. To be able to use the interface, one has to set the default facility to ILL first.
+Open the settings through the workbench menu (*File* -> *Settings*). In the *General* tab,
+set the facility to ILL.
 
 
 Interface overview
@@ -25,7 +28,9 @@ The DrILL main window is composed of different parts:
    :align: center
 
 spreadsheet like table (1)
-    This is the main part of the DrILL interface. One row represents one sample.
+    This is the main part of the DrILL interface. Generally one row represents one sample
+    measured at one or more distances (SANS) or angles (Reflectometry). There is no limit
+    on the number of the different configurations.
     It is used to provide filenames and options to the reduction algorithm.
 
 tool buttons (2)
@@ -123,7 +128,7 @@ During processing, the table is in read-only mode. The active row(s) turn
 yellow, the processed ones turn green and the row(s) for which the processing
 failed turn red. The progress bar is also updated.
 
-At the end of the processing, in any error occurs, a popup lists the concerned
+At the end of the processing, if any error occurs, a popup lists the concerned
 row(s). To get further information about the errors, one has to look into the
 Mantid logs.
 
