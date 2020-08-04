@@ -29,7 +29,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     # an approximate universal peak width:
     _PeakWidth = 2.0 # in degrees
     # positions of YIG peaks i d-spacing (Geller_59)
-    _YIG_D = np.array([5.0521,4.3752,3.3074,3.0938,2.9168,2.7671,2.6384,2.526,2.4269,2.2594,2.1876,2.0075,1.9567,1.9095,1.8656,1.8246,1.7862,1.7501,1.7161,1.684,1.6537,1.5716])
+    _YIG_D = np.array([5.0521,4.3752,3.3074,3.0938,2.9168,2.7671,2.6384,2.526,2.4269,2.2594,
+        2.1876,2.0075,1.9567,1.9095,1.8656,1.8246,1.7862,1.7501,1.7161,1.684,1.6537,1.5716])
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -46,7 +47,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         if (self.getProperty('Filenames').isDefault
-        and self.getProperty('ScanWorkspace').isDefault):
+                and self.getProperty('ScanWorkspace').isDefault):
             issues['Filenames'] = 'Either a list of filenames containing YIG scan \
                 or the workspace with the loaded scan is required for calibration.'
             issues['ScanWorkspace'] = issues['Filenames']
@@ -96,10 +97,10 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         detector_parameters = self._fit_detector_positions(peaks_positions)
         progress.report()
         # fit the even and odd detectors to get position distributions in banks
-        offsets = self._calibrate_detectors(detector_parameters)
+        wavelength, pixel_offsets = self._calibrate_detectors(detector_parameters)
         progress.report()
         # print the Instrument Parameter File that can be used in the ILLPolarizedDiffraction loader
-        self._print_parameter_file(offsets)
+        self._print_parameter_file(wavelength, pixel_offsets)
         progress.report()
 
         if self.getProperty('DetectorFitOutput').isDefault:
@@ -214,12 +215,13 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             constraints = "f0.A0 >= 0"
             function_no = 1
             for peak_intensity, peak_centre in single_spectrum_peaks:
-                function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(peak_centre,
-                    peak_intensity, 0.5*self._PeakWidth)
+                function += "name=Gaussian, PeakCentre={0}, Height={1}, \
+                    Sigma={2};\n".format(peak_centre, peak_intensity, 0.5*self._PeakWidth)
                 constraints += ",f{0}.Height > 0.0".format(function_no)
                 constraints += ",f{0}.Sigma < 2.0".format(function_no)
                 constraints += ",{0} < f{1}.PeakCentre < {2}".format(float(peak_centre)-self._PeakWidth*2,
-                    function_no, float(peak_centre)+self._PeakWidth*2)
+                                                                     function_no, 
+                                                                     float(peak_centre)+self._PeakWidth*2)
                 function_no += 1
             fit_output = Fit(Function=function,
                              InputWorkspace=ws,
@@ -345,7 +347,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         gradients and offsets.
         Returns a list of pixel positions relative to their
         respective bank"""
-        wavelength = parameter_table.column(1)[1]
+        intitial_wavelength = self.getProperty('ApproximateWavelength').value
+        wavelength = parameter_table.column(1)[1] * float(intitial_wavelength)
         if parameter_table.column(1)[0] == 0:
             raise RuntimeError('Bank2 slope is equal to 0.')
         bank2_slope = 1.0 / float(parameter_table.column(1)[0])
@@ -368,10 +371,10 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                     pixel_offset -= self._RAD_2_DEG * 0.011 / (2.0 * (1.5177 - 0.01252)) # repeats calculation from the D7 IDF
                 pixel_offsets.append(pixel_offset)
                 pixel_no += 1
-        return pixel_offsets
+        return wavelength, pixel_offsets
 
     def _calibrate_detectors(self, parameter_table):
-        pixel_offsets = self._calculate_pixel_positions(parameter_table)
+        wavelength, pixel_offsets = self._calculate_pixel_positions(parameter_table)
         bank2_pixels = pixel_offsets[:44]
         pos_bank2 = CreateWorkspace(DataX=range(44), DataY=bank2_pixels, NSpec=1)
         bank3_pixels = pixel_offsets[44:87]
@@ -379,7 +382,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         bank4_pixels = pixel_offsets[89:132]
         pos_bank4 = CreateWorkspace(DataX=range(89, 132), DataY=bank4_pixels, NSpec=1)
 
-        return pixel_offsets
+        return wavelength, pixel_offsets
 
     def _prettify(self, elem):
         """Returns a pretty-printed XML string for the Element."""
@@ -387,7 +390,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent="  ")
 
-    def _print_parameter_file(self, pixel_offsets):
+    def _print_parameter_file(self, wavelength, pixel_offsets):
         """Prints the pixel positions as a Instrument Parameter
         File that can be later used by the D7 loader."""
         param_file = ET.Element('parameter-file')
@@ -398,6 +401,13 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         for bank_no in range(self._D7NumberBanks):
             bank = ET.SubElement(param_file, 'component-link')
             bank.set('name', 'bank'+str(bank_no+2))
+            
+            wavelength_information = ET.SubElement(param_file, 'wavelength')
+            param = ET.SubElement(wavelength_information, 'parameter')
+            param.set('name', 'wavelength')
+            value = ET.SubElement(param, 'value')
+            value.set('val', str(wavelength))
+            
             for pixel_no in range(self._D7NumberPixelsBank):
                 pixel = ET.SubElement(bank, 'parameter')
                 pixel.set('name', 'twoTheta_pixel_{0}'.format(pixel_no+1))
