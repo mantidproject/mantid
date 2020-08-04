@@ -29,12 +29,12 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     # an approximate universal peak width:
     _PeakWidth = 2.0 # in degrees
     # positions of YIG peaks i d-spacing (Geller_59)
-    _YIG_D = np.array([5.0521,4.3752,3.3074,3.0938,2.9168,2.7671,2.6384,2.526,2.4269,2.2594,
+    _YIG_D = np.array([5.0521,4.3752,3.3074,3.0938,2.9168,2.7671,2.6384,2.526,2.4269,2.2594,\
         2.1876,2.0075,1.9567,1.9095,1.8656,1.8246,1.7862,1.7501,1.7161,1.684,1.6537,1.5716])
 
     def category(self):
         return 'ILL\\Diffraction'
-  
+
     def summary(self):
         return 'Performs D7 position calibration using YIG scan and returns D7 IPF readable by the NeXus data loader.'
 
@@ -47,7 +47,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         if (self.getProperty('Filenames').isDefault
-                and self.getProperty('ScanWorkspace').isDefault):
+            and self.getProperty('ScanWorkspace').isDefault):
+                
             issues['Filenames'] = 'Either a list of filenames containing YIG scan \
                 or the workspace with the loaded scan is required for calibration.'
             issues['ScanWorkspace'] = issues['Filenames']
@@ -68,7 +69,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                                                optional=PropertyMode.Optional),
                              doc='The table workspace name that will be used to store all of the calibration parameters.')
 
-        self.declareProperty(name="ApproximateWavelength", 
+        self.declareProperty(name="ApproximateWavelength",
                              defaultValue="3.1",
                              validator=StringListValidator(["3.1", "4.8", "5.7"]),
                              direction=Direction.Input,
@@ -107,7 +108,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             pass #will clean up the remaining workspaces
         else:
             self.setProperty('DetectorFitOutput', mtd['det_out_Parameters'])
-            
+
     def _get_scan_data(self):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""
@@ -118,7 +119,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         outGroup = Load(self.getPropertyValue("Filenames"),
                         OutputWorkspace="outGroup",
                         PositionCalibration='None')
-        # load the group into a single table workspace 
+        # load the group into a single table workspace
         nfiles = outGroup.getNumberOfEntries()
         # new vertical axis
         x_axis = NumericAxis.create(nfiles)
@@ -137,9 +138,9 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             workspace = ConvertAxisByFormula(workspace,
                                              Axis='X',
                                              Formula='-180.0 * signedtwotheta / pi')
-            # mask detectors too close to the beam axis or too far away:           
+            # mask detectors too close to the beam axis or too far away:
             workspace = MaskBinsIf(workspace, Criterion='x<15.0 && x>-35.0')
-            # append the new row to a new MatrixWorkspace   
+            # append the new row to a new MatrixWorkspace
             workspace = ConvertToPointData(InputWorkspace=workspace)
             try:
                 intensityWS
@@ -157,7 +158,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             y_axis.setValue(pixel_no, pixel_no+1)
         intensityWS.replaceAxis(1, y_axis)
         return intensityWS
-      
+
     def _remove_invisible_yig_peaks(self, yig_list):
         """Removes YIG peaks with 2theta above 180 degrees
         and returns a list with peaks positions in 2theta"""
@@ -167,7 +168,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         return self._include_other_quadrants(yig_list)
 
     def _include_other_quadrants(self, yig_list):
-        """Adds other quadrants to the peak list: (-90,0) degrees"""    
+        """Adds other quadrants to the peak list: (-90,0) degrees"""
         peak_list = []
         for peak in yig_list:
             peak_list.append(peak)
@@ -216,7 +217,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             function_no = 1
             for peak_intensity, peak_centre in single_spectrum_peaks:
                 function += "name=Gaussian, PeakCentre={0}, Height={1}, \
-                    Sigma={2};\n".format(peak_centre, peak_intensity, 0.5*self._PeakWidth)
+                             Sigma={2};\n".format(peak_centre, peak_intensity, 0.5*self._PeakWidth)
                 constraints += ",f{0}.Height > 0.0".format(function_no)
                 constraints += ",f{0}.Sigma < 2.0".format(function_no)
                 constraints += ",{0} < f{1}.PeakCentre < {2}".format(float(peak_centre)-self._PeakWidth*2,
@@ -302,7 +303,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             constraint_list.append('{0} < f{1}.m < {2}'.format(1-gradient_constr,
                                                                pixel_no,
                                                                1+gradient_constr))
-            # add a global tie on lambda:           
+            # add a global tie on lambda:
             ties_lambda_list.append('f{0}.lambda'.format(pixel_no))
             # set ties for three bank gradients:
             ties_gradient_list.append('f{0}.m'.format(pixel_no))
@@ -375,12 +376,12 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
 
     def _calibrate_detectors(self, parameter_table):
         wavelength, pixel_offsets = self._calculate_pixel_positions(parameter_table)
-        bank2_pixels = pixel_offsets[:44]
-        pos_bank2 = CreateWorkspace(DataX=range(44), DataY=bank2_pixels, NSpec=1)
-        bank3_pixels = pixel_offsets[44:87]
-        pos_bank3 = CreateWorkspace(DataX=range(44, 88), DataY=bank3_pixels, NSpec=1)
-        bank4_pixels = pixel_offsets[89:132]
-        pos_bank4 = CreateWorkspace(DataX=range(89, 132), DataY=bank4_pixels, NSpec=1)
+#         bank2_pixels = pixel_offsets[:44]
+#         pos_bank2 = CreateWorkspace(DataX=range(44), DataY=bank2_pixels, NSpec=1)
+#         bank3_pixels = pixel_offsets[44:87]
+#         pos_bank3 = CreateWorkspace(DataX=range(44, 88), DataY=bank3_pixels, NSpec=1)
+#         bank4_pixels = pixel_offsets[89:132]
+#         pos_bank4 = CreateWorkspace(DataX=range(89, 132), DataY=bank4_pixels, NSpec=1)
 
         return wavelength, pixel_offsets
 
@@ -401,13 +402,13 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         for bank_no in range(self._D7NumberBanks):
             bank = ET.SubElement(param_file, 'component-link')
             bank.set('name', 'bank'+str(bank_no+2))
-            
+
             wavelength_information = ET.SubElement(param_file, 'wavelength')
             param = ET.SubElement(wavelength_information, 'parameter')
             param.set('name', 'wavelength')
             value = ET.SubElement(param, 'value')
             value.set('val', str(wavelength))
-            
+
             for pixel_no in range(self._D7NumberPixelsBank):
                 pixel = ET.SubElement(bank, 'parameter')
                 pixel.set('name', 'twoTheta_pixel_{0}'.format(pixel_no+1))
