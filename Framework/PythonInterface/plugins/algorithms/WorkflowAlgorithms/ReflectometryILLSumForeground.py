@@ -12,7 +12,7 @@ from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValid
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
                            StringListValidator)
 from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, RebinToWorkspace,
-                              ReflectometryBeamStatistics, ReflectometrySumInQ)
+                              ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
 import numpy
 import ReflectometryILL_common as common
 
@@ -322,19 +322,22 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         takes the 2theta from the spectrumInfo of the summed foreground workspace.
         Hence this code below translated the detector by the difference of the
         fractional and integer foreground centre along the detector plane.
-        Ideally there should also be a corresponding rotation afterwards, such that the detector still faces the sample.
-        However, since at this point the workspace is already in wavelength,
-        the second order correction in the sample-to-foreground centre distance no longer matters.
-        All that matters is the angle for subsequent Q calculation.
+        It also applies local rotation so that the detector continues to face the sample.
         Note that this translation has nothing to do with the difference of foreground centres in direct and reflected beams,
         which is hanled already in pre-process algorithm.
         Here it's only about the difference of the fractional and integer foreground centre of the reflected beam
-        with already calibrated angle no matter the option."""
+        with already calibrated angle no matter the option.
+        Note also, that this could probably be avoided, if the loader placed
+        the integer foreground at the given angle and not the fractional one.
+        Fractional foreground centre only matter when calculating the difference between direct and reflected beams.
+        But for the final Q (and sigma) calculation, it takes the position/angle from spectrumInfo()...(0),
+        which corresponds to the centre of the pixel."""
         foreground = self._foregroundIndices(ws)
         # integer foreground centre
         beamPosIndex = foreground[1]
         # fractional foreground centre
         linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
+        l2 = ws.run().getProperty('L2').value
         instr = common.instrumentName(ws)
         pixelSize = common.pixelSize(instr)
         # the distance between the fractional and integer foreground centres along the detector plane
@@ -348,9 +351,11 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             if instr == 'D17':
                 mx = xvsy
                 my = 0.0
+                rotationAxis = [0, 1, 0]
             else:
                 mx = 0.0
                 my = xvsy
+                rotationAxis = [-1, 0, 0]
             MoveInstrumentComponent(
                 Workspace=summedForeground,
                 ComponentName='detector',
@@ -358,6 +363,16 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 Y=my,
                 Z=mz,
                 RelativePosition=True
+            )
+            angle_corr = numpy.arctan2(dist, l2) * 180 / numpy.pi
+            RotateInstrumentComponent(
+                Workspace=summedForeground,
+                ComponentName='detector',
+                X=rotationAxis[0],
+                Y=rotationAxis[1],
+                Z=rotationAxis[2],
+                Angle=angle_corr,
+                RelativeRotation=True
             )
         return summedForeground
 

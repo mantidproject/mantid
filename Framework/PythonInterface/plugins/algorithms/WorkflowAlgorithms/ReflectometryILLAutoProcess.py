@@ -702,11 +702,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             preprocess_args['DirectBeamForegroundCentre'] = self.foreground_centre_from_logs(directBeamName)
         ReflectometryILLPreprocess(**preprocess_args)
         self.log().accumulate('Angle method: {0}\n'.format(angle_option))
-        rb_frg_centre = mtd[out_ws].run().getLogData(SampleLogs.FOREGROUND_CENTRE).value
-        self.log().accumulate('Final source (mid chopper) to sample distance [m]: {0:.5f}\n'.
-                              format(mtd[out_ws].spectrumInfo().l1()))
-        self.log().accumulate('Final reflected foreground centre distance [m]: {0:.5f}\n'.
-                              format(mtd[out_ws].spectrumInfo().l2(rb_frg_centre)))
+
 
     def sum_foreground(self, inputWorkspaceName, outputWorkspaceName, sumType, angle_index, directForegroundName = ''):
         """Run the ReflectometryILLSumForeground, empty directForegroundName decides, if reflected beam is present."""
@@ -723,6 +719,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             SubalgorithmLogging=self._subalgLogging,
             Cleanup=self._cleanup,
         )
+        self.log().accumulate('Final source (mid chopper) to sample distance [m]: {0:.5f}\n'.
+                              format(mtd[outputWorkspaceName].spectrumInfo().l1()))
+        self.log().accumulate('Final reflected foreground centre distance [m]: {0:.5f}\n'.
+                              format(mtd[outputWorkspaceName].spectrumInfo().l2(0)))
 
     def polarization_correction(self, inputWorkspaceName, outputWorkspaceName):
         """Run the ReflectometryILLPolarizationCor."""
@@ -794,7 +794,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.log().accumulate('\nNumber of angles treated: {0}\n'.format(self._dimensionality))
         for angle_index in range(self._dimensionality):
             runDB = self.make_name(self._db[angle_index])
-            self.log().accumulate('Angle 1:\n')
+            self.log().accumulate('Angle {0}:\n'.format(angle_index))
             self.log().accumulate('Direct Beam: {0}\n'.format(runDB))
             directBeamName = runDB + '_direct'
             directForegroundName = directBeamName + '_frg'
