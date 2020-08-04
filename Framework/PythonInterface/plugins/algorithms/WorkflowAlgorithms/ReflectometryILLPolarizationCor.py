@@ -93,18 +93,14 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
 
     def _commonBinning(self, wss):
         """Rebin all workspaces in wss to the first one."""
-        rebinnedWSs = [wss[0]]
         for i in range(1, len(wss)):
-            rebinnedWSName = self._names.withSuffix('rebinned_to_' + str(wss[0]))
             RebinToWorkspace(
                 WorkspaceToRebin=wss[i],
-                OutputWorkspace=rebinnedWSName,
+                OutputWorkspace=wss[i],
                 WorkspaceToMatch=wss[0],
                 EnableLogging=self._subalgLogging
             )
-            self._cleanup.cleanup(wss[i])
-            rebinnedWSs.append(rebinnedWSName)
-        return rebinnedWSs
+        return wss
 
     def _correct(self, wss, effWS):
         """Return a workspace group containing the polarization efficiency corrected workspaces."""
@@ -197,6 +193,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
             flipper1 = run.getProperty('Flipper1.stateint').value
             flipper2 = run.getProperty('Flipper2.stateint').value
             flippers[(flipper1, flipper2)] = ws
+            self.log().information(ws + ' flipper state found: {0}, {1}'.format(str(flipper1), str(flipper2)))
         wss[0] = flippers[0, 0]
         wss[1] = flippers[0, 1]
         wss[2] = flippers[1, 0]
