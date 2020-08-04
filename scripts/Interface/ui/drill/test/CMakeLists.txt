@@ -6,7 +6,7 @@ set(TEST_PY_FILES
   DrillPresenterTest.py
   DrillViewTest.py
   DrillTest.py
-  ParameterControllerTest.py
+  DrillParameterControllerTest.py
   DrillSettingsDialogTest.py
   )
 

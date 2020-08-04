@@ -8,26 +8,26 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.ParameterController import ParameterController, \
-                                                         ControllerSignals, \
-                                                         Parameter
+from Interface.ui.drill.model.DrillParameterController \
+        import DrillParameterController, ControllerSignals, DrillParameter
 
 
-class ParameterControllerTest(unittest.TestCase):
+class DrillParameterControllerTest(unittest.TestCase):
 
     def setUp(self):
         # mock sapi
-        patch = mock.patch('Interface.ui.drill.model.ParameterController.sapi')
+        patch = mock.patch(
+                'Interface.ui.drill.model.DrillParameterController.sapi')
         self.mSapi = patch.start()
         self.addCleanup(patch.stop)
 
-        self.controller = ParameterController("test")
+        self.controller = DrillParameterController("test")
 
     def test_signals(self):
         self.assertTrue(isinstance(self.controller.signals, ControllerSignals))
 
     def test_addParameter(self):
-        p = Parameter("name", "value", 0)
+        p = DrillParameter("name", "value", 0)
         self.controller.addParameter(p)
         pGet = self.controller._paramQueue.get()
         self.assertEqual(p, pGet)

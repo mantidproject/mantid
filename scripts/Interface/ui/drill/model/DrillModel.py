@@ -18,7 +18,7 @@ from mantid.api import *
 from .specifications import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
-from .ParameterController import Parameter, ParameterController
+from .DrillParameterController import DrillParameter, DrillParameterController
 
 
 class DrillModel(QObject):
@@ -293,7 +293,7 @@ class DrillModel(QObject):
 
         if (self.algorithm is None):
             return
-        self.controller = ParameterController(self.algorithm)
+        self.controller = DrillParameterController(self.algorithm)
         self.controller.signals.okParam.connect(onParamOk)
         self.controller.signals.wrongParam.connect(onParamError)
         self.controller.start()
@@ -374,7 +374,7 @@ class DrillModel(QObject):
             value (any): parameter value. Can be str, bool
             sample (int): sample index if it is a sample specific parameter
         """
-        self.controller.addParameter(Parameter(param, value, sample))
+        self.controller.addParameter(DrillParameter(param, value, sample))
 
     def checkAllParameters(self):
         """
@@ -384,11 +384,11 @@ class DrillModel(QObject):
             for (n, v) in self.samples[i].items():
                 if n == "CustomOptions":
                     for (nn, vv) in v.items():
-                        self.controller.addParameter(Parameter(nn, vv, i))
+                        self.controller.addParameter(DrillParameter(nn, vv, i))
                 else:
-                    self.controller.addParameter(Parameter(n, v, i))
+                    self.controller.addParameter(DrillParameter(n, v, i))
         for (n, v) in self.settings.items():
-            self.controller.addParameter(Parameter(n, v, -1))
+            self.controller.addParameter(DrillParameter(n, v, -1))
 
     def changeParameter(self, row, column, contents):
         """

@@ -14,7 +14,7 @@ from qtpy.QtCore import QObject, Signal
 import mantid.simpleapi as sapi
 
 
-class Parameter:
+class DrillParameter:
     """
     Class that defines a parameter to be checked.
     """
@@ -90,11 +90,11 @@ class ControllerSignals(QObject):
     Signals that the controller is using
     """
 
-    okParam = Signal(Parameter)
-    wrongParam = Signal(Parameter)
+    okParam = Signal(DrillParameter)
+    wrongParam = Signal(DrillParameter)
 
 
-class ParameterController(threading.Thread):
+class DrillParameterController(threading.Thread):
     """
     Class that checks algorithm parameters. It runs in a separate daemon
     thread.
@@ -107,7 +107,7 @@ class ParameterController(threading.Thread):
         Args:
             algName (str): algorithm name
         """
-        super(ParameterController, self).__init__()
+        super(DrillParameterController, self).__init__()
         self.daemon = True
         self._signals = ControllerSignals()
         self._paramQueue = queue.Queue()
@@ -124,7 +124,7 @@ class ParameterController(threading.Thread):
         Add a parameter for validation.
 
         Args:
-            parameter (Parameter): the parameter to be validated
+            parameter (DrillParameter): the parameter to be validated
         """
         self._paramQueue.put(parameter)
 
