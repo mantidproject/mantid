@@ -35,7 +35,8 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
         Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
         approximate_wavelength = '3.1' # Angstrom
         ILLYIGPositionCalibration(ScanWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                         DetectorFitOutput='test_shortWavelength', CalibrationFilename="test_shortWavelength.xml")
+                                  YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_shortWavelength.xml',
+                                  DetectorFitOutput='test_shortWavelength')
         self._check_fit_output('test_shortWavelength')
         self._check_load_data_with_calibration('test_shortWavelength.xml')
 
@@ -43,7 +44,8 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
         Load('396442_396831.nxs', OutputWorkspace='intermediateWavelengthScan')
         approximate_wavelength = '4.8' # Angstrom
         ILLYIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                         DetectorFitOutput='test_intermediateWavelength', CalibrationFilename="test_intermediateWavelength.xml")
+                                  YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_intermediateWavelength.xml',
+                                  DetectorFitOutput='test_intermediateWavelength')
         self._check_fit_output('test_intermediateWavelength')
         self._check_load_data_with_calibration('test_intermediateWavelength.xml')
         
@@ -51,7 +53,8 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
         Load('394458_394882.nxs', OutputWorkspace='longWavelengthScan')
         approximate_wavelength = '5.7' # Angstrom
         ILLYIGPositionCalibration(ScanWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                         DetectorFitOutput='test_longWavelength', CalibrationFilename="test_longWavelength.xml")
+                                  YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_longWavelength.xml',
+                                  DetectorFitOutput='test_longWavelength')
         self._check_fit_output('test_longWavelength')
         self._check_load_data_with_calibration('test_longWavelength.xml')
 

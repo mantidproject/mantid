@@ -7,7 +7,7 @@
 
 from mantid.simpleapi import *
 from mantid.kernel import Direction, StringListValidator
-from mantid.api import FileAction, MatrixWorkspaceProperty, MultipleFileProperty, \
+from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
     NumericAxis, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from datetime import date
 import math
@@ -15,6 +15,7 @@ import numpy as np
 import os
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
+
 
 class ILLYIGPositionCalibration(PythonAlgorithm):
 
@@ -27,10 +28,6 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     _D7NumberPixelsBank = 44
     # an approximate universal peak width:
     _PeakWidth = 2.0 # in degrees
-    # positions of YIG peaks i d-spacing (Geller_59)
-    _YIG_D = np.array([5.0521,4.3752,3.3074,3.0938,2.9168,2.7671,2.6384,2.526,2.4269,2.2594,
-                       2.1876,2.0075,1.9567,1.9095,1.8656,1.8246,1.7862,1.7501,1.7161,1.684,
-                       1.6537,1.5716])
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -58,15 +55,16 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         self.declareProperty(MultipleFileProperty("Filenames",
                                                   action=FileAction.OptionalLoad),
                              doc="The file names (including full or relative path) with a single YIG scan.")
+
         self.declareProperty(MatrixWorkspaceProperty('ScanWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the workspace containing the entire YIG scan.')
 
-        self.declareProperty(WorkspaceProperty('DetectorFitOutput', '',
-                                               direction=Direction.Output,
-                                               optional=PropertyMode.Optional),
-                             doc='The table workspace name that will be used to store all of the calibration parameters.')
+        self.declareProperty(FileProperty('YIGPeaksFile', '',
+                                          action=FileAction.Load,
+                                          extensions=['.xml']),
+                             doc='The file name file with all YIG peaks in d-spacing.')
 
         self.declareProperty(name="ApproximateWavelength",
                              defaultValue="3.1",
@@ -79,6 +77,12 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="The output YIG calibration Instrument Parameter File name.")
 
+        self.declareProperty(WorkspaceProperty('DetectorFitOutput', '',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='The table workspace name that will be used to store all of the calibration parameters.')
+
+
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=5)
         # load the chosen YIG scan
@@ -87,8 +91,11 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         else:
             intensityWS = self.getProperty('ScanWorkspace').value
         progress.report()
+        
+        # load the YIG peaks from an IPF
+        yig_d = self._load_yig_peaks(intensityWS)
         # check how many and which peaks can be fitted in each row
-        yig_peaks_positions = self._get_yig_peaks_positions(intensityWS, self._YIG_D)
+        yig_peaks_positions = self._get_yig_peaks_positions(intensityWS, yig_d)
         progress.report()
         # fit gaussian to peaks for each pixel, returns peaks as a function of their expected position
         peaks_positions = self._fit_bragg_peaks(intensityWS, yig_peaks_positions)
@@ -157,6 +164,16 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             y_axis.setValue(pixel_no, pixel_no+1)
         intensityWS.replaceAxis(1, y_axis)
         return intensityWS
+
+    def _load_yig_peaks(self, ws):
+        """Loads YIG peaks provided as an XML Instrument Parameter File"""
+        parameterFilename = self.getPropertyValue('YIGPeaksFile')
+        LoadParameterFile(Workspace=ws, Filename=parameterFilename)
+        yig_d_list = []
+        instrument = ws.getInstrument().getComponentByName('detector')
+        for param_name in instrument.getParameterNames(True):
+            yig_d_list.append(instrument.getNumberParameter(param_name)[0])
+        return sorted(yig_d_list)
 
     def _remove_invisible_yig_peaks(self, yig_list):
         """Removes YIG peaks with 2theta above 180 degrees
