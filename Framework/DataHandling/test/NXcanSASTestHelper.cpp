@@ -7,6 +7,7 @@
 #include "NXcanSASTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
@@ -34,7 +35,7 @@ getIDFfromWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace) {
   auto instrument = workspace->getInstrument();
   auto name = instrument->getFullName();
   auto date = workspace->getWorkspaceStartDate();
-  return workspace->getInstrumentFilename(name, date);
+  return Mantid::API::InstrumentFileFinder::getInstrumentFilename(name, date);
 }
 
 void setXValuesOn1DWorkspaceWithPointData(
