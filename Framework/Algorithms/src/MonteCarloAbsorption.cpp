@@ -491,7 +491,7 @@ void MonteCarloAbsorption::interpolateFromSparse(
     double lat, lon;
     std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
     const auto spatiallyInterpHisto =
-        sparseWS.interpolateFromDetectorGrid(lat, lon);
+        sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);

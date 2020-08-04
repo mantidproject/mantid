@@ -170,6 +170,7 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
     ynew[i] = (xp - x1) * y2 + (x2 - xp) * y1;
     ynew[i] *= overgap;
     enew[i] = sqrt(pow((xp - x1) * e1, 2) + pow(((x2 - xp)) * e2, 2));
+    enew[i] *= overgap;
     step++;
   }
 }

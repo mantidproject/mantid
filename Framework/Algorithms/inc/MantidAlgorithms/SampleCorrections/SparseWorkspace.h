@@ -41,8 +41,7 @@ public:
   virtual HistogramData::Histogram
   interpolateFromDetectorGrid(const double lat, const double lon) const;
   HistogramData::Histogram
-  bilinearInterpolateFromDetectorGrid(const double lat, const double lon,
-                                      const API::MatrixWorkspace &ws);
+  bilinearInterpolateFromDetectorGrid(const double lat, const double lon) const;
 
 protected:
   std::unique_ptr<Algorithms::DetectorGridDefinition> m_gridDef;
@@ -58,6 +57,11 @@ protected:
   extremeWavelengths(const API::MatrixWorkspace &ws);
   static std::tuple<double, double, double, double>
   extremeAngles(const API::MatrixWorkspace &ws);
+  HistogramData::HistogramY
+  secondDerivative(const std::array<boost::optional<size_t>, 4> indices,
+                   const double distanceStep) const;
+  HistogramData::HistogramE esq(HistogramData::HistogramE e) const;
+  HistogramData::HistogramE esqrt(HistogramData::HistogramE e) const;
 };
 
 /// unique pointer to Mantid::API::SparseWorkspace
