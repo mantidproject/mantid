@@ -48,11 +48,6 @@ class DrillModel(QObject):
     """
     PROCESSED_DATA_DIR = "processed"
 
-    """
-    Experiment ID directory prefix.
-    """
-    EXP_PREFIX = "exp_"
-
     ###########################################################################
     # signals                                                                 #
     ###########################################################################
@@ -254,7 +249,7 @@ class DrillModel(QObject):
         dataDir = os.path.join(baseDir, "{0}/{1}/{2}"
                                         .format(cycle,
                                                 self.instrument.lower(),
-                                                self.EXP_PREFIX + experiment))
+                                                experiment))
         rawDataDir = os.path.join(dataDir, self.RAW_DATA_DIR)
         processedDataDir = os.path.join(dataDir, self.PROCESSED_DATA_DIR)
         if not os.path.isdir(dataDir):
