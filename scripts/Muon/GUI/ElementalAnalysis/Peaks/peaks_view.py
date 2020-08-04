@@ -34,4 +34,3 @@ class PeaksView(QtWidgets.QWidget):
 
     def disable_deselect_elements_btn(self):
         self.deselect_elements.setEnabled(False)
-        

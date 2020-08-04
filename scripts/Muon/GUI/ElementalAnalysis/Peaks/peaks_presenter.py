@@ -23,4 +23,3 @@ class PeaksPresenter(object):
 
     def disable_deselect_elements_btn(self):
         self.view.disable_deselect_elements_btn()
-        
