@@ -300,40 +300,22 @@ std::array<double, 4> SparseWorkspace::inverseDistanceWeights(
   return weights;
 }
 
-HistogramData::HistogramY SparseWorkspace::secondDerivative(
-    const std::array<boost::optional<size_t>, 4> indices,
-    const double distanceStep) const {
+/** Calculate the second derivative of a histogram along a row of indices
+ *  @param indices List of detector indices
+ *  @param distanceStep The distance between detector indices
+ *  @return An interpolated histogram.
+ */
+HistogramData::HistogramY
+SparseWorkspace::secondDerivative(const std::array<size_t, 3> indices,
+                                  const double distanceStep) const {
   HistogramData::HistogramY avgSecondDeriv(blocksize());
-  if (indices[1] && indices[2]) {
-    HistogramData::HistogramY sumSecondDeriv(blocksize());
-    auto firstDerivB = (y(*indices[2]) - y(*indices[1])) / distanceStep;
-    auto numSecondDerivs = 0;
-    if (indices[0]) {
-      auto firstDerivA = boost::make_optional(
-          (y(*indices[1]) - y(*indices[0])) / distanceStep);
-      auto secondDerivA = (firstDerivB - *firstDerivA) / distanceStep;
-      sumSecondDeriv += secondDerivA;
-      numSecondDerivs++;
-    }
-    if (indices[3]) {
-      auto firstDerivC = boost::make_optional(
-          (y(*indices[3]) - y(*indices[2])) / distanceStep);
-      auto secondDerivB = (*firstDerivC - firstDerivB) / distanceStep;
-      sumSecondDeriv += secondDerivB;
-      numSecondDerivs++;
-    }
-    if (numSecondDerivs == 0) {
-      throw std::runtime_error(
-          "Not enough points in grid to calculate second derivative");
-    } else {
-      avgSecondDeriv = sumSecondDeriv / numSecondDerivs;
-    }
 
-  } else {
-    throw std::runtime_error(
-        "Not enough points in grid to calculate second derivative");
-  }
-  return avgSecondDeriv;
+  HistogramData::HistogramY sumSecondDeriv(blocksize());
+  auto firstDerivB = (y(indices[2]) - y(indices[1])) / distanceStep;
+  auto firstDerivA = (y(indices[1]) - y(indices[0])) / distanceStep;
+  auto secondDerivA = (firstDerivB - firstDerivA) / distanceStep;
+
+  return secondDerivA;
 }
 
 /** Spatially interpolate a single histogram from nearby detectors.
@@ -366,11 +348,19 @@ SparseWorkspace::interpolateFromDetectorGrid(const double lat,
   return h;
 }
 
+/** Square the error values in a histogram
+ *  @param e A HistgramE object
+ *  @return A HistogramE object containing the squared values
+ */
 HistogramData::HistogramE
 SparseWorkspace::esq(HistogramData::HistogramE e) const {
   return e * e;
 }
 
+/** Square the error values in a histogram
+ *  @param e A HistgramE object
+ *  @return A HistogramE object containing the square root values
+ */
 HistogramData::HistogramE
 SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
   auto &derived = e;
@@ -380,7 +370,9 @@ SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
 }
 
 /** Spatially interpolate a single histogram from nearby detectors using
- *  bilinear interpolation method.
+ *  bilinear interpolation method. Also calculate the resulting errors from:
+ *  a) propagation of errors in the points, b) interpolation error ie
+ *  how well does the bilinear interpolation approximate the actual function
  *  @param lat Latitude of the interpolated detector.
  *  @param lon Longitude of the interpolated detector.
  *  @return An interpolated histogram.
@@ -388,103 +380,74 @@ SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
 HistogramData::Histogram
 SparseWorkspace::bilinearInterpolateFromDetectorGrid(const double lat,
                                                      const double lon) const {
-  const auto indices = m_gridDef->nearestNeighbourIndices(lat, lon, 2);
-  std::array<std::pair<double, double>, 4> detLatsLongs;
-  for (size_t i = 1; i < 3; i++) {
-    for (size_t j = 1; j < 3; j++) {
-      if (indices[i][j]) {
-        std::tie(detLatsLongs[2 * (i - 1) + j - 1].first,
-                 detLatsLongs[2 * (i - 1) + j - 1].second) =
-            spectrumInfo().geographicalAngles(*indices[i][j]);
-      }
+
+  size_t nearestLatIndex, nearestLonIndex;
+  std::tie(nearestLatIndex, nearestLonIndex) =
+      m_gridDef->getNearestVertex(lat, lon);
+
+  std::array<std::array<size_t, 2>, 2> detIndices;
+  for (size_t i = 0; i < 2; i++) {
+    for (size_t j = 0; j < 2; j++) {
+      detIndices[i][j] =
+          m_gridDef->getDetectorIndex(nearestLatIndex + j, nearestLonIndex + i);
     }
   }
 
-  bool doLongInterp = true, doLatInterp = true;
-  if (indices[1][1] && indices[1][2]) {
-    assert(std::abs(detLatsLongs[0].second - detLatsLongs[1].second) <
-           std::numeric_limits<double>::epsilon());
-  } else {
-    doLatInterp = false;
-  }
-  if (indices[2][1] && indices[2][2]) {
-    assert(std::abs(detLatsLongs[2].second - detLatsLongs[3].second) <
-           std::numeric_limits<double>::epsilon());
-  } else {
-    doLatInterp = false;
-  }
-  if (indices[1][1] && indices[2][1]) {
-    assert(std::abs(detLatsLongs[0].first - detLatsLongs[2].first) <
-           std::numeric_limits<double>::epsilon());
-  } else {
-    doLongInterp = false;
-  }
-  if (indices[1][2] && indices[2][2]) {
-    assert(std::abs(detLatsLongs[1].first - detLatsLongs[3].first) <
-           std::numeric_limits<double>::epsilon());
-  } else {
-    doLongInterp = false;
-  }
-
-  auto latLow = detLatsLongs[0].first;
-  auto latHigh = detLatsLongs[1].first;
-  auto longLow = detLatsLongs[0].second;
-  auto longHigh = detLatsLongs[2].second;
+  double latLow, longLow, latHigh, longHigh;
+  std::tie(latLow, longLow) =
+      spectrumInfo().geographicalAngles(detIndices[0][0]);
+  std::tie(latHigh, longHigh) =
+      spectrumInfo().geographicalAngles(detIndices[1][1]);
 
   // interpolate across different longitudes
-  HistogramData::HistogramY ylat1, ylat2;
-  HistogramData::HistogramE errLat1, errLat2;
-  if (doLongInterp) {
-    ylat1 = ((longHigh - lon) * y(*indices[1][1]) +
-             (lon - longLow) * y(*indices[2][1])) /
-            (longHigh - longLow);
-    errLat1 = esqrt(esq((longHigh - lon) * e(*indices[1][1])) +
-                    esq((lon - longLow) * e(*indices[2][1]))) /
-              (longHigh - longLow);
-    if (doLatInterp) {
-      ylat2 = ((longHigh - lon) * y(*indices[1][2]) +
-               (lon - longLow) * y(*indices[2][2])) /
-              (longHigh - longLow);
-      errLat2 = esqrt(esq((longHigh - lon) * e(*indices[1][2])) +
-                      esq((lon - longLow) * e(*indices[2][2]))) /
-                (longHigh - longLow);
-    }
-  } else {
-    ylat1 = y(*indices[1][1]);
-    if (doLatInterp) {
-      ylat2 = y(*indices[1][2]);
-    }
-  }
+  auto ylat1 = ((longHigh - lon) * y(detIndices[0][0]) +
+                (lon - longLow) * y(detIndices[1][0])) /
+               (longHigh - longLow);
+  auto errLat1 = esqrt(esq((longHigh - lon) * e(detIndices[0][0])) +
+                       esq((lon - longLow) * e(detIndices[1][0]))) /
+                 (longHigh - longLow);
+
+  auto ylat2 = ((longHigh - lon) * y(detIndices[0][1]) +
+                (lon - longLow) * y(detIndices[1][1])) /
+               (longHigh - longLow);
+  auto errLat2 = esqrt(esq((longHigh - lon) * e(detIndices[0][1])) +
+                       esq((lon - longLow) * e(detIndices[1][1]))) /
+                 (longHigh - longLow);
 
   // interpolate across different latitudes
-  HistogramData::HistogramY interpY;
-  HistogramData::HistogramE errFromSourcePoints;
-  if (doLatInterp) {
-    interpY =
-        ((latHigh - lat) * ylat1 + (lat - latLow) * ylat2) / (latHigh - latLow);
-    errFromSourcePoints =
-        esqrt(esq((latHigh - lat) * errLat1) + esq((lat - latLow) * errLat2)) /
-        (latHigh - latLow);
-  } else {
-    interpY = ylat1;
-  }
+  auto interpY =
+      ((latHigh - lat) * ylat1 + (lat - latLow) * ylat2) / (latHigh - latLow);
+  auto errFromSourcePoints =
+      esqrt(esq((latHigh - lat) * errLat1) + esq((lat - latLow) * errLat2)) /
+      (latHigh - latLow);
 
   // calculate interpolation errors
+  // step back a further row\col (if possible) to estimate the second derivative
+  auto nearestLatIndexSec = nearestLatIndex > 0 ? nearestLatIndex - 1 : 0;
+  auto nearestLonIndexSec = nearestLonIndex > 0 ? nearestLonIndex - 1 : 0;
+  std::array<size_t, 3> threeIndices;
+
   // 2nd derivative in longitude
-  std::array<boost::optional<size_t>, 4> fourIndices = {
-      indices[0][1], indices[1][1], indices[2][1], indices[3][1]};
-  auto avgSecondDerivLong =
-      secondDerivative(fourIndices, m_gridDef->longitudeStep());
+  for (int i = 0; i < 3; i++) {
+    threeIndices[i] =
+        m_gridDef->getDetectorIndex(nearestLatIndex, nearestLonIndexSec + i);
+  }
+  auto avgSecondDerivLong = secondDerivative(threeIndices, longHigh - longLow);
 
   // 2nd derivative in latitude
-  fourIndices = {indices[1][0], indices[1][1], indices[1][2], indices[1][3]};
-  auto avgSecondDerivLat =
-      secondDerivative(fourIndices, m_gridDef->latitudeStep());
+  for (int i = 0; i < 3; i++) {
+    threeIndices[i] =
+        m_gridDef->getDetectorIndex(nearestLatIndexSec + i, nearestLonIndex);
+  }
+  auto avgSecondDerivLat = secondDerivative(threeIndices, latHigh - latLow);
 
-  // calculate the interpolation error and convert from HistogramY to HistogramE
+  // calculate the interpolation error according to a Taylor expansion from the
+  // low lat and low long points. Doesn't make any difference if do this in
+  // angle or distance because scaling factor (~ radius) cancels out
   HistogramData::HistogramY interpolationErrorAsYData =
       0.5 * (lon - longLow) * (longHigh - lon) * avgSecondDerivLong +
       0.5 * (lat - latLow) * (latHigh - lat) * avgSecondDerivLat;
+  // convert from HistogramY to HistogramE
   HistogramData::HistogramE interpolationError(
       interpolationErrorAsYData.rawData());
 

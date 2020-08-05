@@ -55,7 +55,7 @@ public:
     return SparseWorkspace::extremeAngles(ws);
   }
   Mantid::HistogramData::HistogramY
-  secondDerivative(const std::array<boost::optional<size_t>, 4> indices,
+  secondDerivative(const std::array<size_t, 3> indices,
                    const double distanceStep) {
     return SparseWorkspace::secondDerivative(indices, distanceStep);
   }
@@ -331,12 +331,29 @@ public:
     }
     lat = (grid.latitudeAt(2) + grid.latitudeAt(1)) / 2.0;
     lon = (grid.longitudeAt(3) + grid.longitudeAt(2)) / 2.0;
-    auto indices = sparseWS->grid().nearestNeighbourIndices(lat, lon, 2);
-    double val = static_cast<double>(*indices[1][1] + *indices[1][2] +
-                                     *indices[2][1] + *indices[2][2]) /
+    size_t nearestLatIndex, nearestLonIndex;
+    std::tie(nearestLatIndex, nearestLonIndex) =
+        sparseWS->grid().getNearestVertex(lat, lon);
+    double val = static_cast<double>(
+                     sparseWS->grid().getDetectorIndex(nearestLatIndex,
+                                                       nearestLonIndex) +
+                     sparseWS->grid().getDetectorIndex(nearestLatIndex + 1,
+                                                       nearestLonIndex) +
+                     sparseWS->grid().getDetectorIndex(nearestLatIndex,
+                                                       nearestLonIndex + 1) +
+                     sparseWS->grid().getDetectorIndex(nearestLatIndex + 1,
+                                                       nearestLonIndex + 1)) /
                  4.0;
-    double err = sqrt(*indices[1][1] + *indices[1][2] + *indices[2][1] +
-                      *indices[2][2]) /
+    // second derivative is zero here so error will be from propagating
+    // the original errors on points only
+    double err = sqrt(sparseWS->grid().getDetectorIndex(nearestLatIndex,
+                                                        nearestLonIndex) +
+                      sparseWS->grid().getDetectorIndex(nearestLatIndex + 1,
+                                                        nearestLonIndex) +
+                      sparseWS->grid().getDetectorIndex(nearestLatIndex,
+                                                        nearestLonIndex + 1) +
+                      sparseWS->grid().getDetectorIndex(nearestLatIndex + 1,
+                                                        nearestLonIndex + 1)) /
                  4.0;
     h = sparseWS->bilinearInterpolateFromDetectorGrid(lat, lon);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
@@ -374,9 +391,8 @@ public:
       TS_ASSERT_EQUALS(h.e()[i], 0.0)
     }
     const int longIndex = 2, latIndex = 1;
-    lat = (grid.latitudeAt(latIndex+1) + grid.latitudeAt(latIndex)) / 2.0;
+    lat = (grid.latitudeAt(latIndex + 1) + grid.latitudeAt(latIndex)) / 2.0;
     lon = (grid.longitudeAt(longIndex) + grid.longitudeAt(longIndex + 1)) / 2.0;
-    auto indices = sparseWS->grid().nearestNeighbourIndices(lat, lon, 2);
     double val = (pow(longIndex, 2) + pow(longIndex + 1, 2)) / 2.0;
     // 2nd derivative in long is 2.0, 2nd derivative in lat is zero
     double err = 0.5 * 0.5 * 0.5 * 2.0;
@@ -412,28 +428,20 @@ public:
   void test_secondDerivative() {
     using namespace WorkspaceCreationHelper;
     auto ws = create2DWorkspaceWithRectangularInstrument(1, 4, 7);
-    const int nDetectors = 4;
-    std::array<boost::optional<size_t>, nDetectors> indices = {1, 5, 9, 13};
+    const int nDetectors = 3;
+    std::array<size_t, nDetectors> indices = {1, 5, 9};
     const size_t wavelengths = 3;
     auto sparseWS =
         std::make_unique<SparseWorkspaceWrapper>(*ws, wavelengths, 4, 4);
-    std::array<double, nDetectors> yvalues = {0., 1., 4., 9.};
+    std::array<double, nDetectors> yvalues = {0., 1., 4.};
     for (int i = 0; i < indices.size(); i++) {
-      auto &ys = sparseWS->mutableY(*indices[i]);
+      auto &ys = sparseWS->mutableY(indices[i]);
       for (size_t j = 0; j < ys.size(); ++j) {
         ys[j] = yvalues[i];
       }
     }
 
     auto deriv = sparseWS->secondDerivative(indices, 1);
-    for (size_t i = 0; i < deriv.size(); ++i) {
-      TS_ASSERT_EQUALS(deriv[i], 2.0)
-    }
-
-    // check still get same answer with a row that includes an
-    // empty detector index
-    indices = {boost::optional<size_t>(), 1, 5, 9};
-    deriv = sparseWS->secondDerivative(indices, 1);
     for (size_t i = 0; i < deriv.size(); ++i) {
       TS_ASSERT_EQUALS(deriv[i], 2.0)
     }

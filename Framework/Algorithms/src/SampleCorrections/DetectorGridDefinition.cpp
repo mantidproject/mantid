@@ -30,8 +30,9 @@ DetectorGridDefinition::DetectorGridDefinition(const double minLatitude,
     : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude),
       m_latitudePoints(latitudePoints), m_minLongitude(minLongitude),
       m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
-  if (latitudePoints == 0 || longitudePoints == 0 ||
-      minLatitude > maxLatitude || minLongitude > maxLongitude) {
+  // prevent pointless edge case to simplify interpolation code
+  if (latitudePoints < 2 || longitudePoints < 2 || minLatitude > maxLatitude ||
+      minLongitude > maxLongitude) {
     throw std::runtime_error("Invalid detector grid definition.");
   }
   // The angular ranges might be zero in some cases preventing
@@ -94,13 +95,89 @@ DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
   return is;
 }
 
+size_t DetectorGridDefinition::getDetectorIndex(size_t row, size_t col) {
+  if ((col >= m_longitudePoints) || (row >= m_latitudePoints)) {
+    throw std::runtime_error("DetectorGridDefinition::getDetectorIndex: "
+                             "detector requested for out of bounds row or col");
+  }
+  return col * m_latitudePoints + row;
+}
+
+/** Return the indices to detectors surrounding the given point.
+ *  Include the immediate neighbours and an extra row\col to allow
+ *  the second derivative of a function to be calculated across the set
+ *  @param latitude Latitude of a point.
+ *  @param longitude Longitude of a point.
+ *  @return Indices to nine nearby detectors.
+ */
+/*std::array<std::array<size_t, 3>, 3>
+DetectorGridDefinition::nearestNeighbourIndicesNew(
+    const double latitude, const double longitude) const {
+  size_t topLeftRow, topLeftCol;
+  std::tie(topLeftRow, topLeftCol) = getNearestVertex(latitude, longitude);
+  // go one step further to get points to support second derivative calc
+  if (topLeftRow > 0)
+    --topLeftRow;
+  if (topLeftCol > 0)
+    --topLeftCol;
+
+  const size_t NPOINTS = 3;
+  std::array<std::array<size_t, NPOINTS>, NPOINTS> is;
+  for (auto col = 0; col < NPOINTS; col++) {
+    for (auto row = 0; row < NPOINTS; row++) {
+      auto colNumber = topLeftCol + static_cast<int>(col);
+      auto rowNumber = topLeftRow + static_cast<int>(row);
+      is[col][row] =
+          (colNumber * static_cast<int>(m_latitudePoints) + rowNumber);
+    }
+  }
+
+  return is;
+}*/
+
+/** Return the indices to the detector that is immediate neighbour
+ *  of the supplied lat\long and has lat\long <= supplied values
+ *  @param latitude Latitude of a point.
+ *  @param longitude Longitude of a point.
+ *  @return Indices to nearest detector
+ */
+
+std::pair<size_t, size_t>
+DetectorGridDefinition::getNearestVertex(const double latitude,
+                                         const double longitude) const {
+  auto topLeftRow =
+      static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
+  // Check for points at the edges or outside the grid.
+  if (topLeftRow == m_latitudePoints - 1) {
+    --topLeftRow;
+  }
+  auto topLeftCol =
+      static_cast<size_t>((longitude - m_minLongitude) / m_longitudeStep);
+  if (topLeftCol == m_longitudePoints - 1) {
+    --topLeftCol;
+  }
+  return std::pair<size_t, size_t>{topLeftRow, topLeftCol};
+}
+
+/*std::pair<size_t, size_t> DetectorGridDefinition::getNearestVertexSecondDeriv(
+    const double latitude, const double longitude) const {
+  size_t topLeftRow, topLeftCol;
+  std::tie(topLeftRow, topLeftCol) = getNearestVertex(latitude, longitude);
+  // go one step further to get points to support second derivative calc
+  if (topLeftRow > 0)
+    --topLeftRow;
+  if (topLeftCol > 0)
+    --topLeftCol;
+  return std::pair<size_t, size_t>{topLeftRow, topLeftCol};
+}*/
+
 /** Return the indices to detector surrounding the given point.
  *  @param latitude Latitude of a point.
  *  @param longitude Longitude of a point.
  *  @distance number of rings to consider around given point
  *  @return Indices to nearby detectors (or empty if off the grid)
  */
-std::vector<std::vector<boost::optional<size_t>>>
+/*std::vector<std::vector<boost::optional<size_t>>>
 DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
                                                 const double longitude,
                                                 const size_t distance) const {
@@ -126,7 +203,7 @@ DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
     }
   }
   return is;
-}
+}*/
 
 /** Return the number of columns in the grid.
  *  @return Number of columns.

@@ -40,7 +40,7 @@ public:
                   const size_t columns);
   virtual HistogramData::Histogram
   interpolateFromDetectorGrid(const double lat, const double lon) const;
-  HistogramData::Histogram
+  virtual HistogramData::Histogram
   bilinearInterpolateFromDetectorGrid(const double lat, const double lon) const;
 
 protected:
@@ -58,7 +58,7 @@ protected:
   static std::tuple<double, double, double, double>
   extremeAngles(const API::MatrixWorkspace &ws);
   HistogramData::HistogramY
-  secondDerivative(const std::array<boost::optional<size_t>, 4> indices,
+  secondDerivative(const std::array<size_t, 3> indices,
                    const double distanceStep) const;
   HistogramData::HistogramE esq(HistogramData::HistogramE e) const;
   HistogramData::HistogramE esqrt(HistogramData::HistogramE e) const;

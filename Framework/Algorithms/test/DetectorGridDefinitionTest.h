@@ -66,34 +66,28 @@ public:
     TS_ASSERT(inArray(indices, 45))
   }
 
-  void test_nearestneighbour_edge() {
-    auto def =
-        DetectorGridDefinition(minLat(), maxLat(), 1, minLong(), maxLong(), 1);
-    auto indices = def.nearestNeighbourIndices(minLat(), minLong());
+  void test_grid_too_small() {
+    TS_ASSERT_THROWS(
+        DetectorGridDefinition(minLat(), maxLat(), 1, minLong(), maxLong(), 1),
+        const std::runtime_error &);
   }
 
-  void test_nearestneighbour_with_distance() {
+  void test_getNearestVertex() {
     const auto def = makeTestDefinition();
-    auto indices = def.nearestNeighbourIndices(minLat(), minLong(), 1);
-    TS_ASSERT(in2DVector(indices, 0))
-    TS_ASSERT(in2DVector(indices, 1))
-    TS_ASSERT(in2DVector(indices, nLat()))
-    TS_ASSERT(in2DVector(indices, nLat() + 1))
-    indices = def.nearestNeighbourIndices(maxLat(), maxLong(), 1);
-    TS_ASSERT(!in2DVector(indices, nLat() * (nLong() - 2) + nLat() - 2))
-    TS_ASSERT(!in2DVector(indices, nLat() * (nLong() - 2) + nLat() - 1))
-    TS_ASSERT(!in2DVector(indices, nLat() * (nLong() - 1) + nLat() - 2))
-    TS_ASSERT(in2DVector(indices, nLat() * (nLong() - 1) + nLat() - 1))
+    auto index = def.getNearestVertex(minLat(), minLong());
+    TS_ASSERT_EQUALS(index.first, 0)
+    TS_ASSERT_EQUALS(index.second, 0)
+    index = def.getNearestVertex(maxLat(), maxLong());
+    TS_ASSERT_EQUALS(index.first, nLat() - 2)
+    TS_ASSERT_EQUALS(index.second, nLong() - 2)
     const auto dLat = (maxLat() - minLat()) / static_cast<double>(nLat() - 1);
     const auto lat = (maxLat() + minLat() - dLat) / 2.0;
     const auto dLong =
         (maxLong() - minLong()) / static_cast<double>(nLong() - 1);
     const auto lon = (maxLong() + minLong() - dLong) / 2.0;
-    indices = def.nearestNeighbourIndices(lat, lon, 1);
-    TS_ASSERT(in2DVector(indices, 37))
-    TS_ASSERT(in2DVector(indices, 38))
-    TS_ASSERT(in2DVector(indices, 44))
-    TS_ASSERT(in2DVector(indices, 45))
+    index = def.getNearestVertex(lat, lon);
+    TS_ASSERT_EQUALS(index.first, 2)
+    TS_ASSERT_EQUALS(index.second, 5)
   }
 
   void test_size() {
@@ -136,20 +130,5 @@ private:
 
   static bool inArray(const std::array<size_t, 4> &a, const size_t i) {
     return std::count(a.cbegin(), a.cend(), i) == 1;
-  }
-
-  static bool
-  in2DVector(const std::vector<std::vector<boost::optional<size_t>>> &v2d,
-             const size_t i) {
-    size_t sum = 0;
-    for (auto &v : v2d) {
-      sum += std::count_if(v.begin(), v.end(), [i](boost::optional<size_t> oi) {
-        if (oi)
-          return *oi == i;
-        else
-          return false;
-      });
-    }
-    return sum == 1;
   }
 };

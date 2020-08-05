@@ -145,8 +145,8 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
   size_t step(stepSize);
   double x1(0.), x2(0.), y1(0.), y2(0.), e1(0.), e2(0.), overgap(0.);
   // Copy over end value skipped by loop
-  auto ynew = output.mutableY();
-  auto enew = output.mutableE();
+  auto &ynew = output.mutableY();
+  auto &enew = output.mutableE();
   ynew.back() = yold.back();
   for (size_t i = 0; i < nypts - 1; ++i) // Last point has been calculated
   {
@@ -160,7 +160,7 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
       y1 = yold[i];
       e1 = eold[i];
       y2 = yold[index2];
-      e2 = yold[index2];
+      e2 = eold[index2];
       step = 1;
       ynew[i] = yold[i];
       enew[i] = eold[i];
@@ -224,7 +224,7 @@ size_t minSizeForLinearInterpolation() {
 
 /**
  * Linearly interpolate through the y values of a histogram assuming that the
- * calculated "nodes" are stepSize apart. Currently errors are not treated.
+ * calculated "nodes" are stepSize apart.
  * @param input Input histogram defining x values and containing calculated
  * Y values at stepSize intervals. It is assumed that the first/last points
  * are always calculated points.

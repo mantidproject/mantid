@@ -9,7 +9,6 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 #include <array>
-#include <boost/optional/optional.hpp>
 #include <cstddef>
 
 namespace Mantid {
@@ -28,13 +27,11 @@ public:
   double longitudeAt(const size_t column) const;
   std::array<size_t, 4> nearestNeighbourIndices(const double latitude,
                                                 const double longitude) const;
-  std::vector<std::vector<boost::optional<size_t>>>
-  nearestNeighbourIndices(const double latitude, const double longitude,
-                          const size_t distance) const;
+  std::pair<size_t, size_t> getNearestVertex(const double latitude,
+                                             const double longitude) const;
   size_t numberColumns() const;
   size_t numberRows() const;
-  double latitudeStep() const { return m_latitudeStep; };
-  double longitudeStep() const { return m_longitudeStep; };
+  size_t getDetectorIndex(size_t row, size_t col);
 
 private:
   double m_minLatitude;

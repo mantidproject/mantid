@@ -88,7 +88,7 @@ private:
                     const API::Sample &sample) const;
   void interpolateFromSparse(
       API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
-      const Mantid::Algorithms::InterpolationOption &interpOpt);
+      const Mantid::Algorithms::InterpolationOption &interpOpt, int nLambda);
 };
 } // namespace Algorithms
 } // namespace Mantid

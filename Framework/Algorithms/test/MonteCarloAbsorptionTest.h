@@ -446,18 +446,18 @@ public:
     using namespace ::testing;
     std::vector<double> attenuationFactorZeroes(nbins);
     std::vector<double> attenuationFactorErrorZeroes(nbins);
-    std::vector<double> dummyAttenuationFactorResult = {
-        10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0};
-    std::vector<double> dummyAttenuationFactorErr = {1.0, 1.1, 1.0, 1.1, 0.9,
-                                                     1.2, 1.0, 1.1, 1.1, 1.0};
+    std::vector<double> dummyAttFactor = {10.0, 9.0, 8.0, 7.0, 6.0,
+                                          5.0,  4.0, 3.0, 2.0, 1.0};
+    std::vector<double> dummyAttFactorErr = {1.0, 1.1, 1.0, 1.1, 0.9,
+                                             1.2, 1.0, 1.1, 1.1, 1.0};
     std::vector<double> wavelengths = {0.5, 1.5, 2.5, 3.5, 4.5,
                                        5.5, 6.5, 7.5, 8.5, 9.5};
     EXPECT_CALL(*MCAbsorptionStrategy,
                 calculate(_, _, wavelengths, _, attenuationFactorZeroes,
                           attenuationFactorErrorZeroes, _))
         .Times(Exactly(static_cast<int>(nspectra)))
-        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttenuationFactorResult),
-                              SetArgReferee<5>(dummyAttenuationFactorErr)));
+        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor),
+                              SetArgReferee<5>(dummyAttFactorErr)));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
     auto outputWS = getOutputWorkspace(mcAbsorb);
@@ -488,25 +488,28 @@ public:
     const int nlambdabins = nbins / 2 + 1;
     std::vector<double> attenuationFactorZeroes(nlambdabins);
     std::vector<double> attenuationFactorErrorZeroes(nlambdabins);
-    std::vector<double> dummyAttenuationFactorResult = {10.0, 8.0, 6.0,
-                                                        4.0,  2.0, 0.0};
-    std::vector<double> dummyAttenuationFactorErr = {1.0, 1.0, 1.1,
-                                                     1.2, 1.1, 1.0};
+    std::vector<double> dummyAttFactor = {10.0, 8.0, 6.0, 4.0, 2.0, 0.0};
+    std::vector<double> dummyAttFactorErr = {1.0, 1.0, 1.1, 1.2, 1.1, 1.0};
     std::vector<double> wavelengths = {0.5, 2.5, 4.5, 6.5, 8.5, 9.5};
     EXPECT_CALL(*MCAbsorptionStrategy,
                 calculate(_, _, wavelengths, _, attenuationFactorZeroes,
                           attenuationFactorErrorZeroes, _))
         .Times(Exactly(static_cast<int>(nspectra)))
-        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttenuationFactorResult),
-                              SetArgReferee<5>(dummyAttenuationFactorErr)));
+        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor),
+                              SetArgReferee<5>(dummyAttFactorErr)));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
     auto outputWS = getOutputWorkspace(mcAbsorb);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nspectra);
-    TS_ASSERT_EQUALS(10.0, outputWS->y(0).front());
-    TS_ASSERT_EQUALS(1.0, outputWS->e(0).front());
-    TS_ASSERT_EQUALS(9.0, outputWS->y(0)[1]);
-    TS_ASSERT_EQUALS(7.0, outputWS->y(0)[3]);
+    TS_ASSERT_EQUALS(dummyAttFactor[0], outputWS->y(0).front());
+    TS_ASSERT_EQUALS(dummyAttFactorErr[0], outputWS->e(0).front());
+    TS_ASSERT_EQUALS((dummyAttFactor[0] + dummyAttFactorErr[1]) / 2,
+                     outputWS->y(0)[1]);
+    TS_ASSERT_EQUALS(
+        sqrt(pow(dummyAttFactorErr[0], 2) + pow(dummyAttFactorErr[1], 2)) / 2.0,
+        outputWS->e(0)[1]);
+    TS_ASSERT_EQUALS((dummyAttFactor[1] + dummyAttFactor[2]) / 2,
+                     outputWS->y(0)[3]);
   }
 
   void test_Lambda_StepSize_Two_Spline_Interpolation() {
@@ -540,16 +543,15 @@ public:
     // b = -q'(x2)(x2-x1)+(y2-y1)
     std::vector<double> attenuationFactorZeroes(nlambdabins);
     std::vector<double> attenuationFactorErrorZeroes(nlambdabins);
-    std::vector<double> dummyAttenuationFactorResult = {24.0, 13.0, 6.0, 1.0,
-                                                        0.0};
-    std::vector<double> dummyAttenuationFactorErr = {1.0, 1.0, 1.1, 1.2, 1.1};
+    std::vector<double> dummyAttFactor = {24.0, 13.0, 6.0, 1.0, 0.0};
+    std::vector<double> dummyAttFactorErr = {1.0, 1.0, 1.1, 1.2, 1.1};
     std::vector<double> wavelengths = {0.5, 2.5, 4.5, 6.5, 8.5};
     EXPECT_CALL(*MCAbsorptionStrategy,
                 calculate(_, _, wavelengths, _, attenuationFactorZeroes,
                           attenuationFactorErrorZeroes, _))
         .Times(Exactly(static_cast<int>(nspectra)))
-        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttenuationFactorResult),
-                              SetArgReferee<5>(dummyAttenuationFactorErr)));
+        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor),
+                              SetArgReferee<5>(dummyAttFactorErr)));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
     auto outputWS = getOutputWorkspace(mcAbsorb);
@@ -558,18 +560,16 @@ public:
     const double tx = 0.5;
     std::vector<double> a, b, interp;
     for (size_t i = 0; i < nlambdabins - 1; i++) {
-      a.emplace_back(qdash[i] - (dummyAttenuationFactorResult[i + 1] -
-                                 dummyAttenuationFactorResult[i]));
-      b.emplace_back(-qdash[i + 1] + (dummyAttenuationFactorResult[i + 1] -
-                                      dummyAttenuationFactorResult[i]));
-      interp.emplace_back(tx * (dummyAttenuationFactorResult[i] +
-                                dummyAttenuationFactorResult[i + 1]) +
+      a.emplace_back(qdash[i] - (dummyAttFactor[i + 1] - dummyAttFactor[i]));
+      b.emplace_back(-qdash[i + 1] +
+                     (dummyAttFactor[i + 1] - dummyAttFactor[i]));
+      interp.emplace_back(tx * (dummyAttFactor[i] + dummyAttFactor[i + 1]) +
                           pow(tx, 3) * (a[i] + b[i]));
     }
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nspectra);
-    TS_ASSERT_EQUALS(dummyAttenuationFactorResult[0], outputWS->y(0).front());
-    TS_ASSERT_EQUALS(dummyAttenuationFactorErr[0], outputWS->e(0).front());
+    TS_ASSERT_EQUALS(dummyAttFactor[0], outputWS->y(0).front());
+    TS_ASSERT_EQUALS(dummyAttFactorErr[0], outputWS->e(0).front());
     TS_ASSERT_EQUALS(interp[0], outputWS->y(0)[1]);
     TS_ASSERT_EQUALS(interp[1], outputWS->y(0)[3]);
   }
@@ -706,15 +706,13 @@ public:
         std::make_shared<MockSparseWorkspace>(*modelWS, nbins, 3, 3);
     mcAbsorb->setSparseWorkspace(sparseWS);
     using namespace ::testing;
-    std::vector<double> dummyAttenuationFactorResult = {
-        10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0};
     EXPECT_CALL(*MCAbsorptionStrategy, calculate(_, _, _, _, _, _, _))
         .Times(Exactly(static_cast<int>(9)));
     Mantid::HistogramData::Frequencies ysOnes(nbins, 1.0);
     Mantid::HistogramData::Points ps =
         modelWS->getSpectrum(0).histogram().points();
     const Mantid::HistogramData::Histogram testHistogramOnes(ps, ysOnes);
-    EXPECT_CALL(*sparseWS, interpolateFromDetectorGrid(_, _))
+    EXPECT_CALL(*sparseWS, bilinearInterpolateFromDetectorGrid(_, _))
         .Times(Exactly(static_cast<int>(nspectra)))
         .WillRepeatedly(Return(testHistogramOnes));
 
@@ -756,6 +754,9 @@ private:
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD2(interpolateFromDetectorGrid,
+                       Mantid::HistogramData::Histogram(const double lat,
+                                                        const double lon));
+    MOCK_CONST_METHOD2(bilinearInterpolateFromDetectorGrid,
                        Mantid::HistogramData::Histogram(const double lat,
                                                         const double lon));
     GNU_DIAG_ON_SUGGEST_OVERRIDE
