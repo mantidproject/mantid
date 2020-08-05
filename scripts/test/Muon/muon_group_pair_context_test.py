@@ -78,8 +78,8 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.show('group_1', [12345])
         self.context.show('pair_1', [12345])
 
-        group_1.show.assert_called_once_with(str([12345]))
-        pair.show.assert_called_once_with(str([12345]))
+        group_1.show.assert_called_once_with(tuple([12345]))
+        pair.show.assert_called_once_with(tuple([12345]))
 
     def test_group_names_returns_ordered_list_of_names(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
@@ -175,7 +175,22 @@ class MuonGroupPairContextTest(unittest.TestCase):
         group_name, run = self.context.get_group_pair_name_from_workspace_name(workspace_name_list[0])
 
         self.assertEqual(group_name, 'group_1')
-        self.assertEqual(run, '[62260]')
+        self.assertEqual(run, [62260])
+
+    def test_get_group_pair_name_and_run_works_for_co_added_runs(self):
+        group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
+        group_2 = MuonGroup('group_2', [1, 3, 4, 7, 9])
+        group_3 = MuonGroup('group_3', [1, 3, 4, 7, 9])
+        self.context.add_group(group_1)
+        self.context.add_group(group_2)
+        self.context.add_group(group_3)
+        group_1.update_workspaces([62260, 62261], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
+        workspace_name_list = self.context.get_group_workspace_names(runs = [[62260, 62261]], groups=['group_1'], rebin=False)
+
+        group_name, run = self.context.get_group_pair_name_from_workspace_name(workspace_name_list[0])
+
+        self.assertEqual(group_name, 'group_1')
+        self.assertEqual(run, [62260, 62261])
 
 
 if __name__ == '__main__':

@@ -74,23 +74,23 @@ class MuonPair(object):
             raise AttributeError("Alpha must be > 0.0.")
 
     def show_raw(self, run, name):
-        str(run) not in self._workspace or self._workspace[str(run)].show(name)
+        tuple(run) not in self._workspace or self._workspace[tuple(run)].show(name)
 
     def show_rebin(self, run, name):
-        str(run) not in self.workspace_rebin or self.workspace_rebin[str(run)].show(name)
+        tuple(run) not in self.workspace_rebin or self.workspace_rebin[tuple(run)].show(name)
 
     def update_asymmetry_workspace(self, asymmetry_workspace, run, rebin=False):
         if not rebin:
-            self._workspace.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._workspace.update({tuple(run): MuonWorkspaceWrapper(asymmetry_workspace)})
         else:
-            self.workspace_rebin.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace)})
+            self.workspace_rebin.update({tuple(run): MuonWorkspaceWrapper(asymmetry_workspace)})
 
     def get_asymmetry_workspace_names(self, runs):
         workspace_list = []
 
         for run in runs:
-            if str(run) in self._workspace and self._workspace[str(run)].workspace_name:
-                workspace_list.append(self._workspace[str(run)].workspace_name)
+            if tuple(run) in self._workspace and self._workspace[tuple(run)].workspace_name:
+                workspace_list.append(self._workspace[tuple(run)].workspace_name)
 
         return workspace_list
 
@@ -98,8 +98,8 @@ class MuonPair(object):
         workspace_list = []
 
         for run in runs:
-            if str(run) in self.workspace_rebin and self.workspace_rebin[str(run)].workspace_name:
-                workspace_list.append(self.workspace_rebin[str(run)].workspace_name)
+            if tuple(run) in self.workspace_rebin and self.workspace_rebin[tuple(run)].workspace_name:
+                workspace_list.append(self.workspace_rebin[tuple(run)].workspace_name)
 
         return workspace_list
 
