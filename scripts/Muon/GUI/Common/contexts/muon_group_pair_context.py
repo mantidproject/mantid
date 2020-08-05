@@ -213,7 +213,7 @@ class MuonGroupPairContext(object):
             raise ValueError('Groups and pairs must have unique names')
 
     def show(self, name, run):
-        self[name].show(str(run))
+        self[name].show(tuple(run))
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
         self._groups, self._pairs, self._selected = get_default_grouping(workspace, instrument, main_field_direction)
@@ -303,6 +303,6 @@ class MuonGroupPairContext(object):
         for group_pair in self.groups + self.pairs:
             run = group_pair.check_workspace_exists(workspace_name)
             if(run):
-                return group_pair.name, run
+                return group_pair.name, list(run)
 
         return None, None
