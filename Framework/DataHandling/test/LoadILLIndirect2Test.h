@@ -110,6 +110,32 @@ public:
     TS_ASSERT(boost::ends_with(idf, "IN16BF_Definition.xml"));
   }
 
+  void test_diffraction_bats() {
+    // checks bats in the older version of IN16B diffraction mode
+    LoadILLIndirect2 loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", m_batsDiffraction));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDiffractionData", true));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    MatrixWorkspace_sptr output2D =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2049)
+    TS_ASSERT_EQUALS(output2D->blocksize(), 2048)
+
+    // check some values near the center tubes to verify the geometry
+    // used is from the older version
+    TS_ASSERT_EQUALS(output2D->dataY(1050)[1156], 16)
+    TS_ASSERT_EQUALS(output2D->dataY(871)[1157], 17)
+    TS_ASSERT_EQUALS(output2D->dataY(746)[1157], 18)
+
+    AnalysisDataService::Instance().clear();
+  }
+
   void doExecTest(const std::string &file, int numHist = 2051,
                   int numChannels = 2048) {
     // Name of the output workspace.
@@ -147,6 +173,7 @@ private:
   std::string m_batsFile{"ILL/IN16B/215962.nxs"};
   std::string m_bats33degree{"ILL/IN16B/247933.nxs"};
   std::string m_firstTube251{"ILL/IN16B/136558.nxs"};
+  std::string m_batsDiffraction{"ILL/IN16B/249290.nxs"};
 };
 
 class LoadILLIndirect2TestPerformance : public CxxTest::TestSuite {
