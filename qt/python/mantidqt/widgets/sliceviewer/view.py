@@ -46,7 +46,7 @@ class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -106,7 +106,7 @@ class SliceViewerDataView(QWidget):
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
-        self.colorbar = ColorbarWidget(self)
+        self.colorbar = ColorbarWidget(self, conf)
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         # make width larger to fit image readout table
@@ -494,7 +494,7 @@ class SliceViewerDataView(QWidget):
 class SliceViewerView(QWidget):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -503,7 +503,7 @@ class SliceViewerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._splitter = QSplitter(self)
-        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self)
+        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self, conf)
         self._splitter.addWidget(self._data_view)
         #  peaks viewer off by default
         self._peaks_view = None

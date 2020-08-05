@@ -27,8 +27,10 @@ class ColorbarWidget(QWidget):
     colorbarChanged = Signal()  # The parent should simply redraw their canvas
     cmap_list = sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, conf=None):
         super(ColorbarWidget, self).__init__(parent)
+
+        self.conf = conf
 
         self.setWindowTitle("Colorbar")
         self.setMaximumWidth(100)
@@ -104,10 +106,6 @@ class ColorbarWidget(QWidget):
 
         self.set_default_scale()
 
-    def closeEvent(self, event):
-        ConfigService.saveConfig(ConfigService.getUserFilename())
-        super().closeEvent(event)
-
     def set_mappable(self, mappable):
         """
         When a new plot is created this method should be called with the new mappable
@@ -179,7 +177,8 @@ class ColorbarWidget(QWidget):
         self.colorbar.mappable.set_norm(self.get_norm())
         self.set_mappable(self.colorbar.mappable)
 
-        ConfigService.setString("sliceviewer.colorbar.scale", scale)
+        if self.conf:
+            self.conf.set("sliceviewer/scale_norm", scale)
 
     def get_norm(self):
         """
@@ -271,12 +270,13 @@ class ColorbarWidget(QWidget):
         self.colorbarChanged.emit()
 
     def set_default_scale(self):
-        scale_setting = ConfigService.getString("sliceviewer.colorbar.scale")
-        scale_setting = scale_setting.split(",")
-        if scale_setting and scale_setting[0] in NORM_OPTS:
-            scale = scale_setting[0]
-        else:
-            scale = 'Linear'
+        scale = 'Linear'
+        scale_setting = []
+        if self.conf and self.conf.has("sliceviewer/scale_norm"):
+            scale_setting = self.conf.get("sliceviewer/scale_norm")
+            scale_setting = scale_setting.split(",")
+            if scale_setting and scale_setting[0] in NORM_OPTS:
+                scale = scale_setting[0]
 
         self.norm.blockSignals(True)
         self.norm.setCurrentText(scale)
