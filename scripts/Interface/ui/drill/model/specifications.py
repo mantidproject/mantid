@@ -113,7 +113,7 @@ class RundexSettings(object):
                 "DefaultMaskFile": "",
                 "NormaliseBy": "Timer",
                 "SampleThickness": "0.1",
-                "BeamRadius": "0.05",
+                "BeamRadius": "0.1",
                 "WaterCrossSection": "1",
                 "OutputType": "I(Q)",
                 "CalculateResolution": "None",
