@@ -16,7 +16,7 @@ from qtpy.QtCore import Qt, QPoint
 from mantid.kernel import config
 
 from Interface.ui.drill.view.DrillView import DrillView
-from Interface.ui.drill.model.specifications import RundexSettings
+from Interface.ui.drill.model.configurations import RundexSettings
 
 app = QApplication(sys.argv)
 

@@ -15,7 +15,7 @@ import mantid.simpleapi as sapi
 from mantid.kernel import *
 from mantid.api import *
 
-from .specifications import RundexSettings
+from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 from .DrillParameterController import DrillParameter, DrillParameterController
