@@ -74,21 +74,21 @@ class RundexSettings(object):
                 "AngleOption",
                 "Theta",
                 "SummationType",
-                "CustomOptions",
                 "GlobalScaleFactor",
                 "UseManualScaleFactors",
-                "ManualScaleFactors"
+                "ManualScaleFactors",
+                "CustomOptions"
                 ],
             REFL_NPOL: [
                 "Run",
                 "DirectRun",
                 "OutputWorkspace",
-                "GlobalScaleFactor",
-                "UseManualScaleFactors",
-                "ManualScaleFactors",
                 "AngleOption",
                 "Theta",
                 "SummationType",
+                "GlobalScaleFactor",
+                "UseManualScaleFactors",
+                "ManualScaleFactors",
                 "CustomOptions"
                 ]
             }
