@@ -20,9 +20,9 @@ enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos };
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
   FileFormatOptions(NamedFormat format, std::string const &prefix,
-                    bool includeTitle, std::string const &separator,
+                    bool includeHeader, std::string const &separator,
                     bool includeQResolution);
-  bool shouldIncludeTitle() const;
+  bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;
   std::string const &separator() const;
   std::string const &prefix() const;
@@ -31,7 +31,7 @@ public:
 private:
   NamedFormat m_format;
   std::string m_prefix;
-  bool m_includeTitle;
+  bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;
 };
@@ -48,7 +48,7 @@ private:
 inline bool operator==(const FileFormatOptions &lhs,
                        const FileFormatOptions &rhs) {
   return lhs.format() == rhs.format() &&
-         lhs.shouldIncludeTitle() == rhs.shouldIncludeTitle() &&
+         lhs.shouldIncludeHeader() == rhs.shouldIncludeHeader() &&
          lhs.shouldIncludeQResolution() == rhs.shouldIncludeQResolution() &&
          lhs.separator() == rhs.separator() && lhs.prefix() == rhs.prefix();
 }

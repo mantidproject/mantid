@@ -292,8 +292,8 @@ private:
                      map[QString("savePathEdit")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.prefixEdit->text(),
                      map[QString("prefixEdit")].toString())
-    TS_ASSERT_EQUALS(gui->m_ui.titleCheckBox->isChecked(),
-                     map[QString("titleCheckBox")].toBool())
+    TS_ASSERT_EQUALS(gui->m_ui.headerCheckBox->isChecked(),
+                     map[QString("headerCheckBox")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.qResolutionCheckBox->isChecked(),
                      map[QString("qResolutionCheckBox")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.commaRadioButton->isChecked(),

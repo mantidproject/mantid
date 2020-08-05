@@ -56,6 +56,8 @@ New
 
   *Provide cycle name for more reliable search results*
 
+- The output formats from the **Save ASCII** tab now follow standards more rigidly - see :ref:`algm-SaveReflectometryAscii`, which replaces the old deprecated algorithms.
+
 - The **Options** dialog can now be accessed from the Tools menu, controlling the display of warnings and rounding precision.
 
 Bug fixes
