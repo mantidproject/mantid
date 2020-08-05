@@ -166,12 +166,14 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     def _load_yig_peaks(self, ws):
         """Loads YIG peaks provided as an XML Instrument Parameter File"""
         parameterFilename = self.getPropertyValue('YIGPeaksFile')
+        ClearInstrumentParameters(ws) #in case other IPF was loaded there before
         LoadParameterFile(Workspace=ws, Filename=parameterFilename)
-        yig_d_list = []
+        yig_d_set = set()
         instrument = ws.getInstrument().getComponentByName('detector')
+        print ("Parameter names:", instrument.getParameterNames(True))
         for param_name in instrument.getParameterNames(True):
-            yig_d_list.append(instrument.getNumberParameter(param_name)[0])
-        return sorted(yig_d_list)
+            yig_d_set.add(instrument.getNumberParameter(param_name)[0])
+        return sorted(list(yig_d_set))
 
     def _remove_invisible_yig_peaks(self, yig_list):
         """Removes YIG peaks with 2theta above 180 degrees
@@ -227,7 +229,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             single_spectrum_peaks = yig_peaks[scan]
             # fit all functions simultaneously:
             function="name=FlatBackground, A0=0;\n"
-            constraints = "f0.A0 >= 0"
+            constraints = "f0.A0 > 0"
             function_no = 1
             for peak_intensity, peak_centre in single_spectrum_peaks:
                 function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
@@ -235,7 +237,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                                                                                              peak_intensity,
                                                                                              0.5*self._PeakWidth)
                 constraints += ",f{0}.Height > 0.0".format(function_no)
-                constraints += ",f{0}.Sigma < 2.0".format(function_no)
+                constraints += ",f{0}.Sigma < 1.5".format(function_no)
                 constraints += ",{0} < f{1}.PeakCentre < {2}".format(float(peak_centre)-self._PeakWidth*2,
                                                                      function_no,
                                                                      float(peak_centre)+self._PeakWidth*2)
@@ -254,9 +256,12 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             peak_no = 0
             for row_no in range(param_table.rowCount()):
                 row_data = param_table.row(row_no)
+                if 'A0' in row_data['Name']:
+                    background = row_data['Value']
+                    print ("Bckg:", background)
                 if 'PeakCentre' in row_data['Name']:
                     intensity, peak_position = single_spectrum_peaks[peak_no]
-                    if (param_table.row(row_no-1)['Value'] > 0):
+                    if (param_table.row(row_no-1)['Value'] > 0.1*background):
                         results_x[peak_no] = peak_position
                         results_y[peak_no] = row_data['Value']
                         results_e[peak_no] = row_data['Error']
@@ -305,8 +310,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         ties_gradient_list = []
         ties_gradient = ""
         offset_constr = self._DEG_2_RAD * 30 # +-30 degrees around the bank position
-        gradient_constr = 0.1 # +-10% around the m = 1.0 value
-        lambda_constr = 0.05 # +- 5% of lambda variation from the initial assumption
+        gradient_constr = 0.05 # +-10% around the m = 1.0 value
+        lambda_constr = 0.02 # +- 2% of lambda variation from the initial assumption
         constraint_list = ['{0}<f0.lambda<{1}'.format(1-lambda_constr, 1+lambda_constr)]
 
         for pixel_no in range(ws.getNumberHistograms()):
@@ -398,7 +403,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
 #         pos_bank3 = CreateWorkspace(DataX=range(44, 88), DataY=bank3_pixels, NSpec=1)
 #         bank4_pixels = pixel_offsets[89:132]
 #         pos_bank4 = CreateWorkspace(DataX=range(89, 132), DataY=bank4_pixels, NSpec=1)
-
+# 
         return wavelength, pixel_offsets
 
     def _prettify(self, elem):
@@ -437,6 +442,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             filename = self.getPropertyValue("CalibrationFilename")
         outfile = open(os.path.join(os.getcwd(), filename), "w")
         outfile.write(self._prettify(param_file))
+        outfile.close()
 
 
 AlgorithmFactory.subscribe(ILLYIGPositionCalibration)

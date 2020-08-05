@@ -29,7 +29,8 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
     def test_algorithm_with_wrong_approximate_wavelength_raises_exception(self):
         Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
         with self.assertRaises(ValueError):
-            ILLYIGPositionCalibration(ScanWorkspace='shortWavelengthScan', ApproximateWavelength="0.0")        
+            ILLYIGPositionCalibration(ScanWorkspace='shortWavelengthScan', YIGPeaksFile='YIG_peaks.xml',
+                                      ApproximateWavelength="0.0")
            
     def test_shortWavelength(self):
         Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
