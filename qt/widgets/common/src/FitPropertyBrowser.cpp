@@ -569,7 +569,7 @@ void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
   }
 
   auto noOfItems = m_wsListWidget->count();
-  if (noOfItems != 0 & !m_hideWsListWidget) {
+  if (noOfItems != 0 && !m_hideWsListWidget) {
     auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) +
                   2 * m_wsListWidget->frameWidth();
     m_wsListWidget->setMaximumHeight(height);

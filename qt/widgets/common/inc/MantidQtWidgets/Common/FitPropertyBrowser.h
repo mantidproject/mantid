@@ -664,11 +664,11 @@ private:
   /// Default background name
   std::string m_defaultBackground;
 
-  /// bool to display ws list or not
-  bool m_hideWsListWidget;
-
   /// Shows if the PeakPickerTool is on
   bool m_peakToolOn;
+
+  /// bool to display ws list or not
+  bool m_hideWsListWidget;
 
   /// If true background function will be included automatically
   bool m_auto_back;
