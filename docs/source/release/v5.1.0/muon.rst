@@ -70,5 +70,6 @@ Elemental Analysis
 New Features
 ------------
 - Added a deselect all elements button.
+- Fixed an issue where groups were all being plotted on the same tiled plot.
 
 :ref:`Release 5.1.0 <v5.1.0>`
