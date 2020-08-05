@@ -70,6 +70,9 @@ class PlotConfigDialogPresenter:
             if tab and tab.view:
                 tab.apply_properties()
         self.fig.canvas.draw()
+        for tab in reversed(self.tab_widget_presenters):
+            if tab and tab.view:
+                tab.update_view()
 
     def apply_properties_and_exit(self):
         self.apply_properties()

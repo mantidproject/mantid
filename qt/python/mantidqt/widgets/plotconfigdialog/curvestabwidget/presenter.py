@@ -33,20 +33,15 @@ class CurvesTabWidgetPresenter:
             self.view = view
 
         self.current_view_properties = None
-
-        # Fill the fields in the view
-        self.axes_names_dict = get_axes_names_dict(self.fig, curves_only=True)
-        self.populate_select_axes_combo_box()
         self.curve_names_dict = {}
-        self.populate_curve_combo_box_and_update_view()
-
-        self.set_apply_to_all_buttons_enabled()
+        self.axes_names_dict = None
+        self.update_view()
 
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
-            self.populate_curve_combo_box_and_update_view)
+            self.on_axes_index_changed)
         self.view.select_curve_combo_box.currentIndexChanged.connect(
-            self.update_view)
+            self.on_curves_index_changed)
         self.view.remove_curve_button.clicked.connect(
             self.remove_selected_curve)
         self.view.line.apply_to_all_button.clicked.connect(
@@ -95,7 +90,8 @@ class CurvesTabWidgetPresenter:
 
     def get_selected_curve(self):
         """Get selected Line2D or ErrorbarContainer object"""
-        return self.curve_names_dict[self.view.get_selected_curve_name()]
+        name = self.view.get_selected_curve_name()
+        return self.curve_names_dict[name]
 
     def get_selected_curve_properties(self):
         """Get a CurveProperties object from the selected curve"""
@@ -167,15 +163,6 @@ class CurvesTabWidgetPresenter:
 
         ax.lines += errorbar_cap_lines
 
-    def populate_curve_combo_box_and_update_view(self):
-        """
-        Populate curve combo box and update the view with the curve's
-        properties.
-        """
-        self.curve_names_dict = {}
-        if self._populate_select_curve_combo_box():
-            self.update_view()
-
     def populate_select_axes_combo_box(self):
         """
         Add Axes names to 'select axes' combo box.
@@ -242,8 +229,24 @@ class CurvesTabWidgetPresenter:
         enable_errorbars = curve_has_errors(self.get_selected_curve())
         self.view.set_errorbars_tab_enabled(enable_errorbars)
 
-    def update_view(self):
+    def on_axes_index_changed(self):
+        self.update_view(update_axes=False)
+
+    def on_curves_index_changed(self):
+        self.update_view(update_axes=False, update_curves=False)
+
+    def update_view(self, update_axes=True, update_curves=True):
         """Update the view with the selected curve's properties"""
+        if update_axes:
+            self.axes_names_dict = get_axes_names_dict(self.fig, curves_only=True)
+            self.populate_select_axes_combo_box()
+        if update_curves:
+            # Update the 'select curves' combo box. Do this if curve properties have changed, or
+            # if user selects a different set of axes.
+            self._populate_select_curve_combo_box()
+
+        self.set_apply_to_all_buttons_enabled()
+
         curve_props = CurveProperties.from_curve(self.get_selected_curve())
         self.view.update_fields(curve_props)
         self.set_errorbars_tab_enabled()
@@ -287,6 +290,9 @@ class CurvesTabWidgetPresenter:
 
         # Get the lines in the order that they are listed on the legend.
         active_lines = datafunctions.get_legend_handles(selected_ax)
+
+        # This dict is about to be repopulated with curves on the new selected axes
+        self.curve_names_dict = {}
         for line in active_lines:
             self._update_selected_curve_name(line)
         self.view.populate_select_curve_combo_box(list(self.curve_names_dict))

@@ -25,7 +25,7 @@ class LegendTabWidgetPresenter:
 
         self.current_view_properties = None
         self.populate_font_combo_box()
-        self.init_view()
+        self.update_view()
 
         # Signals
         self.view.transparency_spin_box.valueChanged.connect(
@@ -39,7 +39,7 @@ class LegendTabWidgetPresenter:
         self.view.advanced_options_push_button.clicked.connect(self.show_advanced_options)
         self.view.advanced_options.rejected.connect(self.advanced_options_cancelled)
 
-    def init_view(self):
+    def update_view(self):
         """Sets all of the initial values of the input fields when the tab is first loaded"""
         if int(matplotlib.__version__[0]) < 2:
             self.view.hide_box_properties()
