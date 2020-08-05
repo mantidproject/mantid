@@ -85,7 +85,7 @@ class DrillParameter:
         self._errorMsg = msg
 
 
-class ControllerSignals(QObject):
+class DrillControllerSignals(QObject):
     """
     Signals that the controller is using
     """
@@ -109,7 +109,7 @@ class DrillParameterController(threading.Thread):
         """
         super(DrillParameterController, self).__init__()
         self.daemon = True
-        self._signals = ControllerSignals()
+        self._signals = DrillControllerSignals()
         self._paramQueue = queue.Queue()
         self._alg = sapi.AlgorithmManager.createUnmanaged(algName)
         self._alg.initialize()

@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 
 from Interface.ui.drill.model.DrillParameterController \
-        import DrillParameterController, ControllerSignals, DrillParameter
+        import DrillParameterController, DrillControllerSignals, DrillParameter
 
 
 class DrillParameterControllerTest(unittest.TestCase):
@@ -24,7 +24,8 @@ class DrillParameterControllerTest(unittest.TestCase):
         self.controller = DrillParameterController("test")
 
     def test_signals(self):
-        self.assertTrue(isinstance(self.controller.signals, ControllerSignals))
+        self.assertTrue(isinstance(self.controller.signals,
+                                   DrillControllerSignals))
 
     def test_addParameter(self):
         p = DrillParameter("name", "value", 0)
