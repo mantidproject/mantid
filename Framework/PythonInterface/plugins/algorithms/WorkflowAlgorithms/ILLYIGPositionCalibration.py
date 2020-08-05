@@ -170,7 +170,6 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         LoadParameterFile(Workspace=ws, Filename=parameterFilename)
         yig_d_set = set()
         instrument = ws.getInstrument().getComponentByName('detector')
-        print ("Parameter names:", instrument.getParameterNames(True))
         for param_name in instrument.getParameterNames(True):
             yig_d_set.add(instrument.getNumberParameter(param_name)[0])
         return sorted(list(yig_d_set))
@@ -258,7 +257,6 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                 row_data = param_table.row(row_no)
                 if 'A0' in row_data['Name']:
                     background = row_data['Value']
-                    print ("Bckg:", background)
                 if 'PeakCentre' in row_data['Name']:
                     intensity, peak_position = single_spectrum_peaks[peak_no]
                     if (param_table.row(row_no-1)['Value'] > 0.1*background):
@@ -420,15 +418,17 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         date_today = date.today()
         param_file.set('date',  str(date_today))
 
+        # include the fitted wavelength in the output IPF
+        detector = ET.SubElement(param_file, 'component-link')
+        detector.set('name', 'detector')
+        param = ET.SubElement(detector, 'parameter')
+        param.set('name', 'wavelength')
+        value = ET.SubElement(param, 'value')
+        value.set('val', str(wavelength))
+
         for bank_no in range(self._D7NumberBanks):
             bank = ET.SubElement(param_file, 'component-link')
             bank.set('name', 'bank'+str(bank_no+2))
-
-            wavelength_information = ET.SubElement(param_file, 'wavelength')
-            param = ET.SubElement(wavelength_information, 'parameter')
-            param.set('name', 'wavelength')
-            value = ET.SubElement(param, 'value')
-            value.set('val', str(wavelength))
 
             for pixel_no in range(self._D7NumberPixelsBank):
                 pixel = ET.SubElement(bank, 'parameter')
