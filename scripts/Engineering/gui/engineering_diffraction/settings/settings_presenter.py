@@ -45,7 +45,6 @@ class SettingsPresenter(object):
 
     def save_new_settings(self):
         self._collect_new_settings_from_view()
-        self.savedir_notifier.notify_subscribers(self.settings["save_location"])
         self._save_settings_to_file()
 
     def _collect_new_settings_from_view(self):
@@ -67,6 +66,7 @@ class SettingsPresenter(object):
     def _save_settings_to_file(self):
         if self._validate_settings(self.settings):
             self.model.set_settings_dict(self.settings)
+            self.savedir_notifier.notify_subscribers(self.settings["save_location"])
 
     def load_settings_from_file_or_default(self):
         self.settings = self.model.get_settings_dict(SETTINGS_DICT)

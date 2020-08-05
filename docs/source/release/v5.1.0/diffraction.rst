@@ -45,6 +45,7 @@ Improvements
 - Focusing with the GUI will now generate a CSV containing the averaged values of all numerical sample logs.
 - The currently loaded calibration is now shown at the bottom of the GUI.
 - The location of the saved output files from the GUI is now shown in the messages log.
+- The save directory is now displayed in the status bar of the GUI.
 
 Single Crystal Diffraction
 --------------------------
