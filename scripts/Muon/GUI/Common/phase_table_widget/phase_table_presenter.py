@@ -7,22 +7,13 @@
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad
-from mantidqt.utils.observer_pattern import Observer, Observable
+from mantidqt.utils.observer_pattern import Observable,GenericObserver
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
     get_phase_table_workspace_group_name, \
     get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 import mantid
-
-
-class GenericObserver(Observer):
-    def __init__(self, callback):
-        Observer.__init__(self)
-        self.callback = callback
-
-    def update(self, observable, arg):
-        self.callback()
 
 
 class PhaseTablePresenter(object):
@@ -37,6 +28,9 @@ class PhaseTablePresenter(object):
 
         self.phase_table_calculation_complete_notifier = Observable()
         self.phase_quad_calculation_complete_nofifier = Observable()
+
+        self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(True))
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
 

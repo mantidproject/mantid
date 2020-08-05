@@ -8,6 +8,7 @@ import unittest
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.utils.observer_pattern import GenericObservable
 from qtpy.QtWidgets import QApplication
 from qtpy import QtCore
 from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
@@ -214,6 +215,22 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         workspace_wrapper_mock.assert_called_once_with('MUSR22222 MA/MUSR22222 Phase Tab MA/MUSR22222_PhaseTable; fit_information')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
+
+    def test_that_disable_observer_calls_on_view_when_triggered(self):
+        disable_notifier = GenericObservable()
+        disable_notifier.add_subscriber(self.presenter.disable_tab_observer)
+        self.view.setEnabled = mock.MagicMock()
+
+        disable_notifier.notify_subscribers()
+        self.view.setEnabled.assert_called_once_with(False)
+
+    def test_that_enable_observer_calls_on_view_when_triggered(self):
+        enable_notifier = GenericObservable()
+        enable_notifier.add_subscriber(self.presenter.enable_tab_observer)
+        self.view.setEnabled = mock.MagicMock()
+
+        enable_notifier.notify_subscribers()
+        self.view.setEnabled.assert_called_once_with(True)
 
 
 if __name__ == '__main__':
