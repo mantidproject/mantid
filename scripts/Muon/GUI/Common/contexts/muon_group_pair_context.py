@@ -110,6 +110,8 @@ class MuonGroupPairContext(object):
     def __init__(self, check_group_contains_valid_detectors=lambda x: True):
         self._groups = []
         self._pairs = []
+        self._selected = ''
+        self._selected_type = ''
         self._selected_pairs = []
         self._selected_groups = []
 
@@ -154,6 +156,24 @@ class MuonGroupPairContext(object):
 
     def clear_selected_groups(self):
         self._selected_groups = []
+
+    @property
+    def selected(self):
+        return self._selected
+
+    @property
+    def selected_type(self):
+        return self._selected_type
+
+    @selected.setter
+    def selected(self, value):
+        if value in self.group_names + self.pair_names and self._selected != value:
+            self._selected = value
+
+    @selected_type.setter
+    def selected_type(self, value):
+        if value in ["Pair", "Group"] and self._selected_type != value:
+            self._selected_type = value
 
     @property
     def group_names(self):
