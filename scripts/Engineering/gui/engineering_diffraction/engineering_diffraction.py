@@ -33,6 +33,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
     The engineering diffraction interface
     """
 
+    status_savdirMaxwidth = 300
+
     def __init__(self, parent=None):
         super(EngineeringDiffractionGui, self).__init__(parent)
 
@@ -61,7 +63,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         # Setup status bar
         self.status_label = QtWidgets.QLabel()
         self.savedir_label = QtWidgets.QLabel()
-        self.savedir_label.setMaximumWidth(300)
+        self.savedir_label.setMaximumWidth(self.status_savdirMaxwidth )
         self.setup_statusbar()
 
         # Setup notifiers
