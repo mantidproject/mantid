@@ -131,7 +131,7 @@ class RundexSettings(object):
                 },
             REFL_POL : {
                 "PolarizationEfficiencyFile": "",
-                "DirectFlatBackground": "Background Average",
+                "DirectFlatBackground": "Background Constant Fit",
                 "ReflFlatBackground": "Background Constant Fit",
                 "SubalgorithmLogging": "Logging OFF",
                 "Cleanup": "Cleanup ON",
