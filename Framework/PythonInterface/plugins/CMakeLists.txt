@@ -256,6 +256,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/SANSFitShiftScale.py
   algorithms/WorkflowAlgorithms/SANSILLAutoProcess.py
   algorithms/WorkflowAlgorithms/SANSILLIntegration.py
+  algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
   algorithms/WorkflowAlgorithms/SANSILLReduction.py
   algorithms/WorkflowAlgorithms/SANSMask.py
   algorithms/WorkflowAlgorithms/SANSPatchSensitivity.py
