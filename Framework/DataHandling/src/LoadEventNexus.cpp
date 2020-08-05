@@ -439,11 +439,6 @@ void LoadEventNexus::execLoader() {
 std::pair<DateAndTime, DateAndTime>
 firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
-
-  // const auto heldTimeZeroType = file.getInfo().type;
-  // Nexus only requires event_time_zero to be a NXNumber, we support two
-  // possibilities for held type
-
   std::string isooffset; // ISO8601 offset
   DateAndTime offset;
   // According to the Nexus standard, if the offset is not present, it implies
@@ -460,65 +455,16 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   std::string units; // time units
   if (file.hasAttr("units"))
     file.getAttr("units", units);
-
+  // Read in the pulse times
   auto pulse_times =
       NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
-
+  // Remember to close the entry
   file.closeData();
-
   // Convert to seconds
   auto conv = Kernel::Units::timeConversionValue(units, "s");
-  // auto absoluteFirst =
-  //   pulse_times.front(), units, "s");
-  // auto absoluteFirst = Kernel::Units::timeConversionValue(
-  //   pulse_times.back(), units, "s");
-
   return std::make_pair(
       DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
       DateAndTime(pulse_times.back() * conv, 0.0) + offset.totalNanoseconds());
-  // // Convert to nanoseconds
-  // // Kernel::Units::timeConversionValue(vec, units, "ns");
-  // // std::copy(vec.begin(), vec.end(), event_time_of_flight->data());
-
-  // // TODO. Logic here is similar to BankPulseTimes (ctor) should be
-  // consolidated if (heldTimeZeroType == ::NeXus::UINT64) {
-  //   if (units != "ns")
-  //     logger.warning(
-  //         "event_time_zero is uint64_t, but units not in ns. Found to be: " +
-  //         units);
-  //   std::vector<uint64_t> nanoseconds;
-  //   file.readData("event_time_zero", nanoseconds);
-  //   if (nanoseconds.empty())
-  //     throw std::runtime_error(
-  //         "No event time zeros. Cannot establish run start or end");
-  //   auto absoluteFirst = DateAndTime(int64_t(0),
-  //   int64_t(nanoseconds.front())) +
-  //                        offset.totalNanoseconds();
-  //   auto absoluteLast = DateAndTime(int64_t(0), int64_t(nanoseconds.back()))
-  //   +
-  //                       offset.totalNanoseconds();
-  //   return std::make_pair(absoluteFirst, absoluteLast);
-  // } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
-  //   if (units != "second")
-  //     logger.warning("event_time_zero is double_t, but units not in seconds.
-  //     "
-  //                    "Found to be: " +
-  //                    units);
-  //   std::vector<double> seconds;
-  //   file.readData("event_time_zero", seconds);
-  //   if (seconds.empty())
-  //     throw std::runtime_error(
-  //         "No event time zeros. Cannot establish run start or end");
-  //   auto absoluteFirst =
-  //       DateAndTime(seconds.front(), double(0)) + offset.totalNanoseconds();
-  //   auto absoluteLast =
-  //       DateAndTime(seconds.back(), double(0)) + offset.totalNanoseconds();
-  //   return std::make_pair(absoluteFirst, absoluteLast);
-  // }
-
-  // else {
-  //   throw std::runtime_error("Unrecognised type for event_time_zero");
-  // }
 } // namespace DataHandling
 
 /**

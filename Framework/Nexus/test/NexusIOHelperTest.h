@@ -25,14 +25,45 @@ public:
     file.openGroup("raw_event_data", "NXevent_data");
     auto event_index = Nioh::readNexusVector<uint64_t>(file, "event_index");
     TS_ASSERT_EQUALS(event_index.size(), 1439);
+    TS_ASSERT_EQUALS(event_index[100], 100);
     auto event_id = Nioh::readNexusVector<uint64_t>(file, "event_id");
     TS_ASSERT_EQUALS(event_id.size(), 1439);
+    TS_ASSERT_EQUALS(event_id[100], 3843);
     auto event_time_offset =
         Nioh::readNexusVector<float>(file, "event_time_offset");
     TS_ASSERT_EQUALS(event_time_offset.size(), 1439);
+    TS_ASSERT_EQUALS(event_time_offset[100], 0.);
     auto event_time_zero =
         Nioh::readNexusVector<double>(file, "event_time_zero");
     TS_ASSERT_EQUALS(event_time_zero.size(), 1439);
+    TS_ASSERT_EQUALS(event_time_zero[100], 1543584891250635008.0);
+    file.closeGroup();
+    file.closeGroup();
+  }
+
+  void test_nexus_io_helper_readNexusVector_out_buffer() {
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    ::NeXus::File file(filename);
+    file.openGroup("entry", "NXentry");
+    file.openGroup("raw_event_data", "NXevent_data");
+    file.openData("event_index");
+    const auto info = file.getInfo();
+    const auto size = std::accumulate(info.dims.begin(), info.dims.end(),
+                                      int64_t{1}, std::multiplies<>());
+    std::vector<uint64_t> event_index(size);
+    Nioh::readNexusVector(event_index, file, "event_index");
+    file.closeData();
+    TS_ASSERT_EQUALS(event_index[100], 100);
+    std::vector<uint64_t> event_id(size);
+    Nioh::readNexusVector(event_id, file, "event_id");
+    TS_ASSERT_EQUALS(event_id[100], 3843);
+    std::vector<float> event_time_offset(size);
+    Nioh::readNexusVector(event_time_offset, file, "event_time_offset");
+    TS_ASSERT_EQUALS(event_time_offset[100], 0.);
+    std::vector<double> event_time_zero(size);
+    Nioh::readNexusVector(event_time_zero, file, "event_time_zero");
+    TS_ASSERT_EQUALS(event_time_zero[100], 1543584891250635008.0);
     file.closeGroup();
     file.closeGroup();
   }
@@ -59,6 +90,31 @@ public:
             Nioh::readNexusVector<float>(file, "event_time_zero"),
         std::runtime_error & e, std::string(e.what()),
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
+    file.closeGroup();
+    file.closeGroup();
+  }
+
+  void test_nexus_io_helper_readNexusVector_allow_downcasting() {
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    ::NeXus::File file(filename);
+    file.openGroup("entry", "NXentry");
+    file.openGroup("raw_event_data", "NXevent_data");
+    auto event_index =
+        Nioh::readNexusVector<uint32_t>(file, "event_index", true);
+    TS_ASSERT_EQUALS(event_index.size(), 1439);
+    TS_ASSERT_EQUALS(event_index[100], 100);
+    auto event_id = Nioh::readNexusVector<uint32_t>(file, "event_id", true);
+    TS_ASSERT_EQUALS(event_id.size(), 1439);
+    TS_ASSERT_EQUALS(event_id[100], 3843);
+    auto event_time_offset =
+        Nioh::readNexusVector<uint16_t>(file, "event_time_offset", true);
+    TS_ASSERT_EQUALS(event_time_offset.size(), 1439);
+    TS_ASSERT_EQUALS(event_time_offset[100], 0.);
+    auto event_time_zero =
+        Nioh::readNexusVector<float>(file, "event_time_zero", true);
+    TS_ASSERT_EQUALS(event_time_zero.size(), 1439);
+    TS_ASSERT_DIFFERS(event_time_zero[100], 1543584891250635008.0);
     file.closeGroup();
     file.closeGroup();
   }
@@ -102,6 +158,30 @@ public:
     auto event_time_zero =
         Nioh::readNexusSlab<double>(file, "event_time_zero", {111}, {501});
     TS_ASSERT_EQUALS(event_time_zero.size(), 501);
+    file.closeGroup();
+    file.closeGroup();
+  }
+
+  void test_nexus_io_helper_readNexusSlab_out_buffer() {
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    ::NeXus::File file(filename);
+    file.openGroup("entry", "NXentry");
+    file.openGroup("raw_event_data", "NXevent_data");
+    std::vector<uint64_t> event_index(200);
+    Nioh::readNexusSlab(event_index, file, "event_index", {10}, {200});
+    TS_ASSERT_EQUALS(event_index[90], 100);
+    std::vector<uint64_t> event_id(300);
+    Nioh::readNexusSlab(event_id, file, "event_id", {100}, {300});
+    TS_ASSERT_EQUALS(event_id[0], 3843);
+    std::vector<float> event_time_offset(400);
+    Nioh::readNexusSlab(event_time_offset, file, "event_time_offset", {1000},
+                        {400});
+    TS_ASSERT_EQUALS(event_time_offset[200], 0.);
+    std::vector<double> event_time_zero(501);
+    Nioh::readNexusSlab<double>(event_time_zero, file, "event_time_zero", {111},
+                                {501});
+    TS_ASSERT_EQUALS(event_time_zero[100], 1543585007190292224.0);
     file.closeGroup();
     file.closeGroup();
   }

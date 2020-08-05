@@ -226,9 +226,9 @@ std::vector<T> readNexusVector(::NeXus::File &file,
  * The provided output buffer is filled.
  */
 template <typename T>
-std::vector<T> readNexusVector(std::vector<T> &out, ::NeXus::File &file,
-                               const std::string &entry = "",
-                               const bool allow_downcasting = false) {
+void readNexusVector(std::vector<T> &out, ::NeXus::File &file,
+                     const std::string &entry = "",
+                     const bool allow_downcasting = false) {
   const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   const auto dims = (info_and_close.first).dims;

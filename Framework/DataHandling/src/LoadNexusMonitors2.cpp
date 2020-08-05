@@ -544,8 +544,6 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
       string_map_t inner_entries = file.getEntries(); // get list of entries
       if (inner_entries.find("monitor_number") != inner_entries.end()) {
         // get monitor number from field in file
-        // const auto detNum = NeXus::NeXusIOHelper::readNexusValue<int64_t>(
-        //     file, "monitor_number", g_log);
         const auto detNum = NeXus::NeXusIOHelper::readNexusValue<int64_t>(
             file, "monitor_number");
         if (detNum > std::numeric_limits<detid_t>::max()) {
@@ -693,14 +691,10 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
   std::string tof_units, event_time_zero_units;
 
   // read in the data
-  // auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(
-  //     file, "event_index", g_log);
   auto event_index =
       NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
 
   file.openData("event_time_offset"); // time of flight
-  // MantidVec time_of_flight =
-  //     NeXus::NeXusIOHelper::readNexusVector<double>(file, "", g_log);
   MantidVec time_of_flight =
       NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", tof_units);
@@ -709,8 +703,6 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
   file.closeData();
 
   file.openData("event_time_zero"); // pulse time
-  // MantidVec seconds =
-  //     NeXus::NeXusIOHelper::readNexusVector<double>(file, "", g_log);
   MantidVec seconds = NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", event_time_zero_units);
   Kernel::Units::timeConversionVector(seconds, event_time_zero_units,
