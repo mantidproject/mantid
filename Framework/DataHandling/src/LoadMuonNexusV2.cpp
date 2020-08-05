@@ -160,6 +160,11 @@ void LoadMuonNexusV2::execLoader() {
         std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
     m_loadMuonStrategy = std::make_unique<MultiPeriodLoadMuonStrategy>(
         g_log, m_filename, entry, workspaceGroup);
+    auto numberHistograms =
+        std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(0))
+            ->getNumberHistograms();
+    loadMuonProperties(entry, numberHistograms);
+
   } else {
     // we just have a single workspace
     Workspace2D_sptr workspace2D =

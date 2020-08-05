@@ -122,7 +122,7 @@ API::Workspace_sptr MultiPeriodLoadMuonStrategy::loadDeadTimeTable() const {
     tableGroup->addWorkspace(createDeadTimeTable(m_detectors, deadTimes));
   }
   return tableGroup;
-};
+}
 
 /**
  * Finds the detectors which are loaded in the stored workspace group
