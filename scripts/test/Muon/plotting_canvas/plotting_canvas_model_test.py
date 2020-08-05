@@ -39,7 +39,7 @@ class PlottingCanvasModelTest(unittest.TestCase):
         self.model.create_plot_information.assert_any_call(test_ws_names[1], test_indies[1], axis, False)
 
     def test_get_workspace_plot_axis_returns_correct_axis_for_tiled_plot(self):
-        self.context.group_pair_context.get_group_pair_name_from_workspace_name.return_value = ('fwd', [62260])
+        self.context.group_pair_context.get_group_pair_name_and_run_from_workspace_name.return_value = ('fwd', [62260])
         self.model._is_tiled = True
         self.model._tiled_by = "Group/Pair"
         self.model._axes_workspace_map = {"bkwd": 0, "fwd": 1, "top": 2}
@@ -51,7 +51,7 @@ class PlottingCanvasModelTest(unittest.TestCase):
         self.assertEqual(axis, expected_axis)
 
     def test_get_workspace_plot_axis_handles_bad_input_workspace_name(self):
-        self.context.group_pair_context.get_group_pair_name_from_workspace_name.return_value = ('bottom', [62260])
+        self.context.group_pair_context.get_group_pair_name_and_run_from_workspace_name.return_value = ('bottom', [62260])
         self.model._is_tiled = True
         self.model._tiled_by = "Group/Pair"
         self.model._axes_workspace_map = {"bkwd": 0, "fwd": 1, "top": 2}
@@ -104,7 +104,7 @@ class PlottingCanvasModelTest(unittest.TestCase):
         self.assertEqual(label, expected_label)
 
     def test_that_correctly_assigns_groups_to_axis_in_cases_where_group_name_appears_elsewhere_in_workspace_name_as_substring(self):
-        self.context.group_pair_context.get_group_pair_name_from_workspace_name.return_value = ('fwd', [62260])
+        self.context.group_pair_context.get_group_pair_name_and_run_from_workspace_name.return_value = ('fwd', [62260])
         self.model._is_tiled = True
         self.model._tiled_by = "Group/Pair"
         self.model._axes_workspace_map = {"up": 0, "fwd": 1, "top": 2}
@@ -116,7 +116,7 @@ class PlottingCanvasModelTest(unittest.TestCase):
         self.assertEqual(axis, expected_axis)
 
     def test_that_correctly_assigns_axis_for_tiling_by_run(self):
-        self.context.group_pair_context.get_group_pair_name_from_workspace_name.return_value = ('fwd', [62262])
+        self.context.group_pair_context.get_group_pair_name_and_run_from_workspace_name.return_value = ('fwd', [62262])
         self.model._is_tiled = True
         self.model._tiled_by = "Run"
         self.model._axes_workspace_map = {"62260": 0, "62261": 1, "62262": 2}
