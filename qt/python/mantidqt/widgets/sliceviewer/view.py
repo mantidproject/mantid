@@ -120,7 +120,6 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.linePlotsClicked.connect(self.on_line_plots_toggle)
         self.mpl_toolbar.regionSelectionClicked.connect(self.on_region_selection_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
-        self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)

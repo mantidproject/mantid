@@ -46,6 +46,10 @@ Improvements
 - The currently loaded calibration is now shown at the bottom of the GUI.
 - The location of the saved output files from the GUI is now shown in the messages log.
 
+Bugfixes
+^^^^^^^^
+- The Engineering diffraction gui no longer goes behind the workbench window when a plot is clicked on.
+
 Single Crystal Diffraction
 --------------------------
 Improvements
