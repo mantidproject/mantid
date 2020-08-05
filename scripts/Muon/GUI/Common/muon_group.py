@@ -137,7 +137,7 @@ class MuonGroup(object):
 
         return None
 
-    def check_workspace_exists(self, workspace_name):
+    def get_run_for_workspace(self, workspace_name):
         for key, value in self._asymmetry_estimate.items():
             if value.workspace_name == workspace_name:
                 return key
