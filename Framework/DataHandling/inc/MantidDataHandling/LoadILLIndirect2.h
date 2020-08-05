@@ -46,6 +46,7 @@ private:
                          const std::string &instrumentNamePath);
   void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry);
+  void loadDiffractionData(NeXus::NXEntry &entry);
   void runLoadInstrument();
   void moveComponent(const std::string &, double);
   void moveSingleDetectors(NeXus::NXEntry &entry);

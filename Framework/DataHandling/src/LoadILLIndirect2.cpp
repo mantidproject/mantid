@@ -80,6 +80,9 @@ void LoadILLIndirect2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "LoadDiffractionData", false, Direction::Input),
+                  "Load only the monochromatic data of the file.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -103,24 +106,30 @@ void LoadILLIndirect2::exec() {
   const std::string instrumentPath =
       m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
+
   initWorkSpace();
   progress.report("Initialised the workspace");
 
   loadNexusEntriesIntoProperties(filenameData);
   progress.report("Loaded data details");
 
-  loadDataIntoTheWorkSpace(firstEntry);
+  if (getProperty("LoadDiffractionData")) {
+    loadDiffractionData(firstEntry);
+  } else {
+    loadDataIntoTheWorkSpace(firstEntry);
+  }
   progress.report("Loaded the data");
 
   runLoadInstrument();
   progress.report("Loaded the instrument");
 
-  moveSingleDetectors(firstEntry);
-  progress.report("Loaded the single detectors");
+  if (!(getProperty("LoadDiffractionData"))) {
+    moveSingleDetectors(firstEntry);
+    progress.report("Loaded the single detectors");
 
-  rotateTubes();
-  progress.report("Rotating tubes if necessary");
-
+    rotateTubes();
+    progress.report("Rotating tubes if necessary");
+  }
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 }
@@ -148,38 +157,33 @@ void LoadILLIndirect2::setInstrumentName(
  * @param entry First entry of nexus file
  */
 void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
+  NeXus::NXClass instrument = entry.openNXGroup("instrument");
+
+  // find the data
+  std::string dataPath;
+
+  if (getProperty("LoadDiffractionData")) {
+
+    if (instrument.containsGroup("DiffDet")) {
+      dataPath = "instrument/DiffDet/data";
+    } else if (entry.containsGroup("dataDiffDet")) {
+      dataPath = "dataDiffDet/DiffDet_data";
+    } else {
+      throw std::runtime_error("Dataset path not found.");
+    }
+
+  } else {
+    dataPath = "data";
+  }
+
   // read in the data
-  NXData dataGroup = entry.openNXData("data");
+  NXData dataGroup = entry.openNXData(dataPath);
   NXInt data = dataGroup.openIntData();
 
   m_numberOfTubes = static_cast<size_t>(data.dim0());
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
   m_numberOfChannels = static_cast<size_t>(data.dim2());
 
-  // check which single detectors are enabled, and store their indices
-  NXData dataSDGroup = entry.openNXData("dataSD");
-  NXInt dataSD = dataSDGroup.openIntData();
-
-  for (int i = 1; i <= dataSD.dim0(); ++i) {
-    try {
-      std::string entryNameFlagSD =
-          boost::str(boost::format("instrument/SingleD/tubes%i_function") % i);
-      NXFloat flagSD = entry.openNXFloat(entryNameFlagSD);
-      flagSD.load();
-
-      if (flagSD[0] == 1.0) // is enabled
-      {
-        m_activeSDIndices.insert(i);
-      }
-    } catch (...) {
-      // if the flags are not present in the file (e.g. old format), load all
-      m_activeSDIndices.insert(i);
-    }
-  }
-  m_numberOfSimpleDetectors = m_activeSDIndices.size();
-
-  g_log.information() << "Number of activated single detectors is: "
-                      << m_numberOfSimpleDetectors << std::endl;
   try {
     NXInt mode = entry.openNXInt("acquisition_mode");
     mode.load();
@@ -187,13 +191,42 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
   } catch (...) {
     g_log.information() << "Unable to read acquisition_mode, assuming doppler";
   }
-  try {
-    NXFloat firstTubeAngle = entry.openNXFloat("instrument/PSD/PSD angle 1");
-    firstTubeAngle.load();
-    m_firstTubeAngleRounded =
-        static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
-  } catch (...) {
-    g_log.information() << "Unable to read first tube anlge, assuming 25.1";
+
+  // check which single detectors are enabled, and store their indices
+  if (!getProperty("LoadDiffractionData")) {
+    NXData dataSDGroup = entry.openNXData("dataSD");
+    NXInt dataSD = dataSDGroup.openIntData();
+
+    for (int i = 1; i <= dataSD.dim0(); ++i) {
+      try {
+        std::string entryNameFlagSD = boost::str(
+            boost::format("instrument/SingleD/tubes%i_function") % i);
+        NXFloat flagSD = entry.openNXFloat(entryNameFlagSD);
+        flagSD.load();
+
+        if (flagSD[0] == 1.0) // is enabled
+        {
+          m_activeSDIndices.insert(i);
+        }
+      } catch (...) {
+        // if the flags are not present in the file (e.g. old format), load all
+        m_activeSDIndices.insert(i);
+      }
+    }
+    m_numberOfSimpleDetectors = m_activeSDIndices.size();
+    g_log.information() << "Number of activated single detectors is: "
+                        << m_numberOfSimpleDetectors << std::endl;
+
+    try {
+      NXFloat firstTubeAngle = entry.openNXFloat("instrument/PSD/PSD angle 1");
+      firstTubeAngle.load();
+      m_firstTubeAngleRounded =
+          static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
+    } catch (...) {
+      g_log.information() << "Unable to read first tube anlge, assuming 25.1";
+    }
+  } else {
+    m_numberOfSimpleDetectors = 0;
   }
 }
 
@@ -217,7 +250,7 @@ void LoadILLIndirect2::initWorkSpace() {
 }
 
 /**
- * Load data found in nexus file
+ * Load data found in nexus file in general, indirect mode.
  * @param entry :: The Nexus entry
  */
 void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
@@ -274,6 +307,86 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
 }
 
 /**
+ * @brief LoadILLIndirect2::loadDiffractionData
+ * Load IN16B diffraction data from the Nexus file when requested.
+ * @param entry
+ */
+void LoadILLIndirect2::loadDiffractionData(NeXus::NXEntry &entry) {
+  NeXus::NXClass instrument = entry.openNXGroup("instrument");
+
+  // first, determine version
+  bool newVersion = instrument.containsDataSet("version");
+
+  // find the path to the data
+  std::string dataPath;
+  if (instrument.containsGroup("DiffDet")) {
+    dataPath = "instrument/DiffDet/data";
+  } else if (entry.containsGroup("dataDiffDet")) {
+    dataPath = "dataDiffDet/DiffDet_data";
+  } else {
+    throw std::runtime_error("Dataset path not found.");
+  }
+
+  NXData dataGroup = entry.openNXData(dataPath);
+
+  NXInt data = dataGroup.openIntData();
+  data.load();
+
+  NXData dataMonGroup = entry.openNXData("monitor/data");
+  NXInt dataMon = dataMonGroup.openIntData();
+  dataMon.load();
+
+  // First, Monitor
+  // Assign Y
+  int *monitor_p = &dataMon(0, 0);
+  m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
+  // Assign Error
+  MantidVec &E = m_localWorkspace->dataE(0);
+  std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(),
+                 [](const double v) { return std::sqrt(v); });
+
+  if (!newVersion) {
+    // Then Tubes
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+    for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
+      for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
+        size_t index;
+        if (i == 2 || i == 3) {
+          index = (m_numberOfTubes - 1 - i) * m_numberOfPixelsPerTube +
+                  (m_numberOfPixelsPerTube - 1 - j) + m_numberOfMonitors;
+        } else {
+          index = (m_numberOfTubes - 1 - i) * m_numberOfPixelsPerTube + j +
+                  m_numberOfMonitors;
+        }
+        // Assign Y
+        int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+        m_localWorkspace->dataY(index).assign(data_p,
+                                              data_p + m_numberOfChannels);
+        // Assign Error
+        MantidVec &E = m_localWorkspace->dataE(index);
+        std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
+                       [](const double v) { return std::sqrt(v); });
+      }
+    }
+  } else {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+    for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
+      for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
+        size_t index = i * m_numberOfPixelsPerTube + j + m_numberOfMonitors;
+        // Assign Y
+        int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+        m_localWorkspace->dataY(index).assign(data_p,
+                                              data_p + m_numberOfChannels);
+        // Assign Error
+        MantidVec &E = m_localWorkspace->dataE(index);
+        std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
+                       [](const double v) { return std::sqrt(v); });
+      }
+    }
+  }
+}
+
+/**
  * @brief Loads the sample logs
  * @param nexusfilename
  */
@@ -299,6 +412,12 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(
 void LoadILLIndirect2::runLoadInstrument() {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", getInstrumentFilePath());
+  std::string name;
+  if (m_instrumentName == "IN16B" && getProperty("LoadDiffractionData")) {
+    name = "IN16BD";
+  } else {
+    name = m_instrumentName;
+  }
   loadInst->setPropertyValue("InstrumentName", m_instrumentName);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   loadInst->setProperty("RewriteSpectraMap",
@@ -314,7 +433,9 @@ void LoadILLIndirect2::runLoadInstrument() {
 std::string LoadILLIndirect2::getInstrumentFilePath() {
   Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
   std::string idf = m_instrumentName;
-  if (!m_bats && m_firstTubeAngleRounded == 251) {
+  if (getProperty("LoadDiffractionData")) {
+    idf += "D";
+  } else if (!m_bats && m_firstTubeAngleRounded == 251) {
     // load the instrument with the first tube analyser focused at the midpoint
     // of sample to tube center
     idf += "F";
