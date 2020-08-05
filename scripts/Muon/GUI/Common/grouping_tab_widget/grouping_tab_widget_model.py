@@ -29,10 +29,10 @@ class GroupingTabModel(object):
         it doesn't already exist (e.g. if group added to table but no update yet triggered).
         """
         try:
-            workspace = self._groups_and_pairs[group_name].workspace[str(run)].workspace
+            workspace = self._groups_and_pairs[group_name].workspace[tuple(run)].workspace
         except AttributeError:
-            workspace = self._context.calculate_group(group_name, str(run), rebin=False)
-            self._groups_and_pairs[group_name].update_counts_workspace(workspace, str(run))
+            workspace = self._context.calculate_group(group_name, run, rebin=False)
+            self._groups_and_pairs[group_name].update_counts_workspace(workspace, tuple(run))
         return workspace
 
     @property
