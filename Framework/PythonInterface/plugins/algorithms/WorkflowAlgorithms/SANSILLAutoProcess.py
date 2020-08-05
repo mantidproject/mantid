@@ -158,9 +158,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     thickness = None
     theta_dependent = None
 
-    def clearStaticData(self):
-        print("helloooooo")
-
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
 
