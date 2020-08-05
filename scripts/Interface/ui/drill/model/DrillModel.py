@@ -448,6 +448,8 @@ class DrillModel(QObject):
                             int, float, bool
         """
         params = dict()
+        if self.acquisitionMode in RundexSettings.FLAGS:
+            params.update(RundexSettings.FLAGS[self.acquisitionMode])
         params.update(self.settings)
         params.update(self.samples[sample])
         # override global params with custom ones

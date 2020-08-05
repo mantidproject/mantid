@@ -198,6 +198,16 @@ class RundexSettings(object):
                 }
             }
 
+    # optionnal flags
+    FLAGS = {
+            REFL_POL : {
+                "PolarizationOption": "Polarized"
+                },
+            REFL_NPOL : {
+                "PolarizationOption": "NonPolarized"
+                }
+            }
+
     # Json keys
     INSTRUMENT_JSON_KEY = "Instrument"
     TECHNIQUE_JSON_KEY = "Technique"
