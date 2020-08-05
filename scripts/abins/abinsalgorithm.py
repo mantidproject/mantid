@@ -641,7 +641,7 @@ class AbinsAlgorithm:
                                      " *.xml for VASP calculation output. Please rename your file and try again. "
                                      .format(filename_full_path))
         return output
-            
+
     @staticmethod
     def _get_one_line(file_obj=None):
         """
