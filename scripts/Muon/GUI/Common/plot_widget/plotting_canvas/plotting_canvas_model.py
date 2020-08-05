@@ -7,6 +7,7 @@
 from typing import NamedTuple, List
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import MUON_ANALYSIS_GUESS_WS, \
     FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
 
@@ -137,11 +138,13 @@ class PlottingCanvasModel(object):
 
         group_pair_name, run = self._context.group_pair_context.get_group_pair_name_from_workspace_name(workspace_name)
 
+        run_as_string = run_list_to_string(run)
+
         if group_pair_name in self._axes_workspace_map:
             return self._axes_workspace_map[group_pair_name]
 
-        if run in self._axes_workspace_map:
-            return self._axes_workspace_map[run]
+        if run_as_string in self._axes_workspace_map:
+            return self._axes_workspace_map[run_as_string]
 
         return 0
 
