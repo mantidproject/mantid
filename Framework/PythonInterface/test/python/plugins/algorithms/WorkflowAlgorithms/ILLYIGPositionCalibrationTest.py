@@ -59,24 +59,24 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
         self._check_fit_output('test_longWavelength')
         self._check_load_data_with_calibration('test_longWavelength.xml')
 
-    def _check_fit_output(self, parameters_name):
+    def _check_fit_output(self, fitTableName):
         """ Checks the TableWorkspace if the output values are reasonable, 
         then check if the output IPF can be read by the Loader"""
         D7_NUMBER_PIXELS = 132        
 
-        self.assertNotEqual(mtd[parameters_name], None)
+        self.assertNotEqual(mtd[fitTableName], None)
         
-        wavelength = float(mtd[parameters_name].column(1)[1])
+        wavelength = float(mtd[fitTableName].column(1)[1])
         self.assertAlmostEqual(wavelength, 1.0,  delta=2e-2) # 2 %
-        bank2_slope = float(mtd[parameters_name].column(1)[0])
+        bank2_slope = float(mtd[fitTableName].column(1)[0])
         self.assertAlmostEqual(bank2_slope, 1.0, delta=1e-2) # 1 %
-        bank3_slope = float(mtd[parameters_name].column(1)[D7_NUMBER_PIXELS])
+        bank3_slope = float(mtd[fitTableName].column(1)[D7_NUMBER_PIXELS])
         self.assertAlmostEqual(bank3_slope, 1.0, delta=1e-2) # 1 %
-        bank4_slope = float(mtd[parameters_name].column(1)[D7_NUMBER_PIXELS*2])
+        bank4_slope = float(mtd[fitTableName].column(1)[D7_NUMBER_PIXELS*2])
         self.assertAlmostEqual(bank4_slope, 1.0, delta=1e-2) # 1 %
 
         for pixel_no in range(D7_NUMBER_PIXELS):
-            offset = mtd[parameters_name].column(1)[2+3*pixel_no] * 180.0 / np.pi
+            offset = mtd[fitTableName].column(1)[2+3*pixel_no] * 180.0 / np.pi
             self.assertAlmostEqual(offset, 0.0, delta=24.0) # +- 24 degrees
             
     def _check_load_data_with_calibration(self, ipf_name):
@@ -86,9 +86,11 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
         positionCalibration = []
         for elem in root:
             for subelem in elem:
+                if 'wavelength' in subelem.attrib['name']:
+                    continue
                 for value in subelem:
                     positionCalibration.append(float(value.attrib['val']))
-        self.assertEquals(len(positionCalibration), 133) # number of pixels + wavelength value
+        self.assertEquals(len(positionCalibration), 132) # number of pixels
         LoadILLPolarizedDiffraction('401800', OutputWorkspace='output', PositionCalibration='YIGFile',
                                     YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
         self.assertNotEquals('output', None)
