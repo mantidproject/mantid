@@ -114,6 +114,17 @@ class MuonPair(object):
 
         return None
 
+    def check_workspace_exists(self, workspace_name):
+        for key, value in self._workspace.items():
+            if value.workspace_name == workspace_name:
+                return key
+
+        for key, value in self.workspace_rebin.items():
+            if value.workspace_name == workspace_name:
+                return key
+
+        return None
+
     def remove_workspace_by_name(self, workspace_name):
         """
                 Searches through all of the stored workspaces and remmves any which match the name given. This is used to handle
