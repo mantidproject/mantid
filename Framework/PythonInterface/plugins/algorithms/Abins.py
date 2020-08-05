@@ -80,9 +80,8 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
     def PyExec(self):
         # 0) Create reporter to report progress
-        steps = 9
-        begin = 0
-        end = 1.0
+        # Before calculating S, we use 10% of the bar for two steps
+        begin, end, steps = 0, 0.1, 2
         prog_reporter = Progress(self, begin, end, steps)
 
         # 1) get input parameters from a user
@@ -95,6 +94,10 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         prog_reporter.report("Vibrational/phonon data has been read.")
 
         # 3) calculate S
+        # Reset reporter to span range 10%-80%; s_calculator will decide how many steps are appropriate
+        # so insert placeholder "1" for now.
+        prog_reporter.resetNumSteps(1, 0.1, 0.8)
+
         s_calculator = abins.SCalculatorFactory.init(filename=self._vibrational_or_phonon_data_file,
                                                      temperature=self._temperature,
                                                      sample_form=self._sample_form,
@@ -102,8 +105,15 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                                                      instrument=self._instrument,
                                                      quantum_order_num=self._num_quantum_order_events,
                                                      bin_width=self._bin_width)
+        s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
+
+        # Hold reporter at 80% for this message
+        prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
         prog_reporter.report("Dynamical structure factors have been determined.")
+        # Now determine number of remaining messages and set reporter for rest of run:
+        n_messages = 3 + bool(self._sum_contributions) + bool(self._experimental_file) + bool(self._save_ascii)
+        prog_reporter.resetNumSteps(n_messages, 0.8, 1)
 
         # 4) get atoms for which S should be plotted
         atoms_data = ab_initio_data.get_atoms_data()

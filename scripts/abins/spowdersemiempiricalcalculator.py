@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import gc
 import numpy as np
+from typing import Union
 
 import abins
 from abins.constants import (ANGLE_MESSAGE_INDENTATION,
@@ -17,10 +18,11 @@ from abins.constants import (ANGLE_MESSAGE_INDENTATION,
                              QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR,
                              S_LAST_INDEX)
 from abins.instruments import Instrument
+from mantid.api import Progress
 
 
 # noinspection PyMethodMayBeStatic
-class SPowderSemiEmpiricalCalculator(object):
+class SPowderSemiEmpiricalCalculator:
     """
     Class for calculating S(Q, omega)
     """
@@ -35,6 +37,7 @@ class SPowderSemiEmpiricalCalculator(object):
         :param instrument: name of instrument (str)
         :param quantum_order_num: number of quantum order events taken into account during the simulation
         :param bin_width: bin width used in rebining in wavenumber
+        :param progress_reporter: Mantid progress reporter
         """
         if not isinstance(temperature, (int, float)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
@@ -100,6 +103,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
         self._num_atoms = len(self._abins_data.get_atoms_data())
 
+        self._progress_reporter = None
         self._a_traces = None
         self._b_traces = None
         self._fundamentals_freq = None
@@ -133,9 +137,11 @@ class SPowderSemiEmpiricalCalculator(object):
         Calculates 2D S for the powder case.
         :return:  object of type SData with 2D dynamical structure factors for the powder case
         """
-
         e_init = abins.parameters.instruments[self._instrument.get_name()]['e_init']
         indent = INCIDENT_ENERGY_MESSAGE_INDENTATION
+
+        if self.progress_reporter:
+            self.progress_reporter.setNumSteps(self._num_k * self._num_atoms * len(e_init) + 1)
 
         energy = e_init[0]
         self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % energy)
@@ -207,6 +213,8 @@ class SPowderSemiEmpiricalCalculator(object):
 
         :returns: object of type SData with 1D dynamical structure factors for the powder case
         """
+        if self.progress_reporter:
+            self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
         data = self._calculate_s_powder_over_k()
 
         s_data = abins.SData(temperature=self._temperature,
@@ -253,10 +261,24 @@ class SPowderSemiEmpiricalCalculator(object):
         # free memory
         gc.collect()
 
+    @property
+    def progress_reporter(self) -> Union[None, Progress]:
+        return self._progress_reporter
+
+    @progress_reporter.setter
+    def progress_reporter(self, progress_reporter) -> None:
+        if isinstance(progress_reporter, (Progress, type(None))):
+            self._progress_reporter = progress_reporter
+        else:
+            raise TypeError("Progress reporter type should be mantid.api.Progress. "
+                            "If unavailable, use None.")
+
     @staticmethod
-    def _report_progress(msg):
+    def _report_progress(msg: str, reporter: Union[None, Progress] = None) -> None:
         """
         :param msg:  message to print out
+        :param reporter:  Progress object for visual feedback in Workbench
+
         """
         # In order to avoid
         #
@@ -266,7 +288,11 @@ class SPowderSemiEmpiricalCalculator(object):
         # logger has to be imported locally
 
         from mantid.kernel import logger
-        logger.notice(msg)
+
+        if reporter:
+            reporter.report(msg)
+
+        logger.information(msg)
 
     def _calculate_s_powder_one_atom(self, atom=None, report_progress=False):
         """
@@ -313,7 +339,7 @@ class SPowderSemiEmpiricalCalculator(object):
                     fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order)
 
         if report_progress:
-            self._report_progress(msg=f"S for atom {atom} has been calculated.")
+            self._report_progress(msg=f"S for atom {atom} has been calculated.", reporter=self.progress_reporter)
 
         return s
 
@@ -663,13 +689,13 @@ class SPowderSemiEmpiricalCalculator(object):
 
             self._clerk.check_previous_data()
             data = self.load_formatted_data()
-            self._report_progress(str(data) + " has been loaded from the HDF file.")
+            self._report_progress(f"{data} has been loaded from the HDF file.", reporter=self.progress_reporter)
 
-        except (IOError, ValueError) as err:
-
-            self._report_progress("Warning: " + str(err) + " Data has to be calculated.")
+        except (IOError, ValueError):
+            self._report_progress("Data not found in cache. Structure factors need to be calculated.")
             data = self.calculate_data()
-            self._report_progress(str(data) + " has been calculated.")
+
+            self._report_progress(f"{data} has been calculated.", reporter=self.progress_reporter)
 
         data.check_thresholds()
         return data
