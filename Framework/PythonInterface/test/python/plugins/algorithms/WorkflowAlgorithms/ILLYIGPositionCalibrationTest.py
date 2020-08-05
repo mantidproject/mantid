@@ -88,7 +88,7 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
             for subelem in elem:
                 for value in subelem:
                     positionCalibration.append(float(value.attrib['val']))
-        self.assertEquals(len(positionCalibration), 135) # number of pixels + monitors + wavelength value
+        self.assertEquals(len(positionCalibration), 133) # number of pixels + wavelength value
         LoadILLPolarizedDiffraction('401800', OutputWorkspace='output', PositionCalibration='YIGFile',
                                     YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
         self.assertNotEquals('output', None)
