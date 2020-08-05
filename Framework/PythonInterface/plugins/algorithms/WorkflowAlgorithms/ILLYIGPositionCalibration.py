@@ -403,7 +403,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
 #         pos_bank3 = CreateWorkspace(DataX=range(44, 88), DataY=bank3_pixels, NSpec=1)
 #         bank4_pixels = pixel_offsets[89:132]
 #         pos_bank4 = CreateWorkspace(DataX=range(89, 132), DataY=bank4_pixels, NSpec=1)
-# 
+
         return wavelength, pixel_offsets
 
     def _prettify(self, elem):
