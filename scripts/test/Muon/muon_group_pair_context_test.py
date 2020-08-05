@@ -162,7 +162,8 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.assertEquals(self.context.pairs[1].forward_group, 'fwd2')
         self.assertEquals(self.context.pairs[1].backward_group, 'bwd2')
         self.assertEquals(self.context.selected, 'long1')
-    def test_get_group_pair_name_from_workspace_name(self):
+
+    def test_get_group_pair_name_and_run_from_workspace_name(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
         group_2 = MuonGroup('group_2', [1, 3, 4, 7, 9])
         group_3 = MuonGroup('group_3', [1, 3, 4, 7, 9])
@@ -172,7 +173,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         group_1.update_workspaces([62260], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
         workspace_name_list = self.context.get_group_workspace_names(runs = [[62260]], groups=['group_1'], rebin=False)
 
-        group_name, run = self.context.get_group_pair_name_from_workspace_name(workspace_name_list[0])
+        group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0])
 
         self.assertEqual(group_name, 'group_1')
         self.assertEqual(run, [62260])
@@ -187,7 +188,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         group_1.update_workspaces([62260, 62261], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
         workspace_name_list = self.context.get_group_workspace_names(runs = [[62260, 62261]], groups=['group_1'], rebin=False)
 
-        group_name, run = self.context.get_group_pair_name_from_workspace_name(workspace_name_list[0])
+        group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0])
 
         self.assertEqual(group_name, 'group_1')
         self.assertEqual(run, [62260, 62261])

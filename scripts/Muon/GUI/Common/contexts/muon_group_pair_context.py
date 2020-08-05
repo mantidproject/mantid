@@ -317,9 +317,9 @@ class MuonGroupPairContext(object):
             if unnormalised_workspace:
                 return unnormalised_workspace
 
-    def get_group_pair_name_from_workspace_name(self, workspace_name):
+    def get_group_pair_name_and_run_from_workspace_name(self, workspace_name):
         for group_pair in self.groups + self.pairs:
-            run = group_pair.check_workspace_exists(workspace_name)
+            run = group_pair.get_run_for_workspace(workspace_name)
             if(run):
                 return group_pair.name, list(run)
 
