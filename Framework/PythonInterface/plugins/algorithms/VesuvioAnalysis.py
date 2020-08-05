@@ -528,28 +528,28 @@ class vesuvioTest(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty("AnalysisMode","LoadReduceAnalyse", doc="In the first case, all the algorithm is run. In the second case, the data are not re-loaded, and only the TOF and y-scaling bits are run. In the third case, only the y-scaling final analysis is run.", validator=StringListValidator(["LoadReduceAnalyse","ReduceAnalyse","Analyse"]))
         self.declareProperty("Verbose",True, doc="If to print the fitting parameters.")
-        self.declareProperty("NumberOfIterations",0, doc="Number of time the reduction is reiterated.", validator=IntListValidator([0,1,2,3,4]))
-        self.declareProperty("OutputName", "vesuvio",doc="The base name for the outputs." )
-        self.declareProperty("Runs", "", doc="List of Vesuvio run numbers (e.g. 20934-20937, 30924)")
+        self.declareProperty("NumberOfIterations",2, doc="Number of time the reduction is reiterated.", validator=IntListValidator([0,1,2,3,4]))
+        self.declareProperty("OutputName", "polyethylene",doc="The base name for the outputs." )
+        self.declareProperty("Runs", "38898-38906", doc="List of Vesuvio run numbers (e.g. 20934-20937, 30924)")
         self.declareProperty("Spectra","135-182", doc="Range of spectra to be analysed.")
-        self.declareProperty("TOFRangeStart", 110,doc="In micro seconds.")
         self.declareProperty("TOFRangeLowerBound", 110,doc="In micro seconds.")
-        self.declareProperty("TOFRangeBinning", 1.5, doc="In micro seconds.")
+        self.declareProperty("TOFRangeBinning", 1., doc="In micro seconds.")
         self.declareProperty("TOFRangeUpperBound", 460, doc="In micro seconds.")
-        self.declareProperty("TransmissionGuess", 1.0, doc="A number from 0 to 1 to represent the experimental transmission value of the sample for epithermal neutrons. This value is used for the multiple scattering corrections. If 1, the multiple scattering correction is not run.",validator=FloatBoundedValidator(0,1) )
-        self.declareProperty("MultipleScatteringOrder", 1, doc="Order of multiple scattering events in MC simultation.",validator=IntListValidator([1,2,3,4]))
-        self.declareProperty("MonteCarloEvents", 1.e5, doc="Number of events for MC multiple scattering simulation.")
+        self.declareProperty("TransmissionGuess", 0.9174, doc="A number from 0 to 1 to represent the experimental transmission value of the sample for epithermal neutrons. This value is used for the multiple scattering corrections. If 1, the multiple scattering correction is not run.",validator=FloatBoundedValidator(0,1) )
+        self.declareProperty("MultipleScatteringOrder", 2, doc="Order of multiple scattering events in MC simultation.",validator=IntListValidator([1,2,3,4]))
+        self.declareProperty("MonteCarloEvents", 1.e6, doc="Number of events for MC multiple scattering simulation.")
         self.declareProperty(ITableWorkspaceProperty("ComptonProfile",
                                    "",
                                    direction=Direction.Input),doc="Table for Compton profiles")
-        self.declareProperty("ConstraintsProfileNumbers", "1,2")
-        self.declareProperty("ConstraintsProfileScatteringCrossSection", "3.*5.551/4.232")
+        self.declareProperty("ConstraintsProfileNumbers", "0,1")
+        self.declareProperty("ConstraintsProfileScatteringCrossSection", "2.*82.03/5.551")
         self.declareProperty("ConstraintsProfileState", "eq", validator=StringListValidator(["eq","ineq"]))
-        self.declareProperty("SpectraToBeMasked", "")
+        self.declareProperty("SpectraToBeMasked", "173,174,181")
         self.declareProperty("SubtractResonancesFunction", "", doc="Function for resonance subtraction. Empty means no subtraction.")
         #self.declareProperty(FunctionProperty("SubtractResonancesFunction", PropertyMode.Optional), doc="Function for resonance subtraction. Empty means no subtraction.")
         #self.declareProperty(FunctionProperty("YSpaceFitFunction",PropertyMode.Optional), doc="The TOF spectra are subtracted by all the fitted profiles but the first element specified in the ?elements? string. Then such spectra are converted to the Y space of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermte function up to the sixth order.") 
         self.declareProperty("YSpaceFitFunction", "",doc="The TOF spectra are subtracted by all the fitted profiles but the first element specified in the elements string. Then such spectra are converted to the Y space of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermte function up to the sixth order.") 
+  
     def validateInputs(self):
         tableCols = ["symbol", "mass(a.u.)", "Intensity lower limit", "Intensity value", "Intensity upper limit", "Width lower limit", "Width value", "Width upper limit", "Centre lower limit", "Centre value", "Centre upper limit"]
         issues = dict()
@@ -561,16 +561,17 @@ class vesuvioTest(PythonAlgorithm):
         return issues
 
     def PyExec(self):
+       mylog = self.log()
        load_data=True                             # If data have already been loaded, it can be put to Fasle to save time;
        verbose=True                                 # If True, prints the value of the fitting parameters for each time-of-flight spectrum
        number_of_iterations = 2                # This is the number of iterations for the reduction analysis in time-of-flight.
        # Parameters of the measurement
-       ws_name="zrh2"
-       runs = "30544-30564"
+       ws_name="polyethylene"
+       runs = "38898-38906"
        first_spectrum, last_spectrum = 135, 182
-       tof_range = "110,1.5,460"
+       tof_range = "110,1.,460"
        # Parameters for the multiple-scattering correction, including the shape of the sample.
-       transmission_guess = .9 #  experimental value from VesuvioTransmission
+       transmission_guess = .9174 #  experimental value from VesuvioTransmission
        multiple_scattering_order, number_of_events = 2, 1.e4
 
        # parameters of the neutron Compton profiles to be fitted.
@@ -579,13 +580,12 @@ class vesuvioTest(PythonAlgorithm):
        # provide:      mass [amu],   intensity_range [arb. units], width_range [A-1], centre_range [us]; 
        # ranges as [low limit ,value, high limit]
        H = element( 1.0079, [0,1,None], [3.,4.5,6.], [-1.5,0.,0.5] )
-       Al = element( 27.0, [0,1,None], [10.,15.5,30.], [-1.5,0.,0.5] )
-       Zr = element( 91.22, [0,1,None], [10.,15.5,30.], [-1.5,0.,0.5] )
-       elements = [H, Al, Zr]
+       C = element( 12.0, [0,1,None], [10.,15.5,30.], [-1.5,0.,0.5] )
+       elements = [H, C]
        # constraint on the intensities of element peaks
        #provide LHS element, RHS element, mult. factor, flag
        # if flag=True inequality; if flag = False equality
-       C1 = constraint( 0, 2, 2.*82.03/6.46, "eq")# the type can be either "eq" or "ineq"  
+       C1 = constraint( 0, 1, 2.*82.03/5.51, "eq")# the type can be either "eq" or "ineq"  
        constraints = [C1]
 
        # spectra to be masked
@@ -666,7 +666,9 @@ class vesuvioTest(PythonAlgorithm):
                    calculate_mantid_resolutions(ws_name, masses[0])
 
        # Fit of the summed and symmetrised hydrogen neutron Compton profile in its Y space using MANTID.
+       mylog.notice("here "+str(fit_hydrogen_in_Y_space))
        if fit_hydrogen_in_Y_space:
+           mlog.notice("im in")
            #calculate_mantid_resolutions(ws_name, masses[0])
            max_Y = convert_to_y_space_and_symmetrise(ws_name+"_H",masses[0])
            # IT WOULD BE GOOD TO HAVE THE TIES DEFINED IN THE USER SECTION!!! 
@@ -674,6 +676,7 @@ class vesuvioTest(PythonAlgorithm):
            correct_for_offsets = True
            y_range = (-20., 20.)
            final_fit(ws_name+'_H_JoY_sym', constraints, y_range,correct_for_offsets, masses)
+           mlog.notice("done something")
 
 AlgorithmFactory.subscribe(vesuvioTest)
     
