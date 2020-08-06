@@ -752,7 +752,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def process_direct_beam(self, directBeamName, directForegroundName, angle_index):
         """Processes the direct beam for the given angle configuration."""
-        directBeamInput = self.compose_run_string(self._db[angle_index])
+        dbrun = self._db[0]  if len(self._db) == 1 else self._db[angle_index]
+        directBeamInput = self.compose_run_string(dbrun)
         self.preprocess_direct_beam(directBeamInput, directBeamName, angle_index)
         self.sum_foreground(directBeamName, directForegroundName, SumType.IN_LAMBDA, angle_index)
         if self.getProperty(PropertyNames.CACHE_DIRECT_BEAM).value:
@@ -796,7 +797,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.log().purge()
         self.log().accumulate('\nNumber of angles treated: {0}\n'.format(self._dimensionality))
         for angle_index in range(self._dimensionality):
-            runDB = self.make_name(self._db[angle_index])
+            if len(self._db) == 1:
+                runDB = self.make_name(self._db[0])
+            else:
+                runDB = self.make_name(self._db[angle_index])
             self.log().accumulate('Angle {0}:\n'.format(angle_index+1))
             self.log().accumulate('Direct Beam: {0}\n'.format(runDB))
             directBeamName = runDB + '_direct'
