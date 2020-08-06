@@ -194,8 +194,8 @@ class DrillModel(QObject):
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
-        if self.algorithm in RundexSettings.THREADS_NUMBER:
-            nThreads = RundexSettings.THREADS_NUMBER[self.algorithm]
+        if self.acquisitionMode in RundexSettings.THREADS_NUMBER:
+            nThreads = RundexSettings.THREADS_NUMBER[self.acquisitionMode]
         else:
             nThreads = QThread.idealThreadCount()
         self.tasksPool.setMaxThreadCount(nThreads)

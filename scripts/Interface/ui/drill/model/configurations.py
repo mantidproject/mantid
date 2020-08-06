@@ -103,6 +103,8 @@ class RundexSettings(object):
     # ideal number of threads for each acquisition mode (optional).
     # If not provided, Qt will decide
     THREADS_NUMBER = {
+            REFL_POL:  1,
+            REFL_NPOL: 1
             }
 
     # settings for each acquisition mode
