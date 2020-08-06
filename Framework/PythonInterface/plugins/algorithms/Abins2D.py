@@ -59,7 +59,12 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         self.declareProperty(name="Angles",
                              direction=Direction.Input,
-                             defaultValue="3.0, 140.0, 50")
+                             defaultValue="3.0, 140.0, 50",
+                             doc='Angles sampled in spectrum, expressed as "START, END, NSAMPLES"')
+
+        self.declareProperty(name="IncidentEnergy",
+                             direction=Direction.Input,
+                             defaultValue=4100)
 
     def validateInputs(self) -> Dict[str,str]:
         """
@@ -73,6 +78,9 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         import numbers
         if not isinstance(self.getProperty("Resolution").value, numbers.Real):
             issues["Resolution"] = "Resolution must a real number"
+
+        if not isinstance(self.getProperty("IncidentEnergy").value, numbers.Real):
+            issues["IncidentEnergy"] = "Incident energy must a real number"
 
         try:
             self._angle_string_to_list(self.getProperty("Angles").value)
@@ -259,9 +267,9 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         # Sampling mesh is determined by
         # abins.parameters.sampling['min_wavenumber']
-        # abins.parameters.sampling['max_wavenumber']
-        # and abins.parameters.sampling['bin_width']
-        step = self._bin_width
+        # abins.parameters.sampling['max_wavenumber'],
+        # while abins.parameters.sampling['bin_width'] is set from user input
+        step = abins.parameters.sampling['bin_width'] = self._bin_width
         start = abins.parameters.sampling['min_wavenumber']
         stop = abins.parameters.sampling['max_wavenumber'] + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=abins.constants.FLOAT_TYPE)
@@ -270,6 +278,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         instrument_params['resolution'] = self.getProperty("Resolution").value
         instrument_params['angles'] = self._angle_string_to_list(self.getProperty("Angles").value)
+        instrument_params['e_init'] = [float(self.getProperty("IncidentEnergy").value)]
 
 
 AlgorithmFactory.subscribe(Abins2D)

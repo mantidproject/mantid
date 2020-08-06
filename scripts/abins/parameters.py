@@ -51,6 +51,7 @@ hdf_groups = {
 sampling = {
     'max_wavenumber': 4100.0,  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
     'min_wavenumber': 0.0,  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
+    'bin_width': 1.0,  # Step size for bins in wavenumber. This is modified at runtime by the Abins(2D) algorithm.
     'frequencies_threshold': 0.0,  # minimum included frequency
     's_relative_threshold': 0.01,  # low cutoff for S intensity (fraction of maximum S)
     's_absolute_threshold': 1e-7,  # low cutoff for S intensity (absolute value)
