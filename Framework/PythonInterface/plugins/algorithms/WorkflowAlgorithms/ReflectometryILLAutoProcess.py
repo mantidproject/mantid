@@ -805,8 +805,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.log().accumulate('Direct Beam: {0}\n'.format(runDB))
             directBeamName = runDB + '_direct'
             directForegroundName = directBeamName + '_frg'
-            if directBeamName not in mtd.getObjectNames() or not self.getProperty(PropertyNames.CACHE_DIRECT_BEAM).value:
-                self.process_direct_beam(directBeamName, directForegroundName, angle_index)
+            # always process direct beam; even if it can be the same for different angles,
+            # the foreground and background regions might be different
+            self.process_direct_beam(directBeamName, directForegroundName, angle_index)
             if not self.is_polarized():
                 runRB = self.make_name(self._rb[angle_index])
                 self.log().accumulate('Reflected Beam: {0}\n'.format(runRB))
