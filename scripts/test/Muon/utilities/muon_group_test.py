@@ -55,7 +55,7 @@ class MuonGroupTest(unittest.TestCase):
     def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):
         group = MuonGroup(group_name="group1")
         self.assertEqual(group.workspace, {})
-        
+
         with self.assertRaises(AttributeError):
             group.workspace = [1, 2, 3]
         self.assertEqual(group.workspace, {})
@@ -113,7 +113,7 @@ class MuonGroupTest(unittest.TestCase):
 
     def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden(self):
         group = create_group_populated_by_two_workspace()
-        group._asymmetry_estimate[str([22222])].hide()
+        group._asymmetry_estimate[tuple([22222])].hide()
 
         workspace_list = group.get_asymmetry_workspace_names([[22222]])
 
@@ -128,7 +128,7 @@ class MuonGroupTest(unittest.TestCase):
 
     def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden_for_rebinned(self):
         group = create_group_populated_by_two_rebinned_workspaces()
-        group._asymmetry_estimate_rebin[str([22222])].hide()
+        group._asymmetry_estimate_rebin[tuple([22222])].hide()
 
         workspace_list = group.get_asymmetry_workspace_names_rebinned([[22222]])
 
