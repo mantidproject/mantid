@@ -692,6 +692,8 @@ class DrillView(QMainWindow):
         """
         self.instrumentselector.setDisabled(state)
         self.modeSelector.setDisabled(state)
+        self.cycleNumber.setDisabled(state)
+        self.experimentId.setDisabled(state)
         self.datadirs.setDisabled(state)
         self.load.setDisabled(state)
         self.settings.setDisabled(state)
