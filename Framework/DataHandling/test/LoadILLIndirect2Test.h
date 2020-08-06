@@ -135,6 +135,31 @@ public:
 
     AnalysisDataService::Instance().clear();
   }
+  void test_diffraction_doppler() {
+    // checks doppler in the newer version of IN16B diffraction mode
+    LoadILLIndirect2 loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", m_dopplerDiffraction));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDiffractionData", true));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    MatrixWorkspace_sptr output2D =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2049)
+    TS_ASSERT_EQUALS(output2D->blocksize(), 1024)
+
+    // check some values near the center tubes to verify the geometry
+    // used is from the newer version
+    TS_ASSERT_EQUALS(output2D->dataY(1050)[558], 2)
+    TS_ASSERT_EQUALS(output2D->dataY(873)[557], 2)
+    TS_ASSERT_EQUALS(output2D->dataY(724)[561], 3)
+
+    AnalysisDataService::Instance().clear();
+  }
 
   void doExecTest(const std::string &file, int numHist = 2051,
                   int numChannels = 2048) {
@@ -174,6 +199,7 @@ private:
   std::string m_bats33degree{"ILL/IN16B/247933.nxs"};
   std::string m_firstTube251{"ILL/IN16B/136558.nxs"};
   std::string m_batsDiffraction{"ILL/IN16B/249290.nxs"};
+  std::string m_dopplerDiffraction{"ILL/IN16B/276047.nxs"};
 };
 
 class LoadILLIndirect2TestPerformance : public CxxTest::TestSuite {
