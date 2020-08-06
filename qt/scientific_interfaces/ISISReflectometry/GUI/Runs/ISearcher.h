@@ -27,24 +27,20 @@ implementations.
 */
 class ISearcher {
 public:
-  enum class SearchType { NONE, MANUAL, AUTO };
   virtual ~ISearcher(){};
   virtual void subscribe(SearcherSubscriber *notifyee) = 0;
   virtual std::vector<SearchResult> search(const std::string &text,
                                            const std::string &instrument,
-                                           const std::string &cycle,
-                                           SearchType searchType) = 0;
+                                           const std::string &cycle) = 0;
   virtual bool startSearchAsync(const std::string &text,
                                 const std::string &instrument,
-                                const std::string &cycle,
-                                SearchType searchType) = 0;
+                                const std::string &cycle) = 0;
   virtual bool searchInProgress() const = 0;
   virtual SearchResult const &getSearchResult(int index) const = 0;
   virtual void reset() = 0;
   virtual bool searchSettingsChanged(const std::string &text,
                                      const std::string &instrument,
-                                     const std::string &cycle,
-                                     SearchType searchType) const = 0;
+                                     const std::string &cycle) const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

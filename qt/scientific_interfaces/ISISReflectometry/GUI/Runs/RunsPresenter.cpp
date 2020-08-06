@@ -94,7 +94,7 @@ RunsTable &RunsPresenter::mutableRunsTable() {
 void RunsPresenter::notifySearch() {
   m_searcher->reset();
   updateWidgetEnabledState();
-  search(ISearcher::SearchType::MANUAL);
+  search();
 }
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
@@ -195,8 +195,7 @@ bool RunsPresenter::resumeAutoreduction() {
 
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
-  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle,
-                                        ISearcher::SearchType::AUTO)) {
+  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
     // If there are unsaved changes, ask the user first
     if (isOverwritingTablePrevented()) {
       return false;
@@ -261,14 +260,14 @@ void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
  * there was a problem */
-bool RunsPresenter::search(ISearcher::SearchType searchType) {
+bool RunsPresenter::search() {
   auto const searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return false;
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
-                                    m_view->getSearchCycle(), searchType)) {
+                                    m_view->getSearchCycle())) {
     m_messageHandler->giveUserCritical("Error starting search", "Error");
     return false;
   }
@@ -285,7 +284,7 @@ void RunsPresenter::checkForNewRuns() {
 
   // Initially we just need to start an ICat search and the reduction will be
   // run when the search completes
-  search(ISearcher::SearchType::AUTO);
+  search();
 }
 
 /** Run an autoreduction process based on the latest search results
