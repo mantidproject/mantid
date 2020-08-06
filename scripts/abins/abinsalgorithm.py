@@ -148,7 +148,7 @@ class AbinsAlgorithm:
 
         bin_width = self.getProperty("BinWidthInWavenumber").value
         if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
-            issues["BinWidthInWavenumber"] = ["Invalid bin width. Valid range is [1.0, 10.0] cm^-1"]
+            issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
 
         return issues
 
@@ -388,7 +388,6 @@ class AbinsAlgorithm:
                                                           protons_number=element.z_number,
                                                           nucleons_number=nucleons_number))
         else:
-
             atom_workspaces.append(self._create_workspace(atom_name=element_symbol,
                                                           s_points=np.copy(total_s_atom_data),
                                                           optional_name="_total", protons_number=element.z_number))

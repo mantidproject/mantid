@@ -96,7 +96,6 @@ class IO(object):
         Checks if currently used ab initio file is the same as in the previous calculations. Also checks if currently
         used parameters from AbinsParameters are the same as in the previous calculations.
         """
-
         if not self._valid_hash():
             raise ValueError("Different ab initio file  was used in the previous calculations.")
 
