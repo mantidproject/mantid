@@ -202,9 +202,9 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
             s_points = s_points * self._scale * self.get_cross_section(scattering=self._scale_by_cross_section,
                                                                        protons_number=protons_number,
                                                                        nucleons_number=nucleons_number)
-
         dim = 1
         length = s_points.size
+
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
         for i in range(dim):
             wrk.getSpectrum(i).setDetectorID(i + 1)
@@ -292,7 +292,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         # abins.parameters.sampling['min_wavenumber']
         # abins.parameters.sampling['max_wavenumber']
         # and abins.parameters.sampling['bin_width']
-        step = self._bin_width
+        step = abins.parameters.sampling['bin_width'] = self._bin_width
         start = abins.parameters.sampling['min_wavenumber']
         stop = abins.parameters.sampling['max_wavenumber'] + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
