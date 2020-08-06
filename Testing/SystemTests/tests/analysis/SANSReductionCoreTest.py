@@ -220,6 +220,7 @@ class SANSReductionCoreTest(unittest.TestCase):
                                                    user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
         state.compatibility.use_compatibility_mode = False
+        state.data = data_state
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)

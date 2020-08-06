@@ -189,10 +189,10 @@ class StateMask(metaclass=JsonSerializable):
         self.use_mask_phi_mirror = True
 
         # Beam stop
-        self.beam_stop_arm_width: float = None
-        self.beam_stop_arm_angle: float = None
-        self.beam_stop_arm_pos1: float = None
-        self.beam_stop_arm_pos2: float = None
+        self.beam_stop_arm_width: float = 0.0
+        self.beam_stop_arm_angle: float = 0.0
+        self.beam_stop_arm_pos1: float = 0.0
+        self.beam_stop_arm_pos2: float = 0.0
 
         # Clear commands
         self.clear = None  # : Bool
