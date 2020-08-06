@@ -412,12 +412,6 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(
 void LoadILLIndirect2::runLoadInstrument() {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", getInstrumentFilePath());
-  std::string name;
-  if (m_instrumentName == "IN16B" && getProperty("LoadDiffractionData")) {
-    name = "IN16BD";
-  } else {
-    name = m_instrumentName;
-  }
   loadInst->setPropertyValue("InstrumentName", m_instrumentName);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   loadInst->setProperty("RewriteSpectraMap",
