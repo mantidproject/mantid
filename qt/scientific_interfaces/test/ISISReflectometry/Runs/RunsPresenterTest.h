@@ -131,8 +131,7 @@ public:
     expectSearchString(searchString);
     expectSearchInstrument(instrument);
     expectSearchCycle(cycle);
-    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument, cycle,
-                                              ISearcher::SearchType::MANUAL))
+    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument, cycle))
         .Times(1);
     presenter.notifySearch();
     verifyAndClear();
@@ -142,7 +141,7 @@ public:
     auto presenter = makePresenter();
     auto searchString = std::string("");
     expectSearchString(searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -150,7 +149,7 @@ public:
   void testStartingSearchFails() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(m_messageHandler,
@@ -163,7 +162,7 @@ public:
   void testStartingSearchSucceeds() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -776,14 +775,12 @@ private:
   }
 
   void expectAutoreductionSettingsChanged() {
-    EXPECT_CALL(*m_searcher,
-                searchSettingsChanged(_, _, _, ISearcher::SearchType::AUTO))
+    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _, _))
         .WillOnce(Return(true));
   }
 
   void expectAutoreductionSettingsUnchanged() {
-    EXPECT_CALL(*m_searcher,
-                searchSettingsChanged(_, _, _, ISearcher::SearchType::AUTO))
+    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _, _))
         .WillOnce(Return(false));
   }
 
@@ -821,8 +818,7 @@ private:
     expectSearchString(m_searchString);
     expectSearchCycle(m_cycle);
     EXPECT_CALL(*m_searcher,
-                startSearchAsync(m_searchString, m_instrument, m_cycle,
-                                 ISearcher::SearchType::AUTO))
+                startSearchAsync(m_searchString, m_instrument, m_cycle))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -830,7 +826,7 @@ private:
 
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
   }
 
   void expectGetValidSearchRowSelection() {

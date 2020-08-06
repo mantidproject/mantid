@@ -345,26 +345,22 @@ private:
 
   SearchResults doJournalSearch(MockQtCatalogSearcher &searcher) {
     // Passing non-empty cycle performs journal search
-    return searcher.search("6543210", "INTER", "19_4",
-                           ISearcher::SearchType::MANUAL);
+    return searcher.search("6543210", "INTER", "19_4");
   }
 
   SearchResults doCatalogSearch(MockQtCatalogSearcher &searcher,
                                 std::string const &instrument = "INTER") {
     // Passing empty cycle performs catalog search
-    return searcher.search("6543210", instrument, "",
-                           ISearcher::SearchType::MANUAL);
+    return searcher.search("6543210", instrument, "");
   }
 
   bool startAsyncJournalSearch(MockQtCatalogSearcher &searcher) {
     // Passing non-empty cycle performs journal search
-    return searcher.startSearchAsync("6543210", "INTER", "19_4",
-                                     ISearcher::SearchType::MANUAL);
+    return searcher.startSearchAsync("6543210", "INTER", "19_4");
   }
 
   bool startAsyncCatalogSearch(MockQtCatalogSearcher &searcher) {
     // Passing empty cycle performs catalog search
-    return searcher.startSearchAsync("6543210", "INTER", "",
-                                     ISearcher::SearchType::MANUAL);
+    return searcher.startSearchAsync("6543210", "INTER", "");
   }
 };

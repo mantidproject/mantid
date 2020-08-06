@@ -58,7 +58,7 @@ bool knownFileType(std::string const &filename) {
 
 QtCatalogSearcher::QtCatalogSearcher(IRunsView *view)
     : m_view(view), m_notifyee(nullptr), m_searchText(), m_instrument(),
-      m_cycle(), m_searchType(SearchType::NONE), m_searchInProgress(false) {
+      m_cycle(), m_searchInProgress(false) {
   m_view->subscribeSearch(this);
 }
 
@@ -68,12 +68,10 @@ void QtCatalogSearcher::subscribe(SearcherSubscriber *notifyee) {
 
 SearchResults QtCatalogSearcher::search(const std::string &text,
                                         const std::string &instrument,
-                                        const std::string &cycle,
-                                        ISearcher::SearchType searchType) {
+                                        const std::string &cycle) {
   m_searchText = text;
   m_instrument = instrument;
   m_cycle = cycle;
-  m_searchType = searchType;
   auto algSearch = createSearchAlgorithm();
   algSearch->execute();
   auto resultsTable = getSearchAlgorithmResultsTable(algSearch);
@@ -144,12 +142,10 @@ void QtCatalogSearcher::searchAsync() {
 
 bool QtCatalogSearcher::startSearchAsync(const std::string &text,
                                          const std::string &instrument,
-                                         const std::string &cycle,
-                                         SearchType searchType) {
+                                         const std::string &cycle) {
   m_searchText = text;
   m_instrument = instrument;
   m_cycle = cycle;
-  m_searchType = searchType;
 
   // Check if ICat login is required
   if (!requiresICat() || hasActiveCatalogSession()) {
@@ -204,16 +200,13 @@ SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
 void QtCatalogSearcher::reset() {
   m_searchText.clear();
   m_instrument.clear();
-  m_searchType = SearchType::NONE;
   results().clear();
 }
 
 bool QtCatalogSearcher::searchSettingsChanged(const std::string &text,
                                               const std::string &instrument,
-                                              const std::string &cycle,
-                                              SearchType searchType) const {
-  return m_searchText != text || m_instrument != instrument ||
-         m_cycle != cycle || searchType != m_searchType;
+                                              const std::string &cycle) const {
+  return m_searchText != text || m_instrument != instrument || m_cycle != cycle;
 }
 
 bool QtCatalogSearcher::hasActiveCatalogSession() const {

@@ -35,18 +35,15 @@ public:
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
   SearchResults search(const std::string &text, const std::string &instrument,
-                       const std::string &cycle,
-                       SearchType searchType) override;
+                       const std::string &cycle) override;
   bool startSearchAsync(const std::string &text, const std::string &instrument,
-                        const std::string &cycle,
-                        SearchType searchType) override;
+                        const std::string &cycle) override;
   bool searchInProgress() const override;
   SearchResult const &getSearchResult(int index) const override;
   void reset() override;
   bool searchSettingsChanged(const std::string &text,
                              const std::string &instrument,
-                             const std::string &cycle,
-                             SearchType searchType) const override;
+                             const std::string &cycle) const override;
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
@@ -71,7 +68,6 @@ private:
   std::string m_searchText;
   std::string m_instrument;
   std::string m_cycle;
-  SearchType m_searchType;
   bool m_searchInProgress;
 
   void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);

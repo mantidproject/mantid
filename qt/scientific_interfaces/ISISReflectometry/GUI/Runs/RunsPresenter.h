@@ -149,7 +149,7 @@ private:
   double m_thetaTolerance;
 
   /// searching
-  bool search(ISearcher::SearchType searchType);
+  bool search();
   void resizeSearchResultsColumns();
   bool searchInProgress() const;
   /// autoreduction
@@ -163,11 +163,6 @@ private:
   void updateWidgetEnabledState() const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
-  /// Get runs to transfer from row indices
-  std::vector<SearchResult>
-  getSearchResultRunDetails(const std::set<int> &rowsToTransfer);
-  /// Get the data for a cell in the search results table as a string
-  std::string searchModelData(const int row, const int column);
   /// Start the live data monitor
   void startMonitor();
   void stopMonitor();
