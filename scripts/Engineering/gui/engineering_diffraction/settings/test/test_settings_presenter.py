@@ -56,6 +56,7 @@ class SettingsPresenterTest(unittest.TestCase):
             "foo": "dud",
             "bar": "result"
         }
+        self.presenter.savedir_notifier = mock.MagicMock()
         self.presenter.load_existing_settings()
 
         self.view.set_save_location.assert_called_with(settings_presenter.DEFAULT_SETTINGS["save_location"])
