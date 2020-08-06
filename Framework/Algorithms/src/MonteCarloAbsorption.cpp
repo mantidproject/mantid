@@ -173,6 +173,7 @@ void MonteCarloAbsorption::exec() {
   const int seed = getProperty("SeedValue");
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"));
+  interpolateOpt.setIndependentErrors(resimulateTracks);
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
   auto simulatePointsIn =

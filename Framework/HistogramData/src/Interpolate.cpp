@@ -123,8 +123,15 @@ void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
       gsl_interp_accel_uptr(gsl_interp_accel_alloc(), gsl_interp_accel_free);
   // Evaluate each point for the full range
   for (size_t i = 0; i < outY.size(); ++i) {
+    auto it = std::lower_bound(xs.begin(), xs.end(), points[i]);
+    auto x2 = *it;
+    auto x1 = x2 - 1;
     outY[i] = gsl_interp_eval(interp.get(), xs.data(), ys.data(), points[i],
                               lookupTable.get());
+    auto secondDerivAtx1 = gsl_interp_eval_deriv2(
+        interp.get(), xs.data(), ys.data(), x1, lookupTable.get());
+    auto interpErr =
+        0.5 * (points[i] - x1) * (x2 - points[i]) * secondDerivAtx1;
   }
 }
 
@@ -137,7 +144,9 @@ void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
  * @param ynew A reference to the output Y values
  */
 void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
-                               Histogram &output) {
+                               Histogram &output,
+                               const bool calculateErrors = false,
+                               const bool independentErrors = true) {
   const auto xold = input.points();
   const auto &yold = input.y();
   const auto &eold = input.e();
@@ -151,6 +160,7 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
   for (size_t i = 0; i < nypts - 1; ++i) // Last point has been calculated
   {
     const double xp = xold[i];
+    double secondDeriv;
     if (step == stepSize) {
       x1 = xp;
       const auto index2 =
@@ -164,13 +174,42 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
       step = 1;
       ynew[i] = yold[i];
       enew[i] = eold[i];
+
+      auto x0_secondDeriv = i - stepSize < 0 ? 0 : i - stepSize;
+      auto x1_secondDeriv = x0_secondDeriv + stepSize;
+      auto x2_secondDeriv = x1_secondDeriv + stepSize;
+
+      auto firstDeriv01 = (yold[x1_secondDeriv] - yold[x0_secondDeriv]) /
+                          (x1_secondDeriv - x0_secondDeriv);
+      auto firstDeriv12 = (yold[x2_secondDeriv] - yold[x1_secondDeriv]) /
+                          (x2_secondDeriv - x1_secondDeriv);
+      secondDeriv = (firstDeriv12 - firstDeriv01) /
+                    ((x2_secondDeriv - x0_secondDeriv) / 2);
       continue;
     }
     // Linear interpolation
     ynew[i] = (xp - x1) * y2 + (x2 - xp) * y1;
     ynew[i] *= overgap;
-    enew[i] = sqrt(pow((xp - x1) * e1, 2) + pow(((x2 - xp)) * e2, 2));
-    enew[i] *= overgap;
+
+    if (calculateErrors) {
+      // propagate errors from original points
+      double sourcePointsError;
+      if (independentErrors) {
+        sourcePointsError =
+            sqrt(pow((xp - x1) * e1, 2) + pow(((x2 - xp)) * e2, 2));
+        sourcePointsError *= overgap;
+      } else {
+        // if the errors on the original points are correlated then just
+        // do a linear interpolation on them
+        sourcePointsError = (xp - x1) * e2 + (x2 - xp) * e1;
+      }
+      // calculate interpolation error
+      auto interpError = 0.5 * (xp - x1) * (x2 - xp) * secondDeriv;
+      // combine the two errors
+      enew[i] = sqrt(pow(sourcePointsError, 2) + pow(interpError, 2));
+    } else {
+      enew[i] = eold[i];
+    }
     step++;
   }
 }
@@ -232,12 +271,15 @@ size_t minSizeForLinearInterpolation() {
  * @return A new Histogram with the y-values from the result of a linear
  * interpolation. The XMode of the output will match the input histogram.
  */
-Histogram interpolateLinear(const Histogram &input, const size_t stepSize) {
+Histogram interpolateLinear(const Histogram &input, const size_t stepSize,
+                            const bool calculateErrors,
+                            const bool independentErrors) {
   sanityCheck(input, stepSize, minSizeForLinearInterpolation(), LINEAR_NAME);
 
   // Cheap copy
   Histogram output(input);
-  interpolateYLinearInplace(input, stepSize, output);
+  interpolateYLinearInplace(input, stepSize, output, calculateErrors,
+                            independentErrors);
 
   return output;
 }
@@ -248,9 +290,12 @@ Histogram interpolateLinear(const Histogram &input, const size_t stepSize) {
  * @param inOut Input histogram whose points are interpolated in place
  * @param stepSize See interpolateLinear
  */
-void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
+void interpolateLinearInplace(Histogram &inOut, const size_t stepSize,
+                              const bool calculateErrors,
+                              const bool independentErrors) {
   sanityCheck(inOut, stepSize, minSizeForLinearInterpolation(), LINEAR_NAME);
-  interpolateYLinearInplace(inOut, stepSize, inOut);
+  interpolateYLinearInplace(inOut, stepSize, inOut, calculateErrors,
+                            independentErrors);
 }
 
 /**
