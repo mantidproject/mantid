@@ -22,8 +22,8 @@ class StateTransmissionFit(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
-        self.fit_type = FitType.NO_FIT
-        self.polynomial_order = 2  # : Int (Positive)
+        self.fit_type = FitType.LOGARITHMIC
+        self.polynomial_order = 0  # : Int (Positive)
         self.wavelength_low = None  # : Float (Optional)
         self.wavelength_high = None  # : Float (Optional)
 

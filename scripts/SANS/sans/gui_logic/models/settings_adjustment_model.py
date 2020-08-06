@@ -117,7 +117,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_sample_polynomial_order(self):
         val = self._get_fit_val(DataType.SAMPLE).polynomial_order
-        return val if val else ""
+        return val if val is not None else ""
 
     @transmission_sample_polynomial_order.setter
     def transmission_sample_polynomial_order(self, value):
@@ -126,7 +126,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_can_polynomial_order(self):
         val = self._get_fit_val(DataType.CAN).polynomial_order
-        return val if val else ""
+        return val if val is not None else ""
 
     @transmission_can_polynomial_order.setter
     def transmission_can_polynomial_order(self, value):
