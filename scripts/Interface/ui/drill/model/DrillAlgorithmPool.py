@@ -46,6 +46,7 @@ class DrillAlgorithmPool(QThreadPool):
             tasks (list(DrillTask)): list of tasks
         """
         if not tasks:
+            self.signals.processingDone.emit()
             return
         self._running = True
         self._tasks = tasks
