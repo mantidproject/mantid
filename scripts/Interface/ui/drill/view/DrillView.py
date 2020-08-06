@@ -337,9 +337,12 @@ class DrillView(QMainWindow):
 
     def pasteCells(self):
         """
-        Paste the buffer in selected cells. If the buffer contains only one
-        cell, its contents is pasted on every selected cells. Otherwise, the
-        shape of the selected cells has to match the buffer shape.
+        Paste the buffer in selected cells. The shape of the selected cells has
+        to match the buffer shape except if:
+        - the buffer contains only one cell. In that case, its contents will be
+          pasted in every selected cells
+        - the buffer contains only one row and the selection has the same number
+          of columns. In that case, the row will be repeated in the selection.
         """
         if not self.buffer:
             return
@@ -356,6 +359,11 @@ class DrillView(QMainWindow):
             for i in range(len(cells)):
                 self.table.setCellContents(cells[i][0], cells[i][1],
                                            self.buffer[i])
+        elif ((self.bufferShape[0] == 1) and (shape[1] == self.bufferShape[1])
+                and (shape != (0, 0))):
+            for i in range(len(cells)):
+                self.table.setCellContents(cells[i][0], cells[i][1],
+                                           self.buffer[i % shape[1]])
         elif self.buffer and shape != self.bufferShape and shape != (0, 0):
             QMessageBox.warning(self, "Paste error",
                                 "The selection does not correspond to the "
