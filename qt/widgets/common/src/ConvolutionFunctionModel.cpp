@@ -45,13 +45,15 @@ bool isBackground(const IFunction *fun) {
   return static_cast<bool>(dynamic_cast<const IBackgroundFunction *>(fun));
 }
 
-bool isPeakFunction(const IFunction *fun) {
+bool isLorentzianFunction(const IFunction *fun) {
+  return fun->name() == "Lorentzian";
+}
+bool isfitTypeFunction(const IFunction *fun) {
   if (dynamic_cast<const CompositeFunction *>(fun)) {
     return false;
   }
   return true;
 }
-
 } // namespace
 
 void ConvolutionFunctionModel::setFunction(IFunction_sptr fun) {
@@ -79,17 +81,17 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
 void ConvolutionFunctionModel::setModel(
     const std::string &background,
     const std::vector<std::pair<std::string, size_t>> &resolutionWorkspaces,
-    const std::string &peaks, bool hasDeltaFunction,
-    const std::vector<double> &qValues, const bool isQDependent,
-    bool hasTempCorrection, double tempValue) {
+    const std::string &lorentzianPeaks, const std::string &fitType,
+    bool hasDeltaFunction, const std::vector<double> &qValues,
+    const bool isQDependent, bool hasTempCorrection, double tempValue) {
   auto fitFunction = std::make_shared<MultiDomainFunction>();
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
     CompositeFunction_sptr domainFunction;
     auto qValue = qValues.empty() ? 0.0 : qValues[i];
     auto innerFunction =
-        createInnerFunction(peaks, hasDeltaFunction, isQDependent, qValue,
-                            hasTempCorrection, tempValue);
+        createInnerFunction(lorentzianPeaks, fitType, hasDeltaFunction,
+                            isQDependent, qValue, hasTempCorrection, tempValue);
     auto workspace =
         resolutionWorkspaces.empty() ? "" : resolutionWorkspaces[i].first;
     auto workspaceIndex =
@@ -105,8 +107,8 @@ void ConvolutionFunctionModel::setModel(
   }
   // The two clones here are needed as the clone value of IFunction goes through
   // a string serialisation and deserialisation. This can lead to the function
-  // structure subtly changeing. For exmaple composite functions of only one
-  // member are removed and uneeded brackets are removed from user defined
+  // structure subtly changing. For example composite functions of only one
+  // member are removed and unneeded brackets are removed from user defined
   // functions. As function cloning is used later on in the workflow it seems
   // safer to clone twice here to get the function in it's final state early on
   // rather than have it change during the workflow.
@@ -129,23 +131,29 @@ ConvolutionFunctionModel::addBackground(CompositeFunction_sptr domainFunction,
 }
 
 CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
-    const std::string &peaksFunction, bool hasDeltaFunction, bool isQDependent,
-    double qValue, bool hasTempCorrection, double tempValue) {
-  auto functionSpecified = !peaksFunction.empty();
+    const std::string &lorentzianPeaks, const std::string &fitType,
+    bool hasDeltaFunction, bool isQDependent, double qValue,
+    bool hasTempCorrection, double tempValue) {
   CompositeFunction_sptr innerFunction = std::make_shared<CompositeFunction>();
-  if (functionSpecified) {
-    auto peakFunction =
-        FunctionFactory::Instance().createInitialized(peaksFunction);
+  if (!lorentzianPeaks.empty()) {
+    auto lorentzianPeakFunction =
+        FunctionFactory::Instance().createInitialized(lorentzianPeaks);
     auto peakFunctionComposite =
-        std::dynamic_pointer_cast<CompositeFunction>(peakFunction);
+        std::dynamic_pointer_cast<CompositeFunction>(lorentzianPeakFunction);
     if (peakFunctionComposite) {
       innerFunction = peakFunctionComposite;
     } else {
-      innerFunction->addFunction(peakFunction);
+      innerFunction->addFunction(lorentzianPeakFunction);
     }
+  }
+
+  if (!fitType.empty()) {
+    auto fitTypeFunction =
+        FunctionFactory::Instance().createInitialized(fitType);
+    innerFunction->addFunction(fitTypeFunction);
     if (isQDependent) {
       IFunction::Attribute attr(qValue);
-      peakFunction->setAttribute("Q", attr);
+      fitTypeFunction->setAttribute("Q", attr);
     }
   }
 
@@ -228,6 +236,7 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   m_convolutionPrefix.reset();
   m_deltaFunctionPrefix.reset();
   m_tempFunctionPrefix.reset();
+  m_fitTypePrefix.reset();
   m_peakPrefixes = QStringList();
   m_resolutionWorkspace.clear();
   m_resolutionWorkspaceIndex = 0;
@@ -283,8 +292,10 @@ void ConvolutionFunctionModel::setPrefix(IFunction *func,
   } else if (isResolution(func)) {
     m_resolutionWorkspace = func->getAttribute("Workspace").asString();
     m_resolutionWorkspaceIndex = func->getAttribute("WorkspaceIndex").asInt();
-  } else if (isPeakFunction(func)) {
+  } else if (isLorentzianFunction(func)) {
     m_peakPrefixes->append(prefix);
+  } else if (isfitTypeFunction(func)) {
+    m_fitTypePrefix = prefix;
   }
 }
 

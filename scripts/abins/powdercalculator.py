@@ -1,28 +1,22 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
+from typing import Dict, Tuple
 
 import abins
-from abins.constants import CONSTANT, GAMMA_POINT, NUM_ZERO
-
-try:
-    # noinspection PyUnresolvedReferences
-    from pathos.multiprocessing import ProcessPool
-    PATHOS_FOUND = True
-except ImportError:
-    PATHOS_FOUND = False
+from abins.constants import ACOUSTIC_PHONON_THRESHOLD, CONSTANT, GAMMA_POINT, NUM_ZERO
 
 
 # noinspection PyMethodMayBeStatic
-class PowderCalculator(object):
+class PowderCalculator:
     """
     Class for calculating powder data.
     """
-    def __init__(self, filename=None, abins_data=None):
+    def __init__(self, *, filename: str, abins_data: abins.AbinsData) -> None:
         """
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from input DFT file
@@ -30,43 +24,45 @@ class PowderCalculator(object):
         if not isinstance(abins_data, abins.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
 
-        k_data = abins_data.get_kpoints_data().extract()
-        self._frequencies = k_data["frequencies"]
-        self._displacements = k_data["atomic_displacements"]
-        self._num_atoms = self._displacements[GAMMA_POINT].shape[0]
-        self._atoms_data = abins_data.get_atoms_data().extract()
+        k_data = abins_data.get_kpoints_data()  # type: abins.KpointsData
+        self._frequencies = {}  # type: Dict[str, np.ndarray]
+        self._displacements = {}  # type: Dict[str, np.ndarray]
+
+        atoms_data = abins_data.get_atoms_data()
+
+        # Populate data, removing imaginary modes
+        for k, k_point_data in enumerate(k_data):
+            mask = k_point_data.frequencies > ACOUSTIC_PHONON_THRESHOLD
+            self._frequencies[k] = k_point_data.frequencies[mask]
+            self._displacements[k] = k_point_data.atomic_displacements[:, mask]
+
+        self._masses = np.asarray([atoms_data[atom]["mass"] for atom in range(len(atoms_data))])
 
         self._clerk = abins.IO(input_filename=filename,
                                group_name=abins.parameters.hdf_groups['powder_data'])
 
-    def _calculate_powder(self):
+    def _calculate_powder(self) -> abins.PowderData:
         """
         Calculates powder data (a_tensors, b_tensors according to aCLIMAX manual).
         """
-        # define container for powder data
-        powder = abins.PowderData(num_atoms=self._num_atoms)
 
         k_indices = sorted(self._frequencies.keys())  # make sure dictionary keys are in the same order on each machine
         b_tensors = {}
         a_tensors = {}
 
-        if PATHOS_FOUND:
-            threads = abins.parameters.performance['threads']
-            p_local = ProcessPool(nodes=threads)
-            tensors = p_local.map(self._calculate_powder_k, k_indices)
-        else:
-            tensors = [self._calculate_powder_k(k=k) for k in k_indices]
+        tensors = [self._calculate_powder_k(k=k) for k in k_indices]
 
-        for indx, k in enumerate(k_indices):
-            a_tensors[k] = tensors[indx][0]
-            b_tensors[k] = tensors[indx][1]
+        for i, k_index in enumerate(k_indices):
+            a_tensors[k_index] = tensors[i][0]
+            b_tensors[k_index] = tensors[i][1]
 
-        # fill powder object with powder data
-        powder.set(dict(b_tensors=b_tensors, a_tensors=a_tensors))
-
+        powder = abins.PowderData(a_tensors=a_tensors,
+                                  b_tensors=b_tensors,
+                                  frequencies=self._frequencies,
+                                  num_atoms=len(self._masses))
         return powder
 
-    def _calculate_powder_k(self, k=None):
+    def _calculate_powder_k(self, *, k: str) -> Tuple[np.ndarray, np.ndarray]:
         """
         :param k: k index
         """
@@ -78,11 +74,11 @@ class PowderCalculator(object):
         #     dim -- size of displacement vector for one atom (dim = 3)
 
         # masses[num_atoms, num_freq]
-        masses = np.asarray([([self._atoms_data["atom_%s" % atom]["mass"]] * self._frequencies[k].size)
-                             for atom in range(self._num_atoms)])
+        num_freq = self._frequencies[k].size
+        masses = np.asarray([np.full(num_freq, mass) for mass in self._masses])
 
         # disp[num_atoms, num_freq, dim]
-        disp = self._displacements[k]
+        disp = self._displacements[k]  # type np.ndarray
 
         # factor[num_atoms, num_freq]
         factor = np.einsum('ij,j->ij', 1.0 / masses, CONSTANT / self._frequencies[k])
@@ -91,6 +87,11 @@ class PowderCalculator(object):
         b_tensors = np.einsum('ijkl,ij->ijkl',
                               np.einsum('lki, lkj->lkij', disp, disp.conjugate()).real, factor)
 
+        # Replace tensor values close to zero with a small finite value.
+        # Not clear why this is done; we never divide by these values?
+        # Presumably this stabilises the division by b_trace in first order
+        # intensity calculation; but it could be handled more efficiently
+        # and elegantly at that stage.
         temp = np.fabs(b_tensors)
         indices = temp < NUM_ZERO
         b_tensors[indices] = NUM_ZERO
@@ -100,7 +101,7 @@ class PowderCalculator(object):
 
         return a_tensors, b_tensors
 
-    def get_formatted_data(self):
+    def get_formatted_data(self) -> abins.PowderData:
         """
         Method to obtain data.
         :returns: obtained data
@@ -118,7 +119,7 @@ class PowderCalculator(object):
 
         return data
 
-    def calculate_data(self):
+    def calculate_data(self) -> abins.PowderData:
         """
         Calculates mean square displacements.
         :returns: object of type PowderData with mean square displacements.
@@ -132,18 +133,18 @@ class PowderCalculator(object):
 
         return data
 
-    def load_formatted_data(self):
+    def load_formatted_data(self) -> abins.PowderData:
         """
         Loads mean square displacements.
         :returns: object of type PowderData with mean square displacements.
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
-        powder_data = abins.PowderData(num_atoms=data["datasets"]["powder_data"]["b_tensors"][GAMMA_POINT].shape[0])
-        powder_data.set(data["datasets"]["powder_data"])
+        powder_data = abins.PowderData(**data["datasets"]["powder_data"],
+                                       num_atoms=data["datasets"]["powder_data"]["b_tensors"][str(GAMMA_POINT)].shape[0])
 
         return powder_data
 
-    def _report_progress(self, msg):
+    def _report_progress(self, msg: str) -> None:
         """
         :param msg:  message to print out
         """

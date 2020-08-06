@@ -98,6 +98,7 @@ class FittingTabPresenter(object):
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
         self.update_selected_workspace_list_for_fit()
+        self.model.create_ws_fit_function_map()
 
     def handle_gui_changes_made(self, changed_values):
         for key in changed_values.keys():
@@ -286,12 +287,6 @@ class FittingTabPresenter(object):
         if self._tf_asymmetry_mode == self.view.tf_asymmetry_mode:
             return
 
-        if 'DoublePulseEnabled' in self.model.context.gui_context and self.model.context.gui_context['DoublePulseEnabled'] \
-                and self.view.tf_asymmetry_mode:
-            self.view.tf_asymmetry_mode = False
-            self.view.warning_popup('Tf asymmetry mode incompatible with double pulse analysis.')
-            return
-
         self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
         global_parameters = self.view.get_global_parameters()
         if self._tf_asymmetry_mode:
@@ -432,8 +427,8 @@ class FittingTabPresenter(object):
             if self.manual_selection_made:
                 return  # if it is a manual selection then the data should not change
             self.update_fit_specifier_list()
-        else:
-            self.selected_data = self.get_workspace_selected_list()
+
+        self.selected_data = self.get_workspace_selected_list()
 
     def set_display_workspace(self, workspace_name):
         self.view.display_workspace = workspace_name
@@ -469,7 +464,7 @@ class FittingTabPresenter(object):
         elif self.view.simultaneous_fit_by == "Group/Pair":
             simul_choices = self._get_selected_groups_and_pairs()
         else:
-            simul_choices = self.selected_data
+            simul_choices = []
 
         self.view.setup_fit_by_specifier(simul_choices)
 

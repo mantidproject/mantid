@@ -34,6 +34,9 @@ loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
 double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry);
 // Load time zero from the nexus entry
 double loadTimeZeroFromNexusFile(const NeXus::NXEntry &entry);
+// Load time zero from nexus entry into a vector
+std::vector<double> loadTimeZeroListFromNexusFile(const NeXus::NXEntry &entry,
+                                                  size_t numSpectra);
 
 } // namespace LoadMuonNexusV2Helper
 } // namespace DataHandling

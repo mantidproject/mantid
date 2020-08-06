@@ -22,7 +22,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-.. testcode:: ExLoadGSASInstrumentFileSimple
+.. testcode:: ExLoadGSASInstrumentFileFinderimple
 
    # We load a GSAS Instrument file with 2 Banks
    tws = LoadGSASInstrumentFile("GSAS_2bank.prm")
@@ -34,7 +34,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExLoadGSASInstrumentFileSimple
+.. testoutput:: ExLoadGSASInstrumentFileFinderimple
 
    {'Name': 'BANK','Value_1': 1.00, 'Value_2': 2.00}
    {'Name': 'Alph0','Value_1': 0.00, 'Value_2': 0.00}

@@ -118,6 +118,15 @@ void LoadMuonNexusV2::init() {
                   "First good data in units of micro-seconds (default to 0.0)",
                   Direction::Output);
 
+  declareProperty(std::make_unique<ArrayProperty<double>>("TimeZeroList",
+                                                          Direction::Output),
+                  "A vector of time zero values");
+
+  declareProperty(
+      "CorrectTime", true,
+      "Boolean flag controlling whether time should be corrected by timezero.",
+      Direction::Input);
+
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>(
           "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
@@ -141,9 +150,8 @@ void LoadMuonNexusV2::execLoader() {
         "Multiperiod nexus files not yet supported by LoadMuonNexusV2");
   }
 
-  // Execute child algorithm LoadISISNexus2 and load Muon specific properties
+  // Execute child algorithm LoadISISNexus2
   auto outWS = runLoadISISNexus();
-  loadMuonProperties(entry);
 
   // Check if single or multi period file and create appropriate loading
   // strategy
@@ -155,13 +163,18 @@ void LoadMuonNexusV2::execLoader() {
     // we just have a single workspace
     Workspace2D_sptr workspace2D =
         std::dynamic_pointer_cast<Workspace2D>(outWS);
+    // Load Muon specific properties
+    loadMuonProperties(entry, workspace2D->getNumberHistograms());
     m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
         g_log, m_filename, entry, workspace2D, static_cast<int>(m_entrynumber),
         m_isFileMultiPeriod);
   }
   m_loadMuonStrategy->loadMuonLogData();
   m_loadMuonStrategy->loadGoodFrames();
-  m_loadMuonStrategy->applyTimeZeroCorrection();
+  auto correctTime = getProperty("CorrectTime");
+  if (correctTime) {
+    m_loadMuonStrategy->applyTimeZeroCorrection();
+  }
   // Grouping info should be returned if user has set the property
   if (!getPropertyValue("DetectorGroupingTable").empty()) {
     auto loadedGrouping = m_loadMuonStrategy->loadDetectorGrouping();
@@ -231,7 +244,8 @@ Workspace_sptr LoadMuonNexusV2::runLoadISISNexus() {
  * Loads Muon specific data from the nexus entry
  * and sets the appropriate output properties
  */
-void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry) {
+void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry,
+                                         size_t numSpectra) {
 
   std::string mainFieldDirection =
       LoadMuonNexusV2Helper::loadMainFieldDirectionFromNexus(entry);
@@ -242,6 +256,10 @@ void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry) {
 
   auto firstGoodData = LoadMuonNexusV2Helper::loadFirstGoodDataFromNexus(entry);
   setProperty("FirstGoodData", firstGoodData);
+
+  auto timeZeroVector =
+      LoadMuonNexusV2Helper::loadTimeZeroListFromNexusFile(entry, numSpectra);
+  setProperty("TimeZeroList", timeZeroVector);
 }
 } // namespace DataHandling
 } // namespace Mantid

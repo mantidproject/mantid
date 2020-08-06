@@ -42,11 +42,18 @@ Improvements
   These changes will make the addition of new functionality in the future easier.
 - The plot guess option within the fitting tab will now update when a parameter is changed.
 - Have updated the FDA GUI so that it functions correctly for frquency transforms and single fits.
+- Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
+- Updated :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` to allow double pulse fits.
+- Tf asymmetry mode can now be performed on double pulse fits from the muon analysis GUI.
+- Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to load a list of time zeros into a new property TimZeroList.
+- Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to add an option to not auto-correct the time by loaded timezero.
 
 Bug fixes
 ---------
 - Fixed an issue where ties set in Muon Analysis were not being respected.
 - The plot will always match the state of the `Plot raw` checkbox.
 - Fixed a bug that caused rebinned data to override non-binned data.
+- Fixed an issue where switching to simultaneous fit mode was occasionally throwing an exception.
+- Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
 
 :ref:`Release 5.1.0 <v5.1.0>`

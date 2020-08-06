@@ -96,8 +96,12 @@ class FittingTabModel(object):
 
     def evaluate_plot_guess(self, workspace_names: str, plot_guess: bool, index: int):
         fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
+        if isinstance(data_ws_name, list):
+            data_ws_name = data_ws_name[0]
         if not data_ws_name:
             return
+        if isinstance(data_ws_name, List):
+            data_ws_name = data_ws_name[0]
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
             guess_ws_name = MUON_ANALYSIS_GUESS_WS + data_ws_name
         elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
@@ -177,7 +181,7 @@ class FittingTabModel(object):
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
-        if 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']:
+        if self.double_pulse_enabled():
             alg = self._create_double_pulse_alg()
         else:
             alg = mantid.AlgorithmManager.create("Fit")
@@ -223,7 +227,7 @@ class FittingTabModel(object):
 
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
-        if 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']:
+        if self.double_pulse_enabled():
             alg = self._create_double_pulse_alg()
         else:
             alg = mantid.AlgorithmManager.create("Fit")
@@ -567,7 +571,7 @@ class FittingTabModel(object):
     def get_parameters_for_single_tf_fit(self, workspace):
         # workspace is the name of the input workspace
         fit_workspace_name, _ = create_fitted_workspace_name(workspace, self.function_name)
-        return {
+        parameters = {
             'InputFunction': self.get_ws_fit_function([workspace]),
             'ReNormalizedWorkspaceList': workspace,
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list([workspace])[
@@ -578,19 +582,42 @@ class FittingTabModel(object):
             'Minimizer': self.fitting_options["minimiser"],
         }
 
+        if self.double_pulse_enabled():
+            offset = self.context.gui_context['DoublePulseTime']
+            muon_halflife = 2.2
+            decay = math.exp(-offset / muon_halflife)
+            first_pulse_weighting = decay / (1 + decay)
+            parameters.update({'PulseOffset' : offset,
+                               'EnableDoublePulse': True,'FirstPulseWeight': first_pulse_weighting})
+
+        return parameters
+
     def get_parameters_for_simultaneous_tf_fit(self, workspaces):
         # workspaces is a list containing the N workspaces which form the simultaneous fit
         # creates a workspace name based on the first entry in the workspace list
         fit_workspaces, _ = create_multi_domain_fitted_workspace_name(workspaces[0], self.function_name)
-        return {
+
+        parameters = {
             'InputFunction': self.get_ws_fit_function(workspaces),
             'ReNormalizedWorkspaceList': workspaces,
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(workspaces),
             'OutputFitWorkspace': fit_workspaces,
             'StartX': self.fitting_options["startX"],
             'EndX': self.fitting_options["endX"],
-            'Minimizer': self.fitting_options["minimiser"]
+            'Minimizer': self.fitting_options["minimiser"],
         }
+        if self.double_pulse_enabled():
+            offset = self.context.gui_context['DoublePulseTime']
+            muon_halflife = 2.2
+            decay = math.exp(-offset / muon_halflife)
+            first_pulse_weighting = decay / (1 + decay)
+            parameters.update({'PulseOffset' : offset,
+                               'EnableDoublePulse': True,'FirstPulseWeight': first_pulse_weighting})
+
+        return parameters
+
+    def double_pulse_enabled(self):
+        return 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']
 
     # get workspace information
     def get_selected_workspace_list(self):

@@ -1,5 +1,6 @@
 set(TEST_PY_FILES
-    AbsorptionShapesTest.py 	
+    AbsorptionShapesTest.py
+    CalculateMuonAsymmetryTest.py
     ConvertToWavelengthTest.py
     CrystalFieldMultiSiteTest.py
     CrystalFieldTest.py

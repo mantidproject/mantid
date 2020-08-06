@@ -14,6 +14,7 @@ New
 - The Sample Transmission Calculator is now implemented in workbench.
 - The axis tick markers in a plot can be switched between Log and decimal formats independently of the axes scale.
 - Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
+- A default font for plots can now be set in the workbench settings.
 
 Improvements
 ############
@@ -129,5 +130,7 @@ Bugfixes
 - Sub-plots in the sliceviewer now follow the scaling on the colorbar
 - Fixed a bug which prevented the double click axis editor menus from working for tiled plots.
 - Select image in the plot figure option contains each image rather than each spectra for colorfil plots of workspaces with a numeric vertical axis
+- A bug has been fixed that caused an error if a workspace containing only monitor spectra was attempted to be plotted as a colorfill plot
+- The figure options button on the sliceviewer has been removed as most options did not function correctly.
 
 :ref:`Release 5.1.0 <v5.1.0>`
