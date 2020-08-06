@@ -382,8 +382,19 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
         currentLayer.append("\\");
       }
 
-      if (!categoryIsHidden)
+      if (!categoryIsHidden) {
         res.emplace_back(desc);
+        // Check alias
+        if (desc.alias != "") {
+          // Create a new descriptor for the alias
+          AlgorithmDescriptor aliasDesc;
+          aliasDesc.name = desc.alias + " [" + desc.name + "]";
+          //aliasDesc.name = desc.alias;
+          aliasDesc.category = desc.category;
+          aliasDesc.version = desc.version;
+          res.emplace_back(aliasDesc);
+        }
+      }
     }
   }
   return res;
