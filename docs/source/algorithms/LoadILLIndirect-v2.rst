@@ -14,6 +14,7 @@ It supports both QENS and FWS types of data, both with or without mirror sense.
 The number of active single detectors, and their actual positions are read from the `.nxs` file overriding the ones in the instrument definition.
 The output workspace will be dimensionless containing the number of counts per energy channel for each detector pixel.
 It will have `empty` x-axis unit.
+If the flag `LoadDiffractionData` is checked, the loader ignores indirect data and only load the data recorded by the tube detectors.
 
 Usage
 -----

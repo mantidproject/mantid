@@ -35,6 +35,7 @@ Improvements
 - Added the fit output information (Algorithm status and Chi squared) to each fitting tab of the Indirect Data Analysis interface.
   This change introduces two optional outputs from the QENSFit algorithms (fit status and Chi squared), which may be used to monitor the outcome of the fit.
 - Added default parameter estimations to the F(q) tab.
+- Added an option to load diffraction data on IN16B.
 
 Bug Fixes
 #########
