@@ -325,8 +325,8 @@ std::set<int> QtRunsView::getSelectedSearchRows() const {
   std::set<int> rows;
   auto selectionModel = m_ui.tableSearchResults->selectionModel();
   if (selectionModel) {
-    auto selectedRows = selectionModel->selectedRows();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+    auto selectedIndexes = selectionModel->selectedIndexes();
+    for (auto it = selectedIndexes.begin(); it != selectedIndexes.end(); ++it)
       rows.insert(it->row());
   }
   return rows;

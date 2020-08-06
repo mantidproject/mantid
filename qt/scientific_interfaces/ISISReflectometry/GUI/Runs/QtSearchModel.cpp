@@ -39,7 +39,7 @@ int QtSearchModel::rowCount(const QModelIndex &) const {
 /**
 @return the number of columns in the model.
 */
-int QtSearchModel::columnCount(const QModelIndex &) const { return 2; }
+int QtSearchModel::columnCount(const QModelIndex &) const { return 4; }
 
 /**
 Overrident data method, allows consuming view to extract data for an index and
@@ -60,14 +60,21 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
   /*SETTING TOOL TIP AND BACKGROUND FOR INVALID RUNS*/
   if (role != Qt::DisplayRole) {
     if (role == Qt::ToolTipRole) {
-      // setting the tool tips for any unsuccessful transfers
-      if (runHasError(run)) {
-        auto errorMessage = "Invalid transfer: " + run.error();
-        return QString::fromStdString(errorMessage);
-      }
+      // setting the tool tips for any unsuccessful transfers or user
+      // annotations
+      if (run.hasError())
+        return QString::fromStdString(std::string("Invalid transfer: ") +
+                                      run.error());
+      else if (run.exclude())
+        return QString::fromStdString(std::string("Excluded by user: ") +
+                                      run.excludeReason());
+      else if (run.hasComment())
+        return QString::fromStdString(std::string("User comment: ") +
+                                      run.comment());
     } else if (role == Qt::BackgroundRole) {
-      // setting the background colour for any unsuccessful transfers
-      if (runHasError(run))
+      // setting the background colour for any unsuccessful transfers / excluded
+      // runs
+      if (run.hasError() || run.exclude())
         return QColor("#accbff");
     } else {
       // we have no unsuccessful transfers so return empty QVariant
@@ -77,11 +84,38 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
   /*SETTING DATA FOR RUNS*/
   if (colNumber == 0)
     return QString::fromStdString(run.runNumber());
-
   if (colNumber == 1)
     return QString::fromStdString(run.title());
+  if (colNumber == 2)
+    return QString::fromStdString(run.excludeReason());
+  if (colNumber == 3)
+    return QString::fromStdString(run.comment());
 
   return QVariant();
+}
+
+bool QtSearchModel::setData(const QModelIndex &index, const QVariant &value,
+                            int role) {
+  if (role != Qt::EditRole)
+    return true;
+
+  const int colNumber = index.column();
+  const int rowNumber = index.row();
+
+  if (rowNumber < 0 || rowNumber >= static_cast<int>(m_runDetails.size()))
+    return false;
+
+  auto &run = m_runDetails[rowNumber];
+
+  if (colNumber == 2)
+    run.addExcludeReason(value.toString().toStdString());
+  else if (colNumber == 3)
+    run.addComment(value.toString().toStdString());
+  else
+    return false;
+
+  emit dataChanged(index, index);
+  return true;
 }
 
 /**
@@ -102,6 +136,10 @@ QVariant QtSearchModel::headerData(int section, Qt::Orientation orientation,
       return "Run";
     case 1:
       return "Description";
+    case 2:
+      return "Exclude reason";
+    case 3:
+      return "Comment";
     default:
       return "";
     }
@@ -116,6 +154,8 @@ Provide flags on an index by index basis
 Qt::ItemFlags QtSearchModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return nullptr;
+  else if (index.column() == 2 || index.column() == 3)
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
   else
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -127,14 +167,6 @@ void QtSearchModel::clear() {
   beginResetModel();
   m_runDetails.clear();
   endResetModel();
-}
-
-/** Check whether a run has any error messages
-@param run : the run number
-@return : true if there is at least one error for this run
-*/
-bool QtSearchModel::runHasError(const SearchResult &run) const {
-  return !(run.error().empty());
 }
 
 SearchResult const &QtSearchModel::getRowData(int index) const {

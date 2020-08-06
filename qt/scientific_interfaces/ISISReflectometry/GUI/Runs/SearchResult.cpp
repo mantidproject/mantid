@@ -65,11 +65,29 @@ const std::string &SearchResult::theta() const { return m_theta; }
 
 bool SearchResult::hasError() const { return !m_error.empty(); }
 
+bool SearchResult::exclude() const { return !m_excludeReason.empty(); }
+
+const std::string &SearchResult::excludeReason() const {
+  return m_excludeReason;
+}
+
+bool SearchResult::hasComment() const { return !m_comment.empty(); }
+
+const std::string &SearchResult::comment() const { return m_comment; }
+
 void SearchResult::addError(std::string const &error) {
   if (m_error.empty())
     m_error = error;
   else
     m_error.append("\n").append(error);
+}
+
+void SearchResult::addExcludeReason(std::string const &excludeReason) {
+  m_excludeReason = excludeReason;
+}
+
+void SearchResult::addComment(std::string const &comment) {
+  m_comment = comment;
 }
 
 bool operator==(SearchResult const &lhs, SearchResult const &rhs) {

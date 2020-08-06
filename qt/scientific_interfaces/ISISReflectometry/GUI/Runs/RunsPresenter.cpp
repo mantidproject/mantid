@@ -396,7 +396,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
-      if (result.hasError())
+      if (result.hasError() || result.exclude())
         continue;
       auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
       assert(row.is_initialized());
