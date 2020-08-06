@@ -92,7 +92,6 @@ RunsTable &RunsPresenter::mutableRunsTable() {
 */
 
 void RunsPresenter::notifySearch() {
-  m_searcher->reset();
   updateWidgetEnabledState();
   search(ISearcher::SearchType::MANUAL);
 }
@@ -101,7 +100,7 @@ void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
 void RunsPresenter::notifySearchComplete() {
   if (!isAutoreducing())
-    m_view->resizeSearchResultsColumnsToContents();
+    resizeSearchResultsColumns();
 
   updateWidgetEnabledState();
 
@@ -263,9 +262,16 @@ void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
  * there was a problem */
 bool RunsPresenter::search(ISearcher::SearchType searchType) {
   auto const searchString = m_view->getSearchString();
+  auto const instrument = m_view->getSearchInstrument();
+  auto const cycle = m_view->getSearchCycle();
+
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return false;
+
+  // Clear existing results if performing a different search
+  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle))
+    m_searcher->reset();
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
                                     m_view->getSearchCycle(), searchType)) {
@@ -274,6 +280,25 @@ bool RunsPresenter::search(ISearcher::SearchType searchType) {
   }
 
   return true;
+}
+
+/** Resize the search results table columns to something sensible
+ */
+void RunsPresenter::resizeSearchResultsColumns() {
+  // Resize to content
+  m_view->resizeSearchResultsColumnsToContents();
+
+  // Limit columns' widths to a sensible maximum, based on a % of the table
+  // width
+  static auto constexpr numColumns =
+      static_cast<int>(ISearchModel::Column::NUM_COLUMNS);
+  auto const factor = 0.4;
+  auto const maxWidth =
+      static_cast<int>(m_view->getSearchResultsTableWidth() * factor);
+  for (auto column = 0; column < numColumns; ++column) {
+    if (m_view->getSearchResultsColumnWidth(column) > maxWidth)
+      m_view->setSearchResultsColumnWidth(column, maxWidth);
+  }
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
@@ -396,7 +421,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
-      if (result.hasError())
+      if (result.hasError() || result.exclude())
         continue;
       auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
       assert(row.is_initialized());
@@ -419,6 +444,7 @@ void RunsPresenter::updateWidgetEnabledState() const {
                                     !isAnyBatchAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
+  m_view->setSearchResultsEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&
                                      !isProcessing() && !searchInProgress());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());

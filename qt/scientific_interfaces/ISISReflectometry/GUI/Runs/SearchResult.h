@@ -29,6 +29,12 @@ public:
   const std::string &theta() const;
   bool hasError() const;
   const std::string &error() const;
+  bool exclude() const;
+  const std::string &excludeReason() const;
+  void addExcludeReason(std::string const &error);
+  bool hasComment() const;
+  const std::string &comment() const;
+  void addComment(std::string const &error);
 
 private:
   std::string m_runNumber;
@@ -36,6 +42,8 @@ private:
   std::string m_groupName;
   std::string m_theta;
   std::string m_error;
+  std::string m_excludeReason;
+  std::string m_comment;
 
   void parseRun(std::string const &runNumber);
   void parseMetadataFromTitle();

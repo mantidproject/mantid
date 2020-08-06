@@ -7,6 +7,7 @@
 #include "QtSearchModel.h"
 #include "MantidAPI/TableRow.h"
 #include <QColor>
+#include <QSize>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,13 +20,21 @@ void QtSearchModel::mergeNewResults(SearchResults const &source) {
   if (source.empty())
     return;
 
-  // To append, insert the new runs after the last element in the model
+  // Extract the results that are not already in our list
+  SearchResults newResults;
+  std::copy_if(source.begin(), source.end(), std::back_inserter(newResults),
+               [this](const auto &searchResult) {
+                 return std::find(m_runDetails.cbegin(), m_runDetails.cend(),
+                                  searchResult) == m_runDetails.cend();
+               });
+
+  // Append the new results to our list. We need to tell the Qt model where we
+  // are inserting and how many items we're adding
   const auto first = static_cast<int>(m_runDetails.size());
-  const auto last = static_cast<int>(m_runDetails.size() + source.size() - 1);
+  const auto last =
+      static_cast<int>(m_runDetails.size() + newResults.size() - 1);
   beginInsertRows(QModelIndex(), first, last);
-
-  m_runDetails.insert(m_runDetails.end(), source.begin(), source.end());
-
+  m_runDetails.insert(m_runDetails.end(), newResults.begin(), newResults.end());
   endInsertRows();
 }
 
@@ -39,7 +48,7 @@ int QtSearchModel::rowCount(const QModelIndex &) const {
 /**
 @return the number of columns in the model.
 */
-int QtSearchModel::columnCount(const QModelIndex &) const { return 2; }
+int QtSearchModel::columnCount(const QModelIndex &) const { return 4; }
 
 /**
 Overrident data method, allows consuming view to extract data for an index and
@@ -49,8 +58,8 @@ role.
 */
 QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
 
-  const int colNumber = index.column();
   const int rowNumber = index.row();
+  const auto column = static_cast<Column>(index.column());
 
   if (rowNumber < 0 || rowNumber >= static_cast<int>(m_runDetails.size()))
     return QVariant();
@@ -60,14 +69,21 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
   /*SETTING TOOL TIP AND BACKGROUND FOR INVALID RUNS*/
   if (role != Qt::DisplayRole) {
     if (role == Qt::ToolTipRole) {
-      // setting the tool tips for any unsuccessful transfers
-      if (runHasError(run)) {
-        auto errorMessage = "Invalid transfer: " + run.error();
-        return QString::fromStdString(errorMessage);
-      }
+      // setting the tool tips for any unsuccessful transfers or user
+      // annotations
+      if (run.hasError())
+        return QString::fromStdString(std::string("Invalid transfer: ") +
+                                      run.error());
+      else if (run.exclude())
+        return QString::fromStdString(std::string("Excluded by user: ") +
+                                      run.excludeReason());
+      else if (run.hasComment())
+        return QString::fromStdString(std::string("User comment: ") +
+                                      run.comment());
     } else if (role == Qt::BackgroundRole) {
-      // setting the background colour for any unsuccessful transfers
-      if (runHasError(run))
+      // setting the background colour for any unsuccessful transfers / excluded
+      // runs
+      if (run.hasError() || run.exclude())
         return QColor("#accbff");
     } else {
       // we have no unsuccessful transfers so return empty QVariant
@@ -75,13 +91,40 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
     }
   }
   /*SETTING DATA FOR RUNS*/
-  if (colNumber == 0)
+  if (column == Column::RUN)
     return QString::fromStdString(run.runNumber());
-
-  if (colNumber == 1)
+  if (column == Column::TITLE)
     return QString::fromStdString(run.title());
+  if (column == Column::EXCLUDE)
+    return QString::fromStdString(run.excludeReason());
+  if (column == Column::COMMENT)
+    return QString::fromStdString(run.comment());
 
   return QVariant();
+}
+
+bool QtSearchModel::setData(const QModelIndex &index, const QVariant &value,
+                            int role) {
+  if (role != Qt::EditRole)
+    return true;
+
+  const int rowNumber = index.row();
+  const auto column = static_cast<Column>(index.column());
+
+  if (rowNumber < 0 || rowNumber >= static_cast<int>(m_runDetails.size()))
+    return false;
+
+  auto &run = m_runDetails[rowNumber];
+
+  if (column == Column::EXCLUDE)
+    run.addExcludeReason(value.toString().toStdString());
+  else if (column == Column::COMMENT)
+    run.addComment(value.toString().toStdString());
+  else
+    return false;
+
+  emit dataChanged(index, index);
+  return true;
 }
 
 /**
@@ -93,19 +136,42 @@ Get the heading for a given section, orientation and role.
 */
 QVariant QtSearchModel::headerData(int section, Qt::Orientation orientation,
                                    int role) const {
-  if (role != Qt::DisplayRole)
-    return QVariant();
-
-  if (orientation == Qt::Horizontal) {
-    switch (section) {
-    case 0:
-      return "Run";
-    case 1:
-      return "Description";
-    default:
-      return "";
+  const auto column = static_cast<Column>(section);
+  if (role == Qt::DisplayRole) {
+    if (orientation == Qt::Horizontal) {
+      switch (column) {
+      case Column::RUN:
+        return QString("Run");
+      case Column::TITLE:
+        return QString("Description");
+      case Column::EXCLUDE:
+        return QString("Exclude");
+      case Column::COMMENT:
+        return QString("Comment");
+      default:
+        return "";
+      }
+    }
+  } else if (role == Qt::ToolTipRole) {
+    if (orientation == Qt::Horizontal) {
+      switch (column) {
+      case Column::RUN:
+        return QString("The run number from the catalog (not editable)");
+      case Column::TITLE:
+        return QString("The run title from the catalog (not editable)");
+      case Column::EXCLUDE:
+        return QString("User-specified exclude reason. Double-click to edit. "
+                       "If set, the run will be excluded from autoprocessing "
+                       "and/or transfers to the main table");
+      case Column::COMMENT:
+        return QString("User-specified annotation. Double-click to edit. Does "
+                       "not affect the reduction.");
+      default:
+        return "";
+      }
     }
   }
+
   return QVariant();
 }
 
@@ -114,8 +180,11 @@ Provide flags on an index by index basis
 @param index: To generate a flag for.
 */
 Qt::ItemFlags QtSearchModel::flags(const QModelIndex &index) const {
+  const auto column = static_cast<Column>(index.column());
   if (!index.isValid())
     return nullptr;
+  else if (column == Column::EXCLUDE || column == Column::COMMENT)
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
   else
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -127,14 +196,6 @@ void QtSearchModel::clear() {
   beginResetModel();
   m_runDetails.clear();
   endResetModel();
-}
-
-/** Check whether a run has any error messages
-@param run : the run number
-@return : true if there is at least one error for this run
-*/
-bool QtSearchModel::runHasError(const SearchResult &run) const {
-  return !(run.error().empty());
 }
 
 SearchResult const &QtSearchModel::getRowData(int index) const {

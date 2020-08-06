@@ -150,6 +150,7 @@ private:
 
   /// searching
   bool search(ISearcher::SearchType searchType);
+  void resizeSearchResultsColumns();
   bool searchInProgress() const;
   /// autoreduction
   bool requireNewAutoreduction() const;

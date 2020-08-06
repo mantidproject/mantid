@@ -22,6 +22,8 @@ manipulate the view's model.
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ISearchModel {
 public:
+  enum class Column { RUN, TITLE, EXCLUDE, COMMENT, NUM_COLUMNS };
+
   virtual void mergeNewResults(std::vector<SearchResult> const &source) = 0;
   virtual SearchResult const &getRowData(int index) const = 0;
   virtual void clear() = 0;

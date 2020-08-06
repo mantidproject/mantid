@@ -151,6 +151,18 @@ void QtRunsView::setSearchButtonEnabled(bool enabled) {
 }
 
 /**
+ * Sets editing the search results table enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtRunsView::setSearchResultsEnabled(bool enabled) {
+  static const auto editTriggers = m_ui.tableSearchResults->editTriggers();
+  if (enabled)
+    m_ui.tableSearchResults->setEditTriggers(editTriggers);
+  else
+    m_ui.tableSearchResults->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+/**
  * Sets the start-monitor button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
@@ -217,6 +229,24 @@ void QtRunsView::clearProgress() { m_ui.progressBar->reset(); }
  */
 void QtRunsView::resizeSearchResultsColumnsToContents() {
   m_ui.tableSearchResults->resizeColumnsToContents();
+}
+
+/** Get the width of the search results table
+ */
+int QtRunsView::getSearchResultsTableWidth() const {
+  return m_ui.tableSearchResults->width();
+}
+
+/** Get the width of a particular column in the search results table
+ */
+int QtRunsView::getSearchResultsColumnWidth(int column) const {
+  return m_ui.tableSearchResults->columnWidth(column);
+}
+
+/** Set the width of column in the search results table
+ */
+void QtRunsView::setSearchResultsColumnWidth(int column, int width) {
+  m_ui.tableSearchResults->setColumnWidth(column, width);
 }
 
 /**
@@ -325,8 +355,8 @@ std::set<int> QtRunsView::getSelectedSearchRows() const {
   std::set<int> rows;
   auto selectionModel = m_ui.tableSearchResults->selectionModel();
   if (selectionModel) {
-    auto selectedRows = selectionModel->selectedRows();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+    auto selectedIndexes = selectionModel->selectedIndexes();
+    for (auto it = selectedIndexes.begin(); it != selectedIndexes.end(); ++it)
       rows.insert(it->row());
   }
   return rows;

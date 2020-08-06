@@ -46,6 +46,9 @@ public:
 
   // Search methods
   void resizeSearchResultsColumnsToContents() override;
+  int getSearchResultsTableWidth() const override;
+  int getSearchResultsColumnWidth(int column) const override;
+  void setSearchResultsColumnWidth(int column, int width) override;
   ISearchModel const &searchResults() override;
   ISearchModel &mutableSearchResults() override;
 
@@ -58,6 +61,7 @@ public:
   void setInstrumentComboEnabled(bool enabled) override;
   void setSearchTextEntryEnabled(bool enabled) override;
   void setSearchButtonEnabled(bool enabled) override;
+  void setSearchResultsEnabled(bool enabled) override;
   void setStartMonitorButtonEnabled(bool enabled) override;
   void setStopMonitorButtonEnabled(bool enabled) override;
   void setUpdateIntervalSpinBoxEnabled(bool enabled) override;

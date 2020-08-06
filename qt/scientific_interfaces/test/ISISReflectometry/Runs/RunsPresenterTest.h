@@ -104,6 +104,7 @@ public:
         .WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false)).Times(1);
     EXPECT_CALL(m_view, setSearchButtonEnabled(false)).Times(1);
+    EXPECT_CALL(m_view, setSearchResultsEnabled(false)).Times(1);
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false)).Times(1);
     presenter.notifySearch();
     verifyAndClear();
@@ -116,6 +117,7 @@ public:
         .WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setSearchButtonEnabled(true)).Times(1);
+    EXPECT_CALL(m_view, setSearchResultsEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true)).Times(1);
     presenter.notifySearchComplete();
     verifyAndClear();
@@ -891,6 +893,7 @@ private:
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
     EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setSearchResultsEnabled(false));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(true));
     EXPECT_CALL(m_view, setTransferButtonEnabled(false));
@@ -903,6 +906,7 @@ private:
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
     EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setSearchResultsEnabled(false));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
     EXPECT_CALL(m_view, setTransferButtonEnabled(false));
@@ -927,6 +931,7 @@ private:
     EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true));
     EXPECT_CALL(m_view, setSearchButtonEnabled(true));
+    EXPECT_CALL(m_view, setSearchResultsEnabled(true));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
     EXPECT_CALL(m_view, setTransferButtonEnabled(true));
