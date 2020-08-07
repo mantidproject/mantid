@@ -63,7 +63,8 @@ class FittingTabPresenter(object):
         self.double_pulse_observer = GenericObserverWithArgPassing(
             self.handle_double_pulse_set)
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
-
+        
+        self.view.setEnabled(False)
     @property
     def selected_data(self):
         return self._selected_data
@@ -96,6 +97,8 @@ class FittingTabPresenter(object):
             self.manual_selection_made = True
 
     def handle_new_data_loaded(self):
+        if len(self._selected_data) >= 1:
+            self.view.setEnabled(True)
         self.manual_selection_made = False
         self.update_selected_workspace_list_for_fit()
         self.model.create_ws_fit_function_map()
@@ -349,6 +352,7 @@ class FittingTabPresenter(object):
         self.model.update_plot_guess(self.get_fit_input_workspaces(), self.view.get_index_for_start_end_times())
 
     def handle_undo_fit_clicked(self):
+        self._fit_function = self._fit_function_cache
         self._fit_function = self._fit_function_cache
         self.clear_fit_information()
         self.update_fit_status_information_in_view()
