@@ -725,7 +725,9 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.peaks.disable_deselect_elements_btn = mock.Mock()
 
         self.gui.deselect_elements()
-
+        """with block ensures that if Hydrogen is called by deselect_elements or _remove_element_lines an 
+           AssertionError is thrown  as if an AssertionError is not thrown by code in block one will 
+           automatically be thrown """
         with self.assertRaises(AssertionError):
             self.gui.ptable.deselect_element.assert_any_call("Hydrogen")
 
