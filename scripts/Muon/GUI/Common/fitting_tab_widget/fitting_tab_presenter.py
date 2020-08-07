@@ -51,7 +51,7 @@ class FittingTabPresenter(object):
             self.handle_selected_plot_type_changed)
         self.input_workspace_observer = GenericObserver(
             self.handle_new_data_loaded)
-    
+
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
 
@@ -62,7 +62,7 @@ class FittingTabPresenter(object):
         self.double_pulse_observer = GenericObserverWithArgPassing(
             self.handle_double_pulse_set)
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
-        
+
         self.view.setEnabled(False)
 
     def disable_view(self):
