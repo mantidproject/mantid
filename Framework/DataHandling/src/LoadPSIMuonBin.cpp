@@ -17,6 +17,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BinaryStreamReader.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
@@ -121,6 +122,14 @@ void LoadPSIMuonBin::init() {
   declareProperty("MainFieldDirection", 0,
                   "The field direction of the magnetic field on the instrument",
                   Kernel::Direction::Output);
+
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                      "TimeZeroList", Kernel::Direction::Output),
+                  "A vector of time zero values");
+  declareProperty(
+      "CorrectTime", true,
+      "Boolean flag controlling whether time should be corrected by timezero.",
+      Kernel::Direction::Input);
 }
 
 void LoadPSIMuonBin::exec() {
@@ -184,21 +193,37 @@ void LoadPSIMuonBin::exec() {
   setProperty("LastGoodData", outputWorkspace->x(0)[lastGoodDataSpecIndex]);
 
   double timeZero = 0.0;
+  std::vector<double> timeZeroList;
   if (m_header.realT0[0] != 0) {
     timeZero = *std::max_element(std::begin(m_header.realT0),
                                  std::end(m_header.realT0));
+    timeZeroList =
+        std::vector<double>(std::begin(m_header.realT0),
+                            std::begin(m_header.realT0) + m_histograms.size());
   } else {
     timeZero = static_cast<double>(*std::max_element(
         std::begin(m_header.integerT0), std::end(m_header.integerT0)));
+    timeZeroList = std::vector<double>(std::begin(m_header.integerT0),
+                                       std::begin(m_header.integerT0) +
+                                           m_histograms.size());
   }
 
   // If timeZero is bigger than the largest bin assume it refers to a bin's
   // value
   double absTimeZero = timeZero;
+  std::vector<double> correctedTimeZeroList;
   if (timeZero > largestBinValue) {
     absTimeZero = outputWorkspace->x(0)[static_cast<int>(std::floor(timeZero))];
+    for (auto timeZeroValue : timeZeroList) {
+      correctedTimeZeroList.emplace_back(
+          outputWorkspace->x(0)[static_cast<int>(std::floor(timeZeroValue))]);
+    }
+  } else {
+    correctedTimeZeroList = timeZeroList;
   }
+
   setProperty("TimeZero", absTimeZero);
+  setProperty("TimeZeroList", correctedTimeZeroList);
 
   auto firstGoodDataSpecIndex = static_cast<int>(
       *std::max_element(m_header.firstGood, m_header.firstGood + 16));
@@ -208,10 +233,13 @@ void LoadPSIMuonBin::exec() {
   // Time zero is when the pulse starts.
   // The pulse should be at t=0 to be like ISIS data
   // manually offset the data
-  for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
-    auto &xData = outputWorkspace->mutableX(specNum);
-    for (auto &xValue : xData) {
-      xValue -= absTimeZero;
+  auto correctTime = getProperty("CorrectTime");
+  if (correctTime) {
+    for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
+      auto &xData = outputWorkspace->mutableX(specNum);
+      for (auto &xValue : xData) {
+        xValue -= absTimeZero;
+      }
     }
   }
 }
@@ -803,7 +831,7 @@ std::string LoadPSIMuonBin::detectTempFile() {
   // crawl the while filesystem.
   namespace fs = boost::filesystem;
   const fs::path searchDir{
-      fs ::path{getPropertyValue("Filename")}.parent_path()};
+      fs::path{getPropertyValue("Filename")}.parent_path()};
 
   std::deque<fs::path> queue;
   queue.push_back(fs::path{searchDir});

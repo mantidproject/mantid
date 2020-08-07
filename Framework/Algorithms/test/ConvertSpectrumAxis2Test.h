@@ -14,6 +14,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -31,6 +32,24 @@ private:
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+
+    if (target == "SignedInPlaneTwoTheta" || target == "InPlaneTwoTheta") {
+      for (size_t i = 0; i < 3; i++) {
+        Mantid::DataHandling::MoveInstrumentComponent moveComp;
+        moveComp.initialize();
+        moveComp.setChild(true);
+        moveComp.setProperty("Workspace", inputWS);
+        moveComp.setProperty("X", -1.);
+        moveComp.setProperty("Y", 0.);
+        moveComp.setProperty("Z", 1.);
+        std::ostringstream lexer;
+        lexer << "pixel-" << i << ")";
+        moveComp.setProperty("ComponentName", lexer.str());
+        moveComp.setProperty("RelativePosition", false);
+
+        moveComp.execute();
+      }
+    }
 
     conv.initialize();
 
@@ -96,6 +115,56 @@ private:
     TS_ASSERT_EQUALS(input->x(1), output->x(1));
     TS_ASSERT_EQUALS(input->y(1), output->y(1));
     TS_ASSERT_EQUALS(input->e(1), output->e(1));
+
+    // Check workspace axes are of correct length.
+    TS_ASSERT_THROWS((*thetaAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
+  }
+
+  void check_output_values_for_InPlaneTwoTheta_conversion(
+      const std::string &inputWSTheta, const std::string &outputWSTheta) {
+    MatrixWorkspace_const_sptr input, output;
+    TS_ASSERT_THROWS_NOTHING(
+        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWSTheta));
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputWSTheta));
+    // Workspaces should now have a numeric axes up the side, with units of
+    // angle.
+    const Axis *thetaAxis = nullptr;
+    TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
+    TS_ASSERT(thetaAxis->isNumeric());
+    TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
+    TS_ASSERT_EQUALS(thetaAxis->unit()->label(), "degrees");
+    // the detectors are vertically aligned
+    TS_ASSERT_DELTA((*thetaAxis)(0), 45, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(1), 45, 0.0001);
+
+    // Check workspace axes are of correct length.
+    TS_ASSERT_THROWS((*thetaAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
+  }
+
+  void check_output_values_for_SignedInPlaneTwoTheta_conversion(
+      const std::string &inputWSTheta, const std::string &outputWSTheta) {
+    MatrixWorkspace_const_sptr input, output;
+    TS_ASSERT_THROWS_NOTHING(
+        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWSTheta));
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputWSTheta));
+    // Workspaces should now have a numeric axes up the side, with units of
+    // angle.
+    const Axis *thetaAxis = nullptr;
+    TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
+    TS_ASSERT(thetaAxis->isNumeric());
+    TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
+    TS_ASSERT_EQUALS(thetaAxis->unit()->label(), "degrees");
+    // the detectors are vertically aligned
+    TS_ASSERT_DELTA((*thetaAxis)(0), -45, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(1), -45, 0.0001);
 
     // Check workspace axes are of correct length.
     TS_ASSERT_THROWS((*thetaAxis)(3),
@@ -177,6 +246,26 @@ public:
     // Check output values for the workspace then clean up.
     check_output_values_for_theta_conversion(inputWS, outputWS2);
     clean_up_workspaces(inputWS, outputWS2);
+  }
+
+  void test_Target_InPlaneTwoTheta_Returns_Correct_Value() {
+    const std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+
+    do_algorithm_run("InPlaneTwoTheta", inputWS, outputWS);
+    // Check output values for the workspace then clean up.
+    check_output_values_for_InPlaneTwoTheta_conversion(inputWS, outputWS);
+    clean_up_workspaces(inputWS, outputWS);
+  }
+
+  void test_Target_SignedInPlaneTwoTheta_Returns_Correct_Value() {
+    const std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+
+    do_algorithm_run("SignedInPlaneTwoTheta", inputWS, outputWS);
+    // Check output values for the workspace then clean up.
+    check_output_values_for_SignedInPlaneTwoTheta_conversion(inputWS, outputWS);
+    clean_up_workspaces(inputWS, outputWS);
   }
 
   void

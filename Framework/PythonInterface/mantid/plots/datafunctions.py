@@ -478,8 +478,15 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
                 pass
             min_value = min(min_value, xtmp.min())
             max_value = max(max_value, xtmp.max())
-            diff = xtmp[1:] - xtmp[:-1]
+            diff = np.diff(xtmp)
             delta = min(delta, diff.min())
+    xtmp = workspace.readX(0)
+    if delta == np.finfo(np.float64).max:
+        delta = np.diff(xtmp).min()
+    if min_value == np.finfo(np.float64).max:
+        min_value = xtmp.min()
+    if max_value == np.finfo(np.float64).min:
+        max_value = xtmp.max()
     num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
     x_centers = np.linspace(min_value, max_value, num=num_edges)
     y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
@@ -524,7 +531,11 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     except RuntimeError:
         raise ValueError('The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead')
     x = workspace.extractX()
-    y = workspace.getAxis(1).extractValues()
+    if workspace.getAxis(1).isText():
+        nhist = workspace.getNumberHistograms()
+        y = np.arange(nhist)
+    else:
+        y = workspace.getAxis(1).extractValues()
     z = workspace.extractY()
 
     try:
@@ -584,6 +595,8 @@ def get_uneven_data(workspace, distribution):
     y = []
     nhist = workspace.getNumberHistograms()
     yvals = workspace.getAxis(1).extractValues()
+    if workspace.getAxis(1).isText():
+        yvals = np.arange(nhist)
     if len(yvals) == nhist:
         yvals = boundaries_from_points(yvals)
     try:
@@ -599,7 +612,7 @@ def get_uneven_data(workspace, distribution):
         else:
             xvals = boundaries_from_points(xvals)
         if specInfo and specInfo.hasDetectors(index) and (specInfo.isMasked(index) or specInfo.isMonitor(index)):
-            zvals[:] = np.nan
+            zvals = np.full_like(zvals, np.nan, dtype=np.double)
         zvals = np.ma.masked_invalid(zvals)
         z.append(zvals)
         x.append(xvals)

@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -106,7 +107,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
   const std::string reportMsg = "Computing path lengths";
 
   // Configure strategy
-  MCAbsorptionStrategy strategy(*beamProfile, inputWS->sample(),
+  MCInteractionVolume interactionVol(inputWS->sample(), maxScatterPtAttempts);
+  MCAbsorptionStrategy strategy(interactionVol, *beamProfile,
                                 DeltaEMode::Elastic, nevents,
                                 maxScatterPtAttempts, true);
 

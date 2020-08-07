@@ -2,7 +2,7 @@
 # to remove the need for searching for all of the algorithms and fit functions 
 # on startup.
 
-# List of python alforithms and fit functions
+# List of python algorithms and fit functions
 set(PYTHON_PLUGINS
   algorithms/HFIRSANS2Wavelength.py
   algorithms/DSFinterp.py
@@ -122,6 +122,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/TotScatCalculateSelfScattering.py
   algorithms/WorkflowAlgorithms/IndirectILLEnergyTransfer.py
   algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
+  algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
   algorithms/ViewBOA.py
   algorithms/ReflectometrySliceEventWorkspace.py
   algorithms/SNAPReduce.py

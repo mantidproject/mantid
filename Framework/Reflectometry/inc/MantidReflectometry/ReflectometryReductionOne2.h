@@ -82,6 +82,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   monitorCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
   // convert to momentum transfer
+  bool useDetectorAngleForQConversion(const MatrixWorkspace_sptr &ws) const;
   Mantid::API::MatrixWorkspace_sptr
   convertToQ(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   // Get the twoTheta width of a given detector
@@ -124,7 +125,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   constructIvsLamWS(const API::MatrixWorkspace_sptr &detectorWS);
   // Whether summation should be done in Q or the default lambda
-  bool summingInQ();
+  bool summingInQ() const;
   // Get projected coordinates onto twoThetaR
   void getProjectedLambdaRange(const double lambda, const double twoTheta,
                                const double bLambda, const double bTwoTheta,
