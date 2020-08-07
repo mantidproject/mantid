@@ -51,9 +51,8 @@ class FittingTabPresenter(object):
             self.handle_selected_plot_type_changed)
         self.input_workspace_observer = GenericObserver(
             self.handle_new_data_loaded)
-        self.disable_tab_observer = GenericObserver(lambda: self.view.
-                                                     setEnabled(False) )
-        # self.disable_tab_observer = GenericObserver(self.disable_view)
+    
+        self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
 
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
@@ -66,12 +65,13 @@ class FittingTabPresenter(object):
         
         self.view.setEnabled(False)
 
-    # def disable_view(self):
-    #     if len(self._selected_data) >= 1:
-    #         self.view.setEnabled(False)
+    def disable_view(self):
+        self.view.setEnabled(False)
 
     def enable_view(self):
-        if len(self._selected_data) >= 1:
+        print("in enable")
+        if self.selected_data:
+            print("In if enable")
             self.view.setEnabled(True)
 
     @property
@@ -106,11 +106,11 @@ class FittingTabPresenter(object):
             self.manual_selection_made = True
 
     def handle_new_data_loaded(self):
-        # if len(self._selected_data) >= 1:
-        #     self.view.setEnabled(True)
         self.manual_selection_made = False
         self.update_selected_workspace_list_for_fit()
         self.model.create_ws_fit_function_map()
+        if self.selected_data:
+            self.view.setEnabled(True)
 
     def handle_gui_changes_made(self, changed_values):
         for key in changed_values.keys():
