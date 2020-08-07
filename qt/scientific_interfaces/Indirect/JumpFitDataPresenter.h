@@ -44,6 +44,7 @@ private slots:
                                const std::string &workspace);
   void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
+  void updateActiveDataIndex(int index);
   void setSingleModelSpectrum(int index);
   void handleParameterTypeChanged(const QString &parameter);
   void handleSpectrumSelectionChanged(int parameterIndex);

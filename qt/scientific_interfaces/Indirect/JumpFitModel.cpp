@@ -243,8 +243,7 @@ void JumpFitModel::addWorkspace(const std::string &workspaceName) {
 
   const auto hwhmWorkspace =
       createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  IndirectFittingModel::addWorkspace(hwhmWorkspace->getName(),
-                                     Spectra(createSpectra(spectrum.get())));
+  IndirectFittingModel::addWorkspace(hwhmWorkspace->getName(), Spectra(""));
 }
 
 void JumpFitModel::removeWorkspace(TableDatasetIndex index) {
@@ -281,28 +280,47 @@ std::string JumpFitModel::getFitParameterName(TableDatasetIndex dataIndex,
 }
 
 void JumpFitModel::setActiveWidth(std::size_t widthIndex,
-                                  TableDatasetIndex dataIndex) {
+                                  TableDatasetIndex dataIndex, bool single) {
   const auto parametersIt = findJumpFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.widthSpectra.size() > widthIndex) {
     const auto &widthSpectra = parametersIt->second.widthSpectra;
-
-    setSpectra(
-        createSpectra(std::vector<std::size_t>({widthSpectra[widthIndex]})),
-        dataIndex);
+    if (single == true) {
+      setSpectra(
+          createSpectra(std::vector<std::size_t>({widthSpectra[widthIndex]})),
+          dataIndex);
+    } else { // In multiple mode the spectra needs to be appending on the
+             // existing spectra list.
+      auto spectra_vec = std::vector<std::size_t>({widthSpectra[widthIndex]});
+      auto spectra = getSpectra(dataIndex);
+      for (size_t i = 0; i < spectra.size().value; i++) {
+        spectra_vec.push_back(spectra[i].value);
+      }
+      setSpectra(createSpectra(spectra_vec), dataIndex);
+    }
   } else
     logger.warning("Invalid width index specified.");
 }
 
 void JumpFitModel::setActiveEISF(std::size_t eisfIndex,
-                                 TableDatasetIndex dataIndex) {
+                                 TableDatasetIndex dataIndex, bool single) {
   const auto parametersIt = findJumpFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.eisfSpectra.size() > eisfIndex) {
     const auto &eisfSpectra = parametersIt->second.eisfSpectra;
-    setSpectra(
-        createSpectra(std::vector<std::size_t>({eisfSpectra[eisfIndex]})),
-        dataIndex);
+    if (single == true) {
+      setSpectra(
+          createSpectra(std::vector<std::size_t>({eisfSpectra[eisfIndex]})),
+          dataIndex);
+    } else { // In multiple mode the spectra needs to be appending on the
+             // existing spectra list.
+      auto spectra_vec = std::vector<std::size_t>({eisfSpectra[eisfIndex]});
+      auto spectra = getSpectra(dataIndex);
+      for (size_t i = 0; i < spectra.size().value; i++) {
+        spectra_vec.push_back(spectra[i].value);
+      }
+      setSpectra(createSpectra(spectra_vec), dataIndex);
+    }
   } else
     logger.warning("Invalid EISF index specified.");
 }
