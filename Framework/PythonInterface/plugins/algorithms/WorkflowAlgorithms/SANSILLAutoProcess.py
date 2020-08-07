@@ -358,11 +358,24 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         outputs = []
         panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
         panel_output_groups = []
-        for i in range(self.dimensionality):
-            if self.sample[i] != EMPTY_TOKEN:
-                self.reduce(i)
-                outputs.append(self.output+ '_' + str(i + 1))
-                panel_ws_group = panel_outputs + '_' + str(i + 1)
+
+        container_transmission, sample_transmission = \
+            self.processTransmissions()
+
+        for d in range(self.dimensionality):
+            if self.sample[d] != EMPTY_TOKEN:
+                absorber = self.processAbsorber(d)
+                flux = self.processFlux(d, absorber)
+                if flux:
+                    beam, _ = self.processBeam(d, absorber)
+                else:
+                    beam, flux = self.processBeam(d, absorber)
+                container = self.processContainer(d, beam, absorber,
+                                                  container_transmission)
+                self.processSample(d, flux, sample_transmission, beam, absorber,
+                                   container)
+                outputs.append(self.output+ '_' + str(d + 1))
+                panel_ws_group = panel_outputs + '_' + str(d + 1)
                 if mtd.doesExist(panel_ws_group) and panel_outputs:
                     panel_output_groups.append(panel_ws_group)
             else:
@@ -377,9 +390,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             GroupWorkspaces(InputWorkspaces=panel_output_groups, OutputWorkspace=panel_outputs)
             self.setProperty('PanelOutputWorkspaces', mtd[panel_outputs])
 
-    def reduce(self, i):
-
-        # absorber transmission
+    def processTransmissions(self):
         with AutoProcessContext(self.atransmission, 'Absorber') as \
                 [process_transmission_absorber, transmission_absorber_name]:
             self.progress.report('Processing transmission absorber')
@@ -389,7 +400,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  NormaliseBy=self.normalise,
                                  OutputWorkspace=transmission_absorber_name)
 
-        # beam transmission
         with AutoProcessContext(self.btransmission, 'Beam') as \
                 [process_transmission_beam, transmission_beam_name]:
             self.progress.report('Processing transmission beam')
@@ -404,7 +414,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  AbsorberInputWorkspace=
                                  transmission_absorber_name)
 
-        # container transmission
         with AutoProcessContext(self.ctransmission, 'Transmission') as \
                 [process_container_transmission, container_transmission_name]:
             self.progress.report('Processing container transmission')
@@ -418,7 +427,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  NormaliseBy=self.normalise,
                                  BeamRadius=self.radius)
 
-        # sample transmission
         with AutoProcessContext(self.stransmission, 'Transmission') as \
                 [process_sample_transmission, sample_transmission_name]:
             self.progress.report('Processing sample transmission')
@@ -431,8 +439,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
                                  BeamRadius=self.radius)
+        return container_transmission_name, sample_transmission_name
 
-        # absorber
+    def processAbsorber(self, i):
         absorber = (self.absorber[i]
                     if len(self.absorber) == self.dimensionality
                     else self.absorber[0])
@@ -444,8 +453,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
                                  OutputWorkspace=absorber_name)
+        return absorber_name
 
-        # beam
+    def processBeam(self, i, absorber_name):
         beam = (self.beam[i]
                 if len(self.beam) == self.dimensionality
                 else self.beam[0])
@@ -460,8 +470,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamRadius=self.radius,
                                  AbsorberInputWorkspace=absorber_name,
                                  FluxOutputWorkspace=flux_name)
+        return beam_name, flux_name
 
-        # flux
+    def processFlux(self, i, aborber_name):
         if self.flux[0]:
             flux = (self.flux[i]
                     if len(self.flux) == self.dimensionality
@@ -477,8 +488,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                      BeamRadius=self.radius,
                                      AbsorberInputWorkspace=absorber_name,
                                      FluxOutputWorkspace=flux_name)
+            return flux_name
+        else:
+            return None
 
-        # container
+    def processContainer(self, i, beam_name, absorber_name,
+                         container_transmission_name):
         container = (self.container[i]
                      if len(self.container) == self.dimensionality
                      else self.container[0])
@@ -496,7 +511,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  container_transmission_name,
                                  ThetaDependent=self.theta_dependent,
                                  NormaliseBy=self.normalise)
+        return container_name
 
+    def processSample(self, i, flux_name, sample_transmission_name, beam_name,
+                      absorber_name, container_name):
         # this is the default mask, the same for all the distance configurations
         with AutoProcessContext(self.default_mask, 'DefaultMask', True) as \
                 [load_default_mask, default_mask_name]:
