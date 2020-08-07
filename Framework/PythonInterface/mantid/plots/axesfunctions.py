@@ -627,36 +627,20 @@ def imshow(axes, workspace, *args, **kwargs):
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
+        if 'extent' not in kwargs:
+            if x.ndim == 2 and y.ndim == 2:
+                kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
+            else:
+                kwargs['extent'] = [x[0], x[-1], y[0], y[-1]]
+        return mantid.plots.modest_image.imshow(axes, z, transpose=transpose, *args, **kwargs)
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
         (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
-        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         _setLabels2D(axes,
                      workspace,
                      transpose=transpose,
                      normalize_by_bin_width=normalize_by_bin_width)
-        # sample data for large workspaces to reduce the amount of time it takes to plot
-        if workspace.getNumberHistograms() > 5000:
-            return samplingimage.imshow_sampling(axes, workspace=workspace, *args, **kwargs)
-
-        if aligned:
-            (x, y, z, kwargs) = get_matrix_2d_ragged(workspace,
-                                                     normalize_by_bin_width,
-                                                     histogram2D=True,
-                                                     transpose=transpose,
-                                                     **kwargs)
-        else:
-            (x, y, z) = get_matrix_2d_data(workspace,
-                                           distribution=distribution,
-                                           histogram2D=True,
-                                           transpose=transpose)
-    if 'extent' not in kwargs:
-        if x.ndim == 2 and y.ndim == 2:
-            kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
-        else:
-            kwargs['extent'] = [x[0], x[-1], y[0], y[-1]]
-
-    return mantid.plots.modest_image.imshow(axes, z, transpose=transpose, *args, **kwargs)
+        return samplingimage.imshow_sampling(axes, workspace=workspace, *args, **kwargs)
 
 def tripcolor(axes, workspace, *args, **kwargs):
     '''

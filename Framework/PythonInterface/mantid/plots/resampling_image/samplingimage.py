@@ -6,10 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import matplotlib.image as mimage
 import matplotlib.colors
-from mantid.plots.datafunctions import interpolate_y_data, get_normalize_by_bin_width
-import mantid.api
 import numpy as np
 
+from mantid.plots.datafunctions import get_matrix_2d_ragged, get_normalize_by_bin_width
 
 class SamplingImage(mimage.AxesImage):
     def __init__(self,
@@ -24,7 +23,7 @@ class SamplingImage(mimage.AxesImage):
                  filternorm=1,
                  filterrad=4.0,
                  resample=False,
-                 normalize=None,
+                 normalization=None,
                  **kwargs):
         super().__init__(ax,
                          cmap=cmap,
@@ -39,15 +38,13 @@ class SamplingImage(mimage.AxesImage):
         self.ws = workspace
         try:
             self.spectrum_info = workspace.spectrumInfo()
-        except:
+        except Exception:
             self.spectrum_info = None
         self.transpose = transpose
-        if normalize is None:
-            self.normalization = get_normalize_by_bin_width(self.ws, self.axes, **kwargs)
-        else:
-            self.normalization = normalize
+        self.normalization = normalization
         self._resize_cid, self._xlim_cid, self._ylim_cid = None, None, None
         self._resample_required = True
+        self.current_extent = extent
 
     def connect_events(self):
         axes = self.axes
@@ -85,7 +82,8 @@ class SamplingImage(mimage.AxesImage):
 
     def _resample_image(self, xbins=None, ybins=None):
         if self._resample_required:
-            extent = self.get_extent()
+            extent = self.current_extent
+
             if xbins is None or ybins is None:
                 bbox = self.get_window_extent().transformed(
                     self.axes.get_figure().dpi_scale_trans.inverted())
@@ -93,12 +91,10 @@ class SamplingImage(mimage.AxesImage):
                 xbins = int(np.ceil(bbox.width * dpi))
                 ybins = int(np.ceil(bbox.height * dpi))
 
-            x = np.linspace(extent[0], extent[1], int(xbins))
-            normalize = get_normalize_by_bin_width(self.ws, self.axes)
-            data, _, _ = interpolate_y_data(self.ws, x, xbins, ybins, self.normalization, self.spectrum_info)
-            if self.transpose:
-                data = data.T
+            x, y, data = get_matrix_2d_ragged(self.ws, self.normalization, histogram2D=True, transpose=self.transpose,
+                                              extent=extent, xbins=xbins, ybins=ybins, spec_info=self.spectrum_info)
             self.set_data(data)
+            return x, y
 
     def _update_extent(self):
         """
@@ -106,8 +102,8 @@ class SamplingImage(mimage.AxesImage):
         this limits the range that the data will be sampled. Return True or False if extents have changed.
         """
         new_extent = self.axes.get_xlim() + self.axes.get_ylim()
-        if new_extent != self.get_extent():
-            self.set_extent(new_extent)
+        if new_extent != self.current_extent:
+            self.current_extent = new_extent
             return True
         else:
             return False
@@ -144,10 +140,16 @@ def imshow_sampling(axes,
     fig.show()
     """
     transpose = kwargs.pop('transpose', False)
+    normalization, _ = get_normalize_by_bin_width(workspace, axes, **kwargs)
+    kwargs.pop('distribution', None)
 
     if not extent:
+        width = 0
+        if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
+            width = workspace.getDimension(1).getBinWidth()
         extent = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
-                  workspace.getDimension(1).getMinimum(), workspace.getDimension(1).getMaximum())
+                  workspace.getDimension(1).getMinimum() - width/2, workspace.getDimension(1).getMaximum() + width/2)
+
         if transpose:
             e1, e2, e3, e4 = extent
             extent = e3, e4, e1, e2
@@ -169,14 +171,21 @@ def imshow_sampling(axes,
                        filternorm=filternorm,
                        filterrad=filterrad,
                        resample=resample,
+                       normalization=normalization,
                        **kwargs)
     im._resample_image(100, 100)
+
     im.set_alpha(alpha)
     im.set_url(url)
     if im.get_clip_path() is None:
         # image does not already have clipping set, clip to axes patch
         im.set_clip_path(axes.patch)
     if vmin is not None or vmax is not None:
+        if norm is not None and isinstance(norm, matplotlib.colors.LogNorm):
+            if vmin <= 0:
+                vmin = 0.0001
+            if vmax <= 0:
+                vmax = 1
         im.set_clim(vmin, vmax)
     else:
         im.autoscale_None()

@@ -26,7 +26,6 @@ from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
 from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
 from .lineplots import LinePlots
-from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar, ToolItemText
 from .peaksviewer.workspaceselection import \
     (PeaksWorkspaceSelectorModel, PeaksWorkspaceSelectorPresenter,
@@ -283,7 +282,7 @@ class SliceViewerDataView(QWidget):
         the axes limits that have already been set
         """
         # ensure view is correct if zoomed in while swapping dimensions
-        # compute required extent and set after the new image is created
+        # compute required extent and just have resampling imshow deal with it
         old_extent = None
         if self.image is not None:
             old_extent = self.image.get_extent()
@@ -299,12 +298,8 @@ class SliceViewerDataView(QWidget):
             interpolation='none',
             transpose=self.dimensions.transpose,
             norm=self.colorbar.get_norm(),
+            extent=old_extent,
             **kwargs)
-
-        if old_extent:
-            self.ax.set_xlim(old_extent[0], old_extent[1])
-            self.ax.set_ylim(old_extent[2], old_extent[3])
-
         self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         self.draw_plot()

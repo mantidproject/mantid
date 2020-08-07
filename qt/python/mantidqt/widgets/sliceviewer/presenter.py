@@ -26,7 +26,7 @@ class SliceViewer(object):
         """
         Create a presenter for controlling the slice display for a workspace
         :param ws: Workspace containing data to display and slice
-        :param parent: An optinal parent widget
+        :param parent: An optional parent widget
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
