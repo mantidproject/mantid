@@ -100,6 +100,7 @@ class TransformWidget(QtWidgets.QWidget):
             observer)
 
 
+
 class LoadObserver(Observer):
 
     def __init__(self, outer):

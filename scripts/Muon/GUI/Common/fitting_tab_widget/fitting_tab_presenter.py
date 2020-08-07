@@ -52,9 +52,9 @@ class FittingTabPresenter(object):
         self.input_workspace_observer = GenericObserver(
             self.handle_new_data_loaded)
         self.disable_tab_observer = GenericObserver(lambda: self.view.
-                                                    setEnabled(False))
-        self.enable_tab_observer = GenericObserver(lambda: self.view.
-                                                   setEnabled(True))
+                                                     setEnabled(False) )
+        # self.disable_tab_observer = GenericObserver(self.disable_view)
+        self.enable_tab_observer = GenericObserver(self.enable_view)
 
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
             self.update_view_from_model)
@@ -65,6 +65,15 @@ class FittingTabPresenter(object):
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
         
         self.view.setEnabled(False)
+
+    # def disable_view(self):
+    #     if len(self._selected_data) >= 1:
+    #         self.view.setEnabled(False)
+
+    def enable_view(self):
+        if len(self._selected_data) >= 1:
+            self.view.setEnabled(True)
+
     @property
     def selected_data(self):
         return self._selected_data
@@ -97,8 +106,8 @@ class FittingTabPresenter(object):
             self.manual_selection_made = True
 
     def handle_new_data_loaded(self):
-        if len(self._selected_data) >= 1:
-            self.view.setEnabled(True)
+        # if len(self._selected_data) >= 1:
+        #     self.view.setEnabled(True)
         self.manual_selection_made = False
         self.update_selected_workspace_list_for_fit()
         self.model.create_ws_fit_function_map()
