@@ -104,14 +104,17 @@ class QColor;
 class QLabel;
 class QToolButton;
 
+template <class SpinBox> class QtSpinBoxFactoryPrivateBase;
 class QtSpinBoxFactoryPrivate;
+class QtSpinBoxFactoryReadOnlyPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactory
+// Base QtSpinBoxFactory class
+template <class SpinBox>
+class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactoryBase
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
-  Q_OBJECT
 public:
-  QtSpinBoxFactory(QObject *parent = nullptr);
-  ~QtSpinBoxFactory() override;
+  QtSpinBoxFactoryBase(QObject *parent = nullptr)
+      : QtAbstractEditorFactory<QtIntPropertyManager>(parent){};
 
 protected:
   void connectPropertyManager(QtIntPropertyManager *manager) override;
@@ -119,9 +122,44 @@ protected:
                                   QtProperty *property,
                                   QWidget *parent) override;
   void disconnectPropertyManager(QtIntPropertyManager *manager) override;
+  QtSpinBoxFactoryPrivateBase<SpinBox> *d_ptr;
+  friend class QtSpinBoxFactoryPrivateBase<SpinBox>;
+  void initailiseQPtr() { d_ptr->q_ptr = this; }
+};
+
+class QSpinBoxReadOnly : public QSpinBox {
+  Q_OBJECT
+public:
+  QSpinBoxReadOnly(QWidget *parent = nullptr) : QSpinBox(parent) {
+    this->lineEdit()->setReadOnly(true);
+  };
+};
+
+class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactoryReadOnly
+    : public QtSpinBoxFactoryBase<QSpinBoxReadOnly> {
+  Q_OBJECT
+public:
+  QtSpinBoxFactoryReadOnly(QObject *parent = nullptr);
+  ~QtSpinBoxFactoryReadOnly();
 
 private:
-  QtSpinBoxFactoryPrivate *d_ptr;
+  Q_DECLARE_PRIVATE(QtSpinBoxFactoryReadOnly)
+  Q_DISABLE_COPY(QtSpinBoxFactoryReadOnly)
+  Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
+  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, int, int))
+  Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(QtProperty *, int))
+  Q_PRIVATE_SLOT(d_func(), void slotSetValue(int))
+  Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+};
+
+class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactory
+    : public QtSpinBoxFactoryBase<QSpinBox> {
+  Q_OBJECT
+public:
+  QtSpinBoxFactory(QObject *parent = nullptr);
+  ~QtSpinBoxFactory() override;
+
+private:
   Q_DECLARE_PRIVATE(QtSpinBoxFactory)
   Q_DISABLE_COPY(QtSpinBoxFactory)
   Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
@@ -517,6 +555,7 @@ public:
   using EditorList = QList<Editor *>;
   using PropertyToEditorListMap = QMap<QtProperty *, EditorList>;
   using EditorToPropertyMap = QMap<Editor *, QtProperty *>;
+  typedef Editor EditorType;
 
   Editor *createEditor(QtProperty *property, QWidget *parent);
   void initializeEditor(QtProperty *property, Editor *e);
@@ -778,15 +817,96 @@ public:
   void slotSetValue(int value);
 };
 
-class QtSpinBoxFactoryPrivate : public EditorFactoryPrivate<QSpinBox> {
-  QtSpinBoxFactory *q_ptr;
-  Q_DECLARE_PUBLIC(QtSpinBoxFactory)
+template <class SpinBox>
+class QtSpinBoxFactoryPrivateBase : public EditorFactoryPrivate<SpinBox> {
 public:
+  // This q_ptr is public due to the base class QtSpinBoxFactoryBase needing
+  // access to it.
+  QtSpinBoxFactoryBase<SpinBox> *q_ptr;
   void slotPropertyChanged(QtProperty *property, int value);
   void slotRangeChanged(QtProperty *property, int min, int max);
   void slotSingleStepChanged(QtProperty *property, int step);
   void slotSetValue(int value);
 };
+
+class QtSpinBoxFactoryPrivate : public QtSpinBoxFactoryPrivateBase<QSpinBox> {
+  Q_DECLARE_PUBLIC(QtSpinBoxFactory)
+};
+
+class QtSpinBoxFactoryReadOnlyPrivate
+    : public QtSpinBoxFactoryPrivateBase<QSpinBoxReadOnly> {
+  Q_DECLARE_PUBLIC(QtSpinBoxFactoryReadOnly)
+};
+
+// ------------ QtSpinBoxFactory
+template <class SpinBox>
+void QtSpinBoxFactoryPrivateBase<SpinBox>::slotPropertyChanged(
+    QtProperty *property, int value) {
+  if (!m_createdEditors.contains(property))
+    return;
+  QListIterator<EditorType *> itEditor(m_createdEditors[property]);
+  while (itEditor.hasNext()) {
+    QSpinBox *editor = itEditor.next();
+    if (editor->value() != value) {
+      editor->blockSignals(true);
+      editor->setValue(value);
+      editor->blockSignals(false);
+    }
+  }
+}
+
+template <class SpinBox>
+void QtSpinBoxFactoryPrivateBase<SpinBox>::slotRangeChanged(
+    QtProperty *property, int min, int max) {
+  if (!m_createdEditors.contains(property))
+    return;
+
+  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  if (!manager)
+    return;
+
+  QListIterator<EditorType *> itEditor(m_createdEditors[property]);
+  while (itEditor.hasNext()) {
+    QSpinBox *editor = itEditor.next();
+    editor->blockSignals(true);
+    editor->setRange(min, max);
+    editor->setValue(manager->value(property));
+    editor->blockSignals(false);
+  }
+}
+
+template <class SpinBox>
+void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSingleStepChanged(
+    QtProperty *property, int step) {
+  if (!m_createdEditors.contains(property))
+    return;
+  QListIterator<EditorType *> itEditor(m_createdEditors[property]);
+  while (itEditor.hasNext()) {
+    QSpinBox *editor = itEditor.next();
+    editor->blockSignals(true);
+    editor->setSingleStep(step);
+    editor->blockSignals(false);
+  }
+}
+
+template <class SpinBox>
+void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSetValue(int value) {
+  QObject *object = q_ptr->sender();
+  const QMap<EditorType *, QtProperty *>::ConstIterator ecend =
+      m_editorToProperty.constEnd();
+  for (QMap<EditorType *, QtProperty *>::ConstIterator itEditor =
+           m_editorToProperty.constBegin();
+       itEditor != ecend; ++itEditor) {
+    if (itEditor.key() == object) {
+      QtProperty *property = itEditor.value();
+      QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+      if (!manager)
+        return;
+      manager->setValue(property, value);
+      return;
+    }
+  }
+}
 
 class QtTimeEditFactoryPrivate : public EditorFactoryPrivate<QTimeEdit> {
   QtTimeEditFactory *q_ptr;

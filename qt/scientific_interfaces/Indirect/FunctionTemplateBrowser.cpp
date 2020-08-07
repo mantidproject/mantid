@@ -47,7 +47,7 @@ void FunctionTemplateBrowser::createBrowser() {
   m_parameterManager = new ParameterPropertyManager(this, true);
 
   // create editor factories
-  auto *spinBoxFactory = new QtSpinBoxFactory(this);
+  auto *spinBoxFactoryReadOnly = new QtSpinBoxFactoryReadOnly(this);
   auto *doubleEditorFactory = new DoubleEditorFactory(this);
   auto *lineEditFactory = new QtLineEditFactory(this);
   auto *checkBoxFactory = new QtCheckBoxFactory(this);
@@ -58,7 +58,7 @@ void FunctionTemplateBrowser::createBrowser() {
   // assign factories to property managers
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
+  m_browser->setFactoryForManager(m_intManager, spinBoxFactoryReadOnly);
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_parameterManager, doubleDialogFactory);
