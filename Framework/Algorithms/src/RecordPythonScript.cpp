@@ -23,7 +23,9 @@ DECLARE_ALGORITHM(RecordPythonScript)
 //----------------------------------------------------------------------------------------------
 /// Constructor
 RecordPythonScript::RecordPythonScript()
-    : Algorithms::GeneratePythonScript(), API::AlgorithmObserver() { useAlgorithm("GeneratePythonScript", 1); }
+    : Algorithms::GeneratePythonScript(), API::AlgorithmObserver() {
+  useAlgorithm("GeneratePythonScript", 1);
+}
 
 //----------------------------------------------------------------------------------------------
 
