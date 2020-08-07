@@ -17,6 +17,7 @@
 #include "MantidKernel/EnvironmentHistory.h"
 
 #include <QAbstractListModel>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
 #include <QGroupBox>
@@ -163,6 +164,7 @@ public slots:
 
   void copytoClipboard();
   void writeToScriptFile();
+  void unrollAll(int state);
 
 private:
   AlgExecSummaryGrpBox *createExecSummaryGrpBox();
@@ -182,6 +184,7 @@ private:
   const Mantid::API::WorkspaceHistory &m_algHist;
   QLabel *m_scriptVersionLabel;
   QComboBox *m_scriptComboMode;
+  QCheckBox *m_unrollAllHistoryCheckbox;
   QPushButton *m_scriptButtonFile;
   QPushButton *m_scriptButtonClipboard;
   AlgHistoryTreeWidget *m_Historytree;
