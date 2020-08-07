@@ -52,8 +52,9 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_enable_nonorthogonal_view_disables_lineplots_if_enabled(self):
         pres = SliceViewer(self.hkl_ws)
-        line_plots_action, non_ortho_action = toolbar_actions(
-            pres, (ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES))
+        line_plots_action, region_sel_action, non_ortho_action = toolbar_actions(
+            pres,
+            (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES))
         line_plots_action.trigger()
         QApplication.processEvents()
 
@@ -63,6 +64,24 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(non_ortho_action.isChecked())
         self.assertFalse(line_plots_action.isChecked())
         self.assertFalse(line_plots_action.isEnabled())
+        self.assertFalse(region_sel_action.isChecked())
+        self.assertFalse(region_sel_action.isEnabled())
+
+        pres.view.close()
+
+    def test_disable_lineplots_disables_region_selector(self):
+        pres = SliceViewer(self.hkl_ws)
+        line_plots_action, region_sel_action = toolbar_actions(
+            pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION))
+        line_plots_action.trigger()
+        region_sel_action.trigger()
+        QApplication.processEvents()
+
+        line_plots_action.trigger()
+        QApplication.processEvents()
+
+        self.assertFalse(line_plots_action.isChecked())
+        self.assertFalse(region_sel_action.isChecked())
 
         pres.view.close()
 

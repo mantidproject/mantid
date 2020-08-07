@@ -27,7 +27,7 @@ public:
   MOCK_CONST_METHOD0(getSelectedWorkspaces, std::vector<std::string>());
   MOCK_CONST_METHOD0(getSelectedParameters, std::vector<std::string>());
   MOCK_CONST_METHOD0(getFileFormatIndex, int());
-  MOCK_CONST_METHOD0(getTitleCheck, bool());
+  MOCK_CONST_METHOD0(getHeaderCheck, bool());
   MOCK_CONST_METHOD0(getQResolutionCheck, bool());
   MOCK_CONST_METHOD0(getSeparator, std::string());
 
@@ -40,8 +40,19 @@ public:
   MOCK_METHOD0(disableAutosaveControls, void());
   MOCK_METHOD0(enableAutosaveControls, void());
 
-  MOCK_METHOD0(enableFileFormatAndLocationControls, void());
-  MOCK_METHOD0(disableFileFormatAndLocationControls, void());
+  MOCK_METHOD0(enableFileFormatControls, void());
+  MOCK_METHOD0(disableFileFormatControls, void());
+  MOCK_METHOD0(enableLocationControls, void());
+  MOCK_METHOD0(disableLocationControls, void());
+
+  MOCK_METHOD0(enableLogList, void());
+  MOCK_METHOD0(disableLogList, void());
+  MOCK_METHOD0(enableHeaderCheckBox, void());
+  MOCK_METHOD0(disableHeaderCheckBox, void());
+  MOCK_METHOD0(enableQResolutionCheckBox, void());
+  MOCK_METHOD0(disableQResolutionCheckBox, void());
+  MOCK_METHOD0(enableSeparatorButtonGroup, void());
+  MOCK_METHOD0(disableSeparatorButtonGroup, void());
 
   MOCK_METHOD0(showFilterEditValid, void());
   MOCK_METHOD0(showFilterEditInvalid, void());

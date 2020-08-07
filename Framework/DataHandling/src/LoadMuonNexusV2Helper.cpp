@@ -154,6 +154,24 @@ double loadTimeZeroFromNexusFile(const NeXus::NXEntry &entry) {
   }
 }
 
+std::vector<double> loadTimeZeroListFromNexusFile(const NeXus::NXEntry &entry,
+                                                  size_t numSpectra) {
+  NXClass det_class = entry.openNXGroup(NeXusEntry::DETECTOR);
+
+  NXDouble timeZeroClass = det_class.openNXDouble(NeXusEntry::TIMEZERO);
+  std::vector<double> timeZeroVector = timeZeroClass.vecBuffer();
+  if (timeZeroVector.size() == 0) {
+    double timeZero =
+        static_cast<double>(det_class.getFloat(NeXusEntry::TIMEZERO));
+    timeZeroVector = std::vector<double>(numSpectra, timeZero);
+  } else if (timeZeroVector.size() != numSpectra) {
+    throw std::runtime_error("Time zero list size does not match number of "
+                             "spectra, check Nexus file.");
+  }
+  // We assume that this spectrum list increases monotonically
+  return timeZeroVector;
+}
+
 std::vector<detid_t>
 getLoadedDetectors(const DataObjects::Workspace2D_sptr &localWorkspace) {
 
