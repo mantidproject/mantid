@@ -167,16 +167,13 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         ax.plot([0], [0])
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
-        
         # use mock manager to ensure all user properties are applied before view update
         mock_axes_presenter = presenter.tab_widget_presenters[1]
         mock_curves_presenter = presenter.tab_widget_presenters[2]
         mock_manager = Mock()
         mock_manager.attach_mock(mock_axes_presenter, "mock_axes_presenter")
         mock_manager.attach_mock(mock_curves_presenter, "mock_curves_presenter")
-        
         presenter.apply_properties()
-
         mock_manager.assert_has_calls([
             call.mock_curves_presenter.apply_properties,
             call.mock_axes_presenter.apply_properties,
