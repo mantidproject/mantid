@@ -217,20 +217,24 @@ class PhaseTablePresenterTest(unittest.TestCase):
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
     def test_that_disable_observer_calls_on_view_when_triggered(self):
+        self.view.setEnabled(True)
+        self.assertTrue(self.view.isEnabled())
+
         disable_notifier = GenericObservable()
         disable_notifier.add_subscriber(self.presenter.disable_tab_observer)
-        self.view.setEnabled = mock.MagicMock()
 
         disable_notifier.notify_subscribers()
-        self.view.setEnabled.assert_called_once_with(False)
+        self.assertFalse(self.view.isEnabled())
 
     def test_that_enable_observer_calls_on_view_when_triggered(self):
+        self.view.setEnabled(False)
+        self.assertFalse(self.view.isEnabled())
+
         enable_notifier = GenericObservable()
         enable_notifier.add_subscriber(self.presenter.enable_tab_observer)
-        self.view.setEnabled = mock.MagicMock()
 
         enable_notifier.notify_subscribers()
-        self.view.setEnabled.assert_called_once_with(True)
+        self.assertTrue(self.view.isEnabled())
 
 
 if __name__ == '__main__':

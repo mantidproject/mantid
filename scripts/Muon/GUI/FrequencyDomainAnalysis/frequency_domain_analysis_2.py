@@ -131,13 +131,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.disable_observer = GenericObserver(self.disable_notifier.notify_subscribers)
         self.enable_notifier = GenericObservable()
         self.enable_observer = GenericObserver(self.enable_notifier.notify_subscribers)
+        self.setup_disable_notifier()
+        self.setup_enable_notifier()
 
         self.setCentralWidget(central_widget)
         self.setWindowTitle(self.context.window_title)
-
-        self.setup_disable_notifier()
-
-        self.setup_enable_notifier()
 
         self.setup_load_observers()
 

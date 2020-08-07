@@ -75,9 +75,6 @@ class FittingTabPresenter(object):
         if self.selected_data:
             self.view.setEnabled(True)
 
-
-
-
     @property
     def selected_data(self):
         return self._selected_data
