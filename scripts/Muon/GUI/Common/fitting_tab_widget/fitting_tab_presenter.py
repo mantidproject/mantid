@@ -69,9 +69,7 @@ class FittingTabPresenter(object):
         self.view.setEnabled(False)
 
     def enable_view(self):
-        print("in enable")
         if self.selected_data:
-            print("In if enable")
             self.view.setEnabled(True)
 
     @property
