@@ -110,7 +110,7 @@ class QtSpinBoxFactoryReadOnlyPrivate;
 
 // Base QtSpinBoxFactory class
 template <class SpinBox>
-class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactoryBase
+class QtSpinBoxFactoryBase
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
 public:
   QtSpinBoxFactoryBase(QObject *parent = nullptr)
@@ -126,6 +126,57 @@ protected:
   friend class QtSpinBoxFactoryPrivateBase<SpinBox>;
   void initailiseQPtr() { d_ptr->q_ptr = this; }
 };
+/**
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+template <class SpinBox>
+void QtSpinBoxFactoryBase<SpinBox>::connectPropertyManager(
+    QtIntPropertyManager *manager) {
+  connect(manager, SIGNAL(valueChanged(QtProperty *, int)), this,
+          SLOT(slotPropertyChanged(QtProperty *, int)));
+  connect(manager, SIGNAL(rangeChanged(QtProperty *, int, int)), this,
+          SLOT(slotRangeChanged(QtProperty *, int, int)));
+  connect(manager, SIGNAL(singleStepChanged(QtProperty *, int)), this,
+          SLOT(slotSingleStepChanged(QtProperty *, int)));
+}
+
+/**
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+template <class SpinBox>
+QWidget *QtSpinBoxFactoryBase<SpinBox>::createEditorForManager(
+    QtIntPropertyManager *manager, QtProperty *property, QWidget *parent) {
+  auto *editor = d_ptr->createEditor(property, parent);
+  editor->setSingleStep(manager->singleStep(property));
+  editor->setRange(manager->minimum(property), manager->maximum(property));
+  editor->setValue(manager->value(property));
+  editor->setKeyboardTracking(false);
+
+  connect(editor, SIGNAL(valueChanged(int)), this, SLOT(slotSetValue(int)));
+  connect(editor, SIGNAL(destroyed(QObject *)), this,
+          SLOT(slotEditorDestroyed(QObject *)));
+  return editor;
+}
+
+/**
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+template <class SpinBox>
+void QtSpinBoxFactoryBase<SpinBox>::disconnectPropertyManager(
+    QtIntPropertyManager *manager) {
+  disconnect(manager, SIGNAL(valueChanged(QtProperty *, int)), this,
+             SLOT(slotPropertyChanged(QtProperty *, int)));
+  disconnect(manager, SIGNAL(rangeChanged(QtProperty *, int, int)), this,
+             SLOT(slotRangeChanged(QtProperty *, int, int)));
+  disconnect(manager, SIGNAL(singleStepChanged(QtProperty *, int)), this,
+             SLOT(slotSingleStepChanged(QtProperty *, int)));
+}
 
 class QSpinBoxReadOnly : public QSpinBox {
   Q_OBJECT
@@ -555,7 +606,6 @@ public:
   using EditorList = QList<Editor *>;
   using PropertyToEditorListMap = QMap<QtProperty *, EditorList>;
   using EditorToPropertyMap = QMap<Editor *, QtProperty *>;
-  typedef Editor EditorType;
 
   Editor *createEditor(QtProperty *property, QWidget *parent);
   void initializeEditor(QtProperty *property, Editor *e);
@@ -823,6 +873,7 @@ public:
   // This q_ptr is public due to the base class QtSpinBoxFactoryBase needing
   // access to it.
   QtSpinBoxFactoryBase<SpinBox> *q_ptr;
+  using EditorFactoryPrivate<SpinBox>::m_editorToProperty;
   void slotPropertyChanged(QtProperty *property, int value);
   void slotRangeChanged(QtProperty *property, int min, int max);
   void slotSingleStepChanged(QtProperty *property, int step);
@@ -842,11 +893,11 @@ class QtSpinBoxFactoryReadOnlyPrivate
 template <class SpinBox>
 void QtSpinBoxFactoryPrivateBase<SpinBox>::slotPropertyChanged(
     QtProperty *property, int value) {
-  if (!m_createdEditors.contains(property))
+  if (!this->m_createdEditors.contains(property))
     return;
-  QListIterator<EditorType *> itEditor(m_createdEditors[property]);
+  QListIterator<SpinBox *> itEditor(this->m_createdEditors[property]);
   while (itEditor.hasNext()) {
-    QSpinBox *editor = itEditor.next();
+    auto *editor = itEditor.next();
     if (editor->value() != value) {
       editor->blockSignals(true);
       editor->setValue(value);
@@ -858,16 +909,16 @@ void QtSpinBoxFactoryPrivateBase<SpinBox>::slotPropertyChanged(
 template <class SpinBox>
 void QtSpinBoxFactoryPrivateBase<SpinBox>::slotRangeChanged(
     QtProperty *property, int min, int max) {
-  if (!m_createdEditors.contains(property))
+  if (!this->m_createdEditors.contains(property))
     return;
 
   QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
-  QListIterator<EditorType *> itEditor(m_createdEditors[property]);
+  QListIterator<SpinBox *> itEditor(this->m_createdEditors[property]);
   while (itEditor.hasNext()) {
-    QSpinBox *editor = itEditor.next();
+    auto *editor = itEditor.next();
     editor->blockSignals(true);
     editor->setRange(min, max);
     editor->setValue(manager->value(property));
@@ -878,11 +929,11 @@ void QtSpinBoxFactoryPrivateBase<SpinBox>::slotRangeChanged(
 template <class SpinBox>
 void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSingleStepChanged(
     QtProperty *property, int step) {
-  if (!m_createdEditors.contains(property))
+  if (!this->m_createdEditors.contains(property))
     return;
-  QListIterator<EditorType *> itEditor(m_createdEditors[property]);
+  QListIterator<SpinBox *> itEditor(this->m_createdEditors[property]);
   while (itEditor.hasNext()) {
-    QSpinBox *editor = itEditor.next();
+    auto *editor = itEditor.next();
     editor->blockSignals(true);
     editor->setSingleStep(step);
     editor->blockSignals(false);
@@ -892,10 +943,10 @@ void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSingleStepChanged(
 template <class SpinBox>
 void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSetValue(int value) {
   QObject *object = q_ptr->sender();
-  const QMap<EditorType *, QtProperty *>::ConstIterator ecend =
-      m_editorToProperty.constEnd();
-  for (QMap<EditorType *, QtProperty *>::ConstIterator itEditor =
-           m_editorToProperty.constBegin();
+  typename QMap<SpinBox *, QtProperty *>::ConstIterator ecend =
+      this->m_editorToProperty.constEnd();
+  for (typename QMap<SpinBox *, QtProperty *>::ConstIterator itEditor =
+           this->m_editorToProperty.constBegin();
        itEditor != ecend; ++itEditor) {
     if (itEditor.key() == object) {
       QtProperty *property = itEditor.value();

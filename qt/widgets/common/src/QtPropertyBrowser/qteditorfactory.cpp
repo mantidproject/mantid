@@ -175,58 +175,6 @@ QtSpinBoxFactoryReadOnly::~QtSpinBoxFactoryReadOnly() {
   delete d_ptr;
 }
 
-/**
-    \internal
-
-    Reimplemented from the QtAbstractEditorFactory class.
-*/
-template <class SpinBox>
-void QtSpinBoxFactoryBase<SpinBox>::connectPropertyManager(
-    QtIntPropertyManager *manager) {
-  connect(manager, SIGNAL(valueChanged(QtProperty *, int)), this,
-          SLOT(slotPropertyChanged(QtProperty *, int)));
-  connect(manager, SIGNAL(rangeChanged(QtProperty *, int, int)), this,
-          SLOT(slotRangeChanged(QtProperty *, int, int)));
-  connect(manager, SIGNAL(singleStepChanged(QtProperty *, int)), this,
-          SLOT(slotSingleStepChanged(QtProperty *, int)));
-}
-
-/**
-    \internal
-
-    Reimplemented from the QtAbstractEditorFactory class.
-*/
-template <class SpinBox>
-QWidget *QtSpinBoxFactoryBase<SpinBox>::createEditorForManager(
-    QtIntPropertyManager *manager, QtProperty *property, QWidget *parent) {
-  auto *editor = d_ptr->createEditor(property, parent);
-  editor->setSingleStep(manager->singleStep(property));
-  editor->setRange(manager->minimum(property), manager->maximum(property));
-  editor->setValue(manager->value(property));
-  editor->setKeyboardTracking(false);
-
-  connect(editor, SIGNAL(valueChanged(int)), this, SLOT(slotSetValue(int)));
-  connect(editor, SIGNAL(destroyed(QObject *)), this,
-          SLOT(slotEditorDestroyed(QObject *)));
-  return editor;
-}
-
-/**
-    \internal
-
-    Reimplemented from the QtAbstractEditorFactory class.
-*/
-template <class SpinBox>
-void QtSpinBoxFactoryBase<SpinBox>::disconnectPropertyManager(
-    QtIntPropertyManager *manager) {
-  disconnect(manager, SIGNAL(valueChanged(QtProperty *, int)), this,
-             SLOT(slotPropertyChanged(QtProperty *, int)));
-  disconnect(manager, SIGNAL(rangeChanged(QtProperty *, int, int)), this,
-             SLOT(slotRangeChanged(QtProperty *, int, int)));
-  disconnect(manager, SIGNAL(singleStepChanged(QtProperty *, int)), this,
-             SLOT(slotSingleStepChanged(QtProperty *, int)));
-}
-
 // QtSliderFactory
 
 void QtSliderFactoryPrivate::slotPropertyChanged(QtProperty *property,
