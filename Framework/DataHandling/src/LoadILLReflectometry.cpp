@@ -36,13 +36,6 @@ constexpr double DH1Z{1.135}; // Motor DH1 horizontal position
 constexpr double DH2Z{2.077}; // Motor DH2 horizontal position
 } // namespace FIGARO
 
-/// A struct for information needed for detector angle calibration.
-struct PeakInfo {
-  double detectorAngle;
-  double detectorDistance;
-  double peakCentre;
-};
-
 /// Convert wavelength to TOF
 double wavelengthToTOF(const double lambda, const double l1, const double l2) {
   return Mantid::Kernel::UnitConversion::run(
