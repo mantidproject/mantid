@@ -72,7 +72,7 @@ def _setLabels1D(axes,
     '''
     labels = get_axes_labels(workspace, indices, normalize_by_bin_width)
     # We assume that previous checking has ensured axis can only be 1 of 2 types
-    axes.set_xlabel(labels[1 if axis == MantidAxType.SPECTRUM else 2])
+    axes.set_xlabel(labels[2 if axis == MantidAxType.BIN else 1])
     axes.set_ylabel(labels[0])
 
 
