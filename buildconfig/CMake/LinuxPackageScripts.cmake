@@ -153,7 +153,7 @@ if [ -n \"\${NXSESSIONID}\" ]; then  # running in nx
   VGLRUN=\"vglrun\"
 elif [ -n \"\${TLSESSIONDATA}\" ]; then  # running in thin-linc
   command -v vglrun >/dev/null 2>&1 || { echo >&2 \"MantidPlot requires VirtualGL but it's not installed.  Aborting.\"; exit 1; }
-  if [ command -v vgl-wrapper.sh ]; then
+  if [ \$(command -v vgl-wrapper.sh) ]; then
     VGLRUN=\"vgl-wrapper.sh\"
   else
     VGLRUN=\"vglrun\"
