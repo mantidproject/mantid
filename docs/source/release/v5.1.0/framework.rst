@@ -47,7 +47,7 @@ Algorithms
   and :ref:`MaskInstrument <algm-MaskInstrument>` is now deprecated and you should use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
 - Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
 - Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
-
+- Deprecated the RecordPythonScript algorithm
 
 Data Handling
 -------------
