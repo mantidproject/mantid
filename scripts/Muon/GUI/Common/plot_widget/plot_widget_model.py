@@ -146,7 +146,7 @@ class PlotWidgetModel(object):
         return indices
 
     @staticmethod
-    def get_fit_workspace_and_indices(fit):
+    def get_fit_workspace_and_indices(fit,plot_diff):
         if fit is None:
             return [], []
         workspaces = []
@@ -159,7 +159,8 @@ class PlotWidgetModel(object):
 
             workspaces.append(workspace_name)
             indices.append(first_fit_index)
-            workspaces.append(workspace_name)
-            indices.append(second_fit_index)
+            if plot_diff :
+                workspaces.append(workspace_name)
+                indices.append(second_fit_index)
 
         return workspaces, indices
