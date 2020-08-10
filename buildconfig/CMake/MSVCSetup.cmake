@@ -121,6 +121,13 @@ else()
   set(MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/Common7/IDE")
 endif()
 
+# Setup debugger environment to launch in VS without setting paths
+set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
+set(MSVC_IDE_ENV "\
+PYTHONPATH=${MSVC_BIN_DIR}\n\
+PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\n\
+PATH=${THIRD_PARTY_DIR}/bin$<SEMICOLON>${THIRD_PARTY_DIR}/lib/qt5/bin$<SEMICOLON>%PATH%")
+
 configure_file(
   ${WINDOWS_BUILDCONFIG}/command-prompt.bat.in
   ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY
@@ -157,8 +164,6 @@ else()
   set(PARAVIEW_PYTHON_PATHS "")
 endif()
 
-set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
-
 configure_file(
   ${PACKAGING_DIR}/mantidpython.bat.in
   ${PROJECT_BINARY_DIR}/mantidpython.bat.in @ONLY
@@ -172,13 +177,6 @@ file(
 # install version
 set(MANTIDPYTHON_PREAMBLE
     "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%"
-)
-
-#  Semi-colon gen exp prevents future generators converting to CMake lists
-set ( MSVC_IDE_ENV "PYTHONPATH=${MSVC_BIN_DIR}$<SEMICOLON>PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}" )
-# Semi-colon gen exp prevents future generators converting to CMake lists
-set(MSVC_IDE_ENV
-    "PYTHONPATH=${MSVC_BIN_DIR}$<SEMICOLON>PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}"
 )
 
 if(MAKE_VATES)
