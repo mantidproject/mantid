@@ -345,5 +345,4 @@ public:
     linearDetectorRotationWithFacingAndLinePosition(m_d17WS, twoTheta, linePos,
                                                     pixelSize);
   }
-
 };
