@@ -707,7 +707,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         ReflectometryILLPreprocess(**preprocess_args)
         self.log().accumulate('Angle method: {0}\n'.format(angle_option))
 
-
     def sum_foreground(self, inputWorkspaceName, outputWorkspaceName, sumType, angle_index, directForegroundName = ''):
         """Run the ReflectometryILLSumForeground, empty directForegroundName decides, if reflected beam is present."""
         wavelengthRange = [float(self.get_value(PropertyNames.WAVELENGTH_LOWER, angle_index)),
@@ -857,5 +856,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.setProperty(Prop.OUTPUT_WS, self._outWS)
         self._autoCleanup.finalCleanup()
         self.log().flushNotice()
+
 
 AlgorithmFactory.subscribe(ReflectometryILLAutoProcess)

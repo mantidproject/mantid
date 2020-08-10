@@ -589,4 +589,5 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return calibratedWS
 
+
 AlgorithmFactory.subscribe(ReflectometryILLPreprocess)
