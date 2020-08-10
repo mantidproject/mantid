@@ -40,7 +40,7 @@ private:
   double m_detPosY{5.0};
   // Sample workspace with a monitor and a single detector
   MatrixWorkspace_sptr m_singleDetectorWS;
-  // Sample workspace with a monitor and 3 detectors. The detectors are of size
+  // Sample workspace with a monitor and 5 detectors. The detectors are of size
   // m_detSize and the middle one is centred on m_detPosY
   MatrixWorkspace_sptr m_multiDetectorWS;
   // Sample transmission workspace with same detectors as m_multiDetectorWS
@@ -62,24 +62,32 @@ public:
     m_singleDetectorWS = create2DWorkspaceWithReflectometryInstrument(0);
     // A multi detector ws
     m_multiDetectorWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, m_detSize);
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+            0, m_detSize, V3D(0, 0, 0), V3D(0, 0, 1), 0.5, 1.0, V3D(0, 0, 0),
+            V3D(14, 0, 0), V3D(15, 0, 0), V3D(20, 5, 0), 6);
     m_multiDetectorWS->mutableRun().addProperty<std::string>("run_number",
                                                              "1234");
     // A transmission ws with different spectrum numbers to the run
     m_transmissionWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, m_detSize);
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+            0, m_detSize, V3D(0, 0, 0), V3D(0, 0, 1), 0.5, 1.0, V3D(0, 0, 0),
+            V3D(14, 0, 0), V3D(15, 0, 0), V3D(20, 5, 0), 6);
     m_transmissionWS->mutableRun().addProperty<std::string>("run_number",
                                                             "4321");
     m_transmissionWS->getSpectrum(0).setSpectrumNo(2);
     m_transmissionWS->getSpectrum(1).setSpectrumNo(3);
     m_transmissionWS->getSpectrum(2).setSpectrumNo(4);
     m_transmissionWS->getSpectrum(3).setSpectrumNo(5);
+    m_transmissionWS->getSpectrum(4).setSpectrumNo(6);
+    m_transmissionWS->getSpectrum(5).setSpectrumNo(7);
     // Set different values in each spectrum so that we can check the correct
     // spectra were used for the transmission correction
     m_transmissionWS->setCounts(0, Counts(m_transmissionWS->y(0).size(), 10));
     m_transmissionWS->setCounts(1, Counts(m_transmissionWS->y(1).size(), 20));
-    m_transmissionWS->setCounts(2, Counts(m_transmissionWS->y(2).size(), 30));
-    m_transmissionWS->setCounts(3, Counts(m_transmissionWS->y(3).size(), 40));
+    m_transmissionWS->setCounts(2, Counts(m_transmissionWS->y(2).size(), 20));
+    m_transmissionWS->setCounts(3, Counts(m_transmissionWS->y(3).size(), 30));
+    m_transmissionWS->setCounts(4, Counts(m_transmissionWS->y(3).size(), 40));
+    m_transmissionWS->setCounts(5, Counts(m_transmissionWS->y(3).size(), 40));
   }
 
   void test_IvsLam() {
@@ -88,7 +96,7 @@ public:
     // No direct beam normalization
     // No transmission correction
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
@@ -97,15 +105,15 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.0000, 0.0001);
   }
 
-  void test_IvsLam_processing_instructions_1to2() {
+  void test_IvsLam_processing_instructions_3to4() {
     // Test IvsLam workspace
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
-    // Processing instructions : 2+3
+    // Processing instructions : 3+4
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2+3");
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
@@ -115,15 +123,15 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 4.0000, 0.0001);
   }
 
-  void test_IvsLam_processing_instructions_1to3() {
+  void test_IvsLam_processing_instructions_3to5() {
     // Test IvsLam workspace
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
-    // Processing instructions : 2-4 spectra is (1-3 workspace indices)
+    // Processing instructions : 3-5 spectra is (2-4 workspace indices)
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2-4");
+    setupAlgorithm(alg, 1.5, 15.0, "3-5");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
@@ -138,10 +146,10 @@ public:
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
-    // Processing instructions : 3,2+4 (two separate groups)
+    // Processing instructions : 4,3+5 (two separate groups)
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3,2+4");
+    setupAlgorithm(alg, 1.5, 15.0, "4,3+5");
     // Run the algorithm. There should be 2 output histograms, one for each
     // input group. Note that the group order is swapped from the input order
     // because they are sorted by the first spectrum number in the group,
@@ -160,10 +168,10 @@ public:
   }
 
   void test_bad_processing_instructions() {
-    // Processing instructions : 6+7
+    // Processing instructions : 7+8
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "6+7");
+    setupAlgorithm(alg, 1.5, 15.0, "7+8");
     // Must throw as spectrum 2 is not defined
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -176,7 +184,7 @@ public:
     // SummationType : SumInLambda (same as default)
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInLambda");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -195,7 +203,7 @@ public:
     // ReductionType : DivergentBeam (invalid)
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInLambda");
     alg.setProperty("ReductionType", "DivergentBeam");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
@@ -213,7 +221,7 @@ public:
     // MonitorBackgroundWavelengthMax : Not given
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("I0MonitorIndex", "0");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -245,7 +253,7 @@ public:
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "3", inputWS, false);
+    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "4", inputWS, false);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
 
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
@@ -275,7 +283,7 @@ public:
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "2", inputWS, true);
+    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "3", inputWS, true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 16);
 
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
@@ -289,7 +297,7 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
                                          false);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -302,7 +310,7 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
                                          true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -312,12 +320,12 @@ public:
   }
 
   void test_transmission_correction_with_mapped_spectra() {
-    // Run workspace spectrum numbers are 1,2,3,4.
-    // Transmission workspace has spectrum numbers 2,3,4,5.
-    // Processing instructions 3-4 in the run workspace map to
-    // spectra 3-4.
+    // Run workspace spectrum numbers are 1,2,3,4,5,6.
+    // Transmission workspace has spectrum numbers 2,3,4,5,6,7.
+    // Spectra with numbers 4-5 exist in both the run and transmission
+    // workspaces.
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4",
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5",
                                          m_transmissionWS, true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -326,10 +334,9 @@ public:
   }
 
   void test_transmission_correction_with_bad_mapped_spectra() {
-    // Run workspace spectrum numbers are 1,2,3,4.
-    // Transmission workspace has spectrum numbers 2,3,4,5.
-    // Processing instructions 1 in the run workspace maps to
-    // spectrum 1, which doesn't exist in the transmission
+    // Run workspace spectrum numbers are 1,2,3,4,5,6.
+    // Transmission workspace has spectrum numbers 2,3,4,5,6,7.
+    // Spectrum 1 exists in the run workspace but not in the transmission
     // workspace.
     ReflectometryReductionOne2 alg;
     setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1", m_transmissionWS,
@@ -339,9 +346,9 @@ public:
 
   void test_transmission_processing_instructions() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4",
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5",
                                          m_transmissionWS, false);
-    alg.setPropertyValue("TransmissionProcessingInstructions", "3-4");
+    alg.setPropertyValue("TransmissionProcessingInstructions", "4-5");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.0807, 0.0001);
@@ -350,7 +357,7 @@ public:
 
   void test_transmission_processing_instructions_with_bad_instructions() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1-2",
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2-3",
                                          m_transmissionWS, false);
     alg.setPropertyValue("TransmissionProcessingInstructions", "1");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
@@ -358,9 +365,9 @@ public:
 
   void test_transmission_processing_instructions_that_are_different() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4",
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5",
                                          m_transmissionWS, false);
-    alg.setPropertyValue("TransmissionProcessingInstructions", "3");
+    alg.setPropertyValue("TransmissionProcessingInstructions", "4");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.2029, 0.0001);
@@ -369,9 +376,9 @@ public:
 
   void test_transmission_processing_instructions_two_runs() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_transmissionWS,
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4", m_transmissionWS,
                                          true);
-    alg.setPropertyValue("TransmissionProcessingInstructions", "3");
+    alg.setPropertyValue("TransmissionProcessingInstructions", "4");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.1009, 0.0001);
@@ -382,7 +389,7 @@ public:
     // CorrectionAlgorithm: ExponentialCorrection
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3");
+    setupAlgorithm(alg, 1.5, 15.0, "4");
     alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
     alg.setProperty("C0", 0.2);
     alg.setProperty("C1", 0.1);
@@ -396,7 +403,7 @@ public:
     // CorrectionAlgorithm: PolynomialCorrection
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3");
+    setupAlgorithm(alg, 1.5, 15.0, "4");
     alg.setProperty("CorrectionAlgorithm", "PolynomialCorrection");
     alg.setProperty("Polynomial", "0.1,0.3,0.5");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
@@ -413,7 +420,7 @@ public:
     // Processing instructions : 2
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3");
+    setupAlgorithm(alg, 1.5, 15.0, "4");
     MatrixWorkspace_sptr outQ = runAlgorithmQ(alg);
 
     // X range in outQ
@@ -432,7 +439,7 @@ public:
     // Processing instructions : 3,2+4 (two separate groups)
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3,2+4");
+    setupAlgorithm(alg, 1.5, 15.0, "4,3+5");
     // Run the algorithm. There should be 2 output histograms, one for each
     // input group. Note that the group order is swapped from the input order
     // because they are sorted by the first spectrum number in the group,
@@ -460,7 +467,7 @@ public:
     // ReductionType : not set (invalid)
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInQ");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -473,7 +480,7 @@ public:
     // SummationType : SumInQ
     // ReductionType : DivergentBeam
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
@@ -496,7 +503,7 @@ public:
     // ReductionType : NonFlatSample
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "NonFlatSample");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
@@ -530,7 +537,7 @@ public:
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "3", inputWS, false);
+    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "4", inputWS, false);
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
@@ -548,7 +555,7 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
                                          false);
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
@@ -567,7 +574,7 @@ public:
     // CorrectionAlgorithm: ExponentialCorrection
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3");
+    setupAlgorithm(alg, 1.5, 15.0, "4");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
@@ -592,7 +599,7 @@ public:
     // Processing instructions : 3
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3");
+    setupAlgorithm(alg, 1.5, 15.0, "4");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
@@ -636,7 +643,7 @@ public:
   void test_sum_in_q_exclude_partial_bins() {
     // Sum in Q, single detector
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
@@ -654,7 +661,7 @@ public:
   void test_sum_in_q_exclude_partial_bins_multiple_detectors() {
     // Sum in Q, multiple detectors in group
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2-4");
+    setupAlgorithm(alg, 1.5, 15.0, "3-5");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
@@ -671,7 +678,7 @@ public:
 
   void test_angle_correction_is_done_for_sum_in_lambda_when_theta_provided() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2+3");
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
 
     double const thetaIn = 22.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
@@ -684,15 +691,15 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     checkAngleCorrection(outLam, outQ, thetaIn);
-    checkDetector2And3SummedInLambda(outLam, outQ);
+    checkDetector3And4SummedInLambda(outLam, outQ);
   }
 
   void
   test_angle_correction_is_not_done_for_sum_in_lambda_when_theta_not_provided() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2+3");
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
 
-    double const detectorTheta = twoThetaForDetector2And3() / 2.0;
+    double const detectorTheta = twoThetaForDetector3And4() / 2.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
@@ -702,15 +709,15 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     checkAngleCorrection(outLam, outQ, detectorTheta);
-    checkDetector2And3SummedInLambda(outLam, outQ);
+    checkDetector3And4SummedInLambda(outLam, outQ);
   }
 
   void
   test_angle_correction_not_done_for_single_detector_when_theta_provided() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3");
+    setupAlgorithm(alg, 1.5, 15.0, "4");
 
-    double const detectorTheta = twoThetaForDetector3() / 2.0;
+    double const detectorTheta = twoThetaForDetector4() / 2.0;
     double const thetaIn = 22.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
@@ -722,15 +729,15 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     checkAngleCorrection(outLam, outQ, detectorTheta);
-    checkDetector3SummedInLambda(outLam, outQ);
+    checkDetector4SummedInLambda(outLam, outQ);
   }
 
   void
   test_angle_correction_not_done_for_single_detector_when_theta_not_provided() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3");
+    setupAlgorithm(alg, 1.5, 15.0, "4");
 
-    double const detectorTheta = twoThetaForDetector3() / 2.0;
+    double const detectorTheta = twoThetaForDetector4() / 2.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
@@ -740,21 +747,45 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     checkAngleCorrection(outLam, outQ, detectorTheta);
-    checkDetector3SummedInLambda(outLam, outQ);
+    checkDetector4SummedInLambda(outLam, outQ);
   }
 
   void
   test_requesting_angle_correction_for_sum_in_lambda_throws_for_multiple_groups() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2+3, 4");
+    setupAlgorithm(alg, 1.5, 15.0, "3+4, 5");
     alg.setProperty("ThetaIn", 22.0);
     TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_angle_correction_is_not_done_for_sum_in_q_for_single_detector() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3");
+    setupAlgorithm(alg, 1.5, 15.0, "4");
 
+    double const detectorTheta = twoThetaForDetector4() / 2.0;
+    double const thetaIn = 22.0;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("ThetaIn", thetaIn);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.execute();
+
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    checkAngleCorrection(outLam, outQ, detectorTheta);
+    checkDetector4SummedInQ(outLam, outQ);
+  }
+
+  void test_angle_correction_is_not_done_for_sum_in_q_for_multiple_detectors() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
+
+    // The reference angle when summing in Q is taken from the centre of the
+    // ROI. If we have an even number of pixels it clips the the lower value,
+    // i.e. detector 3 here
     double const detectorTheta = twoThetaForDetector3() / 2.0;
     double const thetaIn = 22.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
@@ -769,38 +800,14 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     checkAngleCorrection(outLam, outQ, detectorTheta);
-    checkDetector3SummedInQ(outLam, outQ);
-  }
-
-  void test_angle_correction_is_not_done_for_sum_in_q_for_multiple_detectors() {
-    ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2+3");
-
-    // The reference angle when summing in Q is taken from the centre of the
-    // ROI. If we have an even number of pixels it clips the the lower value,
-    // i.e. detector 2 here
-    double const detectorTheta = twoThetaForDetector2() / 2.0;
-    double const thetaIn = 22.0;
-    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    setYValuesToWorkspace(*inputWS);
-
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("ThetaIn", thetaIn);
-    alg.setProperty("SummationType", "SumInQ");
-    alg.setProperty("ReductionType", "DivergentBeam");
-    alg.execute();
-
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
-    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
-    checkAngleCorrection(outLam, outQ, detectorTheta);
-    checkDetector2And3SummedInQ(outLam, outQ);
+    checkDetector3And4SummedInQ(outLam, outQ);
   }
 
   void test_angle_correction_is_not_done_for_sum_in_q_for_multiple_groups() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2+3, 3");
+    setupAlgorithm(alg, 1.5, 15.0, "3+4, 4");
 
-    double const detectorTheta = twoThetaForDetector2() / 2.0;
+    double const detectorTheta = twoThetaForDetector3() / 2.0;
     double const thetaIn = 22.0;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
@@ -817,10 +824,10 @@ public:
 
     // The output workspace has two spectra, containing the results for each
     // group. Note that the cropping in wavelength is done based on all groups
-    // so the results for detector 3 here are slightly different to other tests
+    // so the results for detector 4 here are slightly different to other tests
     // that process this detector in a solo group
-    checkDetector2And3SummedInQ(outLam, outQ);
-    checkDetector3SummedInQCroppedToDetector2And3(outLam, outQ, 1);
+    checkDetector3And4SummedInQ(outLam, outQ);
+    checkDetector4SummedInQCroppedToDetector3And4(outLam, outQ, 1);
   }
 
   void test_outputs_when_debug_is_false_and_IvsLam_name_not_set() {
@@ -830,7 +837,7 @@ public:
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("Debug", false);
-    alg.setPropertyValue("ProcessingInstructions", "2+3");
+    alg.setPropertyValue("ProcessingInstructions", "3+4");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.execute();
 
@@ -852,7 +859,7 @@ public:
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("Debug", false);
-    alg.setPropertyValue("ProcessingInstructions", "2+3");
+    alg.setPropertyValue("ProcessingInstructions", "3+4");
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
@@ -873,7 +880,7 @@ public:
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("Debug", true);
-    alg.setPropertyValue("ProcessingInstructions", "2+3");
+    alg.setPropertyValue("ProcessingInstructions", "3+4");
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
@@ -891,7 +898,7 @@ public:
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("Debug", true);
-    alg.setPropertyValue("ProcessingInstructions", "2+3");
+    alg.setPropertyValue("ProcessingInstructions", "3+4");
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_1234"));
@@ -902,7 +909,7 @@ public:
 
   void test_transmission_output_is_stored_when_one_transmission_input() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
                                          false);
     runAlgorithmLam(alg);
 
@@ -914,7 +921,7 @@ public:
 
   void test_transmission_output_is_stored_when_two_transmission_inputs() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
                                          true);
     runAlgorithmLam(alg);
 
@@ -935,7 +942,7 @@ public:
     setupAlgorithmForBackgroundSubtraction(
         alg, createWorkspaceWithFlatBackground("test_ws"));
     alg.setProperty("SubtractBackground", false);
-    alg.setProperty("BackgroundProcessingInstructions", "1");
+    alg.setProperty("BackgroundProcessingInstructions", "2");
     alg.setProperty("BackgroundCalculationMethod", "PerDetectorAverage");
     alg.execute();
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
@@ -970,6 +977,9 @@ public:
     alg.setProperty("BackgroundProcessingInstructions", "1, 2, 4, 5");
     alg.setProperty("BackgroundCalculationMethod", "PerDetectorAverage");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    if (!alg.isExecuted())
+      return;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS, {"ExtractSpectra",
@@ -986,7 +996,7 @@ public:
     ReflectometryReductionOne2 alg;
     setupAlgorithmForBackgroundSubtraction(
         alg, createWorkspaceWithPolynomialBackground("test_ws"));
-    alg.setProperty("BackgroundProcessingInstructions", "1-4, 6-8");
+    alg.setProperty("BackgroundProcessingInstructions", "2-5, 7-9");
     alg.setProperty("BackgroundCalculationMethod", "Polynomial");
     alg.setProperty("DegreeOfPolynomial", "2");
     alg.execute();
@@ -998,7 +1008,7 @@ public:
                                      "CropWorkspace", "ConvertUnits"});
     checkHistoryAlgorithmProperties(
         outputWS, 1, 1,
-        {{"ProcessingInstructions", "1-4,6-8"},
+        {{"ProcessingInstructions", "2-5,7-9"},
          {"BackgroundCalculationMethod", "Polynomial"},
          {"DegreeOfPolynomial", "2"}});
   }
@@ -1060,7 +1070,7 @@ private:
   void
   setupAlgorithmForBackgroundSubtraction(ReflectometryReductionOne2 &alg,
                                          const MatrixWorkspace_sptr &inputWS) {
-    setupAlgorithm(alg, 0, 5, "3");
+    setupAlgorithm(alg, 0, 5, "4");
     alg.setChild(false); // required to get history
     alg.setProperty("InputWorkspace", inputWS);
     alg.setProperty("ThetaIn", 0.5);
@@ -1099,8 +1109,9 @@ private:
   void setYValuesToWorkspace(MatrixWorkspace &ws) {
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       auto &y = ws.mutableY(i);
+      auto const iVal = i > 0 ? i - 1 : 0;
       for (size_t j = 0; j < y.size(); ++j) {
-        y[j] += double(j + 1) * double(i + 1);
+        y[j] += double(j + 1) * double(iVal + 1);
       }
     }
   }
@@ -1166,24 +1177,24 @@ private:
     return ws;
   }
 
-  // Get twoTheta for detector 3 in m_multiDetectorWS, in degrees
-  double twoThetaForDetector3() {
-    // Detector 3 is the centre pixel at m_detPosY
+  // Get twoTheta for detector 4 in m_multiDetectorWS, in degrees
+  double twoThetaForDetector4() {
+    // Detector 4 is the centre pixel at m_detPosY
     return std::atan(m_detPosY / m_detPosX) * radToDeg;
   }
 
-  // Get twoTheta for detector 2 in m_multiDetectorWS, in degrees
-  double twoThetaForDetector2() {
+  // Get twoTheta for detector 3 in m_multiDetectorWS, in degrees
+  double twoThetaForDetector3() {
     // One below the centre pixel
     return std::atan((m_detPosY - m_detSize) / m_detPosX) * radToDeg;
   }
 
-  // Get the average of the twoTheta's of detectors 2 and 3 for
+  // Get the average of the twoTheta's of detectors 3 and 4 for
   // m_multiDetectorWS, in degrees. This is the same as the twoTheta that
   // DetectorInfo will return if these detectors are grouped/summed into a
   // single spectrum.
-  double twoThetaForDetector2And3() {
-    return (twoThetaForDetector3() + twoThetaForDetector2()) / 2.0;
+  double twoThetaForDetector3And4() {
+    return (twoThetaForDetector4() + twoThetaForDetector3()) / 2.0;
   }
 
   void checkWorkspaceHistory(const MatrixWorkspace_sptr &ws,
@@ -1236,7 +1247,7 @@ private:
     }
   }
 
-  void checkDetector2And3SummedInLambda(MatrixWorkspace_sptr outLam,
+  void checkDetector3And4SummedInLambda(MatrixWorkspace_sptr outLam,
                                         MatrixWorkspace_sptr outQ,
                                         int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
@@ -1252,7 +1263,7 @@ private:
     TS_ASSERT_DELTA(qY[13], 19, 1e-2);
   }
 
-  void checkDetector3SummedInLambda(MatrixWorkspace_sptr outLam,
+  void checkDetector4SummedInLambda(MatrixWorkspace_sptr outLam,
                                     MatrixWorkspace_sptr outQ,
                                     int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
@@ -1268,7 +1279,7 @@ private:
     TS_ASSERT_DELTA(qY[13], 11, 1e-2);
   }
 
-  void checkDetector3SummedInQ(MatrixWorkspace_sptr outLam,
+  void checkDetector4SummedInQ(MatrixWorkspace_sptr outLam,
                                MatrixWorkspace_sptr outQ, int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
     TS_ASSERT_EQUALS(lamY.size(), 10);
@@ -1284,7 +1295,7 @@ private:
   }
 
   void
-  checkDetector3SummedInQCroppedToDetector2And3(MatrixWorkspace_sptr outLam,
+  checkDetector4SummedInQCroppedToDetector3And4(MatrixWorkspace_sptr outLam,
                                                 MatrixWorkspace_sptr outQ,
                                                 int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
@@ -1300,7 +1311,7 @@ private:
     TS_ASSERT_DELTA(qY[9], 13.9066291140, 1e-6);
   }
 
-  void checkDetector2And3SummedInQ(MatrixWorkspace_sptr outLam,
+  void checkDetector3And4SummedInQ(MatrixWorkspace_sptr outLam,
                                    MatrixWorkspace_sptr outQ,
                                    int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
