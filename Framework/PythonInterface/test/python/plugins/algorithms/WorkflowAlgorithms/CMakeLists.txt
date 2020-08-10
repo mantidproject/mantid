@@ -47,8 +47,11 @@ set(TEST_PY_FILES
     PowderILLDetectorScanTest.py
     PowderILLParameterScanTest.py
     ReflectometryILLAutoProcessTest.py
-    ReflectometryILLPreprocessTest.py
     ReflectometryILL_commonTest.py
+    ReflectometryILLConvertToQTest.py
+    ReflectometryILLPolarizationCorTest.py
+    ReflectometryILLPreprocessTest.py
+    ReflectometryILLSumForegroundTest.py
     ReflectometryISISLoadAndProcessTest.py
     ResNorm2Test.py
     SANSDarkRunBackgroundCorrectionTest.py

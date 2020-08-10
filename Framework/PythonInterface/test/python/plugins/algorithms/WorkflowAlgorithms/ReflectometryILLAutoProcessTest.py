@@ -170,10 +170,10 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         self.assertEqual(algH.getPropertyValue(PropertyNames.SUM_TYPE), 'Incoherent')
         self.assertEqual(algH.getPropertyValue(PropertyNames.WAVELENGTH_LOWER), '0')
         self.assertEqual(algH.getPropertyValue(PropertyNames.WAVELENGTH_UPPER), '35')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.LOW_FRG_HALF_WIDTH), '0')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.HIGH_FRG_HALF_WIDTH), '0')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.LOW_FRG_HALF_WIDTH_DIRECT), '0')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.HIGH_FRG_HALF_WIDTH_DIRECT), '0')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.LOW_FRG_HALF_WIDTH), '1')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.HIGH_FRG_HALF_WIDTH), '1')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.LOW_FRG_HALF_WIDTH_DIRECT), '1')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.HIGH_FRG_HALF_WIDTH_DIRECT), '1')
 
     def checkOutput(self, ws_group, n_ws):
         self.assertTrue(isinstance(ws_group, WorkspaceGroup))

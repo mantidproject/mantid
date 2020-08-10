@@ -1,0 +1,64 @@
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
+from testhelpers import (assertRaisesNothing, create_algorithm)
+from mantid.simpleapi import ReflectometryILLPreprocess, ReflectometryILLSumForeground, mtd
+import unittest
+
+
+class ReflectometryILLSumForegroundTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        ReflectometryILLPreprocess(Run = 'ILL/D17/317369.nxs',
+                                   Measurement='DirectBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='db')
+        ReflectometryILLPreprocess(Run='ILL/D17/317370.nxs',
+                                   Measurement='ReflectedBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='rb')
+        ReflectometryILLPreprocess(Run='ILL/Figaro/000002.nxs',
+                                   Measurement='DirectBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='fig_db')
+
+    @classmethod
+    def tearDownClass(cls):
+        mtd.clear()
+
+    def testSumInLambdaD17(self):
+        # first the direct beam
+        ReflectometryILLSumForeground(InputWorkspace='db',
+                                      OutputWorkspace='db_frg')
+
+        # then the reflected beam
+        ReflectometryILLSumForeground(InputWorkspace='rb',
+                                      OutputWorkspace='rb_frg',
+                                      SummationType='SumInLambda',
+                                      DirectLineWorkspace='db',
+                                      DirectForegroundWorkspace='db_frg')
+
+    def testSumInQD17(self):
+        # first the direct beam
+        ReflectometryILLSumForeground(InputWorkspace='db',
+                                      OutputWorkspace='db_frg')
+
+        # then the reflected beam
+        ReflectometryILLSumForeground(InputWorkspace='rb',
+                                      OutputWorkspace='rb_inq_frg',
+                                      SummationType='SumInQ',
+                                      DirectLineWorkspace='db',
+                                      DirectForegroundWorkspace='db_frg')
+
+    def testDirectBeamFigaro(self):
+        # the direct beam
+        ReflectometryILLSumForeground(InputWorkspace='fig_db',
+                                      OutputWorkspace='fig_db_frg')
+
+if __name__ == "__main__":
+    unittest.main()

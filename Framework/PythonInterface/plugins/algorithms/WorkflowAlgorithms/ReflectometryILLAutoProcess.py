@@ -361,7 +361,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.LOW_FRG_HALF_WIDTH_DIRECT,
-                values=[0],
+                values=[1],
                 validator=nonnegativeInts
             ),
             doc='Number of foreground pixels at lower angles from the centre pixel.'
@@ -390,7 +390,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.HIGH_FRG_HALF_WIDTH_DIRECT,
-                values=[0],
+                values=[1],
                 validator=nonnegativeInts
             ),
             doc='Number of foreground pixels at higher angles from the centre pixel.'
@@ -453,7 +453,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.LOW_FRG_HALF_WIDTH,
-                values=[0],
+                values=[1],
                 validator=nonnegativeInts,
             ),
             doc='Number of foreground pixels at lower angles from the centre pixel.'
@@ -482,7 +482,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.HIGH_FRG_HALF_WIDTH,
-                values=[0],
+                values=[1],
                 validator=nonnegativeInts,
             ),
             doc='Number of foreground pixels at higher angles from the centre pixel.'
