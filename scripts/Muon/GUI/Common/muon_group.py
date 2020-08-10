@@ -22,6 +22,7 @@ class MuonGroup(object):
 
         self._group_name = group_name
         self._detector_ids = None
+        self._periods = [1]
         self.detectors = detector_ids
         self._counts_workspace = {}
         self._asymmetry_estimate = {}
@@ -71,6 +72,14 @@ class MuonGroup(object):
                 raise AttributeError("MuonGroup : detectors must be a list of ints.")
         else:
             raise ValueError("detectors must be a list of ints.")
+
+    @property
+    def periods(self):
+        return self._periods
+
+    @periods.setter
+    def periods(self, value):
+        self._periods = value
 
     def show_raw(self, run, name, asym_name, asym_name_unnorm):
         str(run) not in self._counts_workspace or self._counts_workspace[str(run)].show(name)

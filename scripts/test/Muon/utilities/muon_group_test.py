@@ -176,6 +176,11 @@ class MuonGroupTest(unittest.TestCase):
 
         self.assertEqual(rebinned_workspace_name, None)
 
+    def test_that_default_period_for_group_set_correctly(self):
+        group = MuonGroup(group_name="group1")
+
+        self.assertEqual(group.periods, [1])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
