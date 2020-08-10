@@ -235,10 +235,9 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   if (m_Historytree) {
     QStringList headers;
     headers << "Algorithms"
-            << "Unroll"
-            << "Unroll All";
+            << "Unroll";
 
-    m_Historytree->setColumnCount(3);
+    m_Historytree->setColumnCount(2);
     m_Historytree->setColumnWidth(0, 180);
     m_Historytree->setColumnWidth(1, 55);
     m_Historytree->setHeaderLabels(headers);
@@ -305,16 +304,15 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   buttonLayout->addWidget(m_scriptButtonFile);
   buttonLayout->addWidget(m_scriptButtonClipboard);
 
-  // Unroll all checkbox added in column 3 of top item
-  m_unrollAllHistoryCheckbox = new QCheckBox("", this);
+  // Unroll all checkbox below tree layout
+  m_unrollAllHistoryCheckbox = new QCheckBox("Unroll All Algorithms", this);
   connect(m_unrollAllHistoryCheckbox, SIGNAL(stateChanged(int)), this,
           SLOT(unrollAll(int)));
-  auto top = m_Historytree->topLevelItem(0);
-  m_Historytree->setItemWidget(top, 2, m_unrollAllHistoryCheckbox);
 
   // Main layout
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   mainLayout->addLayout(treeLayout);
+  mainLayout->addWidget(m_unrollAllHistoryCheckbox);
   mainLayout->addLayout(environmentLayout);
   mainLayout->addLayout(buttonLayout);
 }
@@ -518,12 +516,9 @@ void AlgorithmHistoryWindow::doUnroll(const std::vector<int> &unrollIndicies) {
 void AlgorithmHistoryWindow::doRoll(int index) { m_view->roll(index); }
 
 void AlgorithmHistoryWindow::unrollAll(int state) {
-  // Iterate all items in tree which have children algorithms to be unrolled
+  // Iterate all items in tree which have child algorithms to be unrolled
   QTreeWidgetItemIterator it(m_Historytree,
                              QTreeWidgetItemIterator::HasChildren);
-
-  auto head = m_Historytree->headerItem();
-  std::cout << head->text(0).toStdString() << std::endl;
   while (*it) {
     // set state of unroll based on checkbox sate
     if (state == Qt::Checked)
