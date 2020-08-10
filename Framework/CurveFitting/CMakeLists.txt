@@ -465,6 +465,7 @@ set(TEST_FILES
     Functions/UserFunctionTest.h
     Functions/VesuvioResolutionTest.h
     Functions/VoigtTest.h
+    Functions/ConvTempCorrectionTest.h
     GSLMatrixTest.h
     GSLVectorTest.h
     GeneralDomainCreatorTest.h
