@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.simpleapi import *
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction, FloatBoundedValidator
 from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
     NumericAxis, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from datetime import date
@@ -67,8 +67,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                              doc='The file name file with all YIG peaks in d-spacing.')
 
         self.declareProperty(name="ApproximateWavelength",
-                             defaultValue="3.1",
-                             validator=StringListValidator(["3.1", "4.8", "5.7"]),
+                             defaultValue=3.1,
+                             validator=FloatBoundedValidator(lower=0),
                              direction=Direction.Input,
                              doc="The initial guess for the neutrons' wavelength")
 
@@ -175,10 +175,10 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         return sorted(list(yig_d_set))
 
     def _remove_invisible_yig_peaks(self, yig_list):
-        """Removes YIG peaks with 2theta above 180 degrees
+        """Removes YIG peaks with theta above 180 degrees
         and returns a list with peaks positions in 2theta"""
         wavelength = float(self.getPropertyValue("ApproximateWavelength"))
-        yig_list = [self._RAD_2_DEG * math.asin(wavelength / (2.0 * d_spacing))
+        yig_list = [2.0 * self._RAD_2_DEG * math.asin(wavelength / (2.0 * d_spacing))
                     for d_spacing in yig_list if d_spacing > 0.5*wavelength]
         return self._include_other_quadrants(yig_list)
 
@@ -223,37 +223,41 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         on the Y axis and the expected positions on the X axis"""
         max_n_peaks = len(max(yig_peaks, key=len))
         for scan in range(ws.getNumberHistograms()):
-            if len(yig_peaks[scan]) == 0:
-                continue
-            single_spectrum_peaks = yig_peaks[scan]
-            # fit all functions simultaneously:
-            function="name=FlatBackground, A0=0;\n"
-            constraints = "f0.A0 > 0"
-            function_no = 1
-            for peak_intensity, peak_centre in single_spectrum_peaks:
-                function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
-                                                                                             peak_centre,
-                                                                                             peak_intensity,
-                                                                                             0.5*self._PeakWidth)
-                constraints += ",f{0}.Height > 0.0".format(function_no)
-                constraints += ",f{0}.Sigma < 1.5".format(function_no)
-                constraints += ",{0} < f{1}.PeakCentre < {2}".format(float(peak_centre)-self._PeakWidth*2,
-                                                                     function_no,
-                                                                     float(peak_centre)+self._PeakWidth*2)
-                function_no += 1
-            fit_output = Fit(Function=function,
-                             InputWorkspace=ws,
-                             WorkspaceIndex=scan,
-                             Constraints=constraints,
-                             CreateOutput=True,
-                             Output='out')
-            param_table = fit_output.OutputParameters
+            if len(yig_peaks[scan]) >= 2:
+                single_spectrum_peaks = yig_peaks[scan]
+                # fit all functions simultaneously:
+                function="name=FlatBackground, A0=0;\n"
+                constraints = "f0.A0 > 0"
+                function_no = 1
+                for peak_intensity, peak_centre in single_spectrum_peaks:
+                    function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
+                                                                                                peak_centre,
+                                                                                                peak_intensity,
+                                                                                                0.5*self._PeakWidth)
+                    constraints += ",f{0}.Height > 0.0".format(function_no)
+                    constraints += ",f{0}.Sigma < 1.5".format(function_no)
+                    constraints += ",{0} < f{1}.PeakCentre < {2}".format(float(peak_centre)-self._PeakWidth,
+                                                                         function_no,
+                                                                         float(peak_centre)+self._PeakWidth)
+                    function_no += 1
+                fit_output = Fit(Function=function,
+                                 InputWorkspace=ws,
+                                 WorkspaceIndex=scan,
+                                 Constraints=constraints,
+                                 CreateOutput=True,
+                                 Output='out')
+                param_table = fit_output.OutputParameters
             # create the needed columns in the output workspace
             results_x = np.zeros(max_n_peaks)
             results_y = np.zeros(max_n_peaks)
             results_e = np.zeros(max_n_peaks)
+            try:
+                param_table
+                rowCount = param_table.rowCount()
+            except NameError:
+                rowCount = 0
             peak_no = 0
-            for row_no in range(param_table.rowCount()):
+            for row_no in range(rowCount):
                 row_data = param_table.row(row_no)
                 if 'A0' in row_data['Name']:
                     background = row_data['Value']
@@ -307,17 +311,18 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         ties_lambda_list = []
         ties_gradient_list = []
         ties_gradient = ""
-        offset_constr = self._DEG_2_RAD * 30 # +-30 degrees around the bank position
-        gradient_constr = 0.05 # +-10% around the m = 1.0 value
-        lambda_constr = 0.02 # +- 2% of lambda variation from the initial assumption
+        pixel_offset_constr = self._DEG_2_RAD * 5 # +-5 degrees around the bank position
+        gradient_constr = 0.05 # +-5% around the m = 1.0 value
+        lambda_constr = 0.05 # +- 5% of lambda variation from the initial assumption
         constraint_list = ['{0}<f0.lambda<{1}'.format(1-lambda_constr, 1+lambda_constr)]
 
         for pixel_no in range(ws.getNumberHistograms()):
+            # pixel_in_bank = pixel_no % 44
             function = 'name=UserFunction, \
-            Formula = {0} * m * ( asin( lambda * sin( {1}*x ) ) + offset), \
+            Formula = {0} * m * ( 2.0 * asin( lambda * sin( 0.5 * {1} * x ) ) + offset), \
             lambda= 1.0, m = 1.0, offset = {2}, $domains=i'.format(self._RAD_2_DEG, self._DEG_2_RAD, 0)
             function_list.append(function)
-            constraint_list.append('-{0} < f{1}.offset < {0}'.format(offset_constr,
+            constraint_list.append('-{0} < f{1}.offset < {0}'.format(pixel_offset_constr,
                                                                      pixel_no))
             constraint_list.append('{0} < f{1}.m < {2}'.format(1-gradient_constr,
                                                                pixel_no,
@@ -331,7 +336,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                 ties_gradient_list=[]
 
         ties_lambda = '='.join(ties_lambda_list)
-        ties = ties_lambda + ties_gradient
+        ties = ties_lambda + ties_gradient# + ties_bank_off
 
         constraints = ','.join(constraint_list)
         # create a multi domain function to perform a global fit
@@ -356,7 +361,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                          IgnoreInvalidData=True,
                          CreateOutput=True,
                          Output='det_out',
-                         **fit_kwargs,)
+                         **fit_kwargs)
 
         param_table = fit_output.OutputParameters
 
@@ -374,7 +379,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         bank2_slope = 1.0 / float(parameter_table.column(1)[0])
         if parameter_table.column(1)[3*self._D7NumberPixelsBank] == 0:
             raise RuntimeError('Bank3 slope is equal to 0.')
-        bank3_slope = 1.0 / float(parameter_table.column(1)[3*self._D7NumberPixelsBank])
+        bank3_slope = 1.0 / float(parameter_table.column(1)[2*self._D7NumberPixelsBank])
         if parameter_table.column(1)[6*self._D7NumberPixelsBank] == 0:
             raise RuntimeError('Bank4 slope is equal to 0.')
         bank4_slope = 1.0 / float(parameter_table.column(1)[6*self._D7NumberPixelsBank])
@@ -383,7 +388,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         pixel_no = 0
         for row_no in range(parameter_table.rowCount()):
             row_data = parameter_table.row(row_no)
-            if 'offset' in row_data['Name']:
+            if '.offset' in row_data['Name']:
                 pixel_offset = (0.5*self._D7NumberPixelsBank) \
                              - bank_slopes[math.floor(pixel_no / self._D7NumberPixelsBank)] \
                              * (pixel_no % self._D7NumberPixelsBank) - self._RAD_2_DEG * row_data['Value']
@@ -395,12 +400,12 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
 
     def _calibrate_detectors(self, parameter_table):
         wavelength, pixel_offsets = self._calculate_pixel_positions(parameter_table)
-#         bank2_pixels = pixel_offsets[:44]
-#         pos_bank2 = CreateWorkspace(DataX=range(44), DataY=bank2_pixels, NSpec=1)
-#         bank3_pixels = pixel_offsets[44:87]
-#         pos_bank3 = CreateWorkspace(DataX=range(44, 88), DataY=bank3_pixels, NSpec=1)
-#         bank4_pixels = pixel_offsets[89:132]
-#         pos_bank4 = CreateWorkspace(DataX=range(89, 132), DataY=bank4_pixels, NSpec=1)
+        bank2_pixels = pixel_offsets[:44]
+        pos_bank2 = CreateWorkspace(DataX=range(44), DataY=bank2_pixels, NSpec=1)
+        bank3_pixels = pixel_offsets[44:88]
+        pos_bank3 = CreateWorkspace(DataX=range(44, 89), DataY=bank3_pixels, NSpec=1)
+        bank4_pixels = pixel_offsets[88:132]
+        pos_bank4 = CreateWorkspace(DataX=range(88, 132), DataY=bank4_pixels, NSpec=1)
 
         return wavelength, pixel_offsets
 
