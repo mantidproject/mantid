@@ -221,8 +221,8 @@ void LoadILLReflectometry::init() {
                   "Maximum wavelength used for peak fitting.");
   const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
   declareProperty("XUnit", "Wavelength",
-                   std::make_shared<StringListValidator>(availableUnits),
-                   "X unit of the OutputWorkspace");
+                  std::make_shared<StringListValidator>(availableUnits),
+                  "X unit of the OutputWorkspace");
 }
 
 /// Validate the inputs
@@ -955,7 +955,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
                                                  pairSeparation, "meter", true);
       m_localWorkspace->mutableRun().addProperty(
           "VirtualChopper.dist_chop_samp", pairCentre, "meter", true);
-      pairCentre -=  0.5 * pairSeparation;
+      pairCentre -= 0.5 * pairSeparation;
     } catch (std::runtime_error &) {
       try {
         pairCentre = mmToMeter(doubleFromRun(
