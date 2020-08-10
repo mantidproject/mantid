@@ -3301,10 +3301,8 @@ void FitPropertyBrowser::removePropertiesFromSettingsBrowser(
   // get settings properties
   QList<QtProperty *> props = m_settingsGroup->property()->subProperties();
   for (auto &prop : props) {
-    for (const auto &prop_name : propsToRemove) {
-      if (prop->propertyName() == prop_name) {
-        m_settingsGroup->property()->removeSubProperty(prop);
-      }
+    if (propsToRemove.contains(prop->propertyName())) {
+      m_settingsGroup->property()->removeSubProperty(prop);
     }
   }
 }
