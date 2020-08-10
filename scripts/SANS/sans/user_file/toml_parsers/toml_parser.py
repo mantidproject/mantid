@@ -13,14 +13,21 @@ from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
 class TomlParser(object):
     def __init__(self, toml_reader=None):
         self._lib_impl = toml_reader if toml_reader else TomlReader()
+        self._toml_file_name: str = ''
 
     def get_toml_parser(self, toml_file_path, file_information) -> IStateParser:
         parsed_dict = self._lib_impl.get_user_file_dict(toml_file_path)
+        self._toml_file_name = toml_file_path
         return self.get_versioned_parser(parsed_dict, file_information)
 
     def parse_toml_file(self, toml_file_path, file_information) -> AllStates:
         parser = self.get_toml_parser(toml_file_path=toml_file_path, file_information=file_information)
-        return parser.get_all_states(file_information=file_information)
+        state = self._append_toml_filename(parser.get_all_states(file_information=file_information))
+        return state
+
+    def _append_toml_filename(self, state: AllStates)-> AllStates:
+        state.save.user_file_name = self._toml_file_name
+        return state
 
     @staticmethod
     def get_versioned_parser(toml_dict, file_information) -> IStateParser:

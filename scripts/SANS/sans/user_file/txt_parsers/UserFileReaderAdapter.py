@@ -14,9 +14,15 @@ class UserFileReaderAdapter(ParsedDictConverter):
             txt_user_file_reader = UserFileReader(user_file_name)
 
         self._adapted_parser = txt_user_file_reader
+        self._user_file = user_file_name
 
         # Now we can let the superclass call us
         super(UserFileReaderAdapter, self).__init__(file_information=file_information)
 
     def _get_input_dict(self):  # -> dict:
         return self._adapted_parser.read_user_file()
+
+    def get_state_save(self):
+        state = super().get_state_save()
+        state.user_file_name = self._user_file
+        return state
