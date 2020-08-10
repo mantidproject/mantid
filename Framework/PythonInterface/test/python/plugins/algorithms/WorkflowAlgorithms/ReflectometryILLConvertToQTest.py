@@ -5,80 +5,57 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import mtd
-from testhelpers import (assertRaisesNothing, create_algorithm, illhelpers)
+from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground, ReflectometryILLConvertToQ, mtd)
 import unittest
 
 
 class ReflectometryILLConvertToQTest(unittest.TestCase):
 
-    def tearDown(self):
+    @classmethod
+    def setUpClass(cls):
+        ReflectometryILLPreprocess(Run='ILL/D17/317369.nxs',
+                                   Measurement='DirectBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='db')
+        ReflectometryILLPreprocess(Run='ILL/D17/317370.nxs',
+                                   Measurement='ReflectedBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='rb')
+        # first the direct beam
+        ReflectometryILLSumForeground(InputWorkspace='db',
+                                      OutputWorkspace='db_frg')
+
+        # then the reflected beam in lambda
+        ReflectometryILLSumForeground(InputWorkspace='rb',
+                                      OutputWorkspace='rb_frg',
+                                      SummationType='SumInLambda',
+                                      DirectLineWorkspace='db',
+                                      DirectForegroundWorkspace='db_frg')
+
+        # then the reflected beam in q
+        ReflectometryILLSumForeground(InputWorkspace='rb',
+                                      OutputWorkspace='rb_inq_frg',
+                                      SummationType='SumInQ',
+                                      DirectLineWorkspace='db',
+                                      DirectForegroundWorkspace='db_frg')
+
+    @classmethod
+    def tearDownClass(cls):
         mtd.clear()
 
-    def testSumInLambdaModeProducesDX(self):
-        dirWS = illhelpers.create_poor_mans_d17_workspace()
-        mtd.add('dirWS', dirWS)
-        illhelpers.add_slit_configuration_D17(dirWS, 0.03, 0.02)
-        illhelpers.add_chopper_configuration_D17(dirWS)
-        dirWS = illhelpers.refl_add_two_theta(dirWS, 2.23)
-        dirWS = illhelpers.refl_add_line_position(dirWS, 128.0)
-        dirWS = illhelpers.refl_preprocess('dirWS', dirWS)
-        dirFgdWS = illhelpers.refl_sum_foreground('difFgdWS', 'SumInLambda', dirWS)
-        reflWS = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.add_chopper_configuration_D17(reflWS)
-        illhelpers.add_slit_configuration_D17(reflWS, 0.03, 0.02)
-        illhelpers.refl_rotate_detector(reflWS, 1.5)
-        mtd.add('reflWS', reflWS)
-        reflWS = illhelpers.refl_add_line_position(reflWS, 128.0)
-        reflWS = illhelpers.refl_add_two_theta(reflWS, 6.7)
-        reflWS = illhelpers.refl_preprocess('reflWS', reflWS)
-        fgdWS = illhelpers.refl_sum_foreground('fgdWS', 'SumInLambda', reflWS, dirFgdWS, dirWS)
-        args = {
-            'InputWorkspace': fgdWS,
-            'OutputWorkspace': 'inQ',
-            'DirectForegroundWorkspace': dirFgdWS,
-            'GroupingQFraction': 0.2,
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLConvertToQ', **args)
-        assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(outWS.getNumberHistograms(), 1)
-        self.assertTrue(outWS.hasDx(0))
+    def testD17InLambda(self):
+        ReflectometryILLConvertToQ(
+            InputWorkspace='rb_frg',
+            OutputWorkspace='in_lambda',
+            DirectForegroundWorkspace='db_frg'
+        )
 
-    def testSumInQModeProducesDX(self):
-        dirWS = illhelpers.create_poor_mans_d17_workspace()
-        mtd.add('dirWS', dirWS)
-        illhelpers.add_slit_configuration_D17(dirWS, 0.03, 0.02)
-        illhelpers.add_chopper_configuration_D17(dirWS)
-        dirWS = illhelpers.refl_add_line_position(dirWS, 128.0)
-        dirWS = illhelpers.refl_add_two_theta(dirWS, 2.23)
-        dirWS = illhelpers.refl_preprocess('dirWS', dirWS)
-        dirFgdWS = illhelpers.refl_sum_foreground('dirFgdWS', 'SumInLambda', dirWS)
-        reflWS = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.add_chopper_configuration_D17(reflWS)
-        illhelpers.add_slit_configuration_D17(reflWS, 0.03, 0.02)
-        illhelpers.refl_rotate_detector(reflWS, 1.5)
-        mtd.add('reflWS', reflWS)
-        reflWS = illhelpers.refl_add_line_position(reflWS, 128.0)
-        reflWS = illhelpers.refl_add_two_theta(reflWS, 6.7)
-        reflWS = illhelpers.refl_preprocess('reflWS', reflWS)
-        fgdWS = illhelpers.refl_sum_foreground('fgdWS', 'SumInQ', reflWS, dirFgdWS, dirWS)
-        args = {
-            'InputWorkspace': fgdWS,
-            'OutputWorkspace': 'inQ',
-            'DirectForegroundWorkspace': dirFgdWS,
-            'GroupingQFraction': 0.2,
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLConvertToQ', **args)
-        assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(outWS.getNumberHistograms(), 1)
-        self.assertTrue(outWS.hasDx(0))
-
+    def testD17InQ(self):
+        ReflectometryILLConvertToQ(
+            InputWorkspace='rb_inq_frg',
+            OutputWorkspace='in_q',
+            DirectForegroundWorkspace='db_frg'
+        )
 
 if __name__ == "__main__":
     unittest.main()
