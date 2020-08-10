@@ -131,10 +131,7 @@ Bugfixes
 - Fixed a bug which prevented the double click axis editor menus from working for tiled plots.
 - Select image in the plot figure option contains each image rather than each spectra for colorfil plots of workspaces with a numeric vertical axis
 - A bug has been fixed that caused an error if a workspace containing only monitor spectra was attempted to be plotted as a colorfill plot
-<<<<<<< HEAD
 - The figure options button on the sliceviewer has been removed as most options did not function correctly.
-=======
 - Fixed the bug that caused the fit browser on plots to reset size changes on mouse interactions with the figure.
->>>>>>> e848561139d... Amended release notes for bug fix RE #26999
 
 :ref:`Release 5.1.0 <v5.1.0>`
