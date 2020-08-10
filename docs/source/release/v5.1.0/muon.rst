@@ -32,6 +32,7 @@ New Features
 - Addition of a LoadMuonNexusV2 algorithm to load the new Muon V2 files, see :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>`.
 - Updated rounding for time zero and first good data to be 3 decimal places.
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
+- Added a Plot difference checkbox which users can use to pick if plot difference curve should be visible.
 
 Improvements
 -------------
