@@ -250,6 +250,8 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
                              ['MUSR62260; Group; bottom; Asymmetry; MA'],
                              ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+        self.view.is_plot_diff = mock.Mock
+        self.view.is_plot_diff.return_value = True
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
                                                                  [1]]
         fit_information = FitPlotInformation(input_workspaces=["MUSR62260; Group; bottom; Asymmetry; MA"], fit=fit)
