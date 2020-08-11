@@ -101,7 +101,6 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                 self._get_selected_fit_workspaces(), autoscale
             )
 
-
     def handle_plot_mode_changed(self, plot_mode : PlotMode):
         if isinstance(self.context, FrequencyDomainAnalysisContext):
             self.handle_plot_mode_changed_for_frequency_domain_analysis(plot_mode)
