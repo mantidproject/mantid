@@ -13,6 +13,7 @@ This algorithm is the first step in the ILL reflectometry reduction workflow. It
 
 #. loads data from disk by using :ref:`LoadAndMerge <algm-LoadAndMerge>` (:ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`, :ref:`MergeRuns <algm-MergeRuns>`)
 #. merges the numors
+#. performs the detector angle calibration
 #. normalizes to a (water) reference (optional)
 #. normalizes to slit sizes (optional)
 #. normalizes to experiment time or monitor counts (optional)
@@ -22,8 +23,6 @@ This algorithm is the first step in the ILL reflectometry reduction workflow. It
 The algorithm can be thought as an 'advanced loader', and should be used to load both direct beam and reflected beam measurements.
 
 The *OutputWorkspace* can be further fed to :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>`.
-
-The algorithm adds the following sample log entries to the *OutputWorkspace*:
 
 The option *Slit Normalisation AUTO* will select the slit normalisation depending on the instrument: for D17 and FIGARO, the slit normalisation will be turned on and off, respectively.
 
@@ -43,7 +42,7 @@ For reflected beam there are three possibilities, depending on the **AngleOption
 
 #. **UserAngle**: the detector is rotated such that the foreground centre of the reflected beam corresponds exactly to **2*BraggAngle**.
 #. **SampleAngle**: the detector is rotated such that the foreground centre if the reflected beam corresponds exactly to **2*SAN**, where the SAN is read from the nexus file of the reflected beam run.
-#. **DetectorAngle**: the detector is rotated such that the foreground centre of the corresponding direct beam corresponds exactly to **DAN_RB - DAN_DB**, where the two detector angles are read from the direct and reflected beams correspondingly.
+#. **DetectorAngle**: the detector is rotated such that the foreground centre of the corresponding direct beam corresponds exactly to **DAN_RB - DAN_DB**, where the two detector angles are read from the direct and reflected beams correspondingly. In this case the **DirectBeamDetectorAngle** and **DirectBeamForegroundCentre** are required, which could be retrieved from the sample logs of the pre-processed direct beam runs.
 
 Foreground and backgrounds
 ##########################
@@ -80,7 +79,7 @@ Usage
    )
 
    db_fg_centre = direct.run().getLogData('reduction.line_position').value
-   db_dan = direct.run().getLogData('DAN.value')
+   db_dan = direct.run().getLogData('DAN.value').value
 
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
@@ -92,7 +91,7 @@ Usage
    )
 
    rb_fg_centre = reflected.run().getLogData('reduction.line_position').value
-   rb_dan = reflected.run().getLogData('DAN.value')
+   rb_dan = reflected.run().getLogData('DAN.value').value
 
    print('Reflected line position: {}'.format(rb_fg_centre))
 

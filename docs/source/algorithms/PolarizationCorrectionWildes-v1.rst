@@ -83,12 +83,11 @@ Usage
    LoadILLReflectometry(
        Filename='ILL/D17/317370.nxs',
        OutputWorkspace='direct_beam',
-       OutputBeamPosition='direct_beam_position',
        XUnit='TimeOfFlight')
    LoadILLReflectometry(
        Filename='ILL/D17/317370.nxs',
        OutputWorkspace='reflected_beam',
-       DirectBeamPosition='direct_beam_position',
+       Measurement='ReflectedBeam',
        XUnit='TimeOfFlight')
    # Sum pixels containing the reflected intensity
    GroupDetectors(
@@ -105,7 +104,7 @@ Usage
        InputWorkspace='reflected_beam',
        OutputWorkspace='reflected_beam',
        XMin=0.)
-   # Fake two flipper configurations 
+   # Fake two flipper configurations
    RenameWorkspace(
        InputWorkspace='reflected_beam',
        OutputWorkspace='up'
@@ -128,7 +127,7 @@ Usage
        OutputWorkspace='corrected',
        Efficiencies='efficiencies',
        Flippers='00, 11')
-   
+
    orig = mtd['up']
    corr = mtd['corrected_++']
    index = orig.yIndexOfX(15.)
@@ -156,4 +155,3 @@ References
 .. categories::
 
 .. sourcelink::
-

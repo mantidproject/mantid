@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm is the last step in ILL's reflectometry reduction workflow. Its main purpose it convert a reflectivity workspace from wavelength to momentum transfer. This is achieved by :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>` which also computes the :math:`Q_{z}` resolution. Further, histogrammed *InputWorkspace* is converted to point data by :ref:`ConvertToPointData <algm-ConvertToPointData>` and, optionally, the points are grouped according to the :math:`Q_{z}` resolution.
+This algorithm is the last step in ILL's TOF specular reflectometry reduction workflow. Its main purpose it convert a reflectivity workspace from wavelength to momentum transfer. This is achieved by :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>` which also computes the :math:`Q_{z}` resolution. Further, histogrammed *InputWorkspace* is converted to point data by :ref:`ConvertToPointData <algm-ConvertToPointData>` and, optionally, the points are grouped according to the :math:`Q_{z}` resolution.
 
 The diagram below shows the workflow of this algorithm:
 
@@ -49,7 +49,7 @@ Usage
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectLineWorkspace=direct,
+       Measurement='ReflectedBeam',
        **settings
    )
 
@@ -121,7 +121,7 @@ Output:
    # Reflected beam. Flippers set to '++'
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectLineWorkspace=direct,
+       Measurement='ReflectedBeam',
        **settings
    )
 
@@ -134,7 +134,7 @@ Output:
    # Reload the reflected beam. We will fake the '--' flipper settings
    reflected00 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectLineWorkspace=direct,
+       Measurement='ReflectedBeam',
        **settings
    )
 

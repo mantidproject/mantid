@@ -111,8 +111,8 @@ Usage
 .. testoutput:: MultipleAngles
 
     The R(Q) workspace at first angle has 186 points
-    The R(Q) workspace at second angle has 98 points
-    The R(Q) workspace at second angle has 284 points
+    The R(Q) workspace at second angle has 94 points
+    The R(Q) workspace at second angle has 280 points
 
 **Example - Round Robin with 3 angle configurations and multiple numors summed**
 

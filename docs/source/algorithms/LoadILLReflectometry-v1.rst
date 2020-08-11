@@ -34,16 +34,6 @@ In both cases the foreground centre will be fitted.
 In case of direct beam, the detector will be rotated around the sample such that the fractional workspace index of the foreground centre will appear at 0 scattering angle.
 In case of reflected beam, **BraggAngle** is mandatory, and the detector will be driven such that the foreground centre will appear at **2*BraggAngle**.
 
-Source position
----------------
-
-In the case of D17, this loader will move the source position ('chopper1' in the instrument definition file) on the z-axis to the position
-
-.. math::
-   z_{source} = -d_{ch} + \frac{1}{2} \delta_{ch},
-
-where :math:`d_{ch}` is the :literal:`VirtualChopper.dist_chop_samp` sample log entry and :math:`\delta_{ch}` the :literal:`Distance.ChopperGap` entry.
-
 Usage
 -----
 
@@ -53,6 +43,7 @@ Usage
 
 .. testcode:: LoadBraggAngle
 
+   import numpy
    # Load ILL d17 data file (TOF mode) into a workspace 2D using a user-defined angle of 5.5 degrees:
    ws2 = LoadILLReflectometry('ILL/D17/317370.nxs', Measurement='ReflectedBeam', BraggAngle=5.5)
    detId = 202 # the foreground centre is around 202
@@ -75,6 +66,7 @@ Output:
 
 .. testcode:: LoadDirectBeam
 
+   import numpy
    directBeamWS = LoadILLReflectometry('ILL/D17/317369.nxs')
    detId = 202 # the foreground centre is around 202
    det = directBeamWS.getInstrument().getDetector(detId)
