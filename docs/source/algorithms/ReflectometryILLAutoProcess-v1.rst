@@ -175,7 +175,7 @@ References
 ----------
 
 .. [#Gutfreund] P. Gutfreund, T. Saerbeck, M. A. Gonzalez, E. Pellegrini, M. Laver, C. Dewhurst, R. Cubitt,
-            Towards generalized data reduction on a chopper-based time-of-flight neutron reflectometer.
+            `Towards generalized data reduction on a chopper-based time-of-flight neutron reflectometer.`
             `J. Appl. Cryst. (2018). 51, 606-615, <https://doi.org/10.1107/S160057671800448X>`_
 
 .. relatedalgorithms::
