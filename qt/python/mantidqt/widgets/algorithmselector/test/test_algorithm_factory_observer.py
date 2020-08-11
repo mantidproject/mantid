@@ -39,42 +39,39 @@ class AlgorithmFactoryObserverTest(unittest.TestCase):
 
         AlgorithmFactory.subscribe(ToyAlgorithm)
 
-        self.assertTrue(
-            notifyee.refresh.call_count == 0,
-            "We expect the widget to be refreshed when the Algorithm Factory "
-            "subscribes to a new algorithm. refresh was called "
-            "{widget.refresh.call_count} times after subscription.")
+        self.assertTrue(notifyee.refresh.call_count == 0,
+                        "We expect the widget to be refreshed when the Algorithm Factory "
+                        "subscribes to a new algorithm. refresh was called "
+                        "{widget.refresh.call_count} times after subscription.")
 
     def test_that_selector_is_refreshed_on_alg_sibscribe_from_same_thread(self):
         notifyee = MagicMock()
         # variable keeps object alive
-        _ = AlgorithmSelectorFactoryObserver(notifyee)
+        _ = AlgorithmSelectorFactoryObserver(notifyee)  # noqa: F841
 
         AlgorithmFactory.subscribe(ToyAlgorithm)
 
-        self.assertTrue(
-            notifyee.refresh.call_count == 1,
-            f"We expect the widget to be refreshed when the Algorithm Factory "
-            f"subscribes to a new algorithm. refresh was called "
-            f"{notifyee.refresh.call_count} times after subscription.")
+        self.assertTrue(notifyee.refresh.call_count == 1,
+                        f"We expect the widget to be refreshed when the Algorithm Factory "
+                        f"subscribes to a new algorithm. refresh was called "
+                        f"{notifyee.refresh.call_count} times after subscription.")
 
     @patch("mantidqt.widgets.algorithmselector.algorithm_factory_observer.QAppThreadCall")
     def test_that_selector_is_refreshed_on_alg_subscribe_from_a_different_thread(
             self, mock_qappcall):
         notifyee = MagicMock()
         # variable keeps object alive
-        _ = AlgorithmSelectorFactoryObserver(notifyee)
+        _ = AlgorithmSelectorFactoryObserver(notifyee)  # noqa: F841
         mock_qappcall.assert_called_once()
 
         subscriber = threading.Thread(target=AlgorithmFactory.subscribe, args=[ToyAlgorithm])
         subscriber.start()
         subscriber.join()
 
-        self.assertTrue(
-            mock_qappcall.call_count == 1,
-            f"We expect the widget to be refreshed when the Algorithm Factory "
-            f"subscribes to a new algorithm. refresh was called "
-            f"{mock_qappcall.refresh.call_count} times after subscription.")
+        self.assertTrue(mock_qappcall.call_count == 1,
+                        f"We expect the widget to be refreshed when the Algorithm Factory "
+                        f"subscribes to a new algorithm. refresh was called "
+                        f"{mock_qappcall.refresh.call_count} times after subscription.")
 
 
 if __name__ == '__main__':

@@ -79,6 +79,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
       mantidqt/utils/test/test_writetosignal.py
+      mantidqt/utils/qt/test/test_qappthreadcall.py
       mantidqt/widgets/test/test_messagedisplay.py
       mantidqt/widgets/test/test_fitpropertybrowser.py
       mantidqt/widgets/test/test_fitpropertybrowserbase.py
