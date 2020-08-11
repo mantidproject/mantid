@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from mantid.api import MatrixWorkspace
 from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground, ReflectometryILLConvertToQ, mtd)
 import unittest
 
@@ -49,6 +50,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
             OutputWorkspace='in_lambda',
             DirectForegroundWorkspace='db_frg'
         )
+        self.checkOutput(mtd['in_lambda'], 991)
 
     def testD17InQ(self):
         ReflectometryILLConvertToQ(
@@ -56,6 +58,16 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
             OutputWorkspace='in_q',
             DirectForegroundWorkspace='db_frg'
         )
+        self.checkOutput(mtd['in_q'], 1045)
+
+    def checkOutput(self, ws, blocksize):
+        self.assertTrue(ws)
+        self.assertTrue(isinstance(ws, MatrixWorkspace))
+        self.assertFalse(ws.isHistogramData())
+        self.assertEquals(ws.blocksize(), blocksize)
+        self.assertEquals(ws.getNumberHistograms(), 1)
+        self.assertTrue(ws.hasDx(0))
+        self.assertEquals(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
 
 if __name__ == "__main__":
     unittest.main()
