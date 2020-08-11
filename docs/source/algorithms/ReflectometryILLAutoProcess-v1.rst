@@ -5,7 +5,7 @@
 Description
 -----------
 
-This algorithm executes the full data reduction for ILL reflectometers D17 and FIGARO in TOF mode (specular reflection).
+This algorithm executes the full data reduction for ILL reflectometers D17 and FIGARO in TOF mode (specular reflection) following [#Gutfreund]_.
 
 Input
 -----
@@ -170,6 +170,13 @@ Usage
    ax.set_ylabel('R')
    ax.legend()
    #fig.show()
+
+References
+----------
+
+.. [#Gutfreund] P. Gutfreund, T. Saerbeck, M. A. Gonzalez, E. Pellegrini, M. Laver, C. Dewhurst, R. Cubitt,
+            Towards generalized data reduction on a chopper-based time-of-flight neutron reflectometer.
+            `J. Appl. Cryst. (2018). 51, 606-615, <https://doi.org/10.1107/S160057671800448X>`_
 
 .. relatedalgorithms::
 
