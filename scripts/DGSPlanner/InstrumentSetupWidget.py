@@ -95,25 +95,22 @@ class GonioTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             if column<=1:
-                try:
-                    val=str(value.toString()) #QVariant
-                except AttributeError:
-                    val=str(value) #string
+                val=str(value)
                 if column==0:
                     self.labels[row]=val
                 else:
                     self.dirstrings[row]=val
             elif column==2:
                 try:
-                    val=value.toInt()[0] #QVariant
-                except AttributeError:
-                    val=int(value) #string
+                    val=val=int(value)
+                except ValueError:
+                    return False
                 self.senses[row]=val
             else:
                 try:
-                    val=value.toFloat()[0] #QVariant
-                except AttributeError:
-                    val=float(value) #string
+                    val=float(value)
+                except ValueError:
+                    return False
                 if column==3:
                     self.minvalues[row]=val
                 elif column==4:
