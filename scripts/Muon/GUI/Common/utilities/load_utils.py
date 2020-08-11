@@ -219,7 +219,6 @@ def load_workspace_from_filename(filename,
             DeleteWorkspace(Workspace=table)
 
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 3)
-        print("hiii", )
         UnGroupWorkspace(load_result["DeadTimeTable"])
         load_result["DeadTimeTable"] = None
         UnGroupWorkspace(workspace.name())

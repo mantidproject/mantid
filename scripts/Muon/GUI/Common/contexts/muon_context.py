@@ -70,11 +70,19 @@ class MuonContext(object):
     def default_data_plot_range(self):
         return MUON_ANALYSIS_DEFAULT_X_RANGE
 
+    def num_periods(self, run):
+        return self._data_context.num_periods(run)
+
+    @property
+    def current_runs(self):
+        return self._data_context.current_runs
+
     def calculate_group(self, group_name, run, rebin=False, periods = [1]):
         run_as_string = run_list_to_string(run)
-        name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=rebin)
-        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=rebin)
-        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=rebin)
+        periods_as_string = run_list_to_string(periods)
+        name = get_group_data_workspace_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
+        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
+        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
         group_workspace = calculate_group_data(self, group_name, run, rebin, name, periods)
         group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin,
                                                                                       asym_name, asym_name_unnorm, periods)
@@ -90,22 +98,24 @@ class MuonContext(object):
         self.calculate_all_groups()
         for run in self._data_context.current_runs:
             with WorkspaceGroupDefinition():
-                for group_name in self._group_pair_context.group_names:
+                for group in self._group_pair_context.groups:
                     run_as_string = run_list_to_string(run)
+                    group_name = group.name
+                    periods = run_list_to_string(group.periods)
 
                     directory = get_base_data_directory(self, run_as_string)
 
-                    name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=False)
-                    asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=False)
-                    asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=False)
+                    name = get_group_data_workspace_name(self, group_name, run_as_string, periods, rebin=False)
+                    asym_name = get_group_asymmetry_name(self, group_name, run_as_string, periods, rebin=False)
+                    asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, periods, rebin=False)
 
                     self.group_pair_context[group_name].show_raw(run, directory + name, directory + asym_name,
                                                                  asym_name_unnorm)
 
                     if self._do_rebin():
-                        name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=True)
-                        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=True)
-                        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=True)
+                        name = get_group_data_workspace_name(self, group_name, run_as_string, periods, rebin=True)
+                        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, periods, rebin=True)
+                        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, periods, rebin=True)
 
                         self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name,
                                                                        asym_name_unnorm)

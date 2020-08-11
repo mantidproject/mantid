@@ -30,10 +30,10 @@ def _base_run_name(instrument, run=None):
     return str(instrument) + run
 
 
-def get_group_data_workspace_name(context, group_name, run, rebin):
+def get_group_data_workspace_name(context, group_name, run, period_string, rebin):
     if context.data_context.is_multi_period():
         name = context.data_context._base_run_name(run) + group_str + group_name + \
-               "; Counts; Periods; " + context.gui_context.period_string(run) + ";"
+               "; Counts; Periods; " + period_string + ";"
     else:
         name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
 
@@ -45,10 +45,10 @@ def get_group_data_workspace_name(context, group_name, run, rebin):
     return name
 
 
-def get_group_asymmetry_name(context, group_name, run, rebin):
+def get_group_asymmetry_name(context, group_name, run, period_string, rebin):
     if context.data_context.is_multi_period():
         name = context.data_context._base_run_name(run) + group_str + group_name + \
-               "; Asymmetry; Periods; " + context.gui_context.period_string(run) + ";"
+               "; Asymmetry; Periods; " + period_string + ";"
     else:
         name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry;"
 
@@ -87,8 +87,8 @@ def get_group_or_pair_from_name(name):
     return ""
 
 
-def get_group_asymmetry_unnorm_name(context, group_name, run, rebin):
-    return '__' + get_group_asymmetry_name(context, group_name, run, rebin) + '_unnorm'
+def get_group_asymmetry_unnorm_name(context, group_name, run, periods, rebin):
+    return '__' + get_group_asymmetry_name(context, group_name, run, periods, rebin) + '_unnorm'
 
 
 def get_pair_data_workspace_name(context, pair_name, run, rebin):
