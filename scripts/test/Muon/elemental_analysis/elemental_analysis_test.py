@@ -718,16 +718,14 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
     def test_deselect_elements_fails(self,mock_remove_element_lines):
-
+        #Test passes only if deselect_element is not called with "Hydrogen"
         self.gui.ptable.deselect_element = mock.Mock()
 
         self.gui.peaks.enable_deselect_elements_btn = mock.Mock()
         self.gui.peaks.disable_deselect_elements_btn = mock.Mock()
 
         self.gui.deselect_elements()
-        """with block ensures that if Hydrogen is called by deselect_elements or _remove_element_lines an 
-           AssertionError is thrown  as if an AssertionError is not thrown by code in block one will 
-           automatically be thrown """
+
         with self.assertRaises(AssertionError):
             self.gui.ptable.deselect_element.assert_any_call("Hydrogen")
 
