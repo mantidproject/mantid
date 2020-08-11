@@ -355,6 +355,9 @@ void IndirectFitAnalysisTab::endXChanged(double endX) {
  */
 void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
   m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+  // if convolve members is on, output members should also be on
+  if (convolveMembers)
+    m_fitPropertyBrowser->setOutputCompositeMembers(true);
 }
 
 void IndirectFitAnalysisTab::updateFitOutput(bool error) {
