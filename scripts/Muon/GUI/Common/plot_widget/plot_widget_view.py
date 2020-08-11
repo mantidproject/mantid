@@ -22,8 +22,13 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setupUi(self)
-        self.plot_diff_checkbox.setVisible(False)
         self.setMinimumSize(600,600)
+
+    def show_plot_diff(self):
+        self.plot_diff_checkbox.setVisible(True)
+
+    def hide_plot_diff(self):
+        self.plot_diff_checkbox.setVisible(False)
 
     def setup_plot_type_options(self, options):
         """
@@ -73,7 +78,7 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
 
     def is_plot_diff(self):
         """
-        Checks if tiled plot is currently requested
+        Checks if plot difference is currently requested
         """
         return self.plot_diff_checkbox.isChecked()
 

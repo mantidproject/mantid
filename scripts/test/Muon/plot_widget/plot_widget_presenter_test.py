@@ -250,8 +250,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
                              ['MUSR62260; Group; bottom; Asymmetry; MA'],
                              ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
-        self.view.is_plot_diff = mock.Mock
-        self.view.is_plot_diff.return_value = True
+
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
                                                                  [1]]
         fit_information = FitPlotInformation(input_workspaces=["MUSR62260; Group; bottom; Asymmetry; MA"], fit=fit)
@@ -264,6 +263,20 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.figure_presenter.plot_workspaces.assert_called_once_with(expected_workspace_list, expected_indices,
                                                                       hold_on=False, autoscale=False)
+
+    def test_handle_plot_selected_fits_correctly_calls_model(self):
+        fit = FitInformation(mock.MagicMock(), 'GaussOsc',
+                            ['MUSR62260; Group; bottom; Asymmetry; MA'],
+                            ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+
+        self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
+                                                                 [1]]
+
+        fit_information = FitPlotInformation(input_workspaces=["MUSR62260; Group; bottom; Asymmetry; MA"], fit=fit)
+
+        self.view.is_plot_diff.return_value = False
+        self.presenter.handle_plot_selected_fits([fit_information])
+        self.model.get_fit_workspace_and_indices.assert_called_once_with(fit,False)
 
     def test_handle_external_plot_pressed(self):
         expected_axes = mock.NonCallableMock()
