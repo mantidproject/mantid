@@ -23,6 +23,7 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         super().__init__(parent=parent)
         self.setupUi(self)
         self.plot_diff_checkbox.setVisible(False)
+        self.setMinimumSize(600,600)
 
     def setup_plot_type_options(self, options):
         """
