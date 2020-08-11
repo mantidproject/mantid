@@ -152,7 +152,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
                     isAnalyzer.append(True)
                 else:
                     isAnalyzer.append(False)
-                flippers.append(run.getProperty('Flipper1.stateint').value)
+                flippers.append(int(run.getProperty('fl1.value').value))
             if isAnalyzer[0] != isAnalyzer[1]:
                 raise RuntimeError('Analyzer config mismatch: one of the input workspaces has analyzer on, the other off.')
             isAnalyzer = isAnalyzer[0]
@@ -170,8 +170,8 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
             flippers = dict()
             for ws in wss:
                 run = mtd[ws].run()
-                flipper1 = run.getProperty('Flipper1.stateint').value
-                flipper2 = run.getProperty('Flipper2.stateint').value
+                flipper1 = int(run.getProperty('fl1.value').value)
+                flipper2 = int(run.getProperty('fl2.value').value)
                 flippers[(flipper1, flipper2)] = ws
             # Reorder workspaces as expected by PolarizationEfficiencyCor.
             presentFlipper = (0, 1) if (0, 1) in flippers.keys() else (1, 0)
@@ -190,8 +190,8 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
         flippers = dict()
         for ws in wss:
             run = mtd[ws].run()
-            flipper1 = run.getProperty('Flipper1.stateint').value
-            flipper2 = run.getProperty('Flipper2.stateint').value
+            flipper1 = int(run.getProperty('fl1.value').value)
+            flipper2 = int(run.getProperty('fl2.value').value)
             flippers[(flipper1, flipper2)] = ws
             self.log().information(ws + ' flipper state found: {0}, {1}'.format(str(flipper1), str(flipper2)))
         wss[0] = flippers[0, 0]
