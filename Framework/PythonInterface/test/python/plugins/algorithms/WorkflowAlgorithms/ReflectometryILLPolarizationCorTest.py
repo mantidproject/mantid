@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground, ReflectometryILLPolarizationCor, mtd)
 import unittest
 
@@ -42,6 +43,18 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
             OutputWorkspace='pol_corrected',
             EfficiencyFile='ILL/D17/PolarizationFactors.txt'
         )
+        self.checkOutput(mtd['pol_corrected'], 1, 991)
+
+    def checkOutput(self, ws, items, blocksize):
+        self.assertTrue(ws)
+        self.assertTrue(isinstance(ws, WorkspaceGroup))
+        self.assertEquals(ws.getNumberOfEntries(), items)
+        item = ws[0]
+        self.assertTrue(isinstance(item, MatrixWorkspace))
+        self.assertTrue(item.isHistogramData())
+        self.assertEquals(item.blocksize(), blocksize)
+        self.assertEquals(item.getNumberHistograms(), 1)
+        self.assertEquals(item.getAxis(0).getUnit().unitID(), 'Wavelength')
 
 if __name__ == "__main__":
     unittest.main()
