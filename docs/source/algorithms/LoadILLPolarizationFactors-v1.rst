@@ -46,6 +46,7 @@ Usage
                              XUnit='TimeOfFlight')
    rb = LoadILLReflectometry(Filename='ILL/D17/317370.nxs',
                              Measurement='ReflectedBeam',
+                             BraggAngle=0.8,
                              XUnit='TimeOfFlight')
    # Sum over the reflected beam.
    rb_grouped = GroupDetectors(rb, GroupingPattern='201-203')
