@@ -122,7 +122,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/TotScatCalculateSelfScattering.py
   algorithms/WorkflowAlgorithms/IndirectILLEnergyTransfer.py
   algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
-  algorithms/WorkflowAlgorithms/IndirectILLReductionDiffraction.py
+  algorithms/WorkflowAlgorithms/IndirectILLReductionDIFF.py
   algorithms/ViewBOA.py
   algorithms/ReflectometrySliceEventWorkspace.py
   algorithms/SNAPReduce.py

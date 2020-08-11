@@ -10,7 +10,7 @@ from mantid.kernel import Direction
 from mantid.simpleapi import *
 
 
-class IndirectILLReductionDiffraction(PythonAlgorithm):
+class IndirectILLReductionDIFF(PythonAlgorithm):
     """
     Performs reduction on IN16B's diffraction data. It can be on mode Doppler or BATS.
     """
@@ -28,7 +28,7 @@ class IndirectILLReductionDiffraction(PythonAlgorithm):
         return "Performs reduction on IN16B's diffraction data. Mode is either Doppler or BATS."
 
     def name(self):
-        return "IndirectILLReductionDiffraction"
+        return "IndirectILLReductionDIFF"
 
     def setUp(self):
         self.runs = self.getPropertyValue('SampleRuns').split(',')
@@ -134,4 +134,4 @@ class IndirectILLReductionDiffraction(PythonAlgorithm):
         self.setProperty("OutputWorkspace", mtd[self.output])
 
 
-AlgorithmFactory.subscribe(IndirectILLReductionDiffraction)
+AlgorithmFactory.subscribe(IndirectILLReductionDIFF)
