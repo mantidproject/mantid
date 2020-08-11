@@ -77,9 +77,14 @@ class MuonContext(object):
     def current_runs(self):
         return self._data_context.current_runs
 
-    def calculate_group(self, group_name, run, rebin=False, periods = [1]):
+    def calculate_group(self, group_name, run, periods, rebin=False):
         run_as_string = run_list_to_string(run)
         periods_as_string = run_list_to_string(periods)
+
+        # A scientific requirement is that processing can continue if a period is missing from some 
+        # of the runs. This filters out periods which are not in a given run.
+        periods = [period for period in periods if period <= self.num_periods(run)]
+
         name = get_group_data_workspace_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
         asym_name = get_group_asymmetry_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
         asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
@@ -174,7 +179,7 @@ class MuonContext(object):
             run_pre_processing(context=self, run=run, rebin=rebin)
             for group in self._group_pair_context.groups:
                 group_workspace, group_asymmetry, group_asymmetry_unormalised = \
-                     self.calculate_group(group.name, run, rebin=rebin, periods=group.periods)
+                     self.calculate_group(group.name, run, group.periods, rebin=rebin)
                 self.group_pair_context[group.name].update_workspaces(run, group_workspace, group_asymmetry,
                                                                       group_asymmetry_unormalised, rebin=rebin)
 
@@ -216,14 +221,14 @@ class MuonContext(object):
                     # Multi-period data
                     for i, single_ws in enumerate(loaded_workspace):
                         name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                                       self.data_context.is_multi_period(),
+                                                                       True,
                                                                        period=str(i + 1),
                                                                        workspace_suffix=self.workspace_suffix)
                         single_ws.show(name)
                 else:
                     # Single period data
                     name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                                   self.data_context.is_multi_period(),
+                                                                   False,
                                                                    workspace_suffix=self.workspace_suffix)
                     loaded_workspace[0].show(name)
 

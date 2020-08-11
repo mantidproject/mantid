@@ -85,7 +85,7 @@ class MuonDataContext(object):
 
     def is_multi_period(self):
         for run in self.current_runs:
-            if len(self._loaded_data.get_data(run=run)) > 1:
+            if self.num_periods(run) > 1:
                 return True
 
         return False

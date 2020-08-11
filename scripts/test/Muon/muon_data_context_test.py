@@ -88,6 +88,20 @@ class MuonDataContextTest(unittest.TestCase):
     def test_return_sample_log_returns_correctly(self):
         self.assertEqual(self.context.get_sample_log('goodfrm').value, 31369.0)
 
+    def test_that_is_multi_period_returns_false_for_single_period_data(self):
+        is_multi_period = self.context.is_multi_period()
+        
+        self.assertTrue(not is_multi_period)
+
+    def test_that_any_multi_period_data_will_mark_everything_as_multiperiod(self):
+        load_result = {'OutputWorkspace': [1,2,3,4]}
+        self.loaded_data.add_data(workspace=load_result, run=[84447], filename='workspace_filename', instrument='EMU')
+        self.context._current_runs = [[84447],[19489]]
+
+        is_multi_period = self.context.is_multi_period()
+        
+        self.assertTrue(is_multi_period)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

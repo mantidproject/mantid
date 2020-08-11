@@ -76,7 +76,7 @@ class GroupingTablePresenter(object):
 
         self._view.warning_popup("Invalid detector list.")
         return False
-        
+
     def validate_periods(self, text):
         period_list = run_utils.run_string_to_list(text)
         invalid_runs = []
@@ -95,9 +95,9 @@ class GroupingTablePresenter(object):
             self._view.warning_popup("One of the periods specified missing from all runs")
             return False
         else:
-            run_string = run_utils.run_list_to_string(run_utils.flatten_run_list(invalid_runs))
-            self._view.warning_popup("One of the periods specified missing from runs " + run_string)
-            return False
+            # TODO need to add in some logic here to turn the group row yellow if some but not all runs have correct periods.
+            # run_string = run_utils.run_list_to_string(run_utils.flatten_run_list(invalid_runs))
+            return True
 
     def disable_editing(self):
         self._view.disable_editing()
