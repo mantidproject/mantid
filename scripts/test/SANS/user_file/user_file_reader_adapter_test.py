@@ -4,6 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
+import pathlib
+import tempfile
 import unittest
 from unittest import mock
 
@@ -23,11 +26,12 @@ class UserFileReaderAdapterTest(unittest.TestCase):
         mock_file_reader.return_value.read_user_file.assert_called()
 
     def test_state_save_appends_user_file(self, _):
-        expected_user_file = mock.NonCallableMock()
+        filename = tempfile.mkstemp()[1]  # Get filename instead of handle
 
-        adapter = UserFileReaderAdapter(file_information=None, user_file_name=expected_user_file)
+        adapter = UserFileReaderAdapter(file_information=None, user_file_name=filename)
         returned = adapter.get_state_save()
-        self.assertEqual(expected_user_file, returned.user_file_name)
+        self.assertNotEqual('', returned.user_file_name)
+        self.assertEqual(os.path.basename(filename), returned.user_file_name)
 
 
 if __name__ == '__main__':

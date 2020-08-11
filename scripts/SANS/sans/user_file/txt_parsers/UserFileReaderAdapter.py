@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
+
 from sans.user_file.txt_parsers.ParsedDictConverter import ParsedDictConverter
 from sans.user_file.user_file_reader import UserFileReader
 
@@ -24,5 +26,5 @@ class UserFileReaderAdapter(ParsedDictConverter):
 
     def get_state_save(self):
         state = super().get_state_save()
-        state.user_file_name = self._user_file
+        state.user_file_name = os.path.basename(self._user_file)
         return state
