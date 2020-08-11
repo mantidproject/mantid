@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from testhelpers import (assertRaisesNothing, create_algorithm)
+from mantid.api import MatrixWorkspace
 from mantid.simpleapi import ReflectometryILLPreprocess, ReflectometryILLSumForeground, mtd
 import unittest
 
@@ -42,6 +42,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
                                       SummationType='SumInLambda',
                                       DirectLineWorkspace='db',
                                       DirectForegroundWorkspace='db_frg')
+        self.checkOutput(mtd['rb_frg'], 991)
+
 
     def testSumInQD17(self):
         # first the direct beam
@@ -55,10 +57,24 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
                                       DirectLineWorkspace='db',
                                       DirectForegroundWorkspace='db_frg')
 
+        self.checkOutput(mtd['rb_inq_frg'], 1045)
+
     def testDirectBeamFigaro(self):
         # the direct beam
         ReflectometryILLSumForeground(InputWorkspace='fig_db',
                                       OutputWorkspace='fig_db_frg')
+
+        self.checkOutput(mtd['fig_db_frg'], 971)
+
+
+    def checkOutput(self, ws, blocksize):
+        self.assertTrue(ws)
+        self.assertTrue(isinstance(ws, MatrixWorkspace))
+        self.assertTrue(ws.isHistogramData())
+        self.assertEquals(ws.blocksize(), blocksize)
+        self.assertEquals(ws.getNumberHistograms(), 1)
+        self.assertEquals(ws.getAxis(0).getUnit().unitID(), 'Wavelength')
+
 
 if __name__ == "__main__":
     unittest.main()
