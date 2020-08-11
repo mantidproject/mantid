@@ -10,9 +10,9 @@
 Description
 -----------
 
-This algorithm allows the user to set the MDFrame type for each axis on a workspace. 
-The algorithm makes it possible to introduce the correct MDFrame type to 
-workspaces which are associated with legacy files. Note that this can only be applied 
+This algorithm allows the user to set the MDFrame type for each axis on a workspace.
+The algorithm makes it possible to introduce the correct MDFrame type to
+workspaces which are associated with legacy files. Note that this can only be applied
 to MDHisto and MDEvent workspaces.
 
 The selectable frame types are:
@@ -30,11 +30,11 @@ Usage
 
 **Example - Sample usage of SetMDFrame**
 
-.. testcode:: SetMDFrameExample
+.. code-block:: python
 
     # Prepare the sample workspace
-    mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', 
-                                        Names='A,B,C', Units='U,U,U', 
+    mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10',
+                                        Names='A,B,C', Units='U,U,U',
                                         Frames='QSample, QSample, QSample')
     print("The first MDFrame is of type " + mdws.getDimension(0).getMDFrame().name())
     print("The second MDFrame is of type " + mdws.getDimension(1).getMDFrame().name())
@@ -47,18 +47,6 @@ Usage
     print("The second MDFrame is of type " + mdws.getDimension(1).getMDFrame().name())
     print("The new third MDFrame is of type " + mdws.getDimension(2).getMDFrame().name())
 
-Output:
-
-.. testoutput:: SetMDFrameExample
-
-    The first MDFrame is of type QSample
-    The second MDFrame is of type QSample
-    The third MDFrame is of type QSample
-    The new first MDFrame is of type QLab
-    The second MDFrame is of type QSample
-    The new third MDFrame is of type QLab
-
 .. categories::
 
 .. sourcelink::
-
