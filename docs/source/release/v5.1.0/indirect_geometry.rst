@@ -47,5 +47,6 @@ Bug Fixes
   DMOL3 quantum chemistry code with open boundary conditions
   (i.e. free molecules). Previously, data files from such calculations
   would yield a parsing error.
+- Fixed errors with the temperature correction in the ConvFit tab of the Indirect Data Analysis interface. These issues occurred when the function was evaluated at Q=0, where it is undefined.
 
 :ref:`Release 5.1.0 <v5.1.0>`
