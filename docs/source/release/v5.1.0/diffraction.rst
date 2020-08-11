@@ -37,7 +37,7 @@ Engineering Diffraction
 New features
 ^^^^^^^^^^^^
 - New algorithm for estimating background of powder spectra :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` using iterative smoothing.
-- Mantid fitting capability added to fitting tab of Engineering Diffraction UI.
+- Mantid fitting capability added to fitting tab of Engineering Diffraction UI (with simpler fitpropertybrowser providing only relevant options).
 
 Improvements
 ^^^^^^^^^^^^
