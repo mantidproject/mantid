@@ -24,7 +24,7 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
 
     @abstractmethod
     def hide_plot_diff(self):
-        #Hides Plot Difference checkbox 
+        #Hides Plot Difference checkbox
         pass
 
     @abstractmethod
