@@ -93,7 +93,7 @@ void SaveCanSAS1D2::exec() {
   m_transcan_ws = getProperty("TransmissionCan");
   if (!m_workspace) {
     throw std::invalid_argument(
-        "Invalid inputworkspace ,Error in  SaveCanSAS1D");
+        "Invalid inputworkspace, Error in  SaveCanSAS1D");
   }
 
   if (m_workspace->getNumberHistograms() > 1) {
@@ -214,6 +214,8 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   std::string user_file;
   if (run.hasProperty("UserFile")) {
     user_file = run.getLogData("UserFile")->value();
+  } else {
+    g_log.warning("No user file was found in the input workspace.");
   }
 
   std::string sasProcuserfile = "\n\t\t\t<term name=\"user_file\">";
