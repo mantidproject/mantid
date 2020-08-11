@@ -111,7 +111,7 @@ Output:
 .. testoutput:: ReflectometryMomentumTransferExample
 
    First refectivity point Qz = 0.0006 +- 0.0001 A-1
-   and last Qz = 0.0018 +- 0.0004 A-1
+   and last Qz = 0.0018 +- 0.0003 A-1
 
 References
 ----------

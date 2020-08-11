@@ -88,6 +88,7 @@ Usage
        Filename='ILL/D17/317370.nxs',
        OutputWorkspace='reflected_beam',
        Measurement='ReflectedBeam',
+       BraggAngle=0.8,
        XUnit='TimeOfFlight')
    # Sum pixels containing the reflected intensity
    GroupDetectors(

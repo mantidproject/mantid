@@ -84,7 +84,7 @@ Output:
    Is reflectivityLambda histogram? True
    Is reflectivityQ histogram? False
    Number of bins in reflectivityLambda: 416
-   Number of points in reflectivityQ: 260
+   Number of points in reflectivityQ: 259
    Has reflectivityQ Dx? True
 
 **Example - polarized reduction**
@@ -187,10 +187,10 @@ Output:
 .. testoutput:: PolarizedEx
 
    X unit in R00: MomentumTransfer
-   Number of points in R00: 260
+   Number of points in R00: 259
    X unit in R11: MomentumTransfer
-   Number of points in R11: 260
-   Size of Q resolution data: 260
+   Number of points in R11: 259
+   Size of Q resolution data: 259
 
 .. categories::
 

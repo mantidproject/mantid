@@ -78,7 +78,7 @@ Output:
 
 .. testoutput:: LoadDirectBeam
 
-   Pixel at detector ID 202 was rotated to 0. degrees.
+   Pixel at detector ID 202 was rotated to 0.0 degrees.
 
 .. testcleanup:: LoadDirectBeam
 

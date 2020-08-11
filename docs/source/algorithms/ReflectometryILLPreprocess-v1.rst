@@ -93,7 +93,7 @@ Usage
    rb_fg_centre = reflected.run().getLogData('reduction.line_position').value
    rb_dan = reflected.run().getLogData('DAN.value').value
 
-   print('Reflected line position: {}'.format(rb_fg_centre))
+   print('Reflected line position: {}'.format(int(rb_fg_centre)))
 
 Output:
 
