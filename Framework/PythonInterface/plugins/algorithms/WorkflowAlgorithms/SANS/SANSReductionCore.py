@@ -141,6 +141,8 @@ class SANSReductionCore(SANSReductionCoreBase):
         # ------------------------------------------------------------
         # Populate the output
         # ------------------------------------------------------------
+        replace_prop = False
+        workspace.getRun().addProperty("UserFile", state.save.user_file_name, replace_prop)
         self.setProperty("OutputWorkspace", workspace)
 
         # ------------------------------------------------------------
