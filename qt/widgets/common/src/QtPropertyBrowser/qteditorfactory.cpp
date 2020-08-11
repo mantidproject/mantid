@@ -138,7 +138,7 @@ static inline void setupTreeViewEditorMargin(QLayout *lt) {
 QtSpinBoxFactory::QtSpinBoxFactory(QObject *parent)
     : QtSpinBoxFactoryBase<QSpinBox>(parent) {
   d_ptr = new QtSpinBoxFactoryPrivate();
-  initailiseQPtr();
+  initializeQPtr();
 }
 
 /**
@@ -149,11 +149,11 @@ QtSpinBoxFactory::~QtSpinBoxFactory() {
   delete d_ptr;
 }
 /**
-    \class QtSpinBoxFactoryReadOnly
+    \class QtSpinBoxFactoryNoTimer
 
     \brief The QtSpinBoxFactory class provides QSpinBox widgets for
-    properties created by QtIntPropertyManager objects. The linedit of
-    the spinbox is read only.
+    properties created by QtIntPropertyManager objects. The spinbox has
+    a custom timer event to avoid double incrementing when the slot lags.
 
     \sa QtAbstractEditorFactory, QtIntPropertyManager
 */
@@ -161,16 +161,16 @@ QtSpinBoxFactory::~QtSpinBoxFactory() {
 /**
     Creates a factory with the given \a parent.
 */
-QtSpinBoxFactoryReadOnly::QtSpinBoxFactoryReadOnly(QObject *parent)
-    : QtSpinBoxFactoryBase<QSpinBoxReadOnly>(parent) {
-  d_ptr = new QtSpinBoxFactoryReadOnlyPrivate();
-  initailiseQPtr();
+QtSpinBoxFactoryNoTimer::QtSpinBoxFactoryNoTimer(QObject *parent)
+    : QtSpinBoxFactoryBase<QSpinBoxNoTimer>(parent) {
+  d_ptr = new QtSpinBoxFactoryNoTimerPrivate();
+  initializeQPtr();
 }
 
 /**
     Destroys this factory, and all the widgets it has created.
 */
-QtSpinBoxFactoryReadOnly::~QtSpinBoxFactoryReadOnly() {
+QtSpinBoxFactoryNoTimer::~QtSpinBoxFactoryNoTimer() {
   qDeleteAll(d_ptr->m_editorToProperty.keys());
   delete d_ptr;
 }

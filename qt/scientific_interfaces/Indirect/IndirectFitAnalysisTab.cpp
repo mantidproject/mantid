@@ -268,14 +268,8 @@ size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
 }
 
 void IndirectFitAnalysisTab::setModelFitFunction() {
-  auto future = QtConcurrent::run(
-      m_fitPropertyBrowser, &IndirectFitPropertyBrowser::getFittingFunction);
-
-  while (future.isRunning()) {
-    qApp->processEvents();
-  }
-
-  m_fittingModel->setFitFunction(future.result());
+  auto func = m_fitPropertyBrowser->getFittingFunction();
+  m_fittingModel->setFitFunction(func);
 }
 
 void IndirectFitAnalysisTab::setModelStartX(double startX) {

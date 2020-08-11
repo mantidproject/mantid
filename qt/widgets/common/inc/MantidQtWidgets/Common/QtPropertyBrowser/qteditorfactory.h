@@ -90,11 +90,13 @@
 #include "qtpropertybrowserutils_p.h"
 #include "qtpropertymanager.h"
 
+#include <QApplication>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QLineEdit>
 #include <QScrollBar>
 #include <QSpinBox>
+#include <QTimerEvent>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -106,7 +108,7 @@ class QToolButton;
 
 template <class SpinBox> class QtSpinBoxFactoryPrivateBase;
 class QtSpinBoxFactoryPrivate;
-class QtSpinBoxFactoryReadOnlyPrivate;
+class QtSpinBoxFactoryNoTimerPrivate;
 
 // Base QtSpinBoxFactory class
 template <class SpinBox>
@@ -124,7 +126,7 @@ protected:
   void disconnectPropertyManager(QtIntPropertyManager *manager) override;
   QtSpinBoxFactoryPrivateBase<SpinBox> *d_ptr;
   friend class QtSpinBoxFactoryPrivateBase<SpinBox>;
-  void initailiseQPtr() { d_ptr->q_ptr = this; }
+  void initializeQPtr() { d_ptr->q_ptr = this; }
 };
 /**
     \internal
@@ -178,24 +180,31 @@ void QtSpinBoxFactoryBase<SpinBox>::disconnectPropertyManager(
              SLOT(slotSingleStepChanged(QtProperty *, int)));
 }
 
-class QSpinBoxReadOnly : public QSpinBox {
+class QSpinBoxNoTimer : public QSpinBox {
   Q_OBJECT
 public:
-  QSpinBoxReadOnly(QWidget *parent = nullptr) : QSpinBox(parent) {
-    this->lineEdit()->setReadOnly(true);
-  };
-};
-
-class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactoryReadOnly
-    : public QtSpinBoxFactoryBase<QSpinBoxReadOnly> {
-  Q_OBJECT
-public:
-  QtSpinBoxFactoryReadOnly(QObject *parent = nullptr);
-  ~QtSpinBoxFactoryReadOnly();
+  QSpinBoxNoTimer(QWidget *parent = nullptr) : QSpinBox(parent){};
 
 private:
-  Q_DECLARE_PRIVATE(QtSpinBoxFactoryReadOnly)
-  Q_DISABLE_COPY(QtSpinBoxFactoryReadOnly)
+  void timerEvent(QTimerEvent *event) override {
+    // Override the timer event method and check if the user is actually holding
+    // the mouse buttons down
+    qApp->processEvents();
+    if (QApplication::mouseButtons() & Qt::LeftButton)
+      QSpinBox::timerEvent(event);
+  }
+};
+
+class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactoryNoTimer
+    : public QtSpinBoxFactoryBase<QSpinBoxNoTimer> {
+  Q_OBJECT
+public:
+  QtSpinBoxFactoryNoTimer(QObject *parent = nullptr);
+  ~QtSpinBoxFactoryNoTimer() override;
+
+private:
+  Q_DECLARE_PRIVATE(QtSpinBoxFactoryNoTimer)
+  Q_DISABLE_COPY(QtSpinBoxFactoryNoTimer)
   Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
   Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, int, int))
   Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(QtProperty *, int))
@@ -884,9 +893,9 @@ class QtSpinBoxFactoryPrivate : public QtSpinBoxFactoryPrivateBase<QSpinBox> {
   Q_DECLARE_PUBLIC(QtSpinBoxFactory)
 };
 
-class QtSpinBoxFactoryReadOnlyPrivate
-    : public QtSpinBoxFactoryPrivateBase<QSpinBoxReadOnly> {
-  Q_DECLARE_PUBLIC(QtSpinBoxFactoryReadOnly)
+class QtSpinBoxFactoryNoTimerPrivate
+    : public QtSpinBoxFactoryPrivateBase<QSpinBoxNoTimer> {
+  Q_DECLARE_PUBLIC(QtSpinBoxFactoryNoTimer)
 };
 
 // ------------ QtSpinBoxFactory
