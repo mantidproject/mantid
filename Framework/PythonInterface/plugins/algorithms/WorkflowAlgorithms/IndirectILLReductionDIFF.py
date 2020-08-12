@@ -36,7 +36,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
     def setUp(self):
         self.runs = self.getPropertyValue('SampleRuns').split(',')
         self.transpose = self.getProperty('Transpose').value
-        self.scan_parameter = self.getPropertyValue('ScanParameter')
+        self.scan_parameter = self.getPropertyValue('Observable')
         self.mask_start_pixels = self.getProperty('MaskPixelsFromStart').value
         self.mask_end_pixels = self.getProperty('MaskPixelsFromEnd').value
         self.output = self.getPropertyValue('OutputWorkspace')
@@ -53,7 +53,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         self.declareProperty("MaskPixelsFromEnd", 10, validator=IntBoundedValidator(lower=0),
                              doc="Number of pixels to mask at the end of each tube")
 
-        self.declareProperty("ScanParameter", "",
+        self.declareProperty("Observable", "sample.temperature",
                              doc="If multiple files, the parameter from SampleLog to use as an index when conjoined.")
 
         self.declareProperty("Transpose", False, doc="Transpose the results.")
