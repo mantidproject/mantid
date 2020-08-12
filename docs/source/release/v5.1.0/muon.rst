@@ -48,6 +48,7 @@ Improvements
 - Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to load a list of time zeros into a new property TimZeroList.
 - Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to add an option to not auto-correct the time by loaded timezero.
 - Fitting tab in Muon analysis and Frequency domain analysis GUI's are now disabled when no valid fitting data is present.
+- The ALC interface in workbench will now show errors by default. The error bars can also be turned on/off using the right-click plot menu.
 
 Bug fixes
 ---------
