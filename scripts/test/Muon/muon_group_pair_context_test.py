@@ -11,6 +11,7 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from unittest import mock
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_group_populated_by_two_workspace
+from mantid.simpleapi import CreateSampleWorkspace, LoadInstrument
 
 
 class MuonGroupPairContextTest(unittest.TestCase):
@@ -133,6 +134,34 @@ class MuonGroupPairContextTest(unittest.TestCase):
         workspace_list = self.context.get_group_workspace_names([[33333]], ['group1'], False)
 
         self.assertEqual(workspace_list, ['asymmetry_name_33333'])
+
+    def test_that_reset_to_default_groups_creates_correct_groups_and_pairs_for_single_period_data(self):
+        workspace = CreateSampleWorkspace()
+        LoadInstrument(workspace, InstrumentName="EMU", RewriteSpectraMap=True)
+
+        self.context.reset_group_and_pairs_to_default(workspace, 'EMU', 'longitudanal', 1)
+
+        self.assertEquals(self.context.group_names, ['fwd', 'bwd'])
+        self.assertEquals(self.context.pair_names, ['long'])
+        for group in self.context.groups:
+            self.assertEquals(group.periods, [1])
+    
+    def test_that_reset_to_default_groups_creates_correct_groups_and_pairs_for_multi_period_data(self):
+        workspace = CreateSampleWorkspace()
+        LoadInstrument(workspace, InstrumentName="EMU", RewriteSpectraMap=True)
+
+        self.context.reset_group_and_pairs_to_default(workspace, 'EMU', 'longitudanal', 2)
+
+        self.assertEquals(self.context.group_names, ['fwd1', 'fwd2', 'bwd1', 'bwd2'])
+        self.assertEquals(self.context.pair_names, ['long1', 'long2'])
+        self.assertEquals(self.context.groups[0].periods, [1])
+        self.assertEquals(self.context.groups[1].periods, [2])
+        self.assertEquals(self.context.groups[2].periods, [1])
+        self.assertEquals(self.context.pairs[0].forward_group, 'fwd1')
+        self.assertEquals(self.context.pairs[0].backward_group, 'bwd1')
+        self.assertEquals(self.context.pairs[1].forward_group, 'fwd2')
+        self.assertEquals(self.context.pairs[1].backward_group, 'bwd2')
+        self.assertEquals(self.context.selected, 'long1')
 
 
 if __name__ == '__main__':

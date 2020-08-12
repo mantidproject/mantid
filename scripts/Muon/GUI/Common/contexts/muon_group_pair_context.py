@@ -215,8 +215,26 @@ class MuonGroupPairContext(object):
     def show(self, name, run):
         self[name].show(str(run))
 
-    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
-        self._groups, self._pairs, self._selected = get_default_grouping(workspace, instrument, main_field_direction)
+    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods=1):
+        default_groups, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
+        if num_periods == 1:
+            self._groups = default_groups
+            self._pairs = default_pairs
+            self._selected = default_selected
+        else:
+            periods = range(num_periods + 1)[1:]
+            self._groups = []
+            self._pairs = []
+            for group in default_groups:
+                for period in periods:
+                    self._groups.append(MuonGroup(group.name + str(period), group.detectors, [period]))
+
+            for pair in default_pairs:
+                for period in periods:
+                    self._pairs.append(MuonPair(pair.name + str(period), pair.forward_group + str(period),
+                                       pair.backward_group + str(period), pair.alpha))
+
+            self._selected = self.pair_names[0]
 
     def _check_name_unique(self, name):
         for item in self._groups + self.pairs:
