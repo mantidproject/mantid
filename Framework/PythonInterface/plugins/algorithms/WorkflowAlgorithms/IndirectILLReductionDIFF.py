@@ -86,8 +86,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
             raise RuntimeError("Unable to find incident energy for Doppler mode")
 
         Rebin(InputWorkspace=ws, OutputWorkspace=self.output, Params=[0, number_of_channels, number_of_channels])
-
-        self._normalize_by_monitor(ws)
+        self._normalize_by_monitor(self.output)
 
         ConvertSpectrumAxis(InputWorkspace=self.output,
                             OutputWorkspace=self.output,
@@ -97,9 +96,11 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         ConvertToPointData(InputWorkspace=self.output, OutputWorkspace=self.output)
 
-        ConjoinXRuns(InputWorkspaces=self.output, OutputWorkspace=self.output)
+        ConjoinXRuns(InputWorkspaces=self.output, FailBehaviour="Stop", OutputWorkspace="conjoined_" + self.output)
+        mtd[self.output].delete()
 
-        ExtractUnmaskedSpectra(InputWorkspace=self.output, OutputWorkspace=self.output)
+        ExtractUnmaskedSpectra(InputWorkspace="conjoined_" + self.output, OutputWorkspace=self.output)
+        mtd["conjoined_" + self.output].delete()
 
         if self.transpose:
             Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
