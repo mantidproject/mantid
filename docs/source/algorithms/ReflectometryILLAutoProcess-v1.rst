@@ -114,10 +114,9 @@ Usage
     The R(Q) workspace at second angle has 94 points
     The R(Q) workspace at second angle has 280 points
 
-**Example - Round Robin with 3 angle configurations and multiple numors summed**
+**Example - Full treatment with 3 angles and multiple numors summed**
 
-.. plot::
-   :include-source:
+.. code-block:: python
 
    from mantid.simpleapi import *
    config['default.facility'] = 'ILL'
@@ -169,7 +168,7 @@ Usage
    ax.set_xlabel('Q [$\AA^{-1}$]')
    ax.set_ylabel('R')
    ax.legend()
-   #fig.show()
+   fig.show()
 
 References
 ----------
