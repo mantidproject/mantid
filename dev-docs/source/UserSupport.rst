@@ -30,7 +30,7 @@ Bugs and Error Reports
 
 1.	Users can report bugs via the `Mantid Help Forum <https://forum.mantidproject.org/>`_ or the `Mantid Help Email <mantid-help@mantidproject.org>`_, or from collected **Error Reports**. Currently this is a quick first contact with the team, but doesn't give much detail about the usage or unexpected error.
 2.	The bug is verified and reproduced by the support team.
-3.	The impact and importance is assessed by the support team member by contacting the users, instrument scientists, developers or project manager as appropriate.
+3.	The impact and importance are assessed by the support team member by contacting the users, instrument scientists, developers or project manager as appropriate.
 4.	A GitHub issue to resolve the problem is created if appropriate and/or workaround tested if possible.
 5.	The user is contacted to give a link to the created issue and/or workaround solution, by the support team.
 6.	When any issue is completed naming a user, that user is contacted to let them know it will be available in the nightly build and next release.  The gatekeeper that merges the fix should message the appropriate developer, to remind them to contact the original reporter. This could simply be through adding a comment while merging that points this out.
@@ -48,6 +48,8 @@ For performance profiling check out our `recommended tools <http://developer.man
 
 Windows
 =======
+
+For a full release, ``C:\MantidInstall\`` is likely the correct install path. Take care to readjust this to ``C:\MantidNightlyInstall\`` if you are diagnosing a nightly version.
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
@@ -88,8 +90,8 @@ If this does not work, try launching with:
 
 
 6. Turn off **Server Checks**: Open ``C:\MantidInstall\bin\Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrumentfile : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantidversion : ``CheckMantidVersion.OnStartup = 0``
+	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
 	c. Usage Reporting: ``usagereports.enabled = 0``
 	d. Project Recovery: ``projectRecovery.enabled=false``
 
@@ -119,7 +121,7 @@ Advanced options:
     cd C:\MantidInstall\bin\
     python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
-9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything outside of ``C:`MantidInstall`` could be a problem.
+9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything outside of ``C:\MantidInstall`` could be a problem.
 
 
 10.  Try to open workbench. After it fails, open **Event Viewer** (just search in the Windows menu bar) and selected ``Windows Logs->Application``. Double-click on the relevant error line/s and send the crash information to the dev team.
@@ -127,10 +129,12 @@ Advanced options:
 11. **Process Monitor**: `Download here <https://docs.microsoft.com/en-us/sysinternals/downloads/procmon>`_. Extract the ProcessMonitor.zip and run Procmon.exe (which requires admin credentials). Set up a configuration filter for ``Process Name contains python``, click ``ADD``, ``APPLY``, ``OK`` and then launch Mantid Workbench, then back in Process Monitor select File>Save and save as a ``LogFile.PML`` file and send to the dev team.
 
 
-.. _Trouble_Ubuntu:
+.. _Trouble_Linux:
 
-Ubuntu
+Linux
 ======
+
+For a full release, ``/opt/Mantid/`` is likely the correct install path. Take care to readjust this to ``/opt/mantidnightly/`` if you are diagnosing a nightly version.
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
@@ -175,8 +179,8 @@ Ubuntu
 
 
 7. Turn off **Server Checks**: Open ``$HOME/.mantid/Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrumentfile : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantidversion : ``CheckMantidVersion.OnStartup = 0``
+	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
 	c. Usage Reporting: ``usagereports.enabled = 0``
 	d. Project Recovery: ``projectRecovery.enabled=false``
 
@@ -199,7 +203,7 @@ Advanced Options:
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
 
-10. Further diagnosis for proccess monitoring : `strace <https://strace.io/>`_.
+10. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
 
 
 .. _Trouble_MacOS:
@@ -246,8 +250,8 @@ If this does not work, try launching with:
 
 
 6. Turn off **Server Checks**: Open ``$HOME/.mantid/Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrumentfile : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantidversion : ``CheckMantidVersion.OnStartup = 0``
+	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
 	c. Usage Reporting: ``usagereports.enabled = 0``
 	d. Project Recovery: ``projectRecovery.enabled=false``
 
@@ -282,4 +286,4 @@ Advanced Options:
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
 
-10. Further diagnosis for proccess monitoring : `dtrace <http://dtrace.org/>`_.
+10. Further diagnosis for process monitoring: `dtrace <http://dtrace.org/>`_.
