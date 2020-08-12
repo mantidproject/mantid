@@ -71,6 +71,7 @@ private:
 
   std::vector<std::string> m_supportedInstruments{"IN16B"};
   LoadHelper m_loader;
+  std::string m_loadOption;
 };
 
 } // namespace DataHandling
