@@ -36,5 +36,6 @@ Fixed
 #####
 
 - A bug has been fixed where processing old data could fail if it involves -add files produced from 2013 or earlier.
+- :ref:`SaveCanSAS1D <algm-SaveCanSAS1D>` will now write out the user or TOML filename when writing .xml files from the new interface.
 
 :ref:`Release 5.1.0 <v5.1.0>`
