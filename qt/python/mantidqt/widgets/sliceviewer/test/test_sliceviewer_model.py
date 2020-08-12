@@ -205,7 +205,7 @@ def create_mock_sliceinfo(indices: tuple):
     :param indices: 3D indices defining permuation order of dimensions
     """
     slice_info = MagicMock()
-    slice_info.transform.side_effect = lambda x: [x[indices[0]], x[indices[1]], x[indices[2]]]
+    slice_info.transform.side_effect = lambda x: np.array([x[indices[0]], x[indices[1]], x[indices[2]]])
     return slice_info
 
 

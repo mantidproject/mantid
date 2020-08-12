@@ -211,7 +211,7 @@ struct DeltaSubType : public TemplateSubTypeImpl<bool> {
 };
 
 struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
-  QString name() const override { return "TempCorrection"; }
+  QString name() const override { return "ConvTempCorrection"; }
 };
 
 void applyToFitType(FitType fitType,

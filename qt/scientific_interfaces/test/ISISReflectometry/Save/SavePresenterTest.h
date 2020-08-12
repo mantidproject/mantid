@@ -38,7 +38,7 @@ public:
 
   SavePresenterTest()
       : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom),
-        m_prefix("testoutput_"), m_includeTitle(true), m_separator(","),
+        m_prefix("testoutput_"), m_includeHeader(true), m_separator(","),
         m_includeQResolution(true) {}
 
   void testPresenterSubscribesToView() {
@@ -242,7 +242,7 @@ public:
     expectSetWorkspaceListFromADS(workspaceNames);
     expectNotProcessingOrAutoreducing();
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
-    EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsEnabled();
     presenter.notifyReductionPaused();
     verifyAndClear();
   }
@@ -260,7 +260,7 @@ public:
     auto presenter = makePresenter();
     enableAutosave(presenter);
     expectProcessing();
-    EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsDisabled();
     presenter.notifyReductionResumed();
     verifyAndClear();
   }
@@ -269,7 +269,7 @@ public:
     auto presenter = makePresenter();
     disableAutosave(presenter);
     expectProcessing();
-    EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsEnabled();
     presenter.notifyReductionResumed();
     verifyAndClear();
   }
@@ -296,7 +296,7 @@ public:
     auto presenter = makePresenter();
     enableAutosave(presenter);
     expectAutoreducing();
-    EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsDisabled();
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
@@ -305,7 +305,7 @@ public:
     auto presenter = makePresenter();
     disableAutosave(presenter);
     expectAutoreducing();
-    EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
+    expectFileFormatAndLocationControlsEnabled();
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
@@ -334,6 +334,80 @@ public:
   void testNotifyMainPresenterSettingsChanged() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, setBatchUnsaved(true));
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListEnabledForCustomFormatIfHeaderEnabled() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::Custom);
+    expectHeaderOptionEnabled();
+    expectLogListEnabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListDisabledForCustomFormatIfHeaderDisabled() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::Custom);
+    expectHeaderOptionDisabled();
+    expectLogListDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testCustomOptionsEnabledForCustomFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::Custom);
+    expectCustomOptionsEnabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListEnabledForILLCosmosFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ILLCosmos);
+    expectLogListEnabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testCustomOptionsDisabledForILLCosmosFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ILLCosmos);
+    expectCustomOptionsDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListDisabledForANSTOFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ANSTO);
+    expectLogListDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testCustomOptionsDisabledForANSTOFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ANSTO);
+    expectCustomOptionsDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testLogListDisabledForThreeColumnFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ThreeColumn);
+    expectLogListDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testCustomOptionsDisabledForThreeColumnFormat() {
+    auto presenter = makePresenter();
+    expectFileFormat(NamedFormat::ThreeColumn);
+    expectCustomOptionsDisabled();
     presenter.notifySettingsChanged();
     verifyAndClear();
   }
@@ -433,9 +507,9 @@ private:
         .Times(1)
         .WillOnce(Return(static_cast<int>(m_fileFormat)));
     EXPECT_CALL(m_view, getPrefix()).Times(1).WillOnce(Return(m_prefix));
-    EXPECT_CALL(m_view, getTitleCheck())
+    EXPECT_CALL(m_view, getHeaderCheck())
         .Times(1)
-        .WillOnce(Return(m_includeTitle));
+        .WillOnce(Return(m_includeHeader));
     EXPECT_CALL(m_view, getSeparator()).Times(1).WillOnce(Return(m_separator));
     EXPECT_CALL(m_view, getQResolutionCheck())
         .Times(1)
@@ -451,7 +525,7 @@ private:
     expectGetValidSaveDirectory();
     expectGetSaveParametersFromView();
     auto fileFormatOptions =
-        FileFormatOptions(m_fileFormat, m_prefix, m_includeTitle, m_separator,
+        FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator,
                           m_includeQResolution);
     EXPECT_CALL(*m_asciiSaver,
                 save(m_savePath, workspaceNames, logs, fileFormatOptions))
@@ -479,6 +553,52 @@ private:
         .WillOnce(Return(false));
   }
 
+  void expectFileFormatAndLocationControlsEnabled() {
+    EXPECT_CALL(m_view, enableFileFormatControls()).Times(1);
+    EXPECT_CALL(m_view, enableLocationControls()).Times(1);
+  }
+
+  void expectFileFormatAndLocationControlsDisabled() {
+    EXPECT_CALL(m_view, disableFileFormatControls()).Times(1);
+    EXPECT_CALL(m_view, disableLocationControls()).Times(1);
+  }
+
+  void expectFileFormat(NamedFormat fileFormat) {
+    EXPECT_CALL(m_view, getFileFormatIndex())
+        .Times(AtLeast(1))
+        .WillOnce(Return(static_cast<int>(fileFormat)));
+  }
+
+  void expectHeaderOptionEnabled() {
+    EXPECT_CALL(m_view, getHeaderCheck())
+        .Times(AtLeast(1))
+        .WillOnce(Return(true));
+  }
+
+  void expectHeaderOptionDisabled() {
+    EXPECT_CALL(m_view, getHeaderCheck())
+        .Times(AtLeast(1))
+        .WillOnce(Return(false));
+  }
+
+  void expectLogListEnabled() { EXPECT_CALL(m_view, enableLogList()).Times(1); }
+
+  void expectLogListDisabled() {
+    EXPECT_CALL(m_view, disableLogList()).Times(1);
+  }
+
+  void expectCustomOptionsEnabled() {
+    EXPECT_CALL(m_view, enableHeaderCheckBox()).Times(1);
+    EXPECT_CALL(m_view, enableQResolutionCheckBox()).Times(1);
+    EXPECT_CALL(m_view, enableSeparatorButtonGroup()).Times(1);
+  }
+
+  void expectCustomOptionsDisabled() {
+    EXPECT_CALL(m_view, disableHeaderCheckBox()).Times(1);
+    EXPECT_CALL(m_view, disableQResolutionCheckBox()).Times(1);
+    EXPECT_CALL(m_view, disableSeparatorButtonGroup()).Times(1);
+  }
+
   NiceMock<MockSaveView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockAsciiSaver> *m_asciiSaver;
@@ -486,7 +606,7 @@ private:
   // file format options for ascii saver
   NamedFormat m_fileFormat;
   std::string m_prefix;
-  bool m_includeTitle;
+  bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;
 };

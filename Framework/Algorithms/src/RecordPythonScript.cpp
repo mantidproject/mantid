@@ -26,7 +26,9 @@ const std::string RecordPythonScript::alias() const { return ""; }
 //----------------------------------------------------------------------------------------------
 /// Constructor
 RecordPythonScript::RecordPythonScript()
-    : Algorithms::GeneratePythonScript(), API::AlgorithmObserver() {}
+    : Algorithms::GeneratePythonScript(), API::AlgorithmObserver() {
+  useAlgorithm("GeneratePythonScript", 1);
+}
 
 //----------------------------------------------------------------------------------------------
 

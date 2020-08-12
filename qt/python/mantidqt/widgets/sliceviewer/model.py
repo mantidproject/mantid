@@ -261,7 +261,7 @@ class SliceViewerModel:
             # assume orthogonal projection
             proj_matrix = np.diag([1., 1., 1.])
 
-        display_indices = slice_info.transform([0, 1, 2])
+        display_indices = slice_info.transform([0, 1, 2]).astype(int)
         return NonOrthogonalTransform.from_lattice(
             lattice,
             x_proj=proj_matrix[:, display_indices[0]],

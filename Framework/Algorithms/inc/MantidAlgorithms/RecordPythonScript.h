@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/GeneratePythonScript.h"
 
@@ -26,7 +27,8 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL RecordPythonScript
     : public Algorithms::GeneratePythonScript,
-      public API::AlgorithmObserver {
+      public API::AlgorithmObserver,
+      public API::DeprecatedAlgorithm {
 public:
   RecordPythonScript();
   /// Algorithm's name for identification

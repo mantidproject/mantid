@@ -436,7 +436,7 @@ void Decoder::decodeSave(const QtSaveView *gui,
                          const QMap<QString, QVariant> &map) {
   gui->m_ui.savePathEdit->setText(map[QString("savePathEdit")].toString());
   gui->m_ui.prefixEdit->setText(map[QString("prefixEdit")].toString());
-  gui->m_ui.titleCheckBox->setChecked(map[QString("titleCheckBox")].toBool());
+  gui->m_ui.headerCheckBox->setChecked(map[QString("headerCheckBox")].toBool());
   gui->m_ui.qResolutionCheckBox->setChecked(
       map[QString("qResolutionCheckBox")].toBool());
   gui->m_ui.commaRadioButton->setChecked(
