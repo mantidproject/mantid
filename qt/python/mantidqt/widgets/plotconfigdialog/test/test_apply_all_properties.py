@@ -126,7 +126,7 @@ def _run_apply_properties_on_figure_with_curve(curve_view_mock):
         with patch.object(presenter.tab_widget_presenters[1], 'axis_changed',
                           lambda: None):
             presenter.apply_properties()
-    return ax, curve_view_mock
+    return ax
 
 
 def _run_apply_properties_on_figure_with_image():
@@ -161,7 +161,7 @@ def _run_apply_properties_on_figure_with_legend(curve_view_mock):
         with patch.object(presenter.tab_widget_presenters[1], 'axis_changed',
                           lambda: None):
             presenter.apply_properties()
-    return ax, curve_view_mock
+    return ax
 
 
 class ApplyAllPropertiesTest(unittest.TestCase):
@@ -182,7 +182,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.curve_view_patch = patch(CURVE_VIEW, lambda x: cls.curve_view_mock)
         cls.curve_view_patch.start()
 
-        cls.ax, _ = _run_apply_properties_on_figure_with_curve(cls.curve_view_mock)
+        cls.ax = _run_apply_properties_on_figure_with_curve(cls.curve_view_mock)
         cls.new_curve = cls.ax.containers[0]
 
         # Mock images tab view
@@ -201,7 +201,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.legend_view_patch = patch(LEGEND_VIEW, lambda x: cls.legend_view_mock)
         cls.legend_view_patch.start()
 
-        cls.legend_ax, _ = _run_apply_properties_on_figure_with_legend(cls.curve_view_mock)
+        cls.legend_ax = _run_apply_properties_on_figure_with_legend(cls.curve_view_mock)
         cls.new_legend = cls.legend_ax.get_legend()
 
     @classmethod
