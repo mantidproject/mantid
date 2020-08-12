@@ -91,6 +91,7 @@ public:
   void disableContextMenu();
 
   void allowRedraws(bool state);
+  void replotData();
 
 public slots:
   void clear();
@@ -98,6 +99,7 @@ public slots:
   void resetView();
   void setCanvasColour(const QColor &colour);
   void setLinesWithErrors(const QStringList &labels);
+  void setLinesWithoutErrors(const QStringList &labels);
   void showLegend(bool visible);
   void replot();
 
@@ -138,6 +140,7 @@ private:
   void switchPlotTool(QAction *selected);
   void setXScaleType(QAction *selected);
   void setYScaleType(QAction *selected);
+  void setErrorBars(QAction *selected);
   void setScaleType(AxisID id, const QString &actionName);
   void toggleLegend(const bool checked);
 
@@ -147,10 +150,29 @@ private:
   // Block redrawing from taking place
   bool m_allowRedraws = true;
 
+  // Curve configuration
+  struct PlotCurveConfiguration {
+    Mantid::API::MatrixWorkspace_sptr ws;
+    QString lineName;
+    QColor lineColour;
+    QHash<QString, QVariant> plotKwargs;
+    size_t wsIndex;
+
+    PlotCurveConfiguration(Mantid::API::MatrixWorkspace_sptr ws,
+                           QString lineName, size_t wsIndex, QColor lineColour,
+                           QHash<QString, QVariant> plotKwargs)
+        : ws(ws), lineName(lineName), wsIndex(wsIndex), lineColour(lineColour),
+          plotKwargs(plotKwargs) {};
+  };
+
   // Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   // Map a line label to the boolean indicating whether error bars are shown
   QHash<QString, bool> m_lines;
+  // Map a line name to a plot configuration
+  QMap<QString, QSharedPointer<PlotCurveConfiguration>> m_plottedLines;
+  // Cache of line names which always have errors
+  QHash<QString, bool> m_linesErrorsCache;
   // Map an axis to an override axis label
   QMap<AxisID, char const *> m_axisLabels;
   // Range selector widgets
@@ -174,6 +196,7 @@ private:
   QAction *m_contextResetView;
   QActionGroup *m_contextXScale, *m_contextYScale;
   QAction *m_contextLegend;
+  QActionGroup *m_contextErrorBars;
   bool m_context_enabled;
 };
 
