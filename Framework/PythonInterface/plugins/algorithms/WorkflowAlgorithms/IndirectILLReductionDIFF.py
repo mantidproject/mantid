@@ -120,7 +120,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
     def PyExec(self):
         self.setUp()
         LoadAndMerge(Filename=self.getPropertyValue('SampleRuns'), OutputWorkspace=self.output,
-                     LoaderOptions={"LoadDiffractionData": True}, startProgress=0, endProgress=0.4)
+                     LoaderOptions={"LoadDetectors": "Diffractometer"}, startProgress=0, endProgress=0.4)
 
         if len(self.runs) > 1:
             run = mtd[mtd[self.output].getNames()[0]].getRun()
