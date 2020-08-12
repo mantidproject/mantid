@@ -14,6 +14,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include <memory>
 #include <sstream>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -73,9 +74,10 @@ public:
   std::pair<std::string, int>
   subscribe(std::unique_ptr<Kernel::AbstractInstantiator<T>> instantiator,
             const SubscribeAction replaceExisting = ErrorIfExists) {
-    std::shared_ptr<IAlgorithm> tempAlg = instantiator->createInstance();
+    const auto tempAlg = instantiator->createInstance();
     const int version = extractAlgVersion(tempAlg);
     const std::string className = extractAlgName(tempAlg);
+    const std::string alias = extractAlgAlias(tempAlg);
     typename VersionMap::const_iterator it = m_vmap.find(className);
     if (!className.empty()) {
       const std::string key = createName(className, version);
@@ -97,6 +99,10 @@ public:
     } else {
       throw std::invalid_argument("Cannot register empty algorithm name");
     }
+
+    if (!alias.empty())
+      m_amap[alias] = className;
+
     return std::make_pair(className, version);
   }
   /// Unsubscribe the given algorithm
@@ -120,7 +126,7 @@ public:
 
   /// Returns algorithm descriptors.
   std::vector<AlgorithmDescriptor>
-  getDescriptors(bool includeHidden = false) const;
+  getDescriptors(bool includeHidden = false, bool includeAliases = true) const;
 
   /// unmangles the names used as keys into the name and version
   std::pair<std::string, int> decodeName(const std::string &mangledName) const;
@@ -133,6 +139,9 @@ private:
   extractAlgName(const std::shared_ptr<IAlgorithm> &alg) const;
   /// Extract the version of an algorithm
   int extractAlgVersion(const std::shared_ptr<IAlgorithm> &alg) const;
+  /// Extract the alias of an algorithm
+  const std::string
+  extractAlgAlias(const std::shared_ptr<IAlgorithm> &alg) const;
 
   /// Create an algorithm object with the specified name
   std::shared_ptr<Algorithm> createAlgorithm(const std::string &name,
@@ -151,6 +160,10 @@ private:
   using VersionMap = std::map<std::string, int>;
   /// The map holding the registered class names and their highest versions
   VersionMap m_vmap;
+  /// A typedef for the map pf algorithm aliases
+  using AliasMap = std::unordered_map<std::string, std::string>;
+  /// The map holding the alias names of registered algorithms
+  AliasMap m_amap;
 };
 
 using AlgorithmFactory = Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;

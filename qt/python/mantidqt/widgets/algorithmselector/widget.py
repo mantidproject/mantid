@@ -33,9 +33,6 @@ def get_name_and_version_from_item_label(item_label):
     match = re.match(r'(\w+) v\.(\d+)', item_label)
     if match:
         return SelectedAlgorithm(name=match.group(1), version=int(match.group(2)))
-    # match = re.match(r'(\w+) \[(\w+)\] v\.(\d+)', item_label)
-    # if match is not None:
-    #     return SelectedAlgorithm(name=match.group(2), version=int(match.group(3)))
     return None
 
 
@@ -172,9 +169,6 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         if i < 0:
             return None
         alg_name = self.search_box.currentText()
-        # index = alg_name.find('[')
-        # if index != -1:
-        #     alg_name = alg_name[index+1:len(alg_name)-1]
         return SelectedAlgorithm(name=alg_name, version=-1)
 
     def _on_search_box_selection_changed(self, text):

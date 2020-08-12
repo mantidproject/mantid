@@ -9,6 +9,7 @@
 #include "FakeAlgorithms.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/Instantiator.h"
+#include <algorithm>
 #include <cxxtest/TestSuite.h>
 
 class AlgorithmFactoryTest : public CxxTest::TestSuite {
@@ -154,6 +155,7 @@ public:
     algFactory.subscribe(std::move(newTwo));
 
     TS_ASSERT_THROWS_NOTHING(algFactory.create("ToyAlgorithm", -1));
+    TS_ASSERT_THROWS_NOTHING(algFactory.create("Dog", -1));
     TS_ASSERT_THROWS_ANYTHING(algFactory.create("AlgorithmDoesntExist", -1));
 
     TS_ASSERT_THROWS_NOTHING(algFactory.create("ToyAlgorithm", 1));
@@ -171,30 +173,116 @@ public:
     algFactory.unsubscribe("ToyAlgorithm", 2);
   }
 
-  void testGetDescriptors() {
+  void testGetDescriptorsWithoutAliases() {
     auto &algFactory = AlgorithmFactory::Instance();
-
-    algFactory.subscribe<ToyAlgorithm>();
     std::vector<AlgorithmDescriptor> descriptors;
-    TS_ASSERT_THROWS_NOTHING(descriptors = algFactory.getDescriptors(true));
+    descriptors = algFactory.getDescriptors(false, false);
+    const auto sizeDescExcludeBefore = descriptors.size();
+    algFactory.subscribe<ToyAlgorithm>();
+    descriptors = algFactory.getDescriptors(false, false);
+    const auto sizeDescExcludeAfter = descriptors.size();
 
-    size_t noOfAlgs = descriptors.size();
-    std::vector<AlgorithmDescriptor>::const_iterator descItr =
-        descriptors.begin();
-    bool foundAlg = false;
-    while (descItr != descriptors.end() && !foundAlg) {
-      foundAlg = ("Cat" == descItr->category) &&
-                 ("ToyAlgorithm" == descItr->name) &&
-                 ("Dog" == descItr->alias) && (1 == descItr->version);
-      ++descItr;
-    }
-    TS_ASSERT(foundAlg);
+    auto resAlg = std::find_if(
+        descriptors.cbegin(), descriptors.cend(),
+        [](const AlgorithmDescriptor &d) {
+          return (("Cat" == d.category) && ("ToyAlgorithm" == d.name) &&
+                  ("Dog" == d.alias) && (1 == d.version));
+        });
+
+    auto resAlias =
+        std::find_if(descriptors.cbegin(), descriptors.cend(),
+                     [](const AlgorithmDescriptor &d) {
+                       return (("Cat" == d.category) && ("Dog" == d.name) &&
+                               ("" == d.alias) && (1 == d.version));
+                     });
+
+    TS_ASSERT_EQUALS(sizeDescExcludeAfter - sizeDescExcludeBefore, 1);
+    TS_ASSERT(resAlg != descriptors.cend());
+    TS_ASSERT(resAlias == descriptors.cend());
 
     algFactory.unsubscribe("ToyAlgorithm", 1);
 
-    TS_ASSERT_THROWS_NOTHING(descriptors = algFactory.getDescriptors(true));
+    descriptors = algFactory.getDescriptors(true, false);
+    const auto sizeDescIncludeBefore = descriptors.size();
+    algFactory.subscribe<ToyAlgorithm>();
+    descriptors = algFactory.getDescriptors(true, false);
+    const auto sizeDescIncludeAfter = descriptors.size();
 
-    TS_ASSERT_EQUALS(noOfAlgs - 1, descriptors.size());
+    resAlg = std::find_if(descriptors.cbegin(), descriptors.cend(),
+                          [](const AlgorithmDescriptor &d) {
+                            return (("Cat" == d.category) &&
+                                    ("ToyAlgorithm" == d.name) &&
+                                    ("Dog" == d.alias) && (1 == d.version));
+                          });
+
+    resAlias =
+        std::find_if(descriptors.cbegin(), descriptors.cend(),
+                     [](const AlgorithmDescriptor &d) {
+                       return (("Cat" == d.category) && ("Dog" == d.name) &&
+                               ("" == d.alias) && (1 == d.version));
+                     });
+
+    TS_ASSERT_EQUALS(sizeDescIncludeAfter - sizeDescIncludeBefore, 1);
+    TS_ASSERT(resAlg != descriptors.cend());
+    TS_ASSERT(resAlias == descriptors.cend());
+
+    algFactory.unsubscribe("ToyAlgorithm", 1);
+  }
+
+  void testGetDescriptorsWithAliases() {
+    auto &algFactory = AlgorithmFactory::Instance();
+    std::vector<AlgorithmDescriptor> descriptors;
+    descriptors = algFactory.getDescriptors(false, true);
+    const auto sizeDescExcludeBefore = descriptors.size();
+    algFactory.subscribe<ToyAlgorithm>();
+    descriptors = algFactory.getDescriptors(false, true);
+    const auto sizeDescExcludeAfter = descriptors.size();
+
+    auto resAlg = std::find_if(
+        descriptors.cbegin(), descriptors.cend(),
+        [](const AlgorithmDescriptor &d) {
+          return (("Cat" == d.category) && ("ToyAlgorithm" == d.name) &&
+                  ("Dog" == d.alias) && (1 == d.version));
+        });
+
+    auto resAlias =
+        std::find_if(descriptors.cbegin(), descriptors.cend(),
+                     [](const AlgorithmDescriptor &d) {
+                       return (("Cat" == d.category) && ("Dog" == d.name) &&
+                               ("" == d.alias) && (1 == d.version));
+                     });
+
+    TS_ASSERT_EQUALS(sizeDescExcludeAfter - sizeDescExcludeBefore, 2);
+    TS_ASSERT(resAlg != descriptors.cend());
+    TS_ASSERT(resAlias != descriptors.cend());
+
+    algFactory.unsubscribe("ToyAlgorithm", 1);
+
+    descriptors = algFactory.getDescriptors(true, true);
+    const auto sizeDescIncludeBefore = descriptors.size();
+    algFactory.subscribe<ToyAlgorithm>();
+    descriptors = algFactory.getDescriptors(true, true);
+    const auto sizeDescIncludeAfter = descriptors.size();
+
+    resAlg = std::find_if(descriptors.cbegin(), descriptors.cend(),
+                          [](const AlgorithmDescriptor &d) {
+                            return (("Cat" == d.category) &&
+                                    ("ToyAlgorithm" == d.name) &&
+                                    ("Dog" == d.alias) && (1 == d.version));
+                          });
+
+    resAlias =
+        std::find_if(descriptors.cbegin(), descriptors.cend(),
+                     [](const AlgorithmDescriptor &d) {
+                       return (("Cat" == d.category) && ("Dog" == d.name) &&
+                               ("" == d.alias) && (1 == d.version));
+                     });
+
+    TS_ASSERT_EQUALS(sizeDescIncludeAfter - sizeDescIncludeBefore, 2);
+    TS_ASSERT(resAlg != descriptors.cend());
+    TS_ASSERT(resAlias != descriptors.cend());
+
+    algFactory.unsubscribe("ToyAlgorithm", 1);
   }
 
   void testGetCategories() {
