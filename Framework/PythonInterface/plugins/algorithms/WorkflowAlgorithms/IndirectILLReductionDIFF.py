@@ -18,6 +18,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
     runs = None
     mode = None
     transpose = None
+    scan_parameter = None
     output = None
     progress = None
 
@@ -32,8 +33,9 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
     def setUp(self):
         self.runs = self.getPropertyValue('SampleRuns').split(',')
-        self.output = self.getPropertyValue('OutputWorkspace')
         self.transpose = self.getProperty('Transpose').value
+        self.scan_parameter = self.getPropertyValue('ScanParameter')
+        self.output = self.getPropertyValue('OutputWorkspace')
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
     def PyInit(self):
@@ -41,6 +43,9 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output workspace group containing reduced data.')
+
+        self.declareProperty("ScanParameter", "",
+                             doc="If multiple files, the parameter from SampleLog to use as an index when conjoined.")
 
         self.declareProperty("Transpose", False, doc="Transpose the results.")
 
@@ -96,7 +101,10 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         ConvertToPointData(InputWorkspace=self.output, OutputWorkspace=self.output)
 
-        ConjoinXRuns(InputWorkspaces=self.output, FailBehaviour="Stop", OutputWorkspace="conjoined_" + self.output)
+        ConjoinXRuns(InputWorkspaces=self.output,
+                     SampleLogAsXAxis=self.scan_parameter,
+                     FailBehaviour="Stop",
+                     OutputWorkspace="conjoined_" + self.output)
         mtd[self.output].delete()
 
         ExtractUnmaskedSpectra(InputWorkspace="conjoined_" + self.output, OutputWorkspace=self.output)
