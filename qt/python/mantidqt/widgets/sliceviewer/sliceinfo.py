@@ -6,14 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt.
 # std imports
-from typing import Tuple, Sequence, Union
+from typing import Any, Tuple, Sequence, Optional
 
 # 3rd party
 from mantid.api import SpecialCoordinateSystem
 import numpy as np
 
 # Types
-SlicePointType = Sequence[Union[None, float]]
+SlicePointType = Optional[float]
 DimensionRange = Tuple[float, float]
 DimensionRangeCollection = Sequence[DimensionRange]
 
@@ -32,17 +32,28 @@ class SliceInfo:
                or None for a non-slice dimension
         qflags: A list of booleans indicating if a dimension is a Q dimension or not.
                 There can only be a maximum of 3 dimensions flagged.
+        nonortho_transform: An optional transform object defining tr/inv_tr methods
+                            to transform to rectilinear system and back.
     """
-    def __init__(self, *, frame: SpecialCoordinateSystem, point: SlicePointType, transpose: bool,
-                 range: DimensionRangeCollection, qflags: Sequence[bool]):
+
+    def __init__(self,
+                 *,
+                 frame: SpecialCoordinateSystem,
+                 point: SlicePointType,
+                 transpose: bool,
+                 range: DimensionRangeCollection,
+                 qflags: Sequence[bool],
+                 nonortho_transform: Optional[Any] = None):
         assert len(point) == len(qflags)
-        assert 3 >= sum(1 for i in filter(lambda x: x is True, qflags)
-                        ), "A maximum of 3 spatial dimensions can be specified"
+        assert 3 >= sum(1 for i in filter(
+            lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"
         self.frame = frame
         self.slicepoint = point
         self.range = range
         self._slicevalue_z, self._slicewidth_z = (None, ) * 2
         self._display_x, self._display_y, self._display_z = (None, ) * 3
+        self._axes_tr = _unit_transform if nonortho_transform is None else nonortho_transform.tr
+
         self._init(transpose, qflags)
 
     @property
@@ -66,13 +77,14 @@ class SliceInfo:
         """
         return self._nonorthogonal_axes_supported
 
-    def transform(self, point) -> np.ndarray:
+    def transform(self, point: Sequence) -> np.ndarray:
         """Transform a point to the slice frame.
         It returns a ndarray(X,Y,Z) where X,Y are coordinates of X,Y of the display
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
         """
-        return np.array((point[self._display_x], point[self._display_y], point[self._display_z]))
+        return np.array((*self._axes_tr(point[self._display_x], point[self._display_y]),
+                         point[self._display_z]))
 
     # private api
     def _init(self, transpose: bool, qflags: Sequence[bool]):
@@ -107,3 +119,11 @@ class SliceInfo:
             self._slicewidth_z = z_range[1] - z_range[0]
 
         self._display_x, self._display_y, self._display_z = x_index, y_index, z_index
+
+
+def _unit_transform(x, y) -> tuple:
+    """A transform that leaves the values unchanged.
+    :param x: X coordinate
+    :param y: Y coordindate
+    """
+    return x, y
