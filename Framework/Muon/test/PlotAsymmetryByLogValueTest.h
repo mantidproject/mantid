@@ -583,6 +583,69 @@ public:
     TS_ASSERT_EQUALS(watcher.getFoundCount(), 2);  // reused 2
   }
 
+  void
+  test_validate_inputs_fails_if_neither_first_and_last_or_workspacenames_is_defined() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    auto result = alg.validateInputs();
+    const auto expected = "Must either supply WorkspaceNames or FirstRun and "
+                          "LastRun";
+    TS_ASSERT_EQUALS(result["FirstRun"], expected);
+    TS_ASSERT_EQUALS(result["LastRun"], expected);
+    TS_ASSERT_EQUALS(result["WorkspaceNames"], expected);
+  }
+
+  void test_input_passes_with_first_and_last() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    alg.setProperty("FirstRun", firstRun);
+    alg.setProperty("LastRun", lastRun);
+    auto result = alg.validateInputs();
+    TS_ASSERT(result.empty());
+  }
+
+  void test_input_passes_with_workspacenames() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    std::vector<std::string> input{firstRun, lastRun};
+    alg.setProperty("WorkspaceNames", input);
+    auto result = alg.validateInputs();
+    std::vector<std::string> propertyValue = alg.getProperty("WorkspaceNames");
+    TS_ASSERT(result.empty());
+    TS_ASSERT_EQUALS(input, propertyValue);
+  }
+
+  void test_input_passes_with_both_file_input_methods_used() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    std::vector<std::string> input{firstRun, lastRun};
+    alg.setProperty("WorkspaceNames", input);
+    alg.setProperty("FirstRun", firstRun);
+    alg.setProperty("LastRun", lastRun);
+    auto result = alg.validateInputs();
+    TS_ASSERT(result.empty());
+  }
+
+  void test_input_fails_with_only_first_supplied() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    alg.setProperty("FirstRun", firstRun);
+    auto result = alg.validateInputs();
+    const auto expected = "Must supply both FirstRun and LastRun";
+    TS_ASSERT_EQUALS(result["FirstRun"], expected);
+    TS_ASSERT_EQUALS(result["LastRun"], expected);
+  }
+
+  void test_input_fails_with_only_last_supplied() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    alg.setProperty("LastRun", lastRun);
+    auto result = alg.validateInputs();
+    const auto expected = "Must supply both FirstRun and LastRun";
+    TS_ASSERT_EQUALS(result["FirstRun"], expected);
+    TS_ASSERT_EQUALS(result["LastRun"], expected);
+  }
+
 private:
   std::string firstRun, lastRun;
 };

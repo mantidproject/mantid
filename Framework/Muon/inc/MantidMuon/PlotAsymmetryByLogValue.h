@@ -59,6 +59,7 @@ public:
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Overridden Algorithm methods
@@ -116,6 +117,8 @@ private:
   std::vector<int> m_forward_list;
   /// Store backward spectra
   std::vector<int> m_backward_list;
+  /// Store workspaces
+  std::vector<std::string> m_fileNames;
 
   /// Properties needed to analyse a run
   /// Type of calculation: integral or differential

@@ -7,6 +7,7 @@
 #include <cmath>
 #include <utility>
 
+#include <map>
 #include <vector>
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -98,11 +99,11 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
 void PlotAsymmetryByLogValue::init() {
   std::string nexusExt(".nxs");
 
-  declareProperty(std::make_unique<FileProperty>("FirstRun", "",
-                                                 FileProperty::Load, nexusExt),
+  declareProperty(std::make_unique<FileProperty>(
+                      "FirstRun", "", FileProperty::OptionalLoad, nexusExt),
                   "The name of the first workspace in the series.");
-  declareProperty(std::make_unique<FileProperty>("LastRun", "",
-                                                 FileProperty::Load, nexusExt),
+  declareProperty(std::make_unique<FileProperty>(
+                      "LastRun", "", FileProperty::OptionalLoad, nexusExt),
                   "The name of the last workspace in the series.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -156,6 +157,29 @@ void PlotAsymmetryByLogValue::init() {
                                                  nexusExt),
                   "Custom file with Dead Times. Will be used only if "
                   "appropriate DeadTimeCorrType is set.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      "WorkspaceNames", Direction::Input),
+                  "The range of workspaces");
+}
+
+/// Validate the input properties
+std::map<std::string, std::string> PlotAsymmetryByLogValue::validateInputs() {
+  std::map<std::string, std::string> helpMessages;
+  if (isDefault("FirstRun") && isDefault("LastRun") &&
+      isDefault("WorkspaceNames")) {
+    helpMessages["FirstRun"] =
+        "Must either supply WorkspaceNames or FirstRun and LastRun";
+    helpMessages["LastRun"] =
+        "Must either supply WorkspaceNames or FirstRun and LastRun";
+    helpMessages["WorkspaceNames"] =
+        "Must either supply WorkspaceNames or FirstRun and LastRun";
+  }
+  if ((!isDefault("FirstRun") && isDefault("LastRun")) ||
+      (isDefault("FirstRun") && !isDefault("LastRun"))) {
+    helpMessages["FirstRun"] = "Must supply both FirstRun and LastRun";
+    helpMessages["LastRun"] = "Must supply both FirstRun and LastRun";
+  }
+  return helpMessages;
 }
 
 /**
@@ -234,6 +258,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   // Get runs
   std::string firstFN = getProperty("FirstRun");
   std::string lastFN = getProperty("LastRun");
+  m_fileNames = getProperty("WorkspaceNames");
 
   // Parse run names and get the number of runs
   parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
@@ -243,6 +268,9 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   if (ie < is) {
     throw std::runtime_error(
         "First run number is greater than last run number");
+  }
+
+  if (m_fileNames.empty()) { // Populate from first and last
   }
 
   // Create a string holding all the properties
