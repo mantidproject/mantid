@@ -550,11 +550,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         if not RB:
             RB = self.getProperty(PropertyNames.RB00).value
         dimensionality = len(RB)
-        for property_name in PropertyNames.PROPETIES_TO_SIZE_MATCH:
-            value = self.getProperty(property_name).value
-            if len(value) != dimensionality and len(value) != 1:
-                issues[property_name] = 'Must have a single value or as many as there are reflected beams: given {0}, '\
-                                        'but there are {1} reflected beams'.format(len(value), dimensionality)
+        if dimensionality != 0:
+            for property_name in PropertyNames.PROPETIES_TO_SIZE_MATCH:
+                value = self.getProperty(property_name).value
+                if len(value) != dimensionality and len(value) != 1:
+                    issues[property_name] = 'Must have a single value or as many as there are reflected beams: given {0}, '\
+                                            'but there are {1} reflected beams'.format(len(value), dimensionality)
         if self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value:
             manual_scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
             if len(manual_scale_factors) != dimensionality-1:
@@ -573,10 +574,16 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         if self.getPropertyValue(PropertyNames.POLARIZATION_OPTION) == 'NotPolarized' and not self.getPropertyValue(PropertyNames.RB):
             issues[PropertyNames.RB] = 'Reflected beam input runs are mandatory'
         if self.getPropertyValue(PropertyNames.POLARIZATION_OPTION) == 'Polarized':
-            if not self.getPropertyValue(PropertyNames.RB00):
-                issues[PropertyNames.RB00] = 'Reflected beam input runs are mandatory for 00 (or 0)'
-            if not self.getPropertyValue(PropertyNames.RB11):
-                issues[PropertyNames.RB11] = 'Reflected beam input runs are mandatory for 11 (or 1)'
+            run00 = self.getPropertyValue(PropertyNames.RB00)
+            run01 = self.getPropertyValue(PropertyNames.RB01)
+            run10 = self.getPropertyValue(PropertyNames.RB10)
+            run11 = self.getPropertyValue(PropertyNames.RB11)
+            if not run00 and not run01 and not run10 and not run11:
+                msg = 'Reflected beam input runs are mandatory for at least one flipper configuration in case of polarized reduction.'
+                issues[PropertyNames.RB00] = msg
+                issues[PropertyNames.RB01] = msg
+                issues[PropertyNames.RB10] = msg
+                issues[PropertyNames.RB11] = msg
         return issues
 
     def setup(self):
@@ -786,6 +793,32 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self._autoCleanup.cleanupLater(foregroundName)
         return foregroundName
 
+    def compose_polarized_runs_list(self, angle_index):
+        """Returns the lists of runs and names for different flipper configurations at the given angle_index"""
+        run_inputs = []
+        run_names = []
+        if self._rb00:
+            run00_name = self.make_name(self._rb00[angle_index]) + '_00'
+            run00_input = self.compose_run_string(self._rb00[angle_index])
+            run_names.append(run00_name)
+            run_inputs.append(run00_input)
+        if self._rb01:
+            run01_name = self.make_name(self._rb01[angle_index]) + '_01'
+            run01_input = self.compose_run_string(self._rb01[angle_index])
+            run_names.append(run01_name)
+            run_inputs.append(run01_input)
+        if self._rb10:
+            run10_name = self.make_name(self._rb10[angle_index]) + '_10'
+            run10_input = self.compose_run_string(self._rb10[angle_index])
+            run_names.append(run10_name)
+            run_inputs.append(run10_input)
+        if self._rb11:
+            run11_name = self.make_name(self._rb11[angle_index]) + '_11'
+            run11_input = self.compose_run_string(self._rb11[angle_index])
+            run_names.append(run11_name)
+            run_inputs.append(run11_input)
+        return run_inputs, run_names
+
     def PyExec(self):
         """Execute the algorithm."""
         self.log().purge()
@@ -814,17 +847,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 reflectedBeamInput = self.compose_run_string(self._rb[angle_index])
                 to_convert_to_q = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName, directBeamName, angle_index)
             else:
-                run00_name = self.make_name(self._rb00[angle_index]) + '_00'
-                run00_input = self.compose_run_string(self._rb00[angle_index])
-                run01_name = self.make_name(self._rb01[angle_index]) + '_01'
-                run01_input = self.compose_run_string(self._rb01[angle_index])
-                run10_name = self.make_name(self._rb10[angle_index]) + '_10'
-                run10_input = self.compose_run_string(self._rb10[angle_index])
-                run11_name = self.make_name(self._rb11[angle_index]) + '_11'
-                run11_input = self.compose_run_string(self._rb11[angle_index])
-                run_names = [run00_name, run01_name, run10_name, run11_name]
-                run_inputs = [run00_input, run01_input, run10_input, run11_input]
                 foreground_names = []
+                run_inputs, run_names = self.compose_polarized_runs_list(angle_index)
                 for (run, name) in zip(run_inputs, run_names):
                     reflectedPolForegroundWSName = self.process_reflected_beam(run, name, directBeamName, angle_index)
                     foreground_names.append(reflectedPolForegroundWSName)
