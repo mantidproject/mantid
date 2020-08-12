@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, Progress
-from mantid.kernel import Direction
+from mantid.kernel import Direction, IntBoundedValidator
 from mantid.simpleapi import *
 
 
@@ -19,6 +19,8 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
     mode = None
     transpose = None
     scan_parameter = None
+    mask_start_pixels = None
+    mask_end_pixels = None
     output = None
     progress = None
 
@@ -35,6 +37,8 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         self.runs = self.getPropertyValue('SampleRuns').split(',')
         self.transpose = self.getProperty('Transpose').value
         self.scan_parameter = self.getPropertyValue('ScanParameter')
+        self.mask_start_pixels = self.getProperty('MaskPixelsFromStart').value
+        self.mask_end_pixels = self.getProperty('MaskPixelsFromEnd').value
         self.output = self.getPropertyValue('OutputWorkspace')
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
@@ -43,6 +47,11 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output workspace group containing reduced data.')
+
+        self.declareProperty("MaskPixelsFromStart", 10, validator=IntBoundedValidator(lower=0),
+                             doc="Number of pixels to mask at the start of each tube")
+        self.declareProperty("MaskPixelsFromEnd", 10, validator=IntBoundedValidator(lower=0),
+                             doc="Number of pixels to mask at the end of each tube")
 
         self.declareProperty("ScanParameter", "",
                              doc="If multiple files, the parameter from SampleLog to use as an index when conjoined.")
@@ -67,7 +76,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         Divide(LHSWorkspace=ws, RHSWorkspace=monitor_ws, OutputWorkspace=ws, WarnOnZeroDivide=True)
 
-        cache = list(range(1, 13)) + list(range(245, 257))
+        cache = list(range(1, self.mask_start_pixels)) + list(range(257 - self.mask_end_pixels, 257))
         to_mask = [i + 256 * j for i in cache for j in range(8)]
         MaskDetectors(Workspace=ws, DetectorList=to_mask)
         DeleteWorkspace(monitor_ws)
