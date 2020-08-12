@@ -102,7 +102,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
                     self.dirstrings[row]=val
             elif column==2:
                 try:
-                    val=val=int(value)
+                    val=int(value)
                 except ValueError:
                     return False
                 self.senses[row]=val
