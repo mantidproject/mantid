@@ -16,8 +16,8 @@ public:
   // Constructor
   SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log,
                                const std::string filename,
-                               NeXus::NXEntry &entry,
-                               DataObjects::Workspace2D_sptr workspace,
+                               LoadMuonNexusV2NexusHelper &nexusLoader,
+                               DataObjects::Workspace2D &workspace,
                                int entryNumber, bool isFileMultiPeriod);
   // Loads the muon log data
   void loadMuonLogData() override;
@@ -31,8 +31,7 @@ public:
   API::Workspace_sptr loadDeadTimeTable() const override;
 
 private:
-  NeXus::NXEntry &m_entry;
-  DataObjects::Workspace2D_sptr m_workspace;
+  DataObjects::Workspace2D &m_workspace;
   int m_entryNumber;
   bool m_isFileMultiPeriod;
   std::vector<detid_t> m_detectors;

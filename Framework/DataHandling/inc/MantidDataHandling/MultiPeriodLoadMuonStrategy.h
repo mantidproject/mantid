@@ -15,8 +15,8 @@ class MultiPeriodLoadMuonStrategy : public LoadMuonStrategy {
 public:
   // Constructor
   MultiPeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string filename,
-                              NeXus::NXEntry &entry,
-                              API::WorkspaceGroup_sptr workspaceGroup);
+                              LoadMuonNexusV2NexusHelper &nexusLoader,
+                              API::WorkspaceGroup &workspaceGroup);
   // Loads the muon log data
   void loadMuonLogData() override;
   // Returns the good frames from the nexus entry
@@ -29,8 +29,7 @@ public:
   API::Workspace_sptr loadDeadTimeTable() const override;
 
 private:
-  NeXus::NXEntry &m_entry;
-  API::WorkspaceGroup_sptr m_workspaceGroup;
+  API::WorkspaceGroup &m_workspaceGroup;
   std::vector<detid_t> m_detectors;
   std::vector<detid_t> getLoadedDetectors();
 };

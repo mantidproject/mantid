@@ -11,7 +11,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
-#include "MantidDataHandling/LoadMuonNexusV2Helper.h"
 #include "MantidDataHandling/MultiPeriodLoadMuonStrategy.h"
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -39,7 +38,6 @@ using namespace DataObjects;
 namespace NeXusEntry {
 const std::string RAWDATA{"/raw_data_1"};
 const std::string DEFINITION{"/raw_data_1/definition"};
-const std::string PERIOD{"/periods"};
 const std::string BEAMLINE{"/raw_data_1/beamline"};
 } // namespace NeXusEntry
 
@@ -149,32 +147,14 @@ void LoadMuonNexusV2::execLoader() {
   m_filename = getPropertyValue("Filename");
   NXRoot root(m_filename);
   NXEntry entry = root.openEntry(NeXusEntry::RAWDATA);
-  isEntryMultiPeriod(entry);
+  // Create MuonNexusV2 nexus loader
+  m_nexusLoader = std::make_unique<LoadMuonNexusV2NexusHelper>(entry);
+  isEntryMultiPeriod();
+
   // Execute child algorithm LoadISISNexus2
   auto outWS = runLoadISISNexus();
-
-  // Check if single or multi period file and create appropriate loading
-  // strategy
-  if (m_multiPeriodsLoaded) {
-    WorkspaceGroup_sptr workspaceGroup =
-        std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
-    m_loadMuonStrategy = std::make_unique<MultiPeriodLoadMuonStrategy>(
-        g_log, m_filename, entry, workspaceGroup);
-    auto numberHistograms =
-        std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(0))
-            ->getNumberHistograms();
-    loadMuonProperties(entry, numberHistograms);
-
-  } else {
-    // we just have a single workspace
-    Workspace2D_sptr workspace2D =
-        std::dynamic_pointer_cast<Workspace2D>(outWS);
-    // Load Muon specific properties
-    loadMuonProperties(entry, workspace2D->getNumberHistograms());
-    m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
-        g_log, m_filename, entry, workspace2D, static_cast<int>(m_entrynumber),
-        m_isFileMultiPeriod);
-  }
+  // Create appropriate loading strategy
+  chooseLoaderStrategy(outWS);
   m_loadMuonStrategy->loadMuonLogData();
   m_loadMuonStrategy->loadGoodFrames();
   auto correctTime = getProperty("CorrectTime");
@@ -197,9 +177,8 @@ void LoadMuonNexusV2::execLoader() {
  * Determines whether the file is multi period
  * If multi period the function determines whether multi periods are loaded
  */
-void LoadMuonNexusV2::isEntryMultiPeriod(const NXEntry &entry) {
-  NXClass periodClass = entry.openNXGroup(NeXusEntry::PERIOD);
-  int numberOfPeriods = periodClass.getInt("number");
+void LoadMuonNexusV2::isEntryMultiPeriod() {
+  int numberOfPeriods = m_nexusLoader->getNumberOfPeriods();
   if (numberOfPeriods > 1) {
     m_isFileMultiPeriod = true;
     if (m_entrynumber == 0) {
@@ -244,28 +223,56 @@ Workspace_sptr LoadMuonNexusV2::runLoadISISNexus() {
   ISISLoader->execute();
   this->copyPropertiesFrom(*ISISLoader);
   Workspace_sptr outWS = getProperty("OutputWorkspace");
-  applyTimeAxisUnitCorrection(outWS);
+  applyTimeAxisUnitCorrection(*outWS);
   return outWS;
+}
+/**
+ * Determines the loading strategy used by the Algorithm
+ */
+void LoadMuonNexusV2::chooseLoaderStrategy(const Workspace_sptr &workspace) {
+  // Check if single or multi period file and create appropriate loading
+  // strategy
+  if (m_multiPeriodsLoaded) {
+    WorkspaceGroup_sptr workspaceGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    assert(workspaceGroup);
+    auto numberHistograms =
+        std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(0))
+            ->getNumberHistograms();
+    loadMuonProperties(numberHistograms);
+    m_loadMuonStrategy = std::make_unique<MultiPeriodLoadMuonStrategy>(
+        g_log, m_filename, *m_nexusLoader, *workspaceGroup);
+
+  } else {
+    // we just have a single workspace
+    Workspace2D_sptr workspace2D =
+        std::dynamic_pointer_cast<Workspace2D>(workspace);
+    assert(workspace2D);
+    // Load Muon specific properties
+    loadMuonProperties(workspace2D->getNumberHistograms());
+    m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
+        g_log, m_filename, *m_nexusLoader, *workspace2D,
+        static_cast<int>(m_entrynumber), m_isFileMultiPeriod);
+  }
 }
 /**
  * Loads Muon specific data from the nexus entry
  * and sets the appropriate output properties
  */
-void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry,
-                                         size_t numSpectra) {
+void LoadMuonNexusV2::loadMuonProperties(size_t numSpectra) {
 
   std::string mainFieldDirection =
-      LoadMuonNexusV2Helper::loadMainFieldDirectionFromNexus(entry);
+      m_nexusLoader->loadMainFieldDirectionFromNexus();
   setProperty("MainFieldDirection", mainFieldDirection);
 
-  double timeZero = LoadMuonNexusV2Helper::loadTimeZeroFromNexusFile(entry);
+  double timeZero = m_nexusLoader->loadTimeZeroFromNexusFile();
   setProperty("timeZero", timeZero);
 
-  auto firstGoodData = LoadMuonNexusV2Helper::loadFirstGoodDataFromNexus(entry);
+  auto firstGoodData = m_nexusLoader->loadFirstGoodDataFromNexus();
   setProperty("FirstGoodData", firstGoodData);
 
   auto timeZeroVector =
-      LoadMuonNexusV2Helper::loadTimeZeroListFromNexusFile(entry, numSpectra);
+      m_nexusLoader->loadTimeZeroListFromNexusFile(numSpectra);
   setProperty("TimeZeroList", timeZeroVector);
 }
 
@@ -273,11 +280,11 @@ void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry,
 Changes the unit of the time axis, which is incorrect due to being loaded using
 LoadISISNexus
 */
-void LoadMuonNexusV2::applyTimeAxisUnitCorrection(Workspace_sptr &workspace) {
+void LoadMuonNexusV2::applyTimeAxisUnitCorrection(Workspace &workspace) {
   auto newUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
       Kernel::UnitFactory::Instance().create("Label"));
   newUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
-  auto workspaceGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  auto workspaceGroup = dynamic_cast<WorkspaceGroup *>(&workspace);
   if (workspaceGroup) {
     for (int i = 0; i < workspaceGroup->getNumberOfEntries(); ++i) {
       auto workspace2D =
@@ -285,8 +292,8 @@ void LoadMuonNexusV2::applyTimeAxisUnitCorrection(Workspace_sptr &workspace) {
       workspace2D->getAxis(0)->unit() = newUnit;
     }
   } else {
-    auto workspace2D = std::dynamic_pointer_cast<Workspace2D>(workspace);
-    workspace2D->getAxis(0)->unit() = newUnit;
+    auto &workspace2D = dynamic_cast<Workspace2D &>(workspace);
+    workspace2D.getAxis(0)->unit() = newUnit;
   }
 }
 } // namespace DataHandling
