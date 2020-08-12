@@ -119,7 +119,8 @@ public:
         loader.setPropertyValue("Filename", m_batsDiffraction));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", "__out_ws"));
-    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDiffractionData", true));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("LoadDetectors", "Diffractometer"));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
     MatrixWorkspace_sptr output2D =
@@ -144,7 +145,8 @@ public:
         loader.setPropertyValue("Filename", m_dopplerDiffraction));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", "__out_ws"));
-    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDiffractionData", true));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("LoadDetectors", "Diffractometer"));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
     MatrixWorkspace_sptr output2D =

@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -80,9 +81,11 @@ void LoadILLIndirect2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "LoadDiffractionData", false, Direction::Input),
-                  "Load only the monochromatic data of the file.");
+
+  std::vector<std::string> loadingOptions{"Spectrometer", "Diffractometer"};
+  declareProperty("LoadDetectors", "Spectrometer",
+                  std::make_shared<StringListValidator>(loadingOptions),
+                  "Select the type of data to load from IN16B.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -92,6 +95,8 @@ void LoadILLIndirect2::exec() {
 
   // Retrieve filename
   const std::string filenameData = getPropertyValue("Filename");
+
+  m_loadOption = getPropertyValue("LoadDetectors");
 
   Progress progress(this, 0., 1., 7);
 
@@ -113,7 +118,7 @@ void LoadILLIndirect2::exec() {
   loadNexusEntriesIntoProperties(filenameData);
   progress.report("Loaded data details");
 
-  if (getProperty("LoadDiffractionData")) {
+  if (m_loadOption == "Diffractometer") {
     loadDiffractionData(firstEntry);
   } else {
     loadDataIntoTheWorkSpace(firstEntry);
@@ -123,7 +128,7 @@ void LoadILLIndirect2::exec() {
   runLoadInstrument();
   progress.report("Loaded the instrument");
 
-  if (!(getProperty("LoadDiffractionData"))) {
+  if (m_loadOption == "Spectrometer") {
     moveSingleDetectors(firstEntry);
     progress.report("Loaded the single detectors");
 
@@ -162,7 +167,7 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
   // find the data
   std::string dataPath;
 
-  if (getProperty("LoadDiffractionData")) {
+  if (m_loadOption == "Diffractometer") {
 
     if (instrument.containsGroup("DiffDet")) {
       dataPath = "instrument/DiffDet/data";
@@ -193,7 +198,7 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
   }
 
   // check which single detectors are enabled, and store their indices
-  if (!getProperty("LoadDiffractionData")) {
+  if (m_loadOption == "Spectrometer") {
     NXData dataSDGroup = entry.openNXData("dataSD");
     NXInt dataSD = dataSDGroup.openIntData();
 
@@ -427,7 +432,7 @@ void LoadILLIndirect2::runLoadInstrument() {
 std::string LoadILLIndirect2::getInstrumentFilePath() {
   Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
   std::string idf = m_instrumentName;
-  if (getProperty("LoadDiffractionData")) {
+  if (m_loadOption == "Diffractometer") {
     idf += "D";
   } else if (!m_bats && m_firstTubeAngleRounded == 251) {
     // load the instrument with the first tube analyser focused at the midpoint
