@@ -68,7 +68,7 @@ constexpr double mmToMeter(const double x) { return x * 1.e-3; }
 std::pair<int, int>
 fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
   const size_t nHisto = ws.getNumberHistograms();
-  size_t begin = 0;
+  int begin = 0;
   const auto &spectrumInfo = ws.spectrumInfo();
   for (size_t i = 0; i < nHisto; ++i) {
     if (!spectrumInfo.isMonitor(i)) {
@@ -76,7 +76,7 @@ fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
     }
     ++begin;
   }
-  size_t end = nHisto - 1;
+  int end = static_cast<int>(nHisto) - 1;
   for (ptrdiff_t i = static_cast<ptrdiff_t>(nHisto) - 1; i != 0; --i) {
     if (!spectrumInfo.isMonitor(i)) {
       break;
