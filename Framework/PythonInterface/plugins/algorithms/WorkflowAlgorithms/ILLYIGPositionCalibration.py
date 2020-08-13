@@ -132,6 +132,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         # fit gaussian to peaks for each pixel, returns peaks as a function of their expected position
         peaks_positions = self._fit_bragg_peaks(intensityWS, yig_peaks_positions)
         progress.report()
+        ReplaceSpecialValues(InputWorkspace=peaks_positions, OutputWorkspace=peaks_positions,
+                             NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
         # fit the wavelegnth, bank gradients and individual
         detector_parameters = self._fit_detector_positions(peaks_positions)
         progress.report()
