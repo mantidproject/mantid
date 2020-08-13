@@ -41,6 +41,7 @@ set ( TEST_PY_FILES
    phase_table_widget/phase_table_context_test.py
    frequency_domain_context_test.py
    grouping_tab/grouping_table_presenter_test.py
+   grouping_tab/grouping_tab_model_test.py
    grouping_tab/pairing_table_presenter_test.py
    grouping_tab/grouping_tab_presenter_test.py
    grouping_tab/pairing_table_group_selector_test.py
