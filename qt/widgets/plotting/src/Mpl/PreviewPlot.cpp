@@ -769,6 +769,9 @@ void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
  * @param checked True if the state should be visible, false otherwise
  */
 void PreviewPlot::toggleLegend(const bool checked) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   if (checked) {
     regenerateLegend();
   } else {
