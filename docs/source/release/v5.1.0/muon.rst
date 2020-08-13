@@ -72,5 +72,6 @@ New Features
 ------------
 - Added a deselect all elements button.
 - Removed the ability to deselect all groups and pairs.
+- Added in default group and pair selection when loading grouping files from xml.
 
 :ref:`Release 5.1.0 <v5.1.0>`

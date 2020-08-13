@@ -374,6 +374,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.model.add_group_to_analysis("my_group_0")
         self.presenter.selected_group_changed_notifier.notify_subscribers = mock.MagicMock()
 
+        self.assertEqual(self.model.selected_groups, ["my_group_0"])
         self.presenter.to_analyse_data_checkbox_changed(0, 0,"my_group_0")
 
         self.assertEqual(self.model.selected_groups, ["my_group_0"])
@@ -385,6 +386,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.context._group_pair_context._selected_pairs.append('pair1')
         self.presenter.selected_group_changed_notifier.notify_subscribers = mock.MagicMock()
 
+        self.assertEqual(self.model.selected_groups, ["my_group_0"])
         self.presenter.to_analyse_data_checkbox_changed(0, 0,"my_group_0")
 
         self.assertEqual(self.model.selected_groups, [])

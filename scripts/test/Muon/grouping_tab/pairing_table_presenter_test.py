@@ -261,9 +261,9 @@ class PairingTablePresenterTest(unittest.TestCase):
     def test_that_pair_cannot_be_unselected_if_is_last_pair_or_group_selected(self):
         self.add_two_pairs_to_table()
         self.model.add_pair_to_analysis("my_pair_0")
-
         self.presenter.selected_pair_changed_notifier.notify_subscribers = mock.MagicMock()
 
+        self.assertEqual(self.model.selected_pairs, ["my_pair_0"])
         self.presenter.to_analyse_data_checkbox_changed(0, 0,"my_pair_0")
 
         self.assertEqual(self.model.selected_pairs, ["my_pair_0"])
@@ -273,9 +273,9 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.add_two_pairs_to_table()
         self.model.add_pair_to_analysis("my_pair_0")
         self.model.add_group_to_analysis("my_group_0")
-
         self.presenter.selected_pair_changed_notifier.notify_subscribers = mock.MagicMock()
 
+        self.assertEqual(self.model.selected_pairs, ["my_pair_0"])
         self.presenter.to_analyse_data_checkbox_changed(0, 0,"my_pair_0")
 
         self.assertEqual(self.model.selected_pairs, [])
