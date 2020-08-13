@@ -174,8 +174,9 @@ std::map<std::string, std::string> PlotAsymmetryByLogValue::validateInputs() {
     helpMessages["WorkspaceNames"] =
         "Must either supply WorkspaceNames or FirstRun and LastRun";
   }
-  if ((!isDefault("FirstRun") && isDefault("LastRun")) ||
-      (isDefault("FirstRun") && !isDefault("LastRun"))) {
+  if ((!isDefault("FirstRun") && isDefault("LastRun") && isDefault("WorkspaceNames")) ||
+      (isDefault("FirstRun") && !isDefault("LastRun") &&
+       isDefault("WorkspaceNames"))) {
     helpMessages["FirstRun"] = "Must supply both FirstRun and LastRun";
     helpMessages["LastRun"] = "Must supply both FirstRun and LastRun";
   }
@@ -203,15 +204,15 @@ void PlotAsymmetryByLogValue::exec() {
       logMessage << "Found run " << i;
     } else {
       // Load run, apply dead time corrections and detector grouping
-      Workspace_sptr loadedWs = doLoad(i);
+      //Workspace_sptr loadedWs = doLoad(i);
 
-      if (loadedWs) {
-        // Analyse loadedWs
-        doAnalysis(loadedWs, i);
-      }
-      logMessage << "Loaded run " << i;
+    //  if (loadedWs) {
+    //    // Analyse loadedWs
+    //    doAnalysis(loadedWs, i);
+    //  }
+    //  logMessage << "Loaded run " << i;
     }
-    progress.report(logMessage.str());
+    //progress.report(logMessage.str());
   }
 
   // Create the 2D workspace for the output
@@ -260,18 +261,32 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   std::string lastFN = getProperty("LastRun");
   m_fileNames = getProperty("WorkspaceNames");
 
-  // Parse run names and get the number of runs
-  parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
-                m_filenameZeros);
-  is = std::stoul(firstFN); // starting run number
-  ie = std::stoul(lastFN);  // last run number
-  if (ie < is) {
-    throw std::runtime_error(
-        "First run number is greater than last run number");
-  }
-
   if (m_fileNames.empty()) { // Populate from first and last
-  }
+    // Parse run names and get the number of runs
+    parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
+                  m_filenameZeros);
+    is = std::stoul(firstFN); // starting run number
+    ie = std::stoul(lastFN);  // last run number
+    if (ie < is) {
+      throw std::runtime_error(
+          "First run number is greater than last run number");
+    }
+
+    for (size_t i = is; i <= ie; i++) {
+      // Get complete run name
+      std::ostringstream fn, fnn;
+      fnn << std::setw(m_filenameZeros) << std::setfill('0') << i;
+      fn << m_filenameBase << fnn.str() << m_filenameExt;
+
+      // Check if file exists
+      if (!Poco::File(fn.str()).exists()) {
+        m_log.warning() << "File " << fn.str() << " not found\n";
+        // What to do here?
+      }
+
+      m_fileNames.emplace_back(fn.str());
+    }
+  } 
 
   // Create a string holding all the properties
   std::ostringstream ss;
@@ -344,22 +359,22 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
  *   @param runNumber :: [input] Run number specifying run to load
  *   @return :: Loaded workspace
  */
-Workspace_sptr PlotAsymmetryByLogValue::doLoad(size_t runNumber) {
+Workspace_sptr PlotAsymmetryByLogValue::doLoad(const std::string &fileName) {
 
-  // Get complete run name
-  std::ostringstream fn, fnn;
-  fnn << std::setw(m_filenameZeros) << std::setfill('0') << runNumber;
-  fn << m_filenameBase << fnn.str() << m_filenameExt;
+  //// Get complete run name
+  //std::ostringstream fn, fnn;
+  //fnn << std::setw(m_filenameZeros) << std::setfill('0') << runNumber;
+  //fn << m_filenameBase << fnn.str() << m_filenameExt;
 
-  // Check if file exists
-  if (!Poco::File(fn.str()).exists()) {
-    m_log.warning() << "File " << fn.str() << " not found\n";
-    return Workspace_sptr();
-  }
+  //// Check if file exists
+  //if (!Poco::File(fn.str()).exists()) {
+  //  m_log.warning() << "File " << fn.str() << " not found\n";
+  //  return Workspace_sptr();
+  //}
 
   // Load run
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
-  load->setPropertyValue("Filename", fn.str());
+  load->setPropertyValue("Filename", fileName);
   load->setPropertyValue("DetectorGroupingTable", "detGroupTable");
   load->setPropertyValue("DeadTimeTable", "deadTimeTable");
   load->execute();
