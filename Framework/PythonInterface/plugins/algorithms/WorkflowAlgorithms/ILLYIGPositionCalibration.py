@@ -361,20 +361,24 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         function_list = []
         ties_lambda_list = []
         ties_gradient_list = []
+        ties_bank_off_list = []
         ties_gradient = ""
-        pixel_offset_constr = self._DEG_2_RAD * 5 # +-5 degrees around the bank position
-        gradient_constr = 0.05 # +-5% around the m = 1.0 value
-        lambda_constr = 0.05 # +- 5% of lambda variation from the initial assumption
+        ties_bank_off = ""
+        pixel_offset_constr = self._DEG_2_RAD*25 # +-25 degrees
+        bank_offset_constr = self._DEG_2_RAD*5 # +-5 degrees around the bank position
+        gradient_constr = 0.5 # +-5% around the m = 1.0 value
+        lambda_constr = 0.5 # +- 5% of lambda variation from the initial assumption
         constraint_list = ['{0}<f0.lambda<{1}'.format(1-lambda_constr, 1+lambda_constr)]
 
         for pixel_no in range(ws.getNumberHistograms()):
-            # pixel_in_bank = pixel_no % 44
             function = 'name=UserFunction, \
-            Formula = {0} * m * ( 2.0 * asin( lambda * sin( 0.5 * {1} * x ) ) + offset), \
-            lambda= 1.0, m = 1.0, offset = {2}, $domains=i'.format(self._RAD_2_DEG, self._DEG_2_RAD, 0)
+            Formula = {0} * m * ( 2.0 * asin( lambda * sin( 0.5 * {1} * x ) ) + offset+ bank_offset), \
+            lambda= 1.0, m = 1.0, offset = {2}, bank_offset = {3}, $domains=i'.format(self._RAD_2_DEG, self._DEG_2_RAD, 0, 0)
             function_list.append(function)
             constraint_list.append('-{0} < f{1}.offset < {0}'.format(pixel_offset_constr,
                                                                      pixel_no))
+            constraint_list.append('-{0} < f{1}.bank_offset < {0}'.format(bank_offset_constr,
+                                                                          pixel_no))
             constraint_list.append('{0} < f{1}.m < {2}'.format(1-gradient_constr,
                                                                pixel_no,
                                                                1+gradient_constr))
@@ -382,12 +386,15 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             ties_lambda_list.append('f{0}.lambda'.format(pixel_no))
             # set ties for three bank gradients:
             ties_gradient_list.append('f{0}.m'.format(pixel_no))
+            ties_bank_off_list.append('f{0}.bank_offset'.format(pixel_no))
             if pixel_no % self._D7NumberPixelsBank == (self._D7NumberPixelsBank-1):
                 ties_gradient += ',' + '='.join(ties_gradient_list)
+                ties_bank_off += ',' + '='.join(ties_bank_off_list)
                 ties_gradient_list=[]
+                ties_bank_off_list=[]
 
         ties_lambda = '='.join(ties_lambda_list)
-        ties = ties_lambda + ties_gradient# + ties_bank_off
+        ties = ties_lambda + ties_gradient + ties_bank_off
 
         constraints = ','.join(constraint_list)
         # create a multi domain function to perform a global fit
@@ -431,21 +438,28 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         if parameter_table.column(1)[0] == 0:
             raise RuntimeError('Bank2 slope is equal to 0.')
         bank2_slope = 1.0 / float(parameter_table.column(1)[0])
+        bank2_offset = float(parameter_table.column(1)[3])
         if parameter_table.column(1)[3*self._D7NumberPixelsBank] == 0:
             raise RuntimeError('Bank3 slope is equal to 0.')
-        bank3_slope = 1.0 / float(parameter_table.column(1)[2*self._D7NumberPixelsBank])
+        bank3_slope = 1.0 / float(parameter_table.column(1)[4*self._D7NumberPixelsBank])
+        bank3_offset = float(parameter_table.column(1)[4*self._D7NumberPixelsBank+3])
         if parameter_table.column(1)[6*self._D7NumberPixelsBank] == 0:
             raise RuntimeError('Bank4 slope is equal to 0.')
-        bank4_slope = 1.0 / float(parameter_table.column(1)[6*self._D7NumberPixelsBank])
+        bank4_slope = 1.0 / float(parameter_table.column(1)[8*self._D7NumberPixelsBank])
+        bank4_offset = float(parameter_table.column(1)[8*self._D7NumberPixelsBank+3])
         bank_slopes = [bank2_slope, bank3_slope, bank4_slope]
+        bank_offsets = [bank2_offset, bank3_offset, bank4_offset]
+        user_offsets = self.getPropertyValue("BankOffsets").split(',')
         pixel_offsets = []
         pixel_no = 0
         for row_no in range(parameter_table.rowCount()):
             row_data = parameter_table.row(row_no)
             if '.offset' in row_data['Name']:
-                pixel_offset = (0.5*self._D7NumberPixelsBank) \
-                             - bank_slopes[math.floor(pixel_no / self._D7NumberPixelsBank)] \
-                             * (pixel_no % self._D7NumberPixelsBank) - self._RAD_2_DEG * row_data['Value']
+                pixel_offset = +self._RAD_2_DEG * row_data['Value'] \
+                             + self._RAD_2_DEG * bank_offsets[math.floor(pixel_no / self._D7NumberPixelsBank)] \
+                             + (0.5*self._D7NumberPixelsBank) \
+                             - bank_slopes[math.floor(pixel_no / self._D7NumberPixelsBank)] * (pixel_no % self._D7NumberPixelsBank) \
+                             - float(user_offsets[math.floor(pixel_no / self._D7NumberPixelsBank)])
                 if pixel_no % 2 == 0:
                     pixel_offset -= self._RAD_2_DEG * 0.011 / (2.0 * (1.5177 - 0.01252)) # repeats calculation from the D7 IDF
                 pixel_offsets.append(pixel_offset)
