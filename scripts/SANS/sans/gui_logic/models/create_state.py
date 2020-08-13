@@ -12,12 +12,11 @@ from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 sans_logger = Logger("SANS")
 
 
-def create_states(state_model, facility, row_entries=None, file_lookup=True, user_file=""):
+def create_states(state_model, facility, row_entries=None, file_lookup=True):
     """
     Here we create the states based on the settings in the models
     :param state_model: the state model object
     :param row_entries: a list of row entry objects to create state for
-    :param user_file: the user file under which the data is reduced
     """
 
     states = {}
