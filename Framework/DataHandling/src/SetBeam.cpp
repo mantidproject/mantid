@@ -14,11 +14,13 @@
 
 namespace {
 /// Name of slit geometry
-constexpr const char *SLIT_TYPE_NAME = "Slit";
+const std::vector<std::string> SHAPE_TYPE_NAME = {"Slit", "Circle"};
 /// Name of width parameter in map
 constexpr const char *WIDTH_PARAM_NAME = "beam-width";
 /// Name of height parameter in map
 constexpr const char *HEIGHT_PARAM_NAME = "beam-height";
+/// Name of height parameter in map
+constexpr const char *RADIUS_PARAM_NAME = "beam-radius";
 } // namespace
 
 namespace Mantid {
@@ -48,15 +50,18 @@ std::map<std::string, std::string> SetBeam::validateInputs() {
   std::map<std::string, std::string> errors;
   PropertyManager_sptr geometryArgs = getProperty("Geometry");
   if (geometryArgs) {
-    if (!geometryArgs->existsProperty("Shape") ||
-        !geometryArgs->existsProperty("Width") ||
-        !geometryArgs->existsProperty("Height")) {
-      errors["Geometry"] =
-          "'Geometry' flags missing. Required flags: Shape, Width, Height";
+    bool s = geometryArgs->existsProperty("Shape");
+    bool w = geometryArgs->existsProperty("Width");
+    bool h = geometryArgs->existsProperty("Height");
+    bool r = geometryArgs->existsProperty("Radius");
+    if (s && ((w && h) != r)) {
+      errors["Geometry"] = "'Geometry' flags missing. Required flags: Shape, "
+                           "plus Width and Height, or Radius";
     } else {
       std::string shape = geometryArgs->getProperty("Shape");
-      if (shape != SLIT_TYPE_NAME) {
-        errors["Geometry"] = "Only 'Slit' shape is supported.";
+      if (std::find(SHAPE_TYPE_NAME.begin(), SHAPE_TYPE_NAME.end(), shape) !=
+          SHAPE_TYPE_NAME.end()) {
+        errors["Geometry"] = "Only 'Slit' and 'Circle' shapes are supported.";
       }
     }
   } else {
@@ -89,23 +94,37 @@ void SetBeam::init() {
  * Execute
  */
 void SetBeam::exec() {
+
   using API::MatrixWorkspace_sptr;
   using Kernel::PropertyManager_sptr;
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   PropertyManager_sptr geometryArgs = getProperty("Geometry");
-  double width = geometryArgs->getProperty("Width");
-  double height = geometryArgs->getProperty("Height");
-  // convert to metres
-  width *= 0.01;
-  height *= 0.01;
 
-  // Add the values as parameters on the source object
   auto instrument = inputWS->getInstrument();
   auto source = instrument->getSource();
   auto &pmap = inputWS->instrumentParameters();
-  pmap.addDouble(source->getComponentID(), WIDTH_PARAM_NAME, width);
-  pmap.addDouble(source->getComponentID(), HEIGHT_PARAM_NAME, height);
+
+  std::string shape = geometryArgs->getProperty("Shape");
+
+  if (shape.compare("Circle") == 0) {
+    double radius = geometryArgs->getProperty("Radius");
+    // convert to metres
+    radius *= 0.01;
+
+    // Add the values as parameters on the source object
+    pmap.addDouble(source->getComponentID(), RADIUS_PARAM_NAME, radius);
+  } else {
+    double width = geometryArgs->getProperty("Width");
+    double height = geometryArgs->getProperty("Height");
+    // convert to metres
+    width *= 0.01;
+    height *= 0.01;
+
+    // Add the values as parameters on the source object
+    pmap.addDouble(source->getComponentID(), WIDTH_PARAM_NAME, width);
+    pmap.addDouble(source->getComponentID(), HEIGHT_PARAM_NAME, height);
+  }
 }
 
 } // namespace DataHandling
