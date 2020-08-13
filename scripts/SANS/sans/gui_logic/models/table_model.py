@@ -29,8 +29,6 @@ class TableModel(object):
 
     def __init__(self):
         super(TableModel, self).__init__()
-        self.batch_file = ""
-        self.user_file = ""
         self._subscriber_list = []
 
         self._table_entries = []
