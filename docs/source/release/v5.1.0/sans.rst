@@ -16,6 +16,7 @@ New
 ###
 
  - :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>` algorithm added, used to treat data from ILL's D16 on omega scan mode.
+ - SaveCanSAS1D and SaveNXCanSAS now include the batch file name in their metadata if one was used to produce the output.
 
 Bug Fixed
 #########
