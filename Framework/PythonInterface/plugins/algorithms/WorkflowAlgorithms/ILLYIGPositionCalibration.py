@@ -271,64 +271,64 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         returns a workspace with fitted peak positions
         on the Y axis and the expected positions on the X axis"""
         max_n_peaks = len(max(yig_peaks, key=len))
-        for scan in range(ws.getNumberHistograms()):
-            if len(yig_peaks[scan]) >= 2:
-                single_spectrum_peaks = yig_peaks[scan]
-                # fit all functions simultaneously:
-                function="name=FlatBackground, A0=0;\n"
-                constraints = "f0.A0 > 0"
-                function_no = 1
-                for peak_intensity, peak_centre in single_spectrum_peaks:
-                    function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
-                                                                                                peak_centre,
-                                                                                                peak_intensity,
-                                                                                                0.5*self._PeakWidth)
-                    constraints += ",f{0}.Height > 0.0".format(function_no)
-                    constraints += ",f{0}.Sigma < 1.5".format(function_no)
-                    constraints += ",{0} < f{1}.PeakCentre < {2}".format(float(peak_centre)-self._PeakWidth,
-                                                                         function_no,
-                                                                         float(peak_centre)+self._PeakWidth)
-                    function_no += 1
-                fit_output = Fit(Function=function,
-                                 InputWorkspace=ws,
-                                 WorkspaceIndex=scan,
-                                 Constraints=constraints,
-                                 CreateOutput=True,
-                                 Output='out')
-                param_table = fit_output.OutputParameters
+        ws_names = []
+        for pixel_no in range(ws.getNumberHistograms()):
             # create the needed columns in the output workspace
             results_x = np.zeros(max_n_peaks)
             results_y = np.zeros(max_n_peaks)
             results_e = np.zeros(max_n_peaks)
-            try:
-                param_table
-                rowCount = param_table.rowCount()
-            except NameError:
-                rowCount = 0
-            peak_no = 0
-            for row_no in range(rowCount):
-                row_data = param_table.row(row_no)
-                if 'A0' in row_data['Name']:
-                    background = row_data['Value']
-                if 'PeakCentre' in row_data['Name']:
-                    intensity, peak_position = single_spectrum_peaks[peak_no]
-                    if (param_table.row(row_no-1)['Value'] > 0.1*background):
-                        results_x[peak_no] = peak_position
-                        results_y[peak_no] = row_data['Value']
-                        results_e[peak_no] = row_data['Error']
+            single_spectrum_peaks = yig_peaks[pixel_no]
+            if len(single_spectrum_peaks) >= 1:
+                peak_no = 0
+                for peak_intensity, peak_centre_guess, peak_centre_expected in single_spectrum_peaks:
+#                     function = "name=Polynomial, n=2, A0=1e-4, A1=1e-4, A2=1e-5;\n"
+#                     function = "name=LinearBackground, A0=1e-4, A1=1e-4;\n"
+                    function = "name=FlatBackground, A0=1e-4;\n"
+                    function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
+                                                                                                peak_centre_guess,
+                                                                                                peak_intensity,
+                                                                                                0.5*self._peakWidth)
+                    constraints = "f1.Height > 0, f1.Sigma < {0}".format(0.75*self._peakWidth)
+                    constraints += ",{0} < f1.PeakCentre < {1}".format(float(peak_centre_guess) - self._minDistance,
+                                                                       float(peak_centre_guess) + self._minDistance)
+                    ws_name = 'pixel_{0}_peak_{1}'.format(pixel_no, peak_no)
+                    ws_names.append(ws_name)
+                    fit_output = Fit(Function=function,
+                                     InputWorkspace=ws,
+                                     WorkspaceIndex=pixel_no,
+                                     StartX=float(peak_centre_guess) - self._minDistance,
+                                     EndX=float(peak_centre_guess) + self._minDistance,
+                                     Constraints=constraints,
+                                     CreateOutput=True,
+                                     IgnoreInvalidData=True,
+                                     Output='out')
+                    RenameWorkspace(InputWorkspace='out_Workspace', OutputWorkspace=ws_name)
+                    param_table = fit_output.OutputParameters
+                    try:
+                        param_table
+                        rowCount = param_table.rowCount()
+                    except NameError:
+                        rowCount = 0
+                    for row_no in range(rowCount):
+                        row_data = param_table.row(row_no)
+                        if 'A0' in row_data['Name']:
+                            background = row_data['Value']
+                        if 'PeakCentre' in row_data['Name']:
+                            intensity, peak_pos_guess, peak_pos_expected = single_spectrum_peaks[peak_no]
+                            if (param_table.row(row_no-1)['Value'] > 0.1*background):
+                                results_x[peak_no] = peak_pos_expected
+                                results_y[peak_no] = row_data['Value']
+                                results_e[peak_no] = row_data['Error']
                     peak_no += 1
             try:
                 fit_results
             except NameError:
-                fit_results_exists = False
                 fit_results = CreateWorkspace(DataX=results_x,
                                               DataY=results_y,
                                               DataE=results_e,
                                               UnitX='degrees',
                                               NSpec=1)
             else:
-                fit_results_exists = True
-            if fit_results_exists:
                 workspace = CreateWorkspace(DataX=results_x,
                                             DataY=results_y,
                                             DataE=results_e,
@@ -344,6 +344,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         for pixel_no in range(self._D7NumberPixels):
             y_axis.setValue(pixel_no, pixel_no+1)
         fit_results.replaceAxis(1, y_axis)
+
+        GroupWorkspaces(ws_names, OutputWorkspace='single_peaks_fits')
 
         return fit_results
 
