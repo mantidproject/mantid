@@ -38,6 +38,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def set_on_cancel_clicked(self, slot):
         self.btn_cancel.clicked.connect(slot)
 
+    def set_on_log_changed(self, slot):
+        self.log_list.itemChanged.connect(slot)
+
     # =================
     # Component Getters
     # =================
@@ -51,6 +54,10 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_van_recalc(self):
         return self.check_vanRecalc.isChecked()
 
+    def get_checked_logs(self):
+        return ','.join([self.log_list.item(ilog).text() for ilog in range(self.log_list.count()) if
+                self.log_list.item(ilog).checkState() == QtCore.Qt.Checked])
+
     # =================
     # Component Setters
     # =================
@@ -63,6 +70,18 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_van_recalc(self, checked):
         self.check_vanRecalc.setChecked(checked)
+
+    def add_log_checkboxs(self, logs):
+        for log in logs.split(','):
+            item = QtWidgets.QListWidgetItem(self.log_list)
+            item.setText(log)
+            item.setCheckState(QtCore.Qt.Unchecked)
+            self.log_list.addItem(item)
+
+    def set_checked_logs(self, logs):
+        for log in logs.split(','):
+            items = self.log_list.findItems(log, QtCore.Qt.MatchExactly)
+            items[0].setCheckState(QtCore.Qt.Checked)
 
     # =================
     # Force Actions
