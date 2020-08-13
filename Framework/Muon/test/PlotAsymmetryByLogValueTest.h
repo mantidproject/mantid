@@ -646,6 +646,14 @@ public:
     TS_ASSERT_EQUALS(result["LastRun"], expected);
   }
 
+  void test_extract_run_number_from_run_name() { PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    const int firstRunNumber = alg.extractRunNumberFromRunName(firstRun);
+    const int lastRunNumber = alg.extractRunNumberFromRunName(lastRun);
+    TS_ASSERT_EQUALS(firstRunNumber, 15189);
+    TS_ASSERT_EQUALS(lastRunNumber, 15190);
+  }
+
 private:
   std::string firstRun, lastRun;
 };

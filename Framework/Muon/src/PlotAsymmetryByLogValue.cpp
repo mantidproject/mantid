@@ -91,7 +91,7 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
       m_logName(), m_logFunc(), m_logValue(), m_redY(), m_redE(), m_greenY(),
       m_greenE(), m_sumY(), m_sumE(), m_diffY(), m_diffE(),
       m_allProperties("default"), m_currResName("__PABLV_results"),
-      m_firstStart_ns(0) {}
+      m_firstStart_ns(0), m_rmap() {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -196,23 +196,23 @@ void PlotAsymmetryByLogValue::exec() {
   Progress progress(this, 0, 1, ie - is + 1);
 
   // Loop through runs
-  for (size_t i = is; i <= ie; i++) {
+  for (const auto& fileName : m_fileNames) {
 
-    // Check if run i was already loaded
-    std::ostringstream logMessage;
-    if (m_logValue.count(i)) {
-      logMessage << "Found run " << i;
-    } else {
-      // Load run, apply dead time corrections and detector grouping
-      //Workspace_sptr loadedWs = doLoad(i);
+  // Check if run i was already loaded
+  std::ostringstream logMessage;
+  if (m_logValue.count(m_rmap[fileName])) {
+    logMessage << "Found run " << m_rmap[fileName];
+  } else {
+    // Load run, apply dead time corrections and detector grouping
+    Workspace_sptr loadedWs = doLoad(fileName);
 
-    //  if (loadedWs) {
-    //    // Analyse loadedWs
-    //    doAnalysis(loadedWs, i);
-    //  }
-    //  logMessage << "Loaded run " << i;
+    if (loadedWs) {
+      // Analyse loadedWs
+      doAnalysis(loadedWs, m_rmap[fileName]);
     }
-    //progress.report(logMessage.str());
+    logMessage << "Loaded run " << m_rmap[fileName];
+  }
+  progress.report(logMessage.str());
   }
 
   // Create the 2D workspace for the output
@@ -261,7 +261,8 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   std::string lastFN = getProperty("LastRun");
   m_fileNames = getProperty("WorkspaceNames");
 
-  if (m_fileNames.empty()) { // Populate from first and last
+  // If file names empty, first and last provided so need to populate vector
+  if (m_fileNames.empty()) { 
     // Parse run names and get the number of runs
     parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
                   m_filenameZeros);
@@ -281,12 +282,21 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
       // Check if file exists
       if (!Poco::File(fn.str()).exists()) {
         m_log.warning() << "File " << fn.str() << " not found\n";
-        // What to do here?
+      } else {
+        m_fileNames.emplace_back(fn.str());
       }
-
-      m_fileNames.emplace_back(fn.str());
     }
-  } 
+  }
+
+  // Extract run numbers for all runs and map to filenames
+  for (const auto &n : m_fileNames) {
+    const int runNumber = extractRunNumberFromRunName(n);
+    m_rmap[n] = runNumber;
+  }
+
+  // Reset first and last to first and last elements of the map
+  is = m_rmap.begin()->second;
+  ie = m_rmap.rbegin()->second;
 
   // Create a string holding all the properties
   std::ostringstream ss;
@@ -303,7 +313,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   // We can reuse results if:
   // 1. There is a ws in the ADS with name m_currResName
   // 2. It is a MatrixWorkspace
-  // 3. It has a title equatl to m_allProperties
+  // 3. It has a title equal to m_allProperties
   // This ws stores previous results as described below
   if (AnalysisDataService::Instance().doesExist(m_currResName)) {
     MatrixWorkspace_sptr prevResults =
@@ -356,21 +366,10 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
 
 /**  Loads one run and applies dead-time corrections and detector grouping if
  * required
- *   @param runNumber :: [input] Run number specifying run to load
+ *   @param fileName :: [input] File name specifying run to load
  *   @return :: Loaded workspace
  */
 Workspace_sptr PlotAsymmetryByLogValue::doLoad(const std::string &fileName) {
-
-  //// Get complete run name
-  //std::ostringstream fn, fnn;
-  //fnn << std::setw(m_filenameZeros) << std::setfill('0') << runNumber;
-  //fn << m_filenameBase << fnn.str() << m_filenameExt;
-
-  //// Check if file exists
-  //if (!Poco::File(fn.str()).exists()) {
-  //  m_log.warning() << "File " << fn.str() << " not found\n";
-  //  return Workspace_sptr();
-  //}
 
   // Load run
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
@@ -600,6 +599,29 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
     fnExt = firstExt;
   }
   fnZeros = static_cast<int>(firstFN.size());
+}
+/**  Extract the run numbers from a run name string
+ *   @param runName :: [input] File name to extract run number from
+ *   @return :: Run number as int
+ */
+int PlotAsymmetryByLogValue::extractRunNumberFromRunName(
+  const std::string& runName) {
+
+  auto returnVal = runName;
+  // Remove file extension
+  returnVal.erase(returnVal.size() - 4);
+
+  std::string base = returnVal;
+  size_t i = base.size() - 1;
+  while (isdigit(base[i]))
+    i--;
+  if (i == base.size() - 1) {
+    throw Exception::FileError("File name must end with a number.", returnVal);
+  }
+  base.erase(i + 1);
+  returnVal.erase(0, base.size());
+
+  return std::stoi(returnVal);
 }
 
 /**  Apply dead-time corrections. The calculation is done by ApplyDeadTimeCorr

@@ -60,6 +60,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
   std::map<std::string, std::string> validateInputs() override;
+  int extractRunNumberFromRunName(const std::string &runName);
 
 private:
   // Overridden Algorithm methods
@@ -119,6 +120,10 @@ private:
   std::vector<int> m_backward_list;
   /// Store workspaces
   std::vector<std::string> m_fileNames;
+  /// A typedef for the map of workspace names to run numbers
+  using RunNumberMap = std::map<std::string, int>;
+  /// The map holding extracted run numbers from filenames
+  RunNumberMap m_rmap;
 
   /// Properties needed to analyse a run
   /// Type of calculation: integral or differential
