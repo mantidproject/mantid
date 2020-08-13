@@ -17,8 +17,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
@@ -26,7 +24,6 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <stdio.h>
 
 #include <Poco/File.h>
 
@@ -50,7 +47,7 @@ public:
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
     inst->setName("SillyInstrument");
-    auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
+    auto pw = std::make_shared<PeaksWorkspace>();
     pw->setInstrument(inst);
     std::string val = "value";
     pw->mutableRun().addProperty("TestProp", val);
@@ -81,12 +78,15 @@ public:
   public:
     TestablePeaksWorkspace(const PeaksWorkspace &other)
         : PeaksWorkspace(other) {}
+
+    using ExperimentInfo::numberOfDetectorGroups;
   };
 
   void test_copyConstructor() {
     auto pw = buildPW();
-    auto pw2 = PeaksWorkspace_sptr(new TestablePeaksWorkspace(*pw));
+    auto pw2 = std::make_shared<TestablePeaksWorkspace>(*pw);
     checkPW(*pw2);
+    TS_ASSERT_EQUALS(0, pw2->numberOfDetectorGroups());
   }
 
   void test_clone() {
@@ -97,7 +97,7 @@ public:
 
   void test_sort() {
     auto pw = buildPW();
-    Instrument_const_sptr inst = pw->getInstrument();
+    const auto inst = pw->getInstrument();
     Peak p0 = Peak(pw->getPeak(0)); // Peak(inst, 1, 3.0)
     Peak p1(inst, 1, 4.0);
     Peak p2(inst, 1, 5.0);

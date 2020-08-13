@@ -5,39 +5,21 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/Column.h"
-#include "MantidAPI/ColumnFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/TableColumn.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidKernel/V3D.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <exception>
-#include <fstream>
-#include <memory>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 // clang-format on
-#include <ostream>
-#include <string>
+
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -67,8 +49,8 @@ PeaksWorkspace::PeaksWorkspace()
 /** Copy constructor
  *
  * @param other :: other PeaksWorkspace to copy from
- * @return
  */
+// PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other) = default;
 PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
     : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
       m_coordSystem(other.m_coordSystem) {
@@ -77,39 +59,38 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
   setNumberOfDetectorGroups(0);
 }
 
-//=====================================================================================
-//=====================================================================================
 /** Comparator class for sorting peaks by one or more criteria
  */
 class PeakComparator {
 public:
-  std::vector<std::pair<std::string, bool>> &criteria;
+  using ColumnAndDirection = PeaksWorkspace::ColumnAndDirection;
+  std::vector<ColumnAndDirection> &criteria;
 
   /** Constructor for the comparator for sorting peaks
    * @param criteria : a vector with a list of pairs: column name, bool;
    *        where bool = true for ascending, false for descending sort.
    */
-  explicit PeakComparator(std::vector<std::pair<std::string, bool>> &criteria)
+  explicit PeakComparator(std::vector<ColumnAndDirection> &criteria)
       : criteria(criteria) {}
 
   /** Compare two peaks using the stored criteria */
   inline bool operator()(const Peak &a, const Peak &b) {
-    for (auto &name : criteria) {
-      std::string &col = name.first;
-      bool ascending = name.second;
+    for (const auto &name : criteria) {
+      const auto &col = name.first;
+      const bool ascending = name.second;
       bool lessThan = false;
       if (col == "BankName") {
         // If this criterion is equal, move on to the next one
-        std::string valA = a.getBankName();
-        std::string valB = b.getBankName();
+        const std::string valA = a.getBankName();
+        const std::string valB = b.getBankName();
         // Move on to lesser criterion if equal
         if (valA == valB)
           continue;
         lessThan = (valA < valB);
       } else {
         // General double comparison
-        double valA = a.getValueByColName(col);
-        double valB = b.getValueByColName(col);
+        const double valA = a.getValueByColName(col);
+        const double valB = b.getValueByColName(col);
         // Move on to lesser criterion if equal
         if (valA == valB)
           continue;
@@ -134,7 +115,7 @@ public:
  *        The peaks are sorted by the first criterion first, then the 2nd if
  *equal, etc.
  */
-void PeaksWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
+void PeaksWorkspace::sort(std::vector<ColumnAndDirection> &criteria) {
   PeakComparator comparator(criteria);
   std::stable_sort(peaks.begin(), peaks.end(), comparator);
 }
@@ -667,8 +648,8 @@ void PeaksWorkspace::initColumns() {
  **/
 void PeaksWorkspace::addPeakColumn(const std::string &name) {
   // Create the PeakColumn.
-  columns.emplace_back(std::shared_ptr<DataObjects::PeakColumn>(
-      new DataObjects::PeakColumn(this->peaks, name)));
+  columns.emplace_back(
+      std::make_shared<DataObjects::PeakColumn>(this->peaks, name));
   // Cache the names
   columnNames.emplace_back(name);
 }
