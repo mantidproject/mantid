@@ -112,6 +112,8 @@ const std::string sasProcessTermSvn = "svn";
 const std::string sasProcessTermCan = "can_trans_run";
 const std::string sasProcessTermUserFile = "user_file";
 const std::string sasProcessUserFileInLogs = "UserFile";
+const std::string sasProcessTermBatchFile = "batch_file";
+const std::string sasProcessBatchFileInLogs = "BatchFile";
 
 // SASnote
 const std::string sasNoteClassAttr = "SASnote";
