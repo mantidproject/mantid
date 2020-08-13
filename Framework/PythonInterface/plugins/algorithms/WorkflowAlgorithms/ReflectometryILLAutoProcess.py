@@ -174,7 +174,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 action=FileAction.OptionalLoad,
                 extensions=['nxs']
             ),
-            doc='A list of reflected run numbers/files for 00.')
+            doc='A list of reflected run numbers/files for 00 (or 0).')
         self.setPropertySettings(PropertyNames.RB00, is_polarized)
         self.setPropertyGroup(PropertyNames.RB00, polarized)
 
@@ -204,7 +204,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 action=FileAction.OptionalLoad,
                 extensions=['nxs']
             ),
-            doc='A list of reflected run numbers/files for 11.')
+            doc='A list of reflected run numbers/files for 11 (or 1).')
         self.setPropertySettings(PropertyNames.RB11, is_polarized)
         self.setPropertyGroup(PropertyNames.RB11, polarized)
 
@@ -554,8 +554,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             for property_name in PropertyNames.PROPETIES_TO_SIZE_MATCH:
                 value = self.getProperty(property_name).value
                 if len(value) != dimensionality and len(value) != 1:
-                    issues[property_name] = 'Must have a single value or as many as there are reflected beams: given {0}, '\
-                                            'but there are {1} reflected beams'.format(len(value), dimensionality)
+                    issues[property_name] = 'Parameter size mismatch: must have a single value or as many as there are reflected beams:' \
+                                            ' given {0}, but there are {1} reflected beam runs'.format(len(value), dimensionality)
         if self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value:
             manual_scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
             if len(manual_scale_factors) != dimensionality-1:
@@ -575,15 +575,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             issues[PropertyNames.RB] = 'Reflected beam input runs are mandatory'
         if self.getPropertyValue(PropertyNames.POLARIZATION_OPTION) == 'Polarized':
             run00 = self.getPropertyValue(PropertyNames.RB00)
-            run01 = self.getPropertyValue(PropertyNames.RB01)
-            run10 = self.getPropertyValue(PropertyNames.RB10)
             run11 = self.getPropertyValue(PropertyNames.RB11)
-            if not run00 and not run01 and not run10 and not run11:
-                msg = 'Reflected beam input runs are mandatory for at least one flipper configuration in case of polarized reduction.'
-                issues[PropertyNames.RB00] = msg
-                issues[PropertyNames.RB01] = msg
-                issues[PropertyNames.RB10] = msg
-                issues[PropertyNames.RB11] = msg
+            if not run00:
+                issues[PropertyNames.RB00] = 'Reflected beam runs are mandatory for 00 (or 0).'
+            if not run11:
+                issues[PropertyNames.RB11] = 'Reflected beam runs are mandatory for 11 (or 1).'
         return issues
 
     def setup(self):
