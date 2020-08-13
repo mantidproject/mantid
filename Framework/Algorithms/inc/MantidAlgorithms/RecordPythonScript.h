@@ -52,6 +52,7 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+  const std::string alias() const override;
   /** Handler of the start notifications. Must be overriden in inherited
   classes.
   @param alg :: Shared Pointer to the algorithm sending the notification.
