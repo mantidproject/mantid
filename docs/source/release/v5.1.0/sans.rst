@@ -12,6 +12,11 @@ SANS Changes
 Algorithms and instruments
 --------------------------
 
+New
+###
+
+- SaveCanSAS1D and SaveNXCanSAS now include the batch file name in their metadata if one was used to produce the output.
+
 Bug Fixed
 #########
 
