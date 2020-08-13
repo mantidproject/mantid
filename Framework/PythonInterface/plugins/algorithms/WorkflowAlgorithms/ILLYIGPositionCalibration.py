@@ -27,7 +27,11 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
     _D7NumberPixels = 132
     _D7NumberPixelsBank = 44
     # an approximate universal peak width:
-    _PeakWidth = 2.0 # in degrees
+    _peakWidth = 2.0 # in degrees
+    _beamMask1 = -35.0
+    _beamMask2 = 15.0
+    _minDistance = None
+    _scanStepSize = 0.25
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -72,6 +76,23 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="The initial guess for the neutrons' wavelength")
 
+        self.declareProperty(name="MinimalDistanceBetweenPeaks",
+                             defaultValue=3.0,
+                             validator=FloatBoundedValidator(lower=0),
+                             direction=Direction.Input,
+                             doc="The minimal allowable distance between two YIG peaks (in degrees 2theta).")
+
+        self.declareProperty(name="BankOffsets",
+                             defaultValue="",
+                             direction=Direction.Input,
+                             doc="List of values of offset for each bank (in degrees).")
+
+        self.declareProperty(name="ScanStepSize",
+                             defaultValue=0.25,
+                             validator=FloatBoundedValidator(lower=0),
+                             direction=Direction.Input,
+                             doc="The length of each step during YIG scan (in degrees).")
+
         self.declareProperty(name='CalibrationFilename',
                              defaultValue='',
                              direction=Direction.Input,
@@ -90,6 +111,19 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         else:
             intensityWS = self.getProperty('ScanWorkspace').value
         progress.report()
+        if not self.getProperty("BankOffsets").isDefault:
+            offsets = self.getPropertyValue("BankOffsets").split(',')
+            for bank_no in range(self._D7NumberBanks):
+                ChangeBinOffset(intensityWS, offsets[bank_no],
+                                WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
+                                                                    (bank_no+1)*self._D7NumberPixelsBank-1),
+                                OutputWorkspace=intensityWS)
+
+        if not self.getProperty("ScanStepSize").isDefault:
+            self._scanStepSize = float(self.getProperty("ScanStepSize")[0])
+
+        self._minDistance = float(self.getPropertyValue("MinimalDistanceBetweenPeaks"))
+
         # load the YIG peaks from an IPF
         yig_d = self._load_yig_peaks(intensityWS)
         # check how many and which peaks can be fitted in each row
@@ -130,7 +164,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         # Fill the intensity and position tables with all the data from scans
         for scan in range(nfiles):
             workspace = outGroup.getItem(scan)
-#             # normalize to monitor1 as monitor2 is sometimes empty:
+            # normalize to monitor1 as monitor2 is sometimes empty:
             if workspace.readY(workspace.getNumberHistograms()-2)[0] != 0:
                 workspace /= workspace.readY(workspace.getNumberHistograms()-2)[0]
             # remove Monitors:
@@ -143,7 +177,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                                              Axis='X',
                                              Formula='-180.0 * signedtwotheta / pi')
             # mask detectors too close to the beam axis or too far away:
-            workspace = MaskBinsIf(workspace, Criterion='x<15.0 && x>-35.0')
+            workspace = MaskBinsIf(workspace, Criterion='x>{0} && x<{1}'.format(self._beamMask1, self._beamMask2))
             # append the new row to a new MatrixWorkspace
             workspace = ConvertToPointData(InputWorkspace=workspace)
             try:
@@ -171,16 +205,22 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         yig_d_set = set()
         instrument = ws.getInstrument().getComponentByName('detector')
         for param_name in instrument.getParameterNames(True):
-            yig_d_set.add(instrument.getNumberParameter(param_name)[0])
+            if 'peak_' in param_name:
+                yig_d_set.add(instrument.getNumberParameter(param_name)[0])
         return sorted(list(yig_d_set))
 
-    def _remove_invisible_yig_peaks(self, yig_list):
+    def _remove_unwanted_yig_peaks(self, yig_list):
         """Removes YIG peaks with theta above 180 degrees
+        and those that are too close to each other,
         and returns a list with peaks positions in 2theta"""
         wavelength = float(self.getPropertyValue("ApproximateWavelength"))
         yig_list = [2.0 * self._RAD_2_DEG * math.asin(wavelength / (2.0 * d_spacing))
                     for d_spacing in yig_list if d_spacing > 0.5*wavelength]
-        return self._include_other_quadrants(yig_list)
+        yig_peaks = []
+        for index in range(len(yig_list)-1):
+            if abs(yig_list[index]-yig_list[index+1]) >= 2*self._minDistance:
+                yig_peaks.append(yig_list[index])
+        return self._include_other_quadrants(yig_peaks)
 
     def _include_other_quadrants(self, yig_list):
         """Adds other quadrants to the peak list: (-90,0) degrees"""
@@ -400,12 +440,12 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
 
     def _calibrate_detectors(self, parameter_table):
         wavelength, pixel_offsets = self._calculate_pixel_positions(parameter_table)
-        bank2_pixels = pixel_offsets[:44]
-        pos_bank2 = CreateWorkspace(DataX=range(44), DataY=bank2_pixels, NSpec=1)
-        bank3_pixels = pixel_offsets[44:88]
-        pos_bank3 = CreateWorkspace(DataX=range(44, 89), DataY=bank3_pixels, NSpec=1)
-        bank4_pixels = pixel_offsets[88:132]
-        pos_bank4 = CreateWorkspace(DataX=range(88, 132), DataY=bank4_pixels, NSpec=1)
+        # bank2_pixels = pixel_offsets[:44]
+        # pos_bank2 = CreateWorkspace(DataX=range(44), DataY=bank2_pixels, NSpec=1)
+        # bank3_pixels = pixel_offsets[44:88]
+        # pos_bank3 = CreateWorkspace(DataX=range(44, 89), DataY=bank3_pixels, NSpec=1)
+        # bank4_pixels = pixel_offsets[88:132]
+        # pos_bank4 = CreateWorkspace(DataX=range(88, 132), DataY=bank4_pixels, NSpec=1)
 
         return wavelength, pixel_offsets
 
