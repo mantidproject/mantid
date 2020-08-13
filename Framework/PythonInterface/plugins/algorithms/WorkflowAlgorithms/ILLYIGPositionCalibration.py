@@ -237,24 +237,31 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         """Returns a list o tuples with peak centre positions and peak height
         used for further fitting. Removes all peaks that would require scattering
         angle above 180 degrees and returns the peak positions in degrees"""
-        yig2theta = self._remove_invisible_yig_peaks(YIG_D)
-
+        yig2theta = self._remove_unwanted_yig_peaks(YIG_D)
         peak_list = []
-        for scan in range(ws.getNumberHistograms()):
-            detector_2theta = ws.readX(scan)
-            intensity = ws.readY(scan)
+        for pixel_no in range(ws.getNumberHistograms()):
+            detector_2theta = ws.readX(pixel_no)
+            intensity = ws.readY(pixel_no)
             min2Theta = detector_2theta[0]
             max2Theta = detector_2theta[-1]
             single_spectrum_peaks = []
             for peak in yig2theta:
-                if ( ((peak - self._PeakWidth) > min2Theta ) and ( (peak + self._PeakWidth) < max2Theta) ):
+                if ( ((peak - self._peakWidth*2) > min2Theta ) and ( (peak + self._peakWidth*2) < max2Theta)
+                     and (peak+self._peakWidth*2 < self._beamMask1 or peak-self._peakWidth*2 > self._beamMask2)):
                     peak_intensity = 0
-                    for pixel_no in range(len(detector_2theta)):
-                        twoTheta = detector_2theta[pixel_no]
+                    for bin_no in range(len(detector_2theta)):
+                        twoTheta = detector_2theta[bin_no]
                         if (abs(twoTheta-peak) < 1): # within 1 degree from the expected peak position
-                            peak_intensity = intensity[pixel_no]
-                            if (peak_intensity != 0): # exclude masked peaks
-                                single_spectrum_peaks.append((peak_intensity, twoTheta))
+                            # scan for the local maximum:
+                            peak_intensity = intensity[bin_no]
+                            index_maximum = bin_no
+                            for index in range(bin_no-int((self._minDistance)/self._scanStepSize),
+                                               bin_no+int((self._minDistance)/self._scanStepSize), 1):
+                                if intensity[index] > peak_intensity:
+                                    peak_intensity = intensity[index]
+                                    index_maximum = index
+                            expected_pos = peak
+                            single_spectrum_peaks.append((peak_intensity, detector_2theta[index_maximum], expected_pos))
                             break
             peak_list.append(single_spectrum_peaks)
         return peak_list
@@ -398,13 +405,16 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             func_no += 1
 
         multiFunc += 'ties=(' + ties + ')'
-        fit_output = Fit(Function=multiFunc,
-                         Constraints=constraints,
-                         IgnoreInvalidData=True,
-                         CreateOutput=True,
-                         Output='det_out',
-                         **fit_kwargs)
-
+        try:
+            fit_output = Fit(Function=multiFunc,
+                             Constraints=constraints,
+                             IgnoreInvalidData=True,
+                             CreateOutput=True,
+                             Output='det_out',
+                             **fit_kwargs)
+        except RuntimeError:
+            print("Please change initial parameters of the fit")
+            raise
         param_table = fit_output.OutputParameters
 
         return param_table
