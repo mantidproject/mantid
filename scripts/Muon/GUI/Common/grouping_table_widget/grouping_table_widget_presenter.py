@@ -125,7 +125,8 @@ class GroupingTablePresenter(object):
     def add_group_to_view(self, group, state):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        entry = [str(group.name), run_utils.run_list_to_string(group.periods), state, run_utils.run_list_to_string(group.detectors, False), str(group.n_detectors)]
+        entry = [str(group.name), run_utils.run_list_to_string(group.periods), state, run_utils.run_list_to_string(group.detectors, False),
+                 str(group.n_detectors)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 

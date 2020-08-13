@@ -163,7 +163,7 @@ class GroupingTableView(QtWidgets.QWidget):
                 self.grouping_table.setItem(row_position, i, group_name_widget)
                 self.grouping_table.item(row_position, i).setToolTip(entry)
                 group_name_widget.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-   
+
             if group_table_columns[i] == 'periods':
                 period_widget = QtWidgets.QTableWidgetItem(entry)
                 self.grouping_table.setItem(row_position, i, period_widget)

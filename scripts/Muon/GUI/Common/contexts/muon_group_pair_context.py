@@ -215,7 +215,7 @@ class MuonGroupPairContext(object):
     def show(self, name, run):
         self[name].show(str(run))
 
-    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods=1):
+    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
         default_groups, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
         if num_periods == 1:
             self._groups = default_groups

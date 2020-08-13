@@ -81,7 +81,7 @@ class MuonContext(object):
         run_as_string = run_list_to_string(run)
         periods_as_string = run_list_to_string(periods)
 
-        # A scientific requirement is that processing can continue if a period is missing from some 
+        # A scientific requirement is that processing can continue if a period is missing from some
         # of the runs. This filters out periods which are not in a given run.
         periods = [period for period in periods if period <= self.num_periods(run)]
 
@@ -190,10 +190,12 @@ class MuonContext(object):
             self.data_context.update_current_data()
 
             if not self.group_pair_context.groups:
+                minimum_number_of_periods = min([self.num_periods(run) for run in self.current_runs])
                 self.group_pair_context.reset_group_and_pairs_to_default(
                     self.data_context.current_workspace,
                     self.data_context.instrument,
-                    self.data_context.main_field_direction)
+                    self.data_context.main_field_direction,
+                    minimum_number_of_periods)
         else:
             self.data_context.clear()
 
