@@ -83,7 +83,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                              doc="The minimal allowable distance between two YIG peaks (in degrees 2theta).")
 
         self.declareProperty(name="BankOffsets",
-                             defaultValue="",
+                             defaultValue='0,0,0',
                              direction=Direction.Input,
                              doc="List of values of offset for each bank (in degrees).")
 
@@ -132,7 +132,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         # fit gaussian to peaks for each pixel, returns peaks as a function of their expected position
         peaks_positions = self._fit_bragg_peaks(intensityWS, yig_peaks_positions)
         progress.report()
-        ReplaceSpecialValues(InputWorkspace=peaks_positions, OutputWorkspace=peaks_positions,
+        ReplaceSpecialValues(InputWorkspace='fit_results', OutputWorkspace='fit_results',
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
         # fit the wavelegnth, bank gradients and individual
         detector_parameters = self._fit_detector_positions(peaks_positions)
@@ -296,8 +296,8 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                     fit_output = Fit(Function=function,
                                      InputWorkspace=ws,
                                      WorkspaceIndex=pixel_no,
-                                     StartX=float(peak_centre_guess) - self._minDistance,
-                                     EndX=float(peak_centre_guess) + self._minDistance,
+                                     StartX=float(peak_centre_expected) - self._minDistance,
+                                     EndX=float(peak_centre_expected) + self._minDistance,
                                      Constraints=constraints,
                                      CreateOutput=True,
                                      IgnoreInvalidData=True,
@@ -315,7 +315,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
                             background = row_data['Value']
                         if 'PeakCentre' in row_data['Name']:
                             intensity, peak_pos_guess, peak_pos_expected = single_spectrum_peaks[peak_no]
-                            if (param_table.row(row_no-1)['Value'] > 0.1*background):
+                            if (abs(param_table.row(row_no-1)['Value'] / background) > 0.1):
                                 results_x[peak_no] = peak_pos_expected
                                 results_y[peak_no] = row_data['Value']
                                 results_e[peak_no] = row_data['Error']
