@@ -134,5 +134,7 @@ Bugfixes
 - The figure options button on the sliceviewer has been removed as most options did not function correctly.
 - Fixed the bug that caused the fit browser on plots to reset size changes on mouse interactions with the figure.
 - Fix crash when subscribing algorithms from a separate thread
+- The workbench launch scripts have been replaced by an executable on macOS & Windows. On Windows this will stop virus scanners
+  flagging the old ``launch_workbench.exe`` as a threat and quarantining it.
 
 :ref:`Release 5.1.0 <v5.1.0>`
