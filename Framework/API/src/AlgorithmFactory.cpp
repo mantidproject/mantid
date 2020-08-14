@@ -63,14 +63,13 @@ AlgorithmFactoryImpl::create(const std::string &name,
     try {
       return this->createAlgorithm(realName, local_version);
     } catch (Kernel::Exception::NotFoundError &) {
-      // Get highest registered version 
+      // Get highest registered version
       const auto hVersion = highestVersion(realName); // Throws if not found
 
       // The version registered does not match version supplied
       g_log.error() << "algorithm " << name << " version " << version
                     << " is not registered \n";
-      g_log.error() << "the latest registered version is " << hVersion
-                    << '\n';
+      g_log.error() << "the latest registered version is " << hVersion << '\n';
       throw std::runtime_error("algorithm not registered " +
                                createName(name, local_version));
     }
@@ -231,7 +230,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
  * @return Real name of algrotihm if found, otherwsie empty string
  */
 std::string AlgorithmFactoryImpl::getNameFromAliasMap(
-  const std::string& algorithmName) const {
+    const std::string &algorithmName) const {
   auto a_it = m_amap.find(algorithmName);
   if (a_it == m_amap.end())
     return "";
