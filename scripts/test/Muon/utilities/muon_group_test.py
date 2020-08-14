@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_group import MuonGroup, MuonRun
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantid.simpleapi import CreateWorkspace
 from Muon.GUI.Common.test_helpers.general_test_helpers import (create_group_populated_by_two_workspace,
@@ -113,7 +113,7 @@ class MuonGroupTest(unittest.TestCase):
 
     def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden(self):
         group = create_group_populated_by_two_workspace()
-        group._asymmetry_estimate[tuple([22222])].hide()
+        group._asymmetry_estimate[MuonRun([22222])].hide()
 
         workspace_list = group.get_asymmetry_workspace_names([[22222]])
 
@@ -128,7 +128,7 @@ class MuonGroupTest(unittest.TestCase):
 
     def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden_for_rebinned(self):
         group = create_group_populated_by_two_rebinned_workspaces()
-        group._asymmetry_estimate_rebin[tuple([22222])].hide()
+        group._asymmetry_estimate_rebin[MuonRun([22222])].hide()
 
         workspace_list = group.get_asymmetry_workspace_names_rebinned([[22222]])
 

@@ -176,7 +176,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0])
 
         self.assertEqual(group_name, 'group_1')
-        self.assertEqual(run, [62260])
+        self.assertEqual(run, '62260')
 
     def test_get_group_pair_name_and_run_works_for_co_added_runs(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
@@ -191,7 +191,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0])
 
         self.assertEqual(group_name, 'group_1')
-        self.assertEqual(run, [62260, 62261])
+        self.assertEqual(run, '62260-62261')
 
 
 if __name__ == '__main__':
