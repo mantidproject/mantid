@@ -114,6 +114,9 @@ public:
   const std::vector<std::string> getKeys() const override;
   const std::vector<std::string> getKeys(bool includeHidden) const;
 
+  /// Get an algorithms name from the alias map
+  std::string getNameFromAliasMap(const std::string &algorithmName) const;
+
   /// Returns the highest version of the algorithm currently registered
   int highestVersion(const std::string &algorithmName) const;
 
@@ -126,7 +129,7 @@ public:
 
   /// Returns algorithm descriptors.
   std::vector<AlgorithmDescriptor>
-  getDescriptors(bool includeHidden = false, bool includeAliases = true) const;
+  getDescriptors(bool includeHidden = false, bool includeAliases = false) const;
 
   /// unmangles the names used as keys into the name and version
   std::pair<std::string, int> decodeName(const std::string &mangledName) const;
@@ -160,7 +163,7 @@ private:
   using VersionMap = std::map<std::string, int>;
   /// The map holding the registered class names and their highest versions
   VersionMap m_vmap;
-  /// A typedef for the map pf algorithm aliases
+  /// A typedef for the map of algorithm aliases
   using AliasMap = std::unordered_map<std::string, std::string>;
   /// The map holding the alias names of registered algorithms
   AliasMap m_amap;

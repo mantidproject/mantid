@@ -168,8 +168,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         i = self.search_box.findText(text)
         if i < 0:
             return None
-        alg_name = self.search_box.currentText()
-        return SelectedAlgorithm(name=alg_name, version=-1)
+        return SelectedAlgorithm(name=self.search_box.currentText(), version=-1)
 
     def _on_search_box_selection_changed(self, text):
         """

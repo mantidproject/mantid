@@ -125,20 +125,34 @@ public:
     TS_ASSERT_EQUALS(noOfAlgs - 1, keys.size());
   }
 
+  void test_getNameFromAliasMap() {
+    auto &algFactory = AlgorithmFactory::Instance();
+
+    const auto resultAlias = algFactory.getNameFromAliasMap("Dog");
+    const auto resultFakeAlias = algFactory.getNameFromAliasMap("Frog");
+
+    TS_ASSERT_EQUALS(resultAlias, "ToyAlgorithm");
+    TS_ASSERT_EQUALS(resultFakeAlias, "");
+  }
+
   void test_HighestVersion() {
     auto &algFactory = AlgorithmFactory::Instance();
 
     TS_ASSERT_THROWS(algFactory.highestVersion("ToyAlgorithm"),
                      const std::invalid_argument &);
+    TS_ASSERT_THROWS(algFactory.highestVersion("Dog"),
+                     const std::invalid_argument &);
 
     algFactory.subscribe<ToyAlgorithm>();
     TS_ASSERT_EQUALS(1, algFactory.highestVersion("ToyAlgorithm"));
+    TS_ASSERT_EQUALS(1, algFactory.highestVersion("Dog"));
 
     std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newTwo =
         std::make_unique<
             Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>>();
     algFactory.subscribe(std::move(newTwo));
     TS_ASSERT_EQUALS(2, algFactory.highestVersion("ToyAlgorithm"));
+    TS_ASSERT_EQUALS(2, algFactory.highestVersion("Dog"));
 
     algFactory.unsubscribe("ToyAlgorithm", 1);
     algFactory.unsubscribe("ToyAlgorithm", 2);

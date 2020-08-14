@@ -46,44 +46,36 @@ AlgorithmFactoryImpl::create(const std::string &name,
   int local_version = version;
   // Version not supplied
   if (version == -1) {
-    auto v_it = m_vmap.find(name);
-    if (v_it == m_vmap.end()) {
-      // Try finding version from alias instead
-      auto a_it = m_amap.find(name);
-      if (a_it != m_amap.end()) {
-        v_it = m_vmap.find(a_it->second);
-      }
-    }
-    if (v_it == m_vmap.end()) // Version could not be found
-      throw std::runtime_error("Algorithm not registered " + name);
-    else
-      local_version = v_it->second;
+    local_version = highestVersion(name); // throws if not found
   }
 
+  // Try create from given name
   try {
     return this->createAlgorithm(name, local_version);
   } catch (Kernel::Exception::NotFoundError &) {
   }
-  auto v_it = m_vmap.find(name);
-  // Try create from alias instead
-  auto a_it = m_amap.find(name);
-  if (a_it != m_amap.end()) {
-    v_it = m_vmap.find(a_it->second);
-    try {
-      return this->createAlgorithm(a_it->second, local_version);
-    } catch (Kernel::Exception::NotFoundError &) {
-    }
-  }
 
-  if (v_it == m_vmap.end())
+  // Fallback, name might be an alias
+  // Try get real name and create from that instead
+  const auto realName = getNameFromAliasMap(name);
+  if (!realName.empty()) {
+    // Try create algorithm again with real name
+    try {
+      return this->createAlgorithm(realName, local_version);
+    } catch (Kernel::Exception::NotFoundError &) {
+      // Get highest registered version 
+      const auto hVersion = highestVersion(realName); // Throws if not found
+
+      // The version registered does not match version supplied
+      g_log.error() << "algorithm " << name << " version " << version
+                    << " is not registered \n";
+      g_log.error() << "the latest registered version is " << hVersion
+                    << '\n';
+      throw std::runtime_error("algorithm not registered " +
+                               createName(name, local_version));
+    }
+  } else {
     throw std::runtime_error("algorithm not registered " + name);
-  else {
-    g_log.error() << "algorithm " << name << " version " << version
-                  << " is not registered \n";
-    g_log.error() << "the latest registered version is " << v_it->second
-                  << '\n';
-    throw std::runtime_error("algorithm not registered " +
-                             createName(name, local_version));
   }
 }
 
@@ -235,6 +227,19 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
 }
 
 /**
+ * @param algorithmName The name of the algorithm to look up in the alias map
+ * @return Real name of algrotihm if found, otherwsie empty string
+ */
+std::string AlgorithmFactoryImpl::getNameFromAliasMap(
+  const std::string& algorithmName) const {
+  auto a_it = m_amap.find(algorithmName);
+  if (a_it == m_amap.end())
+    return "";
+  else
+    return a_it->second;
+}
+
+/**
  * @param algorithmName The name of an algorithm registered with the factory
  * @return An integer corresponding to the highest version registered
  * @throw std::invalid_argument if the algorithm cannot be found
@@ -245,9 +250,19 @@ int AlgorithmFactoryImpl::highestVersion(
   if (viter != m_vmap.end())
     return viter->second;
   else {
-    throw std::invalid_argument(
-        "AlgorithmFactory::highestVersion() - Unknown algorithm '" +
-        algorithmName + "'");
+    // Fall back, algorithmName might be an alias
+    // Check alias map, then find version from real name
+    const auto realName = getNameFromAliasMap(algorithmName);
+    if (!realName.empty()) {
+      viter = m_vmap.find(realName);
+    }
+    if (viter != m_vmap.end())
+      return viter->second;
+    else {
+      throw std::invalid_argument(
+          "AlgorithmFactory::highestVersion() - Unknown algorithm '" +
+          algorithmName + "'");
+    }
   }
 }
 
