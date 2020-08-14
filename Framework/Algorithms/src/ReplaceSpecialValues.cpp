@@ -99,13 +99,14 @@ void ReplaceSpecialValues::performUnaryOperation(const double XIn,
   if (m_performNaNCheck && (checkIfNan(YIn) || checkIfNan(EIn))) {
     YOut = m_NaNValue;
     EOut = m_NaNError;
-  } else if (m_performInfiniteCheck && (checkIfInfinite(YIn) || checkIfNan(EIn))) {
+  } else if (m_performInfiniteCheck &&
+             (checkIfInfinite(YIn) || checkIfInfinite(EIn))) {
     YOut = m_InfiniteValue;
     EOut = m_InfiniteError;
-  } else if (m_performBigCheck && (checkIfBig(YIn) || checkIfNan(EIn))) {
+  } else if (m_performBigCheck && (checkIfBig(YIn) || checkIfBig(EIn))) {
     YOut = m_bigValue;
     EOut = m_bigError;
-  } else if (m_performSmallCheck && (checkIfSmall(YIn) || checkIfNan(EIn))) {
+  } else if (m_performSmallCheck && (checkIfSmall(YIn) || checkIfSmall(EIn))) {
     YOut = m_smallValue;
     EOut = m_smallError;
   }
