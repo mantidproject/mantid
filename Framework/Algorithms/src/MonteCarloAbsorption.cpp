@@ -107,6 +107,8 @@ void MonteCarloAbsorption::init() {
       "The number of \"neutron\" events to generate per simulated point");
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
+  declareProperty("IncrementSeed", false,
+                  "increment the random seed for each detector");
 
   auto interpolateOpt = createInterpolateOption();
   declareProperty(interpolateOpt->property(), interpolateOpt->propertyDoc());
@@ -171,6 +173,7 @@ void MonteCarloAbsorption::exec() {
   const bool resimulateTracks =
       getProperty("ResimulateTracksForDifferentWavelengths");
   const int seed = getProperty("SeedValue");
+  const bool incrementSeed = getProperty("IncrementSeed");
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"));
   const bool useSparseInstrument = getProperty("SparseInstrument");
@@ -186,7 +189,7 @@ void MonteCarloAbsorption::exec() {
   }
   auto outputWS =
       doSimulation(*inputWS, static_cast<size_t>(nevents), resimulateTracks,
-                   seed, interpolateOpt, useSparseInstrument,
+                   seed, incrementSeed, interpolateOpt, useSparseInstrument,
                    static_cast<size_t>(maxScatterPtAttempts), simulatePointsIn);
   setProperty("OutputWorkspace", std::move(outputWS));
 }
@@ -301,8 +304,8 @@ MonteCarloAbsorption::createInterpolateOption() {
 MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     const MatrixWorkspace &inputWS, const size_t nevents,
     const bool resimulateTracksForDiffWavelengths, const int seed,
-    const InterpolationOption &interpolateOpt, const bool useSparseInstrument,
-    const size_t maxScatterPtAttempts,
+    const bool incrementSeed, const InterpolationOption &interpolateOpt,
+    const bool useSparseInstrument, const size_t maxScatterPtAttempts,
     const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
   auto outputWS = createOutputWorkspace(inputWS);
   const auto inputNbins = static_cast<int>(inputWS.blocksize());
@@ -368,7 +371,11 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     const auto &detPos = spectrumInfo.position(i);
     const double lambdaFixed =
         toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
-    MersenneTwister rng(seed);
+    int rngSeed = seed;
+    if (incrementSeed) {
+      rngSeed += i;
+    }
+    MersenneTwister rng(rngSeed);
 
     const auto lambdas = simulationWS.points(i).rawData();
 

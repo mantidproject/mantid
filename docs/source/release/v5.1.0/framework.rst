@@ -48,6 +48,7 @@ Algorithms
 - Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
 - Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
 - Deprecated the RecordPythonScript algorithm
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` can now increments the random seed with the `IncrementSeed` parameter
 
 Data Handling
 -------------
