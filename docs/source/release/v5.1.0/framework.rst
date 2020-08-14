@@ -21,7 +21,7 @@ New Algorithms
 Algorithms
 ----------
 
-- :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues` now also checks the Error axis for unwanted values.
+- :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now also checks the Error axis for unwanted values.
 - :ref:`SetSample <algm-SetSample>` is extended to support for composite shapes, such as FlatPlateHolder and HollowCylinderHolder. Also the input validation is made more stringent.
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
