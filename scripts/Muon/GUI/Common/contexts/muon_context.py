@@ -77,19 +77,19 @@ class MuonContext(object):
     def current_runs(self):
         return self._data_context.current_runs
 
-    def calculate_group(self, group_name, run, periods, rebin=False):
+    def calculate_group(self, group, run, rebin=False):
         run_as_string = run_list_to_string(run)
-        periods_as_string = run_list_to_string(periods)
+        periods_as_string = run_list_to_string(group.periods)
 
-        # A scientific requirement is that processing can continue if a period is missing from some
+        # A user requirement is that processing can continue if a period is missing from some
         # of the runs. This filters out periods which are not in a given run.
-        periods = [period for period in periods if period <= self.num_periods(run)]
+        periods = [period for period in group.periods if period <= self.num_periods(run)]
 
-        name = get_group_data_workspace_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
-        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
-        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, periods_as_string, rebin=rebin)
-        group_workspace = calculate_group_data(self, group_name, run, rebin, name, periods)
-        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin,
+        name = get_group_data_workspace_name(self, group.name, run_as_string, periods_as_string, rebin=rebin)
+        asym_name = get_group_asymmetry_name(self, group.name, run_as_string, periods_as_string, rebin=rebin)
+        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group.name, run_as_string, periods_as_string, rebin=rebin)
+        group_workspace = calculate_group_data(self, group, run, rebin, name, periods)
+        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group, run, rebin,
                                                                                       asym_name, asym_name_unnorm, periods)
 
         return group_workspace, group_asymmetry, group_asymmetry_unnormalised
@@ -179,7 +179,7 @@ class MuonContext(object):
             run_pre_processing(context=self, run=run, rebin=rebin)
             for group in self._group_pair_context.groups:
                 group_workspace, group_asymmetry, group_asymmetry_unormalised = \
-                     self.calculate_group(group.name, run, group.periods, rebin=rebin)
+                     self.calculate_group(group, run, rebin=rebin)
                 self.group_pair_context[group.name].update_workspaces(run, group_workspace, group_asymmetry,
                                                                       group_asymmetry_unormalised, rebin=rebin)
 
