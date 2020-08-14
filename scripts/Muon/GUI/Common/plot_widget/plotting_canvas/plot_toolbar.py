@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from matplotlib.backends.qt_compat import is_pyqt5
 from mantidqt.icons import get_icon
+from qtpy import QtCore, QtWidgets
 if is_pyqt5():
     from matplotlib.backends.backend_qt5agg import (
         NavigationToolbar2QT as NavigationToolbar)
@@ -13,9 +14,9 @@ else:
     from matplotlib.backends.backend_qt4agg import (
         NavigationToolbar2QT as NavigationToolbar)
 
-from qtpy import QtCore, QtWidgets
 
 class PlotToolbar(NavigationToolbar):
+
     def __init__(self, figure_canvas, parent=None):
         self.toolitems = (('Home', 'Reset original view', 'mdi.home', 'home'),
                           ('Back', 'Back to previous view', 'mdi.arrow-left', 'back'),
