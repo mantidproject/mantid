@@ -39,3 +39,9 @@ class SettingsView(base, form):
     def get_properties_filename(self, accept_mode, file_mode):
         return open_a_file_dialog(parent=self, default_suffix=".properties", file_filter="PROPERTIES file (*.properties)",
                                   accept_mode=accept_mode, file_mode=file_mode)
+
+    def notify_changes_need_restart(self, list_of_changes_that_need_restart):
+        QMessageBox.information(self, self.presenter.CHANGES_NEED_RESTART_TITLE,
+                             self.presenter.CHANGES_NEED_RESTART_MESSAGE + "  • " +
+                                "\n  • ".join(list_of_changes_that_need_restart),
+                             QMessageBox.Ok)

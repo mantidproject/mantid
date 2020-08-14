@@ -42,9 +42,10 @@ class GeneralSettings(object):
     be handled here.
     """
 
-    def __init__(self, parent, view=None):
+    def __init__(self, parent, view=None, settings_presenter=None):
         self.view = view if view else GeneralSettingsView(parent, self)
         self.parent = parent
+        self.settings_presenter = settings_presenter
         self.load_current_setting_values()
 
         self.setup_facilities_group()
@@ -100,7 +101,12 @@ class GeneralSettings(object):
         font_dialog.fontSelected.connect(self.action_font_selected)
 
     def action_font_selected(self, font):
-        CONF.set(GeneralProperties.FONT.value, font.toString())
+        font_string = ""
+        if CONF.has(GeneralProperties.FONT.value):
+            font_string = CONF.get(GeneralProperties.FONT.value)
+        if self.settings_presenter is not None and font_string != font.toString():
+            CONF.set(GeneralProperties.FONT.value, font.toString())
+            self.settings_presenter.register_change_needs_restart("Main Font Selection")
 
     def setup_checkbox_signals(self):
         self.view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
