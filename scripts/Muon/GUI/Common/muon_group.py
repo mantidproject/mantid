@@ -8,21 +8,38 @@
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from typing import List
+import itertools
 
 
 class MuonRun(object):
+    """
+    Holds the experimental runs a dataset corrosponds to.
+    Due to the ability to co-add runs on load this can be one to many.
+    This is used to index and referance by dataset.
+    """
     def __init__(self, run_numbers: List[int]):
         self._runs = tuple(run_numbers)
 
+    """
+    A range of runs should be returned seperated by a dash whilst
+    non-cosecutive runs should be comma seperated.
+    For example (62260, 62261, 62263, 62270)
+    should return '62260-62263, 62270'
+    """
     def __str__(self):
         return run_list_to_string(list(self._runs))
 
     def __eq__(self, other):
-        return other._runs == self._runs
+        return isinstance(other, self.__class__) and other._runs == self._runs
 
     def __repr__(self):
         return 'MuonRun({})'.format(self._runs)
 
+    """
+    We need to be able to hash this class so it can be used as
+    a key in dict objects. For this purpose just hashing the
+    internal tuple is sufficient.
+    """
     def __hash__(self):
         return hash(self._runs)
 
@@ -171,19 +188,10 @@ class MuonGroup(object):
         return None
 
     def get_run_for_workspace(self, workspace_name):
-        for key, value in self._asymmetry_estimate.items():
-            if value.workspace_name == workspace_name:
-                return key
-
-        for key, value in self._counts_workspace.items():
-            if value.workspace_name == workspace_name:
-                return key
-
-        for key, value in self._asymmetry_estimate_rebin.items():
-            if value.workspace_name == workspace_name:
-                return key
-
-        for key, value in self._counts_workspace_rebin.items():
+        for key, value in itertools.chain(self._asymmetry_estimate.items(),
+                                          self._counts_workspace.items(),
+                                          self._asymmetry_estimate_rebin.items(),
+                                          self._counts_workspace_rebin.items()):
             if value.workspace_name == workspace_name:
                 return key
 

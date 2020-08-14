@@ -7,7 +7,6 @@
 from typing import NamedTuple, List
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import MUON_ANALYSIS_GUESS_WS, \
     FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
 
