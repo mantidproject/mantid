@@ -631,6 +631,7 @@ void PeaksWorkspace::initColumns() {
   addPeakColumn("DSpacing");
   addPeakColumn("Intens");
   addPeakColumn("SigInt");
+  addPeakColumn("Intens/SigInt");
   addPeakColumn("BinCount");
   addPeakColumn("BankName");
   addPeakColumn("Row");
