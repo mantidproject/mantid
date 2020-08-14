@@ -303,6 +303,6 @@ class MuonGroupPairContext(object):
         for group_pair in self.groups + self.pairs:
             run = group_pair.get_run_for_workspace(workspace_name)
             if(run):
-                return group_pair.name, list(run)
+                return group_pair.name, str(run)
 
         return None, None

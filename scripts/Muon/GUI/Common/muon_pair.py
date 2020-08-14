@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0111
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-
+from Muon.GUI.Common.muon_group import MuonRun
 
 class MuonPair(object):
     """
@@ -74,32 +74,36 @@ class MuonPair(object):
             raise AttributeError("Alpha must be > 0.0.")
 
     def show_raw(self, run, name):
-        tuple(run) not in self._workspace or self._workspace[tuple(run)].show(name)
+        run_object = MuonRun(run)
+        run_object not in self._workspace or self._workspace[run_object].show(name)
 
     def show_rebin(self, run, name):
-        tuple(run) not in self.workspace_rebin or self.workspace_rebin[tuple(run)].show(name)
+        run_object = MuonRun(run)
+        run_object not in self.workspace_rebin or self.workspace_rebin[run_object].show(name)
 
     def update_asymmetry_workspace(self, asymmetry_workspace, run, rebin=False):
+        run_object = MuonRun(run)
         if not rebin:
-            self._workspace.update({tuple(run): MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._workspace.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
         else:
-            self.workspace_rebin.update({tuple(run): MuonWorkspaceWrapper(asymmetry_workspace)})
+            self.workspace_rebin.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
 
     def get_asymmetry_workspace_names(self, runs):
         workspace_list = []
 
         for run in runs:
-            if tuple(run) in self._workspace and self._workspace[tuple(run)].workspace_name:
-                workspace_list.append(self._workspace[tuple(run)].workspace_name)
+            run_object = MuonRun(run)
+            if run_object in self._workspace and self._workspace[run_object].workspace_name:
+                workspace_list.append(self._workspace[run_object].workspace_name)
 
         return workspace_list
 
     def get_asymmetry_workspace_names_rebinned(self, runs):
         workspace_list = []
-
         for run in runs:
-            if tuple(run) in self.workspace_rebin and self.workspace_rebin[tuple(run)].workspace_name:
-                workspace_list.append(self.workspace_rebin[tuple(run)].workspace_name)
+            run_object = MuonRun(run)
+            if run_object in self.workspace_rebin and self.workspace_rebin[run_object].workspace_name:
+                workspace_list.append(self.workspace_rebin[run_object].workspace_name)
 
         return workspace_list
 
