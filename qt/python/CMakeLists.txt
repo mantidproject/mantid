@@ -79,6 +79,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
       mantidqt/utils/test/test_writetosignal.py
+      mantidqt/utils/qt/test/test_qappthreadcall.py
       mantidqt/widgets/test/test_messagedisplay.py
       mantidqt/widgets/test/test_fitpropertybrowser.py
       mantidqt/widgets/test/test_fitpropertybrowserbase.py
@@ -95,7 +96,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
     # ctest target for widgets that only get tested in qt5, because they are
     # only used in the workbench
     set(PYTHON_WIDGET_QT5_ONLY_TESTS
-        mantidqt/widgets/algorithmselector/test/observer_test.py
+        mantidqt/widgets/algorithmselector/test/test_algorithm_factory_observer.py
         mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
         mantidqt/widgets/codeeditor/test/test_codeeditor.py
         mantidqt/widgets/codeeditor/test/test_completion.py

@@ -43,7 +43,7 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
     
     #include "MantidAPI/Algorithm.h"
     
-    class MyAlg : public Mantid::API::Algorithm
+    class DLLExport MyAlg : public Mantid::API::Algorithm
     {
     public:
       /// (Empty) Constructor
@@ -51,17 +51,19 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
       /// Virtual destructor
       virtual ~MyAlg() {}
       /// Algorithm's name
-      virtual const std::string name() const { return "MyAlg"; }
+      const std::string name() const override { return "MyAlg"; }
+      /// Algorithm's purpose/summary
+      const std::string summary() const override { return "Summary";}
       /// Algorithm's version
-      virtual const int version() const { return (1); }
+      int version() const override { return (1); }
       /// Algorithm's category for identification
-      virtual const std::string category() const { return "UserDefined"; }
+      const std::string category() const override { return "UserDefined"; }
     
     private:
       /// Initialisation code
-      void init();
+      void init() override;
       /// Execution code
-      void exec();
+      void exec() override;
     };
 
 **Source file (MyAlg.cpp)**:
