@@ -258,8 +258,9 @@ public:
 
         if (infCheck && (std::isinf(inputWS->y(i)[j - 1]) ||
                          std::isinf(inputWS->e(i)[j - 1]))) {
-          if (std::isinf(result->y(i)[j - 1]) || std::isinf(result->e(i)[j - 1])) {
-              TS_FAIL("Infinity detected that should have been replaced");
+          if (std::isinf(result->y(i)[j - 1]) ||
+              std::isinf(result->e(i)[j - 1])) {
+            TS_FAIL("Infinity detected that should have been replaced");
           } else {
             TS_ASSERT_DELTA(result->y(i)[j - 1], 999.0, 1e-8);
             TS_ASSERT_DELTA(result->e(i)[j - 1], 0.00005, 1e-8);
@@ -320,8 +321,7 @@ public:
         std::numeric_limits<float>::infinity();
     evlist.getWeightedEvents().at(2).m_weight =
         std::numeric_limits<float>::quiet_NaN();
-    evlist.getWeightedEvents().at(3).m_weight =
-        static_cast<float>(10);
+    evlist.getWeightedEvents().at(3).m_weight = static_cast<float>(10);
 
     Mantid::Algorithms::ReplaceSpecialValues alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
