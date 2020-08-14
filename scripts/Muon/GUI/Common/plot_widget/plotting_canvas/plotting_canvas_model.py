@@ -136,9 +136,7 @@ class PlottingCanvasModel(object):
         if not self._is_tiled:
             return 0
 
-        group_pair_name, run = self._context.group_pair_context.get_group_pair_name_and_run_from_workspace_name(workspace_name)
-
-        run_as_string = run_list_to_string(run)
+        group_pair_name, run_as_string = self._context.group_pair_context.get_group_pair_name_and_run_from_workspace_name(workspace_name)
 
         if group_pair_name in self._axes_workspace_map:
             return self._axes_workspace_map[group_pair_name]
