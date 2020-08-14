@@ -7,6 +7,8 @@
 # pylint: disable=C0111
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.muon_group import MuonRun
+import itertools
+
 
 class MuonPair(object):
     """
@@ -119,11 +121,8 @@ class MuonPair(object):
         return None
 
     def get_run_for_workspace(self, workspace_name):
-        for key, value in self._workspace.items():
-            if value.workspace_name == workspace_name:
-                return key
-
-        for key, value in self.workspace_rebin.items():
+        for key, value in itertools.chain(self._workspace.items(),
+                                          self.workspace_rebin.items()):
             if value.workspace_name == workspace_name:
                 return key
 
