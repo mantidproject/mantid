@@ -174,7 +174,8 @@ std::map<std::string, std::string> PlotAsymmetryByLogValue::validateInputs() {
     helpMessages["WorkspaceNames"] =
         "Must either supply WorkspaceNames or FirstRun and LastRun";
   }
-  if ((!isDefault("FirstRun") && isDefault("LastRun") && isDefault("WorkspaceNames")) ||
+  if ((!isDefault("FirstRun") && isDefault("LastRun") &&
+       isDefault("WorkspaceNames")) ||
       (isDefault("FirstRun") && !isDefault("LastRun") &&
        isDefault("WorkspaceNames"))) {
     helpMessages["FirstRun"] = "Must supply both FirstRun and LastRun";
@@ -196,23 +197,23 @@ void PlotAsymmetryByLogValue::exec() {
   Progress progress(this, 0, 1, ie - is + 1);
 
   // Loop through runs
-  for (const auto& fileName : m_fileNames) {
+  for (const auto &fileName : m_fileNames) {
 
-  // Check if run i was already loaded
-  std::ostringstream logMessage;
-  if (m_logValue.count(m_rmap[fileName])) {
-    logMessage << "Found run " << m_rmap[fileName];
-  } else {
-    // Load run, apply dead time corrections and detector grouping
-    Workspace_sptr loadedWs = doLoad(fileName);
+    // Check if run i was already loaded
+    std::ostringstream logMessage;
+    if (m_logValue.count(m_rmap[fileName])) {
+      logMessage << "Found run " << m_rmap[fileName];
+    } else {
+      // Load run, apply dead time corrections and detector grouping
+      Workspace_sptr loadedWs = doLoad(fileName);
 
-    if (loadedWs) {
-      // Analyse loadedWs
-      doAnalysis(loadedWs, m_rmap[fileName]);
+      if (loadedWs) {
+        // Analyse loadedWs
+        doAnalysis(loadedWs, m_rmap[fileName]);
+      }
+      logMessage << "Loaded run " << m_rmap[fileName];
     }
-    logMessage << "Loaded run " << m_rmap[fileName];
-  }
-  progress.report(logMessage.str());
+    progress.report(logMessage.str());
   }
 
   // Create the 2D workspace for the output
@@ -262,7 +263,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   m_fileNames = getProperty("WorkspaceNames");
 
   // If file names empty, first and last provided so need to populate vector
-  if (m_fileNames.empty()) { 
+  if (m_fileNames.empty()) {
     // Parse run names and get the number of runs
     parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
                   m_filenameZeros);
@@ -605,7 +606,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
  *   @return :: Run number as int
  */
 int PlotAsymmetryByLogValue::extractRunNumberFromRunName(
-  const std::string& runName) {
+    const std::string &runName) {
 
   auto returnVal = runName;
   // Remove file extension

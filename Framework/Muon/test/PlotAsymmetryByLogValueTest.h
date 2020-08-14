@@ -121,11 +121,47 @@ public:
   /// Clear the ADS at the end of every test
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void testExec() {
+  void test_exec_with_first_and_last() {
     PlotAsymmetryByLogValue alg;
     alg.initialize();
     alg.setPropertyValue("FirstRun", firstRun);
     alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueTest_WS");
+    alg.setPropertyValue("LogValue", "Field_Danfysik");
+    alg.setPropertyValue("Red", "2");
+    alg.setPropertyValue("Green", "1");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "PlotAsymmetryByLogValueTest_WS"));
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 2);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    const auto &Y = outWS->y(0);
+    TS_ASSERT_DELTA(Y[0], 0.0128845, 0.001);
+    TS_ASSERT_DELTA(Y[1], 0.0224898, 0.00001);
+
+    const TextAxis *axis = dynamic_cast<const TextAxis *>(outWS->getAxis(1));
+    TS_ASSERT(axis);
+    if (axis) {
+      TS_ASSERT_EQUALS(axis->length(), 4);
+      TS_ASSERT_EQUALS(axis->label(0), "Red-Green");
+      TS_ASSERT_EQUALS(axis->label(1), "Red");
+      TS_ASSERT_EQUALS(axis->label(2), "Green");
+      TS_ASSERT_EQUALS(axis->label(3), "Red+Green");
+    }
+  }
+
+  void test_exec_with_workspacenames() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    const std::vector<std::string> names{firstRun, lastRun};
+
+    alg.setProperty("WorkspaceNames", names);
     alg.setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueTest_WS");
     alg.setPropertyValue("LogValue", "Field_Danfysik");
     alg.setPropertyValue("Red", "2");
@@ -646,7 +682,8 @@ public:
     TS_ASSERT_EQUALS(result["LastRun"], expected);
   }
 
-  void test_extract_run_number_from_run_name() { PlotAsymmetryByLogValue alg;
+  void test_extract_run_number_from_run_name() {
+    PlotAsymmetryByLogValue alg;
     alg.initialize();
     const int firstRunNumber = alg.extractRunNumberFromRunName(firstRun);
     const int lastRunNumber = alg.extractRunNumberFromRunName(lastRun);
