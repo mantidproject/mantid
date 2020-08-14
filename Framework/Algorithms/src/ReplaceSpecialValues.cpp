@@ -96,16 +96,16 @@ void ReplaceSpecialValues::performUnaryOperation(const double XIn,
   YOut = YIn;
   EOut = EIn;
 
-  if (m_performNaNCheck && checkIfNan(YIn)) {
+  if (m_performNaNCheck && (checkIfNan(YIn) || checkIfNan(EIn))) {
     YOut = m_NaNValue;
     EOut = m_NaNError;
-  } else if (m_performInfiniteCheck && checkIfInfinite(YIn)) {
+  } else if (m_performInfiniteCheck && (checkIfInfinite(YIn) || checkIfNan(EIn))) {
     YOut = m_InfiniteValue;
     EOut = m_InfiniteError;
-  } else if (m_performBigCheck && checkIfBig(YIn)) {
+  } else if (m_performBigCheck && (checkIfBig(YIn) || checkIfNan(EIn))) {
     YOut = m_bigValue;
     EOut = m_bigError;
-  } else if (m_performSmallCheck && checkIfSmall(YIn)) {
+  } else if (m_performSmallCheck && (checkIfSmall(YIn) || checkIfNan(EIn))) {
     YOut = m_smallValue;
     EOut = m_smallError;
   }
