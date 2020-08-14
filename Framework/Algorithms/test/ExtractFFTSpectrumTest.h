@@ -84,10 +84,46 @@ public:
     TS_ASSERT_EQUALS(inputWS->getNumberHistograms(),
                      outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(inputWS->blocksize(), outputWS->blocksize());
+    TS_ASSERT_EQUALS(inputWS->x(0).size(), outputWS->x(0).size() + 1); // FFT results in one less X value
 
     // Units ( Axis 1 should be the same, Axis 0 should be "Time/ns"
     TS_ASSERT(*inputWS->getAxis(1)->unit() == *outputWS->getAxis(1)->unit());
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Time");
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "ns");
   }
+
+  void testTailZerosTrimmedOnOnlyRealInput() { 
+    Mantid::DataHandling::LoadNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "IRS26176_ipg.nxs");
+    loader.setPropertyValue("OutputWorkspace", "alg_irs_r");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "alg_irs_r");
+    rebin.setPropertyValue("OutputWorkspace", "alg_irs_r");
+    rebin.setPropertyValue("Params", "-0.5,0.005,0.5");
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+
+    MatrixWorkspace_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "alg_irs_r");
+
+    ExtractFFTSpectrum alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "alg_irs_r");
+    alg.setPropertyValue("OutputWorkspace", "alg_irs_t");
+    alg.execute();
+
+    const auto outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "alg_irs_t"
+    );
+    // For this particular workspace, the tail of zeros began at index 100,
+    // so they should have been removed.
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), 100);
+  }
+>>>>>>> 865bb37134e... fixup! chopping unecessary tail zeros
 };
