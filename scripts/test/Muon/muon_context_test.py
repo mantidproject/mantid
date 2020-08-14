@@ -17,6 +17,7 @@ from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.muon_group import MuonGroup
 
 
 @start_qapplication
@@ -88,7 +89,7 @@ class MuonContextTest(unittest.TestCase):
     def test_calculate_group_calculates_group_for_given_run(self):
         # Generate the pre_process_data workspace
         run_pre_processing(self.context, [self.run_number], rebin=False)
-        counts_workspace, asymmetry_workspace, group_asymmetry_unormalised = self.context.calculate_group('fwd',
+        counts_workspace, asymmetry_workspace, group_asymmetry_unormalised = self.context.calculate_group(MuonGroup('fwd'),
                                                                                                           run=[19489])
 
         self.assertEqual(counts_workspace, 'EMU19489; Group; fwd; Counts; MA')

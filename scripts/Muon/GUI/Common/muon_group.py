@@ -18,12 +18,12 @@ class MuonGroup(object):
     - The workspace associated to the group can be set, but must be of type MuonWorkspaceWrapper.
     """
 
-    def __init__(self, group_name, detector_ids=[], periods=[1]):
+    def __init__(self, group_name, detector_ids=(1,), periods=(1,)):
 
         self._group_name = group_name
         self._detector_ids = None
-        self._periods = periods
-        self.detectors = detector_ids
+        self._periods = list(periods)
+        self.detectors = list(detector_ids)
         self._counts_workspace = {}
         self._asymmetry_estimate = {}
         self._counts_workspace_rebin = {}
