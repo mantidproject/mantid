@@ -32,7 +32,8 @@ class PlotToolbar(NavigationToolbar):
                           (None, None, None, None),
                           ('Show/hide legend', 'Toggles the legend on/off', None, 'toggle_legend'),
                           )
-        self.is_major_grid_on = True
+        self.is_major_grid_on = False
+        self.is_minor_grid_on = False
         NavigationToolbar.__init__(self, figure_canvas, parent=parent)
 
     def _init_toolbar(self):
@@ -69,20 +70,24 @@ class PlotToolbar(NavigationToolbar):
         self.canvas.draw()
 
     def show_major_gridlines(self):
-        # if self.is_major_grid_on:
-        #     for ax in self.canvas.figure.get_axes():
-        #         ax.grid(self.is_major_grid_on,colour = 'black')
-        #     self.is_major_grid_on = False
-        # else:
-        #     for ax in self.canvas.figure.get_axes():
-        #         ax.grid(self.is_major_grid_on)
-        #     self.is_major_grid_on = True
-        for ax in self.canvas.figure.get_axes():
-            ax.grid(which='major')
+        if self.is_major_grid_on:
+            for ax in self.canvas.figure.get_axes():
+                ax.grid(False)
+            self.is_major_grid_on = False
+        else:
+            for ax in self.canvas.figure.get_axes():
+                ax.grid(True , color='black')
+            self.is_major_grid_on = True
         self.canvas.draw()
 
     def show_minor_gridlines(self):
-        for ax in self.canvas.figure.get_axes():
-            ax.minorticks_on()
-            ax.grid(which='minor')
+        if self.is_minor_grid_on:
+            for ax in self.canvas.figure.get_axes():
+                ax.minorticks_off()
+            self.is_major_grid_on = False
+        else:
+            for ax in self.canvas.figure.get_axes():
+                ax.minorticks_on()
+                ax.grid(which='minor')
+            self.is_major_grid_on = True
         self.canvas.draw()
