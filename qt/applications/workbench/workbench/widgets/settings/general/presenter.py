@@ -104,9 +104,10 @@ class GeneralSettings(object):
         font_string = ""
         if CONF.has(GeneralProperties.FONT.value):
             font_string = CONF.get(GeneralProperties.FONT.value)
-        if self.settings_presenter is not None and font_string != font.toString():
+        if font_string != font.toString():
             CONF.set(GeneralProperties.FONT.value, font.toString())
-            self.settings_presenter.register_change_needs_restart("Main Font Selection")
+            if self.settings_presenter is not None:
+                self.settings_presenter.register_change_needs_restart("Main Font Selection")
 
     def setup_checkbox_signals(self):
         self.view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
