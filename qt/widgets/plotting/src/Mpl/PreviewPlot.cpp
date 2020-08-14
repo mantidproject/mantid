@@ -41,7 +41,8 @@ constexpr auto PLOT_TOOL_ZOOM = "Zoom";
 constexpr auto LINEAR_SCALE = "Linear";
 constexpr auto LOG_SCALE = "Log";
 constexpr auto SQUARE_SCALE = "Square";
-
+constexpr auto SHOWALLERRORS = "Show all errors";
+constexpr auto HIDEALLERRORS = "Hide all errors";
 } // namespace
 
 namespace MantidQt {
@@ -128,7 +129,8 @@ void PreviewPlot::addSpectrum(const QString &lineName,
   removeSpectrum(lineName);
 
   auto axes = m_canvas->gca<MantidAxes>();
-  if (linesWithErrors().contains(lineName)) {
+  if (m_linesErrorsCache.value(lineName)) {
+    m_lines[lineName] = true;
     axes.errorbar(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
                   plotKwargs);
   } else {
@@ -136,6 +138,12 @@ void PreviewPlot::addSpectrum(const QString &lineName,
     axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
               plotKwargs);
   }
+
+  // Add line to stored line data
+  auto plotCurveConfig =
+      QSharedPointer<PlotCurveConfiguration>(new PlotCurveConfiguration(
+          ws, lineName, wsIndex, lineColour, plotKwargs));
+  m_plottedLines.insert(lineName, plotCurveConfig);
 
   if (auto const xLabel = overrideAxisLabel(AxisID::XBottom))
     setAxisLabel(AxisID::XBottom, xLabel.get());
@@ -334,6 +342,18 @@ void PreviewPlot::replot() {
   }
 }
 
+// Called when the user turns errors on/off
+void PreviewPlot::replotData() {
+  m_allowRedraws = false;
+  clear();
+  for (const auto &curveConfig : m_plottedLines) {
+    addSpectrum(curveConfig->lineName, curveConfig->ws, curveConfig->wsIndex,
+                curveConfig->lineColour, curveConfig->plotKwargs);
+  }
+  m_allowRedraws = true;
+  replot();
+}
+
 void PreviewPlot::allowRedraws(bool state) { m_allowRedraws = state; }
 
 /**
@@ -368,11 +388,20 @@ void PreviewPlot::setCanvasColour(const QColor &colour) {
 
 /**
  * @brief PreviewPlot::setLinesWithErrors
- * @param labels A list of line labels where error bars should be shown
+ * @param labels A list of line labels for which error should be shown
  */
 void PreviewPlot::setLinesWithErrors(const QStringList &labels) {
   for (const QString &label : labels) {
-    m_lines[label] = true;
+    m_linesErrorsCache[label] = true;
+  }
+}
+/**
+ * @brief PreviewPlot::setLinesWithoutErrors
+ * @param labels A list of line labels for which error bars should not be shown
+ */
+void PreviewPlot::setLinesWithoutErrors(const QStringList &labels) {
+  for (const QString &label : labels) {
+    m_linesErrorsCache[label] = false;
   }
 }
 
@@ -502,6 +531,11 @@ void PreviewPlot::showContextMenu(QMouseEvent *evt) {
   auto yScale = contextMenu.addMenu("Y Scale");
   yScale->addActions(m_contextYScale->actions());
 
+  // Create the error bars option
+  contextMenu.addSeparator();
+  auto errors = contextMenu.addMenu("Error Bars:");
+  errors->addActions(m_contextErrorBars->actions());
+
   contextMenu.addSeparator();
   contextMenu.addAction(m_contextLegend);
 
@@ -554,6 +588,12 @@ void PreviewPlot::createActions() {
           &PreviewPlot::setYScaleType);
   m_contextXScale->actions()[0]->setChecked(true);
   m_contextYScale->actions()[0]->setChecked(true);
+
+  // Error bars
+  m_contextErrorBars =
+      createExclusiveActionGroup({SHOWALLERRORS, HIDEALLERRORS});
+  connect(m_contextErrorBars, &QActionGroup::triggered, this,
+          &PreviewPlot::setErrorBars);
 
   // legend
   m_contextLegend = new QAction("Legend", this);
@@ -688,6 +728,19 @@ void PreviewPlot::setXScaleType(QAction *selected) {
 }
 
 /**
+ * Set the error bars based on the given QAction
+ * @param selected The action that triggered the slot
+ */
+void PreviewPlot::setErrorBars(QAction *selected) {
+  if (selected->text().toStdString() == SHOWALLERRORS) {
+    setLinesWithErrors(m_lines.keys());
+  } else {
+    setLinesWithoutErrors(m_lines.keys());
+  }
+  replotData();
+}
+
+/**
  * Set the X scale based on the given QAction
  * @param selected The action that triggered the slot
  */
@@ -716,6 +769,9 @@ void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
  * @param checked True if the state should be visible, false otherwise
  */
 void PreviewPlot::toggleLegend(const bool checked) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   if (checked) {
     regenerateLegend();
   } else {
@@ -727,7 +783,7 @@ void PreviewPlot::toggleLegend(const bool checked) {
 void PreviewPlot::disableContextMenu() {
   // Disable the context menu signal
   // TODO Currently when changes are made to the plot through the context menu
-  // it is not communicated through to the perant gui which can cause issues,
+  // it is not communicated through to the parent GUI which can cause issues,
   // for now we are disabling the context menu but is should be made to
   // communicate so it can be reactivated.
   m_context_enabled = false;
