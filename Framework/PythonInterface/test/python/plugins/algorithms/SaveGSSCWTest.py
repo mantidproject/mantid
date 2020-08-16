@@ -7,7 +7,7 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
 import mantid
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import CreateWorkspace, SaveGSSCW
+from mantid.simpleapi import CreateWorkspace, SaveGSSCW, LoadAscii
 import numpy as np
 import os
 import unittest
@@ -46,6 +46,28 @@ class SaveGSSCWTest(unittest.TestCase):
             self.check(gsas_file_name)
         finally:
             self.cleanup(gsas_file_name, ws_name)
+
+    def testSaveGSS_hb2a(self):
+        """Test with real HB2B data including XYE and verified by GSAS
+
+        Returns
+        -------
+
+        """
+        # Test files were provided by Stuart
+        source_xye_file = 'IPTS-2005_exp719_Scan52_MANTID.dat'
+        ws_name = 'HB2AData'
+        LoadAscii(OutputWorkspace=ws_name,
+                  Filename=source_xye_file,
+                  Unit="Degrees")
+
+        spice_gss_file = 'IPTS-2005_exp719_Scan52_SPICE.gss'
+
+        try:
+            xye_file = open(source_xye_file, 'r')
+            xye_file.close()
+        except IOError:
+            raise IOError(f'Unable to locate XYE file {source_xye_file}')
 
     def checkDataFields(self, nxitem, withInstrument):
         keys = nxitem.keys()
