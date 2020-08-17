@@ -806,8 +806,14 @@ class DrillView(QMainWindow):
                                    parameters that the view can deal with
         """
         # folding state
-        if ("FoldingState" in visualSettings):
-            self.table.setHeaderFoldingState(visualSettings["FoldingState"])
+        if ("FoldedColumns" in visualSettings):
+            f = list()
+            for c in self.columns:
+                if (c not in visualSettings["FoldedColumns"]):
+                    f.append(False)
+                    continue
+                f.append(visualSettings["FoldedColumns"][c])
+            self.table.setHeaderFoldingState(f)
 
     def getVisualSettings(self):
         """
@@ -820,7 +826,11 @@ class DrillView(QMainWindow):
         """
         vs = dict()
         # folding state
-        vs["FoldingState"] = self.table.getHeaderFoldingState()
+        vs["FoldedColumns"] = dict()
+        f = self.table.getHeaderFoldingState()
+        for i in range(len(self.columns)):
+            if f[i]:
+                vs["FoldedColumns"][self.columns[i]] = f[i]
 
         return vs
 

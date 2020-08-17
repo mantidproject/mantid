@@ -270,23 +270,7 @@ class DrillTest(unittest.TestCase):
                 'Instrument': 'D11',
                 'AcquisitionMode': 'SANS',
                 'VisualSettings': {
-                    'FoldingState': [
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False
-                        ]
+                    'FoldedColumns': {}
                     },
                 'GlobalSettings': RundexSettings.SETTINGS['SANS'],
                 'Samples': []
