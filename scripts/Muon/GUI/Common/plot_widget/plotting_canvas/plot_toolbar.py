@@ -84,11 +84,15 @@ class PlotToolbar(NavigationToolbar):
     def show_minor_gridlines(self):
         if self.is_minor_grid_on:
             for ax in self.canvas.figure.get_axes():
-                ax.minorticks_off()
-            self.is_major_grid_on = False
+                ax.grid(which='minor')
+            self.is_minor_grid_on = False
         else:
             for ax in self.canvas.figure.get_axes():
                 ax.minorticks_on()
                 ax.grid(which='minor')
-            self.is_major_grid_on = True
+            self.is_minor_grid_on = True
         self.canvas.draw()
+
+    def reset_gridline_flags(self):
+        self.is_minor_grid_on = False
+        self.is_major_grid_on = False
