@@ -74,12 +74,13 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
 
-  API::MatrixWorkspace_uptr doSimulation(
-      const API::MatrixWorkspace &inputWS, const size_t nevents,
-      const bool simulateTracksForEachWavelength, const int seed,
-      const bool incrementSeed, const InterpolationOption &interpolateOpt,
-      const bool useSparseInstrument, const size_t maxScatterPtAttempts,
-      const MCInteractionVolume::ScatteringPointVicinity pointsIn);
+  API::MatrixWorkspace_uptr
+  doSimulation(const API::MatrixWorkspace &inputWS, const size_t nevents,
+               const bool simulateTracksForEachWavelength, const int seed,
+               const InterpolationOption &interpolateOpt,
+               const bool useSparseInstrument,
+               const size_t maxScatterPtAttempts,
+               const MCInteractionVolume::ScatteringPointVicinity pointsIn);
   API::MatrixWorkspace_uptr
   createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::unique_ptr<IBeamProfile>
