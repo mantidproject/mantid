@@ -61,4 +61,11 @@ Bug fixes
 - Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
 - Fixed an issue where mantid crashed when the muon analysis plotting window crashed was resized to be too small.
 
+Elemental Analysis 
+##################
+
+New Features
+------------
+- Added a deselect all elements button.
+
 :ref:`Release 5.1.0 <v5.1.0>`
