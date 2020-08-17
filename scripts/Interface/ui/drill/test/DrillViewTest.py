@@ -407,6 +407,41 @@ class DrillViewTest(unittest.TestCase):
         self.view.set_row_error(0)
         self.view.table.setRowBackground.assert_called_once()
 
+    def test_setCellOk(self):
+        self.view.table.rowCount.return_value = 1
+        self.view.columns = ["test"]
+        self.view.set_cell_ok(1, "test1")
+        self.view.table.removeCellBackground.assert_not_called()
+        self.view.set_cell_ok(0, "test")
+        self.view.table.removeCellBackground.assert_called_once()
+
+    def test_setCellError(self):
+        self.view.table.rowCount.return_value = 1
+        self.view.columns = ["test"]
+        self.view.set_cell_error(1, "test1", "")
+        self.view.table.setCellBackground.assert_not_called()
+        self.view.set_cell_error(0, "test", "")
+        self.view.table.setCellBackground.assert_called_once()
+
+    def test_setVisualSettings(self):
+        self.view.columns = ["test"]
+        self.view.setVisualSettings(dict())
+        self.view.table.setHeaderFoldingState.assert_not_called()
+        self.view.setVisualSettings({"FoldedColumns": {}})
+        self.view.table.setHeaderFoldingState.assert_called_once_with([False])
+        self.view.table.reset_mock()
+        self.view.setVisualSettings({"FoldedColumns": {"test": True}})
+        self.view.table.setHeaderFoldingState.assert_called_once_with([True])
+        self.view.table.reset_mock()
+        self.view.setVisualSettings({"FoldedColumns": {"test1": True}})
+        self.view.table.setHeaderFoldingState.assert_called_once_with([False])
+
+    def test_getVisualSettings(self):
+        self.view.columns = ["test1", "test2", "test3"]
+        self.view.table.getHeaderFoldingState.return_value = [True, False, True]
+        d = {"FoldedColumns": {"test1": True, "test3": True}}
+        self.assertDictEqual(self.view.getVisualSettings(), d)
+
 
 if __name__ == "__main__":
     unittest.main()
