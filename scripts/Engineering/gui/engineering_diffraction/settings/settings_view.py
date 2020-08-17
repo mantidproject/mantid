@@ -56,7 +56,7 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def get_checked_logs(self):
         return ','.join([self.log_list.item(ilog).text() for ilog in range(self.log_list.count()) if
-                self.log_list.item(ilog).checkState() == QtCore.Qt.Checked])
+                         self.log_list.item(ilog).checkState() == QtCore.Qt.Checked])
 
     # =================
     # Component Setters

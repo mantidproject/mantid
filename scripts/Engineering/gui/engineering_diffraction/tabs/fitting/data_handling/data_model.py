@@ -14,6 +14,7 @@ from mantid.api import AnalysisDataService as ADS
 from matplotlib.pyplot import subplots
 from numpy import full, nan
 
+
 class FittingDataModel(object):
     def __init__(self):
         self._log_workspaces = None
@@ -82,7 +83,7 @@ class FittingDataModel(object):
             try:
                 avg, stdev = AverageLogData(ws, LogName=self._log_workspaces[ilog].name(), FixZero=False)
                 self._log_workspaces[ilog].addRow([avg, stdev])
-            except RuntimeError as e:
+            except RuntimeError:
                 self._log_workspaces[ilog].addRow(full(2, nan))
                 logger.error(
                     f"File {ws.name()} does not contain log {self._log_workspaces[ilog].name()}")
