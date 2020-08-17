@@ -230,14 +230,28 @@ class CurvesTabWidgetPresenter:
         self.view.set_errorbars_tab_enabled(enable_errorbars)
 
     def on_axes_index_changed(self):
+        # No axes properties have changed, but we need to update the rest of
+        # the view to match the curve that are on the new axes.
         self.update_view(update_axes=False)
 
     def on_curves_index_changed(self):
+        # No properties about the axes or the curves have changed, but we need to
+        # update the rest of the view so the information matches the new selected curve.
         self.update_view(update_axes=False, update_curves=False)
 
     def update_view(self, update_axes=True, update_curves=True):
-        """Update the view with the selected curve's properties"""
+        """Update the view with the selected axes and curve properties.
+        By default we update everything since, if we changed something about
+        the axes (e.g. title), we need to ensure these propagate to the curves tab.
+
+        update_axes=True -> the axes combo will be updated
+        update_curves=True -> the curves combo will be updated
+
+        Regardless of the two parameters, the rest of the curves tab will update to show
+        the properties of the selected curve."""
+
         if update_axes:
+            # Update the 'select axes' combo box. Do this if axes properties have changed.
             self.axes_names_dict = get_axes_names_dict(self.fig, curves_only=True)
             self.populate_select_axes_combo_box()
         if update_curves:
@@ -247,6 +261,7 @@ class CurvesTabWidgetPresenter:
 
         self.set_apply_to_all_buttons_enabled()
 
+        # Then update the rest of the view to reflect the selected combo items.
         curve_props = CurveProperties.from_curve(self.get_selected_curve())
         self.view.update_fields(curve_props)
         self.set_errorbars_tab_enabled()
