@@ -120,12 +120,18 @@ class FittingDataPresenter(object):
 
     def _remove_selected_tracked_workspaces(self):
         row_numbers = self._remove_selected_table_rows()
+        self.model.remove_log_rows(row_numbers)
         for row_no in row_numbers:
             ws_name = self.row_numbers.pop(row_no)
             removed = self.get_loaded_workspaces().pop(ws_name)
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
         self._repopulate_table()
+
+    def _remove_all_tracked_workspaces(self):
+        self.clear_workspaces()
+        self.model.clear_logs()
+        self._remove_all_table_rows()
 
     def _plotBG(self):
         # make external figure
@@ -135,10 +141,6 @@ class FittingDataPresenter(object):
                 # background has been subtracted from workspace
                 ws_name = self.row_numbers[row]
                 self.model.plot_background_figure(ws_name)
-
-    def _remove_all_tracked_workspaces(self):
-        self.clear_workspaces()
-        self._remove_all_table_rows()
 
     def _handle_table_cell_changed(self, row, col):
         if row in self.row_numbers:
