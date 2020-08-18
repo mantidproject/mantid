@@ -32,6 +32,7 @@ New Features
 - Addition of a LoadMuonNexusV2 algorithm to load the new Muon V2 files, see :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>`.
 - Updated rounding for time zero and first good data to be 3 decimal places.
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
+- Added multi-period support to the LoadMuonNexusV2 algorithm.
 
 Improvements
 -------------
@@ -48,6 +49,8 @@ Improvements
 - Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to load a list of time zeros into a new property TimZeroList.
 - Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to add an option to not auto-correct the time by loaded timezero.
 - Fitting tab in Muon analysis and Frequency domain analysis GUI's are now disabled when no valid fitting data is present.
+- Updated plotting to make line colours more consistent.
+- The ALC interface in workbench will now show errors by default. The error bars can also be turned on/off using the right-click plot menu.
 
 Bug fixes
 ---------
@@ -57,5 +60,12 @@ Bug fixes
 - Fixed an issue where switching to simultaneous fit mode was occasionally throwing an exception.
 - Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
 - Fixed an issue where mantid crashed when the muon analysis plotting window crashed was resized to be too small.
+
+Elemental Analysis 
+##################
+
+New Features
+------------
+- Added a deselect all elements button.
 
 :ref:`Release 5.1.0 <v5.1.0>`

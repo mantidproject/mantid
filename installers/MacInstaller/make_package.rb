@@ -57,6 +57,7 @@ BUNDLED_PY_MODULES_WORKBENCH = [
 ]
 REQUIREMENTS_FILE = Pathname.new(__dir__) + 'requirements.txt'
 REQUIREMENTS_WORKBENCH_FILE = Pathname.new(__dir__) + 'requirements-workbench.txt'
+SITECUSTOMIZE_FILE = Pathname.new(__dir__) + 'sitecustomize.py'
 DEBUG = 1
 FRAMEWORK_IDENTIFIER = '.framework'
 HOMEBREW_PREFIX = '/usr/local'
@@ -117,7 +118,7 @@ def python_version(py_exe)
   return version_number_str.split('.').map { |x| x.to_i }
 end
 
-# Deploy the embedded Python bundle
+# Deploy the embedded Python bundle to the Frameworks subdirectory
 # Params:
 # +destination+:: Destination directory for bundle
 # +host_python_exe+:: Executable of Python bundle to copy over
@@ -129,7 +130,7 @@ def deploy_python_framework(destination, host_python_exe,
                             requirements_files)
   host_py_home = host_python_exe.realpath.parent.parent
   py_ver = host_py_home.basename
-  bundle_python_framework = destination + 'Python.framework'
+  bundle_python_framework = destination + 'Frameworks/Python.framework'
   bundle_py_home = bundle_python_framework + "Versions/#{py_ver}"
   deployable_assets = [
     'Python', "bin/python#{py_ver}", "bin/2to3-#{py_ver}",
@@ -173,6 +174,17 @@ def deploy_python_framework(destination, host_python_exe,
     FileUtils.ln_s "python#{py_ver}", "python"
     FileUtils.ln_s "2to3-#{py_ver}", "2to3"
   end
+
+  # add python symlink to MacOS for easier command-line access
+  contents_macos = destination + 'MacOS'
+  Dir.chdir(contents_macos) do
+    py_exe = Pathname.new("#{bundle_python_framework}/Versions/#{py_ver}/bin/python#{py_ver}")
+    FileUtils.ln_s "#{py_exe.relative_path_from(contents_macos)}", "python"
+  end
+
+  # remove Info.plist files so outer application controls app display name
+  FileUtils.rm "#{bundle_py_home}/Resources/Info.plist"
+  FileUtils.rm "#{bundle_py_home}/Resources/Python.app/Contents/Info.plist"
   
   # remove site-packages symlink, copy brew python modules and pip install the rest
   src_site_packages = Pathname.new("#{host_py_home}/lib/python#{py_ver}/site-packages")
@@ -193,6 +205,10 @@ def deploy_python_framework(destination, host_python_exe,
   mpltoolkit_init =
     FileUtils.touch "#{bundle_site_packages}/mpl_toolkits/__init__.py"
 
+  # add sitecustomize module
+  FileUtils.cp SITECUSTOMIZE_FILE, bundle_site_packages,
+               preserve: true
+  
   bundle_site_packages
 end
 
@@ -553,6 +569,7 @@ end
 
 # Bundle paths
 bundle_path = Pathname.new(ARGV[0])
+contents = bundle_path + 'Contents'
 contents_macos = bundle_path + 'Contents/MacOS'
 contents_frameworks = bundle_path + 'Contents/Frameworks'
 # additional executables not detectable by dependency analysis
@@ -598,7 +615,7 @@ end
 
 # We start with the assumption CMake has installed all required target libraries/executables
 # into the bundle and the main layout exists.
-bundle_py_site_packages = deploy_python_framework(contents_frameworks, host_python_exe,
+bundle_py_site_packages = deploy_python_framework(contents, host_python_exe,
                                                   bundled_packages, requirements_files)
 if $PARAVIEW_BUILD_DIR.start_with?('/')
   pv_lib_dir = Pathname.new($PARAVIEW_BUILD_DIR) + 'lib'

@@ -177,16 +177,11 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     )
   endif()
 
-  # install the generated executable - only tested with "workbench"
-  if(_parsed_arg_EXECUTABLE)
-    # On UNIX systems install the workbench executable directly. The Windows
-    # case is handled with a custom startup script installed in WindowsNSIS
-    if(NOT WIN32)
+  # install the generated executable
+  if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
       install(
         PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
         DESTINATION ${_parsed_arg_INSTALL_BIN_DIR}
-        RENAME workbench-script
       )
-    endif()
   endif()
 endfunction()

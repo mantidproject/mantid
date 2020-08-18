@@ -11,9 +11,9 @@ endif()
 # mantidqt
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   if(APPLE)
-    set(_install_lib_dirs "${LIB_DIR};${WORKBENCH_LIB_DIR}")
+    set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
   else()
-    set(_install_lib_dirs "${WORKBENCH_LIB_DIR}")
+    set(_install_lib_dirs "${WORKBENCH_SITE_PACKAGES}")
   endif()
   add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
 
@@ -62,6 +62,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   set(PYTHON_TEST_FILES
       mantidqt/test/test_algorithm_observer.py
       mantidqt/test/test_import.py
+      mantidqt/dialogs/errorreports/test/test_errorreport_presenter.py
       mantidqt/dialogs/test/test_algorithm_dialog.py
       mantidqt/dialogs/test/test_spectraselectiondialog.py
       mantidqt/dialogs/test/test_spectraselectorutils.py

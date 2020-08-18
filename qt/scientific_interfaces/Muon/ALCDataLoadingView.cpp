@@ -41,7 +41,7 @@ void ALCDataLoadingView::initialize() {
   // Error bars on the plot
   QStringList plotsWithErrors{"Data"};
   m_ui.dataPlot->setLinesWithErrors(plotsWithErrors);
-
+  m_ui.dataPlot->showLegend(false);
   // The following lines disable the groups' titles when the
   // group is disabled
   QPalette palette;
