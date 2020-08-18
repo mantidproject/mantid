@@ -104,7 +104,7 @@ void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file,
       file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
-  } else if constexpr (std::is_same<T, U>::value) {
+  } else if constexpr (std::is_same_v<T, U>) {
     if (size > 0)
       callGetData(file, out, close_file);
   } else {
@@ -147,7 +147,7 @@ void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
       file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
-  } else if constexpr (std::is_same<T, U>::value) {
+  } else if constexpr (std::is_same_v<T, U>) {
     if (size[0] > 0)
       callGetSlab(file, out, start, size, close_file);
   } else {
@@ -189,7 +189,7 @@ T readNexusAnyVariable(::NeXus::File &file, const bool close_file) {
       file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readAnyVariable");
-  } else if constexpr (std::is_same<T, U>::value) {
+  } else if constexpr (std::is_same_v<T, U>) {
     T buf;
     callGetData(file, buf, close_file);
     return buf;
