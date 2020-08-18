@@ -123,6 +123,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/IndirectILLEnergyTransfer.py
   algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
   algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
+  algorithms/WorkflowAlgorithms/PolDiffILLReduction.py
   algorithms/ViewBOA.py
   algorithms/ReflectometrySliceEventWorkspace.py
   algorithms/SNAPReduce.py
