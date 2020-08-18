@@ -61,6 +61,7 @@ Bug fixes
 - Fixed an issue where switching to simultaneous fit mode was occasionally throwing an exception.
 - Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
 - Fixed an issue where mantid crashed when the muon analysis plotting window crashed was resized to be too small.
+- Fixed an issue where groups were all being plotted on the same tiled plot.
 - Fixed an issue with setting the current workspace before adding a function.
 - Fixed an issue with the results tab not updating correctly after multiple fits with different functions.
 

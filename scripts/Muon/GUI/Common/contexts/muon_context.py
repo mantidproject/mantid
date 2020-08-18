@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
-                                                         get_pair_data_workspace_name, get_base_data_directory,
+                                                         get_pair_asymmetry_name, get_base_data_directory,
                                                          get_group_asymmetry_name,
                                                          get_group_asymmetry_unnorm_name,
                                                          get_deadtime_data_workspace_name)
@@ -108,7 +108,7 @@ class MuonContext(object):
             return None
 
         run_as_string = run_list_to_string(run)
-        output_workspace_name = get_pair_data_workspace_name(self, pair.name, run_as_string, rebin=rebin)
+        output_workspace_name = get_pair_asymmetry_name(self, pair.name, run_as_string, rebin=rebin)
         return calculate_pair_data(pair, forward_group_workspace_name, backward_group_workspace_name, output_workspace_name)
 
     def show_all_groups(self):
@@ -143,7 +143,7 @@ class MuonContext(object):
             with WorkspaceGroupDefinition():
                 for pair_name in self._group_pair_context.pair_names:
                     run_as_string = run_list_to_string(run)
-                    name = get_pair_data_workspace_name(
+                    name = get_pair_asymmetry_name(
                         self,
                         pair_name,
                         run_as_string,
@@ -156,7 +156,7 @@ class MuonContext(object):
                         pair_name].show_raw(run, directory + name)
 
                     if self._do_rebin():
-                        name = get_pair_data_workspace_name(
+                        name = get_pair_asymmetry_name(
                             self,
                             pair_name,
                             run_as_string,

@@ -123,7 +123,7 @@ class MuonPair(object):
     def get_run_for_workspace(self, workspace_name):
         for key, value in itertools.chain(self._workspace.items(),
                                           self.workspace_rebin.items()):
-            if value.workspace_name == workspace_name:
+            if value.workspace_name in workspace_name:
                 return key
 
         return None
