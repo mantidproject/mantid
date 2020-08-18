@@ -31,11 +31,9 @@ class WS_TYPE(Enum):
 
 class SliceViewerModel:
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
-
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
-        # For MDH the view will show the original NDE if possible
-        self._selected_ws = ws
+        self._ws = ws
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
                 raise ValueError("workspace must contain at least 2 spectrum")
@@ -45,15 +43,12 @@ class SliceViewerModel:
             if ws.isMDHistoWorkspace():
                 if len(ws.getNonIntegratedDimensions()) < 2:
                     raise ValueError("workspace must have at least 2 non-integrated dimensions")
-                if ws.hasOriginalWorkspace(0):
-                    ws = ws.getOriginalWorkspace(0)
             else:
                 if ws.getNumDims() < 2:
                     raise ValueError("workspace must have at least 2 dimensions")
         else:
             raise ValueError("only works for MatrixWorkspace and MDWorkspace")
 
-        self._ws = ws
         wsname = self.get_ws_name()
         self._rebinned_name = wsname + '_svrebinned'
         self._xcut_name, self._ycut_name = wsname + '_cut_x', wsname + '_cut_y'
@@ -123,12 +118,7 @@ class SliceViewerModel:
         """
         Check if the given workspace can multiple BinMD calls.
         """
-        try:
-            return self.get_ws_type() == WS_TYPE.MDE or self._get_ws().hasOriginalWorkspace(0)
-        except AttributeError:
-            pass
-
-        return False
+        return self.get_ws_type() == WS_TYPE.MDE
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
@@ -141,11 +131,7 @@ class SliceViewerModel:
     def get_title(self) -> str:
         """Return a title for model"""
         ws_name = self.get_ws_name()
-        title = f'Sliceviewer - {ws_name}'
-        selected_name = self._selected_ws.name()
-        if selected_name != ws_name:
-            title += f' (original of {selected_name})'
-        return title
+        return f'Sliceviewer - {ws_name}'
 
     def get_ws_MDE(self,
                    slicepoint: Sequence[Optional[float]],
@@ -261,11 +247,10 @@ class SliceViewerModel:
             # assume orthogonal projection
             proj_matrix = np.diag([1., 1., 1.])
 
-        display_indices = slice_info.transform([0, 1, 2])
-        return NonOrthogonalTransform.from_lattice(
-            lattice,
-            x_proj=proj_matrix[:, display_indices[0]],
-            y_proj=proj_matrix[:, display_indices[1]])
+        display_indices = slice_info.transform([0, 1, 2]).astype(int)
+        return NonOrthogonalTransform.from_lattice(lattice,
+                                                   x_proj=proj_matrix[:, display_indices[0]],
+                                                   y_proj=proj_matrix[:, display_indices[1]])
 
     def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,
