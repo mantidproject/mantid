@@ -478,7 +478,7 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
                                                       beamWidth, beamHeight);
     }
   } else if (beamShapeParam.compare("Circle") == 0) {
-    auto beamRadiusParam = source->getNumberParameter("beam-parameter");
+    auto beamRadiusParam = source->getNumberParameter("beam-radius");
     if (beamRadiusParam.size() == 1) {
       beamRadius = beamRadiusParam[0];
       return std::make_unique<CircularBeamProfile>(*frame, source->getPos(),
