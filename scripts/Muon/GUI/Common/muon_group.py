@@ -79,6 +79,16 @@ class MuonGroup(object):
             raise AttributeError("Attempting to set workspace to type " + str(
                 type(new_workspace)) + " but should be MuonWorkspaceWrapper")
 
+    """
+    Returns the name of the counts workspace for a given run
+    if the workspace does not exist will raise a KeyError
+    """
+    def get_counts_workspace_for_run(self, run, rebin):
+        if rebin:
+            return self._counts_workspace_rebin[MuonRun(run)].workspace_name
+        else:
+            return self._counts_workspace[MuonRun(run)].workspace_name
+
     @property
     def name(self):
         return self._group_name
