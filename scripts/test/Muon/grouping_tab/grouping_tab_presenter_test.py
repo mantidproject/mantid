@@ -199,34 +199,6 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.presenter.add_pair_from_grouping_table("first", "second")
         self.pairing_table_widget.handle_add_pair_button_clicked.assert_called_once_with("first", "second")
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Periods
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def test_period_changes_are_propogated_to_model(self):
-        perform_musr_file_finder(self)
-        self.model.number_of_periods = mock.MagicMock(return_value=5)
-
-        self.view.summed_period_edit.setText('1, 3, 5')
-        self.view.subtracted_period_edit.setText('2, 4')
-        self.view.summed_period_edit.editingFinished.emit()
-
-        self.view.display_warning_box.assert_not_called()
-        self.assertEqual(self.model.get_summed_periods(), [1, 3, 5])
-        self.assertEqual(self.model.get_subtracted_periods(), [2, 4])
-
-    def test_invalid_periods_are_removed_and_warning_given(self):
-        perform_musr_file_finder(self)
-        self.model.number_of_periods = mock.MagicMock(return_value=5)
-
-        self.view.summed_period_edit.setText('1, 3, 5')
-        self.view.subtracted_period_edit.setText('2, 4, 6')
-        self.view.summed_period_edit.editingFinished.emit()
-
-        self.view.display_warning_box.assert_called_once_with('The following periods are invalid : 6')
-        self.assertEqual(self.model.get_summed_periods(), [1, 3, 5])
-        self.assertEqual(self.model.get_subtracted_periods(), [2, 4])
-
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
