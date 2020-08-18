@@ -323,7 +323,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                 index += 1
             elif self._method == '10-p' and entry_no % 10 == 9:
                 index += 1
-            
 
         GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace='tmp')
         DeleteWorkspaces(ws)
@@ -444,9 +443,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                     sigma_xp = mtd[ws].getItem(entry_no+4).readY(spectrum)
                     sigma_xm = mtd[ws].getItem(entry_no+5).readY(spectrum)
                     if nMeasurements == 6:
-                        dataY[spectrum][0] = 2.0 * (2.0 * sigma_zp - sigma_xp - sigma_yp ) # Magnetic
-                        dataY[spectrum][1] = (2.0*(sigma_xp + sigma_yp + sigma_zp) - sigma_xm - sigma_ym - sigma_zm ) / 6.0 # Nuclear coherent
-                        dataY[spectrum][2] = sigma_zp + sigma_zm - dataY[spectrum][1] # Incoherent
+                        # Magnetic component
+                        dataY[spectrum][0] = 2.0 * (2.0 * sigma_zp - sigma_xp - sigma_yp )
+                        # Nuclear coherent
+                        dataY[spectrum][1] = (2.0*(sigma_xp + sigma_yp + sigma_zp) - sigma_xm - sigma_ym - sigma_zm ) / 6.0
+                        # Incoherent
+                        dataY[spectrum][2] = sigma_zp + sigma_zm - dataY[spectrum][1]
                     else:
                         sigma_xmyp = mtd[ws].getItem(entry_no+6).readY(spectrum)
                         sigma_xmym = mtd[ws].getItem(entry_no+7).readY(spectrum)
@@ -457,7 +459,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
                 dataX[spectrum] = range(3)
                 dataE = np.sqrt(dataY)
-                tmp_name = str(mtd[ws].getItem(entry_no).name())[:-1] + 'comp_sep' 
+                tmp_name = str(mtd[ws].getItem(entry_no).name())[:-1] + 'comp_sep'
                 tmp_names.append(tmp_name)
                 CreateWorkspace(DataX=dataX, DataY=dataY, dataE=dataE,
                                 Nspec=mtd[ws].getItem(entry_no).getNumberHistograms(),
