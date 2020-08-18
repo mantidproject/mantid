@@ -38,6 +38,7 @@ New features
 ^^^^^^^^^^^^
 - New algorithm for estimating background of powder spectra :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` using iterative smoothing.
 - Mantid fitting capability added to fitting tab of Engineering Diffraction UI (with simpler fitpropertybrowser providing only relevant options).
+- Loading focussed runs into the fitting tab now shows the proton charge weighted average and standard deviation of select log values (set in the settings) in a group of table workspaces.
 
 Improvements
 ^^^^^^^^^^^^
@@ -50,6 +51,7 @@ Improvements
 Bugfixes
 ^^^^^^^^
 - The Engineering diffraction gui no longer goes behind the workbench window when a plot is clicked on.
+- A focussed run cannot be loeaded with the same x unit more than once
 
 Single Crystal Diffraction
 --------------------------
