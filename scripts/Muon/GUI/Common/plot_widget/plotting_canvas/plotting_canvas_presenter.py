@@ -28,8 +28,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
         # connection to quick edit widget
         self._setup_quick_edit_widgeet()
-        self.autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
-        self._view.toolBar.uncheck_autoscale_notifier.add_subscriber(self.autoscale_observer)
 
     def _setup_quick_edit_widgeet(self):
         self._options_presenter.connect_errors_changed(self.handle_error_selection_changed)
@@ -37,6 +35,10 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.connect_y_range_changed(self._handle_ylim_changed_in_quick_edit_options)
         self._options_presenter.connect_autoscale_changed(self._handle_autoscale_y_axes)
         self._options_presenter.connect_plot_selection(self._handle_subplot_changed_in_quick_edit_widget)
+
+    def _setup_autoscale_observer(self):
+        self.autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
+        self._view.toolBar.uncheck_autoscale_notifier.add_subscriber(self.autoscale_observer)
 
     # Interface implementation
     def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
@@ -77,6 +79,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def replace_workspace_in_plot(self, workspace):
         """Replace specified workspace in the plot with a new and presumably updated instance"""
         self._view.replace_specified_workspace_in_plot(workspace)
+        self._handle_autoscale_y_axes()
 
     def replot_workspace_with_error_state(self, workspace_name, error_state):
         """Replot a workspace in the plot with a different error_state"""
@@ -228,5 +231,4 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         for axis_number, title in enumerate(titles):
             self._view.set_title(axis_number, title)
         self._update_quickedit_widget()
-        self._handle_autoscale_y_axes()
         self._view.redraw_figure()

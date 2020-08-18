@@ -20,6 +20,7 @@ class PlottingCanvasWidget(object):
         self._plotting_view.add_widget(self._figure_options.widget)
         self._model = PlottingCanvasModel(context)
         self._presenter = PlottingCanvasPresenter(self._plotting_view, self._model, self._figure_options)
+        self._presenter._setup_autoscale_observer()
 
     @property
     def presenter(self):
