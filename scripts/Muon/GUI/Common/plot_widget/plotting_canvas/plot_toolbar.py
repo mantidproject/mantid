@@ -7,6 +7,8 @@
 from matplotlib.backends.qt_compat import is_pyqt5
 from mantidqt.icons import get_icon
 from qtpy import QtCore, QtWidgets
+from mantidqt.utils.observer_pattern import GenericObservable
+
 if is_pyqt5():
     from matplotlib.backends.backend_qt5agg import (
         NavigationToolbar2QT as NavigationToolbar)
@@ -33,9 +35,11 @@ class PlotToolbar(NavigationToolbar):
                           (None, None, None, None),
                           ('Show/hide legend', 'Toggles the legend on/off', None, 'toggle_legend'),
                           )
+
         self.is_major_grid_on = False
         self.is_minor_grid_on = False
         NavigationToolbar.__init__(self, figure_canvas, parent=parent)
+        self.uncheck_autoscale_notifier = GenericObservable()
 
     def _init_toolbar(self):
         for text, tooltip_text, mdi_icon, callback in self.toolitems:
@@ -96,3 +100,67 @@ class PlotToolbar(NavigationToolbar):
     def reset_gridline_flags(self):
         self.is_minor_grid_on = False
         self.is_major_grid_on = False
+
+    def zoom(self, *args):
+        """Activate zoom to rect mode."""
+        self.uncheck_autoscale_notifier.notify_subscribers()
+        if self._active == 'ZOOM':
+            self._active = None
+        else:
+            self._active = 'ZOOM'
+
+        if self._idPress is not None:
+            self._idPress = self.canvas.mpl_disconnect(self._idPress)
+            self.mode = ''
+
+        if self._idRelease is not None:
+            self._idRelease = self.canvas.mpl_disconnect(self._idRelease)
+            self.mode = ''
+
+        if self._active:
+            self._idPress = self.canvas.mpl_connect('button_press_event',
+                                                    self.press_zoom)
+            self._idRelease = self.canvas.mpl_connect('button_release_event',
+                                                      self.release_zoom)
+            self.mode = 'zoom rect'
+            self.canvas.widgetlock(self)
+        else:
+            self.canvas.widgetlock.release(self)
+
+        for a in self.canvas.figure.get_axes():
+            a.set_navigate_mode(self._active)
+
+        self.set_message(self.mode)
+
+    def pan(self, *args):
+        """Activate the pan/zoom tool. pan with left button, zoom with right"""
+        # set the pointer icon and button press funcs to the
+        # appropriate callbacks
+        self.uncheck_autoscale_notifier.notify_subscribers()
+        if self._active == 'PAN':
+            self._active = None
+        else:
+            self._active = 'PAN'
+        if self._idPress is not None:
+            self._idPress = self.canvas.mpl_disconnect(self._idPress)
+            self.mode = ''
+
+        if self._idRelease is not None:
+            self._idRelease = self.canvas.mpl_disconnect(self._idRelease)
+            self.mode = ''
+
+        if self._active:
+            self._idPress = self.canvas.mpl_connect(
+                'button_press_event', self.press_pan)
+            self._idRelease = self.canvas.mpl_connect(
+                'button_release_event', self.release_pan)
+            self.mode = 'pan/zoom'
+            self.canvas.widgetlock(self)
+        else:
+            self.canvas.widgetlock.release(self)
+
+        for a in self.canvas.figure.get_axes():
+            a.set_navigate_mode(self._active)
+
+        self.set_message(self.mode)
+

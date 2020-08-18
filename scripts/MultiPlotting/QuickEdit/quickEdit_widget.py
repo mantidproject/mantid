@@ -18,8 +18,19 @@ class QuickEditWidget(object):
     def widget(self):
         return self._presenter.widget
 
-    """ connect statements"""
+    def disable_yaxis_changer(self):
+        self._presenter.disable_yaxis_changer()
 
+    def enable_yaxis_changer(self):
+        self._presenter.enable_yaxis_changer()
+
+    def check_autoscale_state(self):
+        return self._presenter.check_autoscale_state()
+
+    def uncheck_autoscale(self):
+        self._presenter.uncheck_autoscale()
+
+    """ connect statements"""
     def connect_autoscale_changed(self, slot):
         self._presenter.connect_autoscale_changed(slot)
 

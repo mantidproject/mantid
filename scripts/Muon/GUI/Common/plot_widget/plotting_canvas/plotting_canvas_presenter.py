@@ -11,6 +11,7 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_inter
     PlottingCanvasPresenterInterface
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantid import AnalysisDataService
+from mantidqt.utils.observer_pattern import GenericObserver
 
 DEFAULT_X_LIMITS = [0, 15]
 DEFAULT_Y_LIMITS = [-1, 1]
@@ -27,6 +28,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
         # connection to quick edit widget
         self._setup_quick_edit_widgeet()
+        self.autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
+        self._view.toolBar.uncheck_autoscale_notifier.add_subscriber(self.autoscale_observer)
 
     def _setup_quick_edit_widgeet(self):
         self._options_presenter.connect_errors_changed(self.handle_error_selection_changed)
@@ -63,6 +66,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             except RuntimeError:
                 continue
             self._view.remove_workspace_from_plot(workspace)
+
         self._view.redraw_figure()
 
     def remove_workspace_from_plot(self, workspace):
@@ -112,6 +116,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         fit_plot_information = self._model.create_plot_information_for_guess_ws(guess_ws_name)
         self._view.add_workspaces_to_plot([fit_plot_information])
         self._view.redraw_figure()
+
 
     def get_plot_axes(self):
         """Returns the matplotlib axes - needed for the external plot button"""
@@ -176,15 +181,19 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.redraw_figure()
 
     def _handle_autoscale_y_axes(self):
-        selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
-        if len(selected_subplots) == 1:
-            self.autoscale_selected_y_axis(selected_subplots[0])
-        else:
-            self.autoscale_y_axes()
+        if self._options_presenter.check_autoscale_state():
+            self._options_presenter.disable_yaxis_changer()
+            selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
+            if len(selected_subplots) == 1:
+                self.autoscale_selected_y_axis(selected_subplots[0])
+            else:
+                self.autoscale_y_axes()
 
-        xmin, xmax, ymin, ymax = self._view.get_axis_limits(selected_subplots[0])
-        self._options_presenter.set_plot_x_range([xmin, xmax])
-        self._options_presenter.set_plot_y_range([ymin, ymax])
+            xmin, xmax, ymin, ymax = self._view.get_axis_limits(selected_subplots[0])
+            self._options_presenter.set_plot_x_range([xmin, xmax])
+            self._options_presenter.set_plot_y_range([ymin, ymax])
+        else:
+            self._options_presenter.enable_yaxis_changer()
 
     def handle_error_selection_changed(self):
         plotted_workspaces, _ = self._view.plotted_workspaces_and_indices
@@ -220,4 +229,5 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         for axis_number, title in enumerate(titles):
             self._view.set_title(axis_number, title)
         self._update_quickedit_widget()
+        self._handle_autoscale_y_axes()
         self._view.redraw_figure()
