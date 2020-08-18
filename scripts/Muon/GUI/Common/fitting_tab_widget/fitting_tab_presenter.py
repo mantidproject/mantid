@@ -239,6 +239,8 @@ class FittingTabPresenter(object):
         self.model.function_name = self.view.function_name
 
     def handle_function_structure_changed(self):
+        if not self._fit_function[0]:
+            self.handle_display_workspace_changed()
         self.view.plot_guess_checkbox.setChecked(False)
         if self._tf_asymmetry_mode:
             self.view.warning_popup('Cannot change function structure during tf asymmetry mode')
@@ -250,7 +252,8 @@ class FittingTabPresenter(object):
             if self.view.is_simul_fit():
                 self._fit_function = [None]
             else:
-                self._fit_function = [None] * len(self.selected_data)
+                self._fit_function = [None] * len(self.selected_data)\
+                    if self.selected_data else [None]
             self.model.clear_fit_information()
             self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
         else:

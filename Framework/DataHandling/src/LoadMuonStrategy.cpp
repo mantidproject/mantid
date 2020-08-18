@@ -1,4 +1,3 @@
-
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
@@ -7,9 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/LoadMuonStrategy.h"
+#include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include <vector>
 
@@ -17,8 +19,59 @@ namespace Mantid {
 namespace DataHandling {
 
 // Constructor
-LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log, std::string filename)
-    : m_logger(g_log), m_filename(std::move(filename)) {}
+LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log, std::string filename,
+                                   LoadMuonNexusV2NexusHelper &nexusLoader)
+    : m_logger(g_log), m_filename(std::move(filename)),
+      m_nexusLoader(nexusLoader) {}
+
+/**
+ * Loads default detector grouping, if this isn't present
+ * return dummy grouping
+ * @returns :: Grouping table
+ */
+API::Workspace_sptr LoadMuonStrategy::loadDefaultDetectorGrouping(
+    const DataObjects::Workspace2D &localWorkspace) const {
+
+  auto instrument = localWorkspace.getInstrument();
+  auto &run = localWorkspace.run();
+  std::string mainFieldDirection =
+      run.getLogData("main_field_direction")->value();
+  API::GroupingLoader groupLoader(instrument, mainFieldDirection);
+  try {
+    const auto idfGrouping = groupLoader.getGroupingFromIDF();
+    return idfGrouping->toTable();
+  } catch (const std::runtime_error &) {
+    auto dummyGrouping = std::make_shared<API::Grouping>();
+    if (instrument->getNumberDetectors() != 0) {
+      dummyGrouping = groupLoader.getDummyGrouping();
+    } else {
+      // Make sure it uses the right number of detectors
+      std::string numDetectors =
+          "1-" + std::to_string(localWorkspace.getNumberHistograms());
+      dummyGrouping->groups.emplace_back(std::move(numDetectors));
+      dummyGrouping->groupNames.emplace_back("all");
+    }
+    return dummyGrouping->toTable();
+  }
+}
+/**
+ * Determines the detectors loaded in the input workspace.
+ * @returns :: Vector containing loaded detectors
+ */
+std::vector<detid_t> LoadMuonStrategy::getLoadedDetectorsFromWorkspace(
+    const DataObjects::Workspace2D &localWorkspace) const {
+  size_t numberOfSpectra = localWorkspace.getNumberHistograms();
+  std::vector<detid_t> loadedDetectors;
+  loadedDetectors.reserve(numberOfSpectra);
+  for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra;
+       spectraIndex++) {
+    const auto detIdSet =
+        localWorkspace.getSpectrum(spectraIndex).getDetectorIDs();
+    // each spectrum should only point to one detector in the Muon file
+    loadedDetectors.emplace_back(*detIdSet.begin());
+  }
+  return loadedDetectors;
+}
 
 /**
  * Creates Detector Grouping Table .

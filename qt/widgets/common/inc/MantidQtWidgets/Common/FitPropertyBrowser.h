@@ -321,6 +321,10 @@ public:
 
 public slots:
   virtual void fit();
+  virtual void toggleSettingsBrowserVisible();
+  virtual void
+  removePropertiesFromSettingsBrowser(const QStringList &propsToRemove);
+  virtual void toggleWsListVisible();
   virtual void sequentialFit();
   void undoFit();
   virtual void clear();
@@ -662,6 +666,9 @@ private:
 
   /// Shows if the PeakPickerTool is on
   bool m_peakToolOn;
+
+  /// bool to display ws list or not
+  bool m_hideWsListWidget;
 
   /// If true background function will be included automatically
   bool m_auto_back;

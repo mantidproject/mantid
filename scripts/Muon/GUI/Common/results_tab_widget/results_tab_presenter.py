@@ -71,6 +71,7 @@ class ResultsTabPresenter(QObject):
     @Slot()
     def _on_new_fit_performed_impl(self):
         """Use as part of an invokeMethod call to call across threads"""
+        self.model.on_new_fit_performed()
         self.view.set_fit_function_names(self.model.fit_functions())
         self._update_fit_results_view_on_new_fit()
         self._update_logs_view()

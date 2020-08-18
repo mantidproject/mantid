@@ -145,24 +145,10 @@ target_link_libraries(
           ${Boost_LIBRARIES}
 )
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(
-    PythonAPIModule
-    PROPERTIES
-      INSTALL_RPATH
-      "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/"
-  )
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(
-    PythonAPIModule
-    PROPERTIES
-      INSTALL_RPATH
-      "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/"
-  )
-endif()
-
 # Installation settings
+set_target_properties(PythonAPIModule
+    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/")
 mtd_install_targets(
-  TARGETS PythonAPIModule INSTALL_DIRS ${LIB_DIR}/mantid/api
-  ${WORKBENCH_LIB_DIR}/mantid/api
+  TARGETS PythonAPIModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/api
+  ${WORKBENCH_SITE_PACKAGES}/mantid/api
 )

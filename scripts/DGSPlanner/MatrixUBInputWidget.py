@@ -56,9 +56,9 @@ class UBTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             try:
-                val=value.toFloat()[0] #QVariant
-            except AttributeError:
-                val=float(value) #string
+                val=float(value)
+            except ValueError:
+                return False
             self.__UB[row][column]=val
             self.dataChanged.emit(index, index)
             if ValidateUB(self.__UB):
