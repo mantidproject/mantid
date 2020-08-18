@@ -393,8 +393,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     def processTransmissions(self):
         with AutoProcessContext(self.atransmission, 'Absorber') as \
                 [process_transmission_absorber, transmission_absorber_name]:
-            self.progress.report('Processing transmission absorber')
             if process_transmission_absorber:
+                self.progress.report('Processing transmission absorber')
                 SANSILLReduction(Run=self.atransmission,
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
@@ -402,9 +402,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         with AutoProcessContext(self.btransmission, 'Beam') as \
                 [process_transmission_beam, transmission_beam_name]:
-            self.progress.report('Processing transmission beam')
             flux_name = transmission_beam_name + '_Flux'
             if process_transmission_beam:
+                self.progress.report('Processing transmission beam')
                 SANSILLReduction(Run=self.btransmission,
                                  ProcessAs='Beam',
                                  NormaliseBy=self.normalise,
@@ -416,8 +416,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         with AutoProcessContext(self.ctransmission, 'Transmission') as \
                 [process_container_transmission, container_transmission_name]:
-            self.progress.report('Processing container transmission')
             if process_container_transmission:
+                self.progress.report('Processing container transmission')
                 SANSILLReduction(Run=self.ctransmission,
                                  ProcessAs='Transmission',
                                  OutputWorkspace=container_transmission_name,
@@ -429,8 +429,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         with AutoProcessContext(self.stransmission, 'Transmission') as \
                 [process_sample_transmission, sample_transmission_name]:
-            self.progress.report('Processing sample transmission')
             if process_sample_transmission:
+                self.progress.report('Processing sample transmission')
                 SANSILLReduction(Run=self.stransmission,
                                  ProcessAs='Transmission',
                                  OutputWorkspace=sample_transmission_name,
@@ -447,8 +447,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     else self.absorber[0])
         with AutoProcessContext(absorber, 'Absorber') as \
                 [process_absorber, absorber_name]:
-            self.progress.report('Processing absorber')
             if process_absorber:
+                self.progress.report('Processing absorber')
                 SANSILLReduction(Run=absorber,
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
@@ -461,8 +461,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 else self.beam[0])
         with AutoProcessContext(beam, 'Beam') as [process_beam, beam_name]:
             flux_name = beam_name + '_Flux' if not self.flux[0] else ''
-            self.progress.report('Processing beam')
             if process_beam:
+                self.progress.report('Processing beam')
                 SANSILLReduction(Run=beam,
                                  ProcessAs='Beam',
                                  OutputWorkspace=beam_name,
@@ -478,8 +478,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     if len(self.flux) == self.dimensionality
                     else self.flux[0])
             with AutoProcessContext(flux, 'Flux') as [process_flux, flux_name]:
-                self.progress.report('Processing flux')
                 if process_flux:
+                    self.progress.report('Processing flux')
                     SANSILLReduction(Run=flux,
                                      ProcessAs='Beam',
                                      OutputWorkspace=flux_name.replace('Flux',
@@ -499,8 +499,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                      else self.container[0])
         with AutoProcessContext(container, 'Container') as \
                 [process_container, container_name]:
-            self.progress.report('Processing container')
             if process_container:
+                self.progress.report('Processing container')
                 SANSILLReduction(Run=container,
                                  ProcessAs='Container',
                                  OutputWorkspace=container_name,
@@ -518,8 +518,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         # this is the default mask, the same for all the distance configurations
         with AutoProcessContext(self.default_mask, 'DefaultMask', True) as \
                 [load_default_mask, default_mask_name]:
-            self.progress.report('Loading default mask')
             if load_default_mask:
+                self.progress.report('Loading default mask')
                 LoadNexusProcessed(Filename=self.default_mask,
                                    OutputWorkspace=default_mask_name)
 
@@ -528,8 +528,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 if len(self.mask) == self.dimensionality
                 else self.mask[0])
         with AutoProcessContext(mask, 'Mask', True) as [load_mask, mask_name]:
-            self.progress.report('Loading mask')
             if load_mask:
+                self.progress.report('Loading mask')
                 LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
 
         # sensitivity
@@ -542,8 +542,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             with AutoProcessContext(sens, 'Sensitivity', True) as \
                     [load_sensitivity, sensitivity_name]:
                 sens_input = sensitivity_name
-                self.progress.report('Loading sensitivity')
                 if load_sensitivity:
+                    self.progress.report('Loading sensitivity')
                     LoadNexusProcessed(Filename=sens,
                                        OutputWorkspace=sensitivity_name)
 
@@ -555,8 +555,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             with AutoProcessContext(reference, 'Reference', True) as \
                     [load_reference, reference_name]:
                 ref_input = reference_name
-                self.progress.report('Loading reference')
                 if load_reference:
+                    self.progress.report('Loading reference')
                     LoadNexusProcessed(Filename=reference,
                                        OutputWorkspace=reference_name)
 
