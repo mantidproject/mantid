@@ -13,8 +13,9 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 
 namespace {
-/// Name of slit geometry
-const std::vector<std::string> SHAPE_TYPE_NAME = {"Slit", "Circle"};
+/// Names of possible slit geometries
+constexpr const char *SHAPE_NAME_SLIT = "Slit";
+constexpr const char *SHAPE_NAME_CIRCLE = "Circle";
 /// Name of width parameter in map
 constexpr const char *WIDTH_PARAM_NAME = "beam-width";
 /// Name of height parameter in map
@@ -54,15 +55,14 @@ std::map<std::string, std::string> SetBeam::validateInputs() {
     bool w = geometryArgs->existsProperty("Width");
     bool h = geometryArgs->existsProperty("Height");
     bool r = geometryArgs->existsProperty("Radius");
-    if (!s || ((w && h) == r)) {
-      errors["Geometry"] =
-          "'Geometry' flags missing or incorrect. Required flags: Shape, "
-          "plus Width and Height, or Radius";
-    } else {
+    if (s && ((w && h) != r)) {
       std::string shape = geometryArgs->getProperty("Shape");
-      if (std::find(SHAPE_TYPE_NAME.begin(), SHAPE_TYPE_NAME.end(), shape) !=
-          SHAPE_TYPE_NAME.end()) {
+      if (shape != SHAPE_NAME_SLIT || shape != SHAPE_NAME_CIRCLE) {
         errors["Geometry"] = "Only 'Slit' and 'Circle' shapes are supported.";
+      } else {
+        errors["Geometry"] =
+            "'Geometry' flags missing or incorrect. Required flags: Shape, "
+            "plus Width and Height, or Radius";
       }
     }
   } else {
