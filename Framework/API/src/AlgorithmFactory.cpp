@@ -64,7 +64,8 @@ AlgorithmFactoryImpl::create(const std::string &name,
       return this->createAlgorithm(realName.get(), local_version);
     } catch (Kernel::Exception::NotFoundError &) {
       // Get highest registered version
-      const auto hVersion = highestVersion(realName.get()); // Throws if not found
+      const auto hVersion =
+          highestVersion(realName.get()); // Throws if not found
 
       // The version registered does not match version supplied
       g_log.error() << "algorithm " << name << " version " << version
@@ -226,12 +227,12 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
 }
 
 /**
- * @param algorithmName The name of the algorithm to look up in the alias map
+ * @param alias The name of the algorithm to look up in the alias map
  * @return Real name of algroithm if found
  */
-// std::string AlgorithmFactoryImpl::getNameFromAliasMap(
-//    const std::string &algorithmName) const {
-boost::optional<std::string> AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const noexcept {
+boost::optional<std::string>
+AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const
+    noexcept {
   auto a_it = m_amap.find(alias);
   if (a_it == m_amap.end())
     return boost::none;
@@ -420,7 +421,8 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden,
           aliasDesc.category = desc.category;
           aliasDesc.version = desc.version;
           res.emplace_back(aliasDesc);*/
-          res.emplace_back(AlgorithmDescriptor{desc.alias, desc.version, desc.category, ""});
+          res.emplace_back(
+              AlgorithmDescriptor{desc.alias, desc.version, desc.category, ""});
         }
       }
     }
