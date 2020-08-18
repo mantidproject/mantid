@@ -51,10 +51,9 @@ class FittingTabPresenter(object):
             self.handle_selected_plot_type_changed)
         self.input_workspace_observer = GenericObserver(
             self.handle_new_data_loaded)
-        self.disable_tab_observer = GenericObserver(lambda: self.view.
-                                                    setEnabled(False))
-        self.enable_tab_observer = GenericObserver(lambda: self.view.
-                                                   setEnabled(True))
+
+        self.disable_tab_observer = GenericObserver(self.disable_view)
+        self.enable_tab_observer = GenericObserver(self.enable_view)
 
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
             self.update_view_from_model)
@@ -63,6 +62,15 @@ class FittingTabPresenter(object):
         self.double_pulse_observer = GenericObserverWithArgPassing(
             self.handle_double_pulse_set)
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
+
+        self.view.setEnabled(False)
+
+    def disable_view(self):
+        self.view.setEnabled(False)
+
+    def enable_view(self):
+        if self.selected_data:
+            self.view.setEnabled(True)
 
     @property
     def selected_data(self):
@@ -99,6 +107,8 @@ class FittingTabPresenter(object):
         self.manual_selection_made = False
         self.update_selected_workspace_list_for_fit()
         self.model.create_ws_fit_function_map()
+        if self.selected_data:
+            self.view.setEnabled(True)
 
     def handle_gui_changes_made(self, changed_values):
         for key in changed_values.keys():
@@ -349,6 +359,7 @@ class FittingTabPresenter(object):
         self.model.update_plot_guess(self.get_fit_input_workspaces(), self.view.get_index_for_start_end_times())
 
     def handle_undo_fit_clicked(self):
+        self._fit_function = self._fit_function_cache
         self._fit_function = self._fit_function_cache
         self.clear_fit_information()
         self.update_fit_status_information_in_view()

@@ -21,6 +21,7 @@ New Algorithms
 Algorithms
 ----------
 
+- :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now also checks the Error axis for unwanted values.
 - :ref:`SetSample <algm-SetSample>` is extended to support for composite shapes, such as FlatPlateHolder and HollowCylinderHolder. Also the input validation is made more stringent.
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
@@ -47,7 +48,8 @@ Algorithms
   and :ref:`MaskInstrument <algm-MaskInstrument>` is now deprecated and you should use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
 - Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
 - Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
-
+- Added alias for GeneratePythonScript as ExportHistory
+- Deprecated the RecordPythonScript algorithm
 
 Data Handling
 -------------

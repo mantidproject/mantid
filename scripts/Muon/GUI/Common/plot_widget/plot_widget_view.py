@@ -22,6 +22,7 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setupUi(self)
+        self.setMinimumSize(600,600)
 
     def setup_plot_type_options(self, options):
         """

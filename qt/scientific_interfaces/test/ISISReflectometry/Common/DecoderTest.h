@@ -306,7 +306,7 @@ const static QString BATCH_JSON_STRING{
     "        \"saveReductionResultsCheckBox\": false,"
     "        \"spaceRadioButton\": true,"
     "        \"tabRadioButton\": false,"
-    "        \"titleCheckBox\": true"
+    "        \"headerCheckBox\": true"
     "    }"
     "}"};
 
@@ -404,7 +404,7 @@ const static QString EMPTY_BATCH_JSON_STRING{
     "        \"saveReductionResultsCheckBox\": false,"
     "        \"spaceRadioButton\": false,"
     "        \"tabRadioButton\": false,"
-    "        \"titleCheckBox\": false"
+    "        \"headerCheckBox\": false"
     "    }"
     "}"};
 
