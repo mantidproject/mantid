@@ -140,9 +140,9 @@ public:
     auto &algFactory = AlgorithmFactory::Instance();
 
     TS_ASSERT_THROWS(algFactory.highestVersion("ToyAlgorithm"),
-                     const std::invalid_argument &);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(algFactory.highestVersion("Dog"),
-                     const std::invalid_argument &);
+                     const std::runtime_error &);
 
     algFactory.subscribe<ToyAlgorithm>();
     TS_ASSERT_EQUALS(1, algFactory.highestVersion("ToyAlgorithm"));
