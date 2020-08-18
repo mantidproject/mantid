@@ -10,6 +10,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/Instantiator.h"
 #include <algorithm>
+#include <boost/optional.hpp>
 #include <cxxtest/TestSuite.h>
 
 class AlgorithmFactoryTest : public CxxTest::TestSuite {
@@ -125,14 +126,14 @@ public:
     TS_ASSERT_EQUALS(noOfAlgs - 1, keys.size());
   }
 
-  void test_getNameFromAliasMap() {
+  void test_getRealNameFromAlias() {
     auto &algFactory = AlgorithmFactory::Instance();
 
-    const auto resultAlias = algFactory.getNameFromAliasMap("Dog");
-    const auto resultFakeAlias = algFactory.getNameFromAliasMap("Frog");
+    const auto resultAlias = algFactory.getRealNameFromAlias("Dog");
+    const auto resultFakeAlias = algFactory.getRealNameFromAlias("Frog");
 
-    TS_ASSERT_EQUALS(resultAlias, "ToyAlgorithm");
-    TS_ASSERT_EQUALS(resultFakeAlias, "");
+    TS_ASSERT_EQUALS(resultAlias.get(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(resultFakeAlias, boost::none);
   }
 
   void test_HighestVersion() {

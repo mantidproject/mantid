@@ -12,6 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <boost/optional.hpp>
 #include <memory>
 #include <sstream>
 #include <unordered_map>
@@ -115,7 +116,8 @@ public:
   const std::vector<std::string> getKeys(bool includeHidden) const;
 
   /// Get an algorithms name from the alias map
-  std::string getNameFromAliasMap(const std::string &algorithmName) const;
+  //std::string getNameFromAliasMap(const std::string &algorithmName) const;
+  boost::optional<std::string>getRealNameFromAlias(const std::string &alias) const noexcept;
 
   /// Returns the highest version of the algorithm currently registered
   int highestVersion(const std::string &algorithmName) const;

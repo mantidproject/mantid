@@ -105,7 +105,7 @@ public:
   void test_An_Invalid_String_Returns_An_Appropriate_Error() {
     AlgorithmProperty testProp("CalculateStep");
     TS_ASSERT_EQUALS(testProp.setValue("{\"name\":\"ComplexSum\"}"),
-                     "Algorithm not registered ComplexSum");
+                     "AlgorithmFactory::highestVersion() - Unknown algorithm 'ComplexSum'");
   }
 
   void test_Alg_With_An_AlgorithmProperty_Accepts_Another_Algorithm() {
