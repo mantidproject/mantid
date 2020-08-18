@@ -86,12 +86,12 @@ DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
 
 PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
     : Algorithm(), m_filenameBase(), m_filenameExt(), m_filenameZeros(),
-      m_dtcType(), m_dtcFile(), m_forward_list(), m_backward_list(),
+      m_dtcType(), m_dtcFile(), m_forward_list(), m_backward_list(), m_rmap(),
       m_int(true), m_red(-1), m_green(-1), m_minTime(-1.0), m_maxTime(-1.0),
       m_logName(), m_logFunc(), m_logValue(), m_redY(), m_redE(), m_greenY(),
       m_greenE(), m_sumY(), m_sumE(), m_diffY(), m_diffE(),
       m_allProperties("default"), m_currResName("__PABLV_results"),
-      m_firstStart_ns(0), m_rmap() {}
+      m_firstStart_ns(0) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
