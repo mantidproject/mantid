@@ -284,9 +284,11 @@ LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Mantid assumes event_time_offset to be float.
   // Nexus only requires event_time_offset to be a NXNumber.
   // We thus have to consider 32-bit or 64-bit options, and we
-  // explicitly allow downcasting (last argument `true`).
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float, NeXus::NeXusIOHelper::AllowDowncasting>(file, key, m_loadStart,
-                                                        m_loadSize);
+  // explicitly allow downcasting using the additional AllowDowncasting
+  // template argument.
+  auto vec = NeXus::NeXusIOHelper::readNexusSlab<
+      float, NeXus::NeXusIOHelper::AllowDowncasting>(file, key, m_loadStart,
+                                                     m_loadSize);
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds
