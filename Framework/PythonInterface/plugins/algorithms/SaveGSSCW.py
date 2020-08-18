@@ -81,7 +81,7 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         wksp = self.getProperty('InputWorkspace').value
         assert wksp, 'Input workspace cannot be None'
 
-        # process workspace
+        # process workspace to make it a PointData workspace
         if wksp.isHistogramData():
             wksp_name = wksp.name()
             wksp = ConvertToMatrixWorkspace(InputWorkspace=wksp_name, OutputWorkspace=wksp_name)
@@ -118,11 +118,11 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         # generate header
         header = self._create_gsas_header(workspace)
 
-        # generte body
+        # generate body
         body = self._create_gsas_body(workspace)
 
+        # construct the file
         gsas_content = self.empty_line(80) + '\n' + header + body
-        print(gsas_content)
 
         return gsas_content
 
