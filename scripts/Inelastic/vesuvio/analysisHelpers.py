@@ -457,6 +457,11 @@ class element:
         self.width_low, self.width, self.width_high = width_range[0],width_range[1],width_range[2]
         self.centre_low, self.centre, self.centre_high = centre_range[0],centre_range[1],centre_range[2]
 
+    def print(self):
+        print(self.mass, "mass")
+        print(self.intensity_low, self.intensity, self.intensity_high, "I")
+        print(self.centre_low, self.centre, self.centre_high, "C")
+
 class constraint: # with reference to the "elements" vector positions
     def __init__(self, lhs_element_position, rhs_element_position, rhs_factor , type):
         self.lhs_element_position = lhs_element_position
@@ -479,3 +484,34 @@ def prepare_fit_arguments(elements, constraints) :
         lhs_int, rhs_int = 3*constraints[k].lhs_element_position, 3*constraints[k].rhs_element_position
         fit_constraints = ({'type': constraints[k].type, 'fun': lambda par:  par[lhs_int] -constraints[k].rhs_factor*par[rhs_int] })
     return masses, par, bounds, fit_constraints
+
+def cleanNames(list):
+    return [name.replace(" ","").lower() for name in list]
+
+def generate_elements(table):
+    table_cols = table.getColumnNames()
+    clean_names = cleanNames(table.getColumnNames())
+    num_rows = table.rowCount()
+    elements =[]
+    for row in range(num_rows):
+        value = {}
+        for name, clean in zip(table_cols, clean_names):
+            print(clean, name)
+            print(table.row(row)[name])
+            print("next")
+            data = table.row(row)[name]
+            if isinstance(data, float) and data == 9.9e9:
+                data = None
+            value[clean] = data
+            print(value[clean])
+        intensity = [value["intensitylowerlimit"], value["intensityvalue"], value["intensityupperlimit"]]
+        width = [value["widthlowerlimit"], value["widthvalue"], value["widthupperlimit"]]
+        centre = [value["centrelowerlimit"], value["centrevalue"], value["centreupperlimit"]]
+        el = element(mass=value["mass(a.u.)"], intensity_range=intensity, width_range=width, centre_range=centre)
+        elements.append(el)
+    return elements
+
+def evaluate(input):
+    if input.isdigit():
+        return float(input)
+    return eval(input)
