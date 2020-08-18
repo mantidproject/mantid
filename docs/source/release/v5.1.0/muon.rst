@@ -54,6 +54,8 @@ Improvements
 - Updated plotting to make line colours more consistent.
 - The ALC interface in workbench will now show errors by default. The error bars can also be turned on/off using the right-click plot menu.
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
+- Replaced Autoscale button in plotting window to a checkbox.
+
 
 Bug fixes
 ---------

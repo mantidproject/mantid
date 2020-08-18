@@ -58,7 +58,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
         self._plot_information_list = []  # type : List[PlotInformation}
 
-
     @property
     def plotted_workspace_information(self):
         return self._plot_information_list

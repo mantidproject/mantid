@@ -117,7 +117,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.add_workspaces_to_plot([fit_plot_information])
         self._view.redraw_figure()
 
-
     def get_plot_axes(self):
         """Returns the matplotlib axes - needed for the external plot button"""
         return self._view.fig.axes
