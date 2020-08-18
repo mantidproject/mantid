@@ -392,6 +392,11 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.model.selected_groups, [])
         self.presenter.selected_group_changed_notifier.notify_subscribers.assert_called_once_with({'is_added': False, 'name': 'my_group_0'})
 
+    def test_when_adding_group_to_empty_table_it_is_selected(self):
+        self.presenter.add_group(MuonGroup('group_1', [1,2,3,4]))
+        self.presenter.add_group(MuonGroup('group_2', [1,2,3,4]))
+
+        self.assertEquals(self.model.selected_groups, ['group_1'])
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
