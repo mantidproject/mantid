@@ -14,40 +14,40 @@ import unittest
 
 runTests = True
 
-Expected_GSS = """                                                                                
-                   BANK 1 2438 488 CONST 1000.000    5.000 0 0 ESD                                 
-                   287.51   16.96  281.38   13.52  279.80   11.83  282.77   11.89  279.73   13.43
-                   270.69   16.45  270.27   13.23  271.90   11.66  275.57   11.74  286.05   13.66
-                   303.35   17.42  295.64   13.86  292.17   12.09  292.92   12.10  288.03   13.63
-                   277.50   16.66  278.01   13.42  274.65   11.72  267.41   11.56  266.29   13.15
-                   271.27   16.47  273.06   13.29  272.29   11.67  268.96   11.60  260.08   12.93
-                   245.63   15.67  250.87   12.73  258.06   11.36  267.18   11.56  272.39   13.29
-                   273.68   16.54  269.92   13.23  266.37   11.54  263.04   11.47  259.18   12.94
-                   254.80   15.96  258.56   12.93  261.36   11.43  263.21   11.47  262.35   13.02
-                   258.78   16.09  254.71   12.86  257.64   11.35  267.57   11.57  265.69   13.07
-                   251.99   15.87  235.43   12.40  230.35   10.73  236.73   10.88  242.60   12.55
-                   247.96   15.75  238.47   12.46  237.80   10.90  246.67   10.96  262.79    9.69
-                   255.80   10.58  247.97   10.13  244.45    9.64  243.10   10.88  255.51    9.56
-                   257.28   10.63  255.45   10.28  255.02    9.85  257.07   11.19  254.40    9.55
-                   256.29   10.61  254.03   10.26  252.45    9.80  257.38   11.20  259.48    9.64
-                   255.86   10.59  248.93   10.16  242.40    9.59  239.86   10.81  252.22    9.50
-                   242.14   10.29  241.52    9.98  244.76    9.64  238.51   10.78  244.85    9.36
-                   251.14   10.51  247.02   10.12  245.47    9.67  256.67   11.19  244.10    9.36
-                   240.22   10.27  242.41   10.01  245.44    9.66  246.65   10.96  256.36    9.58
-                   251.33   10.49  252.20   10.20  252.50    9.78  242.63   10.87  245.65    9.38
-                   253.65   10.56  253.98   10.26  250.80    9.76  251.09   11.07  243.15    9.34
-                   242.25   10.31  243.95   10.04  240.75    9.55  230.83   10.60  237.20    9.21
-                   238.40    8.91  241.68    8.46  245.13    7.83  242.16    7.78  240.49    7.75
-                   242.77    8.47  234.46    8.35  224.29    7.49  235.14    7.67  234.93    7.66
-                   236.81    8.36  234.26    8.34  230.92    7.60  237.71    7.71  230.89    7.60
-                   236.36    8.36  241.12    9.73  240.78   10.97  246.59   10.77  232.34    8.96
-                   236.26   10.40  245.12   11.07  240.23    9.74  235.58    8.86  236.04    8.87
-                   236.26   10.40  245.82   11.09  240.63    9.75  241.24    8.97  252.87    9.18
-                   240.37   10.47  257.21   11.34  252.94   10.00  241.20    8.97  234.21    8.84
-                   235.92   10.39  229.43   10.71  233.05    9.57  238.17    8.91  240.04    8.95
-                   236.77   10.40  247.15   11.12  242.52    9.79  238.47    8.92  241.73    8.98
-                   232.09   10.29  233.01   10.79  236.99    9.66  237.26    8.89  234.89    8.85
-                   242.99   10.55  231.89   10.77  230.57    9.53  229.63    8.75  223.14    8.62"""
+hb2a_exp_data = np.array([
+    [10.02500, 287.51184276, 13.43454614],
+    [10.07500, 278.30585847, 9.30794030],
+    [10.12500, 292.87303075, 13.55254760],
+    [10.17500, 275.63281074, 13.12537194],
+    [10.22500, 270.69168828, 13.00861236],
+    [10.27500, 262.77480661, 12.82209765],
+    [10.32500, 277.35681869, 13.14797416],
+    [10.37500, 274.59594429, 13.12070174],
+    [10.42500, 280.21305288, 13.19471733],
+    [10.47500, 303.34965091, 13.80288705],
+    [10.52500, 282.70648260, 13.32691140],
+    [10.57500, 300.87222859, 13.81951915],
+    [10.62500, 296.89787456, 13.69487774],
+    [10.67500, 289.70021610, 13.42010336],
+    [10.72500, 277.49926017, 13.28980428],
+    [10.77500, 256.52015685, 12.60727791],
+    [10.82500, 300.00488275, 13.70757297],
+    [10.87500, 279.89145922, 13.23841175],
+    [10.92500, 247.69887743, 12.40045414],
+    [10.97500, 271.26941540, 13.05145583],
+    [11.02500, 282.93767404, 13.29357157],
+    [11.07500, 264.96899532, 12.86803196],
+    [11.12500, 266.72777934, 12.93819774],
+    [11.17500, 267.86568113, 12.96292887],
+    [11.22500, 245.63113455, 12.45399289],
+    [11.27500, 263.01979365, 12.84935776],
+    [11.32500, 243.96967945, 12.35388494],
+    [11.37500, 274.70220810, 13.11082107],
+    [11.42500, 268.77756452, 13.05299243],
+    [11.47500, 273.67819710, 13.07685009],
+    [11.52500, 263.64522942, 12.87991230],
+    [11.57500, 272.43577672, 13.07733576]
+])
 
 
 class SaveGSSCWTest(unittest.TestCase):
@@ -63,63 +63,43 @@ class SaveGSSCWTest(unittest.TestCase):
 
     def testSaveGSS2Theta(self):
         """ Test to Save one spectrum without and instrument
+
+        - generate a workspace from test data
+        - create a GSAS file from this workspace
+        - verify the GSAS data with test data
+
+        As the user requirement:
+        1. the header of GSAS file shall follow the GSAS doc
+        2. all data read from GSAS shall be exactly same as test data
         """
         if not runTests:
             return
 
+        # set up test parameters: workspace name, output file name,
         ws_name = "SaveGSSCW_2theta"
         gsas_file_name = self.saveFilePath(ws_name)
-        self._create_2theta_workspace(ws_name)
-        print(f'GSAS file name: {gsas_file_name}')
+
+        # create input workspace
+        self._create_2theta_workspace(ws_name, hb2a_exp_data)
         ws = AnalysisDataService[ws_name]
         assert ws
         print(f'Workspace {ws_name} of type {type(ws)}')
 
         try:
             SaveGSSCW(InputWorkspace=ws_name, OutputFilename=gsas_file_name)
-
-            self.check(gsas_file_name)
+            self.check_gsas(gsas_file_name, expected_data=hb2a_exp_data)
         finally:
             self.cleanup(gsas_file_name, ws_name)
 
-    def testSaveGSS_hb2a(self):
-        """Test with real HB2B data including XYE and verified by GSAS
-
-        Returns
-        -------
-
-        """
-        # Test files were provided by Stuart
-        source_xye_file = 'IPTS-2005_exp719_Scan52_MANTID.dat'
-        ws_name = 'HB2AData'
-        LoadAscii(OutputWorkspace=ws_name,
-                  Filename=source_xye_file,
-                  Unit="Degrees")
-
-        spice_gss_file = 'IPTS-2005_exp719_Scan52_SPICE.gss'
-
-        try:
-            xye_file = open(source_xye_file, 'r')
-            xye_file.close()
-        except IOError:
-            raise IOError(f'Unable to locate XYE file {source_xye_file}')
-
-    def checkDataFields(self, nxitem, withInstrument):
-        keys = nxitem.keys()
-        for fieldname in ['data', 'errors', 'tof']:
-            self.assertTrue(fieldname in keys)
-        if withInstrument:
-            for fieldname in ['Q', 'dspacing']:
-                self.assertTrue(fieldname in keys)
-
-    @staticmethod
-    def check(filename):
+    def check_gsas(self, filename, expected_data):
         """Check output GSAS file
 
         Parameters
         ----------
         filename: str
             GSAS filename
+        expected_data: numpy.ndarray
+            data to verify against
 
         Returns
         -------
@@ -129,15 +109,69 @@ class SaveGSSCWTest(unittest.TestCase):
         assert os.path.exists(filename), f'Generated GSAS file {filename} cannot be found'
 
         # Contents
+        gsas_file = open(filename, 'r')
+        contents = gsas_file.readlines()
+        gsas_file.close()
 
-    @staticmethod
-    def _create_2theta_workspace(ws_name):
+        # Check total number of lines: 1 + 1 + ceil(32/5) = 9
+        assert len(contents) == 9, f'GSAS file contains {len(contents)} lines but not 9.\n{contents}'
+
+        # Check size
+        for li, line in enumerate(contents):
+            # readlines() will keep the line-change sign
+            if len(line) == 81:
+                assert line[-1] == '\n', f'Line {li}: {line} contains {len(line)} characters but not 80.' \
+                                         f'Its last character is [{line[-1]}]'
+            else:
+                assert len(line) == 80, f'Line {li}: {line} contains {len(line)} characters but not 80.' \
+                                        f'Its last character is [{line[-1]}]'
+
+        # line 0 is emtpy
+        assert contents[0].strip() == '', 'First line must be empty but not >{}<'.format(contents[0].strip())
+
+        # line 1 is for information
+        expected_header = 'BANK 1   32   7 CONST 1002.500    5.000 0 0 ESD'
+        assert contents[1].startswith(expected_header), 'Comparison:\n{}\n{}'.format(contents[1],
+                                                                                     expected_header)
+
+        for line_index in range(7):
+            for item_index in range(5):
+                point_index = line_index * 5 + item_index
+                # get Y and E
+                start_char_pos = item_index * 16
+                y_str = contents[line_index + 2][start_char_pos:start_char_pos + 8]
+                e_str = contents[line_index + 2][start_char_pos + 8:start_char_pos + 16]
+                # verify
+                if point_index < expected_data.shape[0]:
+                    # shall be two float to compare with
+                    y_i = float(y_str)
+                    e_i = float(e_str)
+                    self.assertAlmostEquals(y_i, expected_data[point_index][1], places=2)
+                    self.assertAlmostEquals(e_i, expected_data[point_index][2], places=2)
+                else:
+                    # outside of given data range: two empty string
+                    assert y_str.strip() == e_str.strip() == ''
+
+    def _create_2theta_workspace(self, ws_name, data):
+        """
+
+        Parameters
+        ----------
+        ws_name: str
+        data: ndarray
+        Returns
+        -------
+
+        """
         """ Create 2theta workspace
         """
+        # Check input
+        self.assertEqual(data.shape[1], 3)
+
         # From 15 degree to 105 degree with 1 degree space
-        x = np.arange(15., 105., 1.)
-        y = np.zeros((len(x)-1,), dtype='float') + 5 * np.exp(-(x[1:] - 50.)**2 / 4.)  # histogram
-        e = np.sqrt(y)
+        x = data[:, 0]
+        y = data[:, 1]
+        e = data[:, 2]
 
         CreateWorkspace(OutputWorkspace=ws_name,
                         DataX=x, DataY=y, DataE=e, NSpec=1,

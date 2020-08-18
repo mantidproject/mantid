@@ -84,7 +84,7 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         # process workspace
         if wksp.isHistogramData():
             wksp_name = wksp.name()
-            wskp = ConvertToMatrixWorkspace(InputWorkspace=wksp_name, OutputWorkspace=wksp_name)
+            wksp = ConvertToMatrixWorkspace(InputWorkspace=wksp_name, OutputWorkspace=wksp_name)
 
         gsas_content = self._write_gsas_fxye(wksp)
 
@@ -100,12 +100,12 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         Example:
 
         BANK 1 2438 488 CONST 1000.000    5.000 0 0 ESD
-        287.51   16.96  281.38   13.52  279.80   11.83  282.77   11.89  279.73   13.43
-        270.69   16.45  270.27   13.23  271.90   11.66  275.57   11.74  286.05   13.66
-        303.35   17.42  295.64   13.86  292.17   12.09  292.92   12.10  288.03   13.63
-        277.50   16.66  278.01   13.42  274.65   11.72  267.41   11.56  266.29   13.15
-        271.27   16.47  273.06   13.29  272.29   11.67  268.96   11.60  260.08   12.93
-        245.63   15.67  250.87   12.73  258.06   11.36  267.18   11.56  272.39   13.29
+          287.51   16.96  281.38   13.52  279.80   11.83  282.77   11.89  279.73   13.43
+          270.69   16.45  270.27   13.23  271.90   11.66  275.57   11.74  286.05   13.66
+          303.35   17.42  295.64   13.86  292.17   12.09  292.92   12.10  288.03   13.63
+          277.50   16.66  278.01   13.42  274.65   11.72  267.41   11.56  266.29   13.15
+          271.27   16.47  273.06   13.29  272.29   11.67  268.96   11.60  260.08   12.93
+          245.63   15.67  250.87   12.73  258.06   11.36  267.18   11.56  272.39   13.29
 
         Parameters
         ----------
@@ -118,9 +118,30 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         # generate header
         header = self._create_gsas_header(workspace)
 
-        gsas_content = ''
+        # generte body
+        body = self._create_gsas_body(workspace)
+
+        gsas_content = self.empty_line(80) + '\n' + header + body
+        print(gsas_content)
 
         return gsas_content
+
+    @staticmethod
+    def empty_line(width):
+        """Create an empty line
+
+        Parameters
+        ----------
+        width: int
+
+        Returns
+        -------
+        str
+
+        """
+        line = '{:80s}'.format('')
+
+        return line
 
     @staticmethod
     def _create_gsas_header(workspace):
@@ -153,13 +174,17 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         if delta_2theta_std > 1E-5:
             raise RuntimeError(f'2theta steps are not constant')
 
-        min_2theta_str = '%10s' % f'{min_2theta:6.3f}'
-        delta_2theta_str = '%10s' % f'{delta_2theta:6.3f}'
-        header = f'BANK 1{num_data_points:5}{num_lines:5} CONST{min_2theta_str}{delta_2theta_str} 0 0 ESD'
+        min_2theta_str = '%9s' % f'{min_2theta:6.3f}'
+        delta_2theta_str = '%9s' % f'{delta_2theta:6.3f}'
+        header = f'BANK 1{num_data_points:5}{num_lines:4} CONST{min_2theta_str}{delta_2theta_str} 0 0 ESD'
+
+        # enforce to 80 character with line change
+        header = '{:80s}\n'.format(header)
 
         return header
 
-    def _create_gsas_body(self, workspace):
+    @staticmethod
+    def _create_gsas_body(workspace):
         """
 
         Parameters
@@ -197,6 +222,14 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
                 gsas_data += f'{gsas_line}\n'
                 # reset gsas line
                 gsas_line = ''
+
+        # remove end of line if it is the last character
+        if gsas_line == '':
+            # reset gsas line, then the last character must be '\n'
+            gsas_data = gsas_data[:-1]
+        else:
+            # in this case, gsas line cannot empty
+            gsas_data += '{:80s}'.format(gsas_line)
 
         return gsas_data
 
