@@ -285,8 +285,8 @@ LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Nexus only requires event_time_offset to be a NXNumber.
   // We thus have to consider 32-bit or 64-bit options, and we
   // explicitly allow downcasting (last argument `true`).
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart,
-                                                        m_loadSize, true);
+  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float, NeXus::NeXusIOHelper::AllowDowncasting>(file, key, m_loadStart,
+                                                        m_loadSize);
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds
