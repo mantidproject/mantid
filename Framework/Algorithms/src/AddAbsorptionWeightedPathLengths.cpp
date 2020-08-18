@@ -11,6 +11,7 @@
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
+#include "MantidAlgorithms/SampleCorrections/CircularBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -154,18 +155,29 @@ AddAbsorptionWeightedPathLengths::createBeamProfile(
     const Instrument &instrument, const Sample &sample) const {
   const auto frame = instrument.getReferenceFrame();
   const auto source = instrument.getSource();
+  double beamWidth(-1.0), beamHeight(-1.0), beamRadius(-1.0);
 
-  auto beamWidthParam = source->getNumberParameter("beam-width");
-  auto beamHeightParam = source->getNumberParameter("beam-height");
-  double beamWidth(-1.0), beamHeight(-1.0);
-  if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
-    beamWidth = beamWidthParam[0];
-    beamHeight = beamHeightParam[0];
-  } else {
-    const auto bbox = sample.getShape().getBoundingBox().width();
-    beamWidth = bbox[frame->pointingHorizontal()];
-    beamHeight = bbox[frame->pointingUp()];
-  }
+  std::string beamShapeParam = source->getParameterAsString("beam-shape");
+  if (beamShapeParam.compare("Slit") == 0) {
+    auto beamWidthParam = source->getNumberParameter("beam-width");
+    auto beamHeightParam = source->getNumberParameter("beam-height");
+    if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
+      beamWidth = beamWidthParam[0];
+      beamHeight = beamHeightParam[0];
+      return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(),
+                                                      beamWidth, beamHeight);
+    }
+  } else if (beamShapeParam.compare("Circle") == 0) {
+    auto beamRadiusParam = source->getNumberParameter("beam-parameter");
+    if (beamRadiusParam.size() == 1) {
+      beamRadius = beamRadiusParam[0];
+      return std::make_unique<CircularBeamProfile>(*frame, source->getPos(),
+                                                   beamRadius);
+    }
+  } // revert to sample dimensions if no return by this point
+  const auto bbox = sample.getShape().getBoundingBox().width();
+  beamWidth = bbox[frame->pointingHorizontal()];
+  beamHeight = bbox[frame->pointingUp()];
   return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(),
                                                   beamWidth, beamHeight);
 }
