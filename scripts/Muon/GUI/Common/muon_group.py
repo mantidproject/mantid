@@ -183,7 +183,7 @@ class MuonGroup(object):
                                           self._counts_workspace.items(),
                                           self._asymmetry_estimate_rebin.items(),
                                           self._counts_workspace_rebin.items()):
-            if value.workspace_name == workspace_name:
+            if value.workspace_name in workspace_name:
                 return key
 
         return None
