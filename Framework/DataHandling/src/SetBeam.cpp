@@ -20,8 +20,10 @@ constexpr const char *SHAPE_NAME_CIRCLE = "Circle";
 constexpr const char *WIDTH_PARAM_NAME = "beam-width";
 /// Name of height parameter in map
 constexpr const char *HEIGHT_PARAM_NAME = "beam-height";
-/// Name of height parameter in map
+/// Name of radius parameter in map
 constexpr const char *RADIUS_PARAM_NAME = "beam-radius";
+/// Name of shape parameter in map
+constexpr const char *SHAPE_PARAM_NAME = "beam-shape";
 } // namespace
 
 namespace Mantid {
@@ -115,6 +117,8 @@ void SetBeam::exec() {
 
     // Add the values as parameters on the source object
     pmap.addDouble(source->getComponentID(), RADIUS_PARAM_NAME, radius);
+    pmap.addString(source->getComponentID(), SHAPE_PARAM_NAME,
+                   SHAPE_NAME_CIRCLE);
   } else {
     double width = geometryArgs->getProperty("Width");
     double height = geometryArgs->getProperty("Height");
@@ -125,6 +129,7 @@ void SetBeam::exec() {
     // Add the values as parameters on the source object
     pmap.addDouble(source->getComponentID(), WIDTH_PARAM_NAME, width);
     pmap.addDouble(source->getComponentID(), HEIGHT_PARAM_NAME, height);
+    pmap.addString(source->getComponentID(), SHAPE_PARAM_NAME, SHAPE_NAME_SLIT);
   }
 }
 
