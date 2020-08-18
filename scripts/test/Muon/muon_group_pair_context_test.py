@@ -145,7 +145,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.assertEquals(self.context.pair_names, ['long'])
         for group in self.context.groups:
             self.assertEquals(group.periods, [1])
-    
+
     def test_that_reset_to_default_groups_creates_correct_groups_and_pairs_for_multi_period_data(self):
         workspace = CreateSampleWorkspace()
         LoadInstrument(workspace, InstrumentName="EMU", RewriteSpectraMap=True)
