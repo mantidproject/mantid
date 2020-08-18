@@ -453,6 +453,9 @@ public:
     void setWorkspaceIndex(int i);
     QStringList getWorkspaceNames();
     void fit();
+    void toggleSettingsBrowserVisible();
+    void removePropertiesFromSettingsBrowser(const QStringList &propsToRemove);
+    void toggleWsListVisible();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);

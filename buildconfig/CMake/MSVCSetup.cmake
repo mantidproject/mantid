@@ -121,6 +121,13 @@ else()
   set(MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/Common7/IDE")
 endif()
 
+# Setup debugger environment to launch in VS without setting paths
+set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
+set(MSVC_IDE_ENV "\
+PYTHONPATH=${MSVC_BIN_DIR}\n\
+PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\n\
+PATH=${THIRD_PARTY_DIR}/bin$<SEMICOLON>${THIRD_PARTY_DIR}/lib/qt5/bin$<SEMICOLON>%PATH%")
+
 configure_file(
   ${WINDOWS_BUILDCONFIG}/command-prompt.bat.in
   ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY
@@ -145,15 +152,9 @@ configure_file(
 # ##############################################################################
 set(PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging)
 # build version
-if(WITH_PYTHON3)
-  set(MANTIDPYTHON_PREAMBLE
-      "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
-  )
-else()
-  set(MANTIDPYTHON_PREAMBLE
-      "call %~dp0..\\..\\thirdpartypaths.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
-  )
-endif()
+set(MANTIDPYTHON_PREAMBLE
+    "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
+)
 
 if(MAKE_VATES)
   set(PARAVIEW_PYTHON_PATHS
@@ -162,8 +163,6 @@ if(MAKE_VATES)
 else()
   set(PARAVIEW_PYTHON_PATHS "")
 endif()
-
-set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
 
 configure_file(
   ${PACKAGING_DIR}/mantidpython.bat.in
@@ -178,41 +177,6 @@ file(
 # install version
 set(MANTIDPYTHON_PREAMBLE
     "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%"
-)
-# Launch script
-# Developer verison
-set(MANTIDLAUNCH_PREAMBLE
-    "$QT_PLUGIN_PATH=\"${THIRD_PARTY_DIR}\\lib\\qt5\\plugins\"
-$PYTHONHOME=\"${THIRD_PARTY_DIR}\\lib\\python3.8\"
-$ERROR_REPORTER_DIR=\"${PROJECT_SOURCE_DIR}\\scripts\\ErrorReporter\"
-$LAUNCH_SCRIPT=\"$scriptRootDirectory\\workbench-script.pyw\""
-)
-configure_file ( ${PACKAGING_DIR}/launch_workbench.ps1.in
-    ${PROJECT_BINARY_DIR}/launch_workbench.ps1.in @ONLY )
-# place it in the appropriate directory
-file(GENERATE
-     OUTPUT
-     ${MSVC_BIN_DIR}/launch_workbench.ps1
-     INPUT
-     ${PROJECT_BINARY_DIR}/launch_workbench.ps1.in
-  )
-# Install version
-set(MANTIDLAUNCH_PREAMBLE
-    "$QT_PLUGIN_PATH=\"$scriptRootDirectory\\..\\plugins\\qt5\"
-$PYTHONHOME=\"$scriptRootDirectory\"
-$ERROR_REPORTER_DIR=\"$scriptRootDirectory\\..\\scripts\\ErrorReporter\"
-$LAUNCH_SCRIPT=\"$scriptRootDirectory\\launch_workbench.pyw\""
-)
-configure_file(
-  ${PACKAGING_DIR}/launch_workbench.ps1.in
-  ${PROJECT_BINARY_DIR}/launch_workbench.install.ps1 @ONLY
-)
-
-#  Semi-colon gen exp prevents future generators converting to CMake lists
-set ( MSVC_IDE_ENV "PYTHONPATH=${MSVC_BIN_DIR}$<SEMICOLON>PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}" )
-# Semi-colon gen exp prevents future generators converting to CMake lists
-set(MSVC_IDE_ENV
-    "PYTHONPATH=${MSVC_BIN_DIR}$<SEMICOLON>PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}"
 )
 
 if(MAKE_VATES)
@@ -252,11 +216,13 @@ set_target_properties(
 # ##############################################################################
 set(BIN_DIR bin)
 set(LIB_DIR ${BIN_DIR})
+set(SITE_PACKAGES ${LIB_DIR})
 # This is the root of the plugins directory
 set(PLUGINS_DIR plugins)
 
 set(WORKBENCH_BIN_DIR ${BIN_DIR})
 set(WORKBENCH_LIB_DIR ${LIB_DIR})
+set(WORKBENCH_SITE_PACKAGES ${LIB_DIR})
 set(WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR})
 
 # Separate directory of plugins to be discovered by the ParaView framework These

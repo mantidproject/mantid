@@ -4,23 +4,18 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import qtpy
-if qtpy.PYQT5:  # noqa
-    from ErrorReporter import resources_qt5  # noqa
-elif qtpy.PYQT4:  # noqa
-    from ErrorReporter import resources_qt4  # noqa
-else:  # noqa
-    raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))  # noqa
 
 from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QMessageBox
-from ErrorReporter.details_dialog import MoreDetailsDialog
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 
-DEFAULT_PLAIN_TEXT = ("""Please enter any additional information about your problems. (Max 3200 characters)
+from .details import MoreDetailsDialog
+
+DEFAULT_PLAIN_TEXT = (
+    """Please enter any additional information about your problems. (Max 3200 characters)
 
 For example:
     Error messages on the screen
@@ -41,11 +36,13 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
-        if qtpy.PYQT4:
+        if hasattr(self.input_free_text, 'setPlaceholderText'):
+            self.input_free_text.setPlaceholderText(DEFAULT_PLAIN_TEXT)
+        else:
+            # assume Qt<5
             self.input_free_text.setPlainText(DEFAULT_PLAIN_TEXT)
             self.input_free_text.cursorPositionChanged.connect(self.check_placeholder_text)
-        elif qtpy.PYQT5:
-            self.input_free_text.setPlaceholderText(DEFAULT_PLAIN_TEXT)
+
         self.input_text = ""
         if not show_continue_terminate:
             self.continue_terminate_frame.hide()
@@ -53,7 +50,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
         self.quit_signal.connect(QtWidgets.QApplication.instance().quit)
 
-        self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
+        self.icon.setPixmap(QtGui.QPixmap(":/images/crying_mantid.png"))
 
         self.requestTextBrowser.anchorClicked.connect(self.interface_manager.showWebPage)
 
@@ -72,7 +69,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.nonIDShareButton.clicked.connect(self.nonIDShare)
         self.noShareButton.clicked.connect(self.noShare)
 
-        self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint
+                            | QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
         # Dialog window to show more details of the crash to the user.
@@ -82,15 +80,18 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.quit_signal.emit()
 
     def fullShare(self):
-        self.action.emit(self.continue_working, 0, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, 0, self.input_name, self.input_email,
+                         self.input_text)
         self.close()
 
     def nonIDShare(self):
-        self.action.emit(self.continue_working, 1, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, 1, self.input_name, self.input_email,
+                         self.input_text)
         self.close()
 
     def noShare(self):
-        self.action.emit(self.continue_working, 2, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, 2, self.input_name, self.input_email,
+                         self.input_text)
         self.close()
 
     def get_simple_line_edit_field(self, expected_type, line_edit):
@@ -99,7 +100,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         return expected_type(value_as_string) if value_as_string else ''
 
     def set_plain_text_edit_field(self):
-        self.input_text = self.get_plain_text_edit_field(text_edit="input_free_text", expected_type=str)
+        self.input_text = self.get_plain_text_edit_field(text_edit="input_free_text",
+                                                         expected_type=str)
 
     def get_plain_text_edit_field(self, text_edit, expected_type):
         gui_element = getattr(self, text_edit)

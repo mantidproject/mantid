@@ -10,7 +10,7 @@ from qtpy import QtCore, QtWidgets
 from .tabs.calibration.model import CalibrationModel
 from .tabs.calibration.view import CalibrationView
 from .tabs.calibration.presenter import CalibrationPresenter
-from .tabs.common import CalibrationObserver
+from .tabs.common import CalibrationObserver, SavedirObserver
 from .tabs.common.path_handling import get_run_number_from_path
 from .tabs.focus.model import FocusModel
 from .tabs.focus.view import FocusView
@@ -32,6 +32,9 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
     """
     The engineering diffraction interface
     """
+
+    status_savdirMaxwidth = 300
+
     def __init__(self, parent=None, window_flags=None):
         if window_flags is not None:
             super(EngineeringDiffractionGui, self).__init__(parent, window_flags)
@@ -48,14 +51,11 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.fitting_presenter = None
         self.settings_presenter = None
         self.calibration_observer = CalibrationObserver(self)
+        self.savedir_observer = SavedirObserver(self)
         self.set_on_help_clicked(self.open_help_window)
 
         self.set_on_settings_clicked(self.open_settings)
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
-
-        # Setup status bar
-        self.status_label = QtWidgets.QLabel()
-        self.setup_statusbar()
 
         # Setup Elements
         self.setup_settings()
@@ -63,8 +63,15 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.setup_focus()
         self.setup_fitting()
 
+        # Setup status bar
+        self.status_label = QtWidgets.QLabel()
+        self.savedir_label = QtWidgets.QLabel()
+        self.savedir_label.setMaximumWidth(self.status_savdirMaxwidth )
+        self.setup_statusbar()
+
         # Setup notifiers
         self.setup_calibration_notifier()
+        self.setup_savedir_notifier()
 
         # Usage Reporting
         try:
@@ -108,9 +115,14 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
             self.focus_presenter.calibration_observer)
         self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
 
+    def setup_savedir_notifier(self):
+        self.settings_presenter.savedir_notifier.add_subscriber(self.savedir_observer)
+
     def setup_statusbar(self):
         self.statusbar.addWidget(self.status_label)
         self.set_statusbar_text("No Calibration Loaded.")
+        self.statusbar.addWidget(self.savedir_label)
+        self.update_savedir(self.settings_presenter.settings["save_location"])
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)
@@ -142,3 +154,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def set_statusbar_text(self, text):
         self.status_label.setText(text)
+
+    def update_savedir(self, savedir):
+        savedir_text = "SaveDir: " + savedir
+        self.savedir_label.setToolTip(savedir_text)
+        self.savedir_label.setText(savedir_text)

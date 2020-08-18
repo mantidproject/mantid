@@ -122,7 +122,7 @@ Bugfixes
 - `plt.show()` now shows the most recently created figure.
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
-- Changing the settings on tiled colorbars now applys to all the plots if there is only one colorbar.
+- Changing the settings on tiled colorbars now applies to all the plots if there is only one colorbar.
 - Colorfill plots now correctly use the workspace name as the plot title.
 - Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
@@ -132,5 +132,9 @@ Bugfixes
 - Select image in the plot figure option contains each image rather than each spectra for colorfil plots of workspaces with a numeric vertical axis
 - A bug has been fixed that caused an error if a workspace containing only monitor spectra was attempted to be plotted as a colorfill plot
 - The figure options button on the sliceviewer has been removed as most options did not function correctly.
+- Fixed the bug that caused the fit browser on plots to reset size changes on mouse interactions with the figure.
+- Fix crash when subscribing algorithms from a separate thread
+- The workbench launch scripts have been replaced by an executable on macOS & Windows. On Windows this will stop virus scanners
+  flagging the old ``launch_workbench.exe`` as a threat and quarantining it.
 
 :ref:`Release 5.1.0 <v5.1.0>`

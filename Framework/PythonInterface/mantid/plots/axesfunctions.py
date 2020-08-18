@@ -33,7 +33,7 @@ _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 # ================================================
 
 
-def _pcolormesh_nonortho(axes, workspace, to_display, *args, **kwargs):
+def _pcolormesh_nonortho(axes, workspace, nonortho_tr, *args, **kwargs):
     '''
     Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh` and adds arguments related to
     plotting slices on nonorthogonal axes. It requires a non-standard Axes type. See
@@ -45,8 +45,8 @@ def _pcolormesh_nonortho(axes, workspace, to_display, *args, **kwargs):
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
                       to extract the data from
-    :param to_display: Callable accepting two numpy arrays to transfrom from nonorthogonal
-                       coordinates to orthogonal display
+    :param nonortho_tr: Callable accepting two numpy arrays to transfrom from nonorthogonal
+                        coordinates to rectilinear image coordinates
     :param transpose: ``bool`` to transpose the x and y axes of the plotted dimensions of an MDHistoWorkspace
     '''
     transpose = kwargs.pop('transpose', False)
@@ -57,7 +57,7 @@ def _pcolormesh_nonortho(axes, workspace, to_display, *args, **kwargs):
                                        normalization=normalization,
                                        transpose=transpose)
     X, Y = numpy.meshgrid(x, y)
-    xx, yy = to_display(X, Y)
+    xx, yy = nonortho_tr(X, Y)
     _setLabels2D(axes, workspace, indices, transpose)
     return axes.pcolormesh(xx, yy, z, *args, **kwargs)
 
@@ -72,7 +72,7 @@ def _setLabels1D(axes,
     '''
     labels = get_axes_labels(workspace, indices, normalize_by_bin_width)
     # We assume that previous checking has ensured axis can only be 1 of 2 types
-    axes.set_xlabel(labels[1 if axis == MantidAxType.SPECTRUM else 2])
+    axes.set_xlabel(labels[2 if axis == MantidAxType.BIN else 1])
     axes.set_ylabel(labels[0])
 
 

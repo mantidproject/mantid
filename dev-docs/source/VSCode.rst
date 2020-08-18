@@ -1,9 +1,5 @@
 .. _VSCode:
 
-.. |extensions| image:: /images/VSCode/extension-button.png
-.. |debug| image:: /images/VSCode/debug-button.png
-.. |debug-cog| image:: /images/VSCode/debug-cog-button.png
-
 ======
 VSCode
 ======
@@ -38,7 +34,7 @@ All Extensions have been tested working on Ubuntu 18.04 and Ubuntu 19.04,
 however most, if not all, extensions should be cross-platform.
 
 Install extensions either by running the commands given on the marketplace or by
-clicking on this Icon |extensions|.
+clicking `the Extension Marketplace icon. <https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-extensions>`_
 
 Required
 --------
@@ -149,8 +145,8 @@ To get to this file:
 - Hit Enter.
 
 If this fails
-- Click on the debug icon on the left hand side of VSCode |debug|
-- Click on the cod icon at the top of this newly opened side window |debug-cog|
+- Click on `the debug icon <https://code.visualstudio.com/docs/editor/debugging#_start-debugging>`_ on the left hand side of VSCode.
+- Click `the cog icon at the top <https://code.visualstudio.com/docs/editor/debugging#_launch-configurations>`_ of this newly opened side window
 - Select "(GDB) Launch" or "(msvc) Launch"
 
 **Linux/OSX**
@@ -244,7 +240,7 @@ The launch.json should end up looking a little like this:
         ]
     }
 
-To actually start the debug session, switch to the debug tab (clicking |debug|)
+To actually start the debug session, switch to `the debug tab <https://code.visualstudio.com/docs/editor/debugging#_start-debugging>`_
 and select "(GDB) Launch" from the drop down and click the play button.
 
 Debugging C++ called from Workbench

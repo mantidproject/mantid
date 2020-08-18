@@ -175,6 +175,9 @@ QGroupBox:title {
             <property name="enabled">
              <bool>true</bool>
             </property>
+		    <property name="checked">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>Plot Calibrated Workspace</string>
             </property>

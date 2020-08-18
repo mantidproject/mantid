@@ -21,6 +21,9 @@ else(USE_TCMALLOC)
   message(STATUS "TCMalloc will not be included in startup scripts")
 endif()
 
+# Tag used by dynamic loader to identify directory of loading library
+set(DL_ORIGIN_TAG \$ORIGIN)
+
 # ##############################################################################
 # Set up package scripts for this distro
 # ##############################################################################

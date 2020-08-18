@@ -68,11 +68,7 @@ Changes
    *
 
 - :doc:`Framework <framework>`
-- :doc:`General UI & Usability <ui>`
-
-  - :doc:`MantidPlot <mantidplot>`
-
-  - :doc:`MantidWorkbench <mantidworkbench>`
+- :doc:`Mantid Workbench <mantidworkbench>`
 - :doc:`Diffraction <diffraction>`
 - :doc:`Muon Analysis <muon>`
 - Low Q
@@ -121,10 +117,7 @@ Data Objects
 
 Python
 ------
-''',
-    'ui.rst':'''======================
-UI & Usability Changes
-======================
+
 
 .. contents:: Table of Contents
    :local:
@@ -136,10 +129,6 @@ UI & Usability Changes
 Installation
 ------------
 
-MantidPlot
-----------
-
-See :doc:`mantidplot`.
 
 MantidWorkbench
 ---------------
@@ -148,13 +137,6 @@ See :doc:`mantidworkbench`.
 
 SliceViewer and Vates Simple Interface
 --------------------------------------
-''',
-    'mantidplot.rst':'''==================
-MantidPlot Changes
-==================
-
-.. contents:: Table of Contents
-   :local:
 
 Improvements
 ############
@@ -162,9 +144,9 @@ Improvements
 Bugfixes
 ########
 ''',
-    'mantidworkbench.rst':'''=======================
-MantidWorkbench Changes
-=======================
+    'mantidworkbench.rst':'''==================
+Mantid Workbench Changes
+========================
 
 .. contents:: Table of Contents
    :local:
