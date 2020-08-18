@@ -25,8 +25,7 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL CircularBeamProfile final : public IBeamProfile {
 public:
   CircularBeamProfile(const Geometry::ReferenceFrame &frame,
-                      const Kernel::V3D &center,
-                      double radius); // about here :) good luck
+                      const Kernel::V3D &center, double radius);
 
   IBeamProfile::Ray
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const override;
