@@ -25,10 +25,10 @@ namespace Algorithms {
 CircularBeamProfile::CircularBeamProfile(const Geometry::ReferenceFrame &frame,
                                          const Kernel::V3D &center,
                                          double radius)
-    : IBeamProfile(), _upIdx(frame.pointingUp()),
+    : IBeamProfile(), m_upIdx(frame.pointingUp()),
       m_beamIdx(frame.pointingAlongBeam()),
-      m_horIdx(frame.pointingHorizontal()), radius(radius), m_height(height),
-      m_min(), m_beamDir() {
+      m_horIdx(frame.pointingHorizontal()), m_radius(radius), m_min(),
+      m_beamDir() {
   m_min[m_upIdx] = center[m_upIdx] - radius;
   m_min[m_horIdx] = center[m_horIdx] - radius;
   m_min[m_beamIdx] = center[m_beamIdx];

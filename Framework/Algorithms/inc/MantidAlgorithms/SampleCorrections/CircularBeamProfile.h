@@ -33,10 +33,10 @@ public:
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
                 const Geometry::BoundingBox &bounds) const override;
   Geometry::BoundingBox
-  defineActiveRegion(const Geometry::BoundingBox &) const override;
+  defineActiveRegion(const Geometry::BoundingBox &sampleBox) const override;
 
 private:
-  const double m_azimuthDeg;
+  // const double m_azimuthDeg;
 
   const unsigned short m_upIdx;
   const unsigned short m_beamIdx;
