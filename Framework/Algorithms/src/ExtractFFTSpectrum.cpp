@@ -11,11 +11,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Slice.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidHistogramData/Slice.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,9 +49,10 @@ void ExtractFFTSpectrum::init() {
                   "Automatically calculate and apply phase shift. Zero on the "
                   "X axis is assumed to be in the centre - if it is not, "
                   "setting this property will automatically correct for this.");
-  declareProperty("AcceptXRoundingErrors", false,
-                  "Continue to process the data even if X values are not evenly spaced",
-                  Direction::Input);
+  declareProperty(
+      "AcceptXRoundingErrors", false,
+      "Continue to process the data even if X values are not evenly spaced",
+      Direction::Input);
 }
 
 void ExtractFFTSpectrum::exec() {
@@ -65,9 +66,10 @@ void ExtractFFTSpectrum::exec() {
   MatrixWorkspace_sptr outputWS = create<MatrixWorkspace>(*inputWS);
 
   Progress prog(this, 0.0, 1.0, numHists);
-  std::vector<int> chopIndex(numHists, 0);  // we use this to chop tail zeros if necessary
+  std::vector<int> chopIndex(numHists,
+                             0); // we use this to chop tail zeros if necessary
 
-  Mantid::Kernel::Unit_sptr unit;  // must retrieve this from the child FFT
+  Mantid::Kernel::Unit_sptr unit; // must retrieve this from the child FFT
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -108,17 +110,28 @@ void ExtractFFTSpectrum::exec() {
 
   outputWS->getAxis(0)->unit() = unit;
 
-  // chop all tail zeros where it is safe to do so - we don't want to remove actual data
-  // maxChopIter is the maximum 'safe' x value to chop (will only remove 0's)
-  const auto maxChopIter = std::max_element(chopIndex.cbegin(), chopIndex.cend());
-  if (*maxChopIter != 0) { // if the input had imaginary component, we won't chop.
-    const int wsIndex = std::distance(chopIndex.cbegin(), maxChopIter); // the row where our max value is
+  // chop all tail zeros where it is safe to do so - we don't want to remove
+  // actual data maxChopIter is the maximum 'safe' x value to chop (will only
+  // remove 0's)
+  const auto maxChopIter =
+      std::max_element(chopIndex.cbegin(), chopIndex.cend());
+<<<<<<< HEAD
+  // if the input had imaginary component, we won't chop.
+  if (*maxChopIter != 0) { 
+=======
+  if (*maxChopIter !=
+      0) { // if the input had imaginary component, we won't chop.
+>>>>>>> ba0d1f19f53... Clang formatting
+    const int wsIndex = std::distance(
+        chopIndex.cbegin(), maxChopIter); // the row where our max value is
     // now we get the x value at our max value
     const double xMax = outputWS->x(wsIndex)[*maxChopIter - 1];
 
     IAlgorithm_sptr extractSpectra = createChildAlgorithm("ExtractSpectra");
-    extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
-    extractSpectra->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
+    extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
+                                                      outputWS);
+    extractSpectra->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
+                                                      outputWS);
     extractSpectra->setProperty("XMax", xMax);
     extractSpectra->execute();
   }
