@@ -47,9 +47,9 @@ IBeamProfile::Ray CircularBeamProfile::generatePoint(
   const double R = rng.nextValue() * m_radius;
   const double theta = rng.nextValue() * 360.0;
   pt.spherical(R, theta, m_beamIdx);
-  pt[0] += center[0];
-  pt[1] += center[1];
-  pt[2] += center[2];
+  pt[0] += m_min[m_upIdx];
+  pt[1] += m_min[m_horIdx];
+  pt[2] += m_min[m_beamIdx];
   return {pt, m_beamDir};
 }
 
@@ -68,15 +68,15 @@ CircularBeamProfile::generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
   auto rngRay = generatePoint(rng);
   auto &rngPt = rngRay.startPos;
   const V3D minBound(bounds.minPoint()), maxBound(bounds.maxPoint());
-  if (rngPt.X() > maxBound[m_upIdx])
-    rngPt.X() = maxBound[m_upIdx];
-  else if (rngPt.X() < minBound[m_upIdx])
-    rngPt.X() = minBound[m_upIdx];
+  if (rngPt[m_upIdx] > maxBound[m_upIdx])
+    rngPt[m_upIdx] = maxBound[m_upIdx];
+  else if (rngPt[m_upIdx] < minBound[m_upIdx])
+    rngPt[m_upIdx] = minBound[m_upIdx];
 
-  if (rngPt.Y() > maxBound[m_horIdx])
-    rngPt.Y() = maxBound[m_horIdx];
-  else if (rngPt.Y() < minBound[m_horIdx])
-    rngPt.Y() = minBound[m_horIdx];
+  if (rngPt[m_horIdx] > maxBound[m_horIdx])
+    rngPt[m_horIdx] = maxBound[m_horIdx];
+  else if (rngPt[m_horIdx] < minBound[m_horIdx])
+    rngPt[m_horIdx] = minBound[m_horIdx];
   return rngRay;
 }
 
@@ -94,9 +94,10 @@ Geometry::BoundingBox CircularBeamProfile::defineActiveRegion(
   const auto &sampleMax(sampleBox.maxPoint());
   V3D minPoint, maxPoint;
   minPoint[m_horIdx] = std::max(sampleMin[m_horIdx], m_min[m_horIdx]);
-  maxPoint[m_horIdx] = std::min(sampleMax[m_horIdx], m_min[m_horIdx] + m_width);
+  maxPoint[m_horIdx] =
+      std::min(sampleMax[m_horIdx], m_min[m_horIdx] + m_radius);
   minPoint[m_upIdx] = std::max(sampleMin[m_upIdx], m_min[m_upIdx]);
-  maxPoint[m_upIdx] = std::min(sampleMax[m_upIdx], m_min[m_upIdx] + m_height);
+  maxPoint[m_upIdx] = std::min(sampleMax[m_upIdx], m_min[m_upIdx] + m_radius);
   minPoint[m_beamIdx] = sampleMin[m_beamIdx];
   maxPoint[m_beamIdx] = sampleMax[m_beamIdx];
 
