@@ -217,7 +217,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.results_tab.results_tab_presenter.disable_tab_observer)
 
-        self.disable_notifier.add_subscriber(self.transform.enable_observer)
+        self.disable_notifier.add_subscriber(self.transform.disable_observer)
+
+        self.disable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
 
     def setup_enable_notifier(self):
 
@@ -232,6 +234,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.enable_notifier.add_subscriber(self.results_tab.results_tab_presenter.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.transform.enable_observer)
+
+        self.enable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -308,11 +312,17 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_tab.fitting_tab_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
+        self.phase_tab.phase_table_presenter.enable_editing_notifier.add_subscriber(
+            self.enable_observer)
+
     def setup_group_calculation_disabler_notifier(self):
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
         self.fitting_tab.fitting_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.disable_observer)
+
+        self.phase_tab.phase_table_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
     def setup_on_load_enabler(self):
