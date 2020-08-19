@@ -9,7 +9,6 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Multiple
 from mantid.kernel import Direction, FloatBoundedValidator
 from mantid.simpleapi import *
 from os import path
-import threading
 
 EMPTY_TOKEN = '000000'
 
@@ -74,61 +73,6 @@ def needs_loading(property_value, loading_reduction_type):
         else:
             loading = True
     return [loading, ws_name]
-
-
-class AutoProcessContext:
-    """
-    Static lock for the access to the shared dictionnary of events.
-    """
-    AUTO_PROCESS_LOCK = threading.Lock()
-
-    """
-    Static dictionnary used to store the current processing events. If a
-    concurent thread needs the result of a running processing, it will wait on
-    the corresponding event.
-    """
-    AUTO_PROCESS_EVENTS = dict()
-
-    def __init__(self, property_value, reduction_type, only_loading=False):
-        self.value = property_value
-        self.type = reduction_type
-        self.loading = only_loading
-        self.name = None
-
-    def __enter__(self):
-        """
-        Enter the context. This method checks if the processing is needed and
-        blocks if the processing is currently ran by an other thread.
-        """
-        self.__class__.AUTO_PROCESS_LOCK.acquire()
-        if self.loading:
-            [needed, self.name] = needs_loading(self.value, self.type)
-        else:
-            [needed, self.name] = needs_processing(self.value, self.type)
-        if needed:
-            if self.name in self.__class__.AUTO_PROCESS_EVENTS:
-                event = self.__class__.AUTO_PROCESS_EVENTS[self.name]
-                self.__class__.AUTO_PROCESS_LOCK.release()
-                event.wait()
-                return [False, self.name]
-            else:
-                self.__class__.AUTO_PROCESS_EVENTS[self.name] = \
-                        threading.Event()
-                self.__class__.AUTO_PROCESS_LOCK.release()
-                return [True, self.name]
-        else:
-            self.__class__.AUTO_PROCESS_LOCK.release()
-            return [False, self.name]
-
-    def __exit__(self, type, value, traceback):
-        """
-        Exit the context. This method set the processing event to True to let
-        the pending threads know. It also remove the event from the dictionnary.
-        """
-        with self.__class__.AUTO_PROCESS_LOCK:
-            if self.name in self.__class__.AUTO_PROCESS_EVENTS:
-                self.__class__.AUTO_PROCESS_EVENTS[self.name].set()
-                del self.__class__.AUTO_PROCESS_EVENTS[self.name]
 
 
 class SANSILLAutoProcess(DataProcessorAlgorithm):
@@ -391,85 +335,85 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             self.setProperty('PanelOutputWorkspaces', mtd[panel_outputs])
 
     def processTransmissions(self):
-        with AutoProcessContext(self.atransmission, 'Absorber') as \
-                [process_transmission_absorber, transmission_absorber_name]:
-            if process_transmission_absorber:
-                self.progress.report('Processing transmission absorber')
-                SANSILLReduction(Run=self.atransmission,
-                                 ProcessAs='Absorber',
-                                 NormaliseBy=self.normalise,
-                                 OutputWorkspace=transmission_absorber_name)
+        [process_transmission_absorber, transmission_absorber_name] = \
+                needs_processing(self.atransmission, 'Absorber')
+        if process_transmission_absorber:
+            self.progress.report('Processing transmission absorber')
+            SANSILLReduction(Run=self.atransmission,
+                             ProcessAs='Absorber',
+                             NormaliseBy=self.normalise,
+                             OutputWorkspace=transmission_absorber_name)
 
-        with AutoProcessContext(self.btransmission, 'Beam') as \
-                [process_transmission_beam, transmission_beam_name]:
-            flux_name = transmission_beam_name + '_Flux'
-            if process_transmission_beam:
-                self.progress.report('Processing transmission beam')
-                SANSILLReduction(Run=self.btransmission,
-                                 ProcessAs='Beam',
-                                 NormaliseBy=self.normalise,
-                                 OutputWorkspace=transmission_beam_name,
-                                 BeamRadius=self.radius,
-                                 FluxOutputWorkspace=flux_name,
-                                 AbsorberInputWorkspace=
-                                 transmission_absorber_name)
+        [process_transmission_beam, transmission_beam_name] = \
+            needs_processing(self.btransmission, 'Beam')
+        flux_name = transmission_beam_name + '_Flux'
+        if process_transmission_beam:
+            self.progress.report('Processing transmission beam')
+            SANSILLReduction(Run=self.btransmission,
+                             ProcessAs='Beam',
+                             NormaliseBy=self.normalise,
+                             OutputWorkspace=transmission_beam_name,
+                             BeamRadius=self.radius,
+                             FluxOutputWorkspace=flux_name,
+                             AbsorberInputWorkspace=
+                             transmission_absorber_name)
 
-        with AutoProcessContext(self.ctransmission, 'Transmission') as \
-                [process_container_transmission, container_transmission_name]:
-            if process_container_transmission:
-                self.progress.report('Processing container transmission')
-                SANSILLReduction(Run=self.ctransmission,
-                                 ProcessAs='Transmission',
-                                 OutputWorkspace=container_transmission_name,
-                                 AbsorberInputWorkspace=
-                                 transmission_absorber_name,
-                                 BeamInputWorkspace=transmission_beam_name,
-                                 NormaliseBy=self.normalise,
-                                 BeamRadius=self.radius)
+        [process_container_transmission, container_transmission_name] = \
+            needs_processing(self.ctransmission, 'Transmission')
+        if process_container_transmission:
+            self.progress.report('Processing container transmission')
+            SANSILLReduction(Run=self.ctransmission,
+                             ProcessAs='Transmission',
+                             OutputWorkspace=container_transmission_name,
+                             AbsorberInputWorkspace=
+                             transmission_absorber_name,
+                             BeamInputWorkspace=transmission_beam_name,
+                             NormaliseBy=self.normalise,
+                             BeamRadius=self.radius)
 
-        with AutoProcessContext(self.stransmission, 'Transmission') as \
-                [process_sample_transmission, sample_transmission_name]:
-            if process_sample_transmission:
-                self.progress.report('Processing sample transmission')
-                SANSILLReduction(Run=self.stransmission,
-                                 ProcessAs='Transmission',
-                                 OutputWorkspace=sample_transmission_name,
-                                 AbsorberInputWorkspace=
-                                 transmission_absorber_name,
-                                 BeamInputWorkspace=transmission_beam_name,
-                                 NormaliseBy=self.normalise,
-                                 BeamRadius=self.radius)
+        [process_sample_transmission, sample_transmission_name] = \
+            needs_processing(self.stransmission, 'Transmission')
+        if process_sample_transmission:
+            self.progress.report('Processing sample transmission')
+            SANSILLReduction(Run=self.stransmission,
+                             ProcessAs='Transmission',
+                             OutputWorkspace=sample_transmission_name,
+                             AbsorberInputWorkspace=
+                             transmission_absorber_name,
+                             BeamInputWorkspace=transmission_beam_name,
+                             NormaliseBy=self.normalise,
+                             BeamRadius=self.radius)
         return container_transmission_name, sample_transmission_name
 
     def processAbsorber(self, i):
         absorber = (self.absorber[i]
                     if len(self.absorber) == self.dimensionality
                     else self.absorber[0])
-        with AutoProcessContext(absorber, 'Absorber') as \
-                [process_absorber, absorber_name]:
-            if process_absorber:
-                self.progress.report('Processing absorber')
-                SANSILLReduction(Run=absorber,
-                                 ProcessAs='Absorber',
-                                 NormaliseBy=self.normalise,
-                                 OutputWorkspace=absorber_name)
+        [process_absorber, absorber_name] = \
+            needs_processing(absorber, 'Absorber')
+        if process_absorber:
+            self.progress.report('Processing absorber')
+            SANSILLReduction(Run=absorber,
+                             ProcessAs='Absorber',
+                             NormaliseBy=self.normalise,
+                             OutputWorkspace=absorber_name)
         return absorber_name
 
     def processBeam(self, i, absorber_name):
         beam = (self.beam[i]
                 if len(self.beam) == self.dimensionality
                 else self.beam[0])
-        with AutoProcessContext(beam, 'Beam') as [process_beam, beam_name]:
-            flux_name = beam_name + '_Flux' if not self.flux[0] else ''
-            if process_beam:
-                self.progress.report('Processing beam')
-                SANSILLReduction(Run=beam,
-                                 ProcessAs='Beam',
-                                 OutputWorkspace=beam_name,
-                                 NormaliseBy=self.normalise,
-                                 BeamRadius=self.radius,
-                                 AbsorberInputWorkspace=absorber_name,
-                                 FluxOutputWorkspace=flux_name)
+        [process_beam, beam_name] = needs_processing(beam, 'Beam')
+        flux_name = beam_name + '_Flux' if not self.flux[0] else ''
+        if process_beam:
+            self.progress.report('Processing beam')
+            SANSILLReduction(Run=beam,
+                             ProcessAs='Beam',
+                             OutputWorkspace=beam_name,
+                             NormaliseBy=self.normalise,
+                             BeamRadius=self.radius,
+                             AbsorberInputWorkspace=absorber_name,
+                             FluxOutputWorkspace=flux_name)
         return beam_name, flux_name
 
     def processFlux(self, i, aborber_name):
@@ -477,17 +421,17 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             flux = (self.flux[i]
                     if len(self.flux) == self.dimensionality
                     else self.flux[0])
-            with AutoProcessContext(flux, 'Flux') as [process_flux, flux_name]:
-                if process_flux:
-                    self.progress.report('Processing flux')
-                    SANSILLReduction(Run=flux,
-                                     ProcessAs='Beam',
-                                     OutputWorkspace=flux_name.replace('Flux',
-                                                                       'Beam'),
-                                     NormaliseBy=self.normalise,
-                                     BeamRadius=self.radius,
-                                     AbsorberInputWorkspace=absorber_name,
-                                     FluxOutputWorkspace=flux_name)
+            [process_flux, flux_name] = needs_processing(flux, 'Flux')
+            if process_flux:
+                self.progress.report('Processing flux')
+                SANSILLReduction(Run=flux,
+                                 ProcessAs='Beam',
+                                 OutputWorkspace=flux_name.replace('Flux',
+                                                                   'Beam'),
+                                 NormaliseBy=self.normalise,
+                                 BeamRadius=self.radius,
+                                 AbsorberInputWorkspace=absorber_name,
+                                 FluxOutputWorkspace=flux_name)
             return flux_name
         else:
             return None
@@ -497,40 +441,40 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         container = (self.container[i]
                      if len(self.container) == self.dimensionality
                      else self.container[0])
-        with AutoProcessContext(container, 'Container') as \
-                [process_container, container_name]:
-            if process_container:
-                self.progress.report('Processing container')
-                SANSILLReduction(Run=container,
-                                 ProcessAs='Container',
-                                 OutputWorkspace=container_name,
-                                 AbsorberInputWorkspace=absorber_name,
-                                 BeamInputWorkspace=beam_name,
-                                 CacheSolidAngle=True,
-                                 TransmissionInputWorkspace=
-                                 container_transmission_name,
-                                 ThetaDependent=self.theta_dependent,
-                                 NormaliseBy=self.normalise)
+        [process_container, container_name] = \
+            needs_processing(container, 'Container')
+        if process_container:
+            self.progress.report('Processing container')
+            SANSILLReduction(Run=container,
+                             ProcessAs='Container',
+                             OutputWorkspace=container_name,
+                             AbsorberInputWorkspace=absorber_name,
+                             BeamInputWorkspace=beam_name,
+                             CacheSolidAngle=True,
+                             TransmissionInputWorkspace=
+                             container_transmission_name,
+                             ThetaDependent=self.theta_dependent,
+                             NormaliseBy=self.normalise)
         return container_name
 
     def processSample(self, i, flux_name, sample_transmission_name, beam_name,
                       absorber_name, container_name):
         # this is the default mask, the same for all the distance configurations
-        with AutoProcessContext(self.default_mask, 'DefaultMask', True) as \
-                [load_default_mask, default_mask_name]:
-            if load_default_mask:
-                self.progress.report('Loading default mask')
-                LoadNexusProcessed(Filename=self.default_mask,
-                                   OutputWorkspace=default_mask_name)
+        [load_default_mask, default_mask_name] = \
+                needs_loading(self.default_mask, 'DefaultMask')
+        if load_default_mask:
+            self.progress.report('Loading default mask')
+            LoadNexusProcessed(Filename=self.default_mask,
+                               OutputWorkspace=default_mask_name)
 
         # this is the beam stop mask, potentially different at each distance configuration
         mask = (self.mask[i]
                 if len(self.mask) == self.dimensionality
                 else self.mask[0])
-        with AutoProcessContext(mask, 'Mask', True) as [load_mask, mask_name]:
-            if load_mask:
-                self.progress.report('Loading mask')
-                LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
+        [load_mask, mask_name] = needs_loading(mask, 'Mask')
+        if load_mask:
+            self.progress.report('Loading mask')
+            LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
 
         # sensitivity
         sens_input = ''
@@ -539,79 +483,79 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             sens = (self.sensitivity[i]
                     if len(self.sensitivity) == self.dimensionality
                     else self.sensitivity[0])
-            with AutoProcessContext(sens, 'Sensitivity', True) as \
-                    [load_sensitivity, sensitivity_name]:
-                sens_input = sensitivity_name
-                if load_sensitivity:
-                    self.progress.report('Loading sensitivity')
-                    LoadNexusProcessed(Filename=sens,
-                                       OutputWorkspace=sensitivity_name)
+            [load_sensitivity, sensitivity_name] = \
+                needs_loading(sens, 'Sensitivity')
+            sens_input = sensitivity_name
+            if load_sensitivity:
+                self.progress.report('Loading sensitivity')
+                LoadNexusProcessed(Filename=sens,
+                                   OutputWorkspace=sensitivity_name)
 
         # reference
         if self.reference:
             reference = (self.reference[i]
                          if len(self.reference) == self.dimensionality
                          else self.reference[0])
-            with AutoProcessContext(reference, 'Reference', True) as \
-                    [load_reference, reference_name]:
-                ref_input = reference_name
-                if load_reference:
-                    self.progress.report('Loading reference')
-                    LoadNexusProcessed(Filename=reference,
-                                       OutputWorkspace=reference_name)
+            [load_reference, reference_name] = \
+                needs_loading(reference, 'Reference')
+            ref_input = reference_name
+            if load_reference:
+                self.progress.report('Loading reference')
+                LoadNexusProcessed(Filename=reference,
+                                   OutputWorkspace=reference_name)
 
         # sample
-        with AutoProcessContext(self.sample[i], 'Sample') as [_, sample_name]:
-            output = self.output + '_' + str(i + 1)
-            self.progress.report('Processing sample at detector configuration '
-                                 + str(i + 1))
-            SANSILLReduction(
-                    Run=self.sample[i],
-                    ProcessAs='Sample',
-                    OutputWorkspace=sample_name,
-                    ReferenceInputWorkspace=ref_input,
-                    AbsorberInputWorkspace=absorber_name,
-                    BeamInputWorkspace=beam_name,
-                    CacheSolidAngle=True,
-                    ContainerInputWorkspace=container_name,
-                    TransmissionInputWorkspace=sample_transmission_name,
-                    MaskedInputWorkspace=mask_name,
-                    DefaultMaskedInputWorkspace=default_mask_name,
-                    SensitivityInputWorkspace=sens_input,
-                    SensitivityOutputWorkspace=self.output_sens,
-                    FluxInputWorkspace=flux_name,
-                    NormaliseBy=self.normalise,
-                    ThetaDependent=self.theta_dependent,
-                    SampleThickness=
-                    self.getProperty('SampleThickness').value,
-                    WaterCrossSection=
-                    self.getProperty('WaterCrossSection').value
-                    )
+        [_, sample_name] = needs_processing(self.sample[i], 'Sample')
+        output = self.output + '_' + str(i + 1)
+        self.progress.report('Processing sample at detector configuration '
+                             + str(i + 1))
+        SANSILLReduction(
+                Run=self.sample[i],
+                ProcessAs='Sample',
+                OutputWorkspace=sample_name,
+                ReferenceInputWorkspace=ref_input,
+                AbsorberInputWorkspace=absorber_name,
+                BeamInputWorkspace=beam_name,
+                CacheSolidAngle=True,
+                ContainerInputWorkspace=container_name,
+                TransmissionInputWorkspace=sample_transmission_name,
+                MaskedInputWorkspace=mask_name,
+                DefaultMaskedInputWorkspace=default_mask_name,
+                SensitivityInputWorkspace=sens_input,
+                SensitivityOutputWorkspace=self.output_sens,
+                FluxInputWorkspace=flux_name,
+                NormaliseBy=self.normalise,
+                ThetaDependent=self.theta_dependent,
+                SampleThickness=
+                self.getProperty('SampleThickness').value,
+                WaterCrossSection=
+                self.getProperty('WaterCrossSection').value
+                )
 
-            panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
-            panel_ws_group = (panel_outputs + '_' + str(i + 1)
-                              if panel_outputs
-                              else '')
+        panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
+        panel_ws_group = (panel_outputs + '_' + str(i + 1)
+                          if panel_outputs
+                          else '')
 
-            SANSILLIntegration(
-                    InputWorkspace=sample_name,
-                    OutputWorkspace=output,
-                    OutputType=self.getPropertyValue('OutputType'),
-                    CalculateResolution=
-                    self.getPropertyValue('CalculateResolution'),
-                    DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
-                    BinningFactor=self.getProperty('BinningFactor').value,
-                    OutputBinning=self.getPropertyValue('OutputBinning'),
-                    NPixelDivision=self.getProperty('NPixelDivision').value,
-                    NumberOfWedges=self.getProperty('NumberOfWedges').value,
-                    WedgeAngle=self.getProperty('WedgeAngle').value,
-                    WedgeOffset=self.getProperty('WedgeOffset').value,
-                    AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
-                    PanelOutputWorkspaces=panel_ws_group
-                    )
+        SANSILLIntegration(
+                InputWorkspace=sample_name,
+                OutputWorkspace=output,
+                OutputType=self.getPropertyValue('OutputType'),
+                CalculateResolution=
+                self.getPropertyValue('CalculateResolution'),
+                DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
+                BinningFactor=self.getProperty('BinningFactor').value,
+                OutputBinning=self.getPropertyValue('OutputBinning'),
+                NPixelDivision=self.getProperty('NPixelDivision').value,
+                NumberOfWedges=self.getProperty('NumberOfWedges').value,
+                WedgeAngle=self.getProperty('WedgeAngle').value,
+                WedgeOffset=self.getProperty('WedgeOffset').value,
+                AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
+                PanelOutputWorkspaces=panel_ws_group
+                )
 
-            if self.cleanup:
-                DeleteWorkspace(sample_name)
+        if self.cleanup:
+            DeleteWorkspace(sample_name)
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)
