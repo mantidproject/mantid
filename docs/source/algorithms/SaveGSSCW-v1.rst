@@ -29,7 +29,7 @@ Usage
 
     import os
     # Create a workspace to save
-    ws = CreateSampleWorkspace(OutputWorkspace="SaveGSSWorkspace")
+    ws = CreateSampleWorkspace(OutputWorkspace="SaveGSSWorkspace", XUnit='Degrees')
     ws = ExtractSingleSpectrum(ws, WorkspaceIndex=0)
 
     # Save to the users home directory
@@ -43,11 +43,11 @@ Usage
 
 Output:
 
-.. testoutput:: ExSaveGSSSimple
+.. testoutput:: ExSaveGSSCWHB2A
 
     True
 
-.. testcleanup:: ExSaveGSSSimple
+.. testcleanup:: ExSaveGSSCWHB2A
 
     import os
 
