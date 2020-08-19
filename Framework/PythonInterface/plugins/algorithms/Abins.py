@@ -28,6 +28,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
     _scale = None
     _sample_form = None
     _instrument_name = None
+    _setting = None
     _atoms = None
     _sum_contributions = None
     _save_ascii = None
@@ -63,10 +64,15 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                              validator=StringListValidator(ONE_DIMENSIONAL_INSTRUMENTS),
                              doc="Name of an instrument for which analysis should be performed.")
 
+        self.declareProperty(name="Setting",
+                             direction=Direction.Input,
+                             defaultValue="",
+                             doc="Setting choice for this instrument (e.g. monochromator)")
+
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
+                             doc="Name to give the output workspace.")
+
     def validateInputs(self) -> Dict[str,str]:
-        """
-        Performs input validation. Use to ensure the user has defined a consistent set of parameters.
-        """
         issues = dict()
         issues = self.validate_common_inputs(issues)
 
