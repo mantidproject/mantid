@@ -241,7 +241,7 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
 }
 
 void JumpFitDataPresenter::setDataIndexToCurrentWorkspace(
-    IAddWorkspaceDialog const* dialog) {
+    IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
   //  indirectFittingModel get table workspace index
