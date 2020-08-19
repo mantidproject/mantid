@@ -472,6 +472,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                            NumberOfWedges=self.getProperty('NumberOfWedges').value,
                            WedgeAngle=self.getProperty('WedgeAngle').value,
                            WedgeOffset=self.getProperty('WedgeOffset').value,
+                           WedgeWorkspace=self.getPropertyValue('WedgeWorkspace'),
                            AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
                            PanelOutputWorkspaces=panel_ws_group)
         if self.cleanup:
