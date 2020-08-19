@@ -48,7 +48,7 @@ public:
     TS_ASSERT_EQUALS(props[9]->name(), "SmallNumberThreshold");
     TS_ASSERT_EQUALS(props[10]->name(), "SmallNumberValue");
     TS_ASSERT_EQUALS(props[11]->name(), "SmallNumberError");
-    TS_ASSERT_EQUALS(props[12]->name(), "CheckErrors");
+    TS_ASSERT_EQUALS(props[12]->name(), "CheckErrorAxis");
 
     for (const auto prop : props) {
       assert_property_is_default(prop);
@@ -68,7 +68,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("NaNError", "-50.0"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InfinityValue", "999.0"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InfinityError", "0.00005"));
-    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrors", true));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -96,7 +96,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "WSCor"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("NaNValue", "-99.0"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("NaNError", "-50.0"));
-    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrors", true));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -124,7 +124,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "WSCor"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InfinityValue", "999.0"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InfinityError", "0.00005"));
-    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrors", true));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -158,7 +158,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("BigNumberValue", "999"));
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("BigNumberError", "0.00005"));
-    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrors", true));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -205,7 +205,7 @@ public:
         alg3.setPropertyValue("SmallNumberValue", "0.123"));
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("SmallNumberError", "0.456"));
-    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrors", true));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -343,7 +343,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberThreshold", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberValue", "-11"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberError", "-12"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CheckErrors", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CheckErrorAxis", true));
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());

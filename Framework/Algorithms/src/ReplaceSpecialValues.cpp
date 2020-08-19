@@ -60,7 +60,7 @@ void ReplaceSpecialValues::defineProperties() {
       "The value with which to replace occurrences of 'small' numbers.");
   declareProperty("SmallNumberError", 0.0,
                   "The error value used when replacing a 'small' number");
-  declareProperty("CheckErrors", false,
+  declareProperty("CheckErrorAxis", false,
                   "Whether or not to also check the error axis values.");
 }
 
@@ -75,7 +75,7 @@ void ReplaceSpecialValues::retrieveProperties() {
   m_smallThreshold = getProperty("SmallNumberThreshold");
   m_smallValue = getProperty("SmallNumberValue");
   m_smallError = getProperty("SmallNumberError");
-  m_checkErrors = getProperty("CheckErrors");
+  m_checkErrors = getProperty("CheckErrorAxis");
 
   m_performNaNCheck = !checkifPropertyEmpty(m_NaNValue);
   m_performInfiniteCheck = !checkifPropertyEmpty(m_InfiniteValue);
