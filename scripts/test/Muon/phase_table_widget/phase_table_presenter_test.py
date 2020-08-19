@@ -218,23 +218,40 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
     def test_that_disable_observer_calls_on_view_when_triggered(self):
         self.view.setEnabled(True)
-        self.assertTrue(self.view.isEnabled())
+        self.view.enable_widget()
+
+        for widget in self.view.children():
+            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+                continue
+            self.assertTrue(widget.isEnabled())
 
         disable_notifier = GenericObservable()
         disable_notifier.add_subscriber(self.presenter.disable_tab_observer)
 
         disable_notifier.notify_subscribers()
-        self.assertFalse(self.view.isEnabled())
+        for widget in self.view.children():
+            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+                continue
+            self.assertFalse(widget.isEnabled())
+
 
     def test_that_enable_observer_calls_on_view_when_triggered(self):
-        self.view.setEnabled(False)
-        self.assertFalse(self.view.isEnabled())
+        self.view.setEnabled(True)
+        self.view.disable_widget()
+
+        for widget in self.view.children():
+            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+                continue
+            self.assertFalse(widget.isEnabled())
 
         enable_notifier = GenericObservable()
         enable_notifier.add_subscriber(self.presenter.enable_tab_observer)
 
         enable_notifier.notify_subscribers()
-        self.assertTrue(self.view.isEnabled())
+        for widget in self.view.children():
+            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+                continue
+            self.assertTrue(widget.isEnabled())
 
 
 if __name__ == '__main__':
