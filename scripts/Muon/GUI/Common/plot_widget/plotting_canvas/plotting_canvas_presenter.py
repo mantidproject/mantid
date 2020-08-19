@@ -95,7 +95,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def create_tiled_plot(self, keys, tiled_by):
         """Creates a blank tiled plot specified by the keys and tiled by type"""
         self._model.update_tiled_axis_map(keys, tiled_by)
-        self._view.create_new_plot_canvas(len(keys))
+        num_axes = len(keys) if len(keys) > 0 else 1
+        self._view.create_new_plot_canvas(num_axes)
 
     def create_single_plot(self):
         """Creates a blank single plot """

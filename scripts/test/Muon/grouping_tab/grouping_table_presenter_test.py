@@ -369,34 +369,12 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be greater than minimum')
         self.assertEqual(self.view.warning_popup.call_count, 2)
 
-    def test_group_cannot_be_unselected_if_is_last_group_or_pair_selected(self):
-        self.add_three_groups_to_table()
-        self.model.add_group_to_analysis("my_group_0")
-        self.presenter.selected_group_changed_notifier.notify_subscribers = mock.MagicMock()
-
-        self.assertEqual(self.model.selected_groups, ["my_group_0"])
-        self.presenter.to_analyse_data_checkbox_changed(0, 0,"my_group_0")
-
-        self.assertEqual(self.model.selected_groups, ["my_group_0"])
-        self.presenter.selected_group_changed_notifier.notify_subscribers.assert_not_called()
-
-    def test_last_group_to_analyse_can_be_removed_if_a_pair_is_selected(self):
-        self.add_three_groups_to_table()
-        self.model.add_group_to_analysis("my_group_0")
-        self.context._group_pair_context._selected_pairs.append('pair1')
-        self.presenter.selected_group_changed_notifier.notify_subscribers = mock.MagicMock()
-
-        self.assertEqual(self.model.selected_groups, ["my_group_0"])
-        self.presenter.to_analyse_data_checkbox_changed(0, 0,"my_group_0")
-
-        self.assertEqual(self.model.selected_groups, [])
-        self.presenter.selected_group_changed_notifier.notify_subscribers.assert_called_once_with({'is_added': False, 'name': 'my_group_0'})
-
     def test_when_adding_group_to_empty_table_it_is_selected(self):
         self.presenter.add_group(MuonGroup('group_1', [1,2,3,4]))
         self.presenter.add_group(MuonGroup('group_2', [1,2,3,4]))
 
         self.assertEquals(self.model.selected_groups, ['group_1'])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

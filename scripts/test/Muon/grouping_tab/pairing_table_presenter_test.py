@@ -258,29 +258,6 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.assertEqual(str(self.view.get_table_item_text(2, 0)), "pair_3")
         self.assertCountEqual(self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
 
-    def test_that_pair_cannot_be_unselected_if_is_last_pair_or_group_selected(self):
-        self.add_two_pairs_to_table()
-        self.model.add_pair_to_analysis("my_pair_0")
-        self.presenter.selected_pair_changed_notifier.notify_subscribers = mock.MagicMock()
-
-        self.assertEqual(self.model.selected_pairs, ["my_pair_0"])
-        self.presenter.to_analyse_data_checkbox_changed(0, 0,"my_pair_0")
-
-        self.assertEqual(self.model.selected_pairs, ["my_pair_0"])
-        self.presenter.selected_pair_changed_notifier.notify_subscribers.assert_not_called()
-
-    def test_that_pair_can_be_unselected_if_at_least_one_group_is_selected(self):
-        self.add_two_pairs_to_table()
-        self.model.add_pair_to_analysis("my_pair_0")
-        self.model.add_group_to_analysis("my_group_0")
-        self.presenter.selected_pair_changed_notifier.notify_subscribers = mock.MagicMock()
-
-        self.assertEqual(self.model.selected_pairs, ["my_pair_0"])
-        self.presenter.to_analyse_data_checkbox_changed(0, 0,"my_pair_0")
-
-        self.assertEqual(self.model.selected_pairs, [])
-        self.presenter.selected_pair_changed_notifier.notify_subscribers.assert_called_once_with({'is_added': False, 'name': 'my_pair_0'})
-
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
