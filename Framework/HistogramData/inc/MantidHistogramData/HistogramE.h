@@ -52,6 +52,11 @@ public:
   HistogramE(HistogramE &&) = default;
   HistogramE &operator=(const HistogramE &) & = default;
   HistogramE &operator=(HistogramE &&) & = default;
+  // Multiple inheritance causes ambiguous overload, bring operators into scope.
+  using detail::Multipliable<HistogramE>::operator*=;
+  using detail::Multipliable<HistogramE>::operator/=;
+  using detail::Scalable<HistogramE>::operator*=;
+  using detail::Scalable<HistogramE>::operator/=;
   // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<CountStandardDeviations, HistogramE>;

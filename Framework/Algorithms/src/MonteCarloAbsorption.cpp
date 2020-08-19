@@ -431,7 +431,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (useSparseInstrument) {
-    interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt, nlambda);
+    interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
   }
 
   return outputWS;
@@ -479,7 +479,7 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
 
 void MonteCarloAbsorption::interpolateFromSparse(
     MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
-    const Mantid::Algorithms::InterpolationOption &interpOpt, int nLambda) {
+    const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
@@ -491,17 +491,10 @@ void MonteCarloAbsorption::interpolateFromSparse(
         sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
-      const auto lambdas = targetWS.points(i).rawData();
-      const auto nbins = lambdas.size();
-      const size_t lambdaStepSize = nbins / nLambda;
-      if (lambdaStepSize > 1) {
-        interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
-        targetWS.setHistogram(i, targetHisto);
-      } else {
-        targetWS.setHistogram(i, spatiallyInterpHisto);
-      }
+      interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
+      targetWS.setHistogram(i, targetHisto);
     } else {
-      targetWS.setHistogram(i, spatiallyInterpHisto);
+      targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
     }
     PARALLEL_END_INTERUPT_REGION
   }

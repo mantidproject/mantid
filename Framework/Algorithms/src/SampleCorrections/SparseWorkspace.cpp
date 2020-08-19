@@ -17,6 +17,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/HistogramIterator.h"
+#include "MantidKernel/Logger.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -39,6 +40,9 @@ bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info,
 }
 
 constexpr double R = 1.0; // This will be the default L2 distance.
+
+/// static logger
+Mantid::Kernel::Logger g_log("SparseWorkspace");
 } // namespace
 
 namespace Mantid {
@@ -52,6 +56,10 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
   std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
   m_gridDef = std::make_unique<Algorithms::DetectorGridDefinition>(
       minLat, maxLat, rows, minLong, maxLong, columns);
+  if ((rows < 3) || (columns < 3)) {
+    g_log.warning("Can't calculate errors on a sparse workspace with lat or "
+                  "long dimension < 3");
+  }
   const size_t numSpectra = rows * columns;
   const auto h = modelHistogram(modelWS, wavelengthPoints);
   initialize(numSpectra, h);
@@ -371,8 +379,9 @@ SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
 
 /** Spatially interpolate a single histogram from nearby detectors using
  *  bilinear interpolation method. Also calculate the resulting errors from:
- *  a) propagation of errors in the points, b) interpolation error ie
- *  how well does the bilinear interpolation approximate the actual function
+ *  a) propagation of errors in the points
+ *  b) interpolation error ie how well does the bilinear interpolation
+ *  approximate the actual function
  *  @param lat Latitude of the interpolated detector.
  *  @param lon Longitude of the interpolated detector.
  *  @return An interpolated histogram.
@@ -421,35 +430,39 @@ SparseWorkspace::bilinearInterpolateFromDetectorGrid(const double lat,
       esqrt(esq((latHigh - lat) * errLat1) + esq((lat - latLow) * errLat2)) /
       (latHigh - latLow);
 
-  // calculate interpolation errors
-  // step back a further row\col (if possible) to estimate the second derivative
-  auto nearestLatIndexSec = nearestLatIndex > 0 ? nearestLatIndex - 1 : 0;
-  auto nearestLonIndexSec = nearestLonIndex > 0 ? nearestLonIndex - 1 : 0;
-  std::array<size_t, 3> threeIndices;
+  // calculate interpolation errors if possible
+  HistogramData::HistogramE interpolationError(e(0).size(), 0);
+  if ((m_gridDef->numberColumns() > 2) && (m_gridDef->numberRows() > 2)) {
+    // step back a further row\col (if possible) to estimate the second
+    // derivative
+    auto nearestLatIndexSec = nearestLatIndex > 0 ? nearestLatIndex - 1 : 0;
+    auto nearestLonIndexSec = nearestLonIndex > 0 ? nearestLonIndex - 1 : 0;
+    std::array<size_t, 3> threeIndices;
 
-  // 2nd derivative in longitude
-  for (int i = 0; i < 3; i++) {
-    threeIndices[i] =
-        m_gridDef->getDetectorIndex(nearestLatIndex, nearestLonIndexSec + i);
+    // 2nd derivative in longitude
+    for (int i = 0; i < 3; i++) {
+      threeIndices[i] =
+          m_gridDef->getDetectorIndex(nearestLatIndex, nearestLonIndexSec + i);
+    }
+    auto avgSecondDerivLong =
+        secondDerivative(threeIndices, longHigh - longLow);
+
+    // 2nd derivative in latitude
+    for (int i = 0; i < 3; i++) {
+      threeIndices[i] =
+          m_gridDef->getDetectorIndex(nearestLatIndexSec + i, nearestLonIndex);
+    }
+    auto avgSecondDerivLat = secondDerivative(threeIndices, latHigh - latLow);
+
+    // calculate the interpolation error according to a Taylor expansion from
+    // the low lat and low long points. Doesn't make any difference if do this
+    // in angle or distance because scaling factor (~ radius) cancels out
+    HistogramData::HistogramY interpolationErrorAsYData =
+        0.5 * (lon - longLow) * (longHigh - lon) * avgSecondDerivLong +
+        0.5 * (lat - latLow) * (latHigh - lat) * avgSecondDerivLat;
+    // convert from HistogramY to HistogramE
+    interpolationError = interpolationErrorAsYData.rawData();
   }
-  auto avgSecondDerivLong = secondDerivative(threeIndices, longHigh - longLow);
-
-  // 2nd derivative in latitude
-  for (int i = 0; i < 3; i++) {
-    threeIndices[i] =
-        m_gridDef->getDetectorIndex(nearestLatIndexSec + i, nearestLonIndex);
-  }
-  auto avgSecondDerivLat = secondDerivative(threeIndices, latHigh - latLow);
-
-  // calculate the interpolation error according to a Taylor expansion from the
-  // low lat and low long points. Doesn't make any difference if do this in
-  // angle or distance because scaling factor (~ radius) cancels out
-  HistogramData::HistogramY interpolationErrorAsYData =
-      0.5 * (lon - longLow) * (longHigh - lon) * avgSecondDerivLong +
-      0.5 * (lat - latLow) * (latHigh - lat) * avgSecondDerivLat;
-  // convert from HistogramY to HistogramE
-  HistogramData::HistogramE interpolationError(
-      interpolationErrorAsYData.rawData());
 
   auto h = histogram(0);
   h.mutableY() = interpY;

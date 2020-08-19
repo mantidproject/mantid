@@ -503,7 +503,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nspectra);
     TS_ASSERT_EQUALS(dummyAttFactor[0], outputWS->y(0).front());
     TS_ASSERT_EQUALS(dummyAttFactorErr[0], outputWS->e(0).front());
-    TS_ASSERT_EQUALS((dummyAttFactor[0] + dummyAttFactorErr[1]) / 2,
+    TS_ASSERT_EQUALS((dummyAttFactor[0] + dummyAttFactor[1]) / 2,
                      outputWS->y(0)[1]);
     TS_ASSERT_EQUALS(
         sqrt(pow(dummyAttFactorErr[0], 2) + pow(dummyAttFactorErr[1], 2)) / 2.0,
@@ -621,20 +621,6 @@ public:
     TS_ASSERT_EQUALS(allZero, true);
   }
 
-  void test_errors_not_calculated_for_sparse() {
-    using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {
-        5, 10, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
-    auto outputWS = runAlgorithm(wsProps, false, -1, "Linear", true, 3, 3);
-
-    verifyDimensions(wsProps, outputWS);
-
-    auto eData = outputWS->getSpectrum(0).dataE();
-    bool allZero = std::all_of(eData.begin(), eData.end(),
-                               [](double i) { return i == 0; });
-    TS_ASSERT_EQUALS(allZero, true);
-  }
-
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
@@ -711,7 +697,8 @@ public:
     Mantid::HistogramData::Frequencies ysOnes(nbins, 1.0);
     Mantid::HistogramData::Points ps =
         modelWS->getSpectrum(0).histogram().points();
-    const Mantid::HistogramData::Histogram testHistogramOnes(ps, ysOnes);
+    Mantid::HistogramData::FrequencyStandardDeviations errs(nbins, 0.5);
+    const Mantid::HistogramData::Histogram testHistogramOnes(ps, ysOnes, errs);
     EXPECT_CALL(*sparseWS, bilinearInterpolateFromDetectorGrid(_, _))
         .Times(Exactly(static_cast<int>(nspectra)))
         .WillRepeatedly(Return(testHistogramOnes));
@@ -727,6 +714,7 @@ public:
     TS_ASSERT_EQUALS(1.0, outputWS->y(0)[0]);
     TS_ASSERT_EQUALS(1.0, outputWS->y(0)[1]);
     TS_ASSERT_EQUALS(1.0, outputWS->y(1)[0]);
+    TS_ASSERT_EQUALS(0.5, outputWS->e(0)[0]);
   }
 
 private:

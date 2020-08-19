@@ -27,17 +27,24 @@ interpolateLinearInplace(Histogram &inOut, const size_t stepSize,
                          const bool calculateErrors = false,
                          const bool independentErrors = true);
 
-MANTID_HISTOGRAMDATA_DLL void interpolateLinearInplace(const Histogram &input,
-                                                       Histogram &output);
+MANTID_HISTOGRAMDATA_DLL void
+interpolateLinearInplace(const Histogram &input, Histogram &output,
+                         const bool calculateErrors = false,
+                         const bool independentErrors = true);
 
-MANTID_HISTOGRAMDATA_DLL Histogram interpolateCSpline(const Histogram &input,
-                                                      const size_t stepSize);
+MANTID_HISTOGRAMDATA_DLL Histogram interpolateCSpline(
+    const Histogram &input, const size_t stepSize,
+    const bool calculateErrors = false, const bool independentErrors = true);
 
-MANTID_HISTOGRAMDATA_DLL void interpolateCSplineInplace(Histogram &inOut,
-                                                        const size_t stepSize);
+MANTID_HISTOGRAMDATA_DLL void
+interpolateCSplineInplace(Histogram &inOut, const size_t stepSize,
+                          const bool calculateErrors = false,
+                          const bool independentErrors = true);
 
-MANTID_HISTOGRAMDATA_DLL void interpolateCSplineInplace(const Histogram &input,
-                                                        Histogram &output);
+MANTID_HISTOGRAMDATA_DLL void
+interpolateCSplineInplace(const Histogram &input, Histogram &output,
+                          const bool calculateErrors = false,
+                          const bool independentErrors = true);
 MANTID_HISTOGRAMDATA_DLL
 size_t minSizeForCSplineInterpolation();
 

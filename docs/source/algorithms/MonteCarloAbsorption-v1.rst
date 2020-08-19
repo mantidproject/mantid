@@ -112,28 +112,27 @@ When the sparse instrument option is enabled, a sparse instrument corresponding 
 The interpolation is a two step process: first a spatial interpolation is done from the detector grid of the sparse instrument to the actual detector positions of the full instrument. Then, if `ResimulateTracksForDifferentWavelengths` = True the correction factors are interpolated over the missing wavelengths.
 
 .. note:: Currently, the sparse instrument mode does not support instruments with varying *EFixed*.
-.. note:: Errors are not currently provided for absorption correction factors calculated involving spatial interpolation
 
 Spatial interpolation
 ^^^^^^^^^^^^^^^^^^^^^
 
-The sample to detector distance does not matter for absorption, so it suffices to consider directions only. The detector grid of the sparse instrument consists of detectors at constant latitude and longitude intervals. For a detector :math:`D` of the full input instrument at latitude :math:`\phi` and longitude :math:`\lambda`, we pick the four detectors :math:`D_i` (:math:`i = 1, 2, 3, 4`) at the corners of the grid cell which includes (:math:`\phi`, :math:`\lambda`). The distance :math:`\Delta_i` in units of angle between :math:`D` and  :math:`D_i` on a spherical surface is given by
+The sample to detector distance does not matter for absorption, so it suffices to consider directions only. The detector grid of the sparse instrument consists of detectors at constant latitude and longitude intervals. For a detector :math:`D` of the full input instrument at latitude :math:`\phi` and longitude :math:`\lambda`, we pick the four detectors :math:`D_ij` (:math:`i = 1, 2` :math:`j = 1, 2`) at the corners of the grid cell which includes (:math:`\phi`, :math:`\lambda`).
+
+If :math:`D` coincides with any :math:`D_{ij}`, the :math:`y` values of the histogram linked to :math:`D` are directly taken from :math:`D_{ij}`. Otherwise, :math:`y` is interpolated using a bilinear interpolation method. The data is interpolated in the longitude direction first:
 
 .. math::
 
-   \Delta_i = 2 \arcsin \sqrt{\sin^2 \left(\frac{\phi - \phi_i}{2} \right) + \cos \phi \cos \phi_i \sin^2 \left( \frac{\lambda - \lambda_i}{2} \right)}
+   y_1 = \frac{(\lambda_2 - \lambda) * y_{11} + (\lambda - \lambda_1) * y_{21}}{\lambda_2 - \lambda_1}
+   
+   y_2 = \frac{(\lambda_2 - \lambda) * y_{12} + (\lambda - \lambda_1) * y_{22}}{\lambda_2 - \lambda_1},
 
-If :math:`D` coincides with any :math:`D_i`, the :math:`y` values of the histogram linked to :math:`D` are directly taken from :math:`D_i`. Otherwise, :math:`y` is interpolated using the inverse distance weighing method
-
-.. math::
-
-   y = \frac{\sum_i w_i y_i}{\sum_i w_i},
-
-where the weights are given by
+and then finally in the latitude direction:
 
 .. math::
 
-   w_i = \frac{1}{\Delta_i^2}
+   y = \frac{(\phi_2 - \phi) * y_1 + (\phi - \phi_1) * y_2}{\phi_2 - \phi_1}
+   
+The errors present in the 4 simulated histograms are propagated through the bilinear formulae given above to give one contribution to the error on the interpolated histogram. The second contribution is the interpolation error (how well the bilinear interpolation matches the actual attenuation factor variation). This is calculated based on the second derivative of the attenuation factor in the :math:`\phi` and :math:`\lambda` directions
 
 Wavelength interpolation
 ^^^^^^^^^^^^^^^^^^^^^^^^

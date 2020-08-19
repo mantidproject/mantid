@@ -4,11 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidHistogramData/Histogram.h"
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
+#include "MantidKernel/Matrix.h"
 
 #include <memory>
 #include <sstream>
@@ -32,7 +31,10 @@ constexpr const char *CSPLINE_NAME = "CSpline";
  */
 constexpr size_t numberCalculated(const size_t ysize, const size_t stepSize) {
   // First and last points are always assumed to be calculated
-  return 1 + ((ysize - 1) / stepSize);
+  auto nCalc = 1 + (ysize - 1) / stepSize;
+  if ((ysize - 1) % stepSize != 0)
+    nCalc++;
+  return nCalc;
 }
 
 /**
@@ -63,6 +65,13 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
   if (ncalc < minCalculated) {
     std::ostringstream os;
     os << "interpolate - " << method << " requires " << minCalculated
+       << " calculated points but only " << ncalc << " were found.";
+    throw std::runtime_error(os.str());
+  }
+  // need at least one non-calculated point
+  if (ysize < minCalculated + 1) {
+    std::ostringstream os;
+    os << "interpolate - " << method << " requires " << minCalculated + 1
        << " points but only " << ncalc << " were found.";
     throw std::runtime_error(os.str());
   }
@@ -94,99 +103,189 @@ void sanityCheck(const Histogram &input, const Histogram &output,
 }
 
 /**
- * Perform interpolation in place
- * @param xs A container of x values
- * @param ys A container of y values
+ * Perform cubic spline interpolation in place
+ * @param input A histogram containing the input x, y, e values
  * @param points A container of points at which to interpolate
- * @param outY Output for interpolated values
- * @param type Type of interpolation
+ * @param output A histogram containing the original and interpolated values
  */
-template <typename XData, typename YData, typename XInterp, typename YInterp>
-void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
-                        YInterp &outY, const InterpolationType type) {
-  const gsl_interp_type *interpType = nullptr;
-  switch (type) {
-  case InterpolationType::LINEAR:
-    interpType = gsl_interp_linear;
-    break;
-  case InterpolationType::CSPLINE:
-    interpType = gsl_interp_cspline;
-    break;
+void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
+                                const Mantid::HistogramData::Points &points,
+                                Mantid::HistogramData::Histogram &output,
+                                const bool calculateErrors = false,
+                                const bool independentErrors = true) {
+  auto xs = input.dataX();
+  // create tridiagonal "h" matrix
+  Mantid::Kernel::Matrix<double> h(xs.size() - 2, xs.size() - 2);
+  for (size_t i = 0; i < xs.size() - 2; i++) {
+    for (size_t j = 0; j < xs.size() - 2; j++) {
+      if (i == j) {
+        h[i][j] = (xs[i + 2] - xs[i]) / 3;
+      }
+      if (i == j + 1) {
+        h[i][j] = (xs[i] - xs[j]) / 6;
+      }
+      if (j == i + 1) {
+        h[i][j] = (xs[i + 2] - xs[i + 1]) / 6;
+      }
+    }
   }
-  using gsl_interp_uptr = std::unique_ptr<gsl_interp, void (*)(gsl_interp *)>;
-  auto interp =
-      gsl_interp_uptr(gsl_interp_alloc(interpType, xs.size()), gsl_interp_free);
-  gsl_interp_init(interp.get(), xs.data(), ys.data(), xs.size());
-  using gsl_interp_accel_uptr =
-      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)>;
-  auto lookupTable =
-      gsl_interp_accel_uptr(gsl_interp_accel_alloc(), gsl_interp_accel_free);
-  // Evaluate each point for the full range
-  for (size_t i = 0; i < outY.size(); ++i) {
-    auto it = std::lower_bound(xs.begin(), xs.end(), points[i]);
-    auto x2 = *it;
-    auto x1 = x2 - 1;
-    outY[i] = gsl_interp_eval(interp.get(), xs.data(), ys.data(), points[i],
-                              lookupTable.get());
-    auto secondDerivAtx1 = gsl_interp_eval_deriv2(
-        interp.get(), xs.data(), ys.data(), x1, lookupTable.get());
-    auto interpErr =
-        0.5 * (points[i] - x1) * (x2 - points[i]) * secondDerivAtx1;
+  std::vector<double> d(xs.size() - 2);
+  auto ys = input.dataY();
+  for (size_t i = 0; i < xs.size() - 2; i++) {
+    d[i] = (ys[i + 2] - ys[i + 1]) / (xs[i + 2] - xs[i + 1]) -
+           (ys[i + 1] - ys[i]) / (xs[i + 1] - xs[i]);
+  }
+
+  // ypp means y prime prime
+  std::vector<double> ypp(xs.size() - 2);
+  h.Invert();
+  ypp = h * d;
+  // add in the zero second derivatives at extreme pts to give natural splines
+  std::vector<double> ypp_full(xs.size(), 0);
+  std::copy(ypp.begin(), ypp.end(), ypp_full.begin() + 1);
+
+  // calculate some covariances to support error propagation
+  auto &enew = output.mutableE();
+  auto &eold = input.dataE();
+  std::vector<double> u_ypp_ypp(xs.size());
+  std::vector<double> u_ypp_y(xs.size());
+
+  for (size_t i = 0; i < xs.size(); i++) {
+    for (size_t k = 0; k < xs.size(); k++) {
+      double dyppidyk = 0;
+      if ((i != 0) && (i != xs.size() - 1)) {
+        if (k > 1) {
+          dyppidyk += h[i - 1][k - 2] / (xs[k] - xs[k - 1]);
+        }
+        if ((k > 0) && (k < xs.size() - 1)) {
+          dyppidyk += h[i - 1][k - 1] *
+                      (1 / (xs[k + 1] - xs[k]) + 1 / (xs[k] - xs[k - 1]));
+        }
+        if (k < xs.size() - 2) {
+          dyppidyk += h[i - 1][k] / (xs[k + 1] - xs[k]);
+        }
+      }
+      u_ypp_ypp[i] += dyppidyk * dyppidyk * eold[k];
+      if (k == i) {
+        u_ypp_y[i] = dyppidyk * eold[k];
+      }
+    }
+  }
+
+  // plug the calculated second derivatives into the formula for each cubic
+  // polynomial y = A*y_i + B*y_i+1 + C*ypp_i + D*ypp_i+1
+  auto &ynew = output.mutableY();
+  for (size_t i = 0; i < points.size(); i++) {
+    auto it = std::upper_bound(xs.begin(), xs.end(), points[i]);
+    if (it == xs.end()) {
+      it = std::prev(xs.end());
+    }
+    auto index = std::distance(xs.begin(), it);
+    auto x2 = xs[index];
+    auto x1 = xs[index - 1];
+    auto y2 = ys[index];
+    auto y1 = ys[index - 1];
+    auto e2 = eold[index];
+    auto e1 = eold[index - 1];
+    auto ypp2 = ypp_full[index];
+    auto ypp1 = ypp_full[index - 1];
+    auto u_y2pp_y2 = u_ypp_y[index];
+    auto u_y1pp_y1 = u_ypp_y[index - 1];
+    auto u_y2pp_y2pp = u_ypp_ypp[index];
+    auto u_y1pp_y1pp = u_ypp_ypp[index - 1];
+
+    double A = (x2 - points[i]) / (x2 - x1);
+    double B = (points[i] - x1) / (x2 - x1);
+    double C = (pow(A, 3) - A) * (pow(x2 - x1, 2)) / 6;
+    double D = (pow(B, 3) - B) * (pow(x2 - x1, 2)) / 6;
+
+    ynew[i] = A * y1 + B * y2 + C * ypp1 + D * ypp2;
+
+    // propagate the source points errors through to the interpolated point
+    // Interpolation error is hard to calculate and is probably v small so
+    // assume it's zero
+    if (calculateErrors) {
+      if (independentErrors) {
+        auto var = A * A * e1 * e1 + 2 * A * C * u_y1pp_y1 + B * B * e2 * e2 +
+                   2 * B * D * u_y2pp_y2 + C * C * u_y1pp_y1pp +
+                   D * D * u_y2pp_y2pp;
+        enew[i] = sqrt(var);
+      } else {
+        // if the errors are correlated just do linear interpolation on them
+        // to get something approximately equal to the two calculated errors
+        // Not sure there's much point doing a spline interpolation on the
+        // errors
+        enew[i] = (points[i] - x1) * e2 + (x2 - points[i]) * e1;
+      }
+    } else {
+      if (points[i] == x1) {
+        enew[i] = e1;
+      }
+    }
   }
 }
 
 /**
- * Perform linear interpolation assuming the input data set to be a Histogram
- * with XMode=Points. It is assumed all sanity checks have been performed
- * by the interpolateLinear entry point.
- * @param input See interpolateLinear
- * @param stepSize See interpolateLinear
- * @param ynew A reference to the output Y values
+ * Perform cubic spline interpolation in place
+ * @param input A histogram containing the input x, y, e values
+ * @param points A container of points at which to interpolate
+ * @param output A histogram containing the original and interpolated values
+ * @param calculateErrors Boolean to control whether errors are calculated
+ * @param independentErrors Boolean to control whether errors on original points
+ * are considered to be correlated or independent
  */
-void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
-                               Histogram &output,
+void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
+                               const Mantid::HistogramData::Points &points,
+                               Mantid::HistogramData::Histogram &output,
                                const bool calculateErrors = false,
                                const bool independentErrors = true) {
   const auto xold = input.points();
   const auto &yold = input.y();
   const auto &eold = input.e();
-  const auto nypts = yold.size();
-  size_t step(stepSize);
-  double x1(0.), x2(0.), y1(0.), y2(0.), e1(0.), e2(0.), overgap(0.);
-  // Copy over end value skipped by loop
+  const auto nypts = points.size();
+
   auto &ynew = output.mutableY();
   auto &enew = output.mutableE();
-  ynew.back() = yold.back();
-  for (size_t i = 0; i < nypts - 1; ++i) // Last point has been calculated
-  {
-    const double xp = xold[i];
-    double secondDeriv;
-    if (step == stepSize) {
-      x1 = xp;
-      const auto index2 =
-          ((i + stepSize) >= nypts ? nypts - 1 : (i + stepSize));
-      x2 = xold[index2];
-      overgap = 1.0 / (x2 - x1);
-      y1 = yold[i];
-      e1 = eold[i];
-      y2 = yold[index2];
-      e2 = eold[index2];
-      step = 1;
-      ynew[i] = yold[i];
-      enew[i] = eold[i];
 
-      auto x0_secondDeriv = i - stepSize < 0 ? 0 : i - stepSize;
-      auto x1_secondDeriv = x0_secondDeriv + stepSize;
-      auto x2_secondDeriv = x1_secondDeriv + stepSize;
+  std::vector<double> secondDeriv(input.size() - 1);
+  for (size_t i = 0; i < input.size() - 1; i++) {
+    const auto index2 = ((i + 1) >= nypts ? nypts - 1 : (i + 1));
+
+    if (calculateErrors) {
+      if (xold.size() < 3) {
+        throw std::runtime_error(
+            "Number of x points too small to calculate errors");
+      }
+      auto x0_secondDeriv = i < 1 ? 0 : i - 1;
+      auto x1_secondDeriv = x0_secondDeriv + 1 >= xold.size()
+                                ? xold.size() - 1
+                                : x0_secondDeriv + 1;
+      auto x2_secondDeriv = x1_secondDeriv + 1;
 
       auto firstDeriv01 = (yold[x1_secondDeriv] - yold[x0_secondDeriv]) /
-                          (x1_secondDeriv - x0_secondDeriv);
+                          (xold[x1_secondDeriv] - xold[x0_secondDeriv]);
       auto firstDeriv12 = (yold[x2_secondDeriv] - yold[x1_secondDeriv]) /
-                          (x2_secondDeriv - x1_secondDeriv);
-      secondDeriv = (firstDeriv12 - firstDeriv01) /
-                    ((x2_secondDeriv - x0_secondDeriv) / 2);
-      continue;
+                          (xold[x2_secondDeriv] - xold[x1_secondDeriv]);
+      secondDeriv[i] = (firstDeriv12 - firstDeriv01) /
+                       ((xold[x2_secondDeriv] - xold[x0_secondDeriv]) / 2);
     }
+  }
+  for (size_t i = 0; i < nypts; ++i) {
+    auto it = std::upper_bound(xold.begin(), xold.end(), points[i]);
+    if (it == xold.end()) {
+      it = std::prev(xold.end());
+    }
+    auto index = std::distance(xold.begin(), it);
+    auto x2 = xold[index];
+    auto x1 = xold[index - 1];
+    auto overgap = 1.0 / (x2 - x1);
+    auto y2 = yold[index];
+    auto y1 = yold[index - 1];
+    auto e2 = eold[index];
+    auto e1 = eold[index - 1];
+
+    const double xp = points[i];
+
     // Linear interpolation
     ynew[i] = (xp - x1) * y2 + (x2 - xp) * y1;
     ynew[i] *= overgap;
@@ -196,7 +295,7 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
       double sourcePointsError;
       if (independentErrors) {
         sourcePointsError =
-            sqrt(pow((xp - x1) * e1, 2) + pow(((x2 - xp)) * e2, 2));
+            sqrt(pow((xp - x1) * e2, 2) + pow(((x2 - xp)) * e1, 2));
         sourcePointsError *= overgap;
       } else {
         // if the errors on the original points are correlated then just
@@ -204,40 +303,48 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
         sourcePointsError = (xp - x1) * e2 + (x2 - xp) * e1;
       }
       // calculate interpolation error
-      auto interpError = 0.5 * (xp - x1) * (x2 - xp) * secondDeriv;
+      auto interpError =
+          0.5 * (xp - x1) * (x2 - xp) * abs(secondDeriv[index - 1]);
       // combine the two errors
       enew[i] = sqrt(pow(sourcePointsError, 2) + pow(interpError, 2));
     } else {
-      enew[i] = eold[i];
+      if (xp == x1) {
+        enew[i] = e1;
+      }
     }
-    step++;
   }
 }
 
 /**
- * Perform cubic spline interpolation. It is assumed all sanity checks have been
- * performed by the interpolateCSpline entry point.
- * @param input See interpolateCSpline
- * @param stepSize See interpolateCSpline
- * @param ynew A reference to the output Y values
+ * Return a histogram with all the zero points removed from input
+ * @param input Histogram containing some points with a zero y value
+ * @param stepSize distance between the points that should be kept
+ * @return A histogram containing only the required points
  */
-void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
-                                HistogramY &ynew) {
+Histogram compactInputsAndCallInterpolate(const Histogram &input,
+                                          const size_t stepSize) {
   const auto xold = input.points();
   const auto &yold = input.y();
+  const auto &eold = input.e();
   const auto nypts = yold.size();
 
   const auto ncalc = numberCalculated(nypts, stepSize);
-  std::vector<double> xc(ncalc), yc(ncalc);
+  std::vector<double> xc(ncalc), yc(ncalc), ec(ncalc);
   for (size_t step = 0, i = 0; step < nypts; step += stepSize, ++i) {
     xc[i] = xold[step];
     yc[i] = yold[step];
+    ec[i] = eold[step];
   }
   // Ensure we have the last value
   xc.back() = xold.back();
   yc.back() = yold.back();
+  ec.back() = eold.back();
 
-  interpolateInplace(xc, yc, xold, ynew, InterpolationType::CSPLINE);
+  const Histogram calcValues{
+      Mantid::HistogramData::Points(xc), Mantid::HistogramData::Counts(yc),
+      Mantid::HistogramData::CountStandardDeviations(ec)};
+
+  return calcValues;
 }
 
 } // end anonymous namespace
@@ -249,17 +356,13 @@ namespace HistogramData {
  * Return the minimum size of input points for cpline interpolation.
  * @return the minimum number of points
  */
-size_t minSizeForCSplineInterpolation() {
-  return gsl_interp_type_min_size(gsl_interp_cspline);
-}
+size_t minSizeForCSplineInterpolation() { return 3; }
 
 /**
  * Return the minimum size of input points for linear interpolation.
  * @return the minimum number of points
  */
-size_t minSizeForLinearInterpolation() {
-  return gsl_interp_type_min_size(gsl_interp_linear);
-}
+size_t minSizeForLinearInterpolation() { return 2; }
 
 /**
  * Linearly interpolate through the y values of a histogram assuming that the
@@ -278,8 +381,9 @@ Histogram interpolateLinear(const Histogram &input, const size_t stepSize,
 
   // Cheap copy
   Histogram output(input);
-  interpolateYLinearInplace(input, stepSize, output, calculateErrors,
-                            independentErrors);
+  auto calcValues = compactInputsAndCallInterpolate(input, stepSize);
+  interpolateLinearInplace(calcValues, output, calculateErrors,
+                           independentErrors);
 
   return output;
 }
@@ -294,8 +398,9 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize,
                               const bool calculateErrors,
                               const bool independentErrors) {
   sanityCheck(inOut, stepSize, minSizeForLinearInterpolation(), LINEAR_NAME);
-  interpolateYLinearInplace(inOut, stepSize, inOut, calculateErrors,
-                            independentErrors);
+  auto calcValues = compactInputsAndCallInterpolate(inOut, stepSize);
+  interpolateLinearInplace(calcValues, inOut, calculateErrors,
+                           independentErrors);
 }
 
 /**
@@ -303,14 +408,15 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize,
  * @param input A histogram from which to interpolate
  * @param output A histogram containing the interpolated values
  */
-void interpolateLinearInplace(const Histogram &input, Histogram &output) {
+void interpolateLinearInplace(const Histogram &input, Histogram &output,
+                              const bool calculateErrors,
+                              const bool independentErrors) {
   sanityCheck(input, output, minSizeForLinearInterpolation());
   const auto inputPoints = input.points();
-  const auto &points = inputPoints.rawData();
-  const auto &y = input.y().rawData();
   const auto &interpPoints = output.points();
-  auto &newY = output.mutableY();
-  interpolateInplace(points, y, interpPoints, newY, InterpolationType::LINEAR);
+
+  interpolateYLinearInplace(input, interpPoints, output, calculateErrors,
+                            independentErrors);
 }
 
 /**
@@ -324,18 +430,16 @@ void interpolateLinearInplace(const Histogram &input, Histogram &output) {
  * @return A new Histogram with the y-values from the result of a linear
  * interpolation. The XMode of the output will match the input histogram.
  */
-Histogram interpolateCSpline(const Histogram &input, const size_t stepSize) {
+Histogram interpolateCSpline(const Histogram &input, const size_t stepSize,
+                             const bool calculateErrors,
+                             const bool independentErrors) {
   sanityCheck(input, stepSize, minSizeForCSplineInterpolation(), CSPLINE_NAME);
 
-  HistogramY ynew(input.y().size());
-  interpolateYCSplineInplace(input, stepSize, ynew);
-  // Cheap copy
   Histogram output(input);
-  if (output.yMode() == Histogram::YMode::Counts) {
-    output.setCounts(ynew);
-  } else {
-    output.setFrequencies(ynew);
-  }
+  auto calcValues = compactInputsAndCallInterpolate(input, stepSize);
+  interpolateCSplineInplace(calcValues, output, calculateErrors,
+                            independentErrors);
+
   return output;
 }
 
@@ -345,9 +449,13 @@ Histogram interpolateCSpline(const Histogram &input, const size_t stepSize) {
  * @param inOut Input histogram whose points are interpolated in place
  * @param stepSize See interpolateCSpline
  */
-void interpolateCSplineInplace(Histogram &inOut, const size_t stepSize) {
+void interpolateCSplineInplace(Histogram &inOut, const size_t stepSize,
+                               const bool calculateErrors,
+                               const bool independentErrors) {
   sanityCheck(inOut, stepSize, minSizeForCSplineInterpolation(), CSPLINE_NAME);
-  interpolateYCSplineInplace(inOut, stepSize, inOut.mutableY());
+  auto calcValues = compactInputsAndCallInterpolate(inOut, stepSize);
+  interpolateCSplineInplace(calcValues, inOut, calculateErrors,
+                            independentErrors);
 }
 
 /**
@@ -355,13 +463,13 @@ void interpolateCSplineInplace(Histogram &inOut, const size_t stepSize) {
  * @param input A histogram from which to interpolate
  * @param output A histogram where to store the interpolated values
  */
-void interpolateCSplineInplace(const Histogram &input, Histogram &output) {
+void interpolateCSplineInplace(const Histogram &input, Histogram &output,
+                               const bool calculateErrors,
+                               const bool independentErrors) {
   sanityCheck(input, output, minSizeForCSplineInterpolation());
-  const auto &points = input.points().rawData();
-  const auto &y = input.y().rawData();
   const auto &interpPoints = output.points();
-  auto &newY = output.mutableY();
-  interpolateInplace(points, y, interpPoints, newY, InterpolationType::CSPLINE);
+  interpolateYCSplineInplace(input, interpPoints, output, calculateErrors,
+                             independentErrors);
 }
 
 } // namespace HistogramData
