@@ -114,7 +114,6 @@ class GroupingTablePresenter(object):
             # self.add_group_to_view(group)
             self.add_group_to_model(group)
             self.update_view_from_model()
-            self._view.notify_data_changed()
             self.notify_data_changed()
         except ValueError as error:
             self._view.warning_popup(error)
@@ -146,7 +145,6 @@ class GroupingTablePresenter(object):
             self.remove_last_row_in_view_and_model()
         else:
             self.remove_selected_rows_in_view_and_model(group_names)
-        self._view.notify_data_changed()
         self.notify_data_changed()
 
     def remove_selected_rows_in_view_and_model(self, group_names):
@@ -185,7 +183,6 @@ class GroupingTablePresenter(object):
         # if the column containing the "to_analyse" flag is changed, then we don't need to update anything group related
         if col != inverse_group_table_columns['to_analyse']:
             self.update_view_from_model()
-            self._view.notify_data_changed()
             self.notify_data_changed()
 
     def update_model_from_view(self):

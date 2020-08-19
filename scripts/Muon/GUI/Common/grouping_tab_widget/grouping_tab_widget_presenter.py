@@ -33,10 +33,6 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
 
-        # Synchronize the two tables
-        self._view.on_grouping_table_changed(self.pairing_table_widget.update_view_from_model)
-        self._view.on_pairing_table_changed(self.grouping_table_widget.update_view_from_model)
-
         self._view.set_description_text(self.text_for_description())
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
         self._view.on_clear_grouping_button_clicked(self.on_clear_requested)
@@ -235,9 +231,11 @@ class GroupingTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def group_table_changed(self):
+        self.pairing_table_widget.update_view_from_model()
         self.handle_update_all_clicked()
 
     def pair_table_changed(self):
+        self.grouping_table_widget.update_view_from_model()
         self.handle_update_all_clicked()
 
     class LoadObserver(Observer):
