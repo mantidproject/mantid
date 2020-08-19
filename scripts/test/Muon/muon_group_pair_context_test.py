@@ -7,7 +7,7 @@
 import unittest
 
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_group import MuonGroup, MuonRun
 from Muon.GUI.Common.muon_pair import MuonPair
 from unittest import mock
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_group_populated_by_two_workspace
@@ -63,22 +63,6 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_pair(pair_1)
 
         self.assertRaises(ValueError, self.context.add_pair, pair_2)
-
-    def test_show_adds_group_or_pair_to_ADS(self):
-        group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
-        group_2 = MuonGroup('group_2', [1, 3, 4, 7, 9])
-        pair = MuonPair('pair_1')
-        group_1.show = mock.MagicMock()
-        pair.show = mock.MagicMock()
-        self.context.add_group(group_1)
-        self.context.add_group(group_2)
-        self.context.add_pair(pair)
-
-        self.context.show('group_1', [12345])
-        self.context.show('pair_1', [12345])
-
-        group_1.show.assert_called_once_with(tuple([12345]))
-        pair.show.assert_called_once_with(tuple([12345]))
 
     def test_group_names_returns_ordered_list_of_names(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
