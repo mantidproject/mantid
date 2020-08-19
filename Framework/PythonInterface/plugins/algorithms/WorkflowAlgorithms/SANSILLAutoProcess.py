@@ -305,6 +305,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             else:
                 self.log().information('Skipping empty token run.')
 
+        if len(outputs) > 1:
+            try:
+                stitched = self.output + "_stitched"
+                Stitch1DMany(InputWorkspaces=outputs,
+                             OutputWorkspace=stitched)
+                outputs.append(stitched)
+            except RuntimeError as re:
+                self.log().warning("Unable to stitch automatically, consider "
+                                   "stitching manually: " + str(re))
+
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:

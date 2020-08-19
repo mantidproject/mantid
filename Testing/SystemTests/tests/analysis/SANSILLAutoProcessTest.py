@@ -4,7 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, SaveNexusProcessed, LoadNexusProcessed, config, mtd
+from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, \
+                             SaveNexusProcessed, LoadNexusProcessed, \
+                             DeleteWorkspace, config, mtd
 import systemtesting
 from tempfile import gettempdir
 import os
@@ -63,6 +65,11 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
                 OutputWorkspace='iq_s' + str(i + 1)
             )
 
+            try:
+                DeleteWorkspace("iq_s" + str(i + 1) + "_stitched")
+            except:
+                pass
+
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
 
 
@@ -112,6 +119,11 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
             OutputWorkspace='iq',
             PanelOutputWorkspaces='panels'
         )
+
+        try:
+            DeleteWorkspace("iq_stitched")
+        except:
+            pass
 
         GroupWorkspaces(InputWorkspaces=['iq', 'panels'], OutputWorkspace='out')
 
@@ -194,3 +206,8 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            SampleThickness=0.2,
                            BeamRadius=1,
                            ReferenceFiles=",".join(water_dir))
+
+        try:
+            DeleteWorkspace("iq_stitched")
+        except:
+            pass
