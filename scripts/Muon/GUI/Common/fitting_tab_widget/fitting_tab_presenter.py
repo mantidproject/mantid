@@ -177,6 +177,9 @@ class FittingTabPresenter(object):
         self.model.change_plot_guess(self.view.plot_guess, workspaces, index)
 
     def handle_fit_clicked(self):
+        if len(self.selected_data) < 1:
+            self.view.warning_popup('No data selected to fit')
+            return
         self.perform_fit()
 
     def handle_started(self):
