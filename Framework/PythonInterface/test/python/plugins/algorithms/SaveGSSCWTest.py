@@ -91,6 +91,34 @@ class SaveGSSCWTest(unittest.TestCase):
         finally:
             self.cleanup(gsas_file_name, ws_name)
 
+    def test_point_data(self):
+        """Test with point data
+
+        Returns
+        -------
+
+        """
+        # Create a workspace as histogram
+        x = np.arange(300, 16667, 15.)
+        y = np.random.random(len(x)-1)  # histogram
+        e = np.sqrt(y)
+
+        ws_name = 'TestHistogramWS'
+        CreateWorkspace(OutputWorkspace=ws_name,
+                        DataX=x, DataY=y, DataE=e, NSpec=1,
+                        UnitX='Degrees',
+                        YUnitlabel="stuff")
+
+        # Save to GSAS
+        gsas_file_name = self.saveFilePath(ws_name)
+        try:
+            SaveGSSCW(InputWorkspace=ws_name, OutputFilename=gsas_file_name)
+            # check file existence
+            self.assertTrue(os.path.exists(gsas_file_name))
+        finally:
+            # clean
+            self.cleanup(gsas_file_name, ws_name)
+
     def check_gsas(self, filename, expected_data):
         """Check output GSAS file
 

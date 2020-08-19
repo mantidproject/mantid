@@ -8,7 +8,7 @@
 import mantid
 import os
 import numpy as np
-from mantid.simpleapi import ConvertToMatrixWorkspace
+from mantid.simpleapi import ConvertToPointData
 
 
 class SaveGSSCW(mantid.api.PythonAlgorithm):
@@ -84,7 +84,7 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         # process workspace to make it a PointData workspace
         if wksp.isHistogramData():
             wksp_name = wksp.name()
-            wksp = ConvertToMatrixWorkspace(InputWorkspace=wksp_name, OutputWorkspace=wksp_name)
+            wksp = ConvertToPointData(InputWorkspace=wksp_name, OutputWorkspace=wksp_name)
 
         gsas_content = self._write_gsas_fxye(wksp)
 
