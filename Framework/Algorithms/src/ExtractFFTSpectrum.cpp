@@ -67,6 +67,7 @@ void ExtractFFTSpectrum::exec() {
   Progress prog(this, 0.0, 1.0, numHists);
   std::vector<int> chopIndex(numHists, 0);  // we use this to chop tail zeros if necessary
 
+  Mantid::Kernel::Unit_sptr unit;  // must retrieve this from the child FFT
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -85,12 +86,12 @@ void ExtractFFTSpectrum::exec() {
     childFFT->execute();
     MatrixWorkspace_const_sptr fftTemp =
         childFFT->getProperty("OutputWorkspace");
+    unit = fftTemp->getAxis(0)->unit();
 
     auto &histo = fftTemp->histogram(fftPart);
-
     if (!inputImagWS) {
       // with only real input, the tail of the histo is just zeros
-      // so we need to trim them 
+      // so we need to trim them
       const auto &yData = histo.y();
       auto results = std::find_if(yData.rbegin(), yData.rend(),
                                   [](double v) { return v != 0; });
@@ -104,11 +105,13 @@ void ExtractFFTSpectrum::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  
+
+  outputWS->getAxis(0)->unit() = unit;
+
   // chop all tail zeros where it is safe to do so - we don't want to remove actual data
   // maxChopIter is the maximum 'safe' x value to chop (will only remove 0's)
   const auto maxChopIter = std::max_element(chopIndex.cbegin(), chopIndex.cend());
-  if (*maxChopIter != 0) {  // if the input had imaginary component, we won't chop.
+  if (*maxChopIter != 0) { // if the input had imaginary component, we won't chop.
     const int wsIndex = std::distance(chopIndex.cbegin(), maxChopIter); // the row where our max value is
     // now we get the x value at our max value
     const double xMax = outputWS->x(wsIndex)[*maxChopIter - 1];
@@ -119,12 +122,6 @@ void ExtractFFTSpectrum::exec() {
     extractSpectra->setProperty("XMax", xMax);
     extractSpectra->execute();
   }
-
-  std::shared_ptr<Kernel::Units::Label> lblUnit =
-      std::dynamic_pointer_cast<Kernel::Units::Label>(
-          UnitFactory::Instance().create("Label"));
-  lblUnit->setLabel("Time", "ns");
-  outputWS->getAxis(0)->unit() = lblUnit;
 
   setProperty("OutputWorkspace", outputWS);
 }

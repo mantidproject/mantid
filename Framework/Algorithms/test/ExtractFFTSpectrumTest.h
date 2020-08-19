@@ -125,5 +125,4 @@ public:
     // so they should have been removed.
     TS_ASSERT_EQUALS(outputWS->x(0).size(), 100);
   }
->>>>>>> 865bb37134e... fixup! chopping unecessary tail zeros
 };
