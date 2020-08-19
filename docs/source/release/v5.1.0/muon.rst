@@ -33,6 +33,7 @@ New Features
 - Updated rounding for time zero and first good data to be 3 decimal places.
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
 - Added multi-period support to the LoadMuonNexusV2 algorithm.
+- Added support for specifying which groups should be used to calculate a group.
 
 Improvements
 -------------
@@ -71,6 +72,6 @@ Elemental Analysis
 New Features
 ------------
 - Added a deselect all elements button.
-- Fixed an issue where groups were all being plotted on the same tiled plot.
+
 
 :ref:`Release 5.1.0 <v5.1.0>`
