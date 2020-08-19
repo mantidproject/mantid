@@ -80,7 +80,7 @@ public:
     const double testY = sin(1) * 0.25;
     const double testZ = 0;
     const V3D testVec(testX, testY, testZ);
-    const double DBL_EPS = std::numeric_limits<double>::epsilon();
+    constexpr const double DBL_EPS = std::numeric_limits<double>::epsilon();
     CircularBeamProfile profile(createTestFrame(), center, radius);
 
     MockRNG rng;
@@ -95,48 +95,46 @@ public:
     TS_ASSERT_DELTA(testZ + center.X(), ray.startPos.Z(), DBL_EPS);
     TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
   }
-}
 
   void test_DefineActiveRegion_beam_larger_than_sample() {
-  using Mantid::API::Sample;
-  using Mantid::Kernel::V3D;
-  const double width(5.0);
-  const V3D center;
-  CircularBeamProfile profile(createTestFrame(), center, radius);
-  Sample testSample;
-  testSample.setShape(ComponentCreationHelper::createSphere(0.5));
+    using Mantid::API::Sample;
+    using Mantid::Kernel::V3D;
+    const double radius(5.0);
+    const V3D center;
+    CircularBeamProfile profile(createTestFrame(), center, radius);
+    Sample testSample;
+    testSample.setShape(ComponentCreationHelper::createSphere(0.5));
 
-  auto region =
-      profile.defineActiveRegion(testSample.getShape().getBoundingBox());
-  TS_ASSERT(region.isNonNull());
-  TS_ASSERT_EQUALS(V3D(-0.5, -0.5, -0.5), region.minPoint());
-  TS_ASSERT_EQUALS(V3D(0.5, 0.5, 0.5), region.maxPoint());
-}
+    auto region =
+        profile.defineActiveRegion(testSample.getShape().getBoundingBox());
+    TS_ASSERT(region.isNonNull());
+    TS_ASSERT_EQUALS(V3D(-0.5, -0.5, -0.5), region.minPoint());
+    TS_ASSERT_EQUALS(V3D(0.5, 0.5, 0.5), region.maxPoint());
+  }
 
-void test_DefineActiveRegion_beam_smaller_than_sample() {
-  using Mantid::API::Sample;
-  using Mantid::Kernel::V3D;
-  const double radius(0.1);
-  const V3D center;
-  CircularBeamProfile profile(createTestFrame(), center, radius);
-  Sample testSample;
-  testSample.setShape(ComponentCreationHelper::createSphere(0.5));
+  void test_DefineActiveRegion_beam_smaller_than_sample() {
+    using Mantid::API::Sample;
+    using Mantid::Kernel::V3D;
+    const double radius(0.1);
+    const V3D center;
+    CircularBeamProfile profile(createTestFrame(), center, radius);
+    Sample testSample;
+    testSample.setShape(ComponentCreationHelper::createSphere(0.5));
 
-  auto region =
-      profile.defineActiveRegion(testSample.getShape().getBoundingBox());
-  TS_ASSERT(region.isNonNull());
-  TS_ASSERT_EQUALS(V3D(-0.5, -0.1, -0.1), region.minPoint());
-  TS_ASSERT_EQUALS(V3D(0.5, 0.1, 0.1), region.maxPoint());
-}
+    auto region =
+        profile.defineActiveRegion(testSample.getShape().getBoundingBox());
+    TS_ASSERT(region.isNonNull());
+    TS_ASSERT_EQUALS(V3D(-0.5, -0.1, -0.1), region.minPoint());
+    TS_ASSERT_EQUALS(V3D(0.5, 0.1, 0.1), region.maxPoint());
+  }
 
 private:
-Mantid::Geometry::ReferenceFrame createTestFrame() {
-  using Mantid::Geometry::Handedness;
-  using Mantid::Geometry::PointingAlong;
-  using Mantid::Geometry::ReferenceFrame;
-  // up = Z, beam = X
-  return ReferenceFrame(PointingAlong::Z, PointingAlong::X, Handedness::Right,
-                        "source");
-}
-}
-;
+  Mantid::Geometry::ReferenceFrame createTestFrame() {
+    using Mantid::Geometry::Handedness;
+    using Mantid::Geometry::PointingAlong;
+    using Mantid::Geometry::ReferenceFrame;
+    // up = Z, beam = X
+    return ReferenceFrame(PointingAlong::Z, PointingAlong::X, Handedness::Right,
+                          "source");
+  }
+};

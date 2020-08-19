@@ -143,9 +143,9 @@ void AddAbsorptionWeightedPathLengths::exec() {
 }
 
 /**
- * Create the beam profile. Currently only supports Rectangular. The dimensions
- * are either specified by those provided by `SetBeam` algorithm or default
- * to the width and height of the samples bounding box
+ * Create the beam profile. Currently only supports Rectangular and Circular.
+ * The dimensions are either specified by those provided by `SetBeam` algorithm
+ * or default to the width and height of the samples bounding box
  * @param instrument A reference to the instrument object
  * @param sample A reference to the sample object
  * @return A new IBeamProfile object
