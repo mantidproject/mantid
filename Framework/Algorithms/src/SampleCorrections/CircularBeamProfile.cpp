@@ -95,9 +95,10 @@ Geometry::BoundingBox CircularBeamProfile::defineActiveRegion(
   V3D minPoint, maxPoint;
   minPoint[m_horIdx] = std::max(sampleMin[m_horIdx], m_min[m_horIdx]);
   maxPoint[m_horIdx] =
-      std::min(sampleMax[m_horIdx], m_min[m_horIdx] + m_radius);
+      std::min(sampleMax[m_horIdx], m_center[m_horIdx] + m_radius);
   minPoint[m_upIdx] = std::max(sampleMin[m_upIdx], m_min[m_upIdx]);
-  maxPoint[m_upIdx] = std::min(sampleMax[m_upIdx], m_min[m_upIdx] + m_radius);
+  maxPoint[m_upIdx] =
+      std::min(sampleMax[m_upIdx], m_center[m_upIdx] + m_radius);
   minPoint[m_beamIdx] = sampleMin[m_beamIdx];
   maxPoint[m_beamIdx] = sampleMax[m_beamIdx];
 

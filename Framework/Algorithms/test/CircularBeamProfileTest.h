@@ -55,7 +55,7 @@ public:
     using namespace ::testing;
 
     const double radius(0.5);
-    const V3D center(1, 2, -3);
+    const V3D center(-3, 2, 1);
     CircularBeamProfile profile(createTestFrame(), center, radius);
 
     MockRNG rng;
@@ -74,25 +74,25 @@ public:
     using namespace ::testing;
 
     const double radius(0.5);
-    const V3D center(1, 2, -3);
+    const V3D center;
     // values calculated using polar calculations from V3D class
-    const double testX = cos(1) * 0.25;
-    const double testY = sin(1) * 0.25;
+    const double testX = 0.25;
+    const double testY = 0;
     const double testZ = 0;
     const V3D testVec(testX, testY, testZ);
     constexpr const double DBL_EPS = std::numeric_limits<double>::epsilon();
     CircularBeamProfile profile(createTestFrame(), center, radius);
 
     MockRNG rng;
-    const double rand1(0.75), rand2(0.25);
+    const double rand1(0.5), rand2(0.25);
     EXPECT_CALL(rng, nextValue())
         .Times(Exactly(2))
         .WillOnce(Return(rand1))
         .WillRepeatedly(Return(rand2));
     auto ray = profile.generatePoint(rng);
-    TS_ASSERT_DELTA(testX + center.X(), ray.startPos.X(), DBL_EPS);
-    TS_ASSERT_DELTA(testY + center.Y(), ray.startPos.Y(), DBL_EPS);
-    TS_ASSERT_DELTA(testZ + center.X(), ray.startPos.Z(), DBL_EPS);
+    TS_ASSERT_DELTA(testX, ray.startPos.X(), DBL_EPS);
+    TS_ASSERT_DELTA(testY, ray.startPos.Y(), DBL_EPS);
+    TS_ASSERT_DELTA(testZ, ray.startPos.Z(), DBL_EPS);
     TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
   }
 
