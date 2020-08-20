@@ -27,11 +27,11 @@ CircularBeamProfile::CircularBeamProfile(const Geometry::ReferenceFrame &frame,
                                          double radius)
     : IBeamProfile(), m_upIdx(frame.pointingUp()),
       m_beamIdx(frame.pointingAlongBeam()),
-      m_horIdx(frame.pointingHorizontal()), m_radius(radius), m_min(),
-      m_beamDir() {
-  m_min[m_upIdx] = center[m_upIdx] - radius;
-  m_min[m_horIdx] = center[m_horIdx] - radius;
-  m_min[m_beamIdx] = center[m_beamIdx];
+      m_horIdx(frame.pointingHorizontal()), m_center(center), m_radius(radius),
+      m_min(), m_beamDir() {
+  m_min[m_upIdx] = m_center[m_upIdx] - radius;
+  m_min[m_horIdx] = m_center[m_horIdx] - radius;
+  m_min[m_beamIdx] = m_center[m_beamIdx];
   m_beamDir[m_beamIdx] = 1.0;
 }
 
@@ -47,8 +47,8 @@ IBeamProfile::Ray CircularBeamProfile::generatePoint(
   const double R = rng.nextValue() * m_radius;
   const double theta = rng.nextValue() * 360.0;
   pt.spherical(R, theta, m_beamIdx);
-  pt[0] += m_min[m_upIdx];
-  pt[1] += m_min[m_horIdx];
+  pt[0] += m_center[m_upIdx];
+  pt[1] += m_center[m_horIdx];
   pt[2] += m_min[m_beamIdx];
   return {pt, m_beamDir};
 }
