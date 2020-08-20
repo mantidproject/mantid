@@ -141,4 +141,8 @@ You may find the following aliases helpful. You can also add your own.
            st = status --short --branch
            # A more verbose output from branch, showing the commit and upstream branch
            br = branch -vv
-           pushf = push --force-with-lease
+
+           # When pushing a new branch upstream, set the local branch to track it
+           pushu = push --set-upstream
+           # Force push with lease (safer than push --force, but still be careful when changing history)
+           pushfl = push --force-with-lease
