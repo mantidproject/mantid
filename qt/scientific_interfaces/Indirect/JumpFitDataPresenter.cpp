@@ -246,12 +246,12 @@ void JumpFitDataPresenter::setDataIndexToCurrentWorkspace(
   //  and the vector in m_fitDataModel which is in the base class
   //  indirectFittingModel get table workspace index
   const auto wsName = dialog->workspaceName().append("_HWHM");
-  auto wsVector = m_jumpModel->m_fitDataModel->getWorkspaceNames();
   // This a vector of workspace names currently loaded
-  auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
+  auto wsVector = m_jumpModel->m_fitDataModel->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
-  int index = std::distance(wsVector.begin(), wsIt);
+  auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
   // this is the index of the workspace.
+  int index = int(std::distance(wsVector.begin(), wsIt));
   updateActiveDataIndex(index);
 }
 

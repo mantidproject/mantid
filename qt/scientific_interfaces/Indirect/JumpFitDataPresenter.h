@@ -68,8 +68,7 @@ private:
   std::vector<std::string> getParameterTypes(TableDatasetIndex dataIndex) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
-  void JumpFitDataPresenter::setDataIndexToCurrentWorkspace(
-      IAddWorkspaceDialog const *dialog);
+  void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
   void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
