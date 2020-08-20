@@ -61,11 +61,11 @@ std::map<std::string, std::string> SetBeam::validateInputs() {
       std::string shape = geometryArgs->getProperty("Shape");
       if (shape != SHAPE_NAME_SLIT && shape != SHAPE_NAME_CIRCLE) {
         errors["Geometry"] = "Only 'Slit' and 'Circle' shapes are supported.";
-      } else {
-        errors["Geometry"] =
-            "'Geometry' flags missing or incorrect. Required flags: Shape, "
-            "plus Width and Height, or Radius";
       }
+    } else {
+      errors["Geometry"] =
+          "'Geometry' flags missing or incorrect. Required flags: Shape, "
+          "plus Width and Height, or Radius";
     }
   } else {
     errors["Geometry"] = "No 'Geometry' flags given.";
