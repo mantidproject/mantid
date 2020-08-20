@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
@@ -129,7 +130,7 @@ class PlotWidgetModel(object):
         if tiled_by == TILED_BY_GROUP_TYPE:
             keys = self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
         else:
-            keys = [str(item) for sublist in self.context.data_context.current_runs for item in sublist]
+            keys = [run_list_to_string(item) for item in self.context.data_context.current_runs]
         return keys
 
     def get_plot_types(self):

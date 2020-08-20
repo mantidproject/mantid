@@ -138,6 +138,14 @@ class PlotWidgetModelTest(unittest.TestCase):
 
         self.assertEqual(keys, ['62260', '62261'])
 
+    def test_create_tiled_keys_returns_correctly_for_summed_runs_tiled_by_run(self):
+        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
+        runs = [[62260, 62261]]
+        self.context.data_context.current_runs = runs
+        keys = self.model.create_tiled_keys(TILED_BY_RUN_TYPE)
+
+        self.assertEqual(keys, ['62260-62261'])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
