@@ -17,6 +17,7 @@
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
+#include "Poco/File.h"
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -50,26 +51,34 @@ void ALCDataLoadingPresenter::initialize() {
  * If it was "auto", sets up a watcher to automatically reload on new files.
  */
 void ALCDataLoadingPresenter::handleLoadRequested() {
-  std::string lastFile(m_view->lastRun());
+  //const std::string lastFile(m_view->lastRun());
+  std::vector<std::string> files(m_view->getRuns());
   // remove any directories the watcher is currently watching
-  changeWatchState(false);
-  // Check if input was "Auto"
-  if (0 == lastFile.compare(m_view->autoString())) {
-    // Add path to watcher
-    changeWatchState(true);
-    // and get the most recent file in the directory to be lastFile
-    ALCLatestFileFinder finder(m_view->firstRun());
-    lastFile = finder.getMostRecentFile();
-    // check it was able to find a lastFile
-    if (lastFile.empty()) {
-      m_view->displayError(
-          "Could not determine a valid list of files (check run directory)");
-      return;
-    }
-    m_view->setCurrentAutoFile(lastFile);
-  }
+  //changeWatchState(false);
+  //// Check if input was "Auto"
+  //if (0 == lastFile.compare(m_view->autoString())) {
+  //  // Add path to watcher
+  //  changeWatchState(true);
+  //  // and get the most recent file in the directory to be lastFile
+  //  ALCLatestFileFinder finder(m_view->firstRun());
+  //  lastFile = finder.getMostRecentFile();
+  //  // check it was able to find a lastFile
+  //  if (lastFile.empty()) {
+  //    m_view->displayError(
+  //        "Could not determine a valid list of files (check run directory)");
+  //    return;
+  //  }
+  //  m_view->setCurrentAutoFile(lastFile);
+  //}
+
+
+  // Auto mode on
+  // get last file
+  // do some checks
+  // change text 
+
   // Now perform the load
-  load(lastFile);
+  load(files);
 }
 
 /**
@@ -87,24 +96,24 @@ void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
  * @param timeup :: [input] Qt timer event (not used)
  */
 void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
-  Q_UNUSED(timeup); // We only have one timer, so not necessary to use this
+  //Q_UNUSED(timeup); // We only have one timer, so not necessary to use this
 
-  // Check flag for changes
-  if (m_directoryChanged.load()) {
-    // Most recent file in directory
-    ALCLatestFileFinder finder(m_view->firstRun());
-    std::string lastFile = finder.getMostRecentFile();
-    // check it was able to find a lastFile
-    if (lastFile.empty()) {
-      m_view->displayError(
-          "Could not determine a valid list of files (check run directory)");
-      return;
-    }
-    load(lastFile);
-    m_view->setCurrentAutoFile(lastFile);
-    // Reset flag
-    m_directoryChanged = false;
-  }
+  //// Check flag for changes
+  //if (m_directoryChanged.load()) {
+  //  // Most recent file in directory
+  //  ALCLatestFileFinder finder(m_view->firstRun());
+  //  std::string lastFile = finder.getMostRecentFile();
+  //  // check it was able to find a lastFile
+  //  if (lastFile.empty()) {
+  //    m_view->displayError(
+  //        "Could not determine a valid list of files (check run directory)");
+  //    return;
+  //  }
+  //  //load(lastFile);
+  //  m_view->setCurrentAutoFile(lastFile);
+  //  // Reset flag
+  //  m_directoryChanged = false;
+  //}
 }
 
 /**
@@ -112,17 +121,17 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
  * @param watching :: [input] True to start watching, false to stop
  */
 void ALCDataLoadingPresenter::changeWatchState(bool watching) {
-  m_directoryChanged = false;
-  if (watching) {
-    Poco::Path path(m_view->firstRun());
-    m_watcher.addPath(QString(path.parent().toString().c_str()));
-    m_timerID = startTimer(1000); // 1-second timer
-  } else {
-    if (!m_watcher.directories().empty()) {
-      m_watcher.removePaths(m_watcher.directories());
-    }
-    killTimer(m_timerID);
-  }
+  //m_directoryChanged = false;
+  //if (watching) {
+  //  Poco::Path path(m_view->firstRun());
+  //  m_watcher.addPath(QString(path.parent().toString().c_str()));
+  //  m_timerID = startTimer(1000); // 1-second timer
+  //} else {
+  //  if (!m_watcher.directories().empty()) {
+  //    m_watcher.removePaths(m_watcher.directories());
+  //  }
+  //  killTimer(m_timerID);
+  //}
 }
 
 /**
@@ -142,12 +151,18 @@ void ALCDataLoadingPresenter::changeWatchState(int state) {
  * Load new data and update the view accordingly
  * @param lastFile :: [input] Last file in range (user-specified or auto)
  */
-void ALCDataLoadingPresenter::load(const std::string &lastFile) {
+void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
+
+  std::cout << "Files given to load" << std::endl;
+  for (const auto &file : files)
+    std::cout << file << ",";
+  std::cout << std::endl;
+
   m_loadingData = true;
   m_view->disableAll();
   // Use Path.toString() to ensure both are in same (native) format
-  Poco::Path firstRunPath(m_view->firstRun());
-  Poco::Path lastRunPath(lastFile);
+  //Poco::Path firstRunPath(m_view->firstRun());
+  //Poco::Path lastRunPath(lastFile);
 
   // Before loading, check custom grouping (if used) is sensible
   const bool groupingOK = checkCustomGrouping();
@@ -158,20 +173,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     return;
   }
 
-  if (lastRunPath.toString() == "") {
-    m_view->displayError(
-        "The last run is not a valid run number. \n"
-        "This could be because the file is not in the search path or the "
-        "file does not exist yet. ");
-    m_view->enableAll();
-    m_loadingData = false;
-    return;
-  }
-  if (firstRunPath.toString() == "") {
-    m_view->displayError(
-        "The first run is not a valid run number. \n"
-        "This could be because the file is not in the search path or the "
-        "file does not exist yet. ");
+  if (files.empty()) {
+    m_view->displayError("The list of files to load is empty. ");
     m_view->enableAll();
     m_loadingData = false;
     return;
@@ -182,8 +185,14 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
     alg->setChild(true); // Don't want workspaces in the ADS
-    alg->setProperty("FirstRun", firstRunPath.toString());
-    alg->setProperty("LastRun", lastRunPath.toString());
+
+    // Change first last run to WorkspaceNames
+    alg->setProperty("WorkspaceNames", files);
+
+    // 
+    const auto algFiles = alg->getPropertyValue("WorkspaceNames");
+    std::cout << "Alg files : " << algFiles << std::endl; 
+
     alg->setProperty("LogValue", m_view->log());
     alg->setProperty("Function", m_view->function());
     alg->setProperty("Type", m_view->calculationType());
@@ -237,6 +246,12 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     sortAlg->setProperty("Ordering", "Ascending");
     sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
     sortAlg->execute();
+
+    // Reset workspace
+    if (m_loadedData) {
+      m_loadedData = nullptr;
+      std::cout << "in loaded data " << std::endl;
+    }
 
     m_loadedData = sortAlg->getProperty("OutputWorkspace");
 

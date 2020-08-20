@@ -196,8 +196,14 @@ void PlotAsymmetryByLogValue::exec() {
 
   Progress progress(this, 0, 1, lastRunNumber - firstRunNumber + 1);
 
+  std::cout << "PABLG : ";
+
   // Loop through runs
   for (const auto &fileName : m_fileNames) {
+
+    // Check names here
+    std::cout << fileName;
+    std::cout << ", Run number - " << m_rmap[fileName] << std::endl;
 
     // Check if run i was already loaded
     std::ostringstream logMessage;

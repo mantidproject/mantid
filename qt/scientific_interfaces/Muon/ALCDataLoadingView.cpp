@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingView.h"
 
+#include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
 
@@ -28,12 +29,10 @@ void ALCDataLoadingView::initialize() {
   m_ui.logValueSelector->setVisible(true);
   m_ui.logValueSelector->setEnabled(true);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
-  connect(m_ui.firstRun, SIGNAL(fileFindingFinished()),
+  connect(m_ui.runs, SIGNAL(fileFindingFinished()),
           SIGNAL(firstRunSelected()));
-  connect(m_ui.firstRun, SIGNAL(filesFoundChanged()), this,
-          SLOT(handleFirstFileChanged()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.lastRunAuto, SIGNAL(stateChanged(int)), this,
+  connect(m_ui.runAuto, SIGNAL(stateChanged(int)), this,
           SLOT(checkBoxAutoChanged(int)));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
@@ -56,8 +55,8 @@ void ALCDataLoadingView::initialize() {
 }
 
 std::string ALCDataLoadingView::firstRun() const {
-  if (m_ui.firstRun->isValid()) {
-    return m_ui.firstRun->getFirstFilename().toStdString();
+  if (m_ui.runs->isValid()) {
+    return m_ui.runs->getFirstFilename().toStdString();
   } else {
     return "";
   }
@@ -71,15 +70,28 @@ std::string ALCDataLoadingView::firstRun() const {
 std::string ALCDataLoadingView::lastRun() const {
   std::string toReturn("");
 
-  if (m_ui.lastRun->isValid()) {
-    toReturn = m_ui.lastRun->getFirstFilename().toStdString();
-    QString userInput = m_ui.lastRun->getText();
-    if (0 ==
+  if (m_ui.runs->isValid()) {
+    const auto files = m_ui.runs->getFilenames();
+    if (!files.empty())
+      toReturn = files.back().toStdString();
+    QString userInput = m_ui.runs->getText();
+    /*if (0 ==
         userInput.compare(QString(autoString().c_str()), Qt::CaseInsensitive)) {
       toReturn = autoString();
-    }
+    }*/
   }
   return toReturn;
+}
+
+std::vector<std::string> ALCDataLoadingView::getRuns() const {
+  std::vector<std::string> returnFiles;
+  if (m_ui.runs->isValid()) {
+    const auto fileNames = m_ui.runs->getFilenames();
+    for (const auto &file : fileNames) {
+      returnFiles.emplace_back(file.toStdString());
+    }
+  }
+  return returnFiles;
 }
 
 std::string ALCDataLoadingView::log() const {
@@ -146,6 +158,10 @@ boost::optional<std::pair<double, double>>
 ALCDataLoadingView::timeRange() const {
   auto range = std::make_pair(m_ui.minTime->value(), m_ui.maxTime->value());
   return boost::make_optional(range);
+}
+
+bool ALCDataLoadingView::autoIsChecked() const {
+  return m_ui.runAuto->isChecked();
 }
 
 void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
@@ -274,28 +290,33 @@ void ALCDataLoadingView::enableAll() {
  */
 void ALCDataLoadingView::checkBoxAutoChanged(int state) {
   // Tell the presenter about the change
-  emit lastRunAutoCheckedChanged(state);
-  if (state == Qt::Checked) {
-    // Auto mode on
-    m_ui.lastRun->setText(autoString().c_str());
-    m_ui.lastRun->setReadOnly(true);
-  } else {
-    // Replace "auto" with the currently loaded file
-    // The search is necessary to clear the validator
-    m_ui.lastRun->setFileTextWithSearch(m_currentAutoFile.c_str());
-    m_ui.lastRun->setReadOnly(false);
-  }
+  //emit lastRunAutoCheckedChanged(state);
+  //if (state == Qt::Checked) {
+  //  // Auto mode on
+  //  m_ui.lastRun->setText(autoString().c_str());
+  //  m_ui.lastRun->setReadOnly(true);
+  //} else {
+  //  // Replace "auto" with the currently loaded file
+  //  // The search is necessary to clear the validator
+  //  m_ui.lastRun->setFileTextWithSearch(m_currentAutoFile.c_str());
+  //  m_ui.lastRun->setReadOnly(false);
+  //}
 }
 
-/**
- * Called when the "first run" file has changed.
- * Sets the "last run" box to look in the same directory.
- */
-void ALCDataLoadingView::handleFirstFileChanged() {
-  QString directory = m_ui.firstRun->getLastDirectory();
-  if (!directory.isEmpty()) {
-    m_ui.lastRun->setLastDirectory(directory);
-  }
+void ALCDataLoadingView::updateLastRun(const std::string& run) {
+  // get current text
+  const auto currentInput = m_ui.runs->getText();
+  auto finalInput = currentInput;
+
+  // Do some checks
+
+  // Just add -LASTRUN
+  finalInput.append("-");
+  finalInput.append(QString::number(std::stoi(run)));
+
+  // set text
+  m_ui.runs->setText(finalInput); // Does not emit
+  //emit m_ui.runs->fileTextChanged(finalInput);
 }
 
 } // namespace CustomInterfaces

@@ -31,6 +31,9 @@ public:
   /// selected
   virtual std::string lastRun() const = 0;
 
+  /// @return Vector of file names 
+  virtual std::vector<std::string> getRuns() const = 0;
+
   /// Returns the name of the log to use
   /// @return Log name
   virtual std::string log() const = 0;
@@ -77,6 +80,12 @@ public:
   /// @param file :: [input] name of file loaded
   virtual void setCurrentAutoFile(const std::string &file) = 0;
 
+  /// @return auto checkbox
+  virtual bool autoIsChecked() const = 0;
+
+  /// updates text of run box 
+  virtual void updateLastRun(const std::string &run) = 0;
+
 public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;
@@ -120,9 +129,6 @@ public slots:
 
   /// Toggles "auto" mode for last file
   virtual void checkBoxAutoChanged(int state) = 0;
-
-  /// Gets directory from first file and sets last file directory
-  virtual void handleFirstFileChanged() = 0;
 
 signals:
   /// Request to load data

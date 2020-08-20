@@ -66,7 +66,7 @@ protected:
 
 private:
   /// Load new data and update the view accordingly
-  void load(const std::string &lastFile);
+  void load(const std::vector<std::string> &files);
 
   /// Start/stop watching directory
   void changeWatchState(bool watching);

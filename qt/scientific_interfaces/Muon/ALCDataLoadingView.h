@@ -39,6 +39,7 @@ public:
 
   std::string firstRun() const override;
   std::string lastRun() const override;
+  std::vector<std::string> getRuns() const override;
   std::string log() const override;
   std::string function() const override;
   std::string deadTimeType() const override;
@@ -63,7 +64,6 @@ public:
   void disableAll() override;
   void enableAll() override;
   void checkBoxAutoChanged(int state) override;
-  void handleFirstFileChanged() override;
 
   /// returns the string "Auto"
   std::string autoString() const override { return g_autoString; }
@@ -73,6 +73,9 @@ public:
   void setCurrentAutoFile(const std::string &file) override {
     m_currentAutoFile = file;
   }
+
+  bool autoIsChecked() const override;
+  void updateLastRun(const std::string &run) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
