@@ -1,0 +1,144 @@
+.. _GitConfig:
+
+=================
+Mantid Git Config
+=================
+
+.. contents:: Contents
+   :local:
+
+Summary
+-------
+
+This page describes some configuration that will help with your usage of Git - some of which is strongly recommended. This should all be added to the ``.gitconfig`` file in your user home directory, i.e. ``~/`` on Linux or ``%USERPROFILE%`` on Windows. This will then be global across all of your repositories - please sanity check these suggestions if you use git for other repositories.
+
+Note that some of the values are commented out because they must be updated with your own details or are OS specific.
+
+Note that you can split your config into sub-files and include them using the ``[include]`` stanza, e.g.
+
+.. code-block:: sh
+
+   [include]
+           path = ~/.gitconfig_common
+
+
+Recommended Config
+------------------
+
+It is recommended to set up the following as a minimum:
+
+.. code-block:: sh
+
+   [user]
+           # Uncomment and set these to your own details
+           #name =
+           #email =
+   [core]
+           # Set an editor you like
+           editor = vi
+           # Specify your own global list of files/patterns that git should ignore
+           excludesfile = ~/.gitignore
+           # Fix up line endings between windows/linux - uncomment one
+           # Linux
+           #autocrlf = input
+           # Windows
+           #autocrlf = true
+   [log]
+           # Get the log to follow files even if they were renamed
+           follow = true
+   [fetch]
+           # Remove remote-tracking references that no longer exist on the remote when you do a fetch/pull
+           prune = true
+   [push]
+           # The safest default for git-push: push only the current branch and only if it has the same name as upstream
+           default = simple
+   [pull]
+           # Only pull the current branch by default
+           default = current
+           # Rebase onto the remote branch rather than merging it (avoids extra merge commits when you are just syncing changes from github)
+           rebase = true
+   [diff]
+           # Add extra colours for highlighting moved code
+           colorMoved = default
+   [merge]
+           # Include the common ancestor in conflict details - very useful for working out which changes to keep
+           conflictstyle = diff3
+   [rebase]
+           # Automatically reposition !fixup/!squash commits in interactive rebase (useful with git commit --fixup/squash)
+           autosquash = true
+
+Diff/Merge Tools
+----------------
+
+You may find the following diff/merge tools helpful:
+
+.. code-block:: sh
+
+   # Uncomment lines where appropriate for specific OS
+   [diff]
+           # Set up a graphical tool for viewing diffs. I like meld because it looks good and does a good job with directory diffs.
+           tool = meld
+   [difftool]
+           # Disable the prompt when opening the difftool
+           prompt = false
+   [merge]
+           # Specify a graphical tool for resolving merge conflicts. I like diffmerge because you can toggle between the merged file and common ancestor
+           tool = diffmerge
+   [difftool "meld"]
+           external = meld
+           # Windows
+           #cmd = \"C:\\Program Files (x86)\\Meld\\Meld.exe\" "$LOCAL" "$REMOTE"
+           #path = C:/Program Files (x86)/Meld/Meld.exe
+   [mergetool "meld"]
+           trustExitCode = true
+           keepBackup = false
+           # Windows
+           #cmd = \"C:\\Program Files (x86)\\Meld\\Meld.exe\" "$LOCAL" "$BASE" "$REMOTE" "--output=$MERGED"  
+           #path = C:/Program Files (x86)/Meld/Meld.exe
+   [difftool "diffmerge"]
+           # Linux
+           #cmd = diffmerge $LOCAL $REMOTE
+           # Windows
+           #cmd = C:/Program\\ Files/SourceGear/common/DiffMerge/sgdm.exe \"$LOCAL\" \"$REMOTE\"
+   [mergetool "diffmerge"]
+           trustExitCode = true
+           keepBackup = false
+           # Linux
+           #cmd = diffmerge -merge -result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+           # Windows
+           #cmd = C:/Program\\ Files/SourceGear/common/DiffMerge/sgdm.exe -merge -result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+
+Useful Aliases
+--------------
+
+You may find the following aliases helpful. You can also add your own.
+
+.. code-block:: sh
+
+   [pretty]
+           concise = "%C(yellow)%h%Creset %C(green)[%ar]%Creset %C(auto)%d%Creset %s %C(cyan)<%an>"
+           detail = "%C(yellow)commit %h%Creset%C(auto)%d%Creset%n%C(yellow)Parents: %p%Creset%n%C(cyan)Author: %an <%ae>%Creset%n%C(cyan)        %ai (%ar)%Creset%n%C(green)Commit: %cn <%ce>%Creset%n%C(green)        %ci (%cr)%Creset%n%n%w(79)%s%n%n%b"
+
+   [alias]
+           # Check out a pull request for testing - uncomment and replace <main-remote-name>
+           #test-pr = "!f() { git fetch <main-remote-name> +pull/$1/merge:pr/$1-merged && git checkout pr/$1-merged; }; f"
+           # Remove all branches starting pr/
+           test-pr-remove-all = "!f() { git branch | grep pr/ | xargs git branch -D; }; f"
+
+           # Pretty oneline log with a bit more info than git log --oneline
+           lg = log --pretty=concise
+           # Pretty log showing only commits since master
+           lgm = log --pretty=concise master..
+           # Pretty log showing as a graph
+           lgg = log --pretty=concise --graph
+
+           # Show commit details with file names only
+           sh = show --stat --pretty=detail
+           # Show commit details including diffs (same as git-show but slightly prettier)
+           shd = show --pretty=detail
+
+           # A more concise output from status, also showing which branch you're on
+           st = status --short --branch
+           # A more verbose output from branch, showing the commit and upstream branch
+           br = branch -vv
+           pushf = push --force-with-lease

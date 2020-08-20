@@ -10,6 +10,9 @@ Mantid Git Workflow
 Summary
 -------
 
+Go to the :doc:`GitConfig` page to ensure that Git is set up correctly
+before starting.
+
 This page describes the workflow used in conjunction with `Git
 <http://git-scm.com>`_ and `GitHub <https://www.github.com/>`_ for
 those who have push access to the repository.
