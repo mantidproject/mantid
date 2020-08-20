@@ -10,7 +10,6 @@ set_pvplugin_properties(MantidParaViewScaleWorkspaceSMPlugin QT_VERSION 4)
 
 target_link_libraries(MantidParaViewScaleWorkspaceSMPlugin
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${CORE_MANTIDLIBS}
                       DataObjects
                       VatesAPI

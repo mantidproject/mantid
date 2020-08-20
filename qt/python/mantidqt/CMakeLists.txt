@@ -19,7 +19,6 @@ set(
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h)
 
 list(APPEND common_link_libs
-            ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             PythonInterfaceCore)

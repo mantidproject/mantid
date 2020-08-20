@@ -65,7 +65,6 @@ mtd_add_qt_library(
     inc
     ${Boost_INCLUDE_DIRS}
   LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
     PythonInterfaceCore
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
