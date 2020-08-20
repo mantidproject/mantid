@@ -102,6 +102,12 @@ class QuickEditView(QtWidgets.QWidget):
 
     """ auto scale selection """
 
+    def disable_autoscale(self):
+        self.autoscale.setEnabled(False)
+
+    def enable_autoscale(self):
+        self.autoscale.setEnabled(True)
+
     def disable_yaxis_changer(self):
         self.y_axis_changer.view.setEnabled(False)
 

@@ -15,6 +15,12 @@ class QuickEditPresenter(object):
     def widget(self):
         return self._view
 
+    def disable_autoscale(self):
+        self._view.disable_autoscale()
+
+    def enable_autoscale(self):
+        self._view.enable_autoscale()
+
     def check_autoscale_state(self):
         return self._view.check_autoscale_state()
 

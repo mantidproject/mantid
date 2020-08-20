@@ -9,7 +9,7 @@ from copy import deepcopy
 from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 from MultiPlotting.multi_plotting_context import *
-
+from mantidqt.utils.observer_pattern import GenericObserver
 
 class MultiPlotWindow(QtWidgets.QMainWindow):
     windowClosedSignal = QtCore.Signal()
@@ -20,6 +20,7 @@ class MultiPlotWindow(QtWidgets.QMainWindow):
         self.multi_plot = MultiPlotWidget(self.plot_context, self)
         self.setCentralWidget(self.multi_plot)
         self.setWindowTitle(window_title)
+        self.multi_plot._setup_autoscale_observer()
 
     def set_window_title(self, window_title):
         self.setWindowTitle(window_title)
@@ -185,9 +186,24 @@ class MultiPlotWidget(QtWidgets.QWidget):
             self._x_range_changed(xrange)
             self._y_range_changed(yrange)
 
-    def _autoscale_changed(self, _):
-        names = self.quickEdit.get_selection()
-        self.plots.set_y_autoscale(names, True)
+    def _setup_autoscale_observer(self):
+        self.uncheck_autoscale_observer = GenericObserver(self.quickEdit.uncheck_autoscale)
+        self.plots.toolbar.uncheck_autoscale_notifier.add_subscriber(self.uncheck_autoscale_observer)
+
+        self.enable_autoscale_observer = GenericObserver(self.quickEdit.enable_autoscale)
+        self.plots.toolbar.enable_autoscale_notifier.add_subscriber(self.enable_autoscale_observer)
+
+        self.disable_autoscale_observer = GenericObserver(self.quickEdit.disable_autoscale)
+        self.plots.toolbar.disable_autoscale_notifier.add_subscriber(self.disable_autoscale_observer)
+
+
+    def _autoscale_changed(self, _= None):
+        if self.quickEdit.check_autoscale_state():
+            self.quickEdit.disable_yaxis_changer()
+            names = self.quickEdit.get_selection()
+            self.plots.set_y_autoscale(names, True)
+        else:
+            self.quickEdit.enable_yaxis_changer()
 
     def _change_errors(self, state, names):
         self.plots.change_errors(state, names)
@@ -202,6 +218,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
             self._context.set_xBounds(xRange)
         self.plots.set_plot_x_range(names, xRange)
         self.quickEdit.set_plot_x_range(xRange)
+        self._autoscale_changed()
 
     def _y_range_changed(self, yRange):
         names = self.quickEdit.get_selection()

@@ -18,6 +18,12 @@ class QuickEditWidget(object):
     def widget(self):
         return self._presenter.widget
 
+    def disable_autoscale(self):
+        self._presenter.disable_autoscale()
+
+    def enable_autoscale(self):
+        self._presenter.enable_autoscale()
+
     def disable_yaxis_changer(self):
         self._presenter.disable_yaxis_changer()
 

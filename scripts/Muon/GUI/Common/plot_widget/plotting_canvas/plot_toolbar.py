@@ -40,6 +40,8 @@ class PlotToolbar(NavigationToolbar):
         self.is_minor_grid_on = False
         NavigationToolbar.__init__(self, figure_canvas, parent=parent)
         self.uncheck_autoscale_notifier = GenericObservable()
+        self.enable_autoscale_notifier = GenericObservable()
+        self.disable_autoscale_notifier = GenericObservable()
 
     def _init_toolbar(self):
         for text, tooltip_text, mdi_icon, callback in self.toolitems:
@@ -103,10 +105,12 @@ class PlotToolbar(NavigationToolbar):
 
     def zoom(self, *args):
         """Activate zoom to rect mode."""
-        self.uncheck_autoscale_notifier.notify_subscribers()
         if self._active == 'ZOOM':
             self._active = None
+            self.enable_autoscale_notifier.notify_subscribers()
         else:
+            self.uncheck_autoscale_notifier.notify_subscribers()
+            self.disable_autoscale_notifier.notify_subscribers()
             self._active = 'ZOOM'
 
         if self._idPress is not None:
@@ -127,8 +131,8 @@ class PlotToolbar(NavigationToolbar):
         else:
             self.canvas.widgetlock.release(self)
 
-        for a in self.canvas.figure.get_axes():
-            a.set_navigate_mode(self._active)
+        for axes in self.canvas.figure.get_axes():
+            axes.set_navigate_mode(self._active)
 
         self.set_message(self.mode)
 
@@ -136,10 +140,13 @@ class PlotToolbar(NavigationToolbar):
         """Activate the pan/zoom tool. pan with left button, zoom with right"""
         # set the pointer icon and button press funcs to the
         # appropriate callbacks
-        self.uncheck_autoscale_notifier.notify_subscribers()
+
         if self._active == 'PAN':
             self._active = None
+            self.enable_autoscale_notifier.notify_subscribers()
         else:
+            self.uncheck_autoscale_notifier.notify_subscribers()
+            self.disable_autoscale_notifier.notify_subscribers()
             self._active = 'PAN'
         if self._idPress is not None:
             self._idPress = self.canvas.mpl_disconnect(self._idPress)
@@ -159,8 +166,14 @@ class PlotToolbar(NavigationToolbar):
         else:
             self.canvas.widgetlock.release(self)
 
-        for a in self.canvas.figure.get_axes():
-            a.set_navigate_mode(self._active)
+        for axes in self.canvas.figure.get_axes():
+            axes.set_navigate_mode(self._active)
 
         self.set_message(self.mode)
+
+    def home(self, *args):
+        """Restore the original view."""
+        self._nav_stack.home()
+        self.set_history_buttons()
+        self._update_view()
 
