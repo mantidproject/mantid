@@ -36,6 +36,8 @@ New Features
 - Added support for specifying which groups should be used to calculate a group.
 - Added two buttons to the Muon analysis and Frequency domain analysis plot toolbar to allow users to show major and minor gridlines.
 - Added a Plot difference checkbox to the Muon Analysis GUI, which allows user to choose whether the fit difference curve is shown.
+- Added support for specifying which periods should be used to calculate a group.
+- Added suport for loading and saving group period data from xml files.
 
 Improvements
 -------------
