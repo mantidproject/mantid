@@ -55,8 +55,8 @@ It is recommended to set up the following as a minimum:
    [pull]
            # Only pull the current branch by default
            default = current
-           # Rebase onto the remote branch rather than merging it (avoids extra merge commits when you are just syncing changes from github)
-           rebase = true
+           # Only allow pull if it can be fast-forwarded (otherwise you explicitly need to merge in the remote or rebase onto it e.g. with git pull --rebase)
+           ff = only
    [diff]
            # Add extra colours for highlighting moved code
            colorMoved = default
