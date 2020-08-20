@@ -815,6 +815,10 @@ def update_colorplot_datalimits(axes, mappables):
         ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
     axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
     axes.autoscale()
+    if axes._autoscaleXon:
+        axes.set_xlim((xmin_all, xmax_all), auto=None)
+    if axes._autoscaleYon:
+        axes.set_ylim((ymin_all, ymax_all), auto=None)
 
 
 def get_colorplot_extents(mappable):
@@ -824,7 +828,10 @@ def get_colorplot_extents(mappable):
     :return: (left, right, bottom, top)
     """
     if isinstance(mappable, mimage.AxesImage):
-        xmin, xmax, ymin, ymax = mappable.get_extent()
+        if hasattr(mappable, 'get_full_extent'):
+            xmin, xmax, ymin, ymax = mappable.get_full_extent()
+        else:
+            xmin, xmax, ymin, ymax = mappable.get_extent()
     elif isinstance(mappable, mcoll.QuadMesh):
         # coordinates are vertices of the grid
         coords = mappable._coordinates

@@ -44,7 +44,8 @@ class SamplingImage(mimage.AxesImage):
         self.normalization = normalization
         self._resize_cid, self._xlim_cid, self._ylim_cid = None, None, None
         self._resample_required = True
-        self.current_extent = extent
+        self._full_extent = extent
+        self._xbins, self._ybins = 100, 100
 
     def connect_events(self):
         axes = self.axes
@@ -78,23 +79,30 @@ class SamplingImage(mimage.AxesImage):
             self._resample_required = True
 
     def _resize(self, canvas):
-        self._resample_required = True
+        xbins, ybins = self._calculate_bins_from_extent()
+        if  xbins > self._xbins or ybins > self._ybins:
+            self._resample_required = True
+
+    def _calculate_bins_from_extent(self):
+        bbox = self.get_window_extent().transformed(
+            self.axes.get_figure().dpi_scale_trans.inverted())
+        dpi = self.axes.get_figure().dpi
+        xbins = int(np.ceil(bbox.width * dpi))
+        ybins = int(np.ceil(bbox.height * dpi))
+        return xbins, ybins
 
     def _resample_image(self, xbins=None, ybins=None):
         if self._resample_required:
-            extent = self.current_extent
+            extent = self.get_extent()
 
             if xbins is None or ybins is None:
-                bbox = self.get_window_extent().transformed(
-                    self.axes.get_figure().dpi_scale_trans.inverted())
-                dpi = self.axes.get_figure().dpi
-                xbins = int(np.ceil(bbox.width * dpi))
-                ybins = int(np.ceil(bbox.height * dpi))
+                xbins, ybins = self._calculate_bins_from_extent()
 
             x, y, data = get_matrix_2d_ragged(self.ws, self.normalization, histogram2D=True, transpose=self.transpose,
                                               extent=extent, xbins=xbins, ybins=ybins, spec_info=self.spectrum_info)
             self.set_data(data)
-            return x, y
+            self._xbins = xbins
+            self._ybins = ybins
 
     def _update_extent(self):
         """
@@ -102,11 +110,14 @@ class SamplingImage(mimage.AxesImage):
         this limits the range that the data will be sampled. Return True or False if extents have changed.
         """
         new_extent = self.axes.get_xlim() + self.axes.get_ylim()
-        if new_extent != self.current_extent:
-            self.current_extent = new_extent
+        if new_extent != self.get_extent():
+            self.set_extent(new_extent)
             return True
         else:
             return False
+
+    def get_full_extent(self):
+        return self._full_extent
 
 
 def imshow_sampling(axes,
@@ -144,11 +155,13 @@ def imshow_sampling(axes,
     kwargs.pop('distribution', None)
 
     if not extent:
-        width = 0
+        x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
+                          workspace.getDimension(1).getMinimum() , workspace.getDimension(1).getMaximum())
         if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
             width = workspace.getDimension(1).getBinWidth()
-        extent = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
-                  workspace.getDimension(1).getMinimum() - width/2, workspace.getDimension(1).getMaximum() + width/2)
+            y0 -= width/2
+            y1 += width/2
+        extent = (x0, x1, y0, y1)
 
         if transpose:
             e1, e2, e3, e4 = extent
