@@ -198,7 +198,6 @@ void IndirectFitPlotPresenter::appendLastDataToSelection() {
     // if adding a spectra to an existing workspace, update all the combo box
     // entires.
     for (int i = 0; i < workspaceCount.value; i++) {
-      m_model->getFitDataName(TableDatasetIndex(i));
       m_view->setNameInDataSelection(
           m_model->getFitDataName(TableDatasetIndex(i)), TableDatasetIndex(i));
     }
