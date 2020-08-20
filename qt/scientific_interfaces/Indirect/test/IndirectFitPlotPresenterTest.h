@@ -562,7 +562,7 @@ public:
 
   void
   test_that_appendLastDataToSelection_will_set_the_name_of_the_data_selection_if_the_dataSelectionSize_and_numberOfWorkspaces_are_equal() {
-    TableDatasetIndex const index1(1);
+    TableDatasetIndex const index1(0);
     TableDatasetIndex const index2(1);
 
     ON_CALL(*m_view, dataSelectionSize())
@@ -580,12 +580,12 @@ public:
 
     Expectation createName1 =
         EXPECT_CALL(*m_fittingModel, createDisplayName(index1)).Times(1);
-    EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-0", index))
+    EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-0", index1))
         .Times(1)
         .After(createName1);
     Expectation createName2 =
         EXPECT_CALL(*m_fittingModel, createDisplayName(index2)).Times(1);
-    EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-1", index))
+    EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-1", index2))
         .Times(1)
         .After(createName2);
 
