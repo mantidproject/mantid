@@ -66,8 +66,8 @@ void ExtractFFTSpectrum::exec() {
   MatrixWorkspace_sptr outputWS = create<MatrixWorkspace>(*inputWS);
 
   Progress prog(this, 0.0, 1.0, numHists);
-  std::vector<int> chopIndex(numHists,
-                             0); // we use this to chop tail zeros if necessary
+  // we use this to chop tail zeros if necessary
+  std::vector<size_t> chopIndex(numHists, 0);
 
   Mantid::Kernel::Unit_sptr unit; // must retrieve this from the child FFT
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
@@ -90,7 +90,7 @@ void ExtractFFTSpectrum::exec() {
         childFFT->getProperty("OutputWorkspace");
     unit = fftTemp->getAxis(0)->unit();
 
-    auto &histo = fftTemp->histogram(fftPart);
+    const auto &histo = fftTemp->histogram(fftPart);
     if (!inputImagWS) {
       // with only real input, the tail of the histo is just zeros
       // so we need to trim them
@@ -117,7 +117,7 @@ void ExtractFFTSpectrum::exec() {
       std::max_element(chopIndex.cbegin(), chopIndex.cend());
   // if the input had imaginary component, we won't chop.
   if (*maxChopIter != 0) {
-    const int wsIndex = std::distance(
+    const auto wsIndex = std::distance(
         chopIndex.cbegin(), maxChopIter); // the row where our max value is
     // now we get the x value at our max value
     const double xMax = outputWS->x(wsIndex)[*maxChopIter - 1];
