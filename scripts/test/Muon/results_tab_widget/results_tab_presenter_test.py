@@ -7,6 +7,7 @@
 import unittest
 from unittest import mock
 from Muon.GUI.Common.results_tab_widget.results_tab_presenter import ResultsTabPresenter
+from mantidqt.utils.observer_pattern import GenericObservable
 
 RESULTS_TAB_MODEL_CLS = 'Muon.GUI.Common.results_tab_widget.results_tab_model.ResultsTabModel'
 RESULTS_TAB_VIEW_CLS = 'Muon.GUI.Common.results_tab_widget.results_tab_widget.ResultsTabView'
@@ -149,6 +150,21 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
         self.mock_model.on_new_fit_performed.assert_called_once_with()
 
+    def test_that_disable_observer_calls_on_view_when_triggered(self):
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        disable_notifier = GenericObservable()
+        disable_notifier.add_subscriber(presenter.disable_tab_observer)
+
+        disable_notifier._notify_subscribers_impl(arg=None)
+        self.mock_view.setEnabled.assert_called_once_with(False)
+
+    def test_that_enable_observer_calls_on_view_when_triggered(self):
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        enable_notifier = GenericObservable()
+        enable_notifier.add_subscriber(presenter.enable_tab_observer)
+
+        enable_notifier._notify_subscribers_impl(arg=None)
+        self.mock_view.setEnabled.assert_called_once_with(True)
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

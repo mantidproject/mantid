@@ -65,6 +65,8 @@ Bug fixes
 - Fixed an issue where mantid crashed when the muon analysis plotting window crashed was resized to be too small.
 - Fixed an issue with setting the current workspace before adding a function.
 - Fixed an issue with the results tab not updating correctly after multiple fits with different functions.
+- Fixed an issue where Muon Analysis and Frequency Domain Analysis gui was not properly disabling during calculations.
+
 
 Elemental Analysis 
 ##################
@@ -73,5 +75,6 @@ New Features
 ------------
 - Added a deselect all elements button.
 - Fixed an issue where groups were all being plotted on the same tiled plot.
+
 
 :ref:`Release 5.1.0 <v5.1.0>`

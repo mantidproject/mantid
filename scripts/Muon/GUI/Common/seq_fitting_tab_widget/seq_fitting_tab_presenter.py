@@ -31,6 +31,10 @@ class SeqFittingTabPresenter(object):
         self.fit_parameter_updated_observer = GenericObserver(self.handle_fit_function_parameter_changed)
         self.fit_parameter_changed_in_view = GenericObserverWithArgPassing(self.handle_updated_fit_parameter_in_table)
         self.selected_sequential_fit_notifier = GenericObservable()
+        self.disable_tab_observer = GenericObserver(lambda: self.view.
+                                                    setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.
+                                                   setEnabled(True))
 
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
