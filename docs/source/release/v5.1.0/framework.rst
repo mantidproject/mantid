@@ -21,6 +21,7 @@ New Algorithms
 Algorithms
 ----------
 
+- :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can also check the Error axis for unwanted values if the appropriate checkbox is ticked.
 - :ref:`SetSample <algm-SetSample>` is extended to support for composite shapes, such as FlatPlateHolder and HollowCylinderHolder. Also the input validation is made more stringent.
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
@@ -95,6 +96,7 @@ Python
 Improvements
 ------------
 - Updated the convolution function in the fitting framework to allow the convolution of two composite functions.
+- Added an unroll all checkbox in Algorithm History Window which allows all algorithms to be unrolled at once when copying the script
 
 Bugfixes
 --------

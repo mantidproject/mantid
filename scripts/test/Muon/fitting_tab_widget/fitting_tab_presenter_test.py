@@ -326,7 +326,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.fitting_calculation_model.result = (fit_function, 'Success', 1.07)
 
         self.presenter.handle_finished()
-
+        self.view.setEnabled(True)
         self.assertEqual(self.view.undo_fit_button.isEnabled(), True)
 
     def test_after_fit_fit_cache_is_populated_for_after_fit(self):

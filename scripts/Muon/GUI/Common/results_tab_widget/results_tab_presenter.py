@@ -25,6 +25,11 @@ class ResultsTabPresenter(QObject):
 
         self._init_view()
 
+        self.disable_tab_observer = GenericObserver(lambda: self.view.
+                                                    setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.
+                                                   setEnabled(True))
+
     # callbacks
     def on_results_table_name_edited(self):
         """React to the results table name being edited"""
