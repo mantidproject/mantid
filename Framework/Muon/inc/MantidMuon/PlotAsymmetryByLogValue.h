@@ -60,7 +60,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
   std::map<std::string, std::string> validateInputs() override;
-  int extractRunNumberFromRunName(const std::string &runName);
+  int extractRunNumberFromRunName(std::string runName);
 
 private:
   // Overridden Algorithm methods

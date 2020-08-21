@@ -605,24 +605,19 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
  *   @param runName :: [input] File name to extract run number from
  *   @return :: Run number as int
  */
-int PlotAsymmetryByLogValue::extractRunNumberFromRunName(
-    const std::string &runName) {
+int PlotAsymmetryByLogValue::extractRunNumberFromRunName(std::string runName) {
 
-  auto returnVal = runName;
-  // Remove file extension
-  returnVal.erase(returnVal.size() - 4);
+  // Strip beginning of path to just the run (e.g. MUSR00015189.nxs)
+  std::size_t found = runName.find_last_of("/\\");
+  runName = runName.substr(found + 1);
 
-  std::string base = returnVal;
-  size_t i = base.size() - 1;
-  while (isdigit(base[i]))
-    i--;
-  if (i == base.size() - 1) {
-    throw Exception::FileError("File name must end with a number.", returnVal);
-  }
-  base.erase(i + 1);
-  returnVal.erase(0, base.size());
+  // Remove all non-digits
+  runName.erase(std::remove_if(runName.begin(), runName.end(),
+                               [](auto c) { return !std::isdigit(c); }),
+                runName.end());
 
-  return std::stoi(returnVal);
+  // Return run number as int (removes leading 0's)
+  return std::stoi(runName);
 }
 
 /**  Apply dead-time corrections. The calculation is done by ApplyDeadTimeCorr
