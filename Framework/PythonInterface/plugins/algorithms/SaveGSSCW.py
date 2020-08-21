@@ -39,7 +39,6 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
     def validateInputs(self):
         """Validate input properties
         (virtual method)
-
         """
         issues = dict()
 
@@ -107,12 +106,10 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
           271.27   16.47  273.06   13.29  272.29   11.67  268.96   11.60  260.08   12.93
           245.63   15.67  250.87   12.73  258.06   11.36  267.18   11.56  272.39   13.29
 
-        Parameters
-        ----------
-        workspace
-
         Returns
         -------
+        str
+            GSAS file content
 
         """
         # generate header
@@ -133,13 +130,16 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         Parameters
         ----------
         width: int
+            line width
 
         Returns
         -------
         str
+            A line with space only
 
         """
-        line = '{:80s}'.format('')
+        space = ''
+        line = f'{space:{width}s}'
 
         return line
 
@@ -149,10 +149,6 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
 
         Example:
         BANK 1 2438 488 CONST 1000.000    5.000 0 0 ESD
-
-        Parameters
-        ----------
-        workspace
 
         Returns
         -------
@@ -185,17 +181,12 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
 
     @staticmethod
     def _create_gsas_body(workspace):
-        """
-
-        Parameters
-        ----------
-        workspace
+        """Create GSAS file's body containing data only
 
         Returns
         -------
         str
             data body
-
         """
         # Get Y and E
         vec_y = workspace.readY(0)

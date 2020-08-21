@@ -12,7 +12,6 @@ import numpy as np
 import os
 import unittest
 
-runTests = True
 
 hb2a_exp_data = np.array([
     [10.02500, 287.51184276, 13.43454614],
@@ -72,9 +71,6 @@ class SaveGSSCWTest(unittest.TestCase):
         1. the header of GSAS file shall follow the GSAS doc
         2. all data read from GSAS shall be exactly same as test data
         """
-        if not runTests:
-            return
-
         # set up test parameters: workspace name, output file name,
         ws_name = "SaveGSSCW_2theta"
         gsas_file_name = self.saveFilePath(ws_name)
@@ -93,10 +89,6 @@ class SaveGSSCWTest(unittest.TestCase):
 
     def test_point_data(self):
         """Test with point data
-
-        Returns
-        -------
-
         """
         # Create a workspace as histogram
         x = np.arange(300, 16667, 15.)
@@ -131,6 +123,7 @@ class SaveGSSCWTest(unittest.TestCase):
 
         Returns
         -------
+        None
 
         """
         # File exists?
@@ -181,17 +174,15 @@ class SaveGSSCWTest(unittest.TestCase):
                     assert y_str.strip() == e_str.strip() == ''
 
     def _create_2theta_workspace(self, ws_name, data):
-        """
+        """Create a 1D matrix workspace with unit of 2theta Degrees
 
         Parameters
         ----------
         ws_name: str
-        data: ndarray
-        Returns
-        -------
+            workspace name for output
+        data: numpy.ndarray
+            numpy array with 3 columns (2theta, intensity, error) to create workspace
 
-        """
-        """ Create 2theta workspace
         """
         # Check input
         self.assertEqual(data.shape[1], 3)
