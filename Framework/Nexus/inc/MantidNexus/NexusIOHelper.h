@@ -52,6 +52,11 @@ namespace {
     throw std::runtime_error("NeXusIOHelper: Unknown type in Nexus file");     \
   }
 
+int64_t vectorVolume(const std::vector<int64_t> &size) {
+  return std::accumulate(size.begin(), size.end(), int64_t{1},
+                         std::multiplies<>());
+}
+
 std::pair<::NeXus::Info, bool>
 checkIfOpenAndGetInfo(::NeXus::File &file, const std::string &&entry) {
   std::pair<::NeXus::Info, bool> info_and_close;
@@ -142,7 +147,7 @@ void readNexusAnyVector(std::vector<T> &out, ::NeXus::File &file,
 template <typename T, typename U, typename Narrow>
 void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
                         const std::vector<int64_t> &start,
-                        const std::vector<int64_t> &size,
+                        const std::vector<int64_t> &size, const int64_t volume,
                         const bool close_file) {
   if constexpr (sizeof(T) < sizeof(U) &&
                 !std::is_same_v<Narrow, AllowNarrowing>) {
@@ -151,11 +156,11 @@ void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
     throw std::runtime_error(
         "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
   } else if constexpr (std::is_same_v<T, U>) {
-    if (size[0] > 0)
+    if (volume > 0)
       callGetSlab(file, out, start, size, close_file);
   } else {
-    if (size[0] > 0) {
-      std::vector<U> buf(size[0]);
+    if (volume > 0) {
+      std::vector<U> buf(volume);
       callGetSlab(file, buf, start, size, close_file);
       std::transform(buf.begin(), buf.end(), out.begin(),
                      [](U a) -> T { return static_cast<T>(a); });
@@ -168,8 +173,9 @@ template <typename T, typename U, typename Narrow>
 std::vector<T>
 readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
                  const std::vector<int64_t> &size, const bool close_file) {
-  std::vector<T> vec(size[0]);
-  doReadNexusAnySlab<T, U, Narrow>(vec, file, start, size, close_file);
+  const auto volume = vectorVolume(size);
+  std::vector<T> vec(volume);
+  doReadNexusAnySlab<T, U, Narrow>(vec, file, start, size, volume, close_file);
   return vec;
 }
 
@@ -178,10 +184,11 @@ template <typename T, typename U, typename Narrow>
 void readNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
                       const std::vector<int64_t> &start,
                       const std::vector<int64_t> &size, const bool close_file) {
-  if (out.size() < static_cast<size_t>(size[0]))
+  const auto volume = vectorVolume(size);
+  if (out.size() < static_cast<size_t>(volume))
     throw std::runtime_error(
         "The output buffer is too small in NeXusIOHelper::readNexusAnySlab");
-  doReadNexusAnySlab<T, U, Narrow>(out, file, start, size, close_file);
+  doReadNexusAnySlab<T, U, Narrow>(out, file, start, size, volume, close_file);
 }
 
 /** Templated function to read any type of variable and (potentially) convert it
@@ -217,12 +224,9 @@ std::vector<T> readNexusVector(::NeXus::File &file,
                                const std::string &entry = "") {
   const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  const auto dims = (info_and_close.first).dims;
-  const auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
-                                          std::multiplies<>());
-  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
-                             readNexusAnyVector, file, total_size,
-                             info_and_close.second);
+  RUN_NEXUSIOHELPER_FUNCTION(
+      Narrow, (info_and_close.first).type, readNexusAnyVector, file,
+      vectorVolume((info_and_close.first).dims), info_and_close.second);
 }
 
 /** Opens the data group if needed, finds the data type, computes the data size,
@@ -234,12 +238,9 @@ void readNexusVector(std::vector<T> &out, ::NeXus::File &file,
                      const std::string &entry = "") {
   const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  const auto dims = (info_and_close.first).dims;
-  const auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
-                                          std::multiplies<>());
-  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
-                             readNexusAnyVector, out, file, total_size,
-                             info_and_close.second);
+  RUN_NEXUSIOHELPER_FUNCTION(
+      Narrow, (info_and_close.first).type, readNexusAnyVector, out, file,
+      vectorVolume((info_and_close.first).dims), info_and_close.second);
 }
 
 /** Opens the data group if needed, finds the data type, and calls
