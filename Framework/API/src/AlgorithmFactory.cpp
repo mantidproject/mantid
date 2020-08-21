@@ -58,7 +58,7 @@ AlgorithmFactoryImpl::create(const std::string &name,
   // Fallback, name might be an alias
   // Try get real name and create from that instead
   const auto realName = getRealNameFromAlias(name);
-  if (realName != boost::none) {
+  if (realName) {
     // Try create algorithm again with real name
     try {
       return this->createAlgorithm(realName.get(), local_version);
