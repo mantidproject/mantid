@@ -50,6 +50,7 @@ Algorithms
 - Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
 - Added alias for GeneratePythonScript as ExportHistory
 - Deprecated the RecordPythonScript algorithm
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now increments the random seed for each detector.
 
 Data Handling
 -------------
