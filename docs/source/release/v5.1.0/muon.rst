@@ -53,7 +53,6 @@ Improvements
 - The ALC interface in workbench will now show errors by default. The error bars can also be turned on/off using the right-click plot menu.
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Added in default group and pair selection when loading grouping files from xml.
-- Removed the ability to deselect all groups and pairs.
 
 Bug fixes
 ---------
