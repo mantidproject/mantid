@@ -439,25 +439,12 @@ public:
     pmap.addString(source->getComponentID(), "beam-shape", "Circle");
     pmap.addDouble(source->getComponentID(), "beam-radius", 0.01);
 
-    // calculate expected value of the att factor as integral exp(-mu*t)p(t)dt
-    // where t = 2(1-y), p(t) = 8(1-y)/3
-    // integrate over y= 0 to 0.5, which gives
-    // E(att) = 2*(exp(-mu)*(mu+1) - exp(-2*mu)*(2*mu+1))/3*mu^2
-
     auto mcAbsorb = createAlgorithm();
     constexpr int NEVENTS = 500000;
     mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
 
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
-    auto outputWS = getOutputWorkspace(mcAbsorb);
-
-    verifyDimensions(wsProps, outputWS);
-    auto yData = outputWS->getSpectrum(0).dataY();
-
-    constexpr double delta(1e-03);
-    const double calculatedAttFactor1 = 2 * (2 * exp(-1) - 3 * exp(-2)) / 3;
-    TS_ASSERT_DELTA(calculatedAttFactor1, yData[0], delta);
   }
   //---------------------------------------------------------------------------
   // Unit tests
