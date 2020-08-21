@@ -115,13 +115,8 @@ void ExtractFFTSpectrum::exec() {
   // remove 0's)
   const auto maxChopIter =
       std::max_element(chopIndex.cbegin(), chopIndex.cend());
-<<<<<<< HEAD
   // if the input had imaginary component, we won't chop.
-  if (*maxChopIter != 0) { 
-=======
-  if (*maxChopIter !=
-      0) { // if the input had imaginary component, we won't chop.
->>>>>>> ba0d1f19f53... Clang formatting
+  if (*maxChopIter != 0) {
     const int wsIndex = std::distance(
         chopIndex.cbegin(), maxChopIter); // the row where our max value is
     // now we get the x value at our max value

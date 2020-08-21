@@ -137,11 +137,8 @@ Bugfixes
 - Fix crash when subscribing algorithms from a separate thread
 - The workbench launch scripts have been replaced by an executable on macOS & Windows. On Windows this will stop virus scanners
   flagging the old ``launch_workbench.exe`` as a threat and quarantining it.
-<<<<<<< HEAD
 - Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
-=======
 - When running `ExtractFFTSpectrum` with only a real input, there is no longer a blank output on the end of the workspace.
 - `ExtractFFTSpectrum` gives the correct units. 
->>>>>>> ad5f1c175b8... ExtractFFTSpectrum improvements added to docs
 
 :ref:`Release 5.1.0 <v5.1.0>`
