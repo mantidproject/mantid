@@ -73,9 +73,9 @@ Output:
 	ws_list = ['MUSR00015195','MUSR00015189','MUSR00015191']
 
 	ws = PlotAsymmetryByLogValue(WorkspaceNames = ws_list,
-								 LogValue = 'sample_magn_field',
-								 TimeMin = 0.55,
-								 TimeMax = 12.0);
+								LogValue = 'sample_magn_field',
+								TimeMin = 0.55,
+								TimeMax = 12.0);
 
 	print("Y values (asymmetry): {}".format(ws.readY(0)))
 	print("X values (sample magn. field): {}".format(ws.readX(0)))
