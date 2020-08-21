@@ -14,14 +14,6 @@ This page describes some configuration that will help with your usage of Git - s
 
 Note that some of the values are commented out because they must be updated with your own details or are OS specific.
 
-Note that you can split your config into sub-files and include them using the ``[include]`` stanza, e.g.
-
-.. code-block:: sh
-
-   [include]
-           path = ~/.gitconfig_common
-
-
 Recommended Config
 ------------------
 
@@ -146,3 +138,22 @@ You may find the following aliases helpful. You can also add your own.
            pushu = push --set-upstream
            # Force push with lease (safer than push --force, but still be careful when changing history)
            pushfl = push --force-with-lease
+
+More Advanced Options
+---------------------
+
+The following may be useful if you get into more in-depth usage of Git:
+
+.. code-block:: sh
+
+   [rerere]
+           # Reuse Recorded Resolutions - useful if you find yourself fixing the same conflicts over and over
+           enabled = true
+           # Auto-stage files resolved by rerere
+           autoupdate = true
+   [blame]
+           # This file allows you to specify commits that should be ignored in git-blame e.g. bulk changes
+           ignoreRevsFile = ~/.git-blame-ignore-revs
+   [include]
+           # You can split your config into sub-files e.g. to include common config on different OS's
+           path = ~/.gitconfig_common
