@@ -18,5 +18,6 @@
     <file alias="Ornl_hfir_sns_logo_small.png">../../../images/Ornl_hfir_sns_logo_small.png</file>
     <file alias="Tessella_Logo_Transparent.gif">../../../images/Tessella_Logo_Transparent.gif</file>
     <file alias="ess_logo_transparent_small.png">../../../images/ess_logo_transparent_small.png</file>
+    <file alias="crying_mantid.png">../../../images/crying_mantid.png</file>
 </qresource>
 </RCC>

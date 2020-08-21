@@ -43,7 +43,7 @@ if(ENABLE_MANTIDPLOT)
                        Qt4::Qscintilla
                        API
                      INSTALL_DIR
-                       ${LIB_DIR}/mantidqt
+                       ${SITE_PACKAGES}/mantidqt
                      LINUX_INSTALL_RPATH
                        "\$ORIGIN/.."
                      OSX_INSTALL_RPATH
@@ -71,11 +71,11 @@ if(ENABLE_WORKBENCH)
                        Qt5::Qscintilla
                        API
                      INSTALL_DIR
-                       ${WORKBENCH_LIB_DIR}/mantidqt
+                       ${WORKBENCH_SITE_PACKAGES}/mantidqt
                      LINUX_INSTALL_RPATH
                        "\$ORIGIN/.."
                      OSX_INSTALL_RPATH
-                       "@loader_path/.."
+		       "@loader_path/.."
                      FOLDER Qt5)
 endif()
 
