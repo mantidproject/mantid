@@ -79,7 +79,6 @@ public:
     const double testX = 0.25;
     const double testY = 0;
     const double testZ = 0;
-    const V3D testVec(testX, testY, testZ);
     constexpr const double DBL_EPS = std::numeric_limits<double>::epsilon();
     CircularBeamProfile profile(createTestFrame(), center, radius);
 

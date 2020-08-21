@@ -468,7 +468,7 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
   double beamWidth(-1.0), beamHeight(-1.0), beamRadius(-1.0);
 
   std::string beamShapeParam = source->getParameterAsString("beam-shape");
-  if (beamShapeParam.compare("Slit") == 0) {
+  if (beamShapeParam == "Slit") {
     auto beamWidthParam = source->getNumberParameter("beam-width");
     auto beamHeightParam = source->getNumberParameter("beam-height");
     if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
@@ -477,7 +477,7 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
       return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(),
                                                       beamWidth, beamHeight);
     }
-  } else if (beamShapeParam.compare("Circle") == 0) {
+  } else if (beamShapeParam == "Circle") {
     auto beamRadiusParam = source->getNumberParameter("beam-radius");
     if (beamRadiusParam.size() == 1) {
       beamRadius = beamRadiusParam[0];

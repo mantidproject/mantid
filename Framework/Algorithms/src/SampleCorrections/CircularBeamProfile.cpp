@@ -27,8 +27,8 @@ CircularBeamProfile::CircularBeamProfile(const Geometry::ReferenceFrame &frame,
                                          double radius)
     : IBeamProfile(), m_upIdx(frame.pointingUp()),
       m_beamIdx(frame.pointingAlongBeam()),
-      m_horIdx(frame.pointingHorizontal()), m_center(center), m_radius(radius),
-      m_min(), m_beamDir() {
+      m_horIdx(frame.pointingHorizontal()), m_radius(radius), m_min(),
+      m_center(center), m_beamDir() {
   m_min[m_upIdx] = m_center[m_upIdx] - radius;
   m_min[m_horIdx] = m_center[m_horIdx] - radius;
   m_min[m_beamIdx] = m_center[m_beamIdx];
