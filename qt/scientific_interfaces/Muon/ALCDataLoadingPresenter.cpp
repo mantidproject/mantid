@@ -41,8 +41,9 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
   connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
           SLOT(updateDirectoryChangedFlag(const QString &)));
-  connect(m_view, SIGNAL(lastRunAutoCheckedChanged(int)),
-          SLOT(changeWatchState(int)));
+  //connect(m_view, SIGNAL(lastRunAutoCheckedChanged(int)),
+          //SLOT(changeWatchState(int)));
+  connect(m_view, SIGNAL(runAutoCheckedChanged(int)), SLOT(updateAutoRun(int)));
 }
 
 /**
@@ -53,6 +54,13 @@ void ALCDataLoadingPresenter::initialize() {
 void ALCDataLoadingPresenter::handleLoadRequested() {
   //const std::string lastFile(m_view->lastRun());
   std::vector<std::string> files(m_view->getRuns());
+
+  // Check if error
+  if (!files.empty() && files.front() == "error") {
+    m_view->displayError("Not a valid expression for runs");
+    return;
+  }
+
   // remove any directories the watcher is currently watching
   //changeWatchState(false);
   //// Check if input was "Auto"
@@ -70,12 +78,6 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   //  }
   //  m_view->setCurrentAutoFile(lastFile);
   //}
-
-
-  // Auto mode on
-  // get last file
-  // do some checks
-  // change text 
 
   // Now perform the load
   load(files);
@@ -140,11 +142,32 @@ void ALCDataLoadingPresenter::changeWatchState(bool watching) {
  * @param state :: [input] Member of Qt::CheckState enum
  */
 void ALCDataLoadingPresenter::changeWatchState(int state) {
-  if (state == Qt::Checked) {
+  /*if (state == Qt::Checked) {
     changeWatchState(true);
   } else {
     changeWatchState(false);
+  }*/
+}
+
+void ALCDataLoadingPresenter::updateAutoRun(int state) {
+ 
+  // find most recent file
+  // update auto run number
+  ALCLatestFileFinder finder(m_view->firstRun());
+  const auto last = finder.getMostRecentFile();
+
+  if (last.empty()) {
+    // Error
+    m_view->displayError("Could not determine a valid last file.");
+    m_view->setCurrentAutoRun(-1);
+    return;
   }
+
+  // Update last
+  const int lastRun = m_view->extractRunNumber(last);
+
+  // Send back to view
+  m_view->setCurrentAutoRun(lastRun);
 }
 
 /**
@@ -152,11 +175,6 @@ void ALCDataLoadingPresenter::changeWatchState(int state) {
  * @param lastFile :: [input] Last file in range (user-specified or auto)
  */
 void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
-
-  std::cout << "Files given to load" << std::endl;
-  for (const auto &file : files)
-    std::cout << file << ",";
-  std::cout << std::endl;
 
   m_loadingData = true;
   m_view->disableAll();
@@ -188,11 +206,6 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
 
     // Change first last run to WorkspaceNames
     alg->setProperty("WorkspaceNames", files);
-
-    // 
-    const auto algFiles = alg->getPropertyValue("WorkspaceNames");
-    std::cout << "Alg files : " << algFiles << std::endl; 
-
     alg->setProperty("LogValue", m_view->log());
     alg->setProperty("Function", m_view->function());
     alg->setProperty("Type", m_view->calculationType());
@@ -233,7 +246,7 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     // Execute async so we can show progress bar
     Poco::ActiveResult<bool> result(alg->executeAsync());
     while (!result.available()) {
-      QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
     }
     if (!result.error().empty()) {
       throw std::runtime_error(result.error());
@@ -246,12 +259,6 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     sortAlg->setProperty("Ordering", "Ascending");
     sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
     sortAlg->execute();
-
-    // Reset workspace
-    if (m_loadedData) {
-      m_loadedData = nullptr;
-      std::cout << "in loaded data " << std::endl;
-    }
 
     m_loadedData = sortAlg->getProperty("OutputWorkspace");
 

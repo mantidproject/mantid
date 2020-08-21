@@ -68,28 +68,23 @@ std::string ALCDataLoadingView::firstRun() const {
  * Otherwise, return an empty string.
  */
 std::string ALCDataLoadingView::lastRun() const {
-  std::string toReturn("");
-
   if (m_ui.runs->isValid()) {
     const auto files = m_ui.runs->getFilenames();
     if (!files.empty())
-      toReturn = files.back().toStdString();
-    QString userInput = m_ui.runs->getText();
-    /*if (0 ==
-        userInput.compare(QString(autoString().c_str()), Qt::CaseInsensitive)) {
-      toReturn = autoString();
-    }*/
+      return files.back().toStdString();
+  } else {
+    return "";
   }
-  return toReturn;
 }
 
 std::vector<std::string> ALCDataLoadingView::getRuns() const {
   std::vector<std::string> returnFiles;
   if (m_ui.runs->isValid()) {
     const auto fileNames = m_ui.runs->getFilenames();
-    for (const auto &file : fileNames) {
+    for (const auto &file : fileNames) 
       returnFiles.emplace_back(file.toStdString());
-    }
+  } else {
+    returnFiles.emplace_back("error");
   }
   return returnFiles;
 }
@@ -301,22 +296,57 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
   //  m_ui.lastRun->setFileTextWithSearch(m_currentAutoFile.c_str());
   //  m_ui.lastRun->setReadOnly(false);
   //}
+
+  emit runAutoCheckedChanged(state); // Presenter sets auto run number
+
+  if (m_currentAutoRun == -1)
+    return;
+
+  const int currentLastRun = extractRunNumber(lastRun());
+  const auto currentText = m_ui.runs->getText();
+  auto newText = currentText;
+  QString autoEndRun = "-";
+  autoEndRun.append(QString::number(m_currentAutoRun));
+
+  if (state == Qt::Checked) {
+    if (m_currentAutoRun > currentLastRun) {
+      std::cout << "current auto - " << m_currentAutoRun << std::endl;
+      std::cout << "current last - " << currentLastRun << std::endl;
+      // Checks on text
+      // Need to know if ends with -NUMBER
+
+      newText.append("-");
+      newText.append(QString::number(m_currentAutoRun));
+    }
+    m_ui.runs->setReadOnly(true);
+  } else {
+    // If auto on end remove
+    if (currentText.contains(autoEndRun)) {
+      // remove size of auto run and -
+      newText.remove(autoEndRun);
+    }
+    m_ui.runs->setReadOnly(false);
+  }
+
+  // Set new text and search new files
+  m_ui.runs->setFileTextWithSearch(newText);
 }
 
-void ALCDataLoadingView::updateLastRun(const std::string& run) {
-  // get current text
-  const auto currentInput = m_ui.runs->getText();
-  auto finalInput = currentInput;
+int ALCDataLoadingView::extractRunNumber(const std::string& file) {
+  auto returnVal = file;
+  // Remove file extension
+  returnVal.erase(returnVal.size() - 4);
 
-  // Do some checks
+  std::string base = returnVal;
+  size_t i = base.size() - 1;
+  while (isdigit(base[i]))
+    i--;
+  if (i == base.size() - 1)
+    return -1;
+  base.erase(i + 1);
+  returnVal.erase(0, base.size());
 
-  // Just add -LASTRUN
-  finalInput.append("-");
-  finalInput.append(QString::number(std::stoi(run)));
-
-  // set text
-  m_ui.runs->setText(finalInput); // Does not emit
-  //emit m_ui.runs->fileTextChanged(finalInput);
+  return std::stoi(returnVal);
 }
 
 } // namespace CustomInterfaces

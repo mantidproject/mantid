@@ -83,8 +83,7 @@ public:
   /// @return auto checkbox
   virtual bool autoIsChecked() const = 0;
 
-  /// updates text of run box 
-  virtual void updateLastRun(const std::string &run) = 0;
+  virtual void setCurrentAutoRun(const int run) = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -130,6 +129,9 @@ public slots:
   /// Toggles "auto" mode for last file
   virtual void checkBoxAutoChanged(int state) = 0;
 
+  /// Extract run number from a file
+  virtual int extractRunNumber(const std::string &file) = 0;
+
 signals:
   /// Request to load data
   void loadRequested();
@@ -141,7 +143,9 @@ signals:
   void dataChanged();
 
   /// "Auto" box has been checked/unchecked
-  void lastRunAutoCheckedChanged(int state);
+  //void lastRunAutoCheckedChanged(int state);
+
+  void runAutoCheckedChanged(int state);
 };
 
 } // namespace CustomInterfaces

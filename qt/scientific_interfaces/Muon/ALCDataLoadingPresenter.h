@@ -56,6 +56,8 @@ private slots:
   /// When "Auto" selected/deselected, start/stop watching directory
   void changeWatchState(int state);
 
+  void updateAutoRun(int state);
+
 signals:
   /// Signal emitted when data get changed
   void dataChanged();

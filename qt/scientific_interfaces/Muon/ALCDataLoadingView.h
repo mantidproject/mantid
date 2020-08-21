@@ -74,8 +74,12 @@ public:
     m_currentAutoFile = file;
   }
 
+  void setCurrentAutoRun(const int run) override { 
+    m_currentAutoRun = run;
+  }
+
   bool autoIsChecked() const override;
-  void updateLastRun(const std::string &run) override;
+  int extractRunNumber(const std::string &file) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
@@ -96,6 +100,8 @@ private:
 
   /// If Auto in use, the file last loaded
   std::string m_currentAutoFile;
+
+  int m_currentAutoRun;
 };
 
 } // namespace CustomInterfaces
