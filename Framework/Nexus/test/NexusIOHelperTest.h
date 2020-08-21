@@ -51,7 +51,12 @@ public:
     const auto info = file.getInfo();
     const auto size = std::accumulate(info.dims.begin(), info.dims.end(),
                                       int64_t{1}, std::multiplies<>());
-    std::vector<uint64_t> event_index(size);
+    std::vector<uint64_t> event_index(size - 1);
+    TS_ASSERT_THROWS_EQUALS(
+        Nioh::readNexusVector(event_index, file, "event_index"),
+        std::runtime_error & e, std::string(e.what()),
+        "The output buffer is too small in NeXusIOHelper::readNexusAnyVector");
+    event_index.resize(size);
     Nioh::readNexusVector(event_index, file, "event_index");
     file.closeData();
     TS_ASSERT_EQUALS(event_index[100], 100);
@@ -68,7 +73,7 @@ public:
     file.closeGroup();
   }
 
-  void test_nexus_io_helper_readNexusVector_throws_when_downcasting() {
+  void test_nexus_io_helper_readNexusVector_throws_when_narrowing() {
     const std::string filename =
         Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
@@ -79,41 +84,41 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         auto event_id = Nioh::readNexusVector<uint16_t>(file, "event_id"),
         std::runtime_error & e, std::string(e.what()),
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
     TS_ASSERT_THROWS_EQUALS(
         auto event_time_offset =
             Nioh::readNexusVector<uint16_t>(file, "event_time_offset"),
         std::runtime_error & e, std::string(e.what()),
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
     TS_ASSERT_THROWS_EQUALS(
         auto event_time_zero =
             Nioh::readNexusVector<float>(file, "event_time_zero"),
         std::runtime_error & e, std::string(e.what()),
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
     file.closeGroup();
     file.closeGroup();
   }
 
-  void test_nexus_io_helper_readNexusVector_allow_downcasting() {
+  void test_nexus_io_helper_readNexusVector_allow_narrowing() {
     const std::string filename =
         Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
-    auto event_index = Nioh::readNexusVector<uint32_t, Nioh::AllowDowncasting>(
+    auto event_index = Nioh::readNexusVector<uint32_t, Nioh::AllowNarrowing>(
         file, "event_index");
     TS_ASSERT_EQUALS(event_index.size(), 1439);
     TS_ASSERT_EQUALS(event_index[100], 100);
-    auto event_id = Nioh::readNexusVector<uint32_t, Nioh::AllowDowncasting>(
-        file, "event_id");
+    auto event_id =
+        Nioh::readNexusVector<uint32_t, Nioh::AllowNarrowing>(file, "event_id");
     TS_ASSERT_EQUALS(event_id.size(), 1439);
     TS_ASSERT_EQUALS(event_id[100], 3843);
     auto event_time_offset =
-        Nioh::readNexusVector<uint16_t, Nioh::AllowDowncasting>(
+        Nioh::readNexusVector<uint16_t, Nioh::AllowNarrowing>(
             file, "event_time_offset");
     TS_ASSERT_EQUALS(event_time_offset.size(), 1439);
     TS_ASSERT_EQUALS(event_time_offset[100], 0.);
-    auto event_time_zero = Nioh::readNexusVector<float, Nioh::AllowDowncasting>(
+    auto event_time_zero = Nioh::readNexusVector<float, Nioh::AllowNarrowing>(
         file, "event_time_zero");
     TS_ASSERT_EQUALS(event_time_zero.size(), 1439);
     TS_ASSERT_DIFFERS(event_time_zero[100], 1543584891250635008.0);
@@ -188,7 +193,7 @@ public:
     file.closeGroup();
   }
 
-  void test_nexus_io_helper_readNexusSlab_throws_when_downcasting() {
+  void test_nexus_io_helper_readNexusSlab_throws_when_Narrowing() {
     const std::string filename =
         Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
@@ -201,17 +206,17 @@ public:
         auto event_id =
             Nioh::readNexusSlab<uint16_t>(file, "event_id", {222}, {333}),
         std::runtime_error & e, std::string(e.what()),
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
     TS_ASSERT_THROWS_EQUALS(
         auto event_time_offset = Nioh::readNexusSlab<uint16_t>(
             file, "event_time_offset", {333}, {444}),
         std::runtime_error & e, std::string(e.what()),
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
     TS_ASSERT_THROWS_EQUALS(
         auto event_time_zero =
             Nioh::readNexusSlab<float>(file, "event_time_zero", {444}, {555}),
         std::runtime_error & e, std::string(e.what()),
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
     file.closeGroup();
     file.closeGroup();
   }
@@ -248,7 +253,7 @@ public:
     auto monitor_number = Nioh::readNexusValue<int32_t>(file, "monitor_number");
     TS_ASSERT_EQUALS(monitor_number, 1);
     TS_ASSERT_THROWS(Nioh::readNexusValue<int16_t>(file, "monitor_number"),
-                     std::runtime_error &); // Downcasting forbidden
+                     std::runtime_error &); // Narrowing forbidden
     TS_ASSERT_THROWS_NOTHING(
         Nioh::readNexusValue<int64_t>(file, "monitor_number")); // Larger OK
     file.close();

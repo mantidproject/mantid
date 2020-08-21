@@ -286,9 +286,10 @@ LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // We thus have to consider 32-bit or 64-bit options, and we
   // explicitly allow downcasting using the additional AllowDowncasting
   // template argument.
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<
-      float, NeXus::NeXusIOHelper::AllowDowncasting>(file, key, m_loadStart,
-                                                     m_loadSize);
+  auto vec =
+      NeXus::NeXusIOHelper::readNexusSlab<float,
+                                          NeXus::NeXusIOHelper::AllowNarrowing>(
+          file, key, m_loadStart, m_loadSize);
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds

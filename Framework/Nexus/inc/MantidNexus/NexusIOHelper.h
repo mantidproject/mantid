@@ -20,34 +20,34 @@ namespace Mantid {
 namespace NeXus {
 namespace NeXusIOHelper {
 
-struct AllowDowncasting {};
-struct PreventDowncasting {};
+struct AllowNarrowing {};
+struct PreventNarrowing {};
 
 namespace {
 
 /// Macro to run a function depending on the type of data in the Nexus file
-#define RUN_NEXUSIOHELPER_FUNCTION(DowncastT, type, func_name, ...)            \
+#define RUN_NEXUSIOHELPER_FUNCTION(Narrow, type, func_name, ...)               \
   switch (type) {                                                              \
   case ::NeXus::FLOAT32:                                                       \
-    return func_name<T, float, DowncastT>(__VA_ARGS__);                        \
+    return func_name<T, float, Narrow>(__VA_ARGS__);                           \
   case ::NeXus::FLOAT64:                                                       \
-    return func_name<T, double, DowncastT>(__VA_ARGS__);                       \
+    return func_name<T, double, Narrow>(__VA_ARGS__);                          \
   case ::NeXus::INT8:                                                          \
-    return func_name<T, int8_t, DowncastT>(__VA_ARGS__);                       \
+    return func_name<T, int8_t, Narrow>(__VA_ARGS__);                          \
   case ::NeXus::UINT8:                                                         \
-    return func_name<T, uint8_t, DowncastT>(__VA_ARGS__);                      \
+    return func_name<T, uint8_t, Narrow>(__VA_ARGS__);                         \
   case ::NeXus::INT16:                                                         \
-    return func_name<T, int16_t, DowncastT>(__VA_ARGS__);                      \
+    return func_name<T, int16_t, Narrow>(__VA_ARGS__);                         \
   case ::NeXus::UINT16:                                                        \
-    return func_name<T, uint16_t, DowncastT>(__VA_ARGS__);                     \
+    return func_name<T, uint16_t, Narrow>(__VA_ARGS__);                        \
   case ::NeXus::INT32:                                                         \
-    return func_name<T, int32_t, DowncastT>(__VA_ARGS__);                      \
+    return func_name<T, int32_t, Narrow>(__VA_ARGS__);                         \
   case ::NeXus::UINT32:                                                        \
-    return func_name<T, uint32_t, DowncastT>(__VA_ARGS__);                     \
+    return func_name<T, uint32_t, Narrow>(__VA_ARGS__);                        \
   case ::NeXus::INT64:                                                         \
-    return func_name<T, int64_t, DowncastT>(__VA_ARGS__);                      \
+    return func_name<T, int64_t, Narrow>(__VA_ARGS__);                         \
   case ::NeXus::UINT64:                                                        \
-    return func_name<T, uint64_t, DowncastT>(__VA_ARGS__);                     \
+    return func_name<T, uint64_t, Narrow>(__VA_ARGS__);                        \
   default:                                                                     \
     throw std::runtime_error("NeXusIOHelper: Unknown type in Nexus file");     \
   }
@@ -95,15 +95,15 @@ void callGetSlab(::NeXus::File &file, std::vector<T> &buf,
 /** Templated function to read any type of vector and (potentially) convert it
  * to another type. If the two types are the same, the conversion is skipped.
  */
-template <typename T, typename U, typename DowncastT>
+template <typename T, typename U, typename Narrow>
 void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file,
                           const size_t size, const bool close_file) {
   if constexpr (sizeof(T) < sizeof(U) &&
-                !std::is_same_v<DowncastT, AllowDowncasting>) {
+                !std::is_same_v<Narrow, AllowNarrowing>) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
   } else if constexpr (std::is_same_v<T, U>) {
     if (size > 0)
       callGetData(file, out, close_file);
@@ -118,35 +118,38 @@ void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file,
 }
 
 /// Read any type of vector and return it as a new vector.
-template <typename T, typename U, typename DowncastT>
+template <typename T, typename U, typename Narrow>
 std::vector<T> readNexusAnyVector(::NeXus::File &file, const size_t size,
                                   const bool close_file) {
   std::vector<T> vec(size);
-  doReadNexusAnyVector<T, U, DowncastT>(vec, file, size, close_file);
+  doReadNexusAnyVector<T, U, Narrow>(vec, file, size, close_file);
   return vec;
 }
 
 /// Read any type of vector and store it into the provided buffer vector.
-template <typename T, typename U, typename DowncastT>
+template <typename T, typename U, typename Narrow>
 void readNexusAnyVector(std::vector<T> &out, ::NeXus::File &file,
                         const size_t size, const bool close_file) {
-  doReadNexusAnyVector<T, U, DowncastT>(out, file, size, close_file);
+  if (out.size() < size)
+    throw std::runtime_error(
+        "The output buffer is too small in NeXusIOHelper::readNexusAnyVector");
+  doReadNexusAnyVector<T, U, Narrow>(out, file, size, close_file);
 }
 
 /** Templated function to read any type of slab and (potentially) convert it to
  * another type. If the two types are the same, the conversion is skipped.
  */
-template <typename T, typename U, typename DowncastT>
+template <typename T, typename U, typename Narrow>
 void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
                         const std::vector<int64_t> &start,
                         const std::vector<int64_t> &size,
                         const bool close_file) {
   if constexpr (sizeof(T) < sizeof(U) &&
-                !std::is_same_v<DowncastT, AllowDowncasting>) {
+                !std::is_same_v<Narrow, AllowNarrowing>) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
   } else if constexpr (std::is_same_v<T, U>) {
     if (size[0] > 0)
       callGetSlab(file, out, start, size, close_file);
@@ -161,34 +164,37 @@ void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
 }
 
 /// Read any type of slab and return it as a new vector.
-template <typename T, typename U, typename DowncastT>
+template <typename T, typename U, typename Narrow>
 std::vector<T>
 readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
                  const std::vector<int64_t> &size, const bool close_file) {
   std::vector<T> vec(size[0]);
-  doReadNexusAnySlab<T, U, DowncastT>(vec, file, start, size, close_file);
+  doReadNexusAnySlab<T, U, Narrow>(vec, file, start, size, close_file);
   return vec;
 }
 
 /// Read any type of slab and store it into the provided buffer vector.
-template <typename T, typename U, typename DowncastT>
+template <typename T, typename U, typename Narrow>
 void readNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
                       const std::vector<int64_t> &start,
                       const std::vector<int64_t> &size, const bool close_file) {
-  doReadNexusAnySlab<T, U, DowncastT>(out, file, start, size, close_file);
+  if (out.size() < static_cast<size_t>(size[0]))
+    throw std::runtime_error(
+        "The output buffer is too small in NeXusIOHelper::readNexusAnySlab");
+  doReadNexusAnySlab<T, U, Narrow>(out, file, start, size, close_file);
 }
 
 /** Templated function to read any type of variable and (potentially) convert it
  * to another type. If the two types are the same, the conversion is skipped.
  */
-template <typename T, typename U, typename DowncastT>
+template <typename T, typename U, typename Narrow>
 T readNexusAnyVariable(::NeXus::File &file, const bool close_file) {
   if constexpr (sizeof(T) < sizeof(U) &&
-                !std::is_same_v<DowncastT, AllowDowncasting>) {
+                !std::is_same_v<Narrow, AllowNarrowing>) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
-        "Downcasting is forbidden in NeXusIOHelper::readAnyVariable");
+        "Narrowing is forbidden in NeXusIOHelper::readAnyVariable");
   } else if constexpr (std::is_same_v<T, U>) {
     T buf;
     callGetData(file, buf, close_file);
@@ -204,9 +210,9 @@ T readNexusAnyVariable(::NeXus::File &file, const bool close_file) {
 
 /** Opens the data group if needed, finds the data type, computes the data size,
  * and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
- * Version that allows downcasting.
+ * Version that allows Narrowing.
  */
-template <typename T, typename DowncastT = PreventDowncasting>
+template <typename T, typename Narrow = PreventNarrowing>
 std::vector<T> readNexusVector(::NeXus::File &file,
                                const std::string &entry = "") {
   const auto info_and_close =
@@ -214,7 +220,7 @@ std::vector<T> readNexusVector(::NeXus::File &file,
   const auto dims = (info_and_close.first).dims;
   const auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
                                           std::multiplies<>());
-  RUN_NEXUSIOHELPER_FUNCTION(DowncastT, (info_and_close.first).type,
+  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
                              readNexusAnyVector, file, total_size,
                              info_and_close.second);
 }
@@ -223,7 +229,7 @@ std::vector<T> readNexusVector(::NeXus::File &file,
  * and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
  * The provided output buffer is filled.
  */
-template <typename T, typename DowncastT = PreventDowncasting>
+template <typename T, typename Narrow = PreventNarrowing>
 void readNexusVector(std::vector<T> &out, ::NeXus::File &file,
                      const std::string &entry = "") {
   const auto info_and_close =
@@ -231,7 +237,7 @@ void readNexusVector(std::vector<T> &out, ::NeXus::File &file,
   const auto dims = (info_and_close.first).dims;
   const auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
                                           std::multiplies<>());
-  RUN_NEXUSIOHELPER_FUNCTION(DowncastT, (info_and_close.first).type,
+  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
                              readNexusAnyVector, out, file, total_size,
                              info_and_close.second);
 }
@@ -239,13 +245,13 @@ void readNexusVector(std::vector<T> &out, ::NeXus::File &file,
 /** Opens the data group if needed, finds the data type, and calls
  * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
  */
-template <typename T, typename DowncastT = PreventDowncasting>
+template <typename T, typename Narrow = PreventNarrowing>
 std::vector<T> readNexusSlab(::NeXus::File &file, const std::string &entry,
                              const std::vector<int64_t> &start,
                              const std::vector<int64_t> &size) {
   const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  RUN_NEXUSIOHELPER_FUNCTION(DowncastT, (info_and_close.first).type,
+  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
                              readNexusAnySlab, file, start, size,
                              info_and_close.second);
 }
@@ -254,22 +260,22 @@ std::vector<T> readNexusSlab(::NeXus::File &file, const std::string &entry,
  * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
  * The provided output buffer is filled.
  */
-template <typename T, typename DowncastT = PreventDowncasting>
+template <typename T, typename Narrow = PreventNarrowing>
 void readNexusSlab(std::vector<T> &out, ::NeXus::File &file,
                    const std::string &entry, const std::vector<int64_t> &start,
                    const std::vector<int64_t> &size) {
   const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  RUN_NEXUSIOHELPER_FUNCTION(DowncastT, (info_and_close.first).type,
+  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
                              readNexusAnySlab, out, file, start, size,
                              info_and_close.second);
 }
 
-template <typename T, typename DowncastT = PreventDowncasting>
+template <typename T, typename Narrow = PreventNarrowing>
 T readNexusValue(::NeXus::File &file, const std::string &entry = "") {
   const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  RUN_NEXUSIOHELPER_FUNCTION(DowncastT, (info_and_close.first).type,
+  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
                              readNexusAnyVariable, file, info_and_close.second);
 }
 
