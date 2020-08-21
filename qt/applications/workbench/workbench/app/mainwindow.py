@@ -22,7 +22,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # Qt
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
-from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
+from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
                             QSplashScreen, QMessageBox)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
@@ -33,13 +33,13 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
-from mantidqt.usersubwindow import UserSubWindow  # noqa
 
 from workbench.config import CONF  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
+from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
 
@@ -254,11 +254,16 @@ class MainWindow(QMainWindow):
                                     on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
+
+        from qtpy.QtWidgets import QMenu
+        menu_recently_closed_scripts = QMenu("RecentlyClosedScriptsMenu")  # RecentlyClosedScriptsMenu()
+        menu_recently_closed_scripts.addAction("No scripts")
+
         self.file_menu_actions = [
             action_open, action_load_project, None, action_save_script, action_save_script_as,
-            action_generate_ws_script, None, action_save_project, action_save_project_as, None,
-            action_settings, None, action_manage_directories, None, action_script_repository, None,
-            action_quit
+            menu_recently_closed_scripts, action_generate_ws_script, None, action_save_project,
+            action_save_project_as, None, action_settings, None, action_manage_directories, None,
+            action_script_repository, None, action_quit
         ]
 
         # view menu
