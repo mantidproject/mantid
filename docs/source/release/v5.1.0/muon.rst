@@ -33,6 +33,8 @@ New Features
 - Updated rounding for time zero and first good data to be 3 decimal places.
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
 - Added multi-period support to the LoadMuonNexusV2 algorithm.
+- Added two buttons to the Muon analysis and Frequency domain analysis plot toolbar to allow users to show major and minor gridlines.
+
 
 Improvements
 -------------
