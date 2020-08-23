@@ -59,16 +59,17 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         # check output file name: whether user can access and write files
         output_file_name_property = 'OutputFilename'
         gsas_name = self.getProperty(output_file_name_property).value
-        if os.path.exists(gsas_name):
-            # file exists: check write permission
-            if not os.access(gsas_name, os.W_OK):
-                issues[output_file_name_property] = f'Output GSAS file {gsas_name} exists and cannot be overwritten'
+
+        try:
+            temp_file = open(gsas_name, 'w')
+        except PermissionError as per_err:
+            # error message
+            issues[output_file_name_property] = f'User is not allowed to write file {gsas_name} due to ' \
+                                                f'{per_err}'
         else:
-            # file does not exist: check write permission to directory
-            gsas_dir = os.path.dirname(gsas_name)
-            if not os.access(gsas_dir, os.W_OK):
-                issues[output_file_name_property] = f'User has not write permission to directory {gsas_dir} ' \
-                                                    f'for output file {gsas_name}'
+            # delete the temp file
+            temp_file.close()
+            os.remove(gsas_name)
 
         return issues
 
