@@ -134,7 +134,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             except RuntimeError:
                 continue
             for plotted_information in self._plot_information_list.copy():
-                if workspace_plot_info == plotted_information:
+                if workspace_plot_info.workspace_name == plotted_information.workspace_name and \
+                        workspace_plot_info.axis == plotted_information.axis:
                     self._update_color_queue_on_workspace_removal(workspace_plot_info.axis, workspace_name)
                     axis = self.fig.axes[workspace_plot_info.axis]
                     axis.remove_workspace_artists(workspace)
