@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/VesuvioL1ThetaResolution.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
@@ -20,7 +21,7 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <fstream>
 #include <random>
@@ -61,9 +62,9 @@ const std::string VesuvioL1ThetaResolution::summary() const {
 /** Initialize the algorithm's properties.
  */
 void VesuvioL1ThetaResolution::init() {
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
-  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLower(DBL_EPSILON);
 
   const std::vector<std::string> exts{".par", ".dat"};
@@ -131,7 +132,7 @@ void VesuvioL1ThetaResolution::exec() {
 
   // Set X axis to spectrum numbers
   m_outputWorkspace->getAxis(0)->setUnit("Label");
-  auto xAxis = boost::dynamic_pointer_cast<Units::Label>(
+  auto xAxis = std::dynamic_pointer_cast<Units::Label>(
       m_outputWorkspace->getAxis(0)->unit());
   if (xAxis)
     xAxis->setLabel("Spectrum Number");
@@ -148,7 +149,7 @@ void VesuvioL1ThetaResolution::exec() {
     auto distributionXAxis = m_l1DistributionWs->getAxis(0);
     distributionXAxis->setUnit("Label");
     auto labelUnit =
-        boost::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
+        std::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("l1");
   }
@@ -164,7 +165,7 @@ void VesuvioL1ThetaResolution::exec() {
     auto distributionXAxis = m_thetaDistributionWs->getAxis(0);
     distributionXAxis->setUnit("Label");
     auto labelUnit =
-        boost::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
+        std::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("theta");
   }
@@ -267,7 +268,8 @@ void VesuvioL1ThetaResolution::loadInstrument() {
   // Get the filename for the VESUVIO IDF
   MatrixWorkspace_sptr tempWS =
       WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-  const std::string vesuvioIPF = tempWS->getInstrumentFilename("VESUVIO");
+  const std::string vesuvioIPF =
+      InstrumentFileFinder::getInstrumentFilename("VESUVIO");
 
   // Load an empty VESUVIO instrument workspace
   IAlgorithm_sptr loadInst =

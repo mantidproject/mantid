@@ -1,12 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
@@ -22,8 +21,9 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 EventWorkspace_sptr
-execute_change_of_pulse_times(EventWorkspace_sptr in_ws, std::string timeOffset,
-                              std::string workspaceIndexList) {
+execute_change_of_pulse_times(const EventWorkspace_sptr &in_ws,
+                              const std::string &timeOffset,
+                              const std::string &workspaceIndexList) {
   // Create and run the algorithm
   ChangePulsetime alg;
   alg.initialize();
@@ -52,8 +52,8 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test(std::string in_ws_name, std::string out_ws_name,
-               std::string WorkspaceIndexList) {
+  void do_test(const std::string &in_ws_name, const std::string &out_ws_name,
+               const std::string &WorkspaceIndexList) {
     ChangePulsetime alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -71,7 +71,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        out_ws = boost::dynamic_pointer_cast<EventWorkspace>(
+        out_ws = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve(out_ws_name)));
     TS_ASSERT(out_ws);
     if (!out_ws)

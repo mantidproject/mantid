@@ -1,18 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -215,7 +216,7 @@ private:
    * @return True if it is true
    */
   bool is_op_symbol(const char c) const;
-  boost::shared_ptr<Operators> m_operators; ///< pointer ot the operators
+  std::shared_ptr<Operators> m_operators; ///< pointer ot the operators
 };
 
 } // namespace API

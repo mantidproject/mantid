@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -19,8 +19,8 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/make_shared.hpp>
 #include <iterator>
+#include <memory>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -31,7 +31,7 @@ namespace {
 
 /// Finalise shape
 std::unique_ptr<const Geometry::IObject> createCylinderShape(
-    const std::map<int, boost::shared_ptr<Geometry::Surface>> &surfaces,
+    const std::map<int, std::shared_ptr<Geometry::Surface>> &surfaces,
     const std::string &algebra, std::vector<double> &boundingBox,
     Geometry::detail::ShapeInfo &&shapeInfo) {
   auto shape = std::make_unique<Geometry::CSGObject>();
@@ -119,23 +119,23 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   Kernel::V3D normVec =
       Kernel::V3D(axisUnitVector(0), axisUnitVector(1), axisUnitVector(2));
 
-  auto cylinder = boost::make_shared<Geometry::Cylinder>();
+  auto cylinder = std::make_shared<Geometry::Cylinder>();
   auto vCenter = Kernel::V3D(centre(0), centre(1), centre(2));
   cylinder->setCentre(vCenter);
   cylinder->setNorm(normVec);
   cylinder->setRadius(radius);
 
   // Top plane
-  auto planeTop = boost::make_shared<Geometry::Plane>();
+  auto planeTop = std::make_shared<Geometry::Plane>();
   planeTop->setPlane(
       Kernel::V3D(pointsDef(0, 2), pointsDef(1, 2), pointsDef(2, 2)), normVec);
 
   // Bottom plane
-  auto planeBottom = boost::make_shared<Geometry::Plane>();
+  auto planeBottom = std::make_shared<Geometry::Plane>();
   planeBottom->setPlane(
       Kernel::V3D(pointsDef(0, 0), pointsDef(1, 0), pointsDef(2, 0)), normVec);
 
-  std::map<int, boost::shared_ptr<Geometry::Surface>> surfaceShapes;
+  std::map<int, std::shared_ptr<Geometry::Surface>> surfaceShapes;
   surfaceShapes[1] = cylinder;
   surfaceShapes[2] = planeTop;
   surfaceShapes[3] = planeBottom;

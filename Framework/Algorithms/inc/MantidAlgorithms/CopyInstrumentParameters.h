@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <climits>
@@ -39,7 +40,7 @@ namespace Algorithms {
     @author Karl Palmen STFC
     @date 16/08/2012
 */
-class DLLExport CopyInstrumentParameters : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopyInstrumentParameters : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CopyInstrumentParameters"; }

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H
-#define MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H
+#pragma once
 
 #include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IMessageHandler.h"
@@ -23,6 +22,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class QtOptionsDialogView;
+
 /** @class QtMainWindowView
 
 MainWindowView is the concrete main window view implementing the
@@ -37,6 +38,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView
   Q_OBJECT
 public:
   explicit QtMainWindowView(QWidget *parent = nullptr);
+  ~QtMainWindowView();
+  QtMainWindowView(QtMainWindowView const &) = delete;
+  QtMainWindowView(QtMainWindowView &&) = delete;
+  QtMainWindowView &operator=(QtMainWindowView const &) = delete;
+  QtMainWindowView &operator=(QtMainWindowView &&) = delete;
 
   void subscribe(MainWindowSubscriber *notifyee) override;
 
@@ -58,6 +64,7 @@ public:
                     const std::string &title) override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) override;
+  bool askUserDiscardChanges() override;
   std::string askUserForLoadFileName(std::string const &filter) override;
   std::string askUserForSaveFileName(std::string const &filter) override;
 
@@ -91,6 +98,7 @@ private:
   /// instantiated this is currently necessary for QtMainWindowView. Direct use
   /// of m_presenter should be avoided - use m_notifyee instead.
   std::unique_ptr<MainWindowPresenter> m_presenter;
+  std::unique_ptr<QtOptionsDialogView> m_optionsDialogView;
   std::vector<IBatchView *> m_batchViews;
   int m_batchIndex;
 
@@ -103,4 +111,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H */

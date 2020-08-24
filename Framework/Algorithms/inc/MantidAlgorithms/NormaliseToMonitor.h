@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/cow_ptr.h"
@@ -59,7 +60,7 @@ namespace Algorithms {
    boundary. </LI>
     </UL>
 */
-class DLLExport NormaliseToMonitor : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL NormaliseToMonitor : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseToMonitor"; }
@@ -125,7 +126,8 @@ private:
 
 // the internal class to verify and modify interconnected properties affecting
 // the different ways to normalize ws by this ws spectrum.
-class DLLExport MonIDPropChanger : public Kernel::IPropertySettings {
+class MANTID_ALGORITHMS_DLL MonIDPropChanger
+    : public Kernel::IPropertySettings {
 
 public:
   //   properties this property depends on:
@@ -164,7 +166,7 @@ private:
   mutable bool is_enabled;
   // auxiliary function to obtain list of monitor's ID-s (allowed_values) from a
   // workspace;
-  bool monitorIdReader(API::MatrixWorkspace_const_sptr inputWS) const;
+  bool monitorIdReader(const API::MatrixWorkspace_const_sptr &inputWS) const;
 };
 
 } // namespace Algorithms

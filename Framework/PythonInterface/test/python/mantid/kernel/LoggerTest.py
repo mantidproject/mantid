@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import unittest
 
 from mantid.kernel import Logger
@@ -30,7 +28,8 @@ class LoggerTest(unittest.TestCase):
     def test_unicode_logger(self):
         logger = Logger("LoggerTest")
         self.assertTrue(isinstance(logger, Logger))
-        for att in ['fatal', 'error', 'warning', 'notice', 'information', 'debug']:
+        for att in ['fatal', 'error', 'warning', 'notice', 'information', 'debug', 'flush', 'purge', 'accumulate',
+                    'flushDebug', 'flushInformation', 'flushNotice', 'flushWarning', 'flushError', 'flushFatal']:
             if not hasattr(logger, att):
                 self.fail("Logger object does not have the required attribute '%s'" % att)
 
@@ -40,6 +39,23 @@ class LoggerTest(unittest.TestCase):
         logger.notice('This is a test')
         logger.information('This is a test')
         logger.debug('This is a test')
+        logger.purge()
+        logger.accumulate('one')
+        logger.accumulate('two')
+        logger.flush()
+        logger.accumulate('three')
+        logger.flushDebug()
+        logger.accumulate('four')
+        logger.flushInformation()
+        logger.accumulate('five')
+        logger.flushNotice()
+        logger.accumulate('six')
+        logger.flushWarning()
+        logger.accumulate('seven')
+        logger.flushError()
+        logger.accumulate('eight')
+        logger.flushFatal()
+        logger.purge()
 
 
 if __name__ == '__main__':

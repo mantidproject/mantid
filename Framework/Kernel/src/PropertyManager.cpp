@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -10,6 +10,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/StringTokenizer.h"
 
@@ -36,6 +37,31 @@ const std::string createKey(const std::string &name) {
 }
 } // namespace
 
+const std::string PropertyManager::INVALID_VALUES_SUFFIX = "_invalid_values";
+/// Gets the correct log name for the matching invalid values log for a given
+/// log name
+std::string
+PropertyManager::getInvalidValuesFilterLogName(const std::string &logName) {
+  return logName + PropertyManager::INVALID_VALUES_SUFFIX;
+}
+std::string
+PropertyManager::getLogNameFromInvalidValuesFilter(const std::string &logName) {
+  std::string retVal = "";
+  if (PropertyManager::isAnInvalidValuesFilterLog(logName)) {
+    retVal = logName.substr(
+        0, logName.size() - PropertyManager::INVALID_VALUES_SUFFIX.size());
+  }
+  return retVal;
+}
+bool PropertyManager::isAnInvalidValuesFilterLog(const std::string &logName) {
+  const auto ending = PropertyManager::INVALID_VALUES_SUFFIX;
+  if (logName.length() >= ending.length()) {
+    return (0 == logName.compare(logName.length() - ending.length(),
+                                 ending.length(), ending));
+  } else {
+    return false;
+  }
+}
 //-----------------------------------------------------------------------------------------------
 /// Default constructor
 PropertyManager::PropertyManager() : m_properties(), m_orderedProperties() {}
@@ -170,16 +196,45 @@ void PropertyManager::splitByTime(
  * all time
  * series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each property on
+ * @param excludedFromFiltering :: A string list of properties that
+ * will be excluded from filtering
  */
 void PropertyManager::filterByProperty(
-    const Kernel::TimeSeriesProperty<bool> &filter) {
+    const Kernel::TimeSeriesProperty<bool> &filter,
+    const std::vector<std::string> &excludedFromFiltering) {
   for (auto &orderedProperty : m_orderedProperties) {
+    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(),
+                  orderedProperty->name()) != excludedFromFiltering.cend()) {
+      // this log should be excluded from filtering
+      continue;
+    }
+
     Property *currentProp = orderedProperty;
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
-      std::unique_ptr<Property> filtered =
-          std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries,
-                                                               filter);
+      // don't filter the invalid values filters
+      if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
+        break;
+      std::unique_ptr<Property> filtered(nullptr);
+      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(
+              currentProp->name()))) {
+        // add the filter to the passed in filters
+        auto logFilter = std::make_unique<LogFilter>(filter);
+        auto filterProp =
+            getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(
+                currentProp->name()));
+        auto tspFilterProp =
+            dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
+        if (!tspFilterProp)
+          break;
+        logFilter->addFilter(*tspFilterProp);
+
+        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
+            doubleSeries, *logFilter->filter());
+      } else {
+        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
+            doubleSeries, filter);
+      }
       orderedProperty = filtered.get();
       // Now replace in the map
       this->m_properties[createKey(currentProp->name())] = std::move(filtered);
@@ -581,6 +636,22 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   }
 
   return jsonMap;
+}
+
+bool PropertyManager::operator==(const PropertyManager &other) const {
+  if (other.m_properties.size() != m_properties.size())
+    return false;
+  for (const auto &[key, value] : m_properties) {
+    if (other.m_properties.count(key) != 1)
+      return false;
+    if (*other.m_properties.at(key) != *value)
+      return false;
+  }
+  return true;
+}
+
+bool PropertyManager::operator!=(const PropertyManager &other) const {
+  return !this->operator==(other);
 }
 
 //-----------------------------------------------------------------------------------------------

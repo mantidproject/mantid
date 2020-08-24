@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/Strings.h"
@@ -32,14 +33,14 @@ void SlitCalculator::processInstrumentHasBeenChanged() {
   on_recalculate_triggered();
 }
 SlitCalculator::~SlitCalculator() {}
-void SlitCalculator::setInstrument(std::string instrumentName) {
+void SlitCalculator::setInstrument(const std::string &instrumentName) {
   // we want to get the most up-to-date definition, so we use the current
   // date/time
   auto date =
       Mantid::Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   // find the full path to the definition file
-  auto filename =
-      Mantid::API::ExperimentInfo::getInstrumentFilename(instrumentName, date);
+  auto filename = Mantid::API::InstrumentFileFinder::getInstrumentFilename(
+      instrumentName, date);
   // parse the XML that we have found for the definition
   Mantid::Geometry::InstrumentDefinitionParser parser =
       Mantid::Geometry::InstrumentDefinitionParser(
@@ -64,7 +65,7 @@ void SlitCalculator::setInstrument(std::string instrumentName) {
 void SlitCalculator::show() { QDialog::show(); }
 
 void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
-    Mantid::Geometry::Instrument_const_sptr instrument) {
+    const Mantid::Geometry::Instrument_const_sptr &instrument) {
   // fetch the components that we need for values from IDF
   auto slit1Component = instrument->getComponentByName("slit1");
   auto slit2Component = instrument->getComponentByName("slit2");

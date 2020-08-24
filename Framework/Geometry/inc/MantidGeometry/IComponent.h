@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_ICOMPONENT_H_
-#define MANTID_GEOMETRY_ICOMPONENT_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -17,7 +16,7 @@
 #include <vector>
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 namespace Mantid {
@@ -66,11 +65,11 @@ public:
   //! Assign a parent IComponent. Previous parent link is lost
   virtual void setParent(IComponent *) = 0;
   //! Return a pointer to the current parent.
-  virtual boost::shared_ptr<const IComponent> getParent() const = 0;
+  virtual std::shared_ptr<const IComponent> getParent() const = 0;
   /** Returns the bare pointer to the IComponent parent */
   virtual const IComponent *getBareParent() const = 0;
   //! Return an array of all ancestors, the nearest first
-  virtual std::vector<boost::shared_ptr<const IComponent>>
+  virtual std::vector<std::shared_ptr<const IComponent>>
   getAncestors() const = 0;
   //! Set the IComponent name
   virtual void setName(const std::string &) = 0;
@@ -171,9 +170,9 @@ public:
 };
 
 /// Typedef of a shared pointer to a IComponent
-using IComponent_sptr = boost::shared_ptr<IComponent>;
+using IComponent_sptr = std::shared_ptr<IComponent>;
 /// Typdef of a shared pointer to a const IComponent
-using IComponent_const_sptr = boost::shared_ptr<const IComponent>;
+using IComponent_const_sptr = std::shared_ptr<const IComponent>;
 
 } // Namespace Geometry
 
@@ -187,5 +186,3 @@ public:
 };
 
 } // Namespace Mantid
-
-#endif // MANTID_GEOMETRY_ICOMPONENT_H_

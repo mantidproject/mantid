@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/BankPulseTimes.h"
 
@@ -25,7 +25,11 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
     : periodNumbers(pNumbers) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
-  file.getAttr("offset", startTime);
+  // If the offset is not present, use Unix epoch
+  if (!file.hasAttr("offset"))
+    startTime = "1970-01-01T00:00:00Z";
+  else
+    file.getAttr("offset", startTime);
   Mantid::Types::Core::DateAndTime start(startTime);
   // Load the seconds offsets
 
@@ -98,7 +102,8 @@ BankPulseTimes::~BankPulseTimes() { delete[] this->pulseTimes; }
  * @return true if the pulse times are the same and so don't need to be
  * reloaded.
  */
-bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime) {
+bool BankPulseTimes::equals(size_t otherNumPulse,
+                            const std::string &otherStartTime) {
   return ((this->startTime == otherStartTime) &&
           (this->numPulses == otherNumPulse));
 }

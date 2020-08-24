@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERPROCESSINGTEST_H_
-#define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERPROCESSINGTEST_H_
+#pragma once
 
 #include "BatchJobRunnerTest.h"
 
@@ -36,6 +35,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, hasSelection);
     TS_ASSERT_EQUALS(jobRunner.m_processAll, !hasSelection);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, hasSelection);
     verifyAndClear();
   }
 
@@ -53,6 +53,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
 
@@ -67,6 +68,135 @@ public:
     auto jobRunner = makeJobRunner();
     jobRunner.setReprocessFailedItems(true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithNoSelection() {
+    auto jobRunner = makeJobRunner(twoGroupsWithARowModel());
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithBothGroupsSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithARowModel());
+    selectGroup(jobRunner, 0);
+    selectGroup(jobRunner, 1);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithBothGroupsSelectedAndEmptyGroupNotSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsAndOneEmptyGroupModel());
+    selectGroup(jobRunner, 0);
+    selectGroup(jobRunner, 1);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithGroupAndRowSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithARowModel());
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithGroupAndNonInvalidRowSelected() {
+    auto jobRunner = makeJobRunner(
+        oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel());
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithAllRowsSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithARowModel());
+    selectRow(jobRunner, 0, 0);
+    selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithAllNonInvalidRowsSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithOneRowAndOneInvalidRowModel());
+    selectRow(jobRunner, 0, 0);
+    selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithSomeRowsSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    selectRow(jobRunner, 0, 1);
+    selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, true);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithGroupAndSomeRowsSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, true);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithGroupAndChildRowSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 0, 0);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
 
@@ -135,5 +265,3 @@ public:
     verifyAndClear();
   }
 };
-
-#endif // MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERPROCESSINGTEST_H_

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,7 +26,7 @@ data </LI>
 @author Nick Draper
 @date 14/12/2007
 */
-class DLLExport Multiply : public CommutativeBinaryOperation {
+class MANTID_ALGORITHMS_DLL Multiply : public CommutativeBinaryOperation {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Multiply"; }

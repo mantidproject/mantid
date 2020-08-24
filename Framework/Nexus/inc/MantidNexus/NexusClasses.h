@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -13,11 +13,14 @@
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/container/vector.hpp>
 #include <nexus/napi.h>
 
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -195,10 +198,16 @@ private:
   NXInfo m_info; ///< Holds the data info
 };
 
+template <typename T>
+using container_T =
+    std::conditional_t<std::is_same<T, bool>{}, boost::container::vector<bool>,
+                       std::vector<T>>;
+
 /**  Templated class implementation of NXDataSet. After loading the data it can
  * be accessed via operators () and [].
  */
 template <class T> class NXDataSetTyped : public NXDataSet {
+
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -212,25 +221,37 @@ public:
    * initialized.
    *  @return a pointer to the array of items
    */
-  T *operator()() const {
-    if (!m_data)
+  const T *operator()() const {
+    if (m_data.empty())
       throw std::runtime_error("Attempt to read uninitialized data from " +
                                path());
-    return m_data.get();
+    return m_data.data();
   }
+
+  T *operator()() {
+    if (m_data.empty())
+      throw std::runtime_error("Attempt to read uninitialized data from " +
+                               path());
+    return m_data.data();
+  }
+
   /** Returns the i-th value in the internal buffer
    *  @param i :: The linear index of the data element
    *  @throw runtime_error if the data have not been loaded / initialized.
    *  @throw range_error if the index is greater than the buffer size.
    *  @return A reference to the value
    */
-  T &operator[](int i) const {
-    if (!m_data)
+  const T &operator[](int i) const {
+    if (m_data.empty())
       throw std::runtime_error("Attempt to read uninitialized data from " +
                                path());
     if (i < 0 || i >= m_n)
       rangeError();
     return m_data[i];
+  }
+
+  T &operator[](int i) {
+    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)[i]);
   }
   /** Returns a value assuming the data is a two-dimensional array
    *  @param i :: The index along dim0()
@@ -239,7 +260,12 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  T &operator()(int i, int j) const { return this->operator[](i *dim1() + j); }
+  const T &operator()(int i, int j) const {
+    return this->operator[](i *dim1() + j);
+  }
+  T &operator()(int i, int j) {
+    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j));
+  }
   /** Returns a value assuming the data is a tree-dimensional array
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
@@ -248,11 +274,15 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  T &operator()(int i, int j, int k) const {
+  const T &operator()(int i, int j, int k) const {
     return this->operator[]((i * dim1() + j) * dim2() + k);
   }
-  /// Returns a wrapped pointer to the internal buffer
-  boost::shared_array<T> &sharedBuffer() { return m_data; }
+  T &operator()(int i, int j, int k) {
+    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j, k));
+  }
+
+  /// Returns a the internal buffer
+  container_T<T> &vecBuffer() { return m_data; }
   /// Returns the size of the data buffer
   int size() const { return m_n; }
   /**  Implementation of the virtual NXDataSet::load(...) method. Internally the
@@ -288,7 +318,7 @@ public:
       {
         n = dim0() * dim1() * dim2() * dim3();
         alloc(n);
-        getData(m_data.get());
+        getData(m_data.data());
         return;
       } else if (j < 0) {
         if (i >= dim0())
@@ -343,7 +373,7 @@ public:
       if (i < 0) {
         n = dim0() * dim1() * dim2();
         alloc(n);
-        getData(m_data.get());
+        getData(m_data.data());
         return;
       } else if (j < 0) {
         if (i >= dim0())
@@ -383,7 +413,7 @@ public:
       if (i < 0) {
         n = dim0() * dim1();
         alloc(n);
-        getData(m_data.get());
+        getData(m_data.data());
         return;
       } else if (j < 0) {
         if (i >= dim0())
@@ -409,7 +439,7 @@ public:
       if (i < 0) {
         n = dim0();
         alloc(n);
-        getData(m_data.get());
+        getData(m_data.data());
         return;
       } else {
         if (i >= dim0())
@@ -420,7 +450,7 @@ public:
       }
     }
     alloc(n);
-    getSlab(m_data.get(), start, m_size);
+    getSlab(m_data.data(), start, m_size);
   }
 
 private:
@@ -434,7 +464,7 @@ private:
     }
     try {
       if (m_n != n) {
-        m_data.reset(new T[n]);
+        m_data.resize(n);
         m_n = n;
       }
     } catch (...) {
@@ -448,9 +478,10 @@ private:
   void rangeError() const {
     throw std::range_error("Nexus dataset range error");
   }
-  boost::shared_array<T> m_data; ///< The data buffer
-  int m_size[4];                 ///< The sizes of the loaded data
-  int m_n;                       ///< The buffer size
+  // We cannot use an STL vector due to the dreaded std::vector<bool>
+  container_T<T> m_data; ///< The data buffer
+  int m_size[4];         ///< The sizes of the loaded data
+  int m_n;               ///< The buffer size
 };
 
 /// The integer dataset type
@@ -620,9 +651,9 @@ public:
   bool openLocal(const std::string &nxclass = "");
 
 protected:
-  boost::shared_ptr<std::vector<NXClassInfo>>
+  std::shared_ptr<std::vector<NXClassInfo>>
       m_groups; ///< Holds info about the child NXClasses
-  boost::shared_ptr<std::vector<NXInfo>>
+  std::shared_ptr<std::vector<NXInfo>>
       m_datasets;     ///< Holds info about the datasets in this NXClass
   void readAllInfo(); ///< Fills in m_groups and m_datasets.
   void clear();       ///< Deletes content of m_groups and m_datasets

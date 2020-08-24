@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVE_STL_TEST_H_
-#define SAVE_STL_TEST_H_
+#pragma once
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling//SaveStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
@@ -39,11 +38,14 @@ public:
     std::vector<V3D> vertices{
         V3D(5, 5, -15), V3D(-5, -5, -15), V3D(-5, 5, -15), V3D(5, -5, -15),
         V3D(-5, 5, 15), V3D(-5, -5, 15),  V3D(5, -5, 15),  V3D(5, 5, 15)};
+
     auto writer = SaveStl(path, triangle, vertices, ScaleUnits::metres);
     writer.writeStl();
-    auto reader = LoadBinaryStl(path, ScaleUnits::metres);
-    TS_ASSERT(Poco::File(path).exists());
-    TS_ASSERT(reader.isBinarySTL(path));
+    {
+      auto reader = LoadBinaryStl(path, ScaleUnits::metres);
+      TS_ASSERT(Poco::File(path).exists());
+      TS_ASSERT(LoadBinaryStl::isBinarySTL(path));
+    }
     Poco::File(path).remove();
   }
 
@@ -60,14 +62,17 @@ public:
                                         5,   15, -5,  5,   15, -5,  -5, 15};
     auto writer = SaveStl(path, triangle, vertices, ScaleUnits::metres);
     writer.writeStl();
-    auto reader = LoadBinaryStl(cubePath, ScaleUnits::metres);
+
     TS_ASSERT(Poco::File(path).exists());
-    TS_ASSERT(reader.isBinarySTL(path));
-    auto shape = reader.readStl();
-    auto loadedTriangles = shape->getTriangles();
-    auto loadedVertices = shape->getVertices();
-    TS_ASSERT_EQUALS(loadedTriangles, triangle);
-    TS_ASSERT_EQUALS(loadedVertices, compareVertices);
+    TS_ASSERT(LoadBinaryStl::isBinarySTL(path));
+    {
+      auto reader = LoadBinaryStl(path, ScaleUnits::metres);
+      auto shape = reader.readShape();
+      auto loadedTriangles = shape->getTriangles();
+      auto loadedVertices = shape->getVertices();
+      TS_ASSERT_EQUALS(loadedTriangles, triangle);
+      TS_ASSERT_EQUALS(loadedVertices, compareVertices);
+    }
     Poco::File(path).remove();
   }
 
@@ -89,4 +94,3 @@ public:
       FileFinder::Instance().getFullPath("cubeBin.stl");
   std::string path;
 };
-#endif /*SAVE_STL_TEST_H_*/

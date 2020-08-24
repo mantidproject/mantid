@@ -1,23 +1,3 @@
-# This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required(VERSION 3.5)
-
-# Add the path to our custom 'find' modules
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../buildconfig/CMake")
-
-# Define the project name. Allows building framework as a separate project.
-project(MantidFramework)
-
-# If building as a stand-alone project, call our common setup script
-if(NOT COMMONSETUP_DONE)
-  if(MSVC)
-    include(MSVC)
-  elseif(APPLE)
-    include(DarwinSetup)
-  endif()
-
-  include(CommonSetup)
-endif()
-
 # Look for dependencies - bail out if any necessary ones not found
 
 check_include_files(stdint.h stdint)
@@ -77,7 +57,6 @@ add_subdirectory(Beamline)
 set(MANTIDLIBS ${MANTIDLIBS} Parallel)
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
 set(MANTIDLIBS ${MANTIDLIBS} HistogramData)
-# Indexing has header-only dependency on Kernel, so Kernel comes after.
 set(MANTIDLIBS ${MANTIDLIBS} Indexing)
 set(MANTIDLIBS ${MANTIDLIBS} Kernel)
 set(MANTIDLIBS ${MANTIDLIBS} Beamline)
@@ -118,6 +97,7 @@ add_subdirectory(RemoteAlgorithms)
 add_subdirectory(RemoteJobManagers)
 add_subdirectory(SINQ)
 add_subdirectory(Muon)
+add_subdirectory(Reflectometry)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if(MPI_BUILD)
@@ -153,7 +133,8 @@ set(FRAMEWORK_LIBS
     RemoteAlgorithms
     RemoteJobManagers
     SINQ
-    Muon)
+    Muon
+    Reflectometry)
 
 add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 
@@ -213,11 +194,7 @@ foreach(_bundle ${BUNDLES})
     # Also ship mingw libraries for Inelastic fortran code. We need to do a
     # better job here and build things
     file(GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll")
-    if(WITH_PYTHON3)
-      install(FILES ${MINGW_DLLS} DESTINATION ${_bundle}scripts/Inelastic)
-    else()
-      install(FILES ${MINGW_DLLS} DESTINATION ${_bundle}scripts/Inelastic/cp27)
-    endif()
+    install(FILES ${MINGW_DLLS} DESTINATION ${BIN_DIR})
   else()
     install(DIRECTORY ../scripts/
             DESTINATION ${_bundle}scripts

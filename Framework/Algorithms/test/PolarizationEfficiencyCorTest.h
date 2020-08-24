@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -41,6 +42,11 @@ public:
   }
   static void destroySuite(PolarizationEfficiencyCorTest *suite) {
     delete suite;
+  }
+
+  PolarizationEfficiencyCorTest() {
+    // To make sure API is initialized properly
+    Mantid::API::FrameworkManager::Instance();
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
@@ -441,7 +447,7 @@ private:
   }
 
   WorkspaceGroup_sptr createWorkspaceGroup(int n) {
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     auto workspaces = createWorkspaces(n);
     for (auto &ws : workspaces) {
       ws->getAxis(0)->setUnit("Wavelength");
@@ -545,7 +551,7 @@ private:
     double const dX = (endX - startX) / double(size);
     BinEdges xVals(size + 1, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
-    auto retVal = boost::make_shared<Workspace2D>();
+    auto retVal = std::make_shared<Workspace2D>();
     retVal->initialize(1, Histogram(xVals, yVals));
     return retVal;
   }
@@ -555,7 +561,7 @@ private:
     double const dX = (endX - startX) / double(size - 1);
     Points xVals(size, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
-    auto retVal = boost::make_shared<Workspace2D>();
+    auto retVal = std::make_shared<Workspace2D>();
     retVal->initialize(1, Histogram(xVals, yVals));
     return retVal;
   }

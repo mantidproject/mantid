@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -39,7 +39,8 @@ namespace API {
      FileAction type parameter in the constructor.
 
  */
-class DLLExport FileProperty : public Kernel::PropertyWithValue<std::string> {
+class MANTID_API_DLL FileProperty
+    : public Kernel::PropertyWithValue<std::string> {
 public:
   /// An enumeration for load/save types. This is passed on to the FileValidator
   /// as a constructor parameter.
@@ -71,6 +72,9 @@ public:
   FileProperty(const std::string &name, const std::string &default_value,
                unsigned int action, std::initializer_list<std::string> exts,
                unsigned int direction = Kernel::Direction::Input);
+
+  FileProperty(const FileProperty &) = default;
+  FileProperty &operator=(const FileProperty &) = default;
 
   /// 'Virtual copy constructor
   FileProperty *clone() const override { return new FileProperty(*this); }
@@ -116,9 +120,6 @@ private:
   std::string m_oldLoadPropValue;
   /// Last value of foundFile used in FileProperty::setLoadProperty
   std::string m_oldLoadFoundFile;
-
-  /// Private, unimplemented copy assignment operator
-  FileProperty &operator=(const FileProperty &right);
 };
 
 #ifdef _WIN32

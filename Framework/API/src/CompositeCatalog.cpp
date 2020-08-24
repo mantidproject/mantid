@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CompositeCatalog.h"
 
@@ -16,7 +16,7 @@ CompositeCatalog::CompositeCatalog() : m_catalogs() {}
  * Add a catalog to the catalog container.
  * @param catalog :: The catalog to add to the container.
  */
-void CompositeCatalog::add(const ICatalog_sptr catalog) {
+void CompositeCatalog::add(const ICatalog_sptr &catalog) {
   m_catalogs.emplace_back(catalog);
 }
 

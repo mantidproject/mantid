@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -25,16 +25,14 @@ namespace Crystal {
 /** PeakClusterProjection : Maps peaks onto IMDHistoWorkspaces and returns the
   signal value at the peak center.
 */
-class DLLExport PeakClusterProjection {
+class MANTID_CRYSTAL_DLL PeakClusterProjection {
 public:
   /// Constructor
-  PeakClusterProjection(boost::shared_ptr<Mantid::API::IMDWorkspace> &mdWS);
+  PeakClusterProjection(std::shared_ptr<Mantid::API::IMDWorkspace> &mdWS);
   /// Constructor
-  PeakClusterProjection(
-      boost::shared_ptr<Mantid::API::IMDHistoWorkspace> &mdWS);
+  PeakClusterProjection(std::shared_ptr<Mantid::API::IMDHistoWorkspace> &mdWS);
   /// Constructor
-  PeakClusterProjection(
-      boost::shared_ptr<Mantid::API::IMDEventWorkspace> &mdWS);
+  PeakClusterProjection(std::shared_ptr<Mantid::API::IMDEventWorkspace> &mdWS);
   PeakClusterProjection(const PeakClusterProjection &) = delete;
   PeakClusterProjection &operator=(const PeakClusterProjection &) = delete;
   /// Get the signal value at the peak center
@@ -49,10 +47,10 @@ public:
 
 private:
   /// Image
-  boost::shared_ptr<Mantid::API::IMDWorkspace> m_mdWS;
+  std::shared_ptr<Mantid::API::IMDWorkspace> m_mdWS;
 
   /// Peak Transform
-  boost::shared_ptr<Mantid::Geometry::PeakTransform> m_peakTransform;
+  std::shared_ptr<Mantid::Geometry::PeakTransform> m_peakTransform;
 };
 
 } // namespace Crystal

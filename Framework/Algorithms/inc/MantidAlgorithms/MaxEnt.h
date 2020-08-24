@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -21,7 +21,7 @@ namespace Algorithms {
   111-124
 */
 
-class DLLExport MaxEnt : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaxEnt : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override;
@@ -67,7 +67,7 @@ private:
   /// Updates the image
   std::vector<double> updateImage(const std::vector<double> &image,
                                   const std::vector<double> &delta,
-                                  const std::vector<std::vector<double>> dirs);
+                                  const std::vector<std::vector<double>> &dirs);
 
   /// Populates the output workspace containing the reconstructed data
   void populateDataWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,7 +42,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
 
     Mantid::DataObjects::WorkspaceSingleValue_sptr single =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
             ws);
 
     TS_ASSERT(ws.get() != nullptr);
@@ -84,7 +84,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
 
     Mantid::DataObjects::WorkspaceSingleValue_sptr single =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
             ws);
 
     TS_ASSERT(ws.get() != nullptr);

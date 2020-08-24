@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADPSIMUONBIN_H_
-#define MANTID_DATAHANDLING_LOADPSIMUONBIN_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BinaryStreamReader.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <cstdint>
 
 /** LoadPSIMuonBin : Loads a bin file from the PSI facility for muon
@@ -77,7 +77,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::string getFormattedDateTime(std::string date, std::string time);
+  std::string getFormattedDateTime(const std::string &date,
+                                   const std::string &time);
   void assignOutputWorkspaceParticulars(
       DataObjects::Workspace2D_sptr &outputWorkspace);
   void readSingleVariables(Mantid::Kernel::BinaryStreamReader &streamReader);
@@ -116,5 +117,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADPSIMUONBIN_H_*/

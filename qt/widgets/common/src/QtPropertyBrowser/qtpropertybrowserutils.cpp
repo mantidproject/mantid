@@ -304,7 +304,7 @@ QString QtPropertyBrowserUtils::fontValueText(const QFont &f) {
 
 QtBoolEdit::QtBoolEdit(QWidget *parent)
     : QWidget(parent), m_checkBox(new QCheckBox(this)), m_textVisible(true) {
-  QHBoxLayout *lt = new QHBoxLayout;
+  auto *lt = new QHBoxLayout;
   if (QApplication::layoutDirection() == Qt::LeftToRight)
     lt->setContentsMargins(4, 0, 0, 0);
   else
@@ -359,7 +359,7 @@ void QtBoolEdit::mousePressEvent(QMouseEvent *event) {
 
 QtKeySequenceEdit::QtKeySequenceEdit(QWidget *parent)
     : QWidget(parent), m_num(0), m_lineEdit(new QLineEdit(this)) {
-  QHBoxLayout *layout = new QHBoxLayout(this);
+  auto *layout = new QHBoxLayout(this);
   layout->addWidget(m_lineEdit);
   layout->setMargin(0);
   m_lineEdit->installEventFilter(this);
@@ -371,7 +371,7 @@ QtKeySequenceEdit::QtKeySequenceEdit(QWidget *parent)
 
 bool QtKeySequenceEdit::eventFilter(QObject *o, QEvent *e) {
   if (o == m_lineEdit && e->type() == QEvent::ContextMenu) {
-    QContextMenuEvent *c = static_cast<QContextMenuEvent *>(e);
+    auto *c = static_cast<QContextMenuEvent *>(e);
     QMenu *menu = m_lineEdit->createStandardContextMenu();
     const QList<QAction *> actions = menu->actions();
     QListIterator<QAction *> itAction(actions);
@@ -387,7 +387,7 @@ bool QtKeySequenceEdit::eventFilter(QObject *o, QEvent *e) {
     QAction *actionBefore = nullptr;
     if (actions.count() > 0)
       actionBefore = actions[0];
-    QAction *clearAction = new QAction(tr("Clear Shortcut"), menu);
+    auto *clearAction = new QAction(tr("Clear Shortcut"), menu);
     menu->insertAction(actionBefore, clearAction);
     menu->insertSeparator(actionBefore);
     clearAction->setEnabled(!m_keySequence.isEmpty());
@@ -461,7 +461,7 @@ void QtKeySequenceEdit::setKeySequence(const QKeySequence &sequence) {
 
 QKeySequence QtKeySequenceEdit::keySequence() const { return m_keySequence; }
 
-int QtKeySequenceEdit::translateModifiers(Qt::KeyboardModifiers state,
+int QtKeySequenceEdit::translateModifiers(const Qt::KeyboardModifiers &state,
                                           const QString &text) const {
   int result = 0;
   if ((state & Qt::ShiftModifier) &&

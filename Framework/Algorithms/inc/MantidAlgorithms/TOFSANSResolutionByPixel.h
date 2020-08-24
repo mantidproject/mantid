@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -22,7 +23,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TOFSANSResolutionByPixel : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL TOFSANSResolutionByPixel : public API::Algorithm {
 public:
   /// Default constructor
   TOFSANSResolutionByPixel();
@@ -57,13 +58,13 @@ private:
   double provideDefaultLCollimationLength(
       Mantid::API::MatrixWorkspace_sptr inWS) const;
   /// Check input
-  void checkInput(Mantid::API::MatrixWorkspace_sptr inWS);
+  void checkInput(const Mantid::API::MatrixWorkspace_sptr &inWS);
   /// Get the moderator workspace
-  Mantid::API::MatrixWorkspace_sptr
-  getModeratorWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
+  Mantid::API::MatrixWorkspace_sptr getModeratorWorkspace(
+      const Mantid::API::MatrixWorkspace_sptr &inputWorkspace);
   /// Create an output workspace
   Mantid::API::MatrixWorkspace_sptr
-  setupOutputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
+  setupOutputWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace);
   /// Wavelength resolution (constant for all wavelengths)
   double m_wl_resolution;
 };

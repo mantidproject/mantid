@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifdef _MSC_VER
 #pragma warning(disable : 4250) // Disable warning regarding inheritance via
@@ -20,6 +20,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/IsNone.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
@@ -359,12 +360,19 @@ boost::python::dict validateInputs(IAlgorithm &self) {
                                                              std::string>;
   return MapToPyDictionary(map)();
 }
+
+void initializeProxy(IAlgorithm &self) {
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock
+      releaseGlobalInterpreterLock;
+  self.initialize();
+}
+
 } // namespace
 
 void export_ialgorithm() {
   class_<AlgorithmIDProxy>("AlgorithmID", no_init).def(self == self);
 
-  register_ptr_to_python<boost::shared_ptr<IAlgorithm>>();
+  register_ptr_to_python<std::shared_ptr<IAlgorithm>>();
 
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>(
       "IAlgorithm", "Interface for all algorithms", no_init)
@@ -458,7 +466,7 @@ void export_ialgorithm() {
            "To query whether an algorithm "
            "should rethrow exceptions when "
            "executing.")
-      .def("initialize", &IAlgorithm::initialize, arg("self"),
+      .def("initialize", &initializeProxy, arg("self"),
            "Initializes the algorithm")
       .def("validateInputs", &validateInputs, arg("self"),
            "Cross-check all inputs and return any errors as a dictionary")

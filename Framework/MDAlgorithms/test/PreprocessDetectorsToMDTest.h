@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
-#define MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -18,7 +17,7 @@ using namespace Mantid::MDAlgorithms;
 
 class PrepcocessDetectorsToMDTestHelper : public PreprocessDetectorsToMD {
 public:
-  boost::shared_ptr<DataObjects::TableWorkspace>
+  std::shared_ptr<DataObjects::TableWorkspace>
   createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
     return PreprocessDetectorsToMD::createTableWorkspace(inputWS);
   }
@@ -42,7 +41,7 @@ public:
 class PreprocessDetectorsToMDTest : public CxxTest::TestSuite {
   std::unique_ptr<PrepcocessDetectorsToMDTestHelper> pAlg;
   API::MatrixWorkspace_sptr ws2D;
-  boost::shared_ptr<DataObjects::TableWorkspace> tws;
+  std::shared_ptr<DataObjects::TableWorkspace> tws;
 
 public:
   static PreprocessDetectorsToMDTest *createSuite() {
@@ -157,7 +156,7 @@ public:
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ",
                wsOut);
     DataObjects::TableWorkspace_sptr tws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
     double L1(0);
@@ -199,7 +198,7 @@ public:
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ",
                wsOut);
     DataObjects::TableWorkspace_sptr tws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
     auto &Efixed = tws->getColVector<float>("eFixed");
@@ -226,7 +225,7 @@ public:
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ",
                wsOut);
     DataObjects::TableWorkspace_sptr tws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
     auto &maskCol = tws->getColVector<int>("detMask");
@@ -234,7 +233,7 @@ public:
       TS_ASSERT_EQUALS(0, maskCol[i]);
     }
     // now mask a detector and check if masks are updated;
-    auto inputWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         API::AnalysisDataService::Instance().retrieve("testMatrWS"));
     const size_t nRows = inputWS->getNumberHistograms();
 
@@ -280,7 +279,7 @@ public:
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ",
                wsOut);
     DataObjects::TableWorkspace_sptr tws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
     TSM_ASSERT_THROWS("No such column", tws->getColVector<int>("detMask"),
@@ -303,5 +302,3 @@ public:
     API::AnalysisDataService::Instance().addOrReplace("testMatrWS", ws2D);
   }
 };
-
-#endif

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EQSANSCorrectFrame.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -34,7 +34,7 @@ EQSANSCorrectFrame::EQSANSCorrectFrame() : API::Algorithm() {}
 void EQSANSCorrectFrame::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
   declareProperty("PulsePeriod", 1.0E6 / 60.0,
                   "Period of the neutron pulse, in micro-seconds",
@@ -95,11 +95,11 @@ void EQSANSCorrectFrame::exec() {
       double newTOF = tof + m_framesOffsetTime;
       // TOF values smaller than that of the fastest neutrons have been
       // 'folded' by the data acquisition system. They must be shifted
-      double minTOF = m_minTOF * pathToPixelFactor;
-      if (newTOF < minTOF)
+      double scaledMinTOF = m_minTOF * pathToPixelFactor;
+      if (newTOF < scaledMinTOF)
         newTOF += m_frameWidth;
       // Events from the skipped pulse are delayed by one pulse period
-      if (m_isFrameSkipping && newTOF > minTOF + m_pulsePeriod)
+      if (m_isFrameSkipping && newTOF > scaledMinTOF + m_pulsePeriod)
         newTOF += m_pulsePeriod;
       return newTOF;
     }

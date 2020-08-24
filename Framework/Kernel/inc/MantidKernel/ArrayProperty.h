@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -28,16 +28,20 @@ namespace Kernel {
 template <typename T>
 class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
 public:
-  ArrayProperty(std::string name, std::vector<T> vec,
-                IValidator_sptr validator = IValidator_sptr(new NullValidator),
+  ArrayProperty(
+      const std::string &name, std::vector<T> vec,
+      const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+      const unsigned int direction = Direction::Input);
+  ArrayProperty(const std::string &name, const IValidator_sptr &validator,
                 const unsigned int direction = Direction::Input);
-  ArrayProperty(std::string name, IValidator_sptr validator,
+  ArrayProperty(const std::string &name,
                 const unsigned int direction = Direction::Input);
-  ArrayProperty(std::string name,
-                const unsigned int direction = Direction::Input);
-  ArrayProperty(std::string name, const std::string &values,
-                IValidator_sptr validator = IValidator_sptr(new NullValidator),
-                const unsigned int direction = Direction::Input);
+  ArrayProperty(
+      const std::string &name, const std::string &values,
+      const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+      const unsigned int direction = Direction::Input);
+
+  ArrayProperty(const ArrayProperty &);
 
   ArrayProperty<T> *clone() const override;
 

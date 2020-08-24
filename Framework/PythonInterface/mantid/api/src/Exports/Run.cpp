@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Copyable.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
@@ -16,6 +17,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <utility>
 
 using Mantid::API::LogManager;
 using Mantid::API::Run;
@@ -39,7 +41,26 @@ namespace bpl = boost::python;
  */
 double getPropertyAsSingleValueWithDefaultStatistic(Run &self,
                                                     const std::string &name) {
+  //   Before calling the function we need to release the GIL,
+  //   drop the Python threadstate and reset anything installed
+  //   via PyEval_SetTrace while we execute the C++ code -
+  //   ReleaseGlobalInterpreter does this for us
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock
+      releaseGlobalInterpreterLock;
   return self.getPropertyAsSingleValue(name);
+}
+
+/**
+ * Wrapper around getPropertyAsSingleValue to use TimeAveragedMean as the
+ * StatisticType.
+ * @param self A reference to the Run object
+ * @param name A name of a log
+ * @return A double value
+ */
+double getPropertyAsSingleValueWithTimeAveragedMean(Run &self,
+                                                    const std::string &name) {
+  return self.getPropertyAsSingleValue(name,
+                                       Mantid::Kernel::Math::TimeAveragedMean);
 }
 
 /**
@@ -103,7 +124,7 @@ void addOrReplaceProperty(Run &self, const std::string &name,
  * @param key The key
  * @param default_ The default to return if it does not exist
  */
-bpl::object getWithDefault(bpl::object self, bpl::object key,
+bpl::object getWithDefault(bpl::object self, const bpl::object &key,
                            bpl::object default_) {
   bpl::object exists(self.attr("__contains__"));
   if (extract<bool>(exists(key))()) {
@@ -119,8 +140,8 @@ bpl::object getWithDefault(bpl::object self, bpl::object key,
  * @param self The bpl::object called on
  * @param key The key
  */
-bpl::object get(bpl::object self, bpl::object key) {
-  return getWithDefault(self, key, bpl::object());
+bpl::object get(bpl::object self, const bpl::object &key) {
+  return getWithDefault(std::move(self), std::move(key), bpl::object());
 }
 
 /**
@@ -177,6 +198,12 @@ void export_Run() {
            (arg("self"), arg("name")),
            "Return a log as a single float value. Time series values are "
            "averaged.")
+
+      .def("getPropertyAsSingleValueWithTimeAveragedMean",
+           getPropertyAsSingleValueWithTimeAveragedMean,
+           (arg("self"), arg("name")),
+           "Returns a log as a single float value. Calculated using "
+           "time-averaged mean.")
 
       .def("getTimeAveragedStd", &Run::getTimeAveragedStd,
            (arg("self"), arg("name")),
@@ -242,5 +269,6 @@ void export_Run() {
       .def("__setitem__", &addOrReplaceProperty,
            (arg("self"), arg("name"), arg("value")))
       .def("__copy__", &Mantid::PythonInterface::generic__copy__<Run>)
-      .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Run>);
+      .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Run>)
+      .def("__eq__", &Run::operator==, arg("self"), arg("other"));
 }

@@ -1,14 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_
+#pragma once
 
 #include "ISaveView.h"
 #include "ui_SaveWidget.h"
+#include <QCheckBox>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QRadioButton>
 #include <memory>
 
 namespace MantidQt {
@@ -48,7 +51,7 @@ public:
   /// Returns the index of selected file format
   int getFileFormatIndex() const override;
   /// Returns the title check
-  bool getTitleCheck() const override;
+  bool getHeaderCheck() const override;
   /// Returns the Q resolution check
   bool getQResolutionCheck() const override;
   /// Returns the separator type
@@ -70,8 +73,19 @@ public:
   void disableAutosaveControls() override;
   void enableAutosaveControls() override;
 
-  void enableFileFormatAndLocationControls() override;
-  void disableFileFormatAndLocationControls() override;
+  void enableFileFormatControls() override;
+  void disableFileFormatControls() override;
+  void enableLocationControls() override;
+  void disableLocationControls() override;
+
+  void enableLogList() override;
+  void disableLogList() override;
+  void enableHeaderCheckBox() override;
+  void disableHeaderCheckBox() override;
+  void enableQResolutionCheckBox() override;
+  void disableQResolutionCheckBox() override;
+  void enableSeparatorButtonGroup() override;
+  void disableSeparatorButtonGroup() override;
 
   void error(const std::string &title, const std::string &prompt);
   void warning(const std::string &title, const std::string &prompt);
@@ -98,9 +112,18 @@ public slots:
   void onSavePathChanged();
   void onAutosaveChanged(int state);
 
+private slots:
+  void onSettingsChanged();
+
 private:
   /// Initialize the interface
   void initLayout();
+
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QComboBox &edit);
+  void connectSettingsChange(QCheckBox &edit);
+  void connectSettingsChange(QRadioButton &edit);
+  void connectSaveSettingsWidgets() override;
 
   /// The widget
   Ui::SaveWidget m_ui;
@@ -114,5 +137,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_ */

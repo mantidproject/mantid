@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -83,10 +83,10 @@ void SassenaFFT::exec() {
   // Retrieve the real and imaginary parts of the intermediate scattering
   // function
   DataObjects::Workspace2D_sptr fqtRe =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           gws->getItem(ftqReName));
   DataObjects::Workspace2D_sptr fqtIm =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           gws->getItem(ftqImName));
 
   // Calculate the FFT for all spectra, retaining only the real part since
@@ -107,7 +107,7 @@ void SassenaFFT::exec() {
   fft->executeAsChildAlg();
   API::MatrixWorkspace_sptr sqw0 = fft->getProperty("OutputWorkspace");
   DataObjects::Workspace2D_sptr sqw =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(sqw0);
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(sqw0);
   API::AnalysisDataService::Instance().addOrReplace(sqwName, sqw);
 
   // Transform the X-axis to appropriate dimensions

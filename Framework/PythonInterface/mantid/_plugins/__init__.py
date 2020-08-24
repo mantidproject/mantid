@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 Plugins
@@ -19,8 +19,7 @@ and so methods, such as __len__() & add() inherited from CompositeFunction are m
 The names from the library are not imported by default as it is best if the interface classes
 are used for checks such as isinstance()
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 ###############################################################################
 # Load the C++ library and register the C++ class exports

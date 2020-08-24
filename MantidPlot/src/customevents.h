@@ -34,9 +34,6 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef CUSTOM_EVENTS_H
-#define CUSTOM_EVENTS_H
+#pragma once
 
 #define SCRIPTING_CHANGE_EVENT QEvent::User
-
-#endif

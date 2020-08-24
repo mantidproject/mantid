@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_AUGMENTEDLAGRANGIANOPTIMIZERTEST_H_
-#define MANTID_KERNEL_AUGMENTEDLAGRANGIANOPTIMIZERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 class AugmentedLagrangianOptimizerTest : public CxxTest::TestSuite {
 public:
@@ -164,26 +163,26 @@ private:
     inequality[0][0] = -1.0;
     inequality[0][1] = 5.0;
 
-    boost::shared_ptr<AugmentedLagrangianOptimizer> lsqmin;
+    std::shared_ptr<AugmentedLagrangianOptimizer> lsqmin;
     switch (type) {
     case NOCONSTRAINTS:
       lsqmin =
-          boost::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc);
+          std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc);
       break;
     case EMPTYCONSTRAINTS:
-      lsqmin = boost::make_shared<AugmentedLagrangianOptimizer>(
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(
           nparams, userFunc, DblMatrix(), DblMatrix());
       break;
     case EQUALITYCONSTRAINT:
-      lsqmin = boost::make_shared<AugmentedLagrangianOptimizer>(
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(
           nparams, userFunc, equality, DblMatrix());
       break;
     case INEQUALITYCONSTRAINT:
-      lsqmin = boost::make_shared<AugmentedLagrangianOptimizer>(
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(
           nparams, userFunc, DblMatrix(), inequality);
       break;
     case BOTHCONSTRAINTS:
-      lsqmin = boost::make_shared<AugmentedLagrangianOptimizer>(
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(
           nparams, userFunc, equality, inequality);
       break;
     };
@@ -211,5 +210,3 @@ private:
 
   const size_t m_nparams;
 };
-
-#endif /* MANTID_KERNEL_UGMENTEDLAGRANGIANOPTIMIZERTEST_H_ */

@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
+from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, SaveNexusProcessed, LoadNexusProcessed, config, mtd
 import systemtesting
-from mantid.simpleapi import SANSILLAutoProcess, config, mtd, GroupWorkspaces, SaveNexusProcessed
-import os
 from tempfile import gettempdir
+import os
 
 
 class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
@@ -48,13 +46,15 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
         thick = [0.1, 0.2, 0.2]
 
         # reduce samples
+        # this also tests that already loaded workspace can be passed instead of a file
+        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
         for i in range(len(samples)):
             SANSILLAutoProcess(
                 SampleRuns=samples[i],
                 BeamRuns=beams,
                 ContainerRuns=containers,
                 MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
-                SensitivityMaps='sens-lamp.nxs',
+                SensitivityMaps='sens-lamp',
                 SampleTransmissionRuns=sample_tr[i],
                 ContainerTransmissionRuns=container_tr,
                 TransmissionBeamRuns=beam_tr,
@@ -170,7 +170,8 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            ThetaDependent=False,
                            WaterCrossSection=0.87,
                            SampleThickness=0.2,
-                           AbsorberRuns=absorber)
+                           AbsorberRuns=absorber,
+                           ClearCorrected2DWorkspace=False)
         tmp_dir = gettempdir()
         water_dir = [os.path.join(tmp_dir, 'water_reference_g' + str(i) + '.nxs') for i in range(3)]
         SaveNexusProcessed('003659_Sample', water_dir[0])

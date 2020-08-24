@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTY_HANDLER_H
-#define PROPERTY_HANDLER_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IFunction.h"
@@ -43,8 +42,8 @@ class EXPORT_OPT_MANTIDQT_COMMON PropertyHandler
   Q_OBJECT
 public:
   // Constructor
-  PropertyHandler(Mantid::API::IFunction_sptr fun,
-                  boost::shared_ptr<Mantid::API::CompositeFunction> parent,
+  PropertyHandler(const Mantid::API::IFunction_sptr &fun,
+                  std::shared_ptr<Mantid::API::CompositeFunction> parent,
                   FitPropertyBrowser *browser, QtBrowserItem *item = nullptr);
 
   /// Destructor
@@ -67,13 +66,11 @@ public:
   QString functionPrefix() const;
 
   // Return composite function
-  boost::shared_ptr<Mantid::API::CompositeFunction> cfun() const {
-    return m_cf;
-  }
+  std::shared_ptr<Mantid::API::CompositeFunction> cfun() const { return m_cf; }
   // Return peak function
-  boost::shared_ptr<Mantid::API::IPeakFunction> pfun() const { return m_pf; }
+  std::shared_ptr<Mantid::API::IPeakFunction> pfun() const { return m_pf; }
   // Return IFunction
-  boost::shared_ptr<Mantid::API::IFunction> ifun() const { return m_fun; }
+  std::shared_ptr<Mantid::API::IFunction> ifun() const { return m_fun; }
   // Return the browser item
   QtBrowserItem *item() const { return m_item; }
   // Return the parent handler
@@ -84,18 +81,18 @@ public:
    * calls findCompositeFunction recursively with all its children or
    * zero
    */
-  boost::shared_ptr<const Mantid::API::CompositeFunction>
+  std::shared_ptr<const Mantid::API::CompositeFunction>
   findCompositeFunction(QtBrowserItem *item) const;
   /** Returns 'this' if item == m_item or
    * calls findFunction recursively with all its children or
    * zero
    */
-  boost::shared_ptr<const Mantid::API::IFunction>
+  std::shared_ptr<const Mantid::API::IFunction>
   findFunction(QtBrowserItem *item) const;
 
   PropertyHandler *findHandler(QtProperty *prop);
 
-  PropertyHandler *findHandler(Mantid::API::IFunction_const_sptr fun);
+  PropertyHandler *findHandler(const Mantid::API::IFunction_const_sptr &fun);
   PropertyHandler *findHandler(const Mantid::API::IFunction *fun);
 
   /**
@@ -167,7 +164,7 @@ public:
    * Change the type of the function (replace the function)
    * @param prop :: The "Type" property with new value
    */
-  boost::shared_ptr<Mantid::API::IFunction> changeType(QtProperty *prop);
+  std::shared_ptr<Mantid::API::IFunction> changeType(QtProperty *prop);
 
   void setHeight(const double &h);
   void setCentre(const double &c);
@@ -185,7 +182,7 @@ public:
 
   void addTie(const QString &tieStr);
   void fix(const QString &parName);
-  void removeTie(QtProperty *prop, std::string globalName);
+  void removeTie(QtProperty *prop, const std::string &globalName);
   void removeTie(QtProperty *prop);
   void removeTie(const QString &propName);
   void addConstraint(QtProperty *parProp, bool lo, bool up, double loBound,
@@ -229,11 +226,11 @@ protected:
 
 private:
   FitPropertyBrowser *m_browser;
-  boost::shared_ptr<Mantid::API::CompositeFunction>
+  std::shared_ptr<Mantid::API::CompositeFunction>
       m_cf; //< if the function is composite holds pointer to it
-  boost::shared_ptr<Mantid::API::IPeakFunction>
+  std::shared_ptr<Mantid::API::IPeakFunction>
       m_pf; //< if the function is peak holds pointer to it
-  boost::shared_ptr<Mantid::API::CompositeFunction>
+  std::shared_ptr<Mantid::API::CompositeFunction>
       m_parent; //< if the function has parent holds pointer to it
   QtProperty *m_type;
   QtBrowserItem *m_item;              //< the browser item
@@ -276,5 +273,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* PROPERTY_HANDLER_H */

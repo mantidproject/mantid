@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PLOTPEAKBYLOGVALUETEST_H_
-#define PLOTPEAKBYLOGVALUETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -30,6 +29,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <algorithm>
 #include <sstream>
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -68,9 +68,9 @@ DECLARE_FUNCTION(PLOTPEAKBYLOGVALUETEST_Fun)
 
 class PropertyNameIs {
 public:
-  PropertyNameIs(std::string name) : m_name(name){};
+  PropertyNameIs(std::string name) : m_name(std::move(name)){};
 
-  bool operator()(Mantid::Kernel::PropertyHistory_sptr p) {
+  bool operator()(const Mantid::Kernel::PropertyHistory_sptr &p) {
     return p->name() == m_name;
   }
 
@@ -625,8 +625,6 @@ private:
     ws->setSharedX(1, ws->sharedX(0));
     ws->setSharedX(2, ws->sharedX(0));
 
-    std::vector<double> amps{20.0, 30.0, 25.0};
-    std::vector<double> cents{0.0, 0.1, -1.0};
     std::vector<double> fwhms{1.0, 1.1, 0.6};
     for (size_t i = 0; i < 3; ++i) {
       std::string fun = "name=FlatBackground,A0=" + std::to_string(fwhms[i]);
@@ -686,5 +684,3 @@ private:
     m_wsg.reset();
   }
 };
-
-#endif /*PLOTPEAKBYLOGVALUETEST_H_*/

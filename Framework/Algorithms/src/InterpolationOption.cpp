@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/InterpolationOption.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -63,7 +62,7 @@ std::unique_ptr<Property> InterpolationOption::property() const {
   using StringProperty = Kernel::PropertyWithValue<std::string>;
 
   return std::make_unique<StringProperty>(
-      PROP_NAME, LINEAR_OPT, boost::make_shared<StringListValidator>(OPTIONS));
+      PROP_NAME, LINEAR_OPT, std::make_shared<StringListValidator>(OPTIONS));
 }
 
 /**

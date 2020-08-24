@@ -1,12 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
@@ -46,7 +45,7 @@ public:
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        boost::shared_ptr<DataObjects::TableWorkspace>(
+        std::shared_ptr<DataObjects::TableWorkspace>(
             new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -65,7 +64,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
     for (int wi = 1; wi <= 3; wi++) {
@@ -94,7 +93,7 @@ public:
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        boost::shared_ptr<DataObjects::TableWorkspace>(
+        std::shared_ptr<DataObjects::TableWorkspace>(
             new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -114,7 +113,7 @@ public:
 
     // 4. Check
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(opWSName));
     TS_ASSERT(outWS);
     for (int wi = 1; wi <= 3; wi++) {
@@ -144,7 +143,7 @@ public:
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        boost::shared_ptr<DataObjects::TableWorkspace>(
+        std::shared_ptr<DataObjects::TableWorkspace>(
             new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -167,7 +166,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
 
@@ -231,7 +230,7 @@ public:
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        boost::shared_ptr<DataObjects::TableWorkspace>(
+        std::shared_ptr<DataObjects::TableWorkspace>(
             new DataObjects::TableWorkspace());
     tablews->addColumn("str", "SpectraList");
     tablews->addColumn("double", "XMin");
@@ -250,7 +249,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
     for (int wi = 1; wi <= 3; wi++) {
@@ -281,7 +280,7 @@ public:
       dataws->getSpectrum(i).setDetectorID(i + 1);
 
     // Generate a TableWorksapce
-    auto tablews = boost::make_shared<TableWorkspace>();
+    auto tablews = std::make_shared<TableWorkspace>();
     tablews->addColumn("str", "DetectorIDsList");
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -301,7 +300,7 @@ public:
 
     // Check
     MatrixWorkspace_sptr outws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(outws);
     for (int wi = 1; wi <= 3; wi++) {

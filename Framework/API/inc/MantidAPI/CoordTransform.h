@@ -1,18 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/SingleValueParameter.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -28,7 +29,7 @@ DECLARE_SINGLE_VALUE_PARAMETER(OutDimParameter, size_t)
  * @author Janik Zikovsky
  * @date 2011-04-14
  */
-class DLLExport CoordTransform {
+class MANTID_API_DLL CoordTransform {
 public:
   CoordTransform(const size_t inD, const size_t outD);
   virtual ~CoordTransform() = default;
@@ -64,10 +65,10 @@ protected:
 };
 
 // Helper typedef for a shared pointer of this type.
-using CoordTransform_sptr = boost::shared_ptr<CoordTransform>;
+using CoordTransform_sptr = std::shared_ptr<CoordTransform>;
 
 // Helper typdef for a const shared pointer of this type.
-using CoordTransform_const_sptr = boost::shared_ptr<const CoordTransform>;
+using CoordTransform_const_sptr = std::shared_ptr<const CoordTransform>;
 
 } // namespace API
 } // namespace Mantid

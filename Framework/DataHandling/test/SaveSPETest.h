@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVESPETEST_H_
-#define SAVESPETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveSPE.h"
@@ -46,7 +45,7 @@ public:
   SaveSPETest() { // the functioning of SaveSPE is affected by a function call
                   // in the FrameworkManager's constructor, creating the
                   // algorithm in this way ensures that function is executed
-    saver = FrameworkManager::Instance().createAlgorithm("SaveSPE");
+    saver = AlgorithmManager::Instance().create("SaveSPE");
   }
 
   void testName() { TS_ASSERT_EQUALS(saver->name(), "SaveSPE"); }
@@ -204,7 +203,5 @@ private:
   }
 
 private:
-  IAlgorithm *saver;
+  IAlgorithm_sptr saver;
 };
-
-#endif /*SAVESPETEST_H_*/

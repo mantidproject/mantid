@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.muon_file_utils import filter_for_extensions
@@ -46,6 +44,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.on_rebin_type_changed(self.handle_rebin_type_changed)
 
         self._view.on_instrument_changed(self.handle_instrument_changed)
+
+        self._view.on_double_pulse_time_changed(self.handle_double_pulse_time_changed)
+        self._view.on_double_pulse_checkState_changed(self.handle_double_pulse_enabled)
 
         self.handle_loaded_time_zero_checkState_change()
         self.handle_loaded_first_good_data_checkState_change()
@@ -170,6 +171,16 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         if instrument != self._model._data.instrument:
             self._model._data.instrument = instrument
             self._view.set_instrument(instrument, block=True)
+
+    def handle_double_pulse_time_changed(self):
+        double_pulse_time = self._view.get_double_pulse_time()
+        self._model.set_double_pulse_time(double_pulse_time)
+
+    def handle_double_pulse_enabled(self):
+        pulseType = self._view.double_pulse_state()
+        enabled = pulseType == 'Double Pulse'
+        self._view.double_pulse_edit_enabled(enabled)
+        self._model.set_double_pulse_enabled(enabled)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time

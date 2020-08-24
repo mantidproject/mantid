@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AbsorptionCorrections.h"
 
@@ -16,6 +16,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::DeltaEMode;
 
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
@@ -47,16 +48,17 @@ std::string extractFirstOf(std::string const &str,
   return str;
 }
 
-void setYAxisLabels(WorkspaceGroup_sptr group, std::string const &unit,
+void setYAxisLabels(const WorkspaceGroup_sptr &group, std::string const &unit,
                     std::string const &axisLabel) {
   for (auto const &workspace : *group) {
-    auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    auto matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     matrixWs->setYUnit(unit);
     matrixWs->setYUnitLabel(axisLabel);
   }
 }
 
-void convertSpectrumAxis(MatrixWorkspace_sptr workspace, double eFixed = 0.0) {
+void convertSpectrumAxis(const MatrixWorkspace_sptr &workspace,
+                         double eFixed = 0.0) {
   auto convertAlg = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
   convertAlg->initialize();
   convertAlg->setProperty("InputWorkspace", workspace);
@@ -68,17 +70,20 @@ void convertSpectrumAxis(MatrixWorkspace_sptr workspace, double eFixed = 0.0) {
   convertAlg->execute();
 }
 
-MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
+MatrixWorkspace_sptr convertUnits(const MatrixWorkspace_sptr &workspace,
                                   std::string const &target) {
   auto convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
   convertAlg->initialize();
   convertAlg->setChild(true);
   convertAlg->setProperty("InputWorkspace", workspace);
   convertAlg->setProperty("OutputWorkspace", "__converted");
-  convertAlg->setProperty(
-      "EMode", Mantid::Kernel::DeltaEMode::asString(workspace->getEMode()));
-  convertAlg->setProperty("EFixed",
-                          workspace->getEFixed(workspace->getDetector(0)));
+  auto eMode = workspace->getEMode();
+  convertAlg->setProperty("EMode", DeltaEMode::asString(eMode));
+  if ((eMode == DeltaEMode::Type::Direct) ||
+      (eMode == DeltaEMode::Type::Indirect)) {
+    convertAlg->setProperty("EFixed",
+                            workspace->getEFixed(workspace->getDetector(0)));
+  }
   convertAlg->setProperty("Target", target);
   convertAlg->execute();
   return convertAlg->getProperty("OutputWorkspace");
@@ -95,7 +100,7 @@ groupWorkspaces(std::vector<std::string> const &workspaceNames) {
   return groupAlg->getProperty("OutputWorkspace");
 }
 
-WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
+WorkspaceGroup_sptr convertUnits(const WorkspaceGroup_sptr &workspaceGroup,
                                  std::string const &target) {
   std::vector<std::string> convertedNames;
   convertedNames.reserve(workspaceGroup->size());
@@ -103,7 +108,7 @@ WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
   for (auto const &workspace : *workspaceGroup) {
     auto const name = workspace->getName();
     auto const wavelengthWorkspace = convertUnits(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), target);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace), target);
     addWorkspaceToADS(name, wavelengthWorkspace);
     convertedNames.emplace_back(name);
   }
@@ -186,7 +191,7 @@ void AbsorptionCorrections::run() {
   QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
 
   IAlgorithm_sptr monteCarloAbsCor =
-      AlgorithmManager::Instance().create("CalculateMonteCarloAbsorption");
+      AlgorithmManager::Instance().create("PaalmanPingsMonteCarloAbsorption");
   monteCarloAbsCor->initialize();
 
   monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
@@ -225,8 +230,6 @@ void AbsorptionCorrections::run() {
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
   monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
-  long const wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
-  monteCarloAbsCor->setProperty("NumberOfWavelengthPoints", wave);
   long const events = static_cast<long>(m_uiForm.spNumberEvents->value());
   monteCarloAbsCor->setProperty("EventsPerPoint", events);
   auto const interpolation =
@@ -299,8 +302,8 @@ void AbsorptionCorrections::run() {
  * @param alg Algorithm to set properties of
  * @param shape Sample shape
  */
-void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
-                                                          QString shape) {
+void AbsorptionCorrections::addShapeSpecificSampleOptions(
+    const IAlgorithm_sptr &alg, const QString &shape) {
 
   if (shape == "FlatPlate") {
     double const sampleHeight = m_uiForm.spFlatSampleHeight->value();
@@ -342,8 +345,8 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
  * @param alg Algorithm to set properties of
  * @param shape Sample shape
  */
-void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
-                                                       QString const &shape) {
+void AbsorptionCorrections::addShapeSpecificCanOptions(
+    const IAlgorithm_sptr &alg, QString const &shape) {
   if (shape == "FlatPlate") {
     double const canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
     alg->setProperty("ContainerFrontThickness", canFrontThickness);
@@ -351,11 +354,8 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
     double const canBackThickness = m_uiForm.spFlatCanBackThickness->value();
     alg->setProperty("ContainerBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double const canInnerRadius = m_uiForm.spCylSampleRadius->value();
-    alg->setProperty("ContainerInnerRadius", canInnerRadius);
-
     double const canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
-    alg->setProperty("ContainerOuterRadius", canOuterRadius);
+    alg->setProperty("ContainerRadius", canOuterRadius);
 
   } else if (shape == "Annulus") {
     double const canInnerRadius = m_uiForm.spAnnCanInnerRadius->value();
@@ -470,7 +470,7 @@ void AbsorptionCorrections::processWavelengthWorkspace() {
 }
 
 void AbsorptionCorrections::convertSpectrumAxes(
-    WorkspaceGroup_sptr correctionsWs) {
+    const WorkspaceGroup_sptr &correctionsWs) {
   auto const sampleWsName =
       m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
   convertSpectrumAxes(correctionsWs, getADSMatrixWorkspace(sampleWsName));
@@ -478,17 +478,20 @@ void AbsorptionCorrections::convertSpectrumAxes(
 }
 
 void AbsorptionCorrections::convertSpectrumAxes(
-    WorkspaceGroup_sptr correctionsGroup, MatrixWorkspace_sptr sample) {
+    const WorkspaceGroup_sptr &correctionsGroup,
+    const MatrixWorkspace_sptr &sample) {
   for (auto const &workspace : *correctionsGroup) {
     auto const correction =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     convertSpectrumAxes(correction, sample);
   }
 }
 
-void AbsorptionCorrections::convertSpectrumAxes(MatrixWorkspace_sptr correction,
-                                                MatrixWorkspace_sptr sample) {
-  if (correction && sample && getEMode(sample) == "Indirect") {
+void AbsorptionCorrections::convertSpectrumAxes(
+    const MatrixWorkspace_sptr &correction,
+    const MatrixWorkspace_sptr &sample) {
+  if (correction && sample &&
+      sample->getEMode() == DeltaEMode::Type::Indirect) {
     try {
       convertSpectrumAxis(correction, getEFixed(correction));
     } catch (std::runtime_error const &) {
@@ -523,17 +526,16 @@ void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {
 }
 
 void AbsorptionCorrections::getParameterDefaults(
-    Instrument_const_sptr instrument) {
+    const Instrument_const_sptr &instrument) {
   setBeamWidthValue(instrument, "Workflow.beam-width");
   setBeamHeightValue(instrument, "Workflow.beam-height");
-  setWavelengthsValue(instrument, "Workflow.absorption-wavelengths");
   setEventsValue(instrument, "Workflow.absorption-events");
   setInterpolationValue(instrument, "Workflow.absorption-interpolation");
   setMaxAttemptsValue(instrument, "Workflow.absorption-attempts");
 }
 
 void AbsorptionCorrections::setBeamWidthValue(
-    Instrument_const_sptr instrument,
+    const Instrument_const_sptr &instrument,
     std::string const &beamWidthParamName) const {
   if (instrument->hasParameter(beamWidthParamName)) {
     auto const beamWidth = QString::fromStdString(
@@ -544,7 +546,7 @@ void AbsorptionCorrections::setBeamWidthValue(
 }
 
 void AbsorptionCorrections::setBeamHeightValue(
-    Instrument_const_sptr instrument,
+    const Instrument_const_sptr &instrument,
     std::string const &beamHeightParamName) const {
   if (instrument->hasParameter(beamHeightParamName)) {
     auto const beamHeight = QString::fromStdString(
@@ -554,19 +556,8 @@ void AbsorptionCorrections::setBeamHeightValue(
   }
 }
 
-void AbsorptionCorrections::setWavelengthsValue(
-    Instrument_const_sptr instrument,
-    std::string const &wavelengthsParamName) const {
-  if (instrument->hasParameter(wavelengthsParamName)) {
-    auto const wavelengths = QString::fromStdString(
-        instrument->getStringParameter(wavelengthsParamName)[0]);
-    auto const wavelengthsValue = wavelengths.toInt();
-    m_uiForm.spNumberWavelengths->setValue(wavelengthsValue);
-  }
-}
-
 void AbsorptionCorrections::setEventsValue(
-    Instrument_const_sptr instrument,
+    const Instrument_const_sptr &instrument,
     std::string const &eventsParamName) const {
   if (instrument->hasParameter(eventsParamName)) {
     auto const events = QString::fromStdString(
@@ -577,7 +568,7 @@ void AbsorptionCorrections::setEventsValue(
 }
 
 void AbsorptionCorrections::setInterpolationValue(
-    Instrument_const_sptr instrument,
+    const Instrument_const_sptr &instrument,
     std::string const &interpolationParamName) const {
   if (instrument->hasParameter(interpolationParamName)) {
     auto const interpolation = QString::fromStdString(
@@ -589,7 +580,7 @@ void AbsorptionCorrections::setInterpolationValue(
 }
 
 void AbsorptionCorrections::setMaxAttemptsValue(
-    Instrument_const_sptr instrument,
+    const Instrument_const_sptr &instrument,
     std::string const &maxAttemptsParamName) const {
   if (instrument->hasParameter(maxAttemptsParamName)) {
     auto const maxScatterAttempts = QString::fromStdString(

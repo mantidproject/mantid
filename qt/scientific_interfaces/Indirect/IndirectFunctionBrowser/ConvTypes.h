@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECT_CONVTYPES_H_
-#define MANTIDQT_INDIRECT_CONVTYPES_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -26,8 +25,6 @@ using namespace Mantid::API;
 
 enum class FitType {
   None,
-  OneLorentzian,
-  TwoLorentzians,
   TeixeiraWater,
   StretchedExpFT,
   ElasticDiffSphere,
@@ -36,9 +33,20 @@ enum class FitType {
   InelasticDiffRotDiscreteCircle,
 };
 
+enum class LorentzianType {
+  None,
+  OneLorentzian,
+  TwoLorentzians,
+};
+
 extern std::map<FitType, bool> FitTypeQDepends;
 extern std::unordered_map<FitType, std::string> FitTypeEnumToString;
 extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
+
+extern std::unordered_map<LorentzianType, std::string>
+    LorentzianTypeEnumToString;
+extern std::unordered_map<std::string, LorentzianType>
+    LorentzianTypeStringToEnum;
 
 enum class BackgroundType { None, Flat, Linear };
 
@@ -60,6 +68,7 @@ enum class ParamID {
   TW_TAU,
   TW_CENTRE,
   DELTA_HEIGHT,
+  DELTA_CENTER,
   TEMPERATURE,
   SE_HEIGHT,
   SE_TAU,
@@ -92,7 +101,7 @@ inline ParamID &operator++(ParamID &id) {
 }
 
 inline void applyToParamIDRange(ParamID from, ParamID to,
-                                std::function<void(ParamID)> fun) {
+                                const std::function<void(ParamID)> &fun) {
   if (from == ParamID::NONE || to == ParamID::NONE)
     return;
   for (auto i = from; i <= to; ++i)
@@ -100,8 +109,9 @@ inline void applyToParamIDRange(ParamID from, ParamID to,
 }
 
 enum SubTypeIndex {
-  Fit = 0,
-  Background = 1,
+  Lorentzian = 0,
+  Fit = 1,
+  Background = 2,
 };
 
 struct TemplateSubType {
@@ -188,6 +198,10 @@ struct FitSubType : public TemplateSubTypeImpl<FitType> {
   QString name() const override { return "Fit Type"; }
 };
 
+struct LorentzianSubType : public TemplateSubTypeImpl<LorentzianType> {
+  QString name() const override { return "Lorentzians"; }
+};
+
 struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
   QString name() const override { return "Background"; }
 };
@@ -197,11 +211,15 @@ struct DeltaSubType : public TemplateSubTypeImpl<bool> {
 };
 
 struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
-  QString name() const override { return "TempCorrection"; }
+  QString name() const override { return "ConvTempCorrection"; }
 };
 
 void applyToFitType(FitType fitType,
                     const std::function<void(ParamID)> &paramFun);
+
+void applyToLorentzianType(LorentzianType lorenzianType,
+                           const std::function<void(ParamID)> &paramFun);
+
 void applyToBackground(BackgroundType bgType,
                        const std::function<void(ParamID)> &paramFun);
 void applyToDelta(bool deltaType, const std::function<void(ParamID)> &paramFun);
@@ -213,5 +231,3 @@ void applyToTemp(TempCorrectionType tempCorrectionType,
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_INDIRECT_CONVTYPES_H_ */

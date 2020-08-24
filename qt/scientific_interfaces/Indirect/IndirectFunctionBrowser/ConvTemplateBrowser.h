@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECT_CONVTEMPLATEBROWSER_H_
-#define INDIRECT_CONVTEMPLATEBROWSER_H_
+#pragma once
 
 #include "ConvTemplatePresenter.h"
 #include "ConvTypes.h"
@@ -51,17 +50,21 @@ public:
   void clear() override;
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
+
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &name,
                      TableDatasetIndex const &index) override;
-  void setResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions) override;
+  void setResolution(const std::vector<std::pair<std::string, size_t>>
+                         &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
   void addTempCorrection(double value);
   void removeTempCorrection();
   void setQValues(const std::vector<double> &qValues) override;
   void setEnum(size_t subTypeIndex, int fitType);
+  void setInt(size_t subTypeIndex, int val);
+
   void updateTemperatureCorrectionAndDelta(bool tempCorrection,
                                            bool deltaFunction);
 
@@ -79,6 +82,7 @@ private:
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();
+  void createLorentzianFunctionProperties();
   void createDeltaFunctionProperties();
   void createTempCorrectionProperties();
   void setSubType(size_t subTypeIndex, int typeIndex);
@@ -93,6 +97,7 @@ private:
 
   QtProperty *m_deltaFunctionOn;
   QtProperty *m_deltaFunctionHeight;
+  QtProperty *m_deltaFunctionCenter;
 
   QtProperty *m_tempCorrectionOn;
   QtProperty *m_temperature;
@@ -107,11 +112,10 @@ private:
   bool m_emitParameterValueChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
+  bool m_emitIntChange = true;
   friend class ConvTemplatePresenter;
 };
 
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECT_CONVTEMPLATEBROWSER_H_*/

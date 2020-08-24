@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_
-#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_
+#pragma once
 
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
@@ -512,8 +511,8 @@ public:
     auto &wsf = WorkspaceFactory::Instance();
     const std::string baseName = "MuonSimulFit_Label";
     const std::string groupName = "MuonSimulFit_Label_Workspaces";
-    ads.add(baseName, boost::make_shared<WorkspaceGroup>());
-    ads.add(groupName, boost::make_shared<WorkspaceGroup>());
+    ads.add(baseName, std::make_shared<WorkspaceGroup>());
+    ads.add(groupName, std::make_shared<WorkspaceGroup>());
     ads.addToGroup(baseName, groupName);
     constexpr size_t nWorkspaces = 3;
     std::array<std::string, nWorkspaces> workspaceNames;
@@ -521,7 +520,7 @@ public:
       const std::string name = baseName + "_Workspace" + std::to_string(i);
       workspaceNames[i] = name;
       const auto matrixWs = wsf.create("Workspace2D", 1, 1, 1);
-      const auto ws = boost::dynamic_pointer_cast<Workspace>(matrixWs);
+      const auto ws = std::dynamic_pointer_cast<Workspace>(matrixWs);
       ads.add(name, ws);
       ads.addToGroup(groupName, name);
     }
@@ -542,8 +541,8 @@ public:
     const std::string outerName = "MuonSimulFit_Label";
     const std::string baseName = outerName + "_MUSR15189";
     const std::string innerName = baseName + "_Workspaces";
-    ads.add(outerName, boost::make_shared<WorkspaceGroup>());
-    ads.add(innerName, boost::make_shared<WorkspaceGroup>());
+    ads.add(outerName, std::make_shared<WorkspaceGroup>());
+    ads.add(innerName, std::make_shared<WorkspaceGroup>());
     ads.addToGroup(outerName, innerName);
     constexpr size_t nWorkspaces = 3;
     std::array<std::string, nWorkspaces> workspaceNames;
@@ -551,7 +550,7 @@ public:
       const std::string name = baseName + "_Workspace" + std::to_string(i);
       workspaceNames[i] = name;
       const auto matrixWs = wsf.create("Workspace2D", 1, 1, 1);
-      const auto ws = boost::dynamic_pointer_cast<Workspace>(matrixWs);
+      const auto ws = std::dynamic_pointer_cast<Workspace>(matrixWs);
       ads.add(name, ws);
       ads.addToGroup(innerName, name);
     }
@@ -828,7 +827,7 @@ private:
     EXPECT_CALL(*m_fitBrowser, setWorkspaceName(_)).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false));
     m_dataLoader.setDeadTimesType(DeadTimesType::FromFile);
-    ads.add("MUSR00015189", boost::make_shared<WorkspaceGroup>());
+    ads.add("MUSR00015189", std::make_shared<WorkspaceGroup>());
     m_presenter->handleSelectedDataChanged(true);
     // test that all expected names are in the ADS
     const auto namesInADS = ads.getObjectNames();
@@ -892,8 +891,8 @@ private:
     const std::string wsGroupName = baseName + "_Workspaces";
     const std::string paramName = baseName + "_Parameters";
     const std::string ncmName = groupName + "_NormalisedCovarianceMatrix";
-    ads.add(groupName, boost::make_shared<WorkspaceGroup>());
-    ads.add(wsGroupName, boost::make_shared<WorkspaceGroup>());
+    ads.add(groupName, std::make_shared<WorkspaceGroup>());
+    ads.add(wsGroupName, std::make_shared<WorkspaceGroup>());
     ads.addToGroup(groupName, wsGroupName);
     auto paramTable = wsf.createTable();
     paramTable->addColumn("str", "Name");
@@ -902,7 +901,7 @@ private:
     for (size_t i = 0; i < inputNames.size(); i++) {
       const std::string name = baseName + "_Workspace" + std::to_string(i);
       const auto matrixWs = wsf.create("Workspace2D", 1, 1, 1);
-      const auto ws = boost::dynamic_pointer_cast<Workspace>(matrixWs);
+      const auto ws = std::dynamic_pointer_cast<Workspace>(matrixWs);
       ads.add(name, ws);
       ads.addToGroup(wsGroupName, name);
       TableRow rowA0 = paramTable->appendRow();
@@ -920,7 +919,7 @@ private:
     }
     ads.add(paramName, paramTable);
     ads.addToGroup(groupName, paramName);
-    const auto ncmWs = boost::dynamic_pointer_cast<Workspace>(
+    const auto ncmWs = std::dynamic_pointer_cast<Workspace>(
         wsf.create("Workspace2D", 1, 1, 1));
     ads.add(ncmName, ncmWs);
     ads.addToGroup(groupName, ncmName);
@@ -981,7 +980,7 @@ private:
       // Check parameter tables
       for (size_t i = 0; i < baseGroup->size(); i++) {
         const auto table =
-            boost::dynamic_pointer_cast<ITableWorkspace>(baseGroup->getItem(i));
+            std::dynamic_pointer_cast<ITableWorkspace>(baseGroup->getItem(i));
         if (table) {
           auto columns = table->getColumnNames();
           std::sort(columns.begin(), columns.end());
@@ -1027,7 +1026,7 @@ private:
       const QString label = "UserSelectedFitLabel";
       QString groupName = QString("MuonSimulFit_").append(label);
       AnalysisDataService::Instance().add(groupName.toStdString(),
-                                          boost::make_shared<WorkspaceGroup>());
+                                          std::make_shared<WorkspaceGroup>());
       const auto &uniqueName = overwrite ? label : label + "#2";
       EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(uniqueName.toStdString()))
           .Times(1);
@@ -1112,5 +1111,3 @@ private:
   MuonAnalysisFitDataPresenter *m_presenter;
   MuonAnalysisDataLoader m_dataLoader;
 };
-
-#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_ */

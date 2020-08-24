@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name,no-init
 
@@ -12,16 +12,12 @@ Unit test for Vesuvio corrections steps
 Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import numpy as np
 
 from mantid.api import *
 import mantid.simpleapi as ms
 from mantid import *
-from six import iteritems
-
-
 # ====================================Helper Functions=======================================
 
 
@@ -58,7 +54,7 @@ def _create_algorithm(**kwargs):
     alg.setProperty("CorrectionWorkspaces", "__Correction")
     alg.setProperty("CorrectedWorkspaces", "__Corrected")
     alg.setProperty("LinearFitResult", "__LinearFit")
-    for key, value in iteritems(kwargs):
+    for key, value in kwargs.items():
         alg.setProperty(key, value)
     return alg
 
@@ -562,11 +558,11 @@ def _validate_matrix_structure(self, matrix_ws, expected_hist, expected_bins):
     num_hists = matrix_ws.getNumberHistograms()
     num_bins = matrix_ws.blocksize()
     self.assertEqual(num_hists, expected_hist,
-                     msg="Expected Number of Histograms: " + str(expected_hist) +
-                         "\nActual Number of Histograms: " + str(num_hists))
+                     msg="Expected Number of Histograms: " + str(expected_hist)
+                         + "\nActual Number of Histograms: " + str(num_hists))
     self.assertEqual(num_bins, expected_bins,
-                     msg="Expected Number of Bins: " + str(expected_bins) +
-                         "\nActual Number of Bins: " + str(num_bins))
+                     msg="Expected Number of Bins: " + str(expected_bins)
+                         + "\nActual Number of Bins: " + str(num_bins))
 
 
 def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
@@ -580,11 +576,11 @@ def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
     num_rows = table_ws.rowCount()
     num_columns = table_ws.columnCount()
     self.assertEqual(num_rows, expected_rows,
-                     msg="Expected Number of Rows: " + str(expected_rows) +
-                         "\nActual Number of Rows: " + str(num_rows))
+                     msg="Expected Number of Rows: " + str(expected_rows)
+                         + "\nActual Number of Rows: " + str(num_rows))
     self.assertEqual(num_columns, expected_columns,
-                     msg="Expected Number of Columns: " + str(expected_columns) +
-                         "\nActual Number of Columns: " + str(num_columns))
+                     msg="Expected Number of Columns: " + str(expected_columns)
+                         + "\nActual Number of Columns: " + str(num_columns))
 
 
 # =======================================Values===========================================
@@ -603,8 +599,8 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
             tolerance_value = expected_values[i] * tolerance
             abs_difference = abs(expected_values[i] - table_ws.cell(i, 1))
             self.assertLessEqual(abs_difference, abs(tolerance_value),
-                                 msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i]) +
-                                 "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1)))
+                                 msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i])
+                                     + "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1)))
 
 
 # pylint: disable=too-many-arguments

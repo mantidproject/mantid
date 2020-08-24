@@ -1,21 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -23,13 +22,12 @@ using namespace Mantid::API;
 // Anonymous namespace to share methods with Performance test
 namespace {
 void setupWorkspaces(int N, double dX) {
-  FrameworkManager::Instance();
   Mantid::DataObjects::Workspace2D_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, N, N));
 
   Mantid::DataObjects::Workspace2D_sptr ws1 =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, N + 1, N));
 
   auto &X = ws->mutableX(0);
@@ -64,15 +62,14 @@ void setupWorkspaces(int N, double dX) {
 }
 
 void deleteWorkspacesFromADS() {
-  FrameworkManager::Instance().deleteWorkspace("RealFFT_WS");
-  FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_hist");
-  FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_forward");
-  FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_backward");
+  AnalysisDataService::Instance().remove("RealFFT_WS");
+  AnalysisDataService::Instance().remove("RealFFT_WS_hist");
+  AnalysisDataService::Instance().remove("RealFFT_WS_forward");
+  AnalysisDataService::Instance().remove("RealFFT_WS_backward");
 }
 
 void doTestForward(const int N, const double XX, bool performance = false) {
-  IAlgorithm *fft =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward");
@@ -80,7 +77,7 @@ void doTestForward(const int N, const double XX, bool performance = false) {
   fft->execute();
 
   if (!performance) {
-    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("RealFFT_WS_forward"));
 
     const auto &X = fWS->x(0);
@@ -103,8 +100,7 @@ void doTestForward(const int N, const double XX, bool performance = false) {
 }
 
 void doTestBackward(const int N, const double dX, bool performance = false) {
-  IAlgorithm *fft =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward");
@@ -112,10 +108,10 @@ void doTestBackward(const int N, const double dX, bool performance = false) {
   fft->execute();
 
   if (!performance) {
-    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("RealFFT_WS"));
 
-    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("RealFFT_WS_backward"));
 
     const auto &Y0 = WS->y(0);
@@ -132,15 +128,14 @@ void doTestBackward(const int N, const double dX, bool performance = false) {
 
 void doTestForwardHistogram(const int N, const double XX,
                             bool performance = false) {
-  IAlgorithm *fft =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_hist");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward_hist");
   fft->setPropertyValue("WorkspaceIndex", "0");
   fft->execute();
 
-  MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve("RealFFT_WS_forward_hist"));
 
   if (!performance) {
@@ -165,18 +160,17 @@ void doTestForwardHistogram(const int N, const double XX,
 
 void doTestBackwardHistogram(const int N, const double dX,
                              bool performance = false) {
-  IAlgorithm *fft =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward_hist");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward_hist");
   fft->setPropertyValue("Transform", "Backward");
   fft->execute();
 
-  MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve("RealFFT_WS"));
 
-  MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve("RealFFT_WS_backward_hist"));
 
   if (!performance) {

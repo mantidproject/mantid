@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -35,11 +35,11 @@ void ExtractMask::init() {
           "OutputWorkspace", "", Direction::Output),
       "A workspace containing the masked spectra as zeroes and ones.");
 
-  declareProperty(std::make_unique<ArrayProperty<detid_t>>(
-                      "DetectorList", boost::make_shared<NullValidator>(),
-                      Direction::Output),
-                  "A comma separated list or array containing a list of masked "
-                  "detector ID's");
+  declareProperty(
+      std::make_unique<ArrayProperty<detid_t>>(
+          "DetectorList", std::make_shared<NullValidator>(), Direction::Output),
+      "A comma separated list or array containing a list of masked "
+      "detector ID's");
 }
 
 /**
@@ -50,7 +50,7 @@ void ExtractMask::exec() {
 
   // convert input to a mask workspace
   auto inputMaskWS =
-      boost::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
   auto inputWSIsSpecial = bool(inputMaskWS);
   if (inputWSIsSpecial) {
     g_log.notice() << "Input workspace is a MaskWorkspace.\n";
@@ -69,7 +69,7 @@ void ExtractMask::exec() {
 
   // Create a new workspace for the results, copy from the input to ensure
   // that we copy over the instrument and current masking
-  auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>(inputWS);
+  auto maskWS = std::make_shared<DataObjects::MaskWorkspace>(inputWS);
   maskWS->setTitle(inputWS->getTitle());
 
   const auto &spectrumInfo = inputWS->spectrumInfo();

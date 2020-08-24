@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -110,7 +110,7 @@ IAlgorithm_sptr createAlgorithm() {
   MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
   inputW->getAxis(0)->setUnit("Wavelength");
 
-  IAlgorithm_sptr alg = boost::make_shared<NormaliseVanadium>();
+  IAlgorithm_sptr alg = std::make_shared<NormaliseVanadium>();
   TS_ASSERT_THROWS_NOTHING(alg->initialize())
   TS_ASSERT(alg->isInitialized())
   alg->setProperty("InputWorkspace", inputW);

@@ -28,8 +28,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MYCONES_H
-#define MYCONES_H
+#pragma once
 
 #include <qwt3d_plot.h>
 
@@ -52,5 +51,3 @@ private:
   double radius_;
   GLboolean oldstate_;
 };
-
-#endif

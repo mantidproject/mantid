@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 """
@@ -14,7 +14,6 @@ It uses the so-called IPeakFunction that should be used when there is a sensible
 calculate the centre, height & fwhm of the function. If it does not make sense, for example a in linear background,
 where does not give a peak shape, then see the more general Example1DFunction that does not require these concepts.
 """
-from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 from mantid.api import IPeakFunction, FunctionFactory

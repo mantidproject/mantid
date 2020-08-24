@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StringTokenizer.h"
 #include <algorithm>
@@ -54,7 +54,7 @@ DECLARE_ALGORITHM(PlotPeakByLogValue)
  */
 void PlotPeakByLogValue::init() {
   declareProperty(
-      "Input", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Input", "", std::make_shared<MandatoryValidator<std::string>>(),
       "A list of sources of data to fit. \n"
       "Sources can be either workspace names or file names followed optionally "
       "by a list of spectra/workspace-indices \n"
@@ -94,7 +94,7 @@ void PlotPeakByLogValue::init() {
 
   std::vector<std::string> fitOptions{"Sequential", "Individual"};
   declareProperty("FitType", "Sequential",
-                  boost::make_shared<StringListValidator>(fitOptions),
+                  std::make_shared<StringListValidator>(fitOptions),
                   "Defines the way of setting initial values. \n"
                   "If set to 'Sequential' every next fit starts with "
                   "parameters returned by the previous fit. \n"
@@ -115,7 +115,7 @@ void PlotPeakByLogValue::init() {
   std::vector<std::string> costFuncOptions =
       CostFunctionFactory::Instance().getKeys();
   declareProperty("CostFunction", "Least squares",
-                  boost::make_shared<StringListValidator>(costFuncOptions),
+                  std::make_shared<StringListValidator>(costFuncOptions),
                   "Cost functions to use for fitting. Cost functions available "
                   "are 'Least squares' and 'Ignore positive peaks'",
                   Direction::InOut);
@@ -161,6 +161,11 @@ void PlotPeakByLogValue::init() {
 
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
+
+  declareProperty(
+      "OutputFitStatus", false,
+      "Flag to output fit status information which consists of the fit "
+      "OutputStatus and the OutputChiSquared");
 }
 
 /**
@@ -181,6 +186,7 @@ void PlotPeakByLogValue::exec() {
   bool createFitOutput = getProperty("CreateOutput");
   bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   bool outputConvolvedMembers = getProperty("ConvolveMembers");
+  bool outputFitStatus = getProperty("OutputFitStatus");
   m_baseName = getPropertyValue("OutputWorkspace");
 
   bool isDataName = false; // if true first output column is of type string and
@@ -191,8 +197,8 @@ void PlotPeakByLogValue::exec() {
   if (!inputFunction) {
     throw std::invalid_argument("Fitting function failed to initialize");
   }
-  bool isMultiDomainFunction = boost::dynamic_pointer_cast<MultiDomainFunction>(
-                                   inputFunction) != nullptr;
+  bool isMultiDomainFunction =
+      std::dynamic_pointer_cast<MultiDomainFunction>(inputFunction) != nullptr;
 
   IFunction_sptr ifunSingle =
       isMultiDomainFunction ? inputFunction->getFunction(0) : inputFunction;
@@ -214,6 +220,17 @@ void PlotPeakByLogValue::exec() {
     covarianceWorkspaces.reserve(wsNames.size());
     fitWorkspaces.reserve(wsNames.size());
     parameterWorkspaces.reserve(wsNames.size());
+  }
+
+  std::vector<std::string> fitStatus;
+  std::vector<double> fitChiSquared;
+  if (outputFitStatus) {
+    declareProperty(std::make_unique<ArrayProperty<std::string>>(
+        "OutputStatus", Direction::Output));
+    declareProperty(std::make_unique<ArrayProperty<double>>("OutputChiSquared",
+                                                            Direction::Output));
+    fitStatus.reserve(wsNames.size());
+    fitChiSquared.reserve(wsNames.size());
   }
 
   double dProg = 1. / static_cast<double>(wsNames.size());
@@ -253,6 +270,11 @@ void PlotPeakByLogValue::exec() {
       parameterWorkspaces.emplace_back(outputParamWorkspace);
       covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
     }
+    if (outputFitStatus) {
+      fitStatus.push_back(fit->getProperty("OutputStatus"));
+      fitChiSquared.push_back(chi2);
+    }
+
     g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
                   << ' ' << chi2 << '\n';
 
@@ -266,6 +288,12 @@ void PlotPeakByLogValue::exec() {
     progress(Prog, ("Fitting Workspace: (" + current + ") - "));
     interruption_point();
   }
+
+  if (outputFitStatus) {
+    setProperty("OutputStatus", fitStatus);
+    setProperty("OutputChiSquared", fitChiSquared);
+  }
+
   finaliseOutputWorkspaces(createFitOutput, fitWorkspaces, parameterWorkspaces,
                            covarianceWorkspaces);
 }
@@ -308,19 +336,19 @@ void PlotPeakByLogValue::finaliseOutputWorkspaces(
     const std::vector<ITableWorkspace_sptr> &covarianceWorkspaces) {
   if (createFitOutput) {
     // collect output of fit for each spectrum into workspace groups
-    WorkspaceGroup_sptr covarianceGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr covarianceGroup = std::make_shared<WorkspaceGroup>();
     for (auto const &workspace : covarianceWorkspaces)
       covarianceGroup->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(
         this->m_baseName + "_NormalisedCovarianceMatrices", covarianceGroup);
 
-    WorkspaceGroup_sptr parameterGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr parameterGroup = std::make_shared<WorkspaceGroup>();
     for (auto const &workspace : parameterWorkspaces)
       parameterGroup->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(
         this->m_baseName + "_Parameters", parameterGroup);
 
-    WorkspaceGroup_sptr fitGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr fitGroup = std::make_shared<WorkspaceGroup>();
     for (auto const &workspace : fitWorkspaces)
       fitGroup->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(
@@ -384,7 +412,7 @@ PlotPeakByLogValue::createResultsTable(const std::string &logName,
   return result;
 }
 
-boost::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
+std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
     bool createFitOutput, bool outputCompositeMembers,
     bool outputConvolvedMembers, const IFunction_sptr &ifun,
     const InputSpectraToFit &data) {
@@ -431,7 +459,7 @@ boost::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
   return fit;
 }
 
-double PlotPeakByLogValue::calculateLogValue(std::string logName,
+double PlotPeakByLogValue::calculateLogValue(const std::string &logName,
                                              const InputSpectraToFit &data) {
   double logValue = 0;
   if (logName.empty() || logName == "axis-1") {
@@ -457,7 +485,7 @@ double PlotPeakByLogValue::calculateLogValue(std::string logName,
   return logValue;
 }
 
-void PlotPeakByLogValue::setWorkspaceIndexAttribute(IFunction_sptr fun,
+void PlotPeakByLogValue::setWorkspaceIndexAttribute(const IFunction_sptr &fun,
                                                     int wsIndex) const {
   const std::string attName = "WorkspaceIndex";
   if (fun->hasAttribute(attName)) {
@@ -465,7 +493,7 @@ void PlotPeakByLogValue::setWorkspaceIndexAttribute(IFunction_sptr fun,
   }
 
   API::CompositeFunction_sptr cf =
-      boost::dynamic_pointer_cast<API::CompositeFunction>(fun);
+      std::dynamic_pointer_cast<API::CompositeFunction>(fun);
   if (cf) {
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       setWorkspaceIndexAttribute(cf->getFunction(i), wsIndex);

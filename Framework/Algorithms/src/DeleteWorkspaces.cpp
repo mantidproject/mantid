@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DeleteWorkspaces.h"
 #include "MantidAPI/ADSValidator.h"
@@ -18,7 +18,7 @@ DECLARE_ALGORITHM(DeleteWorkspaces)
 /// Initialize the algorithm properties
 void DeleteWorkspaces::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      "WorkspaceList", boost::make_shared<API::ADSValidator>()),
+                      "WorkspaceList", std::make_shared<API::ADSValidator>()),
                   "A list of the workspaces to delete.");
 }
 

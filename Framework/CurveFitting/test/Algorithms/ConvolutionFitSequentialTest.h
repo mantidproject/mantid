@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_
-#define MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -194,8 +193,7 @@ public:
     TS_ASSERT_EQUALS(entities, redWs->getNumberHistograms());
     auto groupMember =
         groupWs->getItem("ReductionWs_conv_1LFixF_s0_to_5_0_Workspace");
-    auto matrixMember =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(groupMember);
+    auto matrixMember = std::dynamic_pointer_cast<MatrixWorkspace>(groupMember);
 
     TS_ASSERT_EQUALS(matrixMember->blocksize(), resWs->blocksize());
 
@@ -291,6 +289,7 @@ public:
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", boost::numeric_cast<int>(specMin));
     alg.setProperty("SpecMax", boost::numeric_cast<int>(specMax));
+    alg.setProperty("OutputCompositeMembers", true);
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("ExtractMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
@@ -325,13 +324,14 @@ public:
   //------------------------ Private Functions---------------------------
 
   template <typename T = MatrixWorkspace>
-  boost::shared_ptr<T> getWorkspaceFromADS(const std::string &name) {
+  std::shared_ptr<T> getWorkspaceFromADS(const std::string &name) {
     return AnalysisDataService::Instance().retrieveWS<T>(name);
   }
 
-  MatrixWorkspace_sptr getMatrixWorkspace(WorkspaceGroup_const_sptr group,
-                                          std::size_t index) {
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(index));
+  MatrixWorkspace_sptr
+  getMatrixWorkspace(const WorkspaceGroup_const_sptr &group,
+                     std::size_t index) {
+    return std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(index));
   }
 
   MatrixWorkspace_sptr loadWorkspace(const std::string &fileName) {
@@ -342,7 +342,7 @@ public:
     loadAlg.setProperty("OutputWorkspace", "__temp");
     loadAlg.executeAsChildAlg();
     Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    return std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   }
 
   MatrixWorkspace_sptr createGenericWorkspace(const std::string &wsName,
@@ -421,5 +421,3 @@ public:
     AnalysisDataService::Instance().add("__ConvFit_Resolution", convFitRes);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_ */

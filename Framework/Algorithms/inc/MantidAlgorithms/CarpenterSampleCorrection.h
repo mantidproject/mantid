@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <vector>
 
 namespace Mantid {
@@ -16,7 +17,7 @@ namespace Algorithms {
     out by Jack Carpenter and Asfia Huq and implmented in Java by
     Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
  */
-class DLLExport CarpenterSampleCorrection
+class MANTID_ALGORITHMS_DLL CarpenterSampleCorrection
     : public API::DistributedDataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -57,10 +58,10 @@ private:
                       double coeff1, double coeff2, double coeff3, bool doAbs,
                       bool doMS);
 
-  API::MatrixWorkspace_sptr multiply(const API::MatrixWorkspace_sptr lhsWS,
-                                     const API::MatrixWorkspace_sptr rhsWS);
-  API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr lhsWS,
-                                  const API::MatrixWorkspace_sptr rhsWS);
+  API::MatrixWorkspace_sptr multiply(const API::MatrixWorkspace_sptr &lhsWS,
+                                     const API::MatrixWorkspace_sptr &rhsWS);
+  API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr &lhsWS,
+                                  const API::MatrixWorkspace_sptr &rhsWS);
 };
 
 } // namespace Algorithms

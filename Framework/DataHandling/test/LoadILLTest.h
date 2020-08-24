@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLTEST_H_
-#define MANTID_DATAHANDLING_LOADILLTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -28,7 +27,7 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void checkLoader(std::string filename, std::string resultLoader) {
+  void checkLoader(const std::string &filename, std::string resultLoader) {
     Load alg;
     alg.setChild(true);
     alg.initialize();
@@ -91,5 +90,3 @@ public:
     checkLoader("ILL/Figaro/000002", "LoadILLReflectometry");
   }
 };
-
-#endif /* MANTID_DATAHANDLING_LOADILLTEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -137,7 +137,7 @@ void MDHWLoadingPresenter::extractMetadata(
     }
     // std::cout << "dim " << d << min << " to " <<  max << '\n';
     axisLabels.push_back(makeAxisTitle(*inDim));
-    dimensions.push_back(boost::make_shared<MDHistoDimension>(
+    dimensions.push_back(std::make_shared<MDHistoDimension>(
         inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max,
         inDim->getNBins()));
   }
@@ -221,7 +221,7 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
   serializer.setWorkspaceName(wsName);
   serializer.setGeometryXML(xmlBuilder.create());
   serializer.setImplicitFunction(
-      boost::make_shared<Mantid::Geometry::NullImplicitFunction>());
+      std::make_shared<Mantid::Geometry::NullImplicitFunction>());
   std::string xmlString = serializer.createXMLString();
 
   // Serialize Json metadata

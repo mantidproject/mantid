@@ -1,12 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
-
 from os import path, makedirs
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
@@ -83,7 +80,7 @@ class CalibrationModel(object):
                 self._plot_tof_fit_single_bank_or_custom(bank)
             else:
                 self._plot_tof_fit_single_bank_or_custom("cropped")
-        difa = [i.DIFC for i in output]
+        difa = [i.DIFA for i in output]
         difc = [i.DIFC for i in output]
         tzero = [i.TZERO for i in output]
 
@@ -319,6 +316,7 @@ class CalibrationModel(object):
         elif bank is None:  # Custom cropped files use the north bank template.
             north_kwargs()
             generate_output_file([difa[0]], [difc[0]], [tzero[0]], "cropped", kwargs)
+        logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 
     @staticmethod
     def get_info_from_file(file_path):

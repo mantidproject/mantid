@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -19,8 +19,8 @@ class DLLExport VisibleWhenProperty : public EnabledWhenProperty {
 public:
   /// Constructs a VisibleWhenProperty object which checks the property
   /// with name given and if it matches the criteria makes it visible
-  VisibleWhenProperty(std::string otherPropName, ePropertyCriterion when,
-                      std::string value = "");
+  VisibleWhenProperty(const std::string &otherPropName, ePropertyCriterion when,
+                      const std::string &value = "");
 
   /// Constructs a VisibleWhenProperty object which copies two
   /// already constructed VisibleWhenProperty objects and returns the result

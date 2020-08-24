@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,9 +41,11 @@ public:
   Run(const Run &other);
   ~Run();
   Run &operator=(const Run &other);
+  bool operator==(const Run &other);
+  bool operator!=(const Run &other);
 
   /// Clone
-  boost::shared_ptr<Run> clone();
+  std::shared_ptr<Run> clone();
 
   /// Addition
   Run &operator+=(const Run &rhs);

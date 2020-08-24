@@ -1,22 +1,21 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
-# std imports
 
 # 3rdparty imports
-from mantid.plots.datafunctions import update_colorbar_scale
+from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_figure
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
-from matplotlib.collections import QuadMesh
+
 from matplotlib.colors import LogNorm, Normalize
+from matplotlib.ticker import ScalarFormatter, LogFormatterSciNotation
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
@@ -98,6 +97,7 @@ class AxisEditorModel(object):
     max = None
     log = None
     grid = None
+    formatter = None
 
 
 class AxisEditor(PropertiesEditorBase):
@@ -115,14 +115,20 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
-        if figure_type(canvas.figure) == FigureType.Image:
+        if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
-
+        self.ui.editor_format.addItem('Decimal Format')
+        self.ui.editor_format.addItem('Scientific Format')
         self.axes = axes
         self.axis_id = axis_id
         self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
-        self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
+        if isinstance(axes, Axes3D):
+            self.lim_setter = getattr(axes, 'set_{}lim3d'.format(axis_id))
+        else:
+            self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
         self.nonposkw = 'nonpos' + axis_id
         # Grid has no direct accessor from the axes
@@ -134,6 +140,10 @@ class AxisEditor(PropertiesEditorBase):
         memento.min, memento.max = getattr(self.axes, 'get_{}lim'.format(self.axis_id))()
         memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
         memento.grid = self.axis._gridOnMajor
+        if type(self.axis.get_major_formatter()) is ScalarFormatter:
+            memento.formatter = 'Decimal Format'
+        elif type(self.axis.get_major_formatter()) is LogFormatterSciNotation:
+            memento.formatter = 'Scientific Format'
         self._fill(memento)
 
     def changes_accepted(self):
@@ -142,7 +152,6 @@ class AxisEditor(PropertiesEditorBase):
         axes = self.axes
 
         self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-
         if self.ui.logBox.isChecked():
             self.scale_setter('log', **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
             self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
@@ -150,8 +159,9 @@ class AxisEditor(PropertiesEditorBase):
             self.scale_setter('linear')
 
         self.lim_setter(self.limit_min, self.limit_max)
-
-        axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id)
+        self._set_tick_format()
+        which = 'both' if hasattr(axes, 'show_minor_gridlines') and axes.show_minor_gridlines else 'major'
+        axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
 
     def error_occurred(self, exc):
         # revert
@@ -165,6 +175,7 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.editor_max.setText(str(model.max))
         self.ui.logBox.setChecked(model.log)
         self.ui.gridBox.setChecked(model.grid)
+        self.ui.editor_format.setCurrentText(model.formatter)
 
     def _check_log_limits(self, editor_min, editor_max):
         # Check that the limits from the editor are sensible for a log graph
@@ -175,6 +186,15 @@ class AxisEditor(PropertiesEditorBase):
         if editor_max <= 0:
             editor_max = lim_max
         return editor_min, editor_max
+
+    def _set_tick_format(self):
+        formatter = self.ui.editor_format.currentText()
+        if formatter == 'Decimal Format':
+            fmt = ScalarFormatter(useOffset=True)
+        elif formatter == 'Scientific Format':
+            fmt = LogFormatterSciNotation()
+        getattr(self.axes, 'get_{}axis'.format(self.axis_id))().set_major_formatter(fmt)
+        return
 
 
 class XAxisEditor(AxisEditor):
@@ -191,29 +211,59 @@ class YAxisEditor(AxisEditor):
         self.create_model()
 
 
+class ZAxisEditor(AxisEditor):
+
+    def __init__(self, canvas, axes):
+        super(ZAxisEditor, self).__init__(canvas, axes, 'z')
+        self.create_model()
+
+
 class ColorbarAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):
         super(ColorbarAxisEditor, self).__init__(canvas, axes, 'y')
 
-        self.images = self.canvas.figure.gca().images
-        if len(self.images) == 0:
-            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)]
+        self.ui.gridBox.hide()
+
+        self.images=[]
+
+        images = get_images_from_figure(canvas.figure)
+        # If there are an equal number of plots and colorbars so apply changes to plot with the selected colorbar
+        # Otherwise apply changes to all the plots in the figure
+        if len(images) != len(self.canvas.figure.axes)/2:
+            self.images = images
+        else:
+            # apply changes to selected axes
+            for img in images:
+                if img.colorbar and img.colorbar.ax == axes:
+                    self.images.append(img)
 
         self.create_model()
+        self.ui.editor_format.setEnabled(False)
 
     def changes_accepted(self):
-        super(ColorbarAxisEditor, self).changes_accepted()
-        scale = Normalize
-        if isinstance(self.images[0].norm, LogNorm):
-            scale = LogNorm
-        update_colorbar_scale(self.canvas.figure, self.images[0], scale, self.limit_min, self.limit_max)
+        self.ui.errors.hide()
+
+        if len(self.images) == 0:
+            raise RuntimeError("Cannot find any plot linked to this colorbar")
+
+        limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
+
+        scale = LogNorm if self.ui.logBox.isChecked() else Normalize
+
+        if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
+            raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
+
+        self.lim_setter(limit_min, limit_max)
+        for img in self.images:
+            update_colorbar_scale(self.canvas.figure, img, scale, limit_min, limit_max)
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
-        memento.min, memento.max = self.images[0].get_clim()
-        memento.log = False
+        if len(self.images) > 0:
+            memento.min, memento.max = self.images[0].get_clim()
+        memento.log = isinstance(self.images[0].norm, LogNorm)
         memento.grid = False
 
         self._fill(memento)

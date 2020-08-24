@@ -1,19 +1,23 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
 #
 #
-from __future__ import absolute_import, unicode_literals
-
 from mantid.api import AlgorithmFactory
 from mantid.kernel import ConfigService
 from workbench.widgets.settings.categories.view import CategoriesSettingsView
 
 from qtpy.QtCore import Qt
+from enum import Enum
+
+
+class CategoryProperties(Enum):
+    HIDDEN_ALGORITHMS = "algorithms.categories.hidden"
+    HIDDEN_INTERFACES = "interfaces.categories.hidden"
 
 
 class CategoriesSettings(object):
@@ -24,12 +28,12 @@ class CategoriesSettings(object):
     If new options are added to the categories settings, their events when changed should
     be handled here.
     """
-    HIDDEN_ALGORITHMS = "algorithms.categories.hidden"
-    HIDDEN_INTERFACES = "interfaces.categories.hidden"
 
     def __init__(self, parent, view=None):
         self.view = view if view else CategoriesSettingsView(parent, self)
         self.parent = parent
+        self.view.algorithm_tree_widget.setHeaderLabel("Show/Hide Algorithm Categories")
+        self.view.interface_tree_widget.setHeaderLabel("Show/Hide Interface Categories")
         self.set_algorithm_tree_categories()
         self.set_interface_tree_categories()
         self.view.algorithm_tree_widget.itemClicked.connect(self.nested_box_clicked)
@@ -38,11 +42,11 @@ class CategoriesSettings(object):
 
     def set_hidden_algorithms_string(self, _):
         categories_string = ';'.join(self._create_hidden_categories_string(self.view.algorithm_tree_widget))
-        ConfigService.setString(self.HIDDEN_ALGORITHMS, categories_string)
+        ConfigService.setString(CategoryProperties.HIDDEN_ALGORITHMS.value, categories_string)
 
     def set_hidden_interfaces_string(self, _):
         categories_string = ';'.join(self._create_hidden_categories_string(self.view.interface_tree_widget))
-        ConfigService.setString(self.HIDDEN_INTERFACES, categories_string)
+        ConfigService.setString(CategoryProperties.HIDDEN_INTERFACES.value, categories_string)
 
     def nested_box_clicked(self, item_clicked, column):
         new_state = item_clicked.checkState(column)
@@ -82,11 +86,10 @@ class CategoriesSettings(object):
 
     def set_interface_tree_categories(self):
         widget = self.view.interface_tree_widget
-        widget.setHeaderLabel("Show/Hide Interface Categories")
         interfaces = []
         if self.parent:
             interfaces = self.parent.interface_list
-        hidden_interfaces = ConfigService.getString(self.HIDDEN_INTERFACES).split(';')
+        hidden_interfaces = ConfigService.getString(CategoryProperties.HIDDEN_INTERFACES.value).split(';')
         interface_map = {}
         for interface in interfaces:
             if interface in hidden_interfaces:
@@ -98,9 +101,12 @@ class CategoriesSettings(object):
 
     def set_algorithm_tree_categories(self):
         widget = self.view.algorithm_tree_widget
-        widget.setHeaderLabel("Show/Hide Algorithm Categories")
         category_map = AlgorithmFactory.Instance().getCategoriesandState()
         self._set_tree_categories(widget, category_map)
+
+    def update_properties(self):
+        self.set_algorithm_tree_categories()
+        self.set_interface_tree_categories()
 
     def _set_tree_categories(self, widget, category_and_states, has_nested = True):
         widget.clear()

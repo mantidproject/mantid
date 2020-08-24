@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/IndexPeaks.h"
 #include "MantidAPI/Sample.h"
@@ -299,6 +299,10 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
         stats.satellites.numIndexed++;
         stats.satellites.error += std::get<2>(satelliteInfo) / 3.;
       }
+    } else {
+      peak->setHKL(V3D(0, 0, 0));
+      peak->setIntHKL(V3D(0, 0, 0));
+      peak->setIntMNP(V3D(0, 0, 0));
     }
   }
   return stats;
@@ -359,7 +363,7 @@ void IndexPeaks::init() {
           Prop::PEAKSWORKSPACE, "", Direction::InOut),
       "Input Peaks Workspace");
 
-  auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0.0);
   this->declareProperty(Prop::TOLERANCE, 0.15, mustBePositiveDbl,
                         "Main peak indexing tolerance", Direction::Input);
@@ -411,6 +415,23 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   } catch (std::runtime_error &exc) {
     helpMsgs[Prop::PEAKSWORKSPACE] = exc.what();
   }
+
+  // get all runs which have peaksin the table
+  const bool commonUB = this->getProperty(Prop::COMMONUB);
+  if (commonUB) {
+    const auto &allPeaks = ws->getPeaks();
+    std::unordered_map<int, int> peaksPerRun;
+    auto it = allPeaks.cbegin();
+    while (peaksPerRun.size() < 2 && it != allPeaks.cend()) {
+      peaksPerRun[it->getRunNumber()] = 1;
+      ++it;
+    };
+    if (peaksPerRun.size() < 2) {
+      helpMsgs[Prop::COMMONUB] =
+          "CommonUBForAll can only be True if there are peaks from more "
+          "than one run present in the peaks worksapce";
+    };
+  };
 
   return helpMsgs;
 }

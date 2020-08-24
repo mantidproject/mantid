@@ -1,22 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 #pylint: disable=no-init
-from __future__ import (absolute_import, division, print_function)
-
 import glob
 import os
 
 from mantid import config
-import six
 import systemtesting
 
-if six.PY2:
-    from io import open  # noqa
 
 # Constants
 FILE_TO_TEST = None  # "MARI_Definition.xml"

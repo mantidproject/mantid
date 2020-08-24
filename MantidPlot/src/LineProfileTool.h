@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef LINE_PROFILE_TOOL_H
-#define LINE_PROFILE_TOOL_H
+#pragma once
 
 #include "PlotToolInterface.h"
 
@@ -121,5 +120,3 @@ private:
   //! Difference between current and start position during operation.
   QPoint d_op_dp;
 };
-
-#endif // ifndef LINE_PROFILE_TOOL_H

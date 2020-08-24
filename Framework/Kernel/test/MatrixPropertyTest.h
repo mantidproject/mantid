@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 //-----------------------------------------------------------------------------
@@ -78,8 +78,8 @@ public:
   //      double type
 
   void test_Extracting_From_PropertyManager_Succeeds() {
-    boost::shared_ptr<PropertyManager> manager =
-        boost::make_shared<PropertyManager>();
+    std::shared_ptr<PropertyManager> manager =
+        std::make_shared<PropertyManager>();
     manager->declareProperty(std::make_unique<MatrixProperty<>>("Rotation"),
                              "Rotation matrix"); // Default is null
     DblMatrix null = manager->getProperty("Rotation");

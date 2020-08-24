@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 """
@@ -25,8 +25,6 @@ For these reasons it was agreed jedi would be dropped, possibly
 revisiting when we move to Python 3.
 """
 
-from __future__ import (absolute_import, unicode_literals)
-
 import ast
 from collections import namedtuple
 import contextlib
@@ -38,13 +36,10 @@ import warnings
 
 from lib2to3.pgen2.tokenize import detect_encoding
 from io import BytesIO
-from six import PY2, string_types
 
-if PY2:  # noqa
-    from inspect import getargspec as getfullargspec
-else:  # noqa
-    from inspect import getfullargspec
+from inspect import getfullargspec
 
+from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 
 ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
@@ -112,7 +107,7 @@ def get_function_spec(func):
     args = argspec[0]
     if args:
         # For methods strip the self argument
-        if hasattr(func, 'im_func'):
+        if callable(func) and args[0] == "self":
             args = args[1:]
         defs = argspec[3]
     elif argspec[1] is not None:
@@ -174,17 +169,14 @@ def generate_call_tips(definitions, prepend_module_name=None):
         return []
     call_tips = []
     for name, py_object in definitions.items():
-        if PY2:
-            if isinstance(py_object, unicode):
-                continue
         if name.startswith('_'):
             continue
         if prepend_module_name is True and hasattr(py_object, '__module__'):
             module_name = py_object.__module__
         else:
             module_name = prepend_module_name
-        if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
-            if isinstance(module_name, string_types):
+        if callable(py_object) or inspect.isbuiltin(py_object):
+            if isinstance(module_name, str):
                 call_tips.append(module_name + '.' + name + get_function_spec(py_object))
             else:
                 call_tips.append(name + get_function_spec(py_object))
@@ -196,16 +188,16 @@ def generate_call_tips(definitions, prepend_module_name=None):
         for attr in dir(py_object):
             try:
                 f_attr = getattr(py_object, attr)
+                if attr.startswith('_'):
+                    continue
+                if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(f_attr):
+                    call_tip = name + '.' + attr + get_function_spec(f_attr)
+                else:
+                    call_tip = name + '.' + attr
+                if isinstance(module_name, str):
+                    call_tips.append(module_name + '.' + call_tip)
             except Exception:
                 continue
-            if attr.startswith('_'):
-                continue
-            if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(f_attr):
-                call_tip = name + '.' + attr + get_function_spec(f_attr)
-            else:
-                call_tip = name + '.' + attr
-            if isinstance(module_name, string_types):
-                call_tips.append(module_name + '.' + call_tip)
     return call_tips
 
 
@@ -235,13 +227,13 @@ class CodeCompleter(object):
     are updated on every successful script execution.
     """
     def __init__(self, editor, env_globals=None):
+        self.simpleapi_in_completions = False
         self.editor = editor
         self.env_globals = env_globals
+        self.worker = None
 
         # A dict gives O(1) lookups and ensures we have no duplicates
         self._completions_dict = dict()
-        if "from mantid.simpleapi import *" in self.editor.text():
-            self._add_to_completions(self._get_module_call_tips('mantid.simpleapi'))
         if re.search("^#{0}import .*numpy( |,|$)", self.editor.text(), re.MULTILINE):
             self._add_to_completions(self._get_module_call_tips('numpy'))
         if re.search("^#{0}import .*pyplot( |,|$)", self.editor.text(), re.MULTILINE):
@@ -267,6 +259,19 @@ class CodeCompleter(object):
         with _ignore_matplotlib_deprecation_warnings():
             self._add_to_completions(self._get_completions_from_globals())
         self.editor.updateCompletionAPI(self.completions)
+
+    def add_simpleapi_to_completions_if_required(self):
+        """
+        If the simpleapi functions haven't been added to the completions, start a separate thread to load them in.
+        """
+        if not self.simpleapi_in_completions and "from mantid.simpleapi import *" in self.editor.text():
+            self.simpleapi_in_completions = True
+            self.worker = AsyncTask(self._add_simpleapi_to_completions_if_required)
+            self.worker.start()
+
+    def _add_simpleapi_to_completions_if_required(self):
+        self._add_to_completions(self._get_module_call_tips('mantid.simpleapi'))
+        self.update_completion_api()
 
     def _get_module_call_tips(self, module):
         """

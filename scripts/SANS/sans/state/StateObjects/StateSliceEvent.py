@@ -1,16 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the state of the event slices which should be reduced."""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-
-from six import with_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
@@ -22,7 +19,7 @@ from sans.common.enums import SANSFacility
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class StateSliceEvent(with_metaclass(JsonSerializable)):
+class StateSliceEvent(metaclass=JsonSerializable):
     def __init__(self):
         super(StateSliceEvent, self).__init__()
 

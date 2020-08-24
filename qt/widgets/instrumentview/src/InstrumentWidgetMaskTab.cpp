@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -69,6 +69,8 @@
 #include <fstream>
 #include <numeric>
 
+using Mantid::API::AlgorithmManager;
+
 namespace MantidQt {
 namespace MantidWidgets {
 InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
@@ -128,6 +130,13 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_ring_rectangle->setToolTip("Draw a rectangular ring (Shift+Alt+R)");
   m_ring_rectangle->setShortcut(QKeySequence("Shift+Alt+R"));
 
+  m_sector = new QPushButton();
+  m_sector->setCheckable(true);
+  m_sector->setAutoExclusive(true);
+  m_sector->setIcon(QIcon(":/MaskTools/selection-sector.png"));
+  m_sector->setToolTip("Draw a circle sector (Shift+Alt+S)");
+  m_sector->setShortcut(QKeySequence("Shift+Alt+S"));
+
   m_free_draw = new QPushButton();
   m_free_draw->setCheckable(true);
   m_free_draw->setAutoExclusive(true);
@@ -135,13 +144,14 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_free_draw->setToolTip("Draw an arbitrary shape (Shift+Alt+A)");
   m_free_draw->setShortcut(QKeySequence("Shift+Alt+A"));
 
-  QHBoxLayout *toolBox = new QHBoxLayout();
+  auto *toolBox = new QHBoxLayout();
   toolBox->addWidget(m_move);
   toolBox->addWidget(m_pointer);
   toolBox->addWidget(m_ellipse);
   toolBox->addWidget(m_rectangle);
   toolBox->addWidget(m_ring_ellipse);
   toolBox->addWidget(m_ring_rectangle);
+  toolBox->addWidget(m_sector);
   toolBox->addWidget(m_free_draw);
   toolBox->addStretch();
   toolBox->setSpacing(2);
@@ -153,9 +163,10 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_sector, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
   m_move->setChecked(true);
-  QFrame *toolGroup = new QFrame();
+  auto *toolGroup = new QFrame();
   toolGroup->setLayout(toolBox);
 
   layout->addWidget(toolGroup);
@@ -168,12 +179,12 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_masking_on, SIGNAL(clicked()), this, SLOT(toggleMaskGroup()));
   connect(m_grouping_on, SIGNAL(clicked()), this, SLOT(toggleMaskGroup()));
   connect(m_roi_on, SIGNAL(clicked()), this, SLOT(toggleMaskGroup()));
-  QHBoxLayout *radioLayout = new QHBoxLayout();
+  auto *radioLayout = new QHBoxLayout();
   radioLayout->addWidget(m_masking_on);
   radioLayout->addWidget(m_roi_on);
   radioLayout->addWidget(m_grouping_on);
   radioLayout->setMargin(0);
-  QGroupBox *radioGroup = new QGroupBox();
+  auto *radioGroup = new QGroupBox();
   radioGroup->setStyleSheet("border: none;");
   radioGroup->setLayout(radioLayout);
 
@@ -325,8 +336,8 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_saveROI, SIGNAL(hovered(QAction *)), this,
           SLOT(showSaveMenuTooltip(QAction *)));
 
-  QGroupBox *box = new QGroupBox("View");
-  QGridLayout *buttons = new QGridLayout();
+  auto *box = new QGroupBox("View");
+  auto *buttons = new QGridLayout();
   buttons->addWidget(m_applyToView, 0, 0, 1, 2);
   buttons->addWidget(m_saveShapesToTable, 1, 0, 1, 2);
   buttons->addWidget(m_saveButton, 2, 0);
@@ -403,6 +414,9 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
   case DrawRectangularRing:
     m_ring_rectangle->setChecked(true);
     break;
+  case DrawSector:
+    m_sector->setChecked(true);
+    break;
   case DrawFree:
     m_free_draw->setChecked(true);
     break;
@@ -459,6 +473,14 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_instrWidget->getSurface()->setInteractionMode(
         ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Rectangular ring. " + whatIsBeingSelected);
+  } else if (m_sector->isChecked()) {
+    m_activity = DrawSector;
+    m_instrWidget->getSurface()->startCreatingShape2D("sector", borderColor,
+                                                      fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(
+        ProjectionSurface::DrawRegularMode);
+    m_activeTool->setText("Tool: Sector. " + whatIsBeingSelected);
+
   } else if (m_free_draw->isChecked()) {
     m_activity = DrawFree;
     m_instrWidget->getSurface()->startCreatingFreeShape(borderColor, fillColor);
@@ -630,6 +652,9 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
         m_instrWidget->getSurface()->setCurrentPoint(name, p);
       }
     }
+    // when the user validates the edit of the field, the view is immediatly
+    // updated this way
+    m_instrWidget->updateInstrumentView();
   }
   m_instrWidget->update();
 }
@@ -679,21 +704,18 @@ InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   Mantid::API::MatrixWorkspace_sptr outputWS;
   const std::string outputWorkspaceName = generateMaskWorkspaceName(temp);
 
-  Mantid::API::IAlgorithm *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",
-                                                                -1);
+  auto alg = AlgorithmManager::Instance().create("ExtractMask", -1);
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
   alg->execute();
 
-  outputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  outputWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(
           outputWorkspaceName));
 
   if (invertMask) {
-    Mantid::API::IAlgorithm *invertAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "BinaryOperateMasks", -1);
+    auto invertAlg =
+        AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
     invertAlg->setPropertyValue("InputWorkspace1", outputWorkspaceName);
     invertAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
     invertAlg->setPropertyValue("OperationType", "NOT");
@@ -745,9 +767,7 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   std::string fname = mapFile();
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
-    Mantid::API::IAlgorithm *alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "GroupDetectors");
+    auto alg = AlgorithmManager::Instance().create("GroupDetectors");
     alg->setPropertyValue("InputWorkspace", workspaceName);
     alg->setPropertyValue("MapFile", fname);
     alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
@@ -769,9 +789,7 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
 
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
-    Mantid::API::IAlgorithm *alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "GroupDetectors");
+    auto alg = AlgorithmManager::Instance().create("GroupDetectors");
     alg->setPropertyValue("InputWorkspace", workspaceName);
     alg->setPropertyValue("MapFile", fname);
     alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
@@ -883,7 +901,7 @@ void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
           Mantid::API::AlgorithmManager::Instance().create("SaveMask", -1);
       alg->setProperty(
           "InputWorkspace",
-          boost::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
+          std::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->execute();
     }
@@ -957,7 +975,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   Mantid::API::ITableWorkspace_sptr temptablews;
   bool overwrite = false;
   try {
-    temptablews = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+    temptablews = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             outputWorkspaceName));
   } catch (const Mantid::Kernel::Exception::NotFoundError &) {
@@ -972,9 +990,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   std::cout << "[DB] MaskTableWorkspace is found? = " << overwrite << ". "
             << ".\n";
 
-  Mantid::API::IAlgorithm *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm(
-          "ExtractMaskToTable", -1);
+  auto alg = AlgorithmManager::Instance().create("ExtractMaskToTable", -1);
   alg->setProperty("InputWorkspace", inputWS);
   if (overwrite)
     alg->setPropertyValue("MaskTableWorkspace", outputWorkspaceName);
@@ -990,7 +1006,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   if (alg->isExecuted()) {
     // Mantid::API::MatrixWorkspace_sptr outputWS
     Mantid::API::ITableWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWorkspaceName));
 
@@ -1134,7 +1150,7 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       // need to invert the mask before adding the new shape
       // but not if the mask is fresh and empty
       if (wsMask->getNumberMasked() > 0) {
-        wsFresh = boost::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(
+        wsFresh = std::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(
             actor.extractCurrentMask());
         actor.invertMaskWorkspace();
       }
@@ -1158,8 +1174,7 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       if (isROI) {
         if (wsFresh)
           m_instrWidget->getInstrumentActor().setMaskMatrixWorkspace(
-              boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                  wsFresh));
+              std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsFresh));
         // need to invert the mask before displaying
         m_instrWidget->getInstrumentActor().invertMaskWorkspace();
       }
@@ -1388,7 +1403,7 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
       auto alg = AlgorithmManager::Instance().createUnmanaged("SaveMask", -1);
       alg->setChild(true);
       alg->setProperty("InputWorkspace",
-                       boost::dynamic_pointer_cast<Workspace>(outputWS));
+                       std::dynamic_pointer_cast<Workspace>(outputWS));
       alg->setPropertyValue("OutputFile", fileName);
       alg->setLogging(false);
       alg->execute();

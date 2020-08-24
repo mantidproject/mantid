@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-from __future__ import absolute_import, unicode_literals
-
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QFontDialog
 
@@ -32,7 +30,9 @@ class GeneralSettingsView(general_base, general_form):
         self.deleteLater()
         super(GeneralSettingsView, self).closeEvent(event)
 
-    def create_font_dialog(self, parent):
-        font_dialog = QFontDialog(parent.font(), parent)
+    def create_font_dialog(self, parent, font=None):
+        if not font:
+            font = parent.font()
+        font_dialog = QFontDialog(font, parent)
         font_dialog.open()
         return font_dialog

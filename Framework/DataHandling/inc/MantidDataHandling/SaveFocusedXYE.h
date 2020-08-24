@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDING_SAVEFOCUSEDXYE_H_
-#define DATAHANDING_SAVEFOCUSEDXYE_H_
+#pragma once
 
 #include "MantidAPI/SerialAlgorithm.h"
 
@@ -105,4 +104,3 @@ private:
 };
 } // namespace DataHandling
 } // namespace Mantid
-#endif // DATAHANDING_SAVEFOCUSEDXYE_H_

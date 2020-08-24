@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_TABULATEDFUNCTION_H_
-#define MANTID_CURVEFITTING_TABULATEDFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <cmath>
 
@@ -53,8 +53,8 @@ along the abscissas 'Shift'
 @author Roman Tolchenov, Tessella plc
 @date 4/09/2012
 */
-class DLLExport TabulatedFunction : public API::ParamFunction,
-                                    public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL TabulatedFunction : public API::ParamFunction,
+                                                  public API::IFunction1D {
 public:
   /// Constructor
   TabulatedFunction();
@@ -88,7 +88,7 @@ private:
   void loadWorkspace(const std::string &wsName) const;
 
   /// Load the points from a MatrixWorkspace
-  void loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) const;
+  void loadWorkspace(std::shared_ptr<API::MatrixWorkspace> ws) const;
 
   /// Size of the data
   size_t size() const { return m_yData.size(); }
@@ -107,7 +107,7 @@ private:
   static const int defaultIndexValue;
 
   /// Temporary workspace holder
-  mutable boost::shared_ptr<API::MatrixWorkspace> m_workspace;
+  mutable std::shared_ptr<API::MatrixWorkspace> m_workspace;
 
   /// Stores x-values
   mutable std::vector<double> m_xData;
@@ -125,5 +125,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_TABULATEDFUNCTION_H_*/

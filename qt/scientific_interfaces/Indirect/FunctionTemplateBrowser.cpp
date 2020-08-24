@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionTemplateBrowser.h"
 
@@ -47,18 +47,20 @@ void FunctionTemplateBrowser::createBrowser() {
   m_parameterManager = new ParameterPropertyManager(this, true);
 
   // create editor factories
-  QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
-  QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
-  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
-  QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(this);
+  // Here we create a spin box factory with a custom timer method
+  // This avoids the slot double incrementing the box
+  auto *spinBoxFactoryNoTimer = new QtSpinBoxFactoryNoTimer(this);
+  auto *doubleEditorFactory = new DoubleEditorFactory(this);
+  auto *lineEditFactory = new QtLineEditFactory(this);
+  auto *checkBoxFactory = new QtCheckBoxFactory(this);
+  auto *comboBoxFactory = new QtEnumEditorFactory(this);
   auto *doubleDialogFactory = new DoubleDialogEditorFactory(this, true);
 
   m_browser = new QtTreePropertyBrowser(nullptr, QStringList(), false);
   // assign factories to property managers
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
+  m_browser->setFactoryForManager(m_intManager, spinBoxFactoryNoTimer);
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_parameterManager, doubleDialogFactory);
@@ -88,7 +90,7 @@ void FunctionTemplateBrowser::createBrowser() {
 void FunctionTemplateBrowser::init() {
   createBrowser();
   createProperties();
-  QVBoxLayout *layout = new QVBoxLayout(this);
+  auto *layout = new QVBoxLayout(this);
   layout->addWidget(m_browser);
   layout->setContentsMargins(0, 0, 0, 0);
 }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -59,7 +59,7 @@ public:
     }
 
     ITableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "DeadTimeTable"));
 
@@ -103,6 +103,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
     Workspace_sptr outputWS = loader.getProperty("OutputWorkspace");
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+    return std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
   }
 };

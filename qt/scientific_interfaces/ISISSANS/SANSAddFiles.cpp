@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SANSAddFiles.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -166,7 +166,7 @@ void SANSAddFiles::setToolTips() {
  *  @return a pointer to the inserted widget
  */
 QListWidgetItem *SANSAddFiles::insertListFront(const QString &text) {
-  QListWidgetItem *newItem = new QListWidgetItem(text);
+  auto *newItem = new QListWidgetItem(text);
   newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
   m_SANSForm->toAdd_List->insertItem(0, newItem);
   return newItem;
@@ -175,7 +175,7 @@ QListWidgetItem *SANSAddFiles::insertListFront(const QString &text) {
  *  that users see
  *  @param dir :: full path of the output directory
  */
-void SANSAddFiles::setOutDir(std::string dir) {
+void SANSAddFiles::setOutDir(const std::string &dir) {
   m_outDir = QString::fromStdString(dir);
   m_SANSForm->summedPath_lb->setText(OUT_MSG + m_outDir);
 }
@@ -521,8 +521,10 @@ bool SANSAddFiles::checkValidityTimeShiftsForAddedEventFiles() {
  * @param lineEditText :: text for the line edit field
  * @param enabled :: if the input should be enabled.
  */
-void SANSAddFiles::setHistogramUiLogic(QString label, QString toolTip,
-                                       QString lineEditText, bool enabled) {
+void SANSAddFiles::setHistogramUiLogic(const QString &label,
+                                       const QString &toolTip,
+                                       const QString &lineEditText,
+                                       bool enabled) {
   // Line edit field
   m_SANSForm->eventToHistBinning->setText(lineEditText);
   m_SANSForm->eventToHistBinning->setToolTip(toolTip);

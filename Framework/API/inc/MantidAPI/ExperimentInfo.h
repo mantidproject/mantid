@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -107,8 +107,8 @@ public:
   /// Easy access to the efixed value for this run & detector ID
   double getEFixed(const detid_t detID) const;
   /// Easy access to the efixed value for this run & optional detector
-  double getEFixed(const boost::shared_ptr<const Geometry::IDetector> detector =
-                       boost::shared_ptr<const Geometry::IDetector>{
+  double getEFixed(const std::shared_ptr<const Geometry::IDetector> &detector =
+                       std::shared_ptr<const Geometry::IDetector>{
                            nullptr}) const;
   /// Set the efixed value for a given detector ID
   void setEFixed(const detid_t detID, const double value);
@@ -147,17 +147,6 @@ public:
   // run end time if available, empty otherwise
   std::string getAvailableWorkspaceEndDate() const;
 
-  /// Utility to retrieve the validity dates for the given IDF
-  static void getValidFromTo(const std::string &IDFfilename,
-                             std::string &outValidFrom,
-                             std::string &outValidTo);
-  /// Utility to retrieve a resource file (IDF, Parameters, ..)
-  static std::vector<std::string> getResourceFilenames(
-      const std::string &prefix, const std::vector<std::string> &fileFormats,
-      const std::vector<std::string> &directoryNames, const std::string &date);
-  /// Get the IDF using the instrument name and date
-  static std::string getInstrumentFilename(const std::string &instrumentName,
-                                           const std::string &date = "");
   const Geometry::DetectorInfo &detectorInfo() const;
   Geometry::DetectorInfo &mutableDetectorInfo();
 
@@ -180,7 +169,7 @@ protected:
 
   virtual void updateCachedDetectorGrouping(const size_t index) const;
   /// Parameters modifying the base instrument
-  boost::shared_ptr<Geometry::ParameterMap> m_parmap;
+  std::shared_ptr<Geometry::ParameterMap> m_parmap;
   /// The base (unparametrized) instrument
   Geometry::Instrument_const_sptr sptr_instrument;
 
@@ -227,10 +216,10 @@ private:
 };
 
 /// Shared pointer to ExperimentInfo
-using ExperimentInfo_sptr = boost::shared_ptr<ExperimentInfo>;
+using ExperimentInfo_sptr = std::shared_ptr<ExperimentInfo>;
 
 /// Shared pointer to const ExperimentInfo
-using ExperimentInfo_const_sptr = boost::shared_ptr<const ExperimentInfo>;
+using ExperimentInfo_const_sptr = std::shared_ptr<const ExperimentInfo>;
 
 } // namespace API
 } // namespace Mantid

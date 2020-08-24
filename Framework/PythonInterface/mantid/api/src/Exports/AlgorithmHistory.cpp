@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -27,7 +27,7 @@ using namespace boost::python;
  * @returns A python list created from the set of child algorithm histories
  */
 boost::python::list
-getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
+getChildrenAsList(const std::shared_ptr<AlgorithmHistory> &self) {
   boost::python::list names;
   const auto histories = self->getChildHistories();
   for (const auto &history : histories) {

@@ -222,6 +222,7 @@ The **Tools** menu provides access to options and utilities:
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | Slit Calculator  | Tool for calculating approximate slit widths             |
+| Options          | Tool for controlling warnings and rounding precision     |
 +------------------+----------------------------------------------------------+
 
 Runs Tab
@@ -486,8 +487,11 @@ Search Interface
 
   *The search interface*
 
-To search for runs, select the instrument the runs are from, enter the id of
-the investigation the runs are part of, and click on **Search**.
+To search for runs, select the instrument the runs are from, enter the
+experiment ID and cycle name of the investigation the runs are part of, and
+click on **Search**. Note that the cycle name is optional but it is recommended
+to use it to avoid requiring an ICat login. At the time of writing, the ICat
+search is also less reliable.
 
 In the table below, valid runs and their descriptions will be listed. You can
 then transfer runs to the processing table by selecting the runs you wish to
@@ -602,7 +606,7 @@ Live Data Monitoring
 ^^^^^^^^^^^^^^^^^^^^
 .. figure:: /images/ISISReflectometryInterface/live_data_section.png
   :class: screenshot
-  :width: 800px
+  :width: 400px
   :align: center
   :alt: The event handling tab
 
@@ -778,6 +782,7 @@ Save ASCII Tab
 
 The **Save ASCII** tab allows for processed workspaces to be saved in specific
 ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
+See :ref:`algm-SaveReflectometryAscii` for a description of the formats.
 
 .. figure:: /images/ISISReflectometryInterface/save_tab.png
   :class: screenshot
@@ -830,7 +835,7 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 |                               | available as save algorithms from mantid itself.     |
 +-------------------------------+------------------------------------------------------+
 | Custom Format Options         | When saving in 'Custom' this section allows you      |
-|                               | to specify if you want a Title and/or Q Resolution   |
+|                               | to specify if you want a Header and/or Q Resolution  |
 |                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |

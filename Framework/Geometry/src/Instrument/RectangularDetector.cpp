@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -18,10 +18,11 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 #include <ostream>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 /**
@@ -99,8 +100,8 @@ RectangularDetector *RectangularDetector::clone() const {
  * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of
  *range
  */
-boost::shared_ptr<Detector> RectangularDetector::getAtXY(const int X,
-                                                         const int Y) const {
+std::shared_ptr<Detector> RectangularDetector::getAtXY(const int X,
+                                                       const int Y) const {
   return GridDetector::getAtXYZ(X, Y, 0);
 }
 
@@ -173,15 +174,15 @@ V3D RectangularDetector::getRelativePosAtXY(int x, int y) const {
  *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
-void RectangularDetector::initialize(boost::shared_ptr<IObject> shape,
+void RectangularDetector::initialize(std::shared_ptr<IObject> shape,
                                      int xpixels, double xstart, double xstep,
                                      int ypixels, double ystart, double ystep,
                                      int idstart, bool idfillbyfirst_y,
                                      int idstepbyrow, int idstep) {
 
   GridDetector::initialize(
-      shape, xpixels, xstart, xstep, ypixels, ystart, ystep, 0, 0, 0, idstart,
-      idfillbyfirst_y ? "yxz" : "xyz", idstepbyrow, idstep);
+      std::move(shape), xpixels, xstart, xstep, ypixels, ystart, ystep, 0, 0, 0,
+      idstart, idfillbyfirst_y ? "yxz" : "xyz", idstepbyrow, idstep);
 }
 
 //------------------------------------------------------------------------------------------------

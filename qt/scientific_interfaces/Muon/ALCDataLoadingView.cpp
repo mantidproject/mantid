@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingView.h"
 
@@ -41,7 +41,7 @@ void ALCDataLoadingView::initialize() {
   // Error bars on the plot
   QStringList plotsWithErrors{"Data"};
   m_ui.dataPlot->setLinesWithErrors(plotsWithErrors);
-
+  m_ui.dataPlot->showLegend(false);
   // The following lines disable the groups' titles when the
   // group is disabled
   QPalette palette;

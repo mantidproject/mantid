@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RecordPythonScript.h"
 #include "MantidAPI/FileProperty.h"
@@ -20,10 +20,15 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RecordPythonScript)
 
+// This is to overwrite inheriting ExportHistory alias from GeneratePythonScript
+const std::string RecordPythonScript::alias() const { return ""; }
+
 //----------------------------------------------------------------------------------------------
 /// Constructor
 RecordPythonScript::RecordPythonScript()
-    : Algorithms::GeneratePythonScript(), API::AlgorithmObserver() {}
+    : Algorithms::GeneratePythonScript(), API::AlgorithmObserver() {
+  useAlgorithm("GeneratePythonScript", 1);
+}
 
 //----------------------------------------------------------------------------------------------
 

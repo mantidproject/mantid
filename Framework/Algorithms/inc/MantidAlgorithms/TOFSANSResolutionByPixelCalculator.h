@@ -1,18 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace Algorithms {
 
 /**Helper class which provides the uncertainty calculations for the
 TOFSANSResolutionByPixel class
 */
-class DLLExport TOFSANSResolutionByPixelCalculator {
+class MANTID_ALGORITHMS_DLL TOFSANSResolutionByPixelCalculator {
 public:
   double getWavelengthIndependentFactor(double r1, double r2, double deltaR,
                                         double lCollim, double l2) const;

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef EVENTLISTTEST_H_
-#define EVENTLISTTEST_H_ 1
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventList.h"
@@ -1537,7 +1536,7 @@ public:
       this->fake_uniform_time_data();
       el.switchTo(static_cast<EventType>(this_type));
       // Do convert
-      TS_ASSERT_THROWS(this->el.addPulsetimes(offsets), std::runtime_error);
+      TS_ASSERT_THROWS(this->el.addPulsetimes(offsets), std::runtime_error &);
     }
   }
 
@@ -2988,5 +2987,3 @@ public:
     TS_ASSERT_DELTA(integ, 5e6, 1);
   }
 };
-
-#endif /// EVENTLISTTEST_H_

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -22,7 +22,7 @@ namespace API {
 class MANTID_API_DLL FunctionDomainMD : public FunctionDomain {
 public:
   /// Constructor.
-  FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start = 0,
+  FunctionDomainMD(const IMDWorkspace_const_sptr &ws, size_t start = 0,
                    size_t length = 0);
   /// Destructor.
   ~FunctionDomainMD() override;

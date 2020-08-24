@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_
-#define MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -21,7 +21,7 @@ class HistogramE;
 namespace CurveFitting {
 namespace Algorithms {
 
-class DLLExport NormaliseByPeakArea : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL NormaliseByPeakArea : public API::Algorithm {
 public:
   NormaliseByPeakArea();
 
@@ -86,5 +86,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_ */

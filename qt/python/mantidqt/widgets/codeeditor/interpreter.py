@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-from __future__ import (absolute_import, unicode_literals)
-
 import io
 import os.path
 import sys
@@ -151,6 +149,9 @@ class PythonFileInterpreter(QWidget):
 
         # Re-populate the completion API after execution success
         self._presenter.model.sig_exec_success.connect(self.code_completer.update_completion_api)
+
+        # Only load the simpleapi completions if the code editor starts being modified.
+        self.sig_editor_modified.connect(self.code_completer.add_simpleapi_to_completions_if_required)
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -316,7 +317,9 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        return self.model.execute_async(code_str, self.view.filename, blocking)
+        return self.model.execute_async(code_str=code_str,
+                                        line_offset=self._code_start_offset,
+                                        filename=self.view.filename, blocking=blocking)
 
     def _get_code_for_execution(self, ignore_selection):
         editor = self.view.editor
@@ -325,6 +328,7 @@ class PythonFileInterpreterPresenter(QObject):
             line_from, _, _, _ = editor.getSelection()
         else:
             # run everything in the file
+            self.model.reset_context()
             code_str = editor.text()
             line_from = 0
         return code_str, line_from
@@ -362,8 +366,3 @@ class PythonFileInterpreterPresenter(QObject):
 
     def _create_status_msg(self, status, timestamp, elapsed_time):
         return IDLE_STATUS_MSG + ' ' + LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
-
-    def _on_progress_update(self, lineno):
-        """Update progress on the view taking into account if a selection of code is
-        running"""
-        self.view.editor.updateProgressMarker(lineno + self._code_start_offset, False)

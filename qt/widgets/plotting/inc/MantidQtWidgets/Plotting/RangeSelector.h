@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGET_RANGESELECTOR_H
-#define MANTIDQT_MANTIDWIDGET_RANGESELECTOR_H
+#pragma once
 
 #include <QtGlobal>
 
@@ -14,5 +13,3 @@
 #else
 #include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
 #endif
-
-#endif // MANTIDQT_MANTIDWIDGET_RANGESELECTOR_H

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Qwt/RangeSelector.h"
 
@@ -305,7 +305,7 @@ void RangeSelector::detach() {
   m_mrkMax->attach(nullptr);
 }
 
-void RangeSelector::setColour(QColor colour) {
+void RangeSelector::setColour(const QColor &colour) {
   m_pen->setColor(colour);
   switch (m_type) {
   case XMINMAX:

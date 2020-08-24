@@ -20,9 +20,9 @@ if(ENABLE_MANTIDPLOT)
                       Qt4::QtCore
                       Qt4::QtGui
                       Qt4::QtScript
-                      ${PYTHON_LIBRARIES}
+                      Python::Python
                      INSTALL_DIR
-                      ${LIB_DIR}/mantidqt/icons
+                      ${SITE_PACKAGES}/mantidqt/icons
                      LINUX_INSTALL_RPATH
                       "\$ORIGIN/../.."
                      OSX_INSTALL_RPATH
@@ -45,9 +45,9 @@ if(ENABLE_WORKBENCH)
                       MantidQtIconsQt5
                       Qt5::Core
                       Qt5::Gui
-                      ${PYTHON_LIBRARIES}
+                      Python::Python
                      INSTALL_DIR
-                      ${WORKBENCH_LIB_DIR}/mantidqt/icons
+                      ${WORKBENCH_SITE_PACKAGES}/mantidqt/icons
                      LINUX_INSTALL_RPATH
                       "\$ORIGIN/../.."
                      OSX_INSTALL_RPATH

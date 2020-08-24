@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,8 +10,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -21,7 +21,7 @@ Rebins both axes of a two-dimensional workspace to the given parameters.
 
 @author Martyn Gigg, Tessella plc
 */
-class DLLExport Rebin2D : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Rebin2D : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "Rebin2D"; }

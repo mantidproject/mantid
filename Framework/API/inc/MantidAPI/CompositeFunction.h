@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,11 +51,10 @@ public:
   /// Returns the function's name
   std::string name() const override { return "CompositeFunction"; }
   /// Sets the workspace for each member function
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const Workspace> ws) override;
   /// Set matrix workspace
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
 
   /// Function you want to fit to.
   void function(const FunctionDomain &domain,
@@ -134,7 +133,7 @@ public:
   /// Get number of domains required by this function
   size_t getNumberDomains() const override;
   /// Split this function (if needed) into a list of independent functions.
-  std::vector<boost::shared_ptr<IFunction>>
+  std::vector<std::shared_ptr<IFunction>>
   createEquivalentFunctions() const override;
   /// Returns the pointer to i-th function
   IFunction_sptr getFunction(std::size_t i) const override;
@@ -148,9 +147,10 @@ public:
   /// Remove a function
   void removeFunction(size_t i);
   /// Replace a function
-  void replaceFunction(size_t i, IFunction_sptr f);
+  void replaceFunction(size_t i, const IFunction_sptr &f);
   /// Replace a function
-  void replaceFunctionPtr(const IFunction_sptr f_old, IFunction_sptr f_new);
+  void replaceFunctionPtr(const IFunction_sptr &f_old,
+                          const IFunction_sptr &f_new);
   /// Get the function index
   std::size_t functionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function
@@ -231,9 +231,9 @@ private:
 };
 
 /// shared pointer to the composite function base class
-using CompositeFunction_sptr = boost::shared_ptr<CompositeFunction>;
+using CompositeFunction_sptr = std::shared_ptr<CompositeFunction>;
 /// shared pointer to the composite function base class (const version)
-using CompositeFunction_const_sptr = boost::shared_ptr<const CompositeFunction>;
+using CompositeFunction_const_sptr = std::shared_ptr<const CompositeFunction>;
 
 /** A Jacobian for individual functions
  */

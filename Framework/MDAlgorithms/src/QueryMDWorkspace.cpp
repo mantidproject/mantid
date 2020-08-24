@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/QueryMDWorkspace.h"
 
@@ -81,7 +81,7 @@ void QueryMDWorkspace::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "MaximumRows", 100000,
-                      boost::make_shared<BoundedValidator<int>>(),
+                      std::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
   setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
@@ -93,7 +93,7 @@ void QueryMDWorkspace::init() {
   propOptions.emplace_back(numberOfEventsNormalisationOption());
 
   declareProperty("Normalisation", "none",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "What normalisation do you wish to apply"
                   "  none: No normalisation.\n"
                   "  volume: Normalise by the volume.\n"

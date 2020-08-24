@@ -42,6 +42,8 @@ Lines corresponding to different elements will appear in different colours.
 To remove lines from a specific element, click on its label on the periodic table which will return to the original
 colour.
 
+To remove all the lines from the plots click on `Deselect All Elements`.
+
 Changing peak data file
 #######################
 If you wish to load a custom data file for the peaks you can do so from *Edit → Change Peak Data File*. This will open

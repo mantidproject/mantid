@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -30,7 +31,7 @@ namespace Algorithms {
     to the sample during the experiment. This algorithm allows one named log
     to be entered.
 */
-class DLLExport AddSampleLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddSampleLog : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "AddSampleLog"; }
@@ -75,21 +76,22 @@ private:
   Types::Core::DateAndTime getRunStart(API::Run &run_obj);
 
   /// get value vector of the integer TimeSeriesProperty entries
-  std::vector<int> getIntValues(API::MatrixWorkspace_const_sptr dataws,
+  std::vector<int> getIntValues(const API::MatrixWorkspace_const_sptr &dataws,
                                 int workspace_index);
 
   /// get value vector of the double TimeSeriesProperty entries
-  std::vector<double> getDblValues(API::MatrixWorkspace_const_sptr dataws,
-                                   int workspace_index);
+  std::vector<double>
+  getDblValues(const API::MatrixWorkspace_const_sptr &dataws,
+               int workspace_index);
 
   /// get the vector of times of the TimeSeriesProperty entries
   std::vector<Types::Core::DateAndTime>
-  getTimes(API::MatrixWorkspace_const_sptr dataws, int workspace_index,
+  getTimes(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index,
            bool is_epoch, bool is_second, API::Run &run_obj);
 
   /// get meta data from input workspace or user input
-  void getMetaData(API::MatrixWorkspace_const_sptr dataws, bool &epochtime,
-                   std::string &timeunit);
+  void getMetaData(const API::MatrixWorkspace_const_sptr &dataws,
+                   bool &epochtime, std::string &timeunit);
 };
 
 } // namespace Algorithms

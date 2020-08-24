@@ -19,18 +19,10 @@ Exercise 1
    # Write a program that prints out the square of the first
    # 20 integers a block such that the block has a dimension of 4x5.
 
-   # range(i,j) produces a list of numbers from i -> j-1
-   #python 2
    for i in range(1,21):
-       print str(i*i).center(3), # center is a function for strings that centers the contents to the given width
+       print(str(i*i).center(3),end=' ') # center is a function for strings that centers the contents to the given width
        if i % 4 == 0:
-           print
-
-   #Python 3
-   #for i in range(1,21):
-   #    print(str(i*i).center(3),end=' ') # center is a function for strings that centers the contents to the given width
-   #    if i % 4 == 0:
-   #        print()
+           print()
 
    # ------------ Produces -------------
    # 1   4   9   16

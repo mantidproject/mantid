@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
@@ -10,14 +10,13 @@
 """
 Functionality for dealing with legends on plots
 """
-from __future__ import (absolute_import, division, print_function)
-
 import sys
 
 import matplotlib
 from matplotlib import colors
 from matplotlib.patches import BoxStyle
 
+from mantid.kernel import ConfigService
 from mantid.plots.utility import legend_set_draggable
 
 
@@ -36,6 +35,9 @@ class LegendProperties(dict):
 
     @classmethod
     def from_legend(cls, legend):
+        if not (legend and legend.get_texts()):
+            return None
+
         props = dict()
 
         props['visible'] = legend.get_visible()
@@ -105,7 +107,7 @@ class LegendProperties(dict):
         props['title'] = view.get_title()
         props['background_color'] = view.get_background_color()
         props['edge_color'] = view.get_edge_color()
-        props['transparency'] = (100-float(view.get_transparency_spin_box_value()))/100
+        props['transparency'] = (100 - float(view.get_transparency_spin_box_value())) / 100
         props['entries_font'] = view.get_entries_font()
         props['entries_size'] = view.get_entries_size()
         props['entries_color'] = view.get_entries_color()
@@ -132,8 +134,23 @@ class LegendProperties(dict):
 
     @classmethod
     def create_legend(cls, props, ax):
+        # Imported here to prevent circular import.
+        from mantid.plots.datafunctions import get_legend_handles
+
+        loc = ConfigService.getString('plots.legend.Location')
+        font_size = float(ConfigService.getString('plots.legend.FontSize'))
+        if not props:
+            legend_set_draggable(ax.legend(handles=get_legend_handles(ax), loc=loc,
+                                           prop={'size': font_size}),
+                                 True)
+            return
+
+        if 'loc' in props.keys():
+            loc = props['loc']
+
         if int(matplotlib.__version__[0]) >= 2:
-            legend = ax.legend(ncol=props['columns'],
+            legend = ax.legend(handles=get_legend_handles(ax),
+                               ncol=props['columns'],
                                prop={'size': props['entries_size']},
                                numpoints=props['markers'],
                                markerfirst=props['marker_position'] == "Left of Entries",
@@ -148,9 +165,11 @@ class LegendProperties(dict):
                                labelspacing=props['label_spacing'],
                                handlelength=props['marker_size'],
                                handletextpad=props['marker_label_padding'],
-                               columnspacing=props['column_spacing'])
+                               columnspacing=props['column_spacing'],
+                               loc=loc)
         else:
-            legend = ax.legend(ncol=props['columns'],
+            legend = ax.legend(handles=get_legend_handles(ax),
+                               ncol=props['columns'],
                                prop={'size': props['entries_size']},
                                numpoints=props['markers'],
                                markerfirst=props['marker_position'] == "Left of Entries",
@@ -163,7 +182,8 @@ class LegendProperties(dict):
                                labelspacing=props['label_spacing'],
                                handlelength=props['marker_size'],
                                handletextpad=props['marker_label_padding'],
-                               columnspacing=props['column_spacing'])
+                               columnspacing=props['column_spacing'],
+                               loc=loc)
 
         title = legend.get_title()
         title.set_fontname(props['title_font'])

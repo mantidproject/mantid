@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
@@ -25,7 +25,9 @@ class AxesTabWidgetPresenter:
         # Store a copy of the current view props. This allows us to tell if any
         # properties have been changed by the user; especially solving issues
         # with x and y axis limits interfering with figure autoscaling
-        self.current_view_props = None
+        self.current_view_props = {}
+
+        self.current_axis = "x"
 
         # Dictionary mapping ax name to Axes object
         self.axes_names_dict = get_axes_names_dict(self.fig)
@@ -37,29 +39,114 @@ class AxesTabWidgetPresenter:
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
             self.update_view)
+        self.view.axis_button_group.buttonClicked.connect(
+            self.axis_changed)
+        self.view.apply_all_button.clicked.connect(self.apply_all_properties)
+        self.view.show_minor_ticks_check_box.toggled.connect(
+            self.show_minor_ticks_checked)
 
     def apply_properties(self):
         """Update the axes with the user inputted properties"""
+        # Make sure current_view_props is up to date if values have been changed
+        self.axis_changed()
+
         ax = self.get_selected_ax()
-        try:
-            new_props = self.view.get_properties()
-        except ValueError as e:
-            self.view.error_occurred(str(e))
-        else:
-            self.set_ax_title(ax, new_props.title)
-            ax.set_xlabel(new_props.xlabel)
-            ax.set_xscale(new_props.xscale)
-            if new_props.xscale == 'Log' and new_props.xlim[0] < 0:
-                ax.set_xlim(new_props.xlim[1]*0.01, new_props.xlim[1])
+
+        self.set_ax_title(ax, self.current_view_props['title'])
+
+        if not isinstance(ax, Axes3D):
+            if self.current_view_props['minor_ticks']:
+                ax.minorticks_on()
             else:
-                ax.set_xlim(new_props.xlim)
-            ax.set_ylabel(new_props.ylabel)
-            ax.set_yscale(new_props.yscale)
-            if new_props.yscale == 'Log' and new_props.ylim[0] < 0:
-                ax.set_ylim(new_props.ylim[1]*0.01, new_props.ylim[1])
+                ax.minorticks_off()
+
+            ax.show_minor_gridlines = self.current_view_props['minor_gridlines']
+
+            # If the grid is enabled update it
+            if ax.show_minor_gridlines:
+                if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
+                    ax.grid(True, which='minor')
+                elif ax.xaxis._gridOnMajor:
+                    ax.grid(True, axis='x', which='minor')
+                elif ax.yaxis._gridOnMajor:
+                    ax.grid(True, axis='y', which='minor')
             else:
-                ax.set_ylim(new_props.ylim)
-            self.update_view()
+                ax.grid(False, which='minor')
+
+        if "xlabel" in self.current_view_props:
+            ax.set_xlabel(self.current_view_props['xlabel'])
+            ax.set_xscale(self.current_view_props['xscale'])
+
+            if isinstance(ax, Axes3D):
+                ax.set_xlim3d(self.current_view_props['xlim'])
+            else:
+                ax.set_xlim(self.current_view_props['xlim'])
+
+        if "ylabel" in self.current_view_props:
+            ax.set_ylabel(self.current_view_props['ylabel'])
+            ax.set_yscale(self.current_view_props['yscale'])
+
+            if isinstance(ax, Axes3D):
+                ax.set_ylim3d(self.current_view_props['ylim'])
+            else:
+                ax.set_ylim(self.current_view_props['ylim'])
+
+        if "zlabel" in self.current_view_props:
+            ax.set_zlabel(self.current_view_props['zlabel'])
+            ax.set_zscale(self.current_view_props['zscale'])
+            ax.set_zlim3d(self.current_view_props['zlim'])
+
+        self.update_view()
+
+    def apply_all_properties(self):
+        """Update the axes with the user inputted properties"""
+        # Make sure current_view_props is up to date if values have been changed
+        self.axis_changed()
+        view_props = self.current_view_props
+        for ax in self.axes_names_dict.values():
+
+            if self.current_view_props['minor_ticks']:
+                ax.minorticks_on()
+            else:
+                ax.minorticks_off()
+
+            ax.show_minor_gridlines = self.current_view_props['minor_gridlines']
+
+            # If the grid is enabled update it
+            if ax.show_minor_gridlines:
+                if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
+                    ax.grid(True, which='minor')
+                elif ax.xaxis._gridOnMajor:
+                    ax.grid(True, axis='x', which='minor')
+                elif ax.yaxis._gridOnMajor:
+                    ax.grid(True, axis='y', which='minor')
+            else:
+                ax.grid(False, which='minor')
+
+            if "xlabel" in view_props:
+                ax.set_xlabel(view_props['xlabel'])
+                ax.set_xscale(view_props['xscale'])
+
+                if isinstance(ax, Axes3D):
+                    ax.set_xlim3d(view_props['xlim'])
+                else:
+                    ax.set_xlim(view_props['xlim'])
+
+            if "ylabel" in view_props:
+                ax.set_ylabel(view_props['ylabel'])
+                ax.set_yscale(view_props['yscale'])
+
+                if isinstance(ax, Axes3D):
+                    ax.set_ylim3d(view_props['ylim'])
+                else:
+                    ax.set_ylim(view_props['ylim'])
+
+            if "zlabel" in view_props:
+                ax.set_zlabel(view_props['zlabel'])
+                ax.set_zscale(view_props['zscale'])
+                ax.set_zlim3d(view_props['zlim'])
+            ax.figure.canvas.draw()
+        self.update_view()
 
     def get_selected_ax(self):
         """Get Axes object of selected axes"""
@@ -96,14 +183,73 @@ class AxesTabWidgetPresenter:
 
     def update_view(self):
         """Update the properties in the view from the selected axes"""
+        self.current_view_props.clear()
         ax_props = self.get_selected_ax_properties()
+
+        plot_is_3d = "zlim" in ax_props
+
+        # Enable the z-axis option if the plot is 3D.
+        self.view.z_radio_button.setEnabled(plot_is_3d)
+
+        # For tiled plots
+        if not plot_is_3d and self.view.z_radio_button.isChecked():
+            self.view.x_radio_button.click()
+
+        # Changing the axis scale doesn't work with 3D plots, this is a known matplotlib issue,
+        # so the scale option is disabled.
+        self.view.scale_combo_box.setEnabled("zlim" not in ax_props)
+
+        # Minor ticks/gridlines are currently not supported for 3D plots.
+        self.view.show_minor_gridlines_check_box.setVisible(not plot_is_3d)
+        self.view.show_minor_ticks_check_box.setVisible(not plot_is_3d)
+
+        ax = self.view.get_axis()
         self.view.set_title(ax_props.title)
-        self.view.set_xlower_limit(ax_props.xlim[0])
-        self.view.set_xupper_limit(ax_props.xlim[1])
-        self.view.set_xlabel(ax_props.xlabel)
-        self.view.set_xscale(ax_props.xscale)
-        self.view.set_ylower_limit(ax_props.ylim[0])
-        self.view.set_yupper_limit(ax_props.ylim[1])
-        self.view.set_ylabel(ax_props.ylabel)
-        self.view.set_yscale(ax_props.yscale)
-        self.current_view_props = AxProperties.from_view(self.view)
+
+        if not plot_is_3d:
+            self.view.set_show_minor_ticks(ax_props.minor_ticks)
+            self.view.show_minor_gridlines_check_box.setEnabled(ax_props.minor_ticks)
+            self.view.set_show_minor_gridlines(ax_props.minor_gridlines)
+
+        lim = ax_props[f"{ax}lim"]
+        self.view.set_lower_limit(lim[0])
+        self.view.set_upper_limit(lim[1])
+        self.view.set_label(ax_props[f"{ax}label"])
+        self.view.set_scale(ax_props[f"{ax}scale"])
+
+        self.current_view_props.update(self.view.get_properties())
+
+    def axis_changed(self):
+        ax = self.current_axis
+
+        self.current_view_props['title'] = self.view.get_title()
+        self.current_view_props['minor_ticks'] = self.view.get_show_minor_ticks()
+        self.current_view_props['minor_gridlines'] = self.view.get_show_minor_gridlines()
+        self.current_view_props[f"{ax}lim"] = (self.view.get_lower_limit(), self.view.get_upper_limit())
+        self.current_view_props[f"{ax}label"] = self.view.get_label()
+        self.current_view_props[f"{ax}scale"] = self.view.get_scale()
+
+        new_ax = self.view.get_axis()
+        self.current_axis = new_ax
+
+        if f"{new_ax}lim" in self.current_view_props:
+            lim = self.current_view_props[f"{new_ax}lim"]
+            self.view.set_lower_limit(lim[0])
+            self.view.set_upper_limit(lim[1])
+            self.view.set_label(self.current_view_props[f"{new_ax}label"])
+            self.view.set_scale(self.current_view_props[f"{new_ax}scale"])
+        else:
+            ax_props = self.get_selected_ax_properties()
+            ax = self.view.get_axis()
+            lim = ax_props[f"{ax}lim"]
+            self.view.set_lower_limit(lim[0])
+            self.view.set_upper_limit(lim[1])
+            self.view.set_label(ax_props[f"{ax}label"])
+            self.view.set_scale(ax_props[f"{ax}scale"])
+
+    def show_minor_ticks_checked(self, checked):
+        # Can't have minor gridlines without minor ticks
+        self.view.show_minor_gridlines_check_box.setEnabled(checked)
+
+        if not checked:
+            self.view.show_minor_gridlines_check_box.setChecked(False)

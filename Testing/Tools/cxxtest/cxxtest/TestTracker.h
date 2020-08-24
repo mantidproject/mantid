@@ -1,5 +1,4 @@
-#ifndef __cxxtest__TestTracker_h__
-#define __cxxtest__TestTracker_h__
+#pragma once
 
 //
 // The TestTracker tracks running tests
@@ -115,8 +114,6 @@ namespace CxxTest
 
     inline TestTracker &tracker() { return TestTracker::tracker(); }
 }
-
-#endif // __cxxtest__TestTracker_h__
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

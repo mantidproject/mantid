@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 
@@ -28,7 +28,7 @@ namespace Algorithms {
 
   @date 2012-07-17
 */
-class DLLExport NormaliseByDetector : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL NormaliseByDetector : public API::Algorithm {
 public:
   NormaliseByDetector(bool parallelExecution = true);
 
@@ -48,16 +48,16 @@ private:
   /// Try to parse a function parameter and extract the correctly typed
   /// parameter.
   const Mantid::Geometry::FitParameter
-  tryParseFunctionParameter(Mantid::Geometry::Parameter_sptr parameter,
+  tryParseFunctionParameter(const Mantid::Geometry::Parameter_sptr &parameter,
                             const Geometry::IDetector &det);
   /// Block to process histograms.
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
-  processHistograms(boost::shared_ptr<Mantid::API::MatrixWorkspace> inWS);
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
+  processHistograms(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inWS);
   /// Process indivdual histogram.
   void processHistogram(
       size_t wsIndex,
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> inWS,
-      boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS,
+      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &inWS,
+      const std::shared_ptr<Mantid::API::MatrixWorkspace> &denominatorWS,
       Mantid::API::Progress &prog);
 
   void init() override;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Iqt.h"
 
@@ -28,10 +28,10 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
-std::string
-checkInstrumentParametersMatch(Instrument_const_sptr sampleInstrument,
-                               Instrument_const_sptr resolutionInstrument,
-                               std::string const &parameter) {
+std::string checkInstrumentParametersMatch(
+    const Instrument_const_sptr &sampleInstrument,
+    const Instrument_const_sptr &resolutionInstrument,
+    std::string const &parameter) {
   if (!sampleInstrument->hasParameter(parameter))
     return "Could not find the " + parameter + " for the sample workspace.";
   if (!resolutionInstrument->hasParameter(parameter))
@@ -43,9 +43,10 @@ checkInstrumentParametersMatch(Instrument_const_sptr sampleInstrument,
   return "";
 }
 
-std::string checkParametersMatch(MatrixWorkspace_const_sptr sampleWorkspace,
-                                 MatrixWorkspace_const_sptr resolutionWorkspace,
-                                 std::string const &parameter) {
+std::string
+checkParametersMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                     const MatrixWorkspace_const_sptr &resolutionWorkspace,
+                     std::string const &parameter) {
   auto const sampleInstrument = sampleWorkspace->getInstrument();
   auto const resolutionInstrument = resolutionWorkspace->getInstrument();
   return checkInstrumentParametersMatch(sampleInstrument, resolutionInstrument,
@@ -61,8 +62,8 @@ std::string checkParametersMatch(std::string const &sampleName,
 }
 
 std::string
-checkInstrumentsMatch(MatrixWorkspace_const_sptr sampleWorkspace,
-                      MatrixWorkspace_const_sptr resolutionWorkspace) {
+checkInstrumentsMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                      const MatrixWorkspace_const_sptr &resolutionWorkspace) {
   auto const sampleInstrument = sampleWorkspace->getInstrument();
   auto const resolutionInstrument = resolutionWorkspace->getInstrument();
   if (sampleInstrument->getName() != resolutionInstrument->getName())
@@ -70,9 +71,9 @@ checkInstrumentsMatch(MatrixWorkspace_const_sptr sampleWorkspace,
   return "";
 }
 
-std::string
-validateNumberOfHistograms(MatrixWorkspace_const_sptr sampleWorkspace,
-                           MatrixWorkspace_const_sptr resolutionWorkspace) {
+std::string validateNumberOfHistograms(
+    const MatrixWorkspace_const_sptr &sampleWorkspace,
+    const MatrixWorkspace_const_sptr &resolutionWorkspace) {
   auto const sampleSize = sampleWorkspace->getNumberHistograms();
   auto const resolutionSize = resolutionWorkspace->getNumberHistograms();
   if (resolutionSize > 1 && sampleSize != resolutionSize)
@@ -85,8 +86,8 @@ void addErrorMessage(UserInputValidator &uiv, std::string const &message) {
     uiv.addErrorMessage(QString::fromStdString(message) + "\n");
 }
 
-bool isTechniqueDirect(MatrixWorkspace_const_sptr sampleWorkspace,
-                       MatrixWorkspace_const_sptr resWorkspace) {
+bool isTechniqueDirect(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                       const MatrixWorkspace_const_sptr &resWorkspace) {
   try {
     auto const logValue1 = sampleWorkspace->getLog("deltaE-mode")->value();
     auto const logValue2 = resWorkspace->getLog("deltaE-mode")->value();

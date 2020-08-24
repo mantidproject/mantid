@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadOff.h"
 #include "MantidGeometry/Instrument.h"
@@ -15,14 +15,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-LoadOff::LoadOff(std::string filename, ScaleUnits scaleType)
-    : MeshFileIO(scaleType) {
-  m_file = std::ifstream(filename.c_str());
-  if (!m_file) {
-    g_log.error("Unable to open file: " + filename);
-    throw Kernel::Exception::FileError("Unable to open file: ", filename);
-  }
-}
+LoadOff::LoadOff(const std::string &filename, ScaleUnits scaleType)
+    : LoadSingleMesh(filename, std::ios_base::in, scaleType) {}
 
 bool LoadOff::getOFFline(std::string &line) {
   // Get line from OFF file ignoring blank lines and comments
@@ -130,7 +124,7 @@ std::unique_ptr<Geometry::MeshObject> LoadOff::readOFFMeshObject() {
   return retVal;
 }
 
-std::unique_ptr<Geometry::MeshObject> LoadOff::readOFFshape() {
+std::unique_ptr<Geometry::MeshObject> LoadOff::readShape() {
   std::string line;
   if (getOFFline(line)) {
     if (line != "OFF") {

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECT_FUNCTIONTEMPLATEBROWSER_H_
-#define INDIRECT_FUNCTIONTEMPLATEBROWSER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -65,11 +64,12 @@ public:
   virtual void clear() = 0;
   virtual void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) = 0;
+  virtual void estimateFunctionParameters() = 0;
   virtual void setBackgroundA0(double value) = 0;
   virtual void setResolution(std::string const &name,
                              TableDatasetIndex const &index) = 0;
   virtual void setResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions) = 0;
+      const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
   virtual void setQValues(const std::vector<double> &qValues) = 0;
 
 signals:
@@ -109,5 +109,3 @@ protected:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECT_FUNCTIONTEMPLATEBROWSER_H_*/

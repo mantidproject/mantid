@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FFTFILTER_H
-#define FFTFILTER_H
+#pragma once
 
 #include "Filter.h"
 
@@ -76,5 +75,3 @@ private:
   // Band Pass/Band block filter respectively.
   bool d_offset;
 };
-
-#endif

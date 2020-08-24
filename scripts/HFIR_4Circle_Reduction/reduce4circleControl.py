@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912,R0921,R0914,W0403
 ################################################################################
@@ -14,7 +14,6 @@
 # - Download from internet to cache (download-mode)
 #
 ################################################################################
-from __future__ import (absolute_import, division, print_function)
 import bisect
 try:
     # python3
@@ -25,7 +24,6 @@ except ImportError:
     from urllib2 import urlopen
     from urllib2 import HTTPError
     from urllib2 import URLError
-from six.moves import range
 import math
 import csv
 import random

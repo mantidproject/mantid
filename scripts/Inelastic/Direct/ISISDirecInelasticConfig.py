@@ -2,10 +2,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 import os
 import sys
 import platform
@@ -15,8 +14,6 @@ import copy
 from datetime import date
 import time
 from xml.dom import minidom
-from six import iteritems, string_types
-
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS', 'LET', 'MERLIN', 'MARI', 'HET']
 # the list of the parameters, which can be replaced if found in user files
@@ -94,7 +91,7 @@ class UserProperties(object):
         self._rb_dirs[recent_date_id] = rb_folder_or_id
         if self._recent_dateID:
             max_date = self._start_dates[self._recent_dateID]
-            for date_key, a_date in iteritems(self._start_dates):
+            for date_key, a_date in self._start_dates.items():
                 if a_date > max_date:
                     self._recent_dateID = date_key
                     max_date = a_date
@@ -265,7 +262,7 @@ class UserProperties(object):
 
         if isinstance(cycle, int):
             cycle = convert_cycle_int(cycle)
-        if isinstance(cycle, string_types):
+        if isinstance(cycle, str):
             if len(cycle) == 11:
                 last_letter = cycle[-1]
                 if not last_letter.upper() in {'A','B','C','D','E'}:
@@ -289,7 +286,7 @@ class UserProperties(object):
                                        "but it is {0}".format(cycle))
         if isinstance(rb_folder_or_id, int):
             rb_folder_or_id = "RB{0:07}".format(rb_folder_or_id)
-        if not isinstance(rb_folder_or_id, string_types):
+        if not isinstance(rb_folder_or_id, str):
             raise RuntimeError("RB Folder {0} should be a string".format(rb_folder_or_id))
         else:
             f_path, rbf = os.path.split(rb_folder_or_id)
@@ -317,7 +314,7 @@ class UserProperties(object):
                                "ISIS inelastic instruments".format(instrument))
 
     def validate_date(self, start_date):
-        if isinstance(start_date, string_types):
+        if isinstance(start_date, str):
             # the date of express -- let's make it long in the past
             if start_date.lower() == 'none':
                 start_date = '19800101'
@@ -364,7 +361,7 @@ class MantidConfigDirectInelastic(object):
         1) Valid for Mantid 3.4 available on 18/05/2015 and expects server
         to have:
         Map/masks folder with layout defined on (e.g. svn checkout)
-        https://svn.isis.rl.ac.uk/InstrumentFiles/trunk
+        https://svn.isis.rl.ac.uk/InstrumentFileFinder/trunk
         2) User scripts folder with layout defined on
         (e.g. git checkout or Mantid script repository set-up):
         git@github.com:mantidproject/scriptrepository.git
@@ -384,7 +381,7 @@ class MantidConfigDirectInelastic(object):
 
     def __init__(self, mantid='/opt/Mantid/', home_dir='/home/',
                  script_repo='/opt/UserScripts/',
-                 map_mask_folder='/usr/local/mprogs/InstrumentFiles/'):
+                 map_mask_folder='/usr/local/mprogs/InstrumentFileFinder/'):
         """Initialize generic config variables and variables specific to a server"""
 
         self._mantid_path = str(mantid)
@@ -778,7 +775,7 @@ class MantidConfigDirectInelastic(object):
         if not os.path.exists(self._map_mask_folder):
             raise RuntimeError(("SERVER ERROR: no correct map/mask folder defined at {0}\n"
                                 "Check out Mantid map/mask files from svn at"
-                                " https://svn.isis.rl.ac.uk/InstrumentFiles/trunk").format(self._map_mask_folder))
+                                " https://svn.isis.rl.ac.uk/InstrumentFileFinder/trunk").format(self._map_mask_folder))
 
     def _init_config(self):
         """Execute Mantid properties setup methods"""
@@ -955,7 +952,7 @@ if __name__ == "__main__":
 
         MantidDir = r"c:\Mantid\_builds\br_master\bin\Release"
         UserScriptRepoDir = os.path.join(analysisDir, "UserScripts")
-        MapMaskDir = os.path.join(analysisDir, "InstrumentFiles")
+        MapMaskDir = os.path.join(analysisDir, "InstrumentFileFinder")
 
         rootDir = os.path.join(base, 'users')
     else:
@@ -963,7 +960,7 @@ if __name__ == "__main__":
         # sys.path.insert(0,'/opt/mantidnightly/scripts/Inelastic/Direct/')
 
         MantidDir = '/opt/Mantid'
-        MapMaskDir = '/usr/local/mprogs/InstrumentFiles/'
+        MapMaskDir = '/usr/local/mprogs/InstrumentFileFinder/'
         UserScriptRepoDir = '/opt/UserScripts'
         home = '/home'
         #

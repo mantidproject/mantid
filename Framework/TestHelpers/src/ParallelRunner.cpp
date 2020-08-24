@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/ParallelRunner.h"
 #include "MantidParallel/ThreadingBackend.h"
@@ -22,9 +22,9 @@ ParallelRunner::ParallelRunner() {
     // invisible.
     int threads =
         std::max(3, static_cast<int>(std::thread::hardware_concurrency()));
-    m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
+    m_backend = std::make_shared<detail::ThreadingBackend>(threads);
   }
-  m_serialBackend = boost::make_shared<detail::ThreadingBackend>(1);
+  m_serialBackend = std::make_shared<detail::ThreadingBackend>(1);
 }
 
 ParallelRunner::ParallelRunner(const int threads) {
@@ -35,8 +35,8 @@ ParallelRunner::ParallelRunner(const int threads) {
     throw("ParallelRunner: number of requested threads does not match number "
           "of MPI ranks");
   if (comm.size() == 1)
-    m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
-  m_serialBackend = boost::make_shared<detail::ThreadingBackend>(1);
+    m_backend = std::make_shared<detail::ThreadingBackend>(threads);
+  m_serialBackend = std::make_shared<detail::ThreadingBackend>(1);
 }
 
 int ParallelRunner::size() const {

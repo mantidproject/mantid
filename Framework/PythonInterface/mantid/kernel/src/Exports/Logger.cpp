@@ -1,19 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Logger.h"
-#include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <memory>
 
 using Mantid::Kernel::Logger;
 using namespace boost::python;
 using LoggerMsgFunction = void (Logger::*)(const std::string &);
+using LoggerFlushFunction = void (Logger::*)();
 
 namespace {
 /**
@@ -21,19 +22,19 @@ namespace {
  * @param name The name for the logger instance
  * @return A new logger instance
  */
-boost::shared_ptr<Logger> getLogger(const std::string &name) {
+std::shared_ptr<Logger> getLogger(const std::string &name) {
   PyErr_Warn(PyExc_DeprecationWarning, "Logger.get(\"name\") is deprecated. "
                                        "Simply use Logger(\"name\") instead");
-  return boost::make_shared<Logger>(name);
+  return std::make_shared<Logger>(name);
 }
 
-boost::shared_ptr<Logger> create(const std::string &name) {
-  return boost::make_shared<Logger>(name);
+std::shared_ptr<Logger> create(const std::string &name) {
+  return std::make_shared<Logger>(name);
 }
 } // namespace
 
 void export_Logger() {
-  register_ptr_to_python<boost::shared_ptr<Logger>>();
+  register_ptr_to_python<std::shared_ptr<Logger>>();
 
   class_<Logger, boost::noncopyable>(
       "Logger", init<std::string>((arg("self"), arg("name"))))
@@ -69,6 +70,27 @@ void export_Logger() {
            "Send a message at debug priority:"
            ". Anything that may be useful to understand what the code has been "
            "doing for debugging purposes.")
+      .def("accumulate", (LoggerMsgFunction)&Logger::accumulate,
+           (arg("self"), arg("message")),
+           "accumulate a message to report later")
+      .def("flush", (LoggerFlushFunction)&Logger::flush, (arg("self")),
+           "Flush the accumulated message to the current channel.")
+      .def("flushDebug", (LoggerFlushFunction)&Logger::flushDebug,
+           (arg("self")), "Flush the accumulated message to the debug channel.")
+      .def("flushInformation", (LoggerFlushFunction)&Logger::flushInformation,
+           (arg("self")), "Flush the accumulated message to the debug channel.")
+      .def("flushNotice", (LoggerFlushFunction)&Logger::flushNotice,
+           (arg("self")),
+           "Flush the accumulated message to the notice channel.")
+      .def("flushWarning", (LoggerFlushFunction)&Logger::flushWarning,
+           (arg("self")),
+           "Flush the accumulated message to the warning channel.")
+      .def("flushError", (LoggerFlushFunction)&Logger::flushError,
+           (arg("self")), "Flush the accumulated message to the error channel.")
+      .def("flushFatal", (LoggerFlushFunction)&Logger::flushFatal,
+           (arg("self")), "Flush the accumulated message to the fatal channel.")
+      .def("purge", (LoggerFlushFunction)&Logger::purge, (arg("self")),
+           "Clear the accumulated messages without logging.")
       // -- deprecated  --
       .def("get", &getLogger,
            "Creates the named logger. "

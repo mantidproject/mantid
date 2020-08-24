@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/LoadHKL.h"
 #include "MantidAPI/FileProperty.h"
@@ -64,8 +64,8 @@ void LoadHKL::exec() {
   detector->setPos(0.0, 0.0, 0.0);
   inst->add(detector); // This takes care of deletion
   inst->markAsDetector(detector);
-  Mantid::Geometry::ObjComponent *sample =
-      new Mantid::Geometry::ObjComponent("Sample");
+  Mantid::Geometry::Component *sample =
+      new Mantid::Geometry::Component("Sample");
   inst->add(sample); // This takes care of deletion
   inst->markAsSamplePos(sample);
   Mantid::Geometry::ObjComponent *source =
@@ -177,12 +177,11 @@ void LoadHKL::exec() {
   mrun.addProperty<double>("Radius", radius, true);
   NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
   auto shape =
-      boost::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(
+      std::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(
           Material("SetInLoadHKL", neutron, 1.0)));
   ws->mutableSample().setShape(shape);
 
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<PeaksWorkspace>(ws));
 }
 
 } // namespace Crystal

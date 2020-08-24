@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -175,7 +175,7 @@ void AlignAndFocusPowder::init() {
                   "Width of events (in "
                   "microseconds) near the prompt "
                   "pulse to remove. 0 disables");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(std::make_unique<PropertyWithValue<double>>(
                       PropertyNames::COMPRESS_TOF_TOL, 1e-5, mustBePositive,
@@ -191,7 +191,7 @@ void AlignAndFocusPowder::init() {
       "means compressing all wall-clock times together disabling pulsetime "
       "resolution.");
 
-  auto dateValidator = boost::make_shared<DateTimeValidator>();
+  auto dateValidator = std::make_shared<DateTimeValidator>();
   dateValidator->allowEmpty(true);
   declareProperty(
       PropertyNames::COMPRESS_WALL_START, "", dateValidator,
@@ -258,7 +258,7 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
   }
 
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
-  m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
+  m_inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   if (m_inputEW && m_inputEW->getNumberEvents() <= 0)
     result[PropertyNames::INPUT_WKSP] = "Cannot process empty event workspace";
 
@@ -328,7 +328,7 @@ AlignAndFocusPowder::getVecPropertyFromPmOrSelf(const std::string &name,
 void AlignAndFocusPowder::exec() {
   // retrieve the properties
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
-  m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
+  m_inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   m_instName = m_inputW->getInstrument()->getName();
   try {
     m_instName =
@@ -440,10 +440,10 @@ void AlignAndFocusPowder::exec() {
     if (m_outputW != m_inputW) {
       // out-of-place: clone the input EventWorkspace
       m_outputEW = m_inputEW->clone();
-      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+      m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
     } else {
       // in-place
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+      m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     }
   } else {
     // workspace2D
@@ -458,12 +458,12 @@ void AlignAndFocusPowder::exec() {
           "Input workspace is not EventWorkspace.  It is not supported now.");
     } else {
       // Make a brand new EventWorkspace
-      m_lowResEW = boost::dynamic_pointer_cast<EventWorkspace>(
+      m_lowResEW = std::dynamic_pointer_cast<EventWorkspace>(
           WorkspaceFactory::Instance().create(
               "EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
 
       // Cast to the matrixOutputWS and save it
-      m_lowResW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_lowResEW);
+      m_lowResW = std::dynamic_pointer_cast<MatrixWorkspace>(m_lowResEW);
       // m_lowResW->setName(lowreswsname);
     }
   }
@@ -491,7 +491,7 @@ void AlignAndFocusPowder::exec() {
       }
       compressAlg->executeAsChildAlg();
       m_outputEW = compressAlg->getProperty("OutputWorkspace");
-      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+      m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
     } else {
       g_log.information() << "Not compressing event list\n";
       doSortEvents(m_outputW); // still sort to help some thing out
@@ -516,7 +516,7 @@ void AlignAndFocusPowder::exec() {
       cropAlg->setProperty("Xmax", xmax);
     cropAlg->executeAsChildAlg();
     m_outputW = cropAlg->getProperty("OutputWorkspace");
-    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -524,7 +524,7 @@ void AlignAndFocusPowder::exec() {
   double removePromptPulseWidth =
       getProperty(PropertyNames::REMOVE_PROMPT_PULSE);
   if (removePromptPulseWidth > 0.) {
-    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (m_outputEW->getNumberEvents() > 0) {
       g_log.information() << "running RemovePromptPulse(Width="
                           << removePromptPulseWidth << ") started at "
@@ -536,7 +536,7 @@ void AlignAndFocusPowder::exec() {
       filterPAlg->setProperty("Width", removePromptPulseWidth);
       filterPAlg->executeAsChildAlg();
       m_outputW = filterPAlg->getProperty("OutputWorkspace");
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+      m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     } else {
       g_log.information("skipping RemovePromptPulse on empty EventWorkspace");
     }
@@ -552,7 +552,7 @@ void AlignAndFocusPowder::exec() {
     alg->setProperty("MaskingInformation", maskBinTableWS);
     alg->executeAsChildAlg();
     m_outputW = alg->getProperty("OutputWorkspace");
-    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -567,14 +567,8 @@ void AlignAndFocusPowder::exec() {
         "DetectorIDs",
         std::vector<detid_t>(maskedDetectors.begin(), maskedDetectors.end()));
     maskAlg->executeAsChildAlg();
-    MatrixWorkspace_sptr tmpW = maskAlg->getProperty("OutputWorkspace");
-
-    API::IAlgorithm_sptr clearAlg = createChildAlgorithm("ClearMaskedSpectra");
-    clearAlg->setProperty("InputWorkspace", tmpW);
-    clearAlg->setProperty("OutputWorkspace", tmpW);
-    clearAlg->executeAsChildAlg();
-    m_outputW = clearAlg->getProperty("OutputWorkspace");
-    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    m_outputW = maskAlg->getProperty("OutputWorkspace");
+    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -608,7 +602,7 @@ void AlignAndFocusPowder::exec() {
     alg->setPropertyValue("Type", "PowderTOF");
     alg->executeAsChildAlg();
     m_outputW = alg->getProperty("OutputWorkspace");
-    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
 
   if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
@@ -639,7 +633,7 @@ void AlignAndFocusPowder::exec() {
     m_processLowResTOF = false;
 
     EventWorkspace_sptr ews =
-        boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+        std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
       g_log.information() << "Number of events = " << ews->getNumberEvents()
                           << ". ";
@@ -668,7 +662,7 @@ void AlignAndFocusPowder::exec() {
                         << ",K=3.22) started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
     EventWorkspace_sptr ews =
-        boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+        std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
       g_log.information() << "Number of events = " << ews->getNumberEvents()
                           << ". ";
@@ -692,12 +686,12 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   EventWorkspace_sptr ews =
-      boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+      std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   if (ews) {
     size_t numhighevents = ews->getNumberEvents();
     if (m_processLowResTOF) {
       EventWorkspace_sptr lowes =
-          boost::dynamic_pointer_cast<EventWorkspace>(m_lowResW);
+          std::dynamic_pointer_cast<EventWorkspace>(m_lowResW);
       size_t numlowevents = lowes->getNumberEvents();
       g_log.information() << "Number of high TOF events = " << numhighevents
                           << "; "
@@ -792,7 +786,7 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // compress again if appropriate
-  m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   if ((m_outputEW) && (compressEventsTolerance > 0.)) {
     g_log.information() << "running CompressEvents(Tolerance="
                         << compressEventsTolerance;
@@ -811,7 +805,7 @@ void AlignAndFocusPowder::exec() {
     }
     compressAlg->executeAsChildAlg();
     m_outputEW = compressAlg->getProperty("OutputWorkspace");
-    m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
   }
   m_progress->report();
 
@@ -823,9 +817,9 @@ void AlignAndFocusPowder::exec() {
 /** Call edit instrument geometry
  */
 API::MatrixWorkspace_sptr AlignAndFocusPowder::editInstrument(
-    API::MatrixWorkspace_sptr ws, std::vector<double> polars,
-    std::vector<specnum_t> specids, std::vector<double> l2s,
-    std::vector<double> phis) {
+    API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
+    const std::vector<specnum_t> &specids, const std::vector<double> &l2s,
+    const std::vector<double> &phis) {
   g_log.information() << "running EditInstrumentGeometry started at "
                       << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
@@ -884,7 +878,7 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
  */
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
-                                  std::string target) {
+                                  const std::string &target) {
   g_log.information() << "running ConvertUnits(Target=" << target
                       << ") started at "
                       << Types::Core::DateAndTime::getCurrentTime() << "\n";
@@ -955,8 +949,8 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
 /** Add workspace2 to workspace1 by adding spectrum.
  */
 MatrixWorkspace_sptr
-AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
-                                       API::MatrixWorkspace_sptr ws2,
+AlignAndFocusPowder::conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
+                                       const API::MatrixWorkspace_sptr &ws2,
                                        size_t offset) {
   // Get information from ws1: maximum spectrum number, and store original
   // spectrum Nos
@@ -1129,8 +1123,8 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
  *
  * @param ws :: any Workspace. Does nothing if not EventWorkspace.
  */
-void AlignAndFocusPowder::doSortEvents(Mantid::API::Workspace_sptr ws) {
-  EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
   if (!eventWS)
     return;
   Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");

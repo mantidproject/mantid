@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,12 +41,12 @@ public:
     // centre must be 2 or 3 values (x,y) or (x,y,z)
     std::vector<double> justOne(1);
     justOne[0] = -0.35;
-    // TS_ASSERT_THROWS(alg.setProperty("Centre",justOne),
-    // const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("Centre", justOne),
+                     const std::invalid_argument &);
 
     std::vector<double> fourInputs(4, -0.45);
-    // TS_ASSERT_THROWS(alg.setProperty("Centre", fourInputs),
-    // const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("Centre", fourInputs),
+                     const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));

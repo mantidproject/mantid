@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     const std::vector<Property *> props = alg2.getProperties();
-    TS_ASSERT_EQUALS(props.size(), 12);
+    TS_ASSERT_EQUALS(props.size(), 13);
 
     TS_ASSERT_EQUALS(props[0]->name(), "InputWorkspace");
     TS_ASSERT(dynamic_cast<WorkspaceProperty<MatrixWorkspace> *>(props[0]));
@@ -48,6 +48,7 @@ public:
     TS_ASSERT_EQUALS(props[9]->name(), "SmallNumberThreshold");
     TS_ASSERT_EQUALS(props[10]->name(), "SmallNumberValue");
     TS_ASSERT_EQUALS(props[11]->name(), "SmallNumberError");
+    TS_ASSERT_EQUALS(props[12]->name(), "CheckErrorAxis");
 
     for (const auto prop : props) {
       assert_property_is_default(prop);
@@ -67,6 +68,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("NaNError", "-50.0"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InfinityValue", "999.0"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InfinityError", "0.00005"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -94,6 +96,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "WSCor"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("NaNValue", "-99.0"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("NaNError", "-50.0"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -121,6 +124,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "WSCor"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InfinityValue", "999.0"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InfinityError", "0.00005"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -154,6 +158,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("BigNumberValue", "999"));
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("BigNumberError", "0.00005"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -200,6 +205,7 @@ public:
         alg3.setPropertyValue("SmallNumberValue", "0.123"));
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("SmallNumberError", "0.456"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
@@ -215,7 +221,8 @@ public:
 
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       for (int j = 0; j < 4; ++j) {
-        if ((i == 0 && j == 1) || !std::isnormal(inputWS->y(i)[j])) {
+        if ((i == 0 && j == 1) || (!std::isnormal(inputWS->y(i)[j]) ||
+                                   !std::isnormal(inputWS->e(i)[j]))) {
           // Skip our changed one or any we can't compare
           continue;
         } else {
@@ -247,30 +254,40 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
-  void checkValues(MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr result,
-                   bool naNCheck, bool infCheck) {
+  void checkValues(const MatrixWorkspace_sptr &inputWS,
+                   const MatrixWorkspace_sptr &result, bool naNCheck,
+                   bool infCheck) {
 
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       for (int j = 1; j < 5; ++j) {
         TS_ASSERT_EQUALS(result->x(i)[j - 1], inputWS->x(i)[j - 1]);
 
-        if (infCheck && std::isinf(inputWS->y(i)[j - 1])) {
-          if (std::isinf(result->y(i)[j - 1])) {
+        if (infCheck && (std::isinf(inputWS->y(i)[j - 1]) ||
+                         std::isinf(inputWS->e(i)[j - 1]))) {
+          if (std::isinf(result->y(i)[j - 1]) ||
+              std::isinf(result->e(i)[j - 1])) {
             TS_FAIL("Infinity detected that should have been replaced");
           } else {
             TS_ASSERT_DELTA(result->y(i)[j - 1], 999.0, 1e-8);
             TS_ASSERT_DELTA(result->e(i)[j - 1], 0.00005, 1e-8);
           }
-        } else if (naNCheck && std::isnan(inputWS->y(i)[j - 1])) {
+        } else if (naNCheck && (std::isnan(inputWS->y(i)[j - 1]) ||
+                                std::isnan(inputWS->e(i)[j - 1]))) {
           TS_ASSERT_DELTA(result->y(i)[j - 1], -99.0, 1e-8);
           TS_ASSERT_DELTA(result->e(i)[j - 1], -50.0, 1e-8);
         } else {
-          if (!naNCheck && std::isnan(inputWS->y(i)[j - 1])) {
-            TS_ASSERT_DIFFERS(result->y(i)[j - 1], result->y(i)[j - 1]);
-          } else {
-            TS_ASSERT_EQUALS(result->y(i)[j - 1], inputWS->y(i)[j - 1]);
+          if (!naNCheck) {
+            if (std::isnan(inputWS->y(i)[j - 1])) {
+              TS_ASSERT_DIFFERS(result->y(i)[j - 1], result->y(i)[j - 1]);
+            } else {
+              TS_ASSERT_EQUALS(result->y(i)[j - 1], inputWS->y(i)[j - 1]);
+              if (std::isnan(inputWS->e(i)[j - 1])) {
+                TS_ASSERT_DIFFERS(result->e(i)[j - 1], result->e(i)[j - 1]);
+              } else {
+                TS_ASSERT_EQUALS(result->e(i)[j - 1], inputWS->e(i)[j - 1]);
+              }
+            }
           }
-          TS_ASSERT_EQUALS(result->e(i)[j - 1], inputWS->e(i)[j - 1]);
         }
       }
     }
@@ -278,14 +295,22 @@ public:
 
   MatrixWorkspace_sptr createWorkspace() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(8, 4, 0.5);
     // put some infinities and NaNs in there
     double inf = std::numeric_limits<double>::infinity();
     inputWS->dataY(0)[2] = inf;
     inputWS->dataY(1)[0] = -inf;
+    inputWS->dataY(2)[0] = 999;
+    inputWS->dataE(2)[0] = inf;
+    inputWS->dataY(3)[1] = 999;
+    inputWS->dataE(3)[1] = -inf;
     double nan = std::numeric_limits<double>::quiet_NaN();
-    inputWS->dataY(2)[3] = nan;
-    inputWS->dataY(3)[1] = nan;
+    inputWS->dataY(4)[3] = nan;
+    inputWS->dataY(5)[1] = nan;
+    inputWS->dataY(6)[3] = 999;
+    inputWS->dataE(6)[3] = nan;
+    inputWS->dataY(7)[1] = 999;
+    inputWS->dataE(7)[1] = nan;
 
     return inputWS;
   }
@@ -302,6 +327,7 @@ public:
         std::numeric_limits<float>::infinity();
     evlist.getWeightedEvents().at(2).m_weight =
         std::numeric_limits<float>::quiet_NaN();
+    evlist.getWeightedEvents().at(3).m_weight = static_cast<float>(10);
 
     Mantid::Algorithms::ReplaceSpecialValues alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -314,15 +340,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NaNError", "8"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InfinityValue", "9"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InfinityError", "10"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberThreshold", "0.1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberThreshold", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberValue", "-11"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberError", "-12"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CheckErrorAxis", true));
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        evout = boost::dynamic_pointer_cast<EventWorkspace>(
+        evout = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("test_ev_rep_out")));
 
     TS_ASSERT(evout); // should be an event workspace

@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -29,6 +30,7 @@ using Mantid::API::FunctionFactoryImpl;
 using Mantid::API::IBackgroundFunction;
 using Mantid::API::IFunction;
 using Mantid::API::IPeakFunction;
+using Mantid::API::MultiDomainFunction;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 using Mantid::PythonInterface::UninstallTrace;
 
@@ -47,7 +49,7 @@ namespace PythonInterface {
 /// and it needs to be a subclass of IFunction and not a
 /// FunctionWrapper.
 template <>
-boost::shared_ptr<IFunction>
+std::shared_ptr<IFunction>
 PythonObjectInstantiator<IFunction>::createInstance() const {
   using namespace boost::python;
   GlobalInterpreterLock gil;
@@ -64,9 +66,9 @@ PythonObjectInstantiator<IFunction>::createInstance() const {
   if (isClassFactoryAware) {
     m_classObject.attr("_factory_free")();
   }
-  auto instancePtr = extract<boost::shared_ptr<IFunction>>(instance)();
+  auto instancePtr = extract<std::shared_ptr<IFunction>>(instance)();
   auto *deleter =
-      boost::get_deleter<converter::shared_ptr_deleter, IFunction>(instancePtr);
+      std::get_deleter<converter::shared_ptr_deleter, IFunction>(instancePtr);
   instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
   return instancePtr;
 }
@@ -156,7 +158,7 @@ Mantid::API::CompositeFunction_sptr
 createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
   auto fun = self.createFunction(name);
   auto composite =
-      boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+      std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (composite) {
     return composite;
   }
@@ -223,6 +225,10 @@ void export_FunctionFactory() {
            "Return a pointer to the requested function")
       .def("createInitialized", &FunctionFactoryImpl::createInitialized,
            (arg("self"), arg("init_expr")),
+           "Return a pointer to the requested function")
+      .def("createInitializedMultiDomainFunction",
+           &FunctionFactoryImpl::createInitializedMultiDomainFunction,
+           (arg("self"), arg("init_expr"), arg("domain_number")),
            "Return a pointer to the requested function")
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from IFunction into the factory")

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,7 +36,7 @@ data.
 @author Roman Tolchenov, Tessella plc
 @date 22/03/2012
 */
-class DLLExport IDomainCreator {
+class MANTID_API_DLL IDomainCreator {
 public:
   /// Type of domain to create.
   enum DomainType { Simple = 0, Sequential, Parallel };
@@ -76,8 +76,8 @@ public:
   /// @param i0 :: Starting index in values for the fitting data.
   /// Implementations must make sure values has enough room
   ///   for the data from index i0 to the end of the container.
-  virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                            boost::shared_ptr<API::FunctionValues> &values,
+  virtual void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                            std::shared_ptr<API::FunctionValues> &values,
                             size_t i0 = 0) = 0;
 
   /// Create an output workspace filled with data simulated with the fitting
@@ -91,10 +91,10 @@ public:
   ///                                       If empty do not create the property,
   ///                                       just return a pointer
   /// @return A shared pointer to the created workspace.
-  virtual boost::shared_ptr<API::Workspace> createOutputWorkspace(
+  virtual std::shared_ptr<API::Workspace> createOutputWorkspace(
       const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::FunctionValues> values,
+      std::shared_ptr<API::FunctionDomain> domain,
+      std::shared_ptr<API::FunctionValues> values,
       const std::string &outputWorkspacePropertyName = "OutputWorkspace") {
     UNUSED_ARG(baseName);
     UNUSED_ARG(function);
@@ -131,7 +131,7 @@ protected:
 };
 
 /// Typedef for a shared pointer to IDomainCreator.
-using IDomainCreator_sptr = boost::shared_ptr<IDomainCreator>;
+using IDomainCreator_sptr = std::shared_ptr<IDomainCreator>;
 
 } // namespace API
 } // namespace Mantid

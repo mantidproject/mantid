@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_SPLINESMOOTHING_H_
-#define MANTID_CURVEFITTING_SPLINESMOOTHING_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -24,7 +23,7 @@ namespace Algorithms {
   @author Samuel Jackson, STFC
   @date 24/07/2013
 */
-class DLLExport SplineSmoothing : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL SplineSmoothing : public API::Algorithm {
 public:
   SplineSmoothing();
 
@@ -88,7 +87,8 @@ private:
                               const double *ysmooth) const;
 
   /// Use an existing fit function to tidy smoothing
-  void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
+  void performAdditionalFitting(const API::MatrixWorkspace_sptr &ws,
+                                const int row);
 
   /// Converts histogram data to point data later processing
   /// convert a binned workspace to point data. Uses mean of the bins as point
@@ -96,7 +96,7 @@ private:
   convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
   /// CubicSpline member used to perform smoothing
-  boost::shared_ptr<Functions::BSpline> m_cspline;
+  std::shared_ptr<Functions::BSpline> m_cspline;
   /// pointer to the input workspace
   API::MatrixWorkspace_sptr m_inputWorkspace;
   /// pointer to the input workspace converted to point data
@@ -110,5 +110,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_SPLINESMOOTHING_H_ */

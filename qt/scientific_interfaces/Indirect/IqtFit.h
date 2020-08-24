@@ -1,20 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
+#pragma once
 
 #include "IndirectFitAnalysisTab.h"
 #include "IqtFitModel.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "ui_IqtFit.h"
+#include "ui_IndirectFitTab.h"
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -50,14 +49,11 @@ private:
   std::string fitTypeString() const;
   void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
-  void setStartAndEndHidden(bool hidden);
 
   IqtFitModel *m_iqtFittingModel;
-  std::unique_ptr<Ui::IqtFit> m_uiForm;
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   QString m_tiedParameter;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTKPEAKMARKERFACTORY_TEST_H_
-#define VTKPEAKMARKERFACTORY_TEST_H_
+#pragma once
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -71,7 +70,7 @@ class vtkPeakMarkerFactoryTest : public CxxTest::TestSuite {
 public:
   void do_test(MockPeak &peak1, vtkPeakMarkerFactory::ePeakDimensions dims) {
     FakeProgressAction updateProgress;
-    auto pw_ptr = boost::make_shared<MockPeaksWorkspace>();
+    auto pw_ptr = std::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace &pw = *pw_ptr;
 
     // Peaks workspace will return 5 identical peaks
@@ -104,8 +103,8 @@ public:
     EXPECT_CALL(mockProgress, eventRaised(AllOf(Le(100), Ge(0))))
         .Times(AtLeast(1));
 
-    boost::shared_ptr<MockPeaksWorkspace> pw_ptr =
-        boost::make_shared<MockPeaksWorkspace>();
+    std::shared_ptr<MockPeaksWorkspace> pw_ptr =
+        std::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace &pw = *pw_ptr;
 
     // Peaks workspace will return 5 identical peaks
@@ -239,7 +238,7 @@ public:
 
   void testShapeOfSphere() {
     FakeProgressAction updateProgress;
-    auto pw_ptr = boost::make_shared<MockPeaksWorkspace>();
+    auto pw_ptr = std::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace &pw = *pw_ptr;
 
     double actualRadius = 2.0;
@@ -272,7 +271,7 @@ public:
 
   void testShapeOfEllipsoid() {
     FakeProgressAction updateProgress;
-    auto pw_ptr = boost::make_shared<MockPeaksWorkspace>();
+    auto pw_ptr = std::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace &pw = *pw_ptr;
 
     // rotate in 60 degree increments in the x-y plane.
@@ -324,5 +323,3 @@ public:
     }
   }
 };
-
-#endif

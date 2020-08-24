@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -15,6 +15,8 @@
 #include "MantidMuon/CalculateMuonAsymmetry.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -90,7 +92,7 @@ ITableWorkspace_sptr genTable() {
   return table;
 }
 
-IAlgorithm_sptr setUpFuncAlg(std::vector<std::string> wsNames,
+IAlgorithm_sptr setUpFuncAlg(const std::vector<std::string> &wsNames,
                              const IFunction_sptr &func) {
   IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create(
       "ConvertFitFunctionForMuonTFAsymmetry");
@@ -103,31 +105,32 @@ IAlgorithm_sptr setUpFuncAlg(std::vector<std::string> wsNames,
   return asymmAlg;
 }
 
-IFunction_sptr genSingleFunc(std::vector<std::string> wsNames) {
+IFunction_sptr genSingleFunc(const std::vector<std::string> &wsNames) {
   IFunction_sptr func = FunctionFactory::Instance().createInitialized(
       "name=GausOsc,Frequency=3.0");
-  IAlgorithm_sptr alg = setUpFuncAlg(wsNames, func);
+  IAlgorithm_sptr alg = setUpFuncAlg(std::move(wsNames), func);
   alg->execute();
   IFunction_sptr funcOut = alg->getProperty("OutputFunction");
   return funcOut;
 }
 
-IFunction_sptr genDoubleFunc(std::vector<std::string> wsNames) {
+IFunction_sptr genDoubleFunc(const std::vector<std::string> &wsNames) {
   std::string multiFuncString = "composite=MultiDomainFunction,NumDeriv=1;";
   multiFuncString += "name=GausOsc,$domains=i,Frequency=3.0;";
   multiFuncString += "name=GausOsc,$domains=i,Frequency=3.0;";
   IFunction_sptr func =
       FunctionFactory::Instance().createInitialized(multiFuncString);
-  IAlgorithm_sptr alg = setUpFuncAlg(wsNames, func);
+  IAlgorithm_sptr alg = setUpFuncAlg(std::move(wsNames), func);
   alg->execute();
   IFunction_sptr funcOut = alg->getProperty("OutputFunction");
   std::cout << funcOut << std::endl;
   return funcOut;
 }
 
-IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table, IFunction_sptr func,
-                         std::vector<std::string> wsNamesNorm,
-                         std::vector<std::string> wsOut) {
+IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table,
+                         const IFunction_sptr &func,
+                         const std::vector<std::string> &wsNamesNorm,
+                         const std::vector<std::string> &wsOut) {
   IAlgorithm_sptr asymmAlg =
       AlgorithmManager::Instance().create("CalculateMuonAsymmetry");
   asymmAlg->initialize();
@@ -155,12 +158,6 @@ public:
 
   CalculateMuonAsymmetryTest() { FrameworkManager::Instance(); }
 
-  void testInit() {
-    // IAlgorithm_sptr alg = setUpAlg();
-
-    // TS_ASSERT(alg->isInitialized());
-  }
-
   void test_Execute() {
 
     genData();
@@ -173,8 +170,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     clearADS();
-    // MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
+
   void test_singleFit() {
 
     genData();
@@ -317,12 +314,57 @@ public:
 
     clearADS();
   }
+
+  void test_simultaneous_fit_with_double_pulse_mode_enabled() {
+    genData();
+    // need the 2 here to get multi func
+    std::vector<std::string> wsNames = {"ws1", "ws2"};
+    std::vector<std::string> wsOut = {"ws3", "ws4"};
+    auto func = genDoubleFunc(wsNames);
+    auto table = genTable();
+
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    alg->setProperty("EnableDoublePulse", true);
+    alg->setProperty("PulseOffset", 0.33);
+    alg->setProperty("FirstPulseWeight", 0.5);
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    std::vector<std::string> output =
+        alg->getProperty("ReNormalizedWorkspaceList");
+
+    for (int j = 0; j < 2; j++) {
+      MatrixWorkspace_sptr outWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              output[j]);
+
+      double delta = 0.0001;
+
+      TS_ASSERT_DELTA(table->Double(j + 2, 0), 3.4, delta);
+      TS_ASSERT_EQUALS(table->String(j + 2, 1), output[j]);
+      TS_ASSERT_EQUALS(table->String(j + 2, 2), "Calculated");
+
+      TS_ASSERT_DELTA(outWS->x(0)[10], 0.5, delta);
+      TS_ASSERT_DELTA(outWS->x(0)[40], 2.0, delta);
+      TS_ASSERT_DELTA(outWS->x(0)[100], 5.0, delta);
+
+      TS_ASSERT_DELTA(outWS->y(0)[10], 0.1031, delta);
+      TS_ASSERT_DELTA(outWS->y(0)[40], -0.1250, delta);
+      TS_ASSERT_DELTA(outWS->y(0)[100], -0.0065, delta);
+
+      TS_ASSERT_DELTA(outWS->e(0)[10], 0.0015, delta);
+      TS_ASSERT_DELTA(outWS->e(0)[40], 0.0015, delta);
+      TS_ASSERT_DELTA(outWS->e(0)[100], 0.0015, delta);
+    }
+    clearADS();
+  }
 };
 
 class CalculateMuonAsymmetryTestPerformance : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
+  // This pair of boilerplate methods prevent the suite being created
+  // statically This means the constructor isn't called when running other
+  // tests
   static CalculateMuonAsymmetryTestPerformance *createSuite() {
     return new CalculateMuonAsymmetryTestPerformance();
   }

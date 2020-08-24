@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDiffractionReduction.h"
 
@@ -112,7 +112,7 @@ void IndirectDiffractionReduction::initLayout() {
  * Make file finding status display on the run button and enable/disable it
  */
 void IndirectDiffractionReduction::connectRunButtonValidation(
-    const MantidQt::API::MWRunFiles *file_field) {
+    const MantidQt::API::FileFinderWidget *file_field) {
   connect(file_field, SIGNAL(fileTextChanged(const QString &)), this,
           SLOT(runFilesChanged()));
   connect(file_field, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
@@ -354,8 +354,8 @@ IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(
  * @param instName Name of the instrument
  * @param mode Mode instrument is operating in (diffspec/diffonly)
  */
-void IndirectDiffractionReduction::runGenericReduction(QString instName,
-                                                       QString mode) {
+void IndirectDiffractionReduction::runGenericReduction(const QString &instName,
+                                                       const QString &mode) {
 
   QString rebinStart = "";
   QString rebinWidth = "";
@@ -447,8 +447,8 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
  * OSIRISDiffractionReduction algorithm.
  */
 void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
-  // Get the files names from MWRunFiles widget, and convert them from Qt forms
-  // into stl equivalents.
+  // Get the files names from FileFinderWidget widget, and convert them from Qt
+  // forms into stl equivalents.
   QStringList fileNames = m_uiForm.rfSampleFiles->getFilenames();
   std::vector<std::string> stlFileNames;
   stlFileNames.reserve(fileNames.size());

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtSaveView.h"
 #include "MantidKernel/UsageService.h"
@@ -35,7 +35,6 @@ Initialize the Interface
 */
 void QtSaveView::initLayout() {
   m_ui.setupUi(this);
-
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
           SLOT(populateListOfWorkspaces()));
   connect(m_ui.saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
@@ -49,6 +48,40 @@ void QtSaveView::initLayout() {
           SLOT(onSavePathChanged()));
   connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this,
           SLOT(browseToSaveDirectory()));
+}
+
+void QtSaveView::connectSettingsChange(QLineEdit &edit) {
+  connect(&edit, SIGNAL(textChanged(QString const &)), this,
+          SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QComboBox &edit) {
+  connect(&edit, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QCheckBox &edit) {
+  connect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QRadioButton &edit) {
+  connect(&edit, SIGNAL(clicked()), this, SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
+
+void QtSaveView::connectSaveSettingsWidgets() {
+  connectSettingsChange(*m_ui.savePathEdit);
+  connectSettingsChange(*m_ui.prefixEdit);
+  connectSettingsChange(*m_ui.filterEdit);
+  connectSettingsChange(*m_ui.regexCheckBox);
+  connectSettingsChange(*m_ui.saveReductionResultsCheckBox);
+  connectSettingsChange(*m_ui.headerCheckBox);
+  connectSettingsChange(*m_ui.qResolutionCheckBox);
+  connectSettingsChange(*m_ui.commaRadioButton);
+  connectSettingsChange(*m_ui.spaceRadioButton);
+  connectSettingsChange(*m_ui.tabRadioButton);
+  connectSettingsChange(*m_ui.fileFormatComboBox);
 }
 
 void QtSaveView::browseToSaveDirectory() {
@@ -89,14 +122,56 @@ void QtSaveView::enableAutosaveControls() {
   m_ui.autosaveGroup->setEnabled(true);
 }
 
-void QtSaveView::enableFileFormatAndLocationControls() {
+void QtSaveView::enableFileFormatControls() {
   m_ui.fileFormatGroup->setEnabled(true);
+}
+
+void QtSaveView::disableFileFormatControls() {
+  m_ui.fileFormatGroup->setEnabled(false);
+}
+
+void QtSaveView::enableLocationControls() {
   m_ui.fileLocationGroup->setEnabled(true);
 }
 
-void QtSaveView::disableFileFormatAndLocationControls() {
-  m_ui.fileFormatGroup->setEnabled(false);
+void QtSaveView::disableLocationControls() {
   m_ui.fileLocationGroup->setEnabled(false);
+}
+
+void QtSaveView::enableLogList() {
+  m_ui.listOfLoggedParameters->setEnabled(true);
+}
+
+void QtSaveView::disableLogList() {
+  m_ui.listOfLoggedParameters->setEnabled(false);
+}
+
+void QtSaveView::enableHeaderCheckBox() {
+  m_ui.headerCheckBox->setEnabled(true);
+}
+
+void QtSaveView::disableHeaderCheckBox() {
+  m_ui.headerCheckBox->setEnabled(false);
+}
+
+void QtSaveView::enableQResolutionCheckBox() {
+  m_ui.qResolutionCheckBox->setEnabled(true);
+}
+
+void QtSaveView::disableQResolutionCheckBox() {
+  m_ui.qResolutionCheckBox->setEnabled(false);
+}
+
+void QtSaveView::enableSeparatorButtonGroup() {
+  m_ui.commaRadioButton->setEnabled(true);
+  m_ui.spaceRadioButton->setEnabled(true);
+  m_ui.tabRadioButton->setEnabled(true);
+}
+
+void QtSaveView::disableSeparatorButtonGroup() {
+  m_ui.commaRadioButton->setEnabled(false);
+  m_ui.spaceRadioButton->setEnabled(false);
+  m_ui.tabRadioButton->setEnabled(false);
 }
 
 /** Returns the save path
@@ -172,11 +247,11 @@ int QtSaveView::getFileFormatIndex() const {
   return m_ui.fileFormatComboBox->currentIndex();
 }
 
-/** Returns the title check value
- * @return :: The title check
+/** Returns the header check value
+ * @return :: The header check
  */
-bool QtSaveView::getTitleCheck() const {
-  return m_ui.titleCheckBox->isChecked();
+bool QtSaveView::getHeaderCheck() const {
+  return m_ui.headerCheckBox->isChecked();
 }
 
 /** Returns the Q resolution check value

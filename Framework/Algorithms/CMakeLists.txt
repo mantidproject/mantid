@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/AbsorptionCorrection.cpp
+    src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
     src/AddNote.cpp
     src/AddPeak.cpp
@@ -28,7 +29,6 @@ set(SRC_FILES
     src/CalculateIqt.cpp
     src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePolynomialBackground.cpp
-    src/CalculateSlits.cpp
     src/CalculateTransmission.cpp
     src/CalculateTransmissionBeamSpreader.cpp
     src/CalculateZscore.cpp
@@ -43,7 +43,6 @@ set(SRC_FILES
     src/ClearCache.cpp
     src/ClearInstrumentParameters.cpp
     src/ClearMaskFlag.cpp
-    src/ClearMaskedSpectra.cpp
     src/CloneWorkspace.cpp
     src/Comment.cpp
     src/CommutativeBinaryOperation.cpp
@@ -88,10 +87,6 @@ set(SRC_FILES
     src/CreatePeaksWorkspace.cpp
     src/CreateSampleWorkspace.cpp
     src/CreateSingleValuedWorkspace.cpp
-    src/CreateTransmissionWorkspace.cpp
-    src/CreateTransmissionWorkspace2.cpp
-    src/CreateTransmissionWorkspaceAuto.cpp
-    src/CreateTransmissionWorkspaceAuto2.cpp
     src/CreateUserDefinedBackground.cpp
     src/CreateWorkspace.cpp
     src/CropToComponent.cpp
@@ -147,7 +142,6 @@ set(SRC_FILES
     src/FindEPP.cpp
     src/FindPeakBackground.cpp
     src/FindPeaks.cpp
-    src/FindReflectometryLines2.cpp
     src/FitPeak.cpp
     src/FitPeaks.cpp
     src/FixGSASInstrumentFile.cpp
@@ -213,7 +207,6 @@ set(SRC_FILES
     src/MostLikelyMean.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
-    src/NRCalculateSlitResolution.cpp
     src/NormaliseByCurrent.cpp
     src/NormaliseByDetector.cpp
     src/NormaliseToMonitor.cpp
@@ -222,6 +215,7 @@ set(SRC_FILES
     src/PDCalibration.cpp
     src/PDDetermineCharacterizations.cpp
     src/PDFFourierTransform.cpp
+    src/PDFFourierTransform2.cpp
     src/PaddingAndApodization.cpp
     src/ParallaxCorrection.cpp
     src/Pause.cpp
@@ -251,15 +245,6 @@ set(SRC_FILES
     src/RebinToWorkspace.cpp
     src/Rebunch.cpp
     src/RecordPythonScript.cpp
-    src/ReflectometryBackgroundSubtraction.cpp
-    src/ReflectometryBeamStatistics.cpp
-    src/ReflectometryMomentumTransfer.cpp
-    src/ReflectometryReductionOne2.cpp
-    src/ReflectometryReductionOneAuto2.cpp
-    src/ReflectometryReductionOneAuto3.cpp
-    src/ReflectometrySumInQ.cpp
-    src/ReflectometryWorkflowBase.cpp
-    src/ReflectometryWorkflowBase2.cpp
     src/Regroup.cpp
     src/RemoveBackground.cpp
     src/RemoveBins.cpp
@@ -280,11 +265,12 @@ set(SRC_FILES
     src/SANSCollimationLengthEstimator.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
+    src/SampleCorrections/MCInteractionStatistics.cpp
     src/SampleCorrections/MCInteractionVolume.cpp
     src/SampleCorrections/MayersSampleCorrection.cpp
     src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
     src/SampleCorrections/RectangularBeamProfile.cpp
-    src/SampleCorrections/SparseInstrument.cpp
+    src/SampleCorrections/SparseWorkspace.cpp
     src/SassenaFFT.cpp
     src/Scale.cpp
     src/ScaleX.cpp
@@ -305,11 +291,6 @@ set(SRC_FILES
     src/SortXAxis.cpp
     src/SpatialGrouping.cpp
     src/SpectrumAlgorithm.cpp
-    src/SpecularReflectionAlgorithm.cpp
-    src/SpecularReflectionCalculateTheta.cpp
-    src/SpecularReflectionCalculateTheta2.cpp
-    src/SpecularReflectionPositionCorrect.cpp
-    src/SpecularReflectionPositionCorrect2.cpp
     src/SphericalAbsorption.cpp
     src/Stitch1D.cpp
     src/Stitch1DMany.cpp
@@ -345,6 +326,7 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
+    inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
     inc/MantidAlgorithms/AddNote.h
     inc/MantidAlgorithms/AddPeak.h
@@ -373,7 +355,6 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateIqt.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
-    inc/MantidAlgorithms/CalculateSlits.h
     inc/MantidAlgorithms/CalculateTransmission.h
     inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
     inc/MantidAlgorithms/CalculateZscore.h
@@ -388,7 +369,6 @@ set(INC_FILES
     inc/MantidAlgorithms/ClearCache.h
     inc/MantidAlgorithms/ClearInstrumentParameters.h
     inc/MantidAlgorithms/ClearMaskFlag.h
-    inc/MantidAlgorithms/ClearMaskedSpectra.h
     inc/MantidAlgorithms/CloneWorkspace.h
     inc/MantidAlgorithms/Comment.h
     inc/MantidAlgorithms/CommutativeBinaryOperation.h
@@ -433,10 +413,6 @@ set(INC_FILES
     inc/MantidAlgorithms/CreatePeaksWorkspace.h
     inc/MantidAlgorithms/CreateSampleWorkspace.h
     inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
-    inc/MantidAlgorithms/CreateTransmissionWorkspace.h
-    inc/MantidAlgorithms/CreateTransmissionWorkspace2.h
-    inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
-    inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto2.h
     inc/MantidAlgorithms/CreateUserDefinedBackground.h
     inc/MantidAlgorithms/CreateWorkspace.h
     inc/MantidAlgorithms/CropToComponent.h
@@ -492,7 +468,6 @@ set(INC_FILES
     inc/MantidAlgorithms/FindEPP.h
     inc/MantidAlgorithms/FindPeakBackground.h
     inc/MantidAlgorithms/FindPeaks.h
-    inc/MantidAlgorithms/FindReflectometryLines2.h
     inc/MantidAlgorithms/FitPeak.h
     inc/MantidAlgorithms/FitPeaks.h
     inc/MantidAlgorithms/FixGSASInstrumentFile.h
@@ -562,7 +537,6 @@ set(INC_FILES
     inc/MantidAlgorithms/MostLikelyMean.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
-    inc/MantidAlgorithms/NRCalculateSlitResolution.h
     inc/MantidAlgorithms/NormaliseByCurrent.h
     inc/MantidAlgorithms/NormaliseByDetector.h
     inc/MantidAlgorithms/NormaliseToMonitor.h
@@ -571,6 +545,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PDCalibration.h
     inc/MantidAlgorithms/PDDetermineCharacterizations.h
     inc/MantidAlgorithms/PDFFourierTransform.h
+    inc/MantidAlgorithms/PDFFourierTransform2.h
     inc/MantidAlgorithms/PaddingAndApodization.h
     inc/MantidAlgorithms/ParallaxCorrection.h
     inc/MantidAlgorithms/Pause.h
@@ -600,15 +575,6 @@ set(INC_FILES
     inc/MantidAlgorithms/RebinToWorkspace.h
     inc/MantidAlgorithms/Rebunch.h
     inc/MantidAlgorithms/RecordPythonScript.h
-    inc/MantidAlgorithms/ReflectometryBackgroundSubtraction.h
-    inc/MantidAlgorithms/ReflectometryBeamStatistics.h
-    inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
-    inc/MantidAlgorithms/ReflectometryReductionOne2.h
-    inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
-    inc/MantidAlgorithms/ReflectometryReductionOneAuto3.h
-    inc/MantidAlgorithms/ReflectometrySumInQ.h
-    inc/MantidAlgorithms/ReflectometryWorkflowBase.h
-    inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
     inc/MantidAlgorithms/Regroup.h
     inc/MantidAlgorithms/RemoveBackground.h
     inc/MantidAlgorithms/RemoveBins.h
@@ -629,12 +595,15 @@ set(INC_FILES
     inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
+    inc/MantidAlgorithms/SampleCorrections/IMCAbsorptionStrategy.h
+    inc/MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h
     inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
+    inc/MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h
     inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
     inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
-    inc/MantidAlgorithms/SampleCorrections/SparseInstrument.h
+    inc/MantidAlgorithms/SampleCorrections/SparseWorkspace.h
     inc/MantidAlgorithms/SassenaFFT.h
     inc/MantidAlgorithms/Scale.h
     inc/MantidAlgorithms/ScaleX.h
@@ -655,11 +624,6 @@ set(INC_FILES
     inc/MantidAlgorithms/SortXAxis.h
     inc/MantidAlgorithms/SpatialGrouping.h
     inc/MantidAlgorithms/SpectrumAlgorithm.h
-    inc/MantidAlgorithms/SpecularReflectionAlgorithm.h
-    inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
-    inc/MantidAlgorithms/SpecularReflectionCalculateTheta2.h
-    inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
-    inc/MantidAlgorithms/SpecularReflectionPositionCorrect2.h
     inc/MantidAlgorithms/SphericalAbsorption.h
     inc/MantidAlgorithms/Stitch1D.h
     inc/MantidAlgorithms/Stitch1DMany.h
@@ -707,6 +671,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set(TEST_FILES
+    AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
     AddNoteTest.h
     AddPeakTest.h
@@ -734,7 +699,6 @@ set(TEST_FILES
     CalculateIqtTest.h
     CalculatePlaczekSelfScatteringTest.h
     CalculatePolynomialBackgroundTest.h
-    CalculateSlitsTest.h
     CalculateTransmissionBeamSpreaderTest.h
     CalculateTransmissionTest.h
     CalculateZscoreTest.h
@@ -750,7 +714,6 @@ set(TEST_FILES
     ClearCacheTest.h
     ClearInstrumentParametersTest.h
     ClearMaskFlagTest.h
-    ClearMaskedSpectraTest.h
     CloneWorkspaceTest.h
     CommentTest.h
     CommutativeBinaryOperationTest.h
@@ -794,10 +757,6 @@ set(TEST_FILES
     CreatePeaksWorkspaceTest.h
     CreateSampleWorkspaceTest.h
     CreateSingleValuedWorkspaceTest.h
-    CreateTransmissionWorkspace2Test.h
-    CreateTransmissionWorkspaceAuto2Test.h
-    CreateTransmissionWorkspaceAutoTest.h
-    CreateTransmissionWorkspaceTest.h
     CreateUserDefinedBackgroundTest.h
     CreateWorkspaceTest.h
     CropToComponentTest.h
@@ -849,7 +808,6 @@ set(TEST_FILES
     FindEPPTest.h
     FindPeakBackgroundTest.h
     FindPeaksTest.h
-    FindReflectometryLines2Test.h
     FitPeakTest.h
     FitPeaksTest.h
     FixGSASInstrumentFileTest.h
@@ -917,7 +875,6 @@ set(TEST_FILES
     MultiplyRangeTest.h
     MultiplyTest.h
     MuonWorkspaceCreationHelperTest.h
-    NRCalculateSlitResolutionTest.h
     NormaliseByCurrentTest.h
     NormaliseByDetectorTest.h
     NormaliseToMonitorTest.h
@@ -925,6 +882,7 @@ set(TEST_FILES
     PDCalibrationTest.h
     PDDetermineCharacterizationsTest.h
     PDFFourierTransformTest.h
+    PDFFourierTransform2Test.h
     PaddingAndApodizationTest.h
     ParallaxCorrectionTest.h
     PauseTest.h
@@ -952,12 +910,6 @@ set(TEST_FILES
     RebinToWorkspaceTest.h
     RebunchTest.h
     RectangularBeamProfileTest.h
-    ReflectometryBeamStatisticsTest.h
-    ReflectometryMomentumTransferTest.h
-    ReflectometryReductionOne2Test.h
-    ReflectometryReductionOneAuto2Test.h
-    ReflectometryReductionOneAuto3Test.h
-    ReflectometrySumInQTest.h
     RegroupTest.h
     RemoveBackgroundTest.h
     RemoveBinsTest.h
@@ -994,12 +946,8 @@ set(TEST_FILES
     SolidAngleTest.h
     SortEventsTest.h
     SortXAxisTest.h
-    SparseInstrumentTest.h
+    SparseWorkspaceTest.h
     SpatialGroupingTest.h
-    SpecularReflectionCalculateTheta2Test.h
-    SpecularReflectionCalculateThetaTest.h
-    SpecularReflectionPositionCorrect2Test.h
-    SpecularReflectionPositionCorrectTest.h
     SphericalAbsorptionTest.h
     Stitch1DManyTest.h
     Stitch1DTest.h
@@ -1032,9 +980,7 @@ set(TEST_FILES
     WorkspaceGroupTest.h)
 
 set(TEST_PY_FILES
-    test/NormaliseToUnityTest.py
-    test/ReflectometryBackgroundSubtractionTest.py
-    test/ReflectometryReductionOne2Test.py)
+    test/NormaliseToUnityTest.py)
 
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
 
@@ -1080,6 +1026,11 @@ target_link_libraries(Algorithms
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(Algorithms PUBLIC ${CMAKE_BINARY_DIR}/Framework/Algorithms)
+target_include_directories(Algorithms PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
+generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
 

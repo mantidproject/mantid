@@ -884,7 +884,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
   d_ptr->m_propertyType = 0;
 
   // IntPropertyManager
-  QtIntPropertyManager *intPropertyManager = new QtIntPropertyManager(this);
+  auto *intPropertyManager = new QtIntPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Int] = intPropertyManager;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::Int]
                                          [d_ptr->m_minimumAttribute] =
@@ -903,8 +903,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
   connect(intPropertyManager, SIGNAL(singleStepChanged(QtProperty *, int)),
           this, SLOT(slotSingleStepChanged(QtProperty *, int)));
   // DoublePropertyManager
-  QtDoublePropertyManager *doublePropertyManager =
-      new QtDoublePropertyManager(this);
+  auto *doublePropertyManager = new QtDoublePropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Double] = doublePropertyManager;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::Double]
                                          [d_ptr->m_minimumAttribute] =
@@ -930,14 +929,13 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
   connect(doublePropertyManager, SIGNAL(decimalsChanged(QtProperty *, int)),
           this, SLOT(slotDecimalsChanged(QtProperty *, int)));
   // BoolPropertyManager
-  QtBoolPropertyManager *boolPropertyManager = new QtBoolPropertyManager(this);
+  auto *boolPropertyManager = new QtBoolPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Bool] = boolPropertyManager;
   d_ptr->m_typeToValueType[QVariant::Bool] = QVariant::Bool;
   connect(boolPropertyManager, SIGNAL(valueChanged(QtProperty *, bool)), this,
           SLOT(slotValueChanged(QtProperty *, bool)));
   // StringPropertyManager
-  QtStringPropertyManager *stringPropertyManager =
-      new QtStringPropertyManager(this);
+  auto *stringPropertyManager = new QtStringPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::String] = stringPropertyManager;
   d_ptr->m_typeToValueType[QVariant::String] = QVariant::String;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::String]
@@ -950,7 +948,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(regExpChanged(QtProperty *, const QRegExp &)), this,
           SLOT(slotRegExpChanged(QtProperty *, const QRegExp &)));
   // DatePropertyManager
-  QtDatePropertyManager *datePropertyManager = new QtDatePropertyManager(this);
+  auto *datePropertyManager = new QtDatePropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Date] = datePropertyManager;
   d_ptr->m_typeToValueType[QVariant::Date] = QVariant::Date;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::Date]
@@ -967,23 +965,21 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           this,
           SLOT(slotRangeChanged(QtProperty *, const QDate &, const QDate &)));
   // TimePropertyManager
-  QtTimePropertyManager *timePropertyManager = new QtTimePropertyManager(this);
+  auto *timePropertyManager = new QtTimePropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Time] = timePropertyManager;
   d_ptr->m_typeToValueType[QVariant::Time] = QVariant::Time;
   connect(timePropertyManager,
           SIGNAL(valueChanged(QtProperty *, const QTime &)), this,
           SLOT(slotValueChanged(QtProperty *, const QTime &)));
   // DateTimePropertyManager
-  QtDateTimePropertyManager *dateTimePropertyManager =
-      new QtDateTimePropertyManager(this);
+  auto *dateTimePropertyManager = new QtDateTimePropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::DateTime] = dateTimePropertyManager;
   d_ptr->m_typeToValueType[QVariant::DateTime] = QVariant::DateTime;
   connect(dateTimePropertyManager,
           SIGNAL(valueChanged(QtProperty *, const QDateTime &)), this,
           SLOT(slotValueChanged(QtProperty *, const QDateTime &)));
   // KeySequencePropertyManager
-  QtKeySequencePropertyManager *keySequencePropertyManager =
-      new QtKeySequencePropertyManager(this);
+  auto *keySequencePropertyManager = new QtKeySequencePropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::KeySequence] =
       keySequencePropertyManager;
   d_ptr->m_typeToValueType[QVariant::KeySequence] = QVariant::KeySequence;
@@ -991,15 +987,14 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(valueChanged(QtProperty *, const QKeySequence &)), this,
           SLOT(slotValueChanged(QtProperty *, const QKeySequence &)));
   // CharPropertyManager
-  QtCharPropertyManager *charPropertyManager = new QtCharPropertyManager(this);
+  auto *charPropertyManager = new QtCharPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Char] = charPropertyManager;
   d_ptr->m_typeToValueType[QVariant::Char] = QVariant::Char;
   connect(charPropertyManager,
           SIGNAL(valueChanged(QtProperty *, const QChar &)), this,
           SLOT(slotValueChanged(QtProperty *, const QChar &)));
   // LocalePropertyManager
-  QtLocalePropertyManager *localePropertyManager =
-      new QtLocalePropertyManager(this);
+  auto *localePropertyManager = new QtLocalePropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Locale] = localePropertyManager;
   d_ptr->m_typeToValueType[QVariant::Locale] = QVariant::Locale;
   connect(localePropertyManager,
@@ -1016,8 +1011,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // PointPropertyManager
-  QtPointPropertyManager *pointPropertyManager =
-      new QtPointPropertyManager(this);
+  auto *pointPropertyManager = new QtPointPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Point] = pointPropertyManager;
   d_ptr->m_typeToValueType[QVariant::Point] = QVariant::Point;
   connect(pointPropertyManager,
@@ -1034,8 +1028,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // PointFPropertyManager
-  QtPointFPropertyManager *pointFPropertyManager =
-      new QtPointFPropertyManager(this);
+  auto *pointFPropertyManager = new QtPointFPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::PointF] = pointFPropertyManager;
   d_ptr->m_typeToValueType[QVariant::PointF] = QVariant::PointF;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::PointF]
@@ -1057,7 +1050,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // SizePropertyManager
-  QtSizePropertyManager *sizePropertyManager = new QtSizePropertyManager(this);
+  auto *sizePropertyManager = new QtSizePropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Size] = sizePropertyManager;
   d_ptr->m_typeToValueType[QVariant::Size] = QVariant::Size;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::Size]
@@ -1087,8 +1080,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // SizeFPropertyManager
-  QtSizeFPropertyManager *sizeFPropertyManager =
-      new QtSizeFPropertyManager(this);
+  auto *sizeFPropertyManager = new QtSizeFPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::SizeF] = sizeFPropertyManager;
   d_ptr->m_typeToValueType[QVariant::SizeF] = QVariant::SizeF;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::SizeF]
@@ -1123,7 +1115,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // RectPropertyManager
-  QtRectPropertyManager *rectPropertyManager = new QtRectPropertyManager(this);
+  auto *rectPropertyManager = new QtRectPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Rect] = rectPropertyManager;
   d_ptr->m_typeToValueType[QVariant::Rect] = QVariant::Rect;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::Rect]
@@ -1149,8 +1141,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // RectFPropertyManager
-  QtRectFPropertyManager *rectFPropertyManager =
-      new QtRectFPropertyManager(this);
+  auto *rectFPropertyManager = new QtRectFPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::RectF] = rectFPropertyManager;
   d_ptr->m_typeToValueType[QVariant::RectF] = QVariant::RectF;
   d_ptr->m_typeToAttributeToAttributeType[QVariant::RectF]
@@ -1181,8 +1172,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // ColorPropertyManager
-  QtColorPropertyManager *colorPropertyManager =
-      new QtColorPropertyManager(this);
+  auto *colorPropertyManager = new QtColorPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Color] = colorPropertyManager;
   d_ptr->m_typeToValueType[QVariant::Color] = QVariant::Color;
   connect(colorPropertyManager,
@@ -1200,7 +1190,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // EnumPropertyManager
   int enumId = enumTypeId();
-  QtEnumPropertyManager *enumPropertyManager = new QtEnumPropertyManager(this);
+  auto *enumPropertyManager = new QtEnumPropertyManager(this);
   d_ptr->m_typeToPropertyManager[enumId] = enumPropertyManager;
   d_ptr->m_typeToValueType[enumId] = QVariant::Int;
   d_ptr->m_typeToAttributeToAttributeType[enumId][d_ptr->m_enumNamesAttribute] =
@@ -1217,8 +1207,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           this,
           SLOT(slotEnumIconsChanged(QtProperty *, const QMap<int, QIcon> &)));
   // SizePolicyPropertyManager
-  QtSizePolicyPropertyManager *sizePolicyPropertyManager =
-      new QtSizePolicyPropertyManager(this);
+  auto *sizePolicyPropertyManager = new QtSizePolicyPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::SizePolicy] =
       sizePolicyPropertyManager;
   d_ptr->m_typeToValueType[QVariant::SizePolicy] = QVariant::SizePolicy;
@@ -1245,7 +1234,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // FontPropertyManager
-  QtFontPropertyManager *fontPropertyManager = new QtFontPropertyManager(this);
+  auto *fontPropertyManager = new QtFontPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Font] = fontPropertyManager;
   d_ptr->m_typeToValueType[QVariant::Font] = QVariant::Font;
   connect(fontPropertyManager,
@@ -1274,8 +1263,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SIGNAL(propertyRemoved(QtProperty *, QtProperty *)), this,
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // CursorPropertyManager
-  QtCursorPropertyManager *cursorPropertyManager =
-      new QtCursorPropertyManager(this);
+  auto *cursorPropertyManager = new QtCursorPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Cursor] = cursorPropertyManager;
   d_ptr->m_typeToValueType[QVariant::Cursor] = QVariant::Cursor;
   connect(cursorPropertyManager,
@@ -1283,7 +1271,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SLOT(slotValueChanged(QtProperty *, const QCursor &)));
   // FlagPropertyManager
   int flagId = flagTypeId();
-  QtFlagPropertyManager *flagPropertyManager = new QtFlagPropertyManager(this);
+  auto *flagPropertyManager = new QtFlagPropertyManager(this);
   d_ptr->m_typeToPropertyManager[flagId] = flagPropertyManager;
   d_ptr->m_typeToValueType[flagId] = QVariant::Int;
   d_ptr->m_typeToAttributeToAttributeType[flagId][d_ptr->m_flagNamesAttribute] =
@@ -1305,8 +1293,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
           SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
   // FlagPropertyManager
   int groupId = groupTypeId();
-  QtGroupPropertyManager *groupPropertyManager =
-      new QtGroupPropertyManager(this);
+  auto *groupPropertyManager = new QtGroupPropertyManager(this);
   d_ptr->m_typeToPropertyManager[groupId] = groupPropertyManager;
   d_ptr->m_typeToValueType[groupId] = QVariant::Invalid;
 }
@@ -1395,72 +1382,71 @@ QVariant QtVariantPropertyManager::value(const QtProperty *property) const {
     return QVariant();
 
   QtAbstractPropertyManager *manager = internProp->propertyManager();
-  if (QtIntPropertyManager *intManager =
-          qobject_cast<QtIntPropertyManager *>(manager)) {
+  if (auto *intManager = qobject_cast<QtIntPropertyManager *>(manager)) {
     return intManager->value(internProp);
-  } else if (QtDoublePropertyManager *doubleManager =
+  } else if (auto *doubleManager =
                  qobject_cast<QtDoublePropertyManager *>(manager)) {
     return doubleManager->value(internProp);
-  } else if (QtBoolPropertyManager *boolManager =
+  } else if (auto *boolManager =
                  qobject_cast<QtBoolPropertyManager *>(manager)) {
     return boolManager->value(internProp);
-  } else if (QtStringPropertyManager *stringManager =
+  } else if (auto *stringManager =
                  qobject_cast<QtStringPropertyManager *>(manager)) {
     return stringManager->value(internProp);
-  } else if (QtDatePropertyManager *dateManager =
+  } else if (auto *dateManager =
                  qobject_cast<QtDatePropertyManager *>(manager)) {
     return dateManager->value(internProp);
-  } else if (QtTimePropertyManager *timeManager =
+  } else if (auto *timeManager =
                  qobject_cast<QtTimePropertyManager *>(manager)) {
     return timeManager->value(internProp);
-  } else if (QtDateTimePropertyManager *dateTimeManager =
+  } else if (auto *dateTimeManager =
                  qobject_cast<QtDateTimePropertyManager *>(manager)) {
     return dateTimeManager->value(internProp);
-  } else if (QtKeySequencePropertyManager *keySequenceManager =
+  } else if (auto *keySequenceManager =
                  qobject_cast<QtKeySequencePropertyManager *>(manager)) {
     return keySequenceManager->value(internProp);
-  } else if (QtCharPropertyManager *charManager =
+  } else if (auto *charManager =
                  qobject_cast<QtCharPropertyManager *>(manager)) {
     return charManager->value(internProp);
-  } else if (QtLocalePropertyManager *localeManager =
+  } else if (auto *localeManager =
                  qobject_cast<QtLocalePropertyManager *>(manager)) {
     return localeManager->value(internProp);
-  } else if (QtPointPropertyManager *pointManager =
+  } else if (auto *pointManager =
                  qobject_cast<QtPointPropertyManager *>(manager)) {
     return pointManager->value(internProp);
-  } else if (QtPointFPropertyManager *pointFManager =
+  } else if (auto *pointFManager =
                  qobject_cast<QtPointFPropertyManager *>(manager)) {
     return pointFManager->value(internProp);
-  } else if (QtSizePropertyManager *sizeManager =
+  } else if (auto *sizeManager =
                  qobject_cast<QtSizePropertyManager *>(manager)) {
     return sizeManager->value(internProp);
-  } else if (QtSizeFPropertyManager *sizeFManager =
+  } else if (auto *sizeFManager =
                  qobject_cast<QtSizeFPropertyManager *>(manager)) {
     return sizeFManager->value(internProp);
-  } else if (QtRectPropertyManager *rectManager =
+  } else if (auto *rectManager =
                  qobject_cast<QtRectPropertyManager *>(manager)) {
     return rectManager->value(internProp);
-  } else if (QtRectFPropertyManager *rectFManager =
+  } else if (auto *rectFManager =
                  qobject_cast<QtRectFPropertyManager *>(manager)) {
     return rectFManager->value(internProp);
-  } else if (QtColorPropertyManager *colorManager =
+  } else if (auto *colorManager =
                  qobject_cast<QtColorPropertyManager *>(manager)) {
     return colorManager->value(internProp);
-  } else if (QtEnumPropertyManager *enumManager =
+  } else if (auto *enumManager =
                  qobject_cast<QtEnumPropertyManager *>(manager)) {
     return enumManager->value(internProp);
-  } else if (QtSizePolicyPropertyManager *sizePolicyManager =
+  } else if (auto *sizePolicyManager =
                  qobject_cast<QtSizePolicyPropertyManager *>(manager)) {
     return sizePolicyManager->value(internProp);
-  } else if (QtFontPropertyManager *fontManager =
+  } else if (auto *fontManager =
                  qobject_cast<QtFontPropertyManager *>(manager)) {
     return fontManager->value(internProp);
 #ifndef QT_NO_CURSOR
-  } else if (QtCursorPropertyManager *cursorManager =
+  } else if (auto *cursorManager =
                  qobject_cast<QtCursorPropertyManager *>(manager)) {
     return cursorManager->value(internProp);
 #endif
-  } else if (QtFlagPropertyManager *flagManager =
+  } else if (auto *flagManager =
                  qobject_cast<QtFlagPropertyManager *>(manager)) {
     return flagManager->value(internProp);
   }
@@ -1534,8 +1520,7 @@ QtVariantPropertyManager::attributeValue(const QtProperty *property,
     return QVariant();
 
   QtAbstractPropertyManager *manager = internProp->propertyManager();
-  if (QtIntPropertyManager *intManager =
-          qobject_cast<QtIntPropertyManager *>(manager)) {
+  if (auto *intManager = qobject_cast<QtIntPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       return intManager->maximum(internProp);
     if (attribute == d_ptr->m_minimumAttribute)
@@ -1543,7 +1528,7 @@ QtVariantPropertyManager::attributeValue(const QtProperty *property,
     if (attribute == d_ptr->m_singleStepAttribute)
       return intManager->singleStep(internProp);
     return QVariant();
-  } else if (QtDoublePropertyManager *doubleManager =
+  } else if (auto *doubleManager =
                  qobject_cast<QtDoublePropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       return doubleManager->maximum(internProp);
@@ -1554,31 +1539,31 @@ QtVariantPropertyManager::attributeValue(const QtProperty *property,
     if (attribute == d_ptr->m_decimalsAttribute)
       return doubleManager->decimals(internProp);
     return QVariant();
-  } else if (QtStringPropertyManager *stringManager =
+  } else if (auto *stringManager =
                  qobject_cast<QtStringPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_regExpAttribute)
       return stringManager->regExp(internProp);
     return QVariant();
-  } else if (QtDatePropertyManager *dateManager =
+  } else if (auto *dateManager =
                  qobject_cast<QtDatePropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       return dateManager->maximum(internProp);
     if (attribute == d_ptr->m_minimumAttribute)
       return dateManager->minimum(internProp);
     return QVariant();
-  } else if (QtPointFPropertyManager *pointFManager =
+  } else if (auto *pointFManager =
                  qobject_cast<QtPointFPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_decimalsAttribute)
       return pointFManager->decimals(internProp);
     return QVariant();
-  } else if (QtSizePropertyManager *sizeManager =
+  } else if (auto *sizeManager =
                  qobject_cast<QtSizePropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       return sizeManager->maximum(internProp);
     if (attribute == d_ptr->m_minimumAttribute)
       return sizeManager->minimum(internProp);
     return QVariant();
-  } else if (QtSizeFPropertyManager *sizeFManager =
+  } else if (auto *sizeFManager =
                  qobject_cast<QtSizeFPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       return sizeFManager->maximum(internProp);
@@ -1587,19 +1572,19 @@ QtVariantPropertyManager::attributeValue(const QtProperty *property,
     if (attribute == d_ptr->m_decimalsAttribute)
       return sizeFManager->decimals(internProp);
     return QVariant();
-  } else if (QtRectPropertyManager *rectManager =
+  } else if (auto *rectManager =
                  qobject_cast<QtRectPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_constraintAttribute)
       return rectManager->constraint(internProp);
     return QVariant();
-  } else if (QtRectFPropertyManager *rectFManager =
+  } else if (auto *rectFManager =
                  qobject_cast<QtRectFPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_constraintAttribute)
       return rectFManager->constraint(internProp);
     if (attribute == d_ptr->m_decimalsAttribute)
       return rectFManager->decimals(internProp);
     return QVariant();
-  } else if (QtEnumPropertyManager *enumManager =
+  } else if (auto *enumManager =
                  qobject_cast<QtEnumPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_enumNamesAttribute)
       return enumManager->enumNames(internProp);
@@ -1609,7 +1594,7 @@ QtVariantPropertyManager::attributeValue(const QtProperty *property,
       return v;
     }
     return QVariant();
-  } else if (QtFlagPropertyManager *flagManager =
+  } else if (auto *flagManager =
                  qobject_cast<QtFlagPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_flagNamesAttribute)
       return flagManager->flagNames(internProp);
@@ -1685,93 +1670,92 @@ void QtVariantPropertyManager::setValue(QtProperty *property,
     return;
 
   QtAbstractPropertyManager *manager = internProp->propertyManager();
-  if (QtIntPropertyManager *intManager =
-          qobject_cast<QtIntPropertyManager *>(manager)) {
+  if (auto *intManager = qobject_cast<QtIntPropertyManager *>(manager)) {
     intManager->setValue(internProp, val.value<int>());
     return;
-  } else if (QtDoublePropertyManager *doubleManager =
+  } else if (auto *doubleManager =
                  qobject_cast<QtDoublePropertyManager *>(manager)) {
     doubleManager->setValue(internProp, val.value<double>());
     return;
-  } else if (QtBoolPropertyManager *boolManager =
+  } else if (auto *boolManager =
                  qobject_cast<QtBoolPropertyManager *>(manager)) {
     boolManager->setValue(internProp, val.value<bool>());
     return;
-  } else if (QtStringPropertyManager *stringManager =
+  } else if (auto *stringManager =
                  qobject_cast<QtStringPropertyManager *>(manager)) {
     stringManager->setValue(internProp, val.value<QString>());
     return;
-  } else if (QtDatePropertyManager *dateManager =
+  } else if (auto *dateManager =
                  qobject_cast<QtDatePropertyManager *>(manager)) {
     dateManager->setValue(internProp, val.value<QDate>());
     return;
-  } else if (QtTimePropertyManager *timeManager =
+  } else if (auto *timeManager =
                  qobject_cast<QtTimePropertyManager *>(manager)) {
     timeManager->setValue(internProp, val.value<QTime>());
     return;
-  } else if (QtDateTimePropertyManager *dateTimeManager =
+  } else if (auto *dateTimeManager =
                  qobject_cast<QtDateTimePropertyManager *>(manager)) {
     dateTimeManager->setValue(internProp, val.value<QDateTime>());
     return;
-  } else if (QtKeySequencePropertyManager *keySequenceManager =
+  } else if (auto *keySequenceManager =
                  qobject_cast<QtKeySequencePropertyManager *>(manager)) {
     keySequenceManager->setValue(internProp, val.value<QKeySequence>());
     return;
-  } else if (QtCharPropertyManager *charManager =
+  } else if (auto *charManager =
                  qobject_cast<QtCharPropertyManager *>(manager)) {
     charManager->setValue(internProp, val.value<QChar>());
     return;
-  } else if (QtLocalePropertyManager *localeManager =
+  } else if (auto *localeManager =
                  qobject_cast<QtLocalePropertyManager *>(manager)) {
     localeManager->setValue(internProp, val.value<QLocale>());
     return;
-  } else if (QtPointPropertyManager *pointManager =
+  } else if (auto *pointManager =
                  qobject_cast<QtPointPropertyManager *>(manager)) {
     pointManager->setValue(internProp, val.value<QPoint>());
     return;
-  } else if (QtPointFPropertyManager *pointFManager =
+  } else if (auto *pointFManager =
                  qobject_cast<QtPointFPropertyManager *>(manager)) {
     pointFManager->setValue(internProp, val.value<QPointF>());
     return;
-  } else if (QtSizePropertyManager *sizeManager =
+  } else if (auto *sizeManager =
                  qobject_cast<QtSizePropertyManager *>(manager)) {
     sizeManager->setValue(internProp, val.value<QSize>());
     return;
-  } else if (QtSizeFPropertyManager *sizeFManager =
+  } else if (auto *sizeFManager =
                  qobject_cast<QtSizeFPropertyManager *>(manager)) {
     sizeFManager->setValue(internProp, val.value<QSizeF>());
     return;
-  } else if (QtRectPropertyManager *rectManager =
+  } else if (auto *rectManager =
                  qobject_cast<QtRectPropertyManager *>(manager)) {
     rectManager->setValue(internProp, val.value<QRect>());
     return;
-  } else if (QtRectFPropertyManager *rectFManager =
+  } else if (auto *rectFManager =
                  qobject_cast<QtRectFPropertyManager *>(manager)) {
     rectFManager->setValue(internProp, val.value<QRectF>());
     return;
-  } else if (QtColorPropertyManager *colorManager =
+  } else if (auto *colorManager =
                  qobject_cast<QtColorPropertyManager *>(manager)) {
     colorManager->setValue(internProp, val.value<QColor>());
     return;
-  } else if (QtEnumPropertyManager *enumManager =
+  } else if (auto *enumManager =
                  qobject_cast<QtEnumPropertyManager *>(manager)) {
     enumManager->setValue(internProp, val.value<int>());
     return;
-  } else if (QtSizePolicyPropertyManager *sizePolicyManager =
+  } else if (auto *sizePolicyManager =
                  qobject_cast<QtSizePolicyPropertyManager *>(manager)) {
     sizePolicyManager->setValue(internProp, val.value<QSizePolicy>());
     return;
-  } else if (QtFontPropertyManager *fontManager =
+  } else if (auto *fontManager =
                  qobject_cast<QtFontPropertyManager *>(manager)) {
     fontManager->setValue(internProp, val.value<QFont>());
     return;
 #ifndef QT_NO_CURSOR
-  } else if (QtCursorPropertyManager *cursorManager =
+  } else if (auto *cursorManager =
                  qobject_cast<QtCursorPropertyManager *>(manager)) {
     cursorManager->setValue(internProp, val.value<QCursor>());
     return;
 #endif
-  } else if (QtFlagPropertyManager *flagManager =
+  } else if (auto *flagManager =
                  qobject_cast<QtFlagPropertyManager *>(manager)) {
     flagManager->setValue(internProp, val.value<int>());
     return;
@@ -1809,8 +1793,7 @@ void QtVariantPropertyManager::setAttribute(QtProperty *property,
     return;
 
   QtAbstractPropertyManager *manager = internProp->propertyManager();
-  if (QtIntPropertyManager *intManager =
-          qobject_cast<QtIntPropertyManager *>(manager)) {
+  if (auto *intManager = qobject_cast<QtIntPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       intManager->setMaximum(internProp, value.value<int>());
     else if (attribute == d_ptr->m_minimumAttribute)
@@ -1818,7 +1801,7 @@ void QtVariantPropertyManager::setAttribute(QtProperty *property,
     else if (attribute == d_ptr->m_singleStepAttribute)
       intManager->setSingleStep(internProp, value.value<int>());
     return;
-  } else if (QtDoublePropertyManager *doubleManager =
+  } else if (auto *doubleManager =
                  qobject_cast<QtDoublePropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       doubleManager->setMaximum(internProp, value.value<double>());
@@ -1829,31 +1812,31 @@ void QtVariantPropertyManager::setAttribute(QtProperty *property,
     if (attribute == d_ptr->m_decimalsAttribute)
       doubleManager->setDecimals(internProp, value.value<int>());
     return;
-  } else if (QtStringPropertyManager *stringManager =
+  } else if (auto *stringManager =
                  qobject_cast<QtStringPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_regExpAttribute)
       stringManager->setRegExp(internProp, value.value<QRegExp>());
     return;
-  } else if (QtDatePropertyManager *dateManager =
+  } else if (auto *dateManager =
                  qobject_cast<QtDatePropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       dateManager->setMaximum(internProp, value.value<QDate>());
     if (attribute == d_ptr->m_minimumAttribute)
       dateManager->setMinimum(internProp, value.value<QDate>());
     return;
-  } else if (QtPointFPropertyManager *pointFManager =
+  } else if (auto *pointFManager =
                  qobject_cast<QtPointFPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_decimalsAttribute)
       pointFManager->setDecimals(internProp, value.value<int>());
     return;
-  } else if (QtSizePropertyManager *sizeManager =
+  } else if (auto *sizeManager =
                  qobject_cast<QtSizePropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       sizeManager->setMaximum(internProp, value.value<QSize>());
     if (attribute == d_ptr->m_minimumAttribute)
       sizeManager->setMinimum(internProp, value.value<QSize>());
     return;
-  } else if (QtSizeFPropertyManager *sizeFManager =
+  } else if (auto *sizeFManager =
                  qobject_cast<QtSizeFPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)
       sizeFManager->setMaximum(internProp, value.value<QSizeF>());
@@ -1862,26 +1845,26 @@ void QtVariantPropertyManager::setAttribute(QtProperty *property,
     if (attribute == d_ptr->m_decimalsAttribute)
       sizeFManager->setDecimals(internProp, value.value<int>());
     return;
-  } else if (QtRectPropertyManager *rectManager =
+  } else if (auto *rectManager =
                  qobject_cast<QtRectPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_constraintAttribute)
       rectManager->setConstraint(internProp, value.value<QRect>());
     return;
-  } else if (QtRectFPropertyManager *rectFManager =
+  } else if (auto *rectFManager =
                  qobject_cast<QtRectFPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_constraintAttribute)
       rectFManager->setConstraint(internProp, value.value<QRectF>());
     if (attribute == d_ptr->m_decimalsAttribute)
       rectFManager->setDecimals(internProp, value.value<int>());
     return;
-  } else if (QtEnumPropertyManager *enumManager =
+  } else if (auto *enumManager =
                  qobject_cast<QtEnumPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_enumNamesAttribute)
       enumManager->setEnumNames(internProp, value.value<QStringList>());
     if (attribute == d_ptr->m_enumIconsAttribute)
       enumManager->setEnumIcons(internProp, value.value<QtIconMap>());
     return;
-  } else if (QtFlagPropertyManager *flagManager =
+  } else if (auto *flagManager =
                  qobject_cast<QtFlagPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_flagNamesAttribute)
       flagManager->setFlagNames(internProp, value.value<QStringList>());
@@ -1977,7 +1960,7 @@ QtProperty *QtVariantPropertyManager::createProperty() {
   if (!d_ptr->m_creatingProperty)
     return nullptr;
 
-  QtVariantProperty *property = new QtVariantProperty(this);
+  auto *property = new QtVariantProperty(this);
   d_ptr->m_propertyToType.insert(property,
                                  qMakePair(property, d_ptr->m_propertyType));
 

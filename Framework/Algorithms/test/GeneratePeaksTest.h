@@ -1,12 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
@@ -43,7 +42,7 @@ namespace {
 DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
-      boost::shared_ptr<DataObjects::TableWorkspace>(
+      std::shared_ptr<DataObjects::TableWorkspace>(
           new DataObjects::TableWorkspace);
   peakparms->addColumn("int", "spectrum");
   peakparms->addColumn("double", "centre");
@@ -80,7 +79,7 @@ DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters() {
 DataObjects::TableWorkspace_sptr createTestPeakParameters2() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
-      boost::shared_ptr<DataObjects::TableWorkspace>(
+      std::shared_ptr<DataObjects::TableWorkspace>(
           new DataObjects::TableWorkspace);
   peakparms->addColumn("int", "spectrum");
   peakparms->addColumn("double", "PeakCentre");
@@ -118,7 +117,7 @@ DataObjects::TableWorkspace_sptr createTestPeakParameters2() {
 DataObjects::TableWorkspace_sptr createTestPeakParameters3() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
-      boost::shared_ptr<DataObjects::TableWorkspace>(
+      std::shared_ptr<DataObjects::TableWorkspace>(
           new DataObjects::TableWorkspace);
   peakparms->addColumn("int", "spectrum");
   peakparms->addColumn("double", "f0.centre");
@@ -228,7 +227,7 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Test01WS"));
     TS_ASSERT(peaksws);
 
@@ -302,7 +301,7 @@ public:
 
     // Get result
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Test02WS"));
     TS_ASSERT(peaksws);
 
@@ -376,7 +375,7 @@ public:
 
     // Get result
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Test03WS"));
     TS_ASSERT(peaksws);
 
@@ -446,7 +445,7 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Test04WS"));
     TS_ASSERT(peaksws);
 
@@ -505,7 +504,7 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Test01WS"));
     TS_ASSERT(peaksws);
 

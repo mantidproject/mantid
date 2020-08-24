@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -14,6 +14,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -40,10 +41,9 @@ using namespace HistogramData;
 
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
-  auto wsVal = boost::make_shared<CompositeValidator>();
+  auto wsVal = std::make_shared<CompositeValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
-
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsVal),
                   "The name of the input workspace.");
@@ -51,22 +51,27 @@ void ConvertSpectrumAxis2::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
   std::vector<std::string> targetOptions{
-      "Theta", "SignedTheta",  "ElasticQ",       "ElasticQSquared",
-      "theta", "signed_theta", "ElasticDSpacing"};
+      "Theta",           "SignedTheta",
+      "InPlaneTwoTheta", "SignedInPlaneTwoTheta",
+      "ElasticQ",        "ElasticQSquared",
+      "theta",           "signed_theta",
+      "ElasticDSpacing"};
   declareProperty(
-      "Target", "", boost::make_shared<StringListValidator>(targetOptions),
+      "Target", "", std::make_shared<StringListValidator>(targetOptions),
       "The unit to which spectrum axis is converted to - \"theta\" (for the "
       "angle in degrees), Q or Q^2, where elastic Q is evaluated at EFixed. "
+      "InPlaneTwoTheta and SignedInPlaneTwoTheta are the angle when each point "
+      "is projected on the horizontal plane."
       "Note that 'theta' and 'signed_theta' are there for compatibility "
       "purposes; they are the same as 'Theta' and 'SignedTheta' respectively");
   std::vector<std::string> eModeOptions;
   eModeOptions.emplace_back("Direct");
   eModeOptions.emplace_back("Indirect");
   declareProperty("EMode", "Direct",
-                  boost::make_shared<StringListValidator>(eModeOptions),
+                  std::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "
                   "(\"Direct\" or \"Indirect\")");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
                   "Value of fixed energy in meV : EI (EMode=Direct) or EF "
@@ -88,7 +93,6 @@ void ConvertSpectrumAxis2::exec() {
 
   // Whether needs to be ordered
   m_toOrder = getProperty("OrderAxis");
-
   size_t nProgress = nHist;
   if (m_toOrder) {
     // we will need to loop twice, once to build the indexMap,
@@ -99,10 +103,11 @@ void ConvertSpectrumAxis2::exec() {
   }
 
   Progress progress(this, 0.0, 1.0, nProgress);
-
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
-      unitTarget == "signed_theta" || unitTarget == "SignedTheta") {
+      unitTarget == "signed_theta" || unitTarget == "SignedTheta" ||
+      unitTarget == "InPlaneTwoTheta" ||
+      unitTarget == "SignedInPlaneTwoTheta") {
     createThetaMap(progress, unitTarget, inputWS);
   } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared" ||
              unitTarget == "ElasticDSpacing") {
@@ -124,13 +129,17 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           const std::string &targetUnit,
                                           API::MatrixWorkspace_sptr &inputWS) {
   // Not sure about default, previously there was a call to a null function?
-  bool signedTheta = false;
+  enum thetaTypes { theta, signedTheta, inPlaneTheta, signedInPlaneTheta };
+  thetaTypes thetaType = theta;
   if (targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    signedTheta = true;
+    thetaType = signedTheta;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
-    signedTheta = false;
+    thetaType = theta;
+  } else if (targetUnit == "InPlaneTwoTheta") {
+    thetaType = inPlaneTheta;
+  } else if (targetUnit == "SignedInPlaneTwoTheta") {
+    thetaType = signedInPlaneTheta;
   }
-
   bool warningGiven = false;
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -143,16 +152,81 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
       continue;
     }
     if (!spectrumInfo.isMonitor(i)) {
-      if (signedTheta)
+      switch (thetaType) {
+      case signedTheta:
         emplaceIndexMap(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
-      else
+        break;
+      case theta:
         emplaceIndexMap(spectrumInfo.twoTheta(i) * rad2deg, i);
+        break;
+      case inPlaneTheta:
+        emplaceIndexMap(inPlaneTwoTheta(i, inputWS) * rad2deg, i);
+        break;
+      case signedInPlaneTheta:
+        emplaceIndexMap(signedInPlaneTwoTheta(i, inputWS) * rad2deg, i);
+        break;
+      }
     } else {
       emplaceIndexMap(0.0, i);
     }
 
     progress.report("Converting to theta...");
   }
+}
+
+/** Returns the scattering angle projected on horizontal plane 2 theta in
+ * radians (angle w.r.t. to beam direction).
+ *
+ * Throws an exception if the spectrum is a monitor.
+ * @param index :: the index of the spectrum
+ * @param inputWS :: input workspace
+ */
+double ConvertSpectrumAxis2::inPlaneTwoTheta(
+    const size_t index, const API::MatrixWorkspace_sptr &inputWS) const {
+  const auto spectrumInfo = inputWS->spectrumInfo();
+  const auto refFrame = inputWS->getInstrument()->getReferenceFrame();
+  const V3D position =
+      spectrumInfo.position(index) - spectrumInfo.samplePosition();
+
+  double angle = std::atan2(std::abs(position[refFrame->pointingHorizontal()]),
+                            position[refFrame->pointingAlongBeam()]);
+  return angle;
+}
+
+/** Returns the signed scattering angle projected on horizontal plane 2 theta in
+ * radians (angle w.r.t. to beam direction).
+ *
+ * Throws an exception if the spectrum is a monitor.
+ * @param index :: the index of the spectrum
+ * @param inputWS :: input workspace
+ */
+double ConvertSpectrumAxis2::signedInPlaneTwoTheta(
+    const size_t index, const API::MatrixWorkspace_sptr &inputWS) const {
+  const auto spectrumInfo = inputWS->spectrumInfo();
+  const auto refFrame = inputWS->getInstrument()->getReferenceFrame();
+
+  // Get the axis defining the sign
+  const auto &instrumentUpAxis = refFrame->vecThetaSign();
+
+  const auto samplePos = spectrumInfo.samplePosition();
+  const auto beamLine = samplePos - spectrumInfo.sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+
+  const V3D sampleDetVec = spectrumInfo.position(index) - samplePos;
+
+  double angle = std::atan2(sampleDetVec[refFrame->pointingHorizontal()],
+                            sampleDetVec[refFrame->pointingAlongBeam()]);
+
+  const auto cross = beamLine.cross_prod(sampleDetVec);
+  const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
+  if (normToSurface.scalar_prod(cross) < 0) {
+    angle *= -1;
+  }
+  return angle;
 }
 
 /** Convert X axis to Elastic Q representation
@@ -229,7 +303,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   MatrixWorkspace_sptr outputWorkspace = nullptr;
   std::unique_ptr<NumericAxis> newAxis = nullptr;
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(inputWS);
   if (m_toOrder) {
     // Can not re-use the input one because the spectra are re-ordered.
     const Histogram hist =
@@ -238,9 +312,10 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
         create<MatrixWorkspace>(*inputWS, m_indexMap.size(), hist);
     std::vector<double> axis;
     axis.reserve(m_indexMap.size());
-    for (const auto &it : m_indexMap) {
-      axis.emplace_back(it.first);
-    }
+    std::transform(m_indexMap.begin(), m_indexMap.end(),
+                   std::back_inserter(axis),
+                   [](const auto &it) { return it.first; });
+
     newAxis = std::make_unique<NumericAxis>(std::move(axis));
   } else {
     // If there is no reordering we can simply clone.
@@ -250,8 +325,10 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
-      targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    newAxis->unit() = boost::make_shared<Units::Degrees>();
+      targetUnit == "signed_theta" || targetUnit == "SignedTheta" ||
+      targetUnit == "InPlaneTwoTheta" ||
+      targetUnit == "SignedInPlaneTwoTheta") {
+    newAxis->unit() = std::make_shared<Units::Degrees>();
   } else if (targetUnit == "ElasticQ") {
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {

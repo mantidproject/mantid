@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DIFFSPHERETEST_H_
-#define DIFFSPHERETEST_H_
+#pragma once
 
 #include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
@@ -94,8 +93,7 @@ public:
     // check the parameters of the resolution did not change
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
-    auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(fitalg_function);
+    auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
                     0.00001); // allow for a small percent variation
@@ -144,15 +142,15 @@ public:
                              // of the 99 coefficients to break down
 
     // initialize the elastic part
-    boost::shared_ptr<ElasticDiffSphere> elastic_part =
-        boost::make_shared<ElasticDiffSphere>();
+    std::shared_ptr<ElasticDiffSphere> elastic_part =
+        std::make_shared<ElasticDiffSphere>();
     elastic_part->setParameter("Height", I);
     elastic_part->setParameter("Radius", R);
     elastic_part->setAttributeValue("Q", Q);
     elastic_part->init();
 
     // initialize the inelastic part
-    boost::shared_ptr<InelasticDiffSphere> inelastic_part(
+    std::shared_ptr<InelasticDiffSphere> inelastic_part(
         new InelasticDiffSphere());
     inelastic_part->setParameter("Intensity", I);
     inelastic_part->setParameter("Radius", R);
@@ -217,15 +215,15 @@ public:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function"); // main function
     fitalg_function->initialize();
-    auto fitalg_conv = boost::dynamic_pointer_cast<Convolution>(
+    auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(
         fitalg_function);                          // cast to Convolution
     fitalg_function = fitalg_conv->getFunction(1); // DiffSphere
     auto fitalg_structure_factor =
-        boost::dynamic_pointer_cast<DiffSphere>(fitalg_function);
+        std::dynamic_pointer_cast<DiffSphere>(fitalg_function);
 
     fitalg_function = fitalg_structure_factor->getFunction(0);
     auto fitalg_elastic =
-        boost::dynamic_pointer_cast<ElasticDiffSphere>(fitalg_function);
+        std::dynamic_pointer_cast<ElasticDiffSphere>(fitalg_function);
     TS_ASSERT_DELTA(fitalg_elastic->getParameter("Height"), I_0,
                     std::numeric_limits<double>::epsilon());
     TS_ASSERT_DELTA(fitalg_elastic->getParameter("Radius"), R_0,
@@ -238,7 +236,7 @@ public:
 
     fitalg_function = fitalg_structure_factor->getFunction(1);
     auto fitalg_inelastic =
-        boost::dynamic_pointer_cast<InelasticDiffSphere>(fitalg_function);
+        std::dynamic_pointer_cast<InelasticDiffSphere>(fitalg_function);
     TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Intensity"), I_0,
                     std::numeric_limits<double>::epsilon());
     TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Radius"), R_0,
@@ -405,8 +403,7 @@ private:
     // check the parameters of the resolution did not change
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
-    auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(fitalg_function);
+    auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
 
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), S,
@@ -487,9 +484,8 @@ private:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
 
     // Create the instrument
-    boost::shared_ptr<Instrument> inst =
-        boost::make_shared<Instrument>("BASIS");
-    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+    std::shared_ptr<Instrument> inst = std::make_shared<Instrument>("BASIS");
+    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // Add the source position
     ObjComponent *source = new ObjComponent(
@@ -501,10 +497,7 @@ private:
     inst->markAsSource(source);
 
     // Add the sample position
-    ObjComponent *sample = new ObjComponent(
-        "samplePos",
-        ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-        inst.get());
+    Component *sample = new Component("samplePos", inst.get());
     inst->setPos(0.0, 0.0, 0.0);
     inst->add(sample);
     inst->markAsSamplePos(sample);
@@ -549,5 +542,3 @@ private:
   }
 
 }; // class DiffSphereTest
-
-#endif /*DIFFSPHERETEST_H_*/

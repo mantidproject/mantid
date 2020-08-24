@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
-#define MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
@@ -26,7 +25,7 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
-  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 9;
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 10;
   using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
 
   enum Column {
@@ -40,7 +39,8 @@ public:
     QMAX = 5,
     QSTEP = 6,
     SCALE = 7,
-    RUN_SPECTRA = 8
+    RUN_SPECTRA = 8,
+    BACKGROUND_SPECTRA = 9
   };
 
   static auto constexpr ColumnPropertyName =
@@ -53,14 +53,16 @@ public:
           "MomentumTransferMax",
           "MomentumTransferStep",
           "ScaleFactor",
-          "ProcessingInstructions"};
+          "ProcessingInstructions",
+          "BackgroundProcessingInstructions"};
 
   PerThetaDefaults(
       boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
       boost::optional<ProcessingInstructions>
           transmissionProcessingInstructions,
       RangeInQ qRange, boost::optional<double> scaleFactor,
-      boost::optional<ProcessingInstructions> processingInstructions);
+      boost::optional<ProcessingInstructions> processingInstructions,
+      boost::optional<ProcessingInstructions> backgroundProcessingInstructions);
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
@@ -70,6 +72,8 @@ public:
   boost::optional<ProcessingInstructions>
   transmissionProcessingInstructions() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
+  boost::optional<ProcessingInstructions>
+  backgroundProcessingInstructions() const;
 
 private:
   boost::optional<double> m_theta;
@@ -78,6 +82,7 @@ private:
   boost::optional<double> m_scaleFactor;
   boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
   boost::optional<ProcessingInstructions> m_processingInstructions;
+  boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PerThetaDefaults const &lhs,
@@ -89,4 +94,3 @@ perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_

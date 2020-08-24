@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
     Defines functions that can be used to inspect the properties of a
@@ -12,13 +12,11 @@
                    arguments that are being assigned to a function
                    return
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 import opcode
 import inspect
 import sys
 import dis
-from six import PY3
 
 
 def replace_signature(func, signature):
@@ -73,10 +71,88 @@ def customise_func(func, name, signature, docstring):
     """
     func.__name__ = str(name)
     func.__doc__ = docstring
-    replace_signature(func, signature)
+    func.__signature__ = signature
     return func
 
 #-------------------------------------------------------------------------------
+
+
+class LazyFunctionSignature(inspect.Signature):
+    """
+    Allows for lazy access to the signature of a function, only generating it when it is requested
+    to reduce the time spent initialising algorithms.
+    """
+    __slots__ = ('_alg_name', '__sig')
+
+    def __init__(self, *args, **kwargs):
+        if "alg_name" not in kwargs:
+            super().__init__(*args, **kwargs)
+            self.__sig = self
+        else:
+            self._alg_name = kwargs.pop("alg_name")
+            self.__sig = None
+
+    @property
+    def _signature(self):
+        if self.__sig is None:
+            self.__sig = self._create_signature(self._alg_name)
+
+        return self.__sig
+
+    def __getattr__(self, item):
+        # Called for each attribute access.
+        if item in LazyFunctionSignature.__slots__:
+            return getattr(self, item)
+        else:
+            return getattr(self._signature, item)
+
+    def _create_signature(self, alg_name):
+        from inspect import Signature
+        return Signature(self._create_parameters(alg_name))
+
+    def _create_parameters(self, alg_name):
+        from mantid.api import AlgorithmManager
+        alg_object = AlgorithmManager.Instance().createUnmanaged(alg_name)
+        alg_object.initialize()
+        from inspect import Parameter
+        pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
+        parameters = []
+        for name in alg_object.mandatoryProperties():
+            prop = alg_object.getProperty(name)
+            # Mandatory parameters are those for which the default value is not valid
+            if isinstance(prop.isValid, str):
+                valid_str = prop.isValid
+            else:
+                valid_str = prop.isValid()
+            if len(valid_str) > 0:
+                parameters.append(Parameter(name, pos_or_keyword))
+            else:
+                # None is not quite accurate here, but we are reproducing the
+                # behavior found in the C++ code for SimpleAPI.
+                parameters.append(Parameter(name, pos_or_keyword, default=None))
+        # Add a self parameter since these are called from a class.
+        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
+        return parameters
+
+
+class LazyMethodSignature(LazyFunctionSignature):
+    """
+    Alternate LazyFunctionSignature intended for use in workspace methods. Replaces the input workspace
+    parameter with self.
+    """
+    def _create_parameters(self, alg_name):
+        from inspect import Parameter
+        parameters = super()._create_parameters(alg_name)
+        try:
+            parameters.pop(0)
+        except IndexError:
+            pass
+        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
+        return parameters
+
+# -------------------------------------------------------------------------------
+
+
 def decompile(code_object):
     """
     Taken from
@@ -108,45 +184,8 @@ def decompile(code_object):
     ins = decompile(f.f_code)
     """
     instructions = []
-
-    if PY3:
-        for ins in dis.get_instructions(code_object):
-            instructions.append( (ins.offset, ins.opcode, ins.opname, ins.arg, ins.argval) )
-    else:
-        code = code_object.co_code
-        variables = code_object.co_cellvars + code_object.co_freevars
-        n = len(code)
-        i = 0
-        e = 0
-        while i < n:
-            i_offset = i
-            i_opcode = ord(code[i])
-            i = i + 1
-            if i_opcode >= opcode.HAVE_ARGUMENT:
-                i_argument = ord(code[i]) + (ord(code[i+1]) << (4*2)) + e
-                i = i + 2
-                if i_opcode == opcode.EXTENDED_ARG:
-                    e = i_argument << 16
-                else:
-                    e = 0
-                if i_opcode in opcode.hasconst:
-                    i_arg_value = repr(code_object.co_consts[i_argument])
-                elif i_opcode in opcode.hasname:
-                    i_arg_value = code_object.co_names[i_argument]
-                elif i_opcode in opcode.hasjrel:
-                    i_arg_value = repr(i + i_argument)
-                elif i_opcode in opcode.haslocal:
-                    i_arg_value = code_object.co_varnames[i_argument]
-                elif i_opcode in opcode.hascompare:
-                    i_arg_value = opcode.cmp_op[i_argument]
-                elif i_opcode in opcode.hasfree:
-                    i_arg_value = variables[i_argument]
-                else:
-                    i_arg_value = i_argument
-            else:
-                i_argument = None
-                i_arg_value = None
-            instructions.append( (i_offset, i_opcode, opcode.opname[i_opcode], i_argument, i_arg_value) )
+    for ins in dis.get_instructions(code_object):
+        instructions.append( (ins.offset, ins.opcode, ins.opname, ins.arg, ins.argval) )
     return instructions
 
 #-------------------------------------------------------------------------------
@@ -167,6 +206,7 @@ __operator_names = set(['CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW'
                         'INPLACE_OR', 'COMPARE_OP',
                         'CALL_FUNCTION_EX', 'LOAD_METHOD', 'CALL_METHOD'])
 #--------------------------------------------------------------------------------------
+
 
 def process_frame(frame):
     """Returns the number of arguments on the left of assignment along
@@ -255,6 +295,7 @@ def process_frame(frame):
     return (max_returns, tuple(output_var_names))
 
 #-------------------------------------------------------------------------------
+
 
 def lhs_info(output_type='both', frame=None):
     """Returns the number of arguments on the left of assignment along

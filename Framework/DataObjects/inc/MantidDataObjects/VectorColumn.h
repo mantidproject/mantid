@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_VECTORCOLUMN_H_
-#define MANTID_DATAOBJECTS_VECTORCOLUMN_H_
+#pragma once
 
 #include "MantidAPI/Column.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -210,5 +209,3 @@ private:
   Kernel::RegistrationHelper register_column_##TypeName((                      \
       API::ColumnFactory::Instance().subscribe<VectorColumn<Type>>(#TypeName), \
       0));
-
-#endif /* MANTID_DATAOBJECTS_VECTORCOLUMN_H_ */

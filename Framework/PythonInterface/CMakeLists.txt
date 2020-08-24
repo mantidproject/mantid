@@ -1,24 +1,12 @@
-# Python API
-
-# Set local dependencies
-
-# boost python
-set(old_boost ${Boost_LIBRARIES})
-set(Boost_LIBRARIES) # Empty out the variable after previous use
-find_package(BoostPython REQUIRED)
-set(Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
-
-# NumPy
-find_package(Numpy REQUIRED)
-include_directories(SYSTEM ${PYTHON_INCLUDE_PATH} ${PYTHON_NUMPY_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
-
 # Common definitions
-add_definitions(-DBOOST_PYTHON_NO_LIB
-                -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+add_definitions(
+  -DBOOST_PYTHON_NO_LIB -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
+)
 if(CMAKE_COMPILER_IS_GNUCXX
    AND Boost_MAJOR_VERSION EQUAL "1"
    AND Boost_MINOR_VERSION GREATER "63"
-   AND Boost_MINOR_VERSION LESS "66")
+   AND Boost_MINOR_VERSION LESS "66"
+)
   # Several bugs in boost 1.64-1.65 prevent python modues from loading on gcc
   # without this definition:   https://github.com/boostorg/python/issues/131
   add_definitions(-DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY)
@@ -26,14 +14,20 @@ endif()
 
 set(PYTHON_DEPS ${MPI_CXX_LIBRARIES})
 
+# Keep boost python separate from other boost
+set(_boost_libs_orig ${Boost_LIBRARIES})
+set(Boost_LIBRARIES)
+find_package(BoostPython REQUIRED)
+set(BoostPython_LIBRARIES ${Boost_LIBRARIES})
+set(Boost_LIBRARIES ${_boost_libs_orig})
+unset(_boost_libs_orig)
+
 # First, common Python code
 add_subdirectory(core)
 
-# A function for generating the exports
-#  - MODULE_TEMPLATE: The file containing the @EXPORT_FUNCTIONS@ and
-#    @EXPORT_DECLARE@ flags to replace
-#  - OUTPUT_FILE:The path to the generated output file
-#  - ... The list of export files
+# A function for generating the exports - MODULE_TEMPLATE: The file containing
+# the @EXPORT_FUNCTIONS@ and @EXPORT_DECLARE@ flags to replace - OUTPUT_FILE:The
+# path to the generated output file - ... The list of export files
 function(CREATE_MODULE MODULE_TEMPLATE OUTPUT_FILE)
   set(_fwd_declarations)
   set(_function_calls)
@@ -43,19 +37,13 @@ function(CREATE_MODULE MODULE_TEMPLATE OUTPUT_FILE)
     foreach(_func_definition ${_definitions})
       # create a forward declaration and function call
       string(STRIP "${_func_definition}" _func_definition)
-      string(REGEX
-             REPLACE "(void *export.*\\(\\)).*"
-                     "\\1"
-                     _func_declaration
-                     "${_func_definition}")
+      string(REGEX REPLACE "(void *export.*\\(\\)).*" "\\1" _func_declaration
+                           "${_func_definition}"
+      )
       # add to list of declarations
       set(_fwd_declarations "${_fwd_declarations}\n${_func_declaration}\;")
       # strip void and add to call list
-      string(REGEX
-             REPLACE "void *"
-                     ""
-                     _func_call
-                     "${_func_declaration}")
+      string(REGEX REPLACE "void *" "" _func_call "${_func_declaration}")
       set(_function_calls "${_function_calls}\n${_func_call}\;")
     endforeach()
   endforeach()
@@ -75,14 +63,9 @@ function(SET_PYTHON_PROPERTIES TARGET TARGET_NAME)
   set_target_properties(${TARGET} PROPERTIES PREFIX "")
   # Library name needs to end in .pyd for Windows
   if(MSVC)
-    set_target_properties(${TARGET}
-                          PROPERTIES SUFFIX
-                                     .pyd
-                                     COMPILE_FLAGS
-                                     "/bigobj /w44005 /w44244") # bigobj
-                                                                # required for
-                                                                # intensive
-                                                                # templating
+    set_target_properties(
+      ${TARGET} PROPERTIES SUFFIX .pyd COMPILE_FLAGS "/bigobj /w44005 /w44244"
+    ) # bigobj required for intensive templating
   elseif(APPLE)
     # and in .so on the Mac
     set_target_properties(${TARGET} PROPERTIES SUFFIX .so)
@@ -91,16 +74,23 @@ function(SET_PYTHON_PROPERTIES TARGET TARGET_NAME)
   set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME ${TARGET_NAME})
   # Debug python library expects imported module names to end in _d
   if(PYTHON_DEBUG_LIBRARY)
-    set_target_properties(${TARGET}
-                          PROPERTIES DEBUG_OUTPUT_NAME ${TARGET_NAME}_d)
+    set_target_properties(
+      ${TARGET} PROPERTIES DEBUG_OUTPUT_NAME ${TARGET_NAME}_d
+    )
   endif()
   # Group within VS
   set_property(TARGET ${TARGET} PROPERTY FOLDER "MantidFramework/Python")
 endfunction()
 
-###########################################################################
+# ##############################################################################
 # mantid package
-###########################################################################
+# ##############################################################################
+# Common install RPATH setting for all extension modules
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(EXT_INSTALL_RPATH ${DL_ORIGIN_TAG}/../../../MacOS)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(EXT_INSTALL_RPATH ${DL_ORIGIN_TAG}/../../../${LIB_DIR})
+endif()
 
 # All targets can see these includes
 include_directories(core/inc)
@@ -109,38 +99,47 @@ include_directories(core/inc)
 include_directories(inc)
 add_subdirectory(mantid)
 
-include ( PythonPackageTargetFunctions )
+include(PythonPackageTargetFunctions)
 
 # Adds `mantid` as a target in the `MantidFramework/Python` folder
 if(APPLE)
-  set(_install_lib_dirs "${LIB_DIR};${WORKBENCH_LIB_DIR}")
+  set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
 else()
-  set(_install_lib_dirs "${WORKBENCH_LIB_DIR}")
+  set(_install_lib_dirs "${SITE_PACKAGES}")
 endif()
-add_python_package ( PythonInterface EGGLINKNAME mantid
-                     INSTALL_LIB_DIRS ${_install_lib_dirs} )
-set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
-add_dependencies ( PythonInterface PythonInterfaceCore PythonKernelModule
-  PythonGeometryModule PythonAPIModule PythonDataObjectsModule
-  PythonCurveFittingModule )
+add_python_package(
+  PythonInterface EGGLINKNAME mantid INSTALL_LIB_DIRS ${_install_lib_dirs}
+)
+set_property(TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python")
+add_dependencies(
+  PythonInterface
+  PythonInterfaceCore
+  PythonKernelModule
+  PythonGeometryModule
+  PythonAPIModule
+  PythonDataObjectsModule
+  PythonCurveFittingModule
+)
 
 # Clear any leftover bin/$(Configuration)/mantid/ folder, from when
-# PythonInterface was being copied over.
-# The last semicolon is there to have an iteration with an empty string
-# which makes the last check just bin/mantid for non-Windows builds
+# PythonInterface was being copied over. The last semicolon is there to have an
+# iteration with an empty string which makes the last check just bin/mantid for
+# non-Windows builds
 set(_windows_configurations "Debug/;Release/;")
 foreach(_configuration IN LISTS _windows_configurations)
-set(_old_mantid_dir ${CMAKE_BINARY_DIR}/bin/${_configuration}mantid)
+  set(_old_mantid_dir ${CMAKE_BINARY_DIR}/bin/${_configuration}mantid)
   if(EXISTS ${_old_mantid_dir})
     message("Removing old mantid PythonInterface directory: ${_old_mantid_dir}")
     file(REMOVE_RECURSE ${_old_mantid_dir})
   endif()
 endforeach(_configuration)
 
-###########################################################################
+# ##############################################################################
 # Python algorithms
-###########################################################################
+# ##############################################################################
 clean_orphaned_pyc_files(${CMAKE_CURRENT_SOURCE_DIR}/plugins)
+
+add_subdirectory(plugins)
 
 # tests
 set(PYTHONINTERFACE_PLUGINS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/plugins)
@@ -149,16 +148,16 @@ add_subdirectory(test)
 # Installation settings
 
 # Python algorithms
-install(DIRECTORY plugins/
-        DESTINATION ${PLUGINS_DIR}/python
-        PATTERN "*.pyc"
-        EXCLUDE
-        PATTERN ".svn"
-        EXCLUDE)
+install(
+  DIRECTORY plugins/
+  DESTINATION ${PLUGINS_DIR}/python
+  PATTERN "*.pyc" EXCLUDE
+  PATTERN ".svn" EXCLUDE
+)
 
-install(DIRECTORY plugins/
-        DESTINATION ${WORKBENCH_PLUGINS_DIR}/python
-        PATTERN "*.pyc"
-        EXCLUDE
-        PATTERN ".svn"
-        EXCLUDE)
+install(
+  DIRECTORY plugins/
+  DESTINATION ${WORKBENCH_PLUGINS_DIR}/python
+  PATTERN "*.pyc" EXCLUDE
+  PATTERN ".svn" EXCLUDE
+)

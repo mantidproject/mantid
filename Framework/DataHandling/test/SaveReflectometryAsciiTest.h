@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_
-#define MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -18,10 +17,10 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <iterator>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -134,7 +133,7 @@ public:
   }
 
   void test_empty_workspace() {
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveReflectometryAscii alg;
@@ -152,7 +151,7 @@ public:
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
@@ -307,7 +306,7 @@ public:
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
@@ -365,7 +364,7 @@ public:
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     Mantid::Kernel::PropertyWithValue<int> *a =
         new Mantid::Kernel::PropertyWithValue<int>("a", 5);
@@ -429,7 +428,7 @@ public:
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     // User wants to add the Instrument name header line
     Mantid::Kernel::PropertyWithValue<std::string> *a =
@@ -494,7 +493,7 @@ public:
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     // Should use this instrument name
     Mantid::Kernel::PropertyWithValue<std::string> *a =
@@ -779,4 +778,3 @@ private:
     return in.peek() != std::ifstream::traits_type::eof();
   }
 };
-#endif /*MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_*/

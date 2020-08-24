@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AsciiSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -11,34 +11,24 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <utility>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-Mantid::API::IAlgorithm_sptr
-AsciiSaver::algorithmForFormat(NamedFormat format) {
-  auto create =
-      [](std::string const &algorithmName) -> Mantid::API::IAlgorithm_sptr {
-    return Mantid::API::AlgorithmManager::Instance().create(algorithmName);
-  };
-  switch (format) {
-  case NamedFormat::Custom:
-    return create("SaveReflCustomAscii");
-  case NamedFormat::ThreeColumn:
-    return create("SaveReflThreeColumnAscii");
-  case NamedFormat::ANSTO:
-    return create("SaveANSTOAscii");
-  case NamedFormat::ILLCosmos:
-    return create("SaveILLCosmosAscii");
-  default:
-    throw std::runtime_error("Unknown save format.");
-  }
+Mantid::API::IAlgorithm_sptr AsciiSaver::getSaveAlgorithm() {
+  return Mantid::API::AlgorithmManager::Instance().create(
+      "SaveReflectometryAscii");
 }
 
 std::string AsciiSaver::extensionForFormat(NamedFormat format) {
+  // The algorithm is slightly inconsistent in that for the custom format the
+  // "extension" property is not really an extension but just the word "custom"
   switch (format) {
   case NamedFormat::Custom:
-    return ".dat";
+    return "custom";
   case NamedFormat::ThreeColumn:
     return ".dat";
   case NamedFormat::ANSTO:
@@ -63,21 +53,17 @@ bool AsciiSaver::isValidSaveDirectory(std::string const &path) const {
     return false;
 }
 
-namespace {
-template <typename T>
-void setPropertyIfSupported(Mantid::API::IAlgorithm_sptr alg,
-                            std::string const &propertyName, T const &value) {
-  if (alg->existsProperty(propertyName))
-    alg->setProperty(propertyName, value);
-}
-} // namespace
-
 std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory,
                                          std::string const &prefix,
                                          std::string const &name,
                                          std::string const &extension) const {
   auto path = Poco::Path(saveDirectory).makeDirectory();
-  path.append(prefix + name + extension);
+  // The extension is added automatically except where it is "custom"
+  if (extension == "custom")
+    path.append(prefix + name + std::string(".dat"));
+  else
+    path.append(prefix + name);
+
   return path.toString();
 }
 
@@ -93,31 +79,31 @@ AsciiSaver::workspace(std::string const &workspaceName) const {
 
 Mantid::API::IAlgorithm_sptr
 AsciiSaver::setUpSaveAlgorithm(std::string const &saveDirectory,
-                               Mantid::API::Workspace_sptr workspace,
+                               const Mantid::API::Workspace_sptr &workspace,
                                std::vector<std::string> const &logParameters,
                                FileFormatOptions const &fileFormat) const {
-  auto saveAlg = algorithmForFormat(fileFormat.format());
-  auto extension = extensionForFormat(fileFormat.format());
-  if (fileFormat.shouldIncludeTitle())
-    setPropertyIfSupported(saveAlg, "Title", workspace->getTitle());
+  auto const saveAlg = getSaveAlgorithm();
+  auto const extension = extensionForFormat(fileFormat.format());
+  auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(),
+                                         workspace->getName(), extension);
 
-  setPropertyIfSupported(saveAlg, "LogList", logParameters);
-  setPropertyIfSupported(saveAlg, "WriteDeltaQ",
-                         fileFormat.shouldIncludeQResolution());
-  saveAlg->setProperty("Separator", fileFormat.separator());
-  saveAlg->setProperty("Filename",
-                       assembleSavePath(saveDirectory, fileFormat.prefix(),
-                                        workspace->getName(), extension));
   saveAlg->setProperty("InputWorkspace", workspace);
+  saveAlg->setProperty("Filename", savePath);
+  saveAlg->setProperty("FileExtension", extension);
+  saveAlg->setProperty("LogList", logParameters);
+  saveAlg->setProperty("WriteHeader", fileFormat.shouldIncludeHeader());
+  saveAlg->setProperty("WriteResolution",
+                       fileFormat.shouldIncludeQResolution());
+  saveAlg->setProperty("Separator", fileFormat.separator());
   return saveAlg;
 }
 
-void AsciiSaver::save(Mantid::API::Workspace_sptr workspace,
+void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace,
                       std::string const &saveDirectory,
                       std::vector<std::string> const &logParameters,
                       FileFormatOptions const &fileFormat) const {
-  auto alg =
-      setUpSaveAlgorithm(saveDirectory, workspace, logParameters, fileFormat);
+  auto alg = setUpSaveAlgorithm(saveDirectory, std::move(workspace),
+                                logParameters, fileFormat);
   alg->execute();
 }
 
@@ -134,7 +120,7 @@ void AsciiSaver::save(std::string const &saveDirectory,
         // don't handle groups. When we switch to SaveReflectometryAscii we can
         // probably remove this
         Mantid::API::WorkspaceGroup_sptr group =
-            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+            std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
         for (auto child : group->getAllItems())
           save(child, saveDirectory, logParameters, fileFormat);
         continue;

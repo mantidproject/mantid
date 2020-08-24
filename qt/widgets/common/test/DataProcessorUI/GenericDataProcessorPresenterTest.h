@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H
-#define MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H
+#pragma once
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <utility>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
@@ -241,7 +242,7 @@ private:
 
     auto stdWorkspaceName = wsName.toStdString();
 
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(
         AnalysisDataService::Instance().retrieve(stdWorkspaceName + "_1"));
     group->addWorkspace(
@@ -433,7 +434,7 @@ private:
   // Expect the view's widgets to be set in a particular state according to
   // whether processing or not
   void expectUpdateViewState(MockDataProcessorView &mockDataProcessorView,
-                             Cardinality numTimes, bool isProcessing) {
+                             const Cardinality &numTimes, bool isProcessing) {
     // Update menu items according to whether processing or not
     EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(isProcessing))
         .Times(numTimes);
@@ -452,18 +453,20 @@ private:
   // Expect the view's widgets to be set in the paused state
   void
   expectUpdateViewToPausedState(MockDataProcessorView &mockDataProcessorView,
-                                Cardinality numTimes) {
-    expectUpdateViewState(mockDataProcessorView, numTimes, false);
+                                const Cardinality &numTimes) {
+    expectUpdateViewState(mockDataProcessorView, std::move(numTimes), false);
   }
 
   // Expect the view's widgets to be set in the processing state
   void expectUpdateViewToProcessingState(
-      MockDataProcessorView &mockDataProcessorView, Cardinality numTimes) {
-    expectUpdateViewState(mockDataProcessorView, numTimes, true);
+      MockDataProcessorView &mockDataProcessorView,
+      const Cardinality &numTimes) {
+    expectUpdateViewState(mockDataProcessorView, std::move(numTimes), true);
   }
 
   void expectGetSelection(MockDataProcessorView &mockDataProcessorView,
-                          Cardinality numTimes, RowList rowlist = RowList(),
+                          const Cardinality &numTimes,
+                          RowList rowlist = RowList(),
                           GroupList grouplist = GroupList()) {
 
     if (numTimes.IsSatisfiedByCallCount(0)) {
@@ -473,16 +476,16 @@ private:
     } else {
       EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
           .Times(numTimes)
-          .WillRepeatedly(Return(rowlist));
+          .WillRepeatedly(Return(std::move(rowlist)));
       EXPECT_CALL(mockDataProcessorView, getSelectedParents())
           .Times(numTimes)
-          .WillRepeatedly(Return(grouplist));
+          .WillRepeatedly(Return(std::move(grouplist)));
     }
   }
 
   void expectGetOptions(MockMainPresenter &mockMainPresenter,
-                        Cardinality numTimes,
-                        std::string postprocessingOptions = "") {
+                        const Cardinality &numTimes,
+                        const std::string &postprocessingOptions = "") {
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
       EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(numTimes);
@@ -504,7 +507,7 @@ private:
   }
 
   void expectNotebookIsDisabled(MockDataProcessorView &mockDataProcessorView,
-                                Cardinality numTimes) {
+                                const Cardinality &numTimes) {
     // Call to check whether the notebook is enabled
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
@@ -520,7 +523,7 @@ private:
   }
 
   void expectNotebookIsEnabled(MockDataProcessorView &mockDataProcessorView,
-                               Cardinality numTimes) {
+                               const Cardinality &numTimes) {
     // Call to check whether the notebook is enabled
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
@@ -536,7 +539,8 @@ private:
   }
 
   void expectGetWorkspace(MockDataProcessorView &mockDataProcessorView,
-                          Cardinality numTimes, const char *workspaceName) {
+                          const Cardinality &numTimes,
+                          const char *workspaceName) {
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
       EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen()).Times(numTimes);
@@ -548,7 +552,7 @@ private:
   }
 
   void expectAskUserWorkspaceName(MockDataProcessorView &mockDataProcessorView,
-                                  Cardinality numTimes,
+                                  const Cardinality &numTimes,
                                   const char *workspaceName = "") {
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
@@ -564,7 +568,8 @@ private:
   }
 
   void expectAskUserYesNo(MockDataProcessorView &mockDataProcessorView,
-                          Cardinality numTimes, const bool answer = false) {
+                          const Cardinality &numTimes,
+                          const bool answer = false) {
 
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
@@ -582,7 +587,7 @@ private:
   }
 
   void expectInstrumentIsINTER(MockDataProcessorView &mockDataProcessorView,
-                               Cardinality numTimes) {
+                               const Cardinality &numTimes) {
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
       EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -608,12 +613,13 @@ private:
       "IvsQ_TOF_12345", "IvsQ_binned_TOF_12346",
       "IvsQ_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
 
-  void checkWorkspacesExistInADS(std::vector<std::string> workspaceNames) {
+  void
+  checkWorkspacesExistInADS(const std::vector<std::string> &workspaceNames) {
     for (auto &ws : workspaceNames)
       TS_ASSERT(AnalysisDataService::Instance().doesExist(ws));
   }
 
-  void removeWorkspacesFromADS(std::vector<std::string> workspaceNames) {
+  void removeWorkspacesFromADS(const std::vector<std::string> &workspaceNames) {
     for (auto &ws : workspaceNames)
       AnalysisDataService::Instance().remove(ws);
   }
@@ -3361,4 +3367,3 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 };
-#endif /* MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H */

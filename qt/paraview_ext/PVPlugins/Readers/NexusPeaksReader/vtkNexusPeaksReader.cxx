@@ -24,7 +24,7 @@
 #include <vtkPVGlyphFilter.h>
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-#include <boost/algorithm/string.hpp>    
+#include <boost/algorithm/string.hpp>
 
 vtkStandardNewMacro(vtkNexusPeaksReader)
 
@@ -85,7 +85,7 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   vtkSmartPointer<vtkPolyDataAlgorithm> shapeMarker;
   if(p_peakFactory->isPeaksWorkspaceIntegrated())
   {
-    double peakRadius = p_peakFactory->getIntegrationRadius(); 
+    double peakRadius = p_peakFactory->getIntegrationRadius();
     const int resolution = 6;
     vtkSphereSource *sphere = vtkSphereSource::New();
     sphere->SetRadius(peakRadius);
@@ -130,7 +130,7 @@ int vtkNexusPeaksReader::RequestInformation(
 {
   Mantid::API::FrameworkManager::Instance();
   //This is just a peaks workspace so should load really quickly.
-  if(!m_isSetup) 
+  if(!m_isSetup)
   {
     // This actually loads the peaks file
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexusProcessed");
@@ -146,7 +146,7 @@ int vtkNexusPeaksReader::RequestInformation(
     alg->removeObserver(observer);
 
     Workspace_sptr result=AnalysisDataService::Instance().retrieve("LoadedPeaksWS");
-    m_PeakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
+    m_PeakWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
     m_wsTypeName = m_PeakWS->id();
     m_isSetup = true;
   }
@@ -173,7 +173,7 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
   boost::algorithm::trim(extension);
   if(extension != ".nxs")
   {
-    return 0; 
+    return 0;
   }
 
   auto file = std::make_unique<::NeXus::File>(fileString);

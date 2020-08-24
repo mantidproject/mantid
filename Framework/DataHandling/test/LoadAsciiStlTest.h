@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOAD_ASCIISTL_TEST_H_
-#define LOAD_ASCIISTL_TEST_H_
+#pragma once
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
@@ -26,21 +25,21 @@ public:
   void test_cube() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
     auto Loader = LoadAsciiStl(path, units);
-    auto cube = Loader.readStl();
+    auto cube = Loader.readShape();
     assert_shape_matches(cube, 8, 12, 3000, 0.001);
   }
 
   void test_cylinder() {
     std::string path = FileFinder::Instance().getFullPath("cylinder.stl");
     auto Loader = LoadAsciiStl(path, units);
-    auto cylinder = Loader.readStl();
+    auto cylinder = Loader.readShape();
     assert_shape_matches(cylinder, 722, 1440, 589, 1);
   }
 
   void test_tube() {
     std::string path = FileFinder::Instance().getFullPath("tube.stl");
     auto Loader = LoadAsciiStl(path, units);
-    auto tube = Loader.readStl();
+    auto tube = Loader.readShape();
     assert_shape_matches(tube, 1080, 2160, 7068, 1);
   }
 
@@ -54,10 +53,10 @@ public:
     loadFailureTest("invalid_triangle.stl");
   }
 
-  void loadFailureTest(const std::string filename) {
+  void loadFailureTest(const std::string &filename) {
     std::string path = FileFinder::Instance().getFullPath(filename);
     auto Loader = LoadAsciiStl(path, units);
-    TS_ASSERT_THROWS_ANYTHING(Loader.readStl());
+    TS_ASSERT_THROWS_ANYTHING(Loader.readShape());
   }
 
   void test_return_false_on_binary_stl() {
@@ -83,5 +82,3 @@ private:
   }
   const ScaleUnits units = ScaleUnits::metres;
 };
-
-#endif /* LOAD_ASCIISTL_TEST_H_ */

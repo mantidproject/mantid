@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
@@ -35,7 +35,8 @@ using namespace Mantid::Kernel;
  *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
  */
 MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
-                                             MantidUI *mui, Qt::WFlags flags,
+                                             MantidUI *mui,
+                                             const Qt::WFlags &flags,
                                              size_t experimentInfoIndex)
     : SampleLogDialogBase(wsname, mui->appWindow(), flags, experimentInfoIndex),
       m_mantidUI(mui) {

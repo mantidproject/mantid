@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/OneStepMDEW.h"
 #include "MantidAPI/FileProperty.h"
@@ -59,7 +59,7 @@ void OneStepMDEW::exec() {
   loadAlg->executeAsChildAlg();
   Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
   IEventWorkspace_sptr tempWS =
-      boost::dynamic_pointer_cast<IEventWorkspace>(temp);
+      std::dynamic_pointer_cast<IEventWorkspace>(temp);
 
   // --------- Now Convert -------------------------------
 

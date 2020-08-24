@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADTOFRAWNEXUSTEST_H_
-#define LOADTOFRAWNEXUSTEST_H_
+#pragma once
 
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 
@@ -65,7 +64,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
     TS_ASSERT(ws);
     if (!ws)
@@ -135,10 +134,10 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws1, ws2;
     TS_ASSERT_THROWS_NOTHING(
-        ws1 = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws1 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
     TS_ASSERT_THROWS_NOTHING(
-        ws2 = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws2 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "outWS_event_2D")););
     TS_ASSERT(ws1);
@@ -206,7 +205,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
     TS_ASSERT(ws);
     if (!ws)
@@ -275,5 +274,3 @@ public:
     TS_ASSERT(loader.execute());
   }
 };
-
-#endif /*LOADTOFRAWNEXUSTEST_H_*/

@@ -1,24 +1,24 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidKernel/RebinParamsValidator.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
 class RebinParamsValidatorTest : public CxxTest::TestSuite {
 public:
   void testClone() {
-    IValidator_sptr v = boost::make_shared<RebinParamsValidator>();
+    IValidator_sptr v = std::make_shared<RebinParamsValidator>();
     IValidator_sptr vv = v->clone();
     TS_ASSERT_DIFFERS(v, vv);
-    TS_ASSERT(boost::dynamic_pointer_cast<RebinParamsValidator>(vv));
+    TS_ASSERT(std::dynamic_pointer_cast<RebinParamsValidator>(vv));
   }
 
   void testCast() {

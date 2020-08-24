@@ -98,7 +98,7 @@ QGroupBox:title {
           </item>
           <item row="6" column="2">
            <widget class="QPushButton" name="button_focus">
-            <property name="enabled">
+		    <property name="enabled">
              <bool>true</bool>
             </property>
             <property name="text">
@@ -107,7 +107,7 @@ QGroupBox:title {
            </widget>
           </item>
           <item row="0" column="0" colspan="3">
-           <widget class="FileFinder" name="finder_focus" native="true">
+           <widget class="FileFinderWidget" name="finder_focus" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -132,6 +132,9 @@ QGroupBox:title {
           <item row="6" column="0" colspan="2">
            <widget class="QCheckBox" name="check_plotOutput">
             <property name="enabled">
+             <bool>true</bool>
+            </property>
+		    <property name="checked">
              <bool>true</bool>
             </property>
             <property name="text">
@@ -199,9 +202,9 @@ QGroupBox:title {
  </widget>
  <customwidgets>
   <customwidget>
-   <class>FileFinder</class>
+   <class>FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>mantidqt.widgets.filefinder</header>
+   <header>mantidqt.widgets.filefinderwidget</header>
    <container>1</container>
   </customwidget>
   <customwidget>

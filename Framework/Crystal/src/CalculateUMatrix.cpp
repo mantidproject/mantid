@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CalculateUMatrix.h"
 #include "MantidAPI/Sample.h"
@@ -27,11 +27,11 @@ void CalculateUMatrix::init() {
   this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "An input workspace.");
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive =
-      boost::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> mustBePositive =
+      std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  boost::shared_ptr<BoundedValidator<double>> reasonable_angle =
-      boost::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> reasonable_angle =
+      std::make_shared<BoundedValidator<double>>();
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
   // put in negative values, so user is forced to input all parameters. no

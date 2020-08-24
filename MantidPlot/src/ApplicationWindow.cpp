@@ -180,6 +180,7 @@
 #include <gsl/gsl_sort.h>
 
 #include <boost/regex.hpp>
+#include <utility>
 
 #include <Poco/Path.h>
 
@@ -217,6 +218,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -341,7 +343,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   m_sharedMenuBar = new QMenuBar(nullptr);
   m_sharedMenuBar->setNativeMenuBar(true);
 #endif
-  setWindowTitle(tr("MantidPlot - untitled")); // Mantid
+  setWindowTitle(
+      tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
   setObjectName("main application");
   initGlobalConstants();
   QPixmapCache::setCacheLimit(20 * QPixmapCache::cacheLimit());
@@ -485,8 +488,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
     }
 
     const QString scriptPath = scriptsDir + '/' + pyQtInterfaceFile;
-
-    if (QFileInfo(scriptPath).exists()) {
+    if (pyQtInterfaceFile.toStdString() ==
+        "Sample_Transmission_Calculator.py") {
+    } else if (QFileInfo(scriptPath).exists()) {
       const QString pyQtInterfaceName =
           QFileInfo(scriptPath).baseName().replace("_", " ");
       m_interfaceNameDataPairs.append(qMakePair(pyQtInterfaceName, scriptPath));
@@ -1079,7 +1083,8 @@ void ApplicationWindow::initToolBars() {
 
 void ApplicationWindow::insertTranslatedStrings() {
   if (projectname == "untitled")
-    setWindowTitle(tr("MantidPlot - untitled")); // Mantid
+    setWindowTitle(
+        tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
 
   QStringList labels;
   labels << "Name"
@@ -3161,7 +3166,7 @@ void ApplicationWindow::initTable(Table *w, const QString &caption) {
  * base
  */
 TableStatistics *ApplicationWindow::newTableStatistics(Table *base, int type,
-                                                       QList<int> target,
+                                                       const QList<int> &target,
                                                        const QString &caption) {
   TableStatistics *s = new TableStatistics(scriptingEnv(), this, base,
                                            (TableStatistics::Type)type, target);
@@ -4231,7 +4236,7 @@ void ApplicationWindow::importASCII(
     const QString &local_column_separator, int local_ignored_lines,
     bool local_rename_columns, bool local_strip_spaces,
     bool local_simplify_spaces, bool local_import_comments,
-    bool update_dec_separators, QLocale local_separators,
+    bool update_dec_separators, const QLocale &local_separators,
     const QString &local_comment_string, bool import_read_only, int endLineChar,
     const QString &sepforloadAscii) {
   if (files.isEmpty())
@@ -4627,7 +4632,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   cacheWorkingDirectory();
   projectname = filename;
-  setWindowTitle("MantidPlot - " + filename);
+  setWindowTitle("MantidPlot (End of Life, use Workbench) - " + filename);
 
   d_opening_file = true;
 
@@ -6015,7 +6020,7 @@ bool ApplicationWindow::saveProject(bool compress) {
   ProjectSerialiser serialiser(this);
   serialiser.save(projectname, compress);
 
-  setWindowTitle("MantidPlot - " + projectname);
+  setWindowTitle("MantidPlot (End of Life, use Workbench) - " + projectname);
   savedProject();
 
   if (autoSave) {
@@ -6083,7 +6088,7 @@ void ApplicationWindow::prepareSaveProject() { execSaveProjectDialog(); }
  * The project was just saved. Update the main window.
  */
 void ApplicationWindow::postSaveProject() {
-  setWindowTitle("MantidPlot - " + projectname);
+  setWindowTitle("MantidPlot (End of Life, use Workbench) - " + projectname);
 
   if (autoSave) {
     if (savingTimerId)
@@ -6158,7 +6163,7 @@ void ApplicationWindow::loadDataFile() {
   saveSettings(); // save new list of recent files
 }
 
-void ApplicationWindow::loadDataFileByName(QString fn) {
+void ApplicationWindow::loadDataFileByName(const QString &fn) {
   QFileInfo fnInfo(fn);
   AlgorithmInputHistory::Instance().setPreviousDirectory(
       fnInfo.absoluteDir().path());
@@ -9711,7 +9716,8 @@ void ApplicationWindow::newProject(const bool doNotSave) {
   folders->blockSignals(false);
 
   // Reset everything else
-  setWindowTitle(tr("MantidPlot - untitled")); // Mantid
+  setWindowTitle(
+      tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
   projectname = "untitled";
 
   if (actionSaveProject)
@@ -13596,7 +13602,8 @@ ApplicationWindow *ApplicationWindow::importOPJ(const QString &filename,
     if (newProject)
       app = new ApplicationWindow(factorySettings);
 
-    app->setWindowTitle("MantidPlot - " + filename); // Mantid
+    app->setWindowTitle("MantidPlot (End of Life, use Workbench) - " +
+                        filename); // Mantid
     app->restoreApplicationGeometry();
     app->projectname = filename;
     app->recentProjects.removeAll(filename);
@@ -13709,7 +13716,7 @@ void ApplicationWindow::updateRecentProjectsList() {
                                   recentProjects[i]);
 }
 
-void ApplicationWindow::updateRecentFilesList(QString fname) {
+void ApplicationWindow::updateRecentFilesList(const QString &fname) {
   if (!fname.isEmpty()) {
     recentFiles.removeAll(fname);
     recentFiles.push_front(fname);
@@ -16791,8 +16798,8 @@ bool ApplicationWindow::isOfType(const QObject *obj,
  * @param sourceFile The full path to the .project file
  * @return True is loading was successful, false otherwise
  */
-bool ApplicationWindow::loadProjectRecovery(std::string sourceFile,
-                                            std::string recoveryFolder) {
+bool ApplicationWindow::loadProjectRecovery(const std::string &sourceFile,
+                                            const std::string &recoveryFolder) {
   // Wait on this thread until scriptWindow is finished (Should be a seperate
   // thread)
   do {
@@ -16801,7 +16808,7 @@ bool ApplicationWindow::loadProjectRecovery(std::string sourceFile,
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   // File version is not applicable to project recovery - so set to 0
-  const auto loadSuccess = projectWriter.load(sourceFile, 0);
+  const auto loadSuccess = projectWriter.load(std::move(sourceFile), 0);
 
   // Handle the removal of old checkpoints and start project saving again
   Poco::Path deletePath(recoveryFolder);
@@ -16820,7 +16827,7 @@ bool ApplicationWindow::loadProjectRecovery(std::string sourceFile,
  * @param destination:: The full path to write the recovery file to
  * @return True if saving is successful, false otherwise
  */
-bool ApplicationWindow::saveProjectRecovery(std::string destination) {
+bool ApplicationWindow::saveProjectRecovery(const std::string &destination) {
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   return projectWriter.save(QString::fromStdString(destination));

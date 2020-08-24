@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEDATA_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEDATA_H
+#pragma once
 /** This file defines the RowData, GroupData and TreeData type aliases used by
    the
     DataProcessor widget.
@@ -36,7 +35,7 @@ class DLLExport RowData {
 public:
   // Constructors
   explicit RowData(const int columnCount);
-  explicit RowData(QStringList data);
+  explicit RowData(const QStringList &data);
   explicit RowData(const std::vector<std::string> &data);
   explicit RowData(const RowData &src);
 
@@ -113,7 +112,7 @@ public:
   bool reductionFailed() const;
 
   /// Get the reduced workspace name, optionally adding a prefix
-  QString reducedName(const QString prefix = QString()) const;
+  QString reducedName(const QString &prefix = QString()) const;
   /// Set the reduced workspace name
   void setReducedName(const QString &name) { m_reducedName = name; }
   bool hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName,
@@ -151,4 +150,3 @@ EXPORT_OPT_MANTIDQT_COMMON bool canPostprocess(GroupData const &group);
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEDATA_H

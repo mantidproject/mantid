@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_
-#define MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_
+#pragma once
 
 #include "ui_MuonSequentialFitDialog.h"
 
@@ -57,7 +56,7 @@ private:
 
   /// Add a new entry to the diagnosis table
   void addDiagnosisEntry(const std::string &runTitle, double fitQuality,
-                         Mantid::API::IFunction_sptr fittedFunction);
+                         const Mantid::API::IFunction_sptr &fittedFunction);
 
   /// Helper function to create new item for Diagnosis table
   QTableWidgetItem *createTableWidgetItem(const QString &text);
@@ -91,7 +90,7 @@ private:
   static std::string isValidLabel(const std::string &label);
 
   /// Returns displayable title for the given workspace
-  static std::string getRunTitle(Mantid::API::Workspace_const_sptr ws);
+  static std::string getRunTitle(const Mantid::API::Workspace_const_sptr &ws);
 
   // -- SLOTS ------------------------------------------------------
 
@@ -124,5 +123,3 @@ private slots:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_ */

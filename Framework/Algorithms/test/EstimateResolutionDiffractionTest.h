@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -65,9 +65,8 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outputws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("PG3_Resolution"));
+    MatrixWorkspace_sptr outputws = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("PG3_Resolution"));
     TS_ASSERT(outputws);
     if (!outputws)
       return;
@@ -100,7 +99,7 @@ public:
     lambda->addValue(time0, 1.066);
 
     // Add log to workspace
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("PG3_Sctrach"));
     ws->mutableRun().addProperty(lambda);
 

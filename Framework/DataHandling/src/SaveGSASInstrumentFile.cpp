@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveGSASInstrumentFile.h"
 #include "MantidAPI/FileProperty.h"
@@ -73,7 +73,7 @@ private:
   std::vector<int> m_vruns;
 };
 
-using ChopperConfiguration_sptr = boost::shared_ptr<ChopperConfiguration>;
+using ChopperConfiguration_sptr = std::shared_ptr<ChopperConfiguration>;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -142,8 +142,7 @@ vector<unsigned int> ChopperConfiguration::getBankIDs() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/**
- */
+
 bool ChopperConfiguration::hasBank(unsigned int bankid) const {
   return std::find(m_bankIDs.begin(), m_bankIDs.end(), bankid) !=
          m_bankIDs.end();
@@ -315,13 +314,13 @@ void SaveGSASInstrumentFile::init() {
 
   vector<string> instruments{"powgen", "nomad"};
   declareProperty("Instrument", "powgen",
-                  boost::make_shared<StringListValidator>(instruments),
+                  std::make_shared<StringListValidator>(instruments),
                   "Name of the instrument that parameters are belonged to. "
                   "So far, only PG3 and NOM are supported.");
 
   vector<string> vecfreq{"10", "30", "60"};
   declareProperty("ChopperFrequency", "60",
-                  boost::make_shared<StringListValidator>(vecfreq),
+                  std::make_shared<StringListValidator>(vecfreq),
                   "Frequency of the chopper. ");
 
   declareProperty("IDLine", "",
@@ -329,7 +328,7 @@ void SaveGSASInstrumentFile::init() {
   declareProperty("Sample", "",
                   "Sample information written to header (title) ");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  std::shared_ptr<BoundedValidator<double>> mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -506,7 +505,7 @@ void SaveGSASInstrumentFile::initConstants(
 /** Parse profile table workspace to a map (the new ...
  */
 void SaveGSASInstrumentFile::parseProfileTableWorkspace(
-    ITableWorkspace_sptr ws,
+    const ITableWorkspace_sptr &ws,
     map<unsigned int, map<string, double>> &profilemap) {
   size_t numbanks = ws->columnCount() - 1;
   size_t numparams = ws->rowCount();
@@ -570,7 +569,7 @@ ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
 
   // Create a configuration object
   ChopperConfiguration_sptr chconfig =
-      boost::make_shared<ChopperConfiguration>(bankids);
+      std::make_shared<ChopperConfiguration>(bankids);
 
   // Add chopper/instrument constants by banks
   for (bmiter = profmap.begin(); bmiter != profmap.end(); ++bmiter) {
@@ -640,8 +639,8 @@ SaveGSASInstrumentFile::setupPG3Constants(int intfrequency) {
   }
 
   // Return
-  return boost::make_shared<ChopperConfiguration>(
-      intfrequency, bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
+  return std::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr,
+                                                mndspstr, mxdspstr, maxtofstr);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -671,8 +670,8 @@ SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
   }
 
   // Create configuration
-  return boost::make_shared<ChopperConfiguration>(
-      intfrequency, bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
+  return std::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr,
+                                                mndspstr, mxdspstr, maxtofstr);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -897,74 +896,74 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
     throw runtime_error(errss.str());
   }
 
-  fprintf(pFile, "INS %2d ICONS%10.3f%10.3f%10.3f          %10.3f%5d%10.3f\n",
+  fprintf(pFile, "INS %2u ICONS%10.3f%10.3f%10.3f          %10.3f%5d%10.3f\n",
           bankid, instC * 1.00009, 0.0, zero, 0.0, 0, 0.0);
-  fprintf(pFile, "INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid,
+  fprintf(pFile, "INS %2uBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid,
           m_L2, twotheta, 0., 0., 0.2, 1, 1);
 
-  fprintf(pFile, "INS %2dBAKGD     1    4    Y    0    Y\n", bankid);
-  fprintf(pFile, "INS %2dI HEAD %s\n", bankid, titleline.c_str());
-  fprintf(pFile, "INS %2dI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0,
+  fprintf(pFile, "INS %2uBAKGD     1    4    Y    0    Y\n", bankid);
+  fprintf(pFile, "INS %2uI HEAD %s\n", bankid, titleline.c_str());
+  fprintf(pFile, "INS %2uI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0,
           mindsp * 0.001 * instC, maxtof, randint);
-  fprintf(pFile, "INS %2dINAME   %s \n", bankid, m_instrument.c_str());
-  fprintf(pFile, "INS %2dPRCF1 %5d%5d%10.5f\n", bankid, -3, 21, 0.002);
-  fprintf(pFile, "INS %2dPRCF11%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uINAME   %s \n", bankid, m_instrument.c_str());
+  fprintf(pFile, "INS %2uPRCF1 %5d%5d%10.5f\n", bankid, -3, 21, 0.002);
+  fprintf(pFile, "INS %2uPRCF11%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, sig0);
-  fprintf(pFile, "INS %2dPRCF12%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2,
+  fprintf(pFile, "INS %2uPRCF12%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2,
           gam0, gam1);
-  fprintf(pFile, "INS %2dPRCF13%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0,
+  fprintf(pFile, "INS %2uPRCF13%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF14%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF14%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF15%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF15%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF16%15.6f\n", bankid, 0.0);
-  fprintf(pFile, "INS %2dPAB3    %3d\n", bankid, 90);
+  fprintf(pFile, "INS %2uPRCF16%15.6f\n", bankid, 0.0);
+  fprintf(pFile, "INS %2uPAB3    %3d\n", bankid, 90);
 
   for (size_t k = 0; k < 90; ++k) {
-    fprintf(pFile, "INS %2dPAB3%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
+    fprintf(pFile, "INS %2uPAB3%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
             static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k], m_galpha[k],
             m_gbeta[k]);
   }
-  fprintf(pFile, "INS %2dPRCF2 %5i%5i%10.5f\n", bankid, -4, 27, 0.002);
-  fprintf(pFile, "INS %2dPRCF21%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF2 %5i%5i%10.5f\n", bankid, -4, 27, 0.002);
+  fprintf(pFile, "INS %2uPRCF21%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, sig1);
-  fprintf(pFile, "INS %2dPRCF22%15.6f%15.6f%15.6f%15.6f\n", bankid, sig2, gam2,
+  fprintf(pFile, "INS %2uPRCF22%15.6f%15.6f%15.6f%15.6f\n", bankid, sig2, gam2,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF23%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF23%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF24%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF24%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF25%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF25%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF26%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF26%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF27%15.6f%15.6f%15.6f \n", bankid, 0.0, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF27%15.6f%15.6f%15.6f \n", bankid, 0.0, 0.0, 0.0);
 
-  fprintf(pFile, "INS %2dPAB4    %3i\n", bankid, 90);
+  fprintf(pFile, "INS %2uPAB4    %3i\n", bankid, 90);
   for (size_t k = 0; k < 90; ++k) {
-    fprintf(pFile, "INS %2dPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
+    fprintf(pFile, "INS %2uPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
             static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k], m_galpha[k],
             m_gbeta[k]);
   }
 
-  fprintf(pFile, "INS %2dPRCF3 %5i%5i%10.5f\n", bankid, -5, 21, 0.002);
-  fprintf(pFile, "INS %2dPRCF31%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF3 %5i%5i%10.5f\n", bankid, -5, 21, 0.002);
+  fprintf(pFile, "INS %2uPRCF31%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, sig0);
-  fprintf(pFile, "INS %2dPRCF32%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2,
+  fprintf(pFile, "INS %2uPRCF32%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2,
           gam0, gam1);
-  fprintf(pFile, "INS %2dPRCF33%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0,
+  fprintf(pFile, "INS %2uPRCF33%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF34%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF34%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF35%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
+  fprintf(pFile, "INS %2uPRCF35%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
           0.0, 0.0);
-  fprintf(pFile, "INS %2dPRCF36%15.6f\n", bankid, 0.0);
+  fprintf(pFile, "INS %2uPRCF36%15.6f\n", bankid, 0.0);
 
-  fprintf(pFile, "INS %2dPAB5    %3i\n", bankid,
+  fprintf(pFile, "INS %2uPAB5    %3i\n", bankid,
           90); // 90 means there will be 90 lines of table
   for (size_t k = 0; k < 90; k++) {
-    fprintf(pFile, "INS %2dPAB5%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
+    fprintf(pFile, "INS %2uPAB5%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
             static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k], m_galpha[k],
             m_gbeta[k]);
   }
@@ -1087,7 +1086,7 @@ double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero,
  * @param irffilename
  */
 void SaveGSASInstrumentFile::loadFullprofResolutionFile(
-    std::string irffilename) {
+    const std::string &irffilename) {
   IAlgorithm_sptr loadfpirf;
   try {
     loadfpirf = createChildAlgorithm("LoadFullprofResolution");

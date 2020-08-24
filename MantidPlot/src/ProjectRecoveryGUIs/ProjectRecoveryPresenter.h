@@ -1,16 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROJECTRECOVERYPRESENTER_H
-#define PROJECTRECOVERYPRESENTER_H
+#pragma once
 
 #include "ProjectRecoveryModel.h"
 #include <QDialog>
 #include <QStringList>
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {
@@ -53,5 +51,3 @@ private:
   OpenView m_openView;
   bool m_startMantidNormallyCalled;
 };
-
-#endif // PROJECTRECOVERYPRESENTER_H

@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTRAYTRACERTEST_H_
-#define INSTRUMENTRAYTRACERTEST_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -35,8 +34,8 @@ public:
   }
 
   void test_That_Constructor_Does_Not_Throw_On_Giving_A_Valid_Instrument() {
-    boost::shared_ptr<Instrument> testInst =
-        boost::make_shared<Instrument>("empty");
+    std::shared_ptr<Instrument> testInst =
+        std::make_shared<Instrument>("empty");
     ObjComponent *source = new ObjComponent("moderator", nullptr);
     testInst->add(source);
     testInst->markAsSource(source);
@@ -47,7 +46,7 @@ public:
 
   void
   test_That_Constructor_Throws_Invalid_Argument_On_Giving_A_Null_Instrument() {
-    TS_ASSERT_THROWS(new InstrumentRayTracer(boost::shared_ptr<Instrument>()),
+    TS_ASSERT_THROWS(new InstrumentRayTracer(std::shared_ptr<Instrument>()),
                      const std::invalid_argument &);
   }
 
@@ -65,18 +64,13 @@ public:
     tracker.trace(V3D(0., 0., 1));
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 2);
-    // Check they are actually what we expect: 1 with the sample and 1 with the
-    // central detector
-    IComponent_const_sptr centralPixel =
-        testInst->getComponentByName("pixel-(0;0)");
-    IComponent_const_sptr sampleComp = testInst->getSample();
+    // Check they are actually what we expect: 1 with the central detector
+    IComponent_const_sptr centralPixelBank1 =
+        testInst->getComponentByName("bank1/pixel-(0;0)");
+    IComponent_const_sptr centralPixelBank2 =
+        testInst->getComponentByName("bank2/pixel-(0;0)");
 
-    if (!sampleComp) {
-      TS_FAIL("Test instrument has been changed, the sample has been removed. "
-              "Ray tracing tests need to be updated.");
-      return;
-    }
-    if (!centralPixel) {
+    if ((!centralPixelBank1) || (!centralPixelBank2)) {
       TS_FAIL("Test instrument has been changed, the instrument config has "
               "changed. Ray tracing tests need to be updated.");
       return;
@@ -84,28 +78,29 @@ public:
     Links::const_iterator resultItr = results.begin();
     Link firstIntersect = *resultItr;
 
-    TS_ASSERT_DELTA(firstIntersect.distFromStart, 10.001, 1e-6);
-    TS_ASSERT_DELTA(firstIntersect.distInsideObject, 0.002, 1e-6);
+    TS_ASSERT_DELTA(firstIntersect.distFromStart, 15.004, 1e-6);
+    TS_ASSERT_DELTA(firstIntersect.distInsideObject, 0.008, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.entryPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.entryPoint.Y(), 0.0, 1e-6);
-    TS_ASSERT_DELTA(firstIntersect.entryPoint.Z(), -0.001, 1e-6);
+    TS_ASSERT_DELTA(firstIntersect.entryPoint.Z(), 4.996, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Y(), 0.0, 1e-6);
-    TS_ASSERT_DELTA(firstIntersect.exitPoint.Z(), 0.001, 1e-6);
-    TS_ASSERT_EQUALS(firstIntersect.componentID, sampleComp->getComponentID());
+    TS_ASSERT_DELTA(firstIntersect.exitPoint.Z(), 5.004, 1e-6);
+    TS_ASSERT_EQUALS(firstIntersect.componentID,
+                     centralPixelBank1->getComponentID());
 
     ++resultItr;
     Link secondIntersect = *resultItr;
-    TS_ASSERT_DELTA(secondIntersect.distFromStart, 15.004, 1e-6);
+    TS_ASSERT_DELTA(secondIntersect.distFromStart, 20.004, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.distInsideObject, 0.008, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.entryPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.entryPoint.Y(), 0.0, 1e-6);
-    TS_ASSERT_DELTA(secondIntersect.entryPoint.Z(), 4.996, 1e-6);
+    TS_ASSERT_DELTA(secondIntersect.entryPoint.Z(), 9.996, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Y(), 0.0, 1e-6);
-    TS_ASSERT_DELTA(secondIntersect.exitPoint.Z(), 5.004, 1e-6);
+    TS_ASSERT_DELTA(secondIntersect.exitPoint.Z(), 10.004, 1e-6);
     TS_ASSERT_EQUALS(secondIntersect.componentID,
-                     centralPixel->getComponentID());
+                     centralPixelBank2->getComponentID());
 
     // Results vector should be empty after first getResults call
     results = tracker.getResults();
@@ -164,29 +159,30 @@ public:
    * @param expectX :: expected x index, -1 if off
    * @param expectY :: expected y index, -1 if off
    */
-  void doTestRectangularDetector(std::string message, Instrument_sptr inst,
-                                 V3D testDir, int expectX, int expectY) {
+  void doTestRectangularDetector(const std::string &message,
+                                 const Instrument_sptr &inst, V3D testDir,
+                                 int expectX, int expectY) {
     InstrumentRayTracer tracker(inst);
     testDir.normalize();
     tracker.traceFromSample(testDir);
 
     Links results = tracker.getResults();
     if (expectX == -1) { // Expect no intersection
-      TSM_ASSERT_LESS_THAN(message, results.size(), 2);
+      TSM_ASSERT_LESS_THAN(message, results.size(), 1);
       return;
     }
 
-    TSM_ASSERT_EQUALS(message, results.size(), 2);
-    if (results.size() < 2)
+    TSM_ASSERT_EQUALS(message, results.size(), 1);
+    if (results.size() < 1)
       return;
 
     // Get the first result
     Link res = *results.begin();
-    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(
+    IDetector_const_sptr det = std::dynamic_pointer_cast<const IDetector>(
         inst->getComponentByID(res.componentID));
     // Parent bank
     RectangularDetector_const_sptr rect =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
+        std::dynamic_pointer_cast<const RectangularDetector>(
             det->getParent()->getParent());
     // Find the xy index from the detector ID
     std::pair<int, int> xy = rect->getXYForDetectorID(det->getID());
@@ -229,8 +225,9 @@ private:
   /// Setup the shared test instrument
   Instrument_sptr setupInstrument() {
     if (!m_testInst) {
-      // 9 cylindrical detectors
-      m_testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+      // 2 banks containing 9 cylindrical detectors each. Set up at different z
+      // values
+      m_testInst = ComponentCreationHelper::createTestInstrumentCylindrical(2);
     }
     return m_testInst;
   }
@@ -243,5 +240,3 @@ private:
 // PERFORMANCE TEST IS IN DataHandling/test/InstrumentRayTracerTest.h because it
 // requires LoadInstrument
 //------------------------------------------------------------------------------------------------------
-
-#endif // InstrumentRayTracerTEST_H_

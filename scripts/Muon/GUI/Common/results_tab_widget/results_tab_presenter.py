@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division)
-
 from qtpy.QtCore import QMetaObject, QObject, Slot
 
 from mantidqt.utils.observer_pattern import GenericObserver
@@ -26,6 +24,11 @@ class ResultsTabPresenter(QObject):
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
 
         self._init_view()
+
+        self.disable_tab_observer = GenericObserver(lambda: self.view.
+                                                    setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.
+                                                   setEnabled(True))
 
     # callbacks
     def on_results_table_name_edited(self):
@@ -73,6 +76,7 @@ class ResultsTabPresenter(QObject):
     @Slot()
     def _on_new_fit_performed_impl(self):
         """Use as part of an invokeMethod call to call across threads"""
+        self.model.on_new_fit_performed()
         self.view.set_fit_function_names(self.model.fit_functions())
         self._update_fit_results_view_on_new_fit()
         self._update_logs_view()

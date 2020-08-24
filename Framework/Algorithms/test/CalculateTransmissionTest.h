@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -88,11 +88,11 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
     TS_ASSERT_THROWS_NOTHING(
-        fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWsName)));
     TS_ASSERT_THROWS_NOTHING(
-        unfitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWsName + "_unfitted")));
 
@@ -137,10 +137,10 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
     TS_ASSERT_THROWS_NOTHING(
-        fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_THROWS_NOTHING(
-        unfitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWS + "_unfitted")));
 
@@ -183,7 +183,7 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
     TS_ASSERT_THROWS_NOTHING(
-        fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
     auto &fit = fitted->y(0);
@@ -235,7 +235,7 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-        output = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        output = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_DELTA(output->y(0)[0], 5.0, 0.005)
 
@@ -244,7 +244,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("TransmissionMonitor", 1))
     trans.execute();
     TS_ASSERT_THROWS_NOTHING(
-        output = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        output = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_DELTA(output->y(0)[0], 0.2, 0.005)
 
@@ -268,7 +268,7 @@ public:
     TS_ASSERT(trans.isExecuted());
 
     Mantid::API::MatrixWorkspace_const_sptr extra =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "CalculateTransmissionTest_extra"));
 
@@ -307,11 +307,11 @@ public:
     TS_ASSERT(trans.isExecuted());
     Mantid::API::MatrixWorkspace_const_sptr logged, lineared;
     TS_ASSERT_THROWS_NOTHING(
-        logged = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        logged = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "CalculateTransmissionTest_log")));
     TS_ASSERT_THROWS_NOTHING(
-        lineared = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        lineared = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "CalculateTransmissionTest_linear")));
 
@@ -349,10 +349,10 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
 
     TS_ASSERT_THROWS_NOTHING(
-        fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_THROWS_NOTHING(
-        unfitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWS + "_unfitted")));
 
@@ -361,10 +361,9 @@ public:
       auto &fitted_x = fitted->x(0);
 
       //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
-      double x;
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
-        x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
+        double x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
         TS_ASSERT_DELTA(fitted_y[i],
                         26.6936 - 9.31494 * x + 1.11532 * x * x -
                             0.044502 * x * x * x,
@@ -393,10 +392,10 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
 
     TS_ASSERT_THROWS_NOTHING(
-        fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_THROWS_NOTHING(
-        unfitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWS + "_unfitted")));
 
@@ -405,10 +404,9 @@ public:
       auto &fitted_x = fitted->x(0);
 
       //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
-      double x;
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
-        x = (fitted_x[i] + fitted_x[i + 1]) * 0.5;
+        double x = (fitted_x[i] + fitted_x[i + 1]) * 0.5;
         TS_ASSERT_DELTA(fitted_y[i],
                         26.6936 - 9.31494 * x + 1.11532 * x * x -
                             0.044502 * x * x * x,
@@ -464,9 +462,9 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(wkspName);
 
     Mantid::API::MatrixWorkspace_sptr
-        dir = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        dir = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(m_dirWS)),
-        source = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        source = std::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(m_transWS));
 
     dir->setSharedX(0, source->sharedX(0));

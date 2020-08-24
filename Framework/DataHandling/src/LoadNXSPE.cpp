@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
@@ -252,7 +253,7 @@ void LoadNXSPE::exec() {
         "incompatible sizes of fields in the NXSPE file");
   }
 
-  MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
                                           energies.size(), numBins));
   // Need to get hold of the parameter map
@@ -279,11 +280,11 @@ void LoadNXSPE::exec() {
   source->setPos(0.0, 0.0, -10.);
   instrument->add(source);
   instrument->markAsSource(source);
-  Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
+  Geometry::Component *sample = new Geometry::Component("sample");
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  boost::shared_ptr<const Geometry::CSGObject> cuboid(
+  std::shared_ptr<const Geometry::CSGObject> cuboid(
       createCuboid(0.1, 0.1, 0.1)); // FIXME: memory hog on rendering. Also,
                                     // make each detector separate size
   for (std::size_t i = 0; i < numSpectra; ++i) {
@@ -330,7 +331,7 @@ void LoadNXSPE::exec() {
   // NB. LoadParameterFile must be used on a workspace with an instrument
   if (!instrument_name.empty() && instrument_name != "NXSPE") {
     std::string IDF_filename =
-        ExperimentInfo::getInstrumentFilename(instrument_name);
+        InstrumentFileFinder::getInstrumentFilename(instrument_name);
     std::string instrument_parfile =
         IDF_filename.substr(0, IDF_filename.find("_Definition")) +
         "_Parameters.xml";
@@ -351,12 +352,15 @@ void LoadNXSPE::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-boost::shared_ptr<Geometry::CSGObject>
+std::shared_ptr<Geometry::CSGObject>
 LoadNXSPE::createCuboid(double dx, double dy, double dz) {
+  UNUSED_ARG(dx)
+  UNUSED_ARG(dy)
+  UNUSED_ARG(dz)
 
-  dx = 0.5 * std::fabs(dx);
-  dy = 0.5 * std::fabs(dy);
-  dz = 0.5 * std::fabs(dz);
+  // dx = 0.5 * std::fabs(dx);
+  // dy = 0.5 * std::fabs(dy);
+  // dz = 0.5 * std::fabs(dz);
   /*
    std::stringstream planeName;
 
@@ -406,15 +410,15 @@ LoadNXSPE::createCuboid(double dx, double dy, double dz) {
   std::string S41 = "so 0.01"; // Sphere at origin radius 0.01
 
   // First create some surfaces
-  std::map<int, boost::shared_ptr<Geometry::Surface>> SphSurMap;
-  SphSurMap[41] = boost::make_shared<Geometry::Sphere>();
+  std::map<int, std::shared_ptr<Geometry::Surface>> SphSurMap;
+  SphSurMap[41] = std::make_shared<Geometry::Sphere>();
   SphSurMap[41]->setSurface(S41);
   SphSurMap[41]->setName(41);
 
   // A sphere
   std::string ObjSphere = "-41";
-  boost::shared_ptr<Geometry::CSGObject> retVal =
-      boost::make_shared<Geometry::CSGObject>();
+  std::shared_ptr<Geometry::CSGObject> retVal =
+      std::make_shared<Geometry::CSGObject>();
   retVal->setObject(41, ObjSphere);
   retVal->populate(SphSurMap);
 

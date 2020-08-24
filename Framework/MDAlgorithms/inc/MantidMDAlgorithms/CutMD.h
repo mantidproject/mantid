@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CUTMD_H_
-#define MANTID_MDALGORITHMS_CUTMD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
@@ -15,9 +14,9 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-std::vector<std::string>
-    DLLExport findOriginalQUnits(Mantid::API::IMDWorkspace_const_sptr inws,
-                                 Mantid::Kernel::Logger &logger);
+std::vector<std::string> DLLExport
+findOriginalQUnits(const Mantid::API::IMDWorkspace_const_sptr &inws,
+                   Mantid::Kernel::Logger &logger);
 
 /** CutMD : Slices multidimensional workspaces.
 
@@ -50,5 +49,3 @@ public:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_CUTMD_H_ */

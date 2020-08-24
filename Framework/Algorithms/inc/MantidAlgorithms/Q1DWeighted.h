@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -51,7 +52,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Q1DWeighted : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Q1DWeighted : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "Q1DWeighted"; }
@@ -69,12 +70,12 @@ public:
 private:
   /// Create an output workspace
   API::MatrixWorkspace_sptr
-  createOutputWorkspace(API::MatrixWorkspace_const_sptr, const size_t,
+  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
                         const std::vector<double> &);
 
-  void bootstrap(API::MatrixWorkspace_const_sptr);
-  void calculate(API::MatrixWorkspace_const_sptr);
-  void finalize(API::MatrixWorkspace_const_sptr);
+  void bootstrap(const API::MatrixWorkspace_const_sptr &);
+  void calculate(const API::MatrixWorkspace_const_sptr &);
+  void finalize(const API::MatrixWorkspace_const_sptr &);
 
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;

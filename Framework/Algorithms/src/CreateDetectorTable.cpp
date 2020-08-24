@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidAlgorithms/CreateDetectorTable.h"
 
 using namespace Mantid::API;
@@ -52,7 +51,7 @@ void CreateDetectorTable::exec() {
 
   ITableWorkspace_sptr detectorTable;
   // Standard MatrixWorkspace
-  auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+  auto matrix = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
   if (matrix) {
     detectorTable =
         createDetectorTableWorkspace(matrix, indices, includeData, g_log);
@@ -61,7 +60,7 @@ void CreateDetectorTable::exec() {
       throw std::runtime_error("The instrument has no sample.");
     }
   } else {
-    auto peaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(inputWS);
+    auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWS);
     if (peaks) {
       detectorTable = peaks->createDetectorTable();
     }
@@ -90,7 +89,7 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
   std::map<std::string, std::string> validationOutput;
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");
-  const auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+  const auto matrix = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
 
   if (matrix) {
     const int numSpectra = static_cast<int>(matrix->getNumberHistograms());
@@ -137,8 +136,8 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
   const auto &spectrumInfo = ws->spectrumInfo();
   if (spectrumInfo.hasDetectors(0)) {
     try {
-      boost::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
-                                                  Mantid::NoDeleting());
+      std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
+                                                Mantid::NoDeleting());
       ws->getEFixed(detector);
     } catch (std::runtime_error &) {
       calcQ = false;

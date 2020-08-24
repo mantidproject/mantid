@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDBOXBASE_H_
-#define MDBOXBASE_H_
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/CoordTransform.h"
@@ -392,7 +391,7 @@ private:
 
 public:
   /// Convenience typedef for a shared pointer to a this type of class
-  using sptr = boost::shared_ptr<MDBoxBase<MDE, nd>>;
+  using sptr = std::shared_ptr<MDBoxBase<MDE, nd>>;
 
 }; //(end class MDBoxBase)
 
@@ -430,5 +429,3 @@ void MDBoxBase<MDE, nd>::calcCaches(const EventIterator &begin,
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MDBOXBASE_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_IMPORTMDHISTOWORKSPACEBASE_H_
-#define MANTID_MDALGORITHMS_IMPORTMDHISTOWORKSPACEBASE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -38,13 +37,11 @@ protected:
 private:
   // Product of the bins across all dimensions.
   size_t m_bin_product = 0;
-  Mantid::Geometry::MDFrame_uptr createMDFrame(std::string frame,
-                                               std::string unit);
+  Mantid::Geometry::MDFrame_uptr createMDFrame(const std::string &frame,
+                                               const std::string &unit);
   bool checkIfFrameValid(const std::string &frame,
                          const std::vector<std::string> &targetFrames);
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_IMPORTMDHISTOWORKSPACEBASE_H_ */

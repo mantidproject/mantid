@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTERDISPLAYTEST_H_
-#define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTERDISPLAYTEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "RunsTablePresenterTest.h"
@@ -239,6 +238,32 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testNotifyRowOutputsChangedRounding() {
+    auto presenter = makePresenter(
+        m_view, oneGroupWithARowWithInputQRangeModelMixedPrecision());
+    auto precision = 2;
+    presenter.setTablePrecision(precision);
+    auto rowLocation = location(0, 0);
+    auto reductionOptions = ReductionOptionsMap();
+    std::vector<MantidQt::MantidWidgets::Batch::Cell> roundedCells =
+        std::vector<MantidQt::MantidWidgets::Batch::Cell>(
+            {MantidQt::MantidWidgets::Batch::Cell("12345"),
+             MantidQt::MantidWidgets::Batch::Cell("0.56"),
+             MantidQt::MantidWidgets::Batch::Cell("Trans A"),
+             MantidQt::MantidWidgets::Batch::Cell("Trans B"),
+             MantidQt::MantidWidgets::Batch::Cell("0.56"),
+             MantidQt::MantidWidgets::Batch::Cell("0.90"),
+             MantidQt::MantidWidgets::Batch::Cell("0.01"),
+             MantidQt::MantidWidgets::Batch::Cell(""),
+             MantidQt::MantidWidgets::Batch::Cell(
+                 MantidQt::MantidWidgets::optionsToString(
+                     ReductionOptionsMap()))});
+    EXPECT_CALL(m_jobs, setCellsAt(rowLocation, roundedCells)).Times(1);
+    presenter.notifyRowOutputsChanged();
+
+    verifyAndClearExpectations();
+  }
+
 private:
   ReductionJobs oneGroupWithTwoRowsWithSrcAndDestTransRuns() {
     auto reductionJobs = ReductionJobs();
@@ -268,4 +293,3 @@ private:
         .WillRepeatedly(Return(defaultCell));
   }
 };
-#endif // MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTERDISPLAYTEST_H_

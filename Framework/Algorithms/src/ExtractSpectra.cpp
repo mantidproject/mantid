@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidAlgorithms/ExtractSpectra2.h"
@@ -53,6 +53,20 @@ const std::string ExtractSpectra::summary() const {
          "workspace.";
 }
 
+/// Validate the input properties are sane
+std::map<std::string, std::string> ExtractSpectra::validateInputs() {
+  std::map<std::string, std::string> helpMessages;
+  if (!isDefault("XMin") && !isDefault("XMax")) {
+    const double xmin = getProperty("XMin");
+    const double xmax = getProperty("XMax");
+    if (xmin > xmax) {
+      helpMessages["XMin"] = "XMin must be less than XMax";
+      helpMessages["XMax"] = "XMax must be greater than XMin";
+    }
+  }
+  return helpMessages;
+}
+
 /** Initialize the algorithm's properties.
  */
 void ExtractSpectra::init() {
@@ -72,7 +86,7 @@ void ExtractSpectra::init() {
                   "An X value that is in the highest X "
                   "value bin to be retained (default: max "
                   "X)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "The index number of the first entry in the Workspace that "
@@ -114,7 +128,7 @@ void ExtractSpectra::exec() {
     if (out != m_inputWorkspace)
       m_inputWorkspace = m_inputWorkspace->clone();
   } else {
-    auto extract = boost::make_shared<ExtractSpectra2>();
+    auto extract = std::make_shared<ExtractSpectra2>();
     setupAsChildAlgorithm(extract);
     extract->setWorkspaceInputProperties(
         "InputWorkspace", m_inputWorkspace, IndexType::WorkspaceIndex,
@@ -128,7 +142,7 @@ void ExtractSpectra::exec() {
   if (isDefault("XMin") && isDefault("XMax"))
     return;
 
-  eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
+  eventW = std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
   if (eventW)
     this->execEvent();
   else
@@ -260,23 +274,20 @@ void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace,
  * input workspace
  */
 void ExtractSpectra::checkProperties() {
-  m_minX = this->getXMin();
-  m_maxX = this->getXMax();
+  m_minX = this->getXMinIndex();
+  m_maxX = this->getXMaxIndex();
   const size_t xSize = m_inputWorkspace->x(0).size();
   if (m_minX > 0 || m_maxX < xSize) {
     if (m_minX > m_maxX) {
-      g_log.error("XMin must be less than XMax");
       throw std::out_of_range("XMin must be less than XMax");
     }
-    if ((m_minX == m_maxX ||
-         (m_inputWorkspace->isHistogramData() && m_maxX == m_minX + 1)) &&
-        m_commonBoundaries &&
-        !boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace)) {
-      g_log.error("The X range given lies entirely within a single bin");
-      throw std::out_of_range(
-          "The X range given lies entirely within a single bin");
-    }
     m_croppingInX = true;
+    if (m_commonBoundaries &&
+        !std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace) &&
+        (m_minX == m_maxX || (m_histogram && m_maxX == m_minX + 1))) {
+      m_minX--;
+      m_maxX = m_minX + 1 + m_histogram;
+    }
   }
   if (!m_commonBoundaries) {
     m_minX = 0;
@@ -316,7 +327,7 @@ void ExtractSpectra::checkProperties() {
       }
     }
   }
-}
+} // namespace Algorithms
 
 /** Find the X index corresponding to (or just within) the value given in the
  * XMin property.
@@ -324,17 +335,16 @@ void ExtractSpectra::checkProperties() {
  *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMin value.
  */
-size_t ExtractSpectra::getXMin(const size_t wsIndex) {
+size_t ExtractSpectra::getXMinIndex(const size_t wsIndex) {
   double minX_val = getProperty("XMin");
   size_t xIndex = 0;
   if (!isEmpty(minX_val)) { // A value has been passed to the algorithm, check
                             // it and maybe store it
-    auto &X = m_inputWorkspace->x(wsIndex);
+    const auto &X = m_inputWorkspace->x(wsIndex);
     if (m_commonBoundaries && minX_val > X.back()) {
       std::stringstream msg;
       msg << "XMin is greater than the largest X value (" << minX_val << " > "
           << X.back() << ")";
-      g_log.error(msg.str());
       throw std::out_of_range(msg.str());
     }
     // Reduce cut-off value slightly to allow for rounding errors
@@ -351,7 +361,7 @@ size_t ExtractSpectra::getXMin(const size_t wsIndex) {
  *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMax value.
  */
-size_t ExtractSpectra::getXMax(const size_t wsIndex) {
+size_t ExtractSpectra::getXMaxIndex(const size_t wsIndex) {
   const auto &X = m_inputWorkspace->x(wsIndex);
   size_t xIndex = X.size();
   // get the value that the user entered if they entered one at all
@@ -361,7 +371,6 @@ size_t ExtractSpectra::getXMax(const size_t wsIndex) {
       std::stringstream msg;
       msg << "XMax is less than the smallest X value (" << maxX_val << " < "
           << X.front() << ")";
-      g_log.error(msg.str());
       throw std::out_of_range(msg.str());
     }
     // Increase cut-off value slightly to allow for rounding errors
@@ -380,14 +389,14 @@ void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
   auto &Y = workspace.mutableY(index);
   auto &E = workspace.mutableE(index);
   const size_t size = Y.size();
-  size_t startX = this->getXMin(index);
+  size_t startX = this->getXMinIndex(index);
   if (startX > size)
     startX = size;
   for (size_t i = 0; i < startX; ++i) {
     Y[i] = 0.0;
     E[i] = 0.0;
   }
-  size_t endX = this->getXMax(index);
+  size_t endX = this->getXMaxIndex(index);
   if (endX > 0)
     endX -= m_histogram;
   for (size_t i = endX; i < size; ++i) {

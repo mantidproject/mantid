@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef ARROWMARKER_H
-#define ARROWMARKER_H
+#pragma once
 
 #include <qwt_plot_marker.h>
 
@@ -172,4 +171,3 @@ private:
    */
   QPoint d_op_startat;
 };
-#endif

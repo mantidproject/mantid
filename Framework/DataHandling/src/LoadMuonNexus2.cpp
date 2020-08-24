@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidAPI/Axis.h"
@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -24,7 +25,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -50,41 +51,56 @@ using Mantid::HistogramData::Histogram;
 using namespace Mantid::NeXus;
 using Mantid::Types::Core::DateAndTime;
 
+namespace {
+inline std::string getLoadAlgName(int confidence1, int confidenceV2) {
+  return confidence1 > confidenceV2 ? "LoadMuonNexus" : "LoadMuonNexusV2";
+}
+} // namespace
+
 /// Empty default constructor
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}
 
-/** Executes the right version of the muon nexus loader: versions 1 or 2.
- *
+/** Executes the right version of the Muon nexus loader
  *  @throw Exception::FileError If the Nexus file cannot be found/opened
  *  @throw std::invalid_argument If the optional properties are set to invalid
  *values
  */
 void LoadMuonNexus2::exec() {
-  std::string filePath = getPropertyValue("Filename");
   LoadMuonNexus1 load1;
+  LoadMuonNexusV2 loadV2;
   load1.initialize();
+  loadV2.initialize();
 
+  std::string filePath = getPropertyValue("Filename");
   Kernel::NexusDescriptor descriptor(filePath);
   int confidence1 = load1.confidence(descriptor);
   int confidence2 = this->confidence(descriptor);
+  int confidenceV2 = 0;
+  // If the file is hdf5 then we can possibly use LoadMuonNexusV2
+  // To check this we'll have to create an HDF5 descriptor for the file.
+  if (Kernel::NexusDescriptor::isReadable(filePath,
+                                          Kernel::NexusDescriptor::Version5)) {
+    Kernel::NexusHDF5Descriptor descriptorHDF5(filePath);
+    confidenceV2 = loadV2.confidence(descriptorHDF5);
+  };
 
   // if none can load the file throw
-  if (confidence1 < 80 && confidence2 < 80) {
+  if (confidence1 < 80 && confidence2 < 80 && confidenceV2 < 80) {
     throw Kernel::Exception::FileError("Cannot open the file ", filePath);
   }
-
-  if (confidence2 > confidence1) {
-    // this loader
+  // Now pick the correct alg
+  if (confidence2 > std::max(confidence1, confidenceV2)) {
+    // Use this loader
     doExec();
   } else {
-    // version 1 loader
-    IAlgorithm_sptr childAlg =
-        createChildAlgorithm("LoadMuonNexus", 0, 1, true, 1);
-    auto version1Loader = boost::dynamic_pointer_cast<API::Algorithm>(childAlg);
-    version1Loader->copyPropertiesFrom(*this);
-    version1Loader->executeAsChildAlg();
-    this->copyPropertiesFrom(*version1Loader);
-    API::Workspace_sptr outWS = version1Loader->getProperty("OutputWorkspace");
+    // Version 1 or V2
+    IAlgorithm_sptr childAlg = createChildAlgorithm(
+        getLoadAlgName(confidence1, confidenceV2), 0, 1, true, 1);
+    auto loader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
+    loader->copyPropertiesFrom(*this);
+    loader->executeAsChildAlg();
+    this->copyPropertiesFrom(*loader);
+    API::Workspace_sptr outWS = loader->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace", outWS);
   }
 }
@@ -127,8 +143,8 @@ void LoadMuonNexus2::doExec() {
   Property *ws = getProperty("OutputWorkspace");
   std::string localWSName = ws->value();
   // If multiperiod, will need to hold the Instrument & Sample for copying
-  boost::shared_ptr<Instrument> instrument;
-  boost::shared_ptr<Sample> sample;
+  std::shared_ptr<Instrument> instrument;
+  std::shared_ptr<Sample> sample;
 
   std::string detectorName;
   // Only the first NXdata found
@@ -177,13 +193,13 @@ void LoadMuonNexus2::doExec() {
 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", total_specs,
                                               nBins + 1, nBins));
   // Set the unit on the workspace to muon time, for now in the form of a Label
   // Unit
-  boost::shared_ptr<Kernel::Units::Label> lblUnit =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> lblUnit =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", Units::Symbol::Microsecond);
   localWorkspace->getAxis(0)->unit() = lblUnit;
@@ -202,7 +218,7 @@ void LoadMuonNexus2::doExec() {
 
   if (m_numberOfPeriods > 1) {
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+                std::dynamic_pointer_cast<Workspace>(wsGrpSptr));
   }
 
   // period_index is currently unused
@@ -238,7 +254,7 @@ void LoadMuonNexus2::doExec() {
       loadLogs(localWorkspace, entry, period);
     } else // We are working on a higher period of a multiperiod raw file
     {
-      localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(localWorkspace));
     }
 
@@ -298,10 +314,10 @@ void LoadMuonNexus2::doExec() {
 
     // Assign the result to the output workspace property
     if (m_numberOfPeriods > 1)
-      setProperty(outws, boost::static_pointer_cast<Workspace>(localWorkspace));
+      setProperty(outws, std::static_pointer_cast<Workspace>(localWorkspace));
     else {
       setProperty("OutputWorkspace",
-                  boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+                  std::dynamic_pointer_cast<Workspace>(localWorkspace));
     }
 
   } // loop over periods
@@ -314,7 +330,7 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
                                    const Mantid::NeXus::NXInt &counts,
                                    int period, int spec) {
   int nBins = 0;
-  int *data = nullptr;
+  const int *data = nullptr;
 
   if (counts.rank() == 3) {
     nBins = counts.dim2();
@@ -335,8 +351,8 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
  *   @param entry :: The Nexus entry
  *   @param period :: The period of this workspace
  */
-void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
-                              int period) {
+void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws,
+                              NXEntry &entry, int period) {
   // Avoid compiler warning
   (void)period;
 
@@ -373,7 +389,7 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
  * @param localWorkspace :: The workspace details to use
  */
 void LoadMuonNexus2::loadRunDetails(
-    DataObjects::Workspace2D_sptr localWorkspace) {
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);

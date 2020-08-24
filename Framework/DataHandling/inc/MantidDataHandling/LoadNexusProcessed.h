@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADNEXUSPROCESSED_H_
-#define MANTID_DATAHANDLING_LOADNEXUSPROCESSED_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -14,6 +13,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidNexus/NexusClasses.h"
 #include <map>
@@ -160,7 +160,7 @@ private:
 
   /// Read the bin masking information
   void readBinMasking(Mantid::NeXus::NXData &wksp_cls,
-                      API::MatrixWorkspace_sptr local_workspace);
+                      const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load a block of data into the workspace where it is assumed that the x
   /// bins have already been cached
@@ -169,7 +169,7 @@ private:
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea,
                  Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
                  int blocksize, int nchannels, int &hist,
-                 API::MatrixWorkspace_sptr local_workspace);
+                 const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load a block of data into the workspace where it is assumed that the x
   /// bins have already been cached
@@ -178,7 +178,7 @@ private:
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea,
                  Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
                  int blocksize, int nchannels, int &hist, int &wsIndex,
-                 API::MatrixWorkspace_sptr local_workspace);
+                 const API::MatrixWorkspace_sptr &local_workspace);
   /// Load a block of data into the workspace
   void loadBlock(Mantid::NeXus::NXDataSetTyped<double> &data,
                  Mantid::NeXus::NXDataSetTyped<double> &errors,
@@ -186,10 +186,10 @@ private:
                  Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
                  Mantid::NeXus::NXDouble &xbins, int blocksize, int nchannels,
                  int &hist, int &wsIndex,
-                 API::MatrixWorkspace_sptr local_workspace);
+                 const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
-  void loadNonSpectraAxis(API::MatrixWorkspace_sptr local_workspace,
+  void loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace,
                           Mantid::NeXus::NXData &data);
 
   /// Validates the optional 'spectra to read' properties, if they have been set
@@ -204,6 +204,9 @@ private:
       Mantid::NeXus::NXRoot &root, const std::string &entryName,
       Mantid::API::MatrixWorkspace_sptr &tempMatrixWorkspace,
       const size_t nWorkspaceEntries, const size_t p);
+
+  /// applies log filtering of the loaded logs if required
+  void applyLogFiltering(Mantid::API::Workspace_sptr local_workspace);
 
   /// Does the current workspace have uniform binning
   bool m_shared_bins;
@@ -232,10 +235,8 @@ private:
   std::unique_ptr<::NeXus::File> m_nexusFile;
 };
 /// to sort the algorithmhistory vector
-bool UDlesserExecCount(Mantid::NeXus::NXClassInfo elem1,
-                       Mantid::NeXus::NXClassInfo elem2);
+bool UDlesserExecCount(const Mantid::NeXus::NXClassInfo &elem1,
+                       const Mantid::NeXus::NXClassInfo &elem2);
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADNEXUSPROCESSED_H_*/

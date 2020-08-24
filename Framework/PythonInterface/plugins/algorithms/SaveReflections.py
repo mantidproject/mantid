@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 import os.path as osp
 import numpy as np
 from mantid.api import (AlgorithmFactory, FileProperty, FileAction, IPeaksWorkspaceProperty, PythonAlgorithm)
 from mantid.kernel import StringListValidator, Direction
-from mantid.py3compat.enum import Enum
+from enum import Enum
 
 
 def num_modulation_vectors(workspace):
@@ -285,9 +283,10 @@ class JanaFormat(object):
                     self.create_peak_line(hkl, modulation_indices,
                                           peak.getIntensity(), peak.getSigmaIntensity(),
                                           peak.getWavelength(),
-                                          get_two_theta(peak.getDSpacing(), peak.getWavelength())))
+                                          get_two_theta(peak.getDSpacing(), peak.getWavelength()),
+                                          peak.getAbsorptionWeightedPathLength()))
 
-        def create_peak_line(self, hkl, mnp, intensity, sig_int, wavelength, two_theta):
+        def create_peak_line(self, hkl, mnp, intensity, sig_int, wavelength, two_theta, t_bar):
             """
             Write the raw peak data to a file.
 
@@ -298,11 +297,12 @@ class JanaFormat(object):
             :param sig_int: Signal value
             :param wavelength: Wavelength in angstroms
             :param two_theta: Two theta of detector
+            :param t_bar: absorption weighted path length for the detector/wavelength
             """
             template = "{: >5.0f}{: >5.0f}{: >5.0f}{}{: >12.2f}{: >12.2f}{: >5.0f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}\n"
             mod_indices = "".join(["{: >5.0f}".format(value) for value in mnp])
             return template.format(hkl[0], hkl[1], hkl[2], mod_indices, intensity, sig_int, 1, wavelength,
-                                   two_theta, 1.0, 0.0, 0.0)
+                                   two_theta, 1.0, t_bar, 0.0)
 
         def write(self):
             with open(self._filepath, 'w') as handle:

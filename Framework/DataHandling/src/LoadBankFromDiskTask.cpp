@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/BankPulseTimes.h"
@@ -10,9 +10,8 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidKernel/Unit.h"
-#include <algorithm>
-
 #include "MantidNexus/NexusIOHelper.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace DataHandling {
@@ -33,7 +32,7 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(
     DefaultEventLoader &loader, const std::string &entry_name,
     const std::string &entry_type, const std::size_t numEvents,
     const bool oldNeXusFileNames, API::Progress *prog,
-    boost::shared_ptr<std::mutex> ioMutex, Kernel::ThreadScheduler &scheduler,
+    std::shared_ptr<std::mutex> ioMutex, Kernel::ThreadScheduler &scheduler,
     const std::vector<int> &framePeriodNumbers)
     : m_loader(loader), entry_name(entry_name), entry_type(entry_type),
       prog(prog), scheduler(scheduler), m_loadError(false),
@@ -60,7 +59,16 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   }
   std::string thisStartTime;
   size_t thisNumPulses = 0;
-  file.getAttr("offset", thisStartTime);
+  // If the offset is not present, use Unix epoch
+  if (!file.hasAttr("offset")) {
+    thisStartTime = "1970-01-01T00:00:00Z";
+    m_loader.alg->getLogger().warning()
+        << "In loadPulseTimes: no ISO8601 offset attribute provided for "
+           "event_time_zero, using UNIX epoch instead\n";
+  } else {
+    file.getAttr("offset", thisStartTime);
+  }
+
   if (!file.getInfo().dims.empty())
     thisNumPulses = file.getInfo().dims[0];
   file.closeData();
@@ -75,8 +83,8 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   }
 
   // Not found? Need to load and add it
-  thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file),
-                                                          m_framePeriodNumbers);
+  thisBankPulseTimes =
+      std::make_shared<BankPulseTimes>(boost::ref(file), m_framePeriodNumbers);
   m_loader.m_bankPulseTimes.emplace_back(thisBankPulseTimes);
 }
 
@@ -183,14 +191,14 @@ void LoadBankFromDiskTask::prepareEventId(
  * @param file An NeXus::File object opened at the correct group
  * @returns A new array containing the event Ids for this bank
  */
-std::unique_ptr<uint32_t[]>
+std::unique_ptr<std::vector<uint32_t>>
 LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   // This is the data size
   ::NeXus::Info id_info = file.getInfo();
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Now we allocate the required arrays
-  auto event_id = std::make_unique<uint32_t[]>(m_loadSize[0]);
+  auto event_id = std::make_unique<std::vector<uint32_t>>(m_loadSize[0]);
 
   // Check that the required space is there in the file.
   if (dim0 < m_loadSize[0] + m_loadStart[0]) {
@@ -207,7 +215,7 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   if (!m_loadError) {
     // Must be uint32
     if (id_info.type == ::NeXus::UINT32)
-      file.getSlab(event_id.get(), m_loadStart, m_loadSize);
+      file.getSlab(event_id->data(), m_loadStart, m_loadSize);
     else {
       m_loader.alg->getLogger().warning()
           << "Entry " << entry_name
@@ -218,9 +226,9 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
 
     // determine the range of pixel ids
     m_min_id =
-        *(std::min_element(event_id.get(), event_id.get() + m_loadSize[0]));
+        *(std::min_element(event_id->data(), event_id->data() + m_loadSize[0]));
     m_max_id =
-        *(std::max_element(event_id.get(), event_id.get() + m_loadSize[0]));
+        *(std::max_element(event_id->data(), event_id->data() + m_loadSize[0]));
 
     if (m_min_id > static_cast<uint32_t>(m_loader.eventid_max)) {
       // All the detector IDs in the bank are higher than the highest 'known'
@@ -248,9 +256,11 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
  * @param file An NeXus::File object opened at the correct group
  * @returns A new array containing the time of flights for this bank
  */
-std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
+std::unique_ptr<std::vector<float>>
+LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Allocate the array
-  auto event_time_of_flight = std::make_unique<float[]>(m_loadSize[0]);
+  auto event_time_of_flight =
+      std::make_unique<std::vector<float>>(m_loadSize[0]);
 
   // Get the list of event_time_of_flight's
   std::string key, tof_unit;
@@ -271,17 +281,20 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     m_loadError = true;
   }
 
-  // The Nexus standard does not specify if event_time_offset should be float or
-  // integer, so we use the NeXusIOHelper to perform the conversion to float on
-  // the fly. If the data field already contains floats, the conversion is
-  // skipped.
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart,
-                                                        m_loadSize);
+  // Mantid assumes event_time_offset to be float.
+  // Nexus only requires event_time_offset to be a NXNumber.
+  // We thus have to consider 32-bit or 64-bit options, and we
+  // explicitly allow downcasting using the additional AllowDowncasting
+  // template argument.
+  auto vec =
+      NeXus::NeXusIOHelper::readNexusSlab<float,
+                                          NeXus::NeXusIOHelper::AllowNarrowing>(
+          file, key, m_loadStart, m_loadSize);
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds
   Kernel::Units::timeConversionVector(vec, tof_unit, "microseconds");
-  std::copy(vec.begin(), vec.end(), event_time_of_flight.get());
+  std::copy(vec.begin(), vec.end(), event_time_of_flight->data());
 
   return event_time_of_flight;
 }
@@ -291,7 +304,7 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
  * @returns A new array containing the weights or a nullptr if the weights
  * are not present
  */
-std::unique_ptr<float[]>
+std::unique_ptr<std::vector<float>>
 LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   try {
     // First, get info about the event_weight field in this bank
@@ -299,13 +312,13 @@ LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   } catch (::NeXus::Exception &) {
     // Field not found error is most likely.
     m_have_weight = false;
-    return std::unique_ptr<float[]>();
+    return std::unique_ptr<std::vector<float>>();
   }
   // OK, we've got them
   m_have_weight = true;
 
   // Allocate the array
-  auto event_weight = std::make_unique<float[]>(m_loadSize[0]);
+  auto event_weight = std::make_unique<std::vector<float>>(m_loadSize[0]);
 
   ::NeXus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
@@ -318,7 +331,7 @@ LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
 
   // Check that the type is what it is supposed to be
   if (weight_info.type == ::NeXus::FLOAT32)
-    file.getSlab(event_weight.get(), m_loadStart, m_loadSize);
+    file.getSlab(event_weight->data(), m_loadStart, m_loadSize);
   else {
     m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
@@ -344,9 +357,9 @@ void LoadBankFromDiskTask::run() {
   prog->report(entry_name + ": load from disk");
 
   // arrays to load into
-  std::unique_ptr<uint32_t[]> event_id;
-  std::unique_ptr<float[]> event_time_of_flight;
-  std::unique_ptr<float[]> event_weight;
+  std::unique_ptr<std::vector<uint32_t>> event_id;
+  std::unique_ptr<std::vector<float>> event_time_of_flight;
+  std::unique_ptr<std::vector<float>> event_weight;
   std::vector<uint64_t> event_index;
 
   // Open the file
@@ -471,12 +484,12 @@ void LoadBankFromDiskTask::run() {
   auto startAt = static_cast<size_t>(m_loadStart[0]);
 
   // convert things to shared_arrays to share between tasks
-  boost::shared_array<uint32_t> event_id_shrd(event_id.release());
-  boost::shared_array<float> event_time_of_flight_shrd(
+  std::shared_ptr<std::vector<uint32_t>> event_id_shrd(event_id.release());
+  std::shared_ptr<std::vector<float>> event_time_of_flight_shrd(
       event_time_of_flight.release());
-  boost::shared_array<float> event_weight_shrd(event_weight.release());
+  std::shared_ptr<std::vector<float>> event_weight_shrd(event_weight.release());
   auto event_index_shrd =
-      boost::make_shared<std::vector<uint64_t>>(std::move(event_index));
+      std::make_shared<std::vector<uint64_t>>(std::move(event_index));
 
   std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankData>(
       m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,

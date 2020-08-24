@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -15,7 +15,7 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -32,6 +32,10 @@ SpectrumInfo::~SpectrumInfo() = default;
 
 /// Returns the size of the SpectrumInfo, i.e., the number of spectra.
 size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
+
+size_t SpectrumInfo::detectorCount() const {
+  return m_spectrumInfo.detectorCount();
+}
 
 /// Returns a const reference to the SpectrumDefinition of the spectrum.
 const SpectrumDefinition &
@@ -111,6 +115,23 @@ double SpectrumInfo::azimuthal(const size_t index) const {
   return phi / static_cast<double>(spectrumDefinition(index).size());
 }
 
+/** Calculate latitude and longitude for given spectrum index.
+ *  @param index Index of the spectrum that lat/long are required for
+ *  @return A pair containing the latitude and longitude values.
+ */
+std::pair<double, double>
+SpectrumInfo::geographicalAngles(const size_t index) const {
+  double lat{0.0}, lon{0.0};
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index)) {
+    auto latlong = m_detectorInfo.geographicalAngles(detIndex);
+    lat += latlong.first;
+    lon += latlong.second;
+  }
+  return std::pair<double, double>(
+      lat / static_cast<double>(spectrumDefinition(index).size()),
+      lon / static_cast<double>(spectrumDefinition(index).size()));
+}
+
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;
@@ -181,13 +202,13 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
                                            std::to_string(index));
   } else {
     // Else need to construct a DetectorGroup and use that
-    std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
+    std::vector<std::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &index : specDef) {
       const auto detIndex = index.first;
       det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex));
     }
     m_lastDetector[thread] =
-        boost::make_shared<Geometry::DetectorGroup>(det_ptrs);
+        std::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
   m_lastIndex[thread] = index;
   return *m_lastDetector[thread];

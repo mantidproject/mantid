@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/RRFMuon.h"
 #include "MantidAPI/Axis.h"
@@ -39,7 +39,7 @@ void RRFMuon::init() {
 
   std::vector<std::string> unitOptions{"MHz", "Gauss", "Mrad/s"};
   declareProperty("FrequencyUnits", "MHz",
-                  boost::make_shared<StringListValidator>(unitOptions),
+                  std::make_shared<StringListValidator>(unitOptions),
                   "The frequency units");
 
   declareProperty(
@@ -87,7 +87,7 @@ void RRFMuon::exec() {
 
   // Create output workspace to put results into
   API::MatrixWorkspace_sptr outputWs =
-      boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<API::MatrixWorkspace>(
           API::WorkspaceFactory::Instance().create("Workspace2D", nHisto,
                                                    nData + 1, nData));
   outputWs->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
@@ -109,7 +109,8 @@ void RRFMuon::exec() {
  *  @param uin :: [input] input workspace units
  *  @param uuser :: [input] units selected by user
  */
-double RRFMuon::unitConversionFactor(std::string uin, std::string uuser) {
+double RRFMuon::unitConversionFactor(const std::string &uin,
+                                     const std::string &uuser) {
 
   if ((uin == "microsecond")) {
 

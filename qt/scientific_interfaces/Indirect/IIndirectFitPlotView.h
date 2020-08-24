@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -28,7 +27,7 @@ public:
   virtual void watchADS(bool watch) = 0;
 
   virtual WorkspaceIndex getSelectedSpectrum() const = 0;
-  virtual TableRowIndex getSelectedSpectrumIndex() const = 0;
+  virtual FitDomainIndex getSelectedSpectrumIndex() const = 0;
   virtual TableDatasetIndex getSelectedDataIndex() const = 0;
   virtual TableDatasetIndex dataSelectionSize() const = 0;
   virtual bool isPlotGuessChecked() const = 0;
@@ -81,6 +80,9 @@ public:
   virtual void displayMessage(const std::string &message) const = 0;
   virtual void disableSpectrumPlotSelection() = 0;
 
+  virtual void allowRedraws(bool state) = 0;
+  virtual void redrawPlots() = 0;
+
 public slots:
   virtual void clearTopPreview() = 0;
   virtual void clearBottomPreview() = 0;
@@ -105,5 +107,3 @@ signals:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

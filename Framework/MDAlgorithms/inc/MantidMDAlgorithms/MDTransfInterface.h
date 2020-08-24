@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_IMD_TRANSFORMATION_H
-#define MANTID_MDALGORITHMS_IMD_TRANSFORMATION_H
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -220,10 +219,8 @@ public:
       Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const = 0;
 };
 
-using MDTransf_sptr = boost::shared_ptr<MDTransfInterface>;
-using MDTransf_const_sptr = boost::shared_ptr<const MDTransfInterface>;
+using MDTransf_sptr = std::shared_ptr<MDTransfInterface>;
+using MDTransf_const_sptr = std::shared_ptr<const MDTransfInterface>;
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

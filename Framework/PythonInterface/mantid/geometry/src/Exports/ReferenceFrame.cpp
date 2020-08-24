@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -10,7 +10,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using Mantid::Geometry::ReferenceFrame;
 using namespace boost::python;
@@ -20,7 +20,7 @@ GET_POINTER_SPECIALIZATION(ReferenceFrame)
 void export_ReferenceFrame() {
   using namespace Mantid::Geometry;
 
-  register_ptr_to_python<boost::shared_ptr<ReferenceFrame>>();
+  register_ptr_to_python<std::shared_ptr<ReferenceFrame>>();
 
   enum_<PointingAlong>("PointingAlong")
       .value("X", X)

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/Matrix.h"
@@ -878,6 +878,13 @@ void UnitCell::recalculateFromGstar(const DblMatrix &NewGstar) {
   da[4] = acos(G[0][2] / da[0] / da[2]); // beta
   da[5] = acos(G[0][1] / da[0] / da[1]); // gamma
   calculateB();
+}
+
+bool UnitCell::operator==(const UnitCell &other) const {
+  return da == other.da; // da error not used in comparison
+}
+bool UnitCell::operator!=(const UnitCell &other) const {
+  return !this->operator==(other);
 }
 
 std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {

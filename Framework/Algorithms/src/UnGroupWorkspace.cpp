@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -26,7 +26,7 @@ void UnGroupWorkspace::init() {
   // Not iterate over, removing all those which are not group workspaces
   for (const auto &name : workspaceList) {
     WorkspaceGroup_const_sptr group =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(
+        std::dynamic_pointer_cast<const WorkspaceGroup>(
             data_store.retrieve(name));
     // RNT: VC returns bad pointer after erase
     // if ( !group ) workspaceList.erase(it);
@@ -38,7 +38,7 @@ void UnGroupWorkspace::init() {
   // values
   declareProperty("InputWorkspace", "",
                   "Name of the input workspace to ungroup",
-                  boost::make_shared<StringListValidator>(groupWorkspaceList));
+                  std::make_shared<StringListValidator>(groupWorkspaceList));
 }
 
 /** Executes the algorithm
@@ -53,7 +53,7 @@ void UnGroupWorkspace::exec() {
   Workspace_sptr wsSptr = data_store.retrieve(inputws);
   // Try to cast it to a WorkspaceGroup
   WorkspaceGroup_sptr wsGrpSptr =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+      std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
   // Test the cast succeeded - it always should because of ListValidator on
   // input property
   if (!wsGrpSptr) {

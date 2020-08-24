@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -113,6 +113,8 @@ void export_Axis() {
                          "The vertical axis index [default=0]"))
       .def("extractValues", &extractAxisValues, arg("self"),
            "Return a numpy array of the axis values")
+      .def("indexOfValue", &Axis::indexOfValue, (arg("value")),
+           "Returns the index of the closest to the given value on the axis")
       .def("setUnit", &Axis::setUnit, (arg("self"), arg("unit_name")),
            return_value_policy<copy_const_reference>(),
            "Set the unit for this axis by name.")

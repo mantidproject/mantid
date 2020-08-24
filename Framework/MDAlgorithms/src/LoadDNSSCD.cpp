@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/LoadDNSSCD.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -138,24 +138,24 @@ void LoadDNSSCD::init() {
 
   const std::vector<std::string> normOptions = {"monitor", "time"};
   declareProperty("Normalization", "monitor",
-                  boost::make_shared<StringListValidator>(normOptions),
+                  std::make_shared<StringListValidator>(normOptions),
                   "Algorithm will create a separate normalization workspace. "
                   "Choose whether it should contain monitor counts or time.");
 
   const std::vector<std::string> wsOptions = {"raw", "HKL"};
   declareProperty("LoadAs", "HKL",
-                  boost::make_shared<StringListValidator>(wsOptions),
+                  std::make_shared<StringListValidator>(wsOptions),
                   "Choose whether the algorithm should load raw data"
                   "or convert to H,K,L,dE space");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  auto reasonableAngle = boost::make_shared<BoundedValidator<double>>();
+  auto reasonableAngle = std::make_shared<BoundedValidator<double>>();
   reasonableAngle->setLower(5.0);
   reasonableAngle->setUpper(175.0);
   // clang-format off
-  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
-  auto mustBe2D = boost::make_shared<ArrayLengthValidator<double> >(2);
+  auto mustBe3D = std::make_shared<ArrayLengthValidator<double> >(3);
+  auto mustBe2D = std::make_shared<ArrayLengthValidator<double> >(2);
   // clang-format on
   std::vector<double> u0(3, 0), v0(3, 0);
   u0[0] = 1.;
@@ -185,7 +185,7 @@ void LoadDNSSCD::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "OmegaOffset", 0.0,
-                      boost::make_shared<BoundedValidator<double>>(),
+                      std::make_shared<BoundedValidator<double>>(),
                       Direction::Input),
                   "Angle in degrees between (HKL1) and the beam axis"
                   "if the goniometer is at zero.");
@@ -221,14 +221,14 @@ void LoadDNSSCD::init() {
           "SaveHuberTo", "", Direction::Output, PropertyMode::Optional),
       "A workspace name to save a list of raw sample rotation angles.");
 
-  auto mustBeIntPositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeIntPositive = std::make_shared<BoundedValidator<int>>();
   mustBeIntPositive->setLower(0);
   declareProperty(
       std::make_unique<PropertyWithValue<int>>(
           "ElasticChannel", 0, std::move(mustBeIntPositive), Direction::Input),
       "Elastic channel number. Only for TOF data.");
 
-  auto mustBeNegative = boost::make_shared<BoundedValidator<double>>();
+  auto mustBeNegative = std::make_shared<BoundedValidator<double>>();
   mustBeNegative->setUpper(0.0);
   declareProperty(
       std::make_unique<PropertyWithValue<double>>(
@@ -240,7 +240,7 @@ void LoadDNSSCD::init() {
 /** Read Huber angles from a given table workspace.
  */
 
-void LoadDNSSCD::loadHuber(ITableWorkspace_sptr tws) {
+void LoadDNSSCD::loadHuber(const ITableWorkspace_sptr &tws) {
   ColumnVector<double> huber = tws->getVector("Huber(degrees)");
   // set huber[0] for each run in m_data
   for (auto &ds : m_data) {
@@ -305,7 +305,7 @@ void LoadDNSSCD::exec() {
   g_log.notice() << "The normalization workspace will contain " << m_normtype
                  << ".\n";
 
-  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr expinfo = std::make_shared<ExperimentInfo>();
   API::Run &run = expinfo->mutableRun();
   for (auto fname : filenames) {
     std::map<std::string, std::string> str_metadata;
@@ -531,7 +531,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
 
   // Creates a new instance of the MDEventInserter to output workspace
   MDEventWorkspace<MDEvent<4>, 4>::sptr mdws_mdevt_4 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(m_OutWS);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(m_OutWS);
   MDEventInserter<MDEventWorkspace<MDEvent<4>, 4>::sptr> inserter(mdws_mdevt_4);
 
   // create a normalization workspace
@@ -539,7 +539,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
 
   // Creates a new instance of the MDEventInserter to norm workspace
   MDEventWorkspace<MDEvent<4>, 4>::sptr normws_mdevt_4 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(normWS);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(normWS);
   MDEventInserter<MDEventWorkspace<MDEvent<4>, 4>::sptr> norm_inserter(
       normws_mdevt_4);
 
@@ -711,7 +711,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
 
   // Creates a new instance of the MDEventInserter to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_OutWS);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_OutWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // create a normalization workspace
@@ -719,7 +719,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
 
   // Creates a new instance of the MDEventInserter to norm workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr normws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(normWS);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(normWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> norm_inserter(
       normws_mdevt_3);
 
@@ -789,7 +789,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   setProperty("NormalizationWorkspace", normWS);
 }
 
-void LoadDNSSCD::read_data(const std::string fname,
+void LoadDNSSCD::read_data(const std::string &fname,
                            std::map<std::string, std::string> &str_metadata,
                            std::map<std::string, double> &num_metadata) {
   std::ifstream file(fname);

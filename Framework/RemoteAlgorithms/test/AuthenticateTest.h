@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REMOTEALGORITHMS_AUTHENTICATETEST_H_
-#define MANTID_REMOTEALGORITHMS_AUTHENTICATETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -33,8 +32,8 @@ public:
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<Authenticate> a;
-    TS_ASSERT(a = boost::make_shared<Authenticate>());
+    std::shared_ptr<Authenticate> a;
+    TS_ASSERT(a = std::make_shared<Authenticate>());
     // can cast to inherited interfaces and base classes
 
     TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::Authenticate *>(a.get()));
@@ -132,5 +131,3 @@ private:
   Mantid::API::IAlgorithm_sptr testAlg;
   std::vector<std::pair<std::string, std::string>> testFacilities;
 };
-
-#endif // MANTID_REMOTEALGORITHMS_AUTHENTICATETEST_H_

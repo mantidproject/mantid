@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef POLINOMFITDIALOG_H
-#define POLINOMFITDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -45,7 +44,7 @@ class PolynomFitDialog : public QDialog {
   Q_OBJECT
 
 public:
-  PolynomFitDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  PolynomFitDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 public slots:
   void fit();
@@ -66,5 +65,3 @@ private:
   QLineEdit *boxEnd;
   ColorBox *boxColor;
 };
-
-#endif

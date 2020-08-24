@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvTemplateBrowser.h"
 
@@ -20,7 +20,6 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
-#include <iostream>
 #include <limits>
 
 namespace MantidQt {
@@ -28,6 +27,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 namespace {
+
 class ScopedFalse {
   bool &m_ref;
   bool m_oldValue;
@@ -40,10 +40,12 @@ public:
   }
   ~ScopedFalse() { m_ref = m_oldValue; }
 };
+
 } // namespace
 
 ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent)
     : FunctionTemplateBrowser(parent), m_presenter(this) {
+  m_templateSubTypes.emplace_back(std::make_unique<LorentzianSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<FitSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<BackgroundSubType>());
   connect(&m_presenter, SIGNAL(functionStructureChanged()), this,
@@ -54,20 +56,22 @@ void ConvTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(true);
   m_boolManager->blockSignals(true);
   m_enumManager->blockSignals(true);
+  m_intManager->blockSignals(true);
 
   createFunctionParameterProperties();
   createDeltaFunctionProperties();
   createTempCorrectionProperties();
 
-  m_browser->addProperty(m_subTypeProperties[0]);
+  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Lorentzian]);
+  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Fit]);
   m_browser->addProperty(m_deltaFunctionOn);
   m_browser->addProperty(m_tempCorrectionOn);
-  m_browser->addProperty(m_subTypeProperties[1]);
+  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Background]);
 
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
   m_boolManager->blockSignals(false);
-  // updateState();
+  m_intManager->blockSignals(false);
 }
 
 void ConvTemplateBrowser::setFunction(const QString &funStr) {
@@ -110,8 +114,6 @@ void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) {
   m_presenter.setGlobalParameters(globals);
 }
 
-void ConvTemplateBrowser::intChanged(QtProperty *) {}
-
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   if (!m_emitBoolChange)
     return;
@@ -129,11 +131,13 @@ void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) {
 void ConvTemplateBrowser::addDeltaFunction() {
   ScopedFalse _boolBlock(m_emitBoolChange);
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
+  m_deltaFunctionOn->addSubProperty(m_deltaFunctionCenter);
   m_boolManager->setValue(m_deltaFunctionOn, true);
 }
 
 void ConvTemplateBrowser::removeDeltaFunction() {
   m_deltaFunctionOn->removeSubProperty(m_deltaFunctionHeight);
+  m_deltaFunctionOn->removeSubProperty(m_deltaFunctionCenter);
   ScopedFalse _false(m_emitBoolChange);
   m_boolManager->setValue(m_deltaFunctionOn, false);
 }
@@ -287,10 +291,20 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
       }
       parameters[index] = props;
     }
-    auto subTypeProp = m_enumManager->addProperty(subType->name());
-    m_enumManager->setEnumNames(subTypeProp,
-                                m_templateSubTypes[isub]->getTypeNames());
-    m_subTypeProperties.push_back(subTypeProp);
+    if (isub == SubTypeIndex::Lorentzian) {
+      auto subtypeProp = m_intManager->addProperty(subType->name());
+      m_intManager->setMinimum(subtypeProp, 0);
+      m_intManager->setMaximum(subtypeProp, 2);
+      m_subTypeProperties.push_back(subtypeProp);
+
+    } else {
+      auto subTypeProp = m_enumManager->addProperty(subType->name());
+      m_enumManager->setEnumNames(subTypeProp,
+                                  m_templateSubTypes[isub]->getTypeNames());
+      m_enumManager->setEnumNames(subTypeProp,
+                                  m_templateSubTypes[isub]->getTypeNames());
+      m_subTypeProperties.push_back(subTypeProp);
+    }
   }
 }
 
@@ -299,15 +313,29 @@ void ConvTemplateBrowser::setEnum(size_t subTypeIndex, int enumIndex) {
   m_enumManager->setValue(m_subTypeProperties[subTypeIndex], enumIndex);
 }
 
+void ConvTemplateBrowser::setInt(size_t subTypeIndex, int value) {
+  ScopedFalse _false(m_emitIntChange);
+  m_intManager->setValue(m_subTypeProperties[subTypeIndex], value);
+}
+
 void ConvTemplateBrowser::createDeltaFunctionProperties() {
   m_deltaFunctionOn = m_boolManager->addProperty("Delta Function");
   m_deltaFunctionHeight =
       m_parameterManager->addProperty("DeltaFunctionHeight");
   m_parameterManager->setDecimals(m_deltaFunctionHeight, 6);
+  m_parameterManager->setMinimum(m_deltaFunctionHeight, 0.0);
   m_parameterManager->setDescription(m_deltaFunctionHeight,
                                      "Delta Function Height");
   m_parameterMap[m_deltaFunctionHeight] = ParamID::DELTA_HEIGHT;
   m_parameterReverseMap[ParamID::DELTA_HEIGHT] = m_deltaFunctionHeight;
+
+  m_deltaFunctionCenter =
+      m_parameterManager->addProperty("DeltaFunctionCenter");
+  m_parameterManager->setDecimals(m_deltaFunctionCenter, 6);
+  m_parameterManager->setDescription(m_deltaFunctionCenter,
+                                     "Delta Function Height");
+  m_parameterMap[m_deltaFunctionCenter] = ParamID::DELTA_CENTER;
+  m_parameterReverseMap[ParamID::DELTA_CENTER] = m_deltaFunctionCenter;
 }
 
 void ConvTemplateBrowser::createTempCorrectionProperties() {
@@ -343,6 +371,8 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value,
 void ConvTemplateBrowser::updateParameterEstimationData(
     DataForParameterEstimationCollection &&) {}
 
+void ConvTemplateBrowser::estimateFunctionParameters() {}
+
 void ConvTemplateBrowser::setBackgroundA0(double value) {
   m_presenter.setBackgroundA0(value);
 }
@@ -353,10 +383,16 @@ void ConvTemplateBrowser::setResolution(std::string const &name,
 }
 
 void ConvTemplateBrowser::setResolution(
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_presenter.setResolution(fitResolutions);
 }
 
+void ConvTemplateBrowser::intChanged(QtProperty *prop) {
+  if (prop == m_subTypeProperties[SubTypeIndex::Lorentzian] &&
+      m_emitIntChange) {
+    m_presenter.setSubType(SubTypeIndex::Lorentzian, m_intManager->value(prop));
+  }
+}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

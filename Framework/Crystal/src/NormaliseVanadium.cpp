@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/NormaliseVanadium.h"
 #include "MantidAPI/Axis.h"
@@ -32,7 +32,7 @@ NormaliseVanadium::NormaliseVanadium() : API::Algorithm() {}
 
 void NormaliseVanadium::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<InstrumentValidator>();
+  auto wsValidator = std::make_shared<InstrumentValidator>();
 
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -42,7 +42,7 @@ void NormaliseVanadium::init() {
                                                         Direction::Output),
                   "Output workspace name");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", 1.0, mustBePositive,
                   "Normalizes spectra to this wavelength");

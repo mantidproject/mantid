@@ -1,23 +1,19 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (print_function, absolute_import, unicode_literals)
-
 from qtpy.QtCore import Qt, Signal, Slot
 
 import matplotlib.pyplot
-
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
-
 from .interactive_tool import FitInteractiveTool
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
@@ -38,7 +34,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
-        self.init()
         self.setFeatures(self.DockWidgetMovable)
         self.canvas = canvas
         # The toolbar state manager to be passed to the peak editing tool
@@ -135,7 +130,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
-        import matplotlib.pyplot as plt
         """
         Override the base class method. Initialise the peak editing tool.
         """
@@ -169,13 +163,19 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.setPeakToolOn(True)
         self.canvas.draw()
+        self.set_output_window_names()
 
-        # change the output name if more than one plot of the same workspace
+    def set_output_window_names(self):
+        import matplotlib.pyplot as plt  # unfortunately need to import again
+        """
+        Change the output name if more than one plot of the same workspace
+        """
         window_title = self.canvas.get_window_title()
         workspace_name = window_title.rsplit('-', 1)[0]
         for open_figures in plt.get_figlabels():
             if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
                 self.setOutputName(window_title)
+        return None
 
     def get_fit_bounds(self):
         """
@@ -369,7 +369,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                   other_names=self.registeredOthers())
         return menu
 
-    def do_plot(self, ws, plot_diff = False, **plot_kwargs):
+    def do_plot(self, ws, plot_diff=False, **plot_kwargs):
         ax = self.get_axes()
 
         self.clear_fit_result_lines()
@@ -440,8 +440,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         fun = self.addFunction(self.defaultPeakType())
         self.setPeakCentreOf(fun, centre)
-        self.setPeakHeightOf(fun, height)
         self.setPeakFwhmOf(fun, fwhm)
+        if height != 0:
+            self.setPeakHeightOf(fun, height)
         self.peak_ids[peak_id] = fun
 
     @Slot(int, float, float)
@@ -510,6 +511,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for prefix in self.getPeakPrefixes():
             c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(
                 prefix), self.getPeakFwhmOf(prefix)
+            if w > (self.endX() - self.startX()):
+                w = (self.endX() - self.startX())/20.
+                self.setPeakFwhmOf(prefix, w)
             if prefix in peaks:
                 self.tool.update_peak(peaks[prefix], c, h, w)
                 del peaks[prefix]
@@ -525,7 +529,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 if prefix is None:
                     need_update_markers = True
                     break
-                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or\
+                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or \
                         self.getPeakFwhmOf(prefix) != w:
                     need_update_markers = True
                     break
@@ -535,8 +539,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.peak_ids.update(peak_ids)
             for prefix, c, h, w in peak_updates:
                 self.setPeakCentreOf(prefix, c)
-                self.setPeakHeightOf(prefix, h)
                 self.setPeakFwhmOf(prefix, w)
+                self.setPeakHeightOf(prefix, h)
         self.update_guess()
 
     @Slot(str)

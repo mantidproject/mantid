@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
@@ -32,7 +33,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 01/09/2009
 */
-class DLLExport ConvertSpectrumAxis : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertSpectrumAxis : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertSpectrumAxis"; }
@@ -60,7 +61,8 @@ private:
   void exec() override;
   /// Getting Efixed
   double getEfixed(const Mantid::Geometry::IDetector &detector,
-                   API::MatrixWorkspace_const_sptr inputWS, int emode) const;
+                   const API::MatrixWorkspace_const_sptr &inputWS,
+                   int emode) const;
 };
 
 } // namespace Algorithms

@@ -9,7 +9,7 @@
 Description
 -----------
 
-Iterates over the input workspace evaluating the test for the first bin in each spectrum. There are two output modes:
+Iterates over the input workspace evaluating the test for each bin in each spectrum, and will select (or deselect) it is any of the bins match the test. There are two output modes:
 
 Output to a calfile
    For this mode the properties ``InputCalFile`` and ``OutputCalFile`` have to be set.
@@ -18,7 +18,9 @@ Output to a calfile
    the ``InputCalFile`` are copied over to the ``OutputCalFile``.
 
 Output to a workspace
-   For this mode the ``OutputWorkspace`` property has to be set. The algorithm masks the selected detectors (:literal:`Mode='SelectIf'`) or unmasks deselected ones (:literal:`Mode='DeselectIf'`) for the output workspace. Masking does not clear the data in the spectra under question. Use :ref:`ClearMaskedSpectra <algm-ClearMaskedSpectra>` to clear the masked data manually.
+   For this mode the ``OutputWorkspace`` property has to be set. The algorithm masks the selected detectors (:literal:`Mode='SelectIf'`) or unmasks deselected ones (:literal:`Mode='DeselectIf'`) for the output workspace. Masking will clear the data in the spectra under question. Unmasking will just clear the masking flag but will not restore the data.
+
+.. note:: If you select the NotFinite operator, the value property is ignored.  This operator finds values that are infinite or `NaN. <https://en.wikipedia.org/wiki/NaN>`_
 
 Usage
 -----

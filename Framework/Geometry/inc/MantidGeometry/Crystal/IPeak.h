@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IPEAK_H_
-#define MANTID_API_IPEAK_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/DllConfig.h"
@@ -110,9 +109,10 @@ public:
   virtual double getL2() const = 0;
 
   virtual const Mantid::Geometry::PeakShape &getPeakShape() const = 0;
+
+  virtual void setAbsorptionWeightedPathLength(double pathLength) = 0;
+  virtual double getAbsorptionWeightedPathLength() const = 0;
 };
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_API_IPEAK_H_ */

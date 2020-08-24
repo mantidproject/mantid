@@ -60,15 +60,11 @@ mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
     boost_filesystem-mt.dll
+    boost_python38-mt.dll
     boost_regex-mt.dll
     boost_serialization-mt.dll
     boost_system-mt.dll
 )
-if ( WITH_PYTHON3 )
-  list( APPEND BOOST_DIST_DLLS boost_python38-mt.dll )
-else ()
-  list( APPEND BOOST_DIST_DLLS boost_python27-mt.dll )
-endif ()
 
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
@@ -100,6 +96,7 @@ set ( MISC_CORE_DIST_DLLS
     hdf5_hl.dll
     hdf5.dll
     jsoncpp.dll
+    lib3mf.dll
     libeay32.dll
     libNeXus-0.dll
     libNeXusCPP-0.dll
@@ -134,41 +131,6 @@ include( WindowsNSISQt5 )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
 install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin RENAME mantidpython.bat )
-
-# On Windows we don't use the setuptools install executable at the moment, because it is
-# generated with a hard coded path to the build Python, that fails to run on
-# other machines, or if the build Python is moved. Instead we have a Python script to
-# run the workbench ourselves and a PowerShell wrapper to run it with the
-# correct Python from Mantid's installation directory
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_workbench.pyw DESTINATION bin )
-
-if ( ENABLE_WORKBENCH )
-  find_program(_powershell_available NAMES "powershell")
-  # Name of the workbench executable without any extensions
-  set(_workbench_base_name launch_workbench)
-
-  if ( NOT _powershell_available )
-    message(FATAL_ERROR "PowerShell was not found. The Workbench executable cannot be generated. Please check that PowerShell is available in your PATH variable.")
-  else()
-    message(STATUS "Found PowerShell: ${POWERSHELL_AVAILABLE}")
-    # Add the extensions for the executable after it is generated in the build directory
-    set(_workbench_executable_install_name ${_workbench_base_name}.exe.install)
-    # Generate an executable from the PowerShell script
-    execute_process(COMMAND powershell.exe -version 2.0 -noprofile -windowstyle hidden -ExecutionPolicy Bypass ${THIRD_PARTY_DIR}/bin/ps2exe.ps1 -inputFile ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 -outputFile ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} -x64 -runtime2 -noconsole RESULT_VARIABLE _workbench_powershell_return_code OUTPUT_VARIABLE _workbench_powershell_output)
-
-    # If the EXE generation failed then display an error and stop the CMAKE generation
-    if ( NOT _workbench_powershell_return_code EQUAL 0 )
-      message(STATUS ${_workbench_powershell_output})
-      message(FATAL_ERROR "Generating the Workbench executable encountered an error.")
-    endif ()
-
-    # If the EXE generation succeeded then install the executable and rename it to remove the .install suffix
-    # the shortcuts for the workbench are ONLY installed if this variable has been declared
-    set (_workbench_executable_full_name ${_workbench_base_name}.exe)
-    message(STATUS "Generated the Workbench executable for installation: ${_workbench_executable_install_name}")
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} DESTINATION bin RENAME ${_workbench_executable_full_name})
-  endif ()
-endif ()
 
 ###########################################################################
 # Icons for shortcuts
@@ -221,7 +183,7 @@ if ( ENABLE_WORKBENCH )
   set ( MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
   message(STATUS "Adding icons for Workbench as it is being packaged in the installation.")
   set (CPACK_NSIS_CREATE_ICONS_EXTRA "
-    CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\launch_workbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
+    CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\MantidWorkbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
 
     ${CPACK_NSIS_CREATE_ICONS_EXTRA}
   ")
@@ -232,7 +194,7 @@ if ( ENABLE_WORKBENCH )
   ")
 
   set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-    CreateShortCut '$DESKTOP\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\launch_workbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
+    CreateShortCut '$DESKTOP\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\MantidWorkbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
 
     ${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
   ")

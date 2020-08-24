@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -69,7 +69,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numBanks = 1,
   return retVal;
 }
 
-void do_test_events(MatrixWorkspace_sptr workspace, bool ev,
+void do_test_events(const MatrixWorkspace_sptr &workspace, bool ev,
                     bool performance = false) {
 
   workspace->getAxis(0)->setUnit("Wavelength");

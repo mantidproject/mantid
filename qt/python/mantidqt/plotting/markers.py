@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import Qt, QObject, Signal
 from qtpy.QtGui import QCursor
@@ -913,7 +913,8 @@ class SingleMarker(QObject):
     def set_name(self, name):
         """Update the name of the marker by deleting the old one first"""
         self.remove_name()
-        del self.annotations[self.name]
+        if self.name in self.annotations:
+            del self.annotations[self.name]
         self.name = name
         self.add_name()
 

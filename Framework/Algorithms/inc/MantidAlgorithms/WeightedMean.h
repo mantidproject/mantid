@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -24,7 +24,7 @@ namespace Algorithms {
     @author Robert Dalgliesh, ISIS, RAL
     @date 12/1/2010
  */
-class DLLExport WeightedMean : public CommutativeBinaryOperation {
+class MANTID_ALGORITHMS_DLL WeightedMean : public CommutativeBinaryOperation {
 public:
   const std::string name() const override { return "WeightedMean"; }
   /// Summary of algorithms purpose

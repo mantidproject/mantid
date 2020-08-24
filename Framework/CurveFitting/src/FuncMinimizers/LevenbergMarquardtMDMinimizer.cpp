@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -47,7 +47,7 @@ LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer()
 void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function,
                                                size_t /*maxIterations*/) {
   m_costFunction =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(function);
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(function);
   if (!m_costFunction) {
     throw std::invalid_argument(
         "Levenberg-Marquardt minimizer works only with "

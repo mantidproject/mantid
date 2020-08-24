@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
-#define MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
+#pragma once
 
 #include "Common/DllConfig.h"
 #include <string>
@@ -17,6 +16,7 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL SaveViewSubscriber {
 public:
+  virtual void notifySettingsChanged() = 0;
   virtual void notifyPopulateWorkspaceList() = 0;
   virtual void notifyFilterWorkspaceList() = 0;
   virtual void notifyPopulateParametersList() = 0;
@@ -38,6 +38,7 @@ public:
   virtual ~ISaveView() = default;
   virtual void subscribe(SaveViewSubscriber *notifyee) = 0;
 
+  virtual void connectSaveSettingsWidgets() = 0;
   virtual std::string getSavePath() const = 0;
   virtual void setSavePath(const std::string &path) const = 0;
   virtual std::string getPrefix() const = 0;
@@ -47,7 +48,7 @@ public:
   virtual std::vector<std::string> getSelectedWorkspaces() const = 0;
   virtual std::vector<std::string> getSelectedParameters() const = 0;
   virtual int getFileFormatIndex() const = 0;
-  virtual bool getTitleCheck() const = 0;
+  virtual bool getHeaderCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
   virtual std::string getSeparator() const = 0;
 
@@ -60,8 +61,19 @@ public:
   virtual void disableAutosaveControls() = 0;
   virtual void enableAutosaveControls() = 0;
 
-  virtual void enableFileFormatAndLocationControls() = 0;
-  virtual void disableFileFormatAndLocationControls() = 0;
+  virtual void enableFileFormatControls() = 0;
+  virtual void disableFileFormatControls() = 0;
+  virtual void enableLocationControls() = 0;
+  virtual void disableLocationControls() = 0;
+
+  virtual void enableLogList() = 0;
+  virtual void disableLogList() = 0;
+  virtual void enableHeaderCheckBox() = 0;
+  virtual void disableHeaderCheckBox() = 0;
+  virtual void enableQResolutionCheckBox() = 0;
+  virtual void disableQResolutionCheckBox() = 0;
+  virtual void enableSeparatorButtonGroup() = 0;
+  virtual void disableSeparatorButtonGroup() = 0;
 
   virtual void showFilterEditValid() = 0;
   virtual void showFilterEditInvalid() = 0;
@@ -74,4 +86,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H */

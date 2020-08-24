@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_NEXUSGEOMETRY_NEXUSFILEREADER_H_
-#define MANTID_NEXUSGEOMETRY_NEXUSFILEREADER_H_
+#pragma once
 
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
@@ -123,7 +121,7 @@ public:
   // read a multidimensional dataset and returns vector containing the data
   template <typename T>
   std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup,
-                                             std::string dataSetName) {
+                                             const std::string &dataSetName) {
 
     std::vector<T> dataInFile;
 
@@ -301,7 +299,7 @@ public:
     return false;
   }
 
-  bool hasDataset(const std::string dsetName, const FullNXPath &pathToGroup) {
+  bool hasDataset(const std::string &dsetName, const FullNXPath &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -375,7 +373,7 @@ public:
   }
 
   bool hasAttributeInDataSet(
-      const std::string dataSetName, const std::string &attrName,
+      const std::string &dataSetName, const std::string &attrName,
       const std::string &attrVal,
       const FullNXPath &pathToGroup /*where the dataset lives*/) {
 
@@ -389,7 +387,7 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool hasNXAttributeInDataSet(const std::string dataSetName,
+  bool hasNXAttributeInDataSet(const std::string &dataSetName,
                                const std::string &attrVal,
                                const FullNXPath &pathToGroup) {
     H5::Attribute attribute;
@@ -417,4 +415,3 @@ private:
 }; // NexusFileReader
 } // namespace NexusGeometry
 } // namespace Mantid
-#endif

@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """Defines a set of helpers wrapped around the C++ TestHelpers package that
 are for use in unit tests only!
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 from distutils.version import LooseVersion
 
@@ -18,6 +17,7 @@ import mantid  # noqa
 import numpy
 
 # Define some pure-Python functions to add to the mix
+
 
 def run_algorithm(name, **kwargs):
     """Run a named algorithm and return the

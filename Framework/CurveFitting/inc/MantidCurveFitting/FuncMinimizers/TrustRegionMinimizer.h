@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_TRUSTREGIONMINIMIZER_H_
-#define MANTID_CURVEFITTING_TRUSTREGIONMINIMIZER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -22,7 +21,8 @@ namespace CurveFitting {
 namespace FuncMinimisers {
 /** Trust Region minimizer class using the DTRS method of GALAHAD.
  */
-class DLLExport TrustRegionMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL TrustRegionMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   TrustRegionMinimizer();
@@ -51,7 +51,7 @@ private:
                      const NLLS::nlls_options &options);
 
   /// Stored cost function
-  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
+  std::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
   /// Stored to access IFunction interface in iterate()
   API::IFunction_sptr m_function;
   /// Fitting data weights
@@ -77,5 +77,3 @@ private:
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_TRUSTREGIONMINIMIZER_H_*/

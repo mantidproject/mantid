@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEDSPACEMAPTEST_H_
-#define MANTID_DATAHANDLING_SAVEDSPACEMAPTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadDspacemap.h"
@@ -97,7 +96,7 @@ public:
     TS_ASSERT(load.isInitialized())
     TS_ASSERT_THROWS_NOTHING(load.setProperty(
         "InputWorkspace",
-        boost::dynamic_pointer_cast<MatrixWorkspace>(offsetsWS)));
+        std::dynamic_pointer_cast<MatrixWorkspace>(offsetsWS)));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("FileType", "POWGEN"));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", "dummy"));
@@ -117,5 +116,3 @@ public:
       Poco::File(filename).remove();
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVEDSPACEMAPTEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSpectrumSelectionView.h"
 
@@ -60,11 +60,13 @@ SpectrumSelectionMode IndirectSpectrumSelectionView::selectionMode() const {
 }
 
 WorkspaceIndex IndirectSpectrumSelectionView::minimumSpectrum() const {
-  return WorkspaceIndex{m_selector->spMinimumSpectrum->value()};
+  return WorkspaceIndex{
+      static_cast<size_t>(m_selector->spMinimumSpectrum->value())};
 }
 
 WorkspaceIndex IndirectSpectrumSelectionView::maximumSpectrum() const {
-  return WorkspaceIndex{m_selector->spMaximumSpectrum->value()};
+  return WorkspaceIndex{
+      static_cast<size_t>(m_selector->spMaximumSpectrum->value())};
 }
 
 std::string IndirectSpectrumSelectionView::spectraString() const {
@@ -99,15 +101,15 @@ void IndirectSpectrumSelectionView::setSpectraRange(WorkspaceIndex minimum,
 void IndirectSpectrumSelectionView::setSpectraRangeMinimum(
     WorkspaceIndex minimum) {
   MantidQt::API::SignalBlocker blocker(m_selector->spMinimumSpectrum);
-  m_selector->spMinimumSpectrum->setMinimum(minimum.value);
-  setSpectraRangeMiniMax(minimum.value);
+  m_selector->spMinimumSpectrum->setMinimum(static_cast<int>(minimum.value));
+  setSpectraRangeMiniMax(static_cast<int>(minimum.value));
 }
 
 void IndirectSpectrumSelectionView::setSpectraRangeMaximum(
     WorkspaceIndex maximum) {
   MantidQt::API::SignalBlocker blocker(m_selector->spMaximumSpectrum);
-  m_selector->spMaximumSpectrum->setMaximum(maximum.value);
-  setSpectraRangeMaxiMin(maximum.value);
+  m_selector->spMaximumSpectrum->setMaximum(static_cast<int>(maximum.value));
+  setSpectraRangeMaxiMin(static_cast<int>(maximum.value));
 }
 
 void IndirectSpectrumSelectionView::setMaskSpectraList(
@@ -277,11 +279,12 @@ void IndirectSpectrumSelectionView::emitMaskChanged() {
 
 void IndirectSpectrumSelectionView::emitMaskSpectrumChanged(
     const QString &spectrum) {
-  emit maskSpectrumChanged(WorkspaceIndex{spectrum.toInt()});
+  emit maskSpectrumChanged(
+      WorkspaceIndex{static_cast<size_t>(spectrum.toInt())});
 }
 
 void IndirectSpectrumSelectionView::emitMaskSpectrumChanged(int spectrum) {
-  emit maskSpectrumChanged(WorkspaceIndex{spectrum});
+  emit maskSpectrumChanged(WorkspaceIndex{static_cast<size_t>(spectrum)});
 }
 
 } // namespace IDA

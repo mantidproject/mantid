@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -91,12 +91,12 @@ void CreateDummyCalFile::exec() {
   vgroups.clear();
 
   // Find Detectors that belong to groups
-  using sptr_ICompAss = boost::shared_ptr<const Geometry::ICompAssembly>;
-  using sptr_IComp = boost::shared_ptr<const Geometry::IComponent>;
-  using sptr_IDet = boost::shared_ptr<const Geometry::IDetector>;
+  using sptr_ICompAss = std::shared_ptr<const Geometry::ICompAssembly>;
+  using sptr_IComp = std::shared_ptr<const Geometry::IComponent>;
+  using sptr_IDet = std::shared_ptr<const Geometry::IDetector>;
   std::queue<std::pair<sptr_ICompAss, int>> assemblies;
   sptr_ICompAss current =
-      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
+      std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
   sptr_IDet currentDet;
   sptr_IComp currentIComp;
   sptr_ICompAss currentchild;
@@ -110,9 +110,6 @@ void CreateDummyCalFile::exec() {
 
   std::string filename = getProperty("CalFilename");
 
-  // Plan to overwrite file, so do not check if it exists
-  const bool overwrite = false;
-
   int number = 0;
   Progress prog(this, 0.0, 0.8, assemblies.size());
   while (!assemblies.empty()) // Travel the tree from the instrument point
@@ -124,20 +121,15 @@ void CreateDummyCalFile::exec() {
     if (nchilds != 0) {
       for (int i = 0; i < nchilds; ++i) {
         currentIComp = (*(current.get()))[i]; // Get child
-        currentDet = boost::dynamic_pointer_cast<const Geometry::IDetector>(
-            currentIComp);
+        currentDet =
+            std::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
         if (currentDet.get()) // Is detector
         {
-          if (overwrite) // Map will contains udet as the key
-            instrcalib[currentDet->getID()] =
-                std::make_pair(number++, top_group);
-          else // Map will contains the entry number as the key
-            instrcalib[number++] =
-                std::make_pair(currentDet->getID(), top_group);
+          instrcalib[number++] = std::make_pair(currentDet->getID(), top_group);
         } else // Is an assembly, push in the queue
         {
           currentchild =
-              boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+              std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
                   currentIComp);
           if (currentchild.get()) {
             child_group = group_map[currentchild->getName()];
@@ -151,6 +143,8 @@ void CreateDummyCalFile::exec() {
     prog.report();
   }
   // Write the results in a file
+  // Plan to overwrite file, so do not check if it exists
+  const bool overwrite = false;
   saveGroupingFile(filename, overwrite);
   progress(0.2);
 }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TestDataListener.h"
 #include "MantidAPI/Axis.h"
@@ -100,7 +100,7 @@ void TestDataListener::start(
 void TestDataListener::createEmptyWorkspace() {
   // Create a new, empty workspace of the same dimensions and assign to the
   // buffer variable
-  m_buffer = boost::dynamic_pointer_cast<EventWorkspace>(
+  m_buffer = std::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
   // Give detector IDs
   for (size_t i = 0; i < m_buffer->getNumberHistograms(); i++)
@@ -123,7 +123,7 @@ void TestDataListener::createEmptyWorkspace() {
   m_buffer->setMonitorWorkspace(monitorWS);
 }
 
-boost::shared_ptr<Workspace> TestDataListener::extractData() {
+std::shared_ptr<Workspace> TestDataListener::extractData() {
   m_dataReset = false;
   // Add a small number of uniformly distributed events to each event list.
   using namespace DataObjects;
@@ -134,7 +134,7 @@ boost::shared_ptr<Workspace> TestDataListener::extractData() {
     el2.addEventQuickly(TofEvent(m_rand->nextValue()));
   }
   auto mon_buffer =
-      boost::dynamic_pointer_cast<EventWorkspace>(m_buffer->monitorWorkspace());
+      std::dynamic_pointer_cast<EventWorkspace>(m_buffer->monitorWorkspace());
   mon_buffer->getSpectrum(0).addEventQuickly(TofEvent(m_rand->nextValue()));
 
   // Copy the workspace pointer to a temporary variable

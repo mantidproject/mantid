@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/InterpolationOption.h"
-#include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
+#include "MantidAlgorithms/SampleCorrections/IMCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/DeltaEMode.h"
 #include <tuple>
@@ -25,6 +26,7 @@ class Logger;
 } // namespace Kernel
 namespace Algorithms {
 class IBeamProfile;
+class MonteCarloAbsorption;
 
 /**
   Implements the algorithm for calculating the correction factor for
@@ -32,35 +34,35 @@ class IBeamProfile;
   instance has a fixed nominal source position, nominal sample
   position & sample + containers shapes.
 
-  The error on all points is defined to be \f$\frac{1}{\sqrt{N}}\f$, where N is
-  the number of events generated.
+  The error on all points is defined to be \f$\frac{SD}{\sqrt{N}}\f$, where SD
+  is the standard deviation of the attenuation factors across the simulated
+  tracks and N is the number of events generated.
 */
-class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy {
+class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy
+    : public IMCAbsorptionStrategy {
 public:
-  MCAbsorptionStrategy(const IBeamProfile &beamProfile,
-                       const API::Sample &sample,
+  MCAbsorptionStrategy(IMCInteractionVolume &interactionVolume,
+                       const IBeamProfile &beamProfile,
                        Kernel::DeltaEMode::Type EMode, const size_t nevents,
-                       const int nlambda, const size_t maxScatterPtAttempts,
-                       const bool useSparseInstrument,
-                       const InterpolationOption &interpolateOpt,
-                       const bool regenerateTracksForEachLambda,
-                       Kernel::Logger &logger);
-  void calculate(Kernel::PseudoRandomNumberGenerator &rng,
-                 const Kernel::V3D &finalPos,
-                 Mantid::HistogramData::Points lambdas, double lambdaFixed,
-                 Mantid::API::ISpectrum &attenuationFactorsSpectrum);
+                       const size_t maxScatterPtAttempts,
+                       const bool regenerateTracksForEachLambda);
+  virtual void calculate(Kernel::PseudoRandomNumberGenerator &rng,
+                         const Kernel::V3D &finalPos,
+                         const std::vector<double> &lambdas,
+                         const double lambdaFixed,
+                         std::vector<double> &attenuationFactors,
+                         std::vector<double> &attFactorErrors,
+                         MCInteractionStatistics &stats) override;
 
 private:
   const IBeamProfile &m_beamProfile;
-  MCInteractionVolume m_scatterVol;
+  const IMCInteractionVolume &m_scatterVol;
   const size_t m_nevents;
   const size_t m_maxScatterAttempts;
-  const double m_error;
   const Kernel::DeltaEMode::Type m_EMode;
-  const int m_nlambda;
-  const bool m_useSparseInstrument;
-  const InterpolationOption &m_interpolateOpt;
   const bool m_regenerateTracksForEachLambda;
+  IMCInteractionVolume &setActiveRegion(IMCInteractionVolume &interactionVolume,
+                                        const IBeamProfile &beamProfile);
 };
 
 } // namespace Algorithms

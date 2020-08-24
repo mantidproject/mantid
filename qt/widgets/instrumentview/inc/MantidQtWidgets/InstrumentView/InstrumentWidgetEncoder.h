@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_INSTRUMENTWIDGETENCODER_H_
-#define MANTIDQT_WIDGETS_INSTRUMENTWIDGETENCODER_H_
+#pragma once
 
 #include "MantidQtWidgets/InstrumentView/ColorBar.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
@@ -63,6 +62,7 @@ private:
   QMap<QString, QVariant> encodeEllipse(const Shape2DEllipse *obj);
   QMap<QString, QVariant> encodeRectangle(const Shape2DRectangle *obj);
   QMap<QString, QVariant> encodeRing(const Shape2DRing *obj);
+  QMap<QString, QVariant> encodeSector(const Shape2DSector *obj);
   QMap<QString, QVariant> encodeFree(const Shape2DFree *obj);
 
   QList<QVariant> encodeMaskShapes(const Shape2DCollection &obj);
@@ -75,5 +75,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDQT_WIDGETS_INSTRUMENTWIDGETENCODER_H_*/

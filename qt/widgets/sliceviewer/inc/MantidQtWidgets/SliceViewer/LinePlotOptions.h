@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LINEPLOTOPTIONS_H
-#define LINEPLOTOPTIONS_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -20,7 +19,7 @@ public:
   LinePlotOptions(QWidget *parent = nullptr, bool logScaleOption = false);
   ~LinePlotOptions() override;
 
-  void setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  void setOriginalWorkspace(const Mantid::API::IMDWorkspace_sptr &ws);
 
   int getPlotAxis() const;
   void setPlotAxis(int choice);
@@ -61,5 +60,3 @@ private:
   /// Chosen normalization method
   Mantid::API::MDNormalization m_normalize;
 };
-
-#endif // LINEPLOTOPTIONS_H

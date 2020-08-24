@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_
-#define MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_
+#pragma once
 
 // Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -26,7 +25,8 @@ namespace Functions {
 /* Class representing the inelastic portion of DiffRotDiscreteCircle
  * Contains a linear combination of Lorentzians.
  */
-class DLLExport InelasticDiffRotDiscreteCircle : public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL InelasticDiffRotDiscreteCircle
+    : public FunctionQDepends {
 public:
   /// Constructor
   InelasticDiffRotDiscreteCircle();
@@ -43,7 +43,7 @@ protected:
 
 private:
   /// Cache Q values from the workspace
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
 
   const double m_hbar; // Plank constant, in meV*ps (or ueV*ns)
 
@@ -53,5 +53,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_

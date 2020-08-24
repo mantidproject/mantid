@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTAPI_PYTHONRUNNER_H_
-#define MANTIDQTAPI_PYTHONRUNNER_H_
+#pragma once
 
 #include "DllOption.h"
 #include <QObject>
@@ -40,5 +39,3 @@ signals:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif // MANTIDQTAPI_PYTHONRUNNER_H_

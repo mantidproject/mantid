@@ -32,12 +32,13 @@ function(
     class CustomCommand(setuptools_command_cls):
         user_options = setuptools_command_cls.user_options[:]
         boolean_options = setuptools_command_cls.boolean_options[:]
+
         def finalize_options(self):
-            build_cmd = self.get_finalized_command('build')
             self.build_lib = '${_setup_py_build_root}/build'
             setuptools_command_cls.finalize_options(self)
 
     return CustomCommand
+
 
 CustomBuildPy = patch_setuptools_command('build_py')
 CustomInstall = patch_setuptools_command('install')
@@ -104,7 +105,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
       -E
       env
       PYTHONPATH=${_egg_link_dir}
-      ${PYTHON_EXECUTABLE}
+      ${Python_EXECUTABLE}
       ${_setup_py}
       develop
       --install-dir
@@ -128,7 +129,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   # directories so we can have a flat structure
   install(
     CODE
-      "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
+      "execute_process(COMMAND ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
   )
 
   # Registers the "installed" components with CMake so it will carry them over
@@ -176,16 +177,11 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     )
   endif()
 
-  # install the generated executable - only tested with "workbench"
-  if(_parsed_arg_EXECUTABLE)
-    # On UNIX systems install the workbench executable directly. The Windows
-    # case is handled with a custom startup script installed in WindowsNSIS
-    if(NOT WIN32)
+  # install the generated executable
+  if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
       install(
         PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
         DESTINATION ${_parsed_arg_INSTALL_BIN_DIR}
-        RENAME workbench-script
       )
-    endif()
   endif()
 endfunction()

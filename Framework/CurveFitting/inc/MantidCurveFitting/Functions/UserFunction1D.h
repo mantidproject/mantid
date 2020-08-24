@@ -1,18 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_USERFUNCTION1D_H_
-#define MANTID_CURVEFITTING_USERFUNCTION1D_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit1D.h"
 #include "MantidGeometry/muParser_Silent.h"
-#include <boost/shared_array.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -59,8 +57,7 @@ the initial histogram and the difference
 class UserFunction1D : public Algorithms::Fit1D {
 public:
   /// Constructor
-  UserFunction1D()
-      : m_x(0.0), m_x_set(false), m_parameters(new double[100]), m_nPars(0){};
+  UserFunction1D() : m_x(0.0), m_x_set(false), m_parameters(100), m_nPars(0){};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UserFunction1D"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -97,17 +94,15 @@ private:
   /// True indicates that input formula contains 'x' variable
   bool m_x_set;
   /// Pointer to muParser variables' buffer
-  boost::shared_array<double> m_parameters;
+  std::vector<double> m_parameters;
   /// Number of actual parameters
   int m_nPars;
   /// Temporary data storage
-  boost::shared_array<double> m_tmp;
+  std::vector<double> m_tmp;
   /// Temporary data storage
-  boost::shared_array<double> m_tmp1;
+  std::vector<double> m_tmp1;
 };
 
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_GAUSSIAN1D_H_*/

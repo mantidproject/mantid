@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import copy
 import matplotlib.axes
 import matplotlib.cm as cm
@@ -40,8 +38,7 @@ class PlotsLoader(object):
                 # Catch all errors in here so it can fail silently-ish
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt(str(e))
-                logger.warning("A plot was unable to be loaded from the save file. Error: " +
-                               str(e))
+                logger.warning("A plot was unable to be loaded from the save file. Error: " + str(e))
 
     def make_fig(self, plot_dict, create_plot=True):
         """
@@ -226,7 +223,9 @@ class PlotsLoader(object):
         if not legend["exists"] and ax.get_legend():
             ax.get_legend().remove()
             return
-        LegendProperties.create_legend(legend, ax)
+
+        if legend["exists"]:
+            LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
         ax.set_position(properties["bounds"])
@@ -245,6 +244,7 @@ class PlotsLoader(object):
         ax.set_yscale(properties["yAxisScale"])
         ax.set_xlim(properties["xLim"])
         ax.set_ylim(properties["yLim"])
+        ax.show_minor_gridlines = properties["showMinorGrid"]
 
     def update_axis(self, axis_, properties):
         if isinstance(axis_, matplotlib.axis.XAxis):
@@ -277,7 +277,8 @@ class PlotsLoader(object):
         grid_dict = properties["gridStyle"]
         grid_lines = axis_.get_gridlines()
         if grid_dict["gridOn"]:
-            axis_._gridOnMajor = True
+            which = 'both' if grid_dict["minorGridOn"] else "major"
+            axis_.axes.grid(True, axis=axis_.axis_name, which=which)
             for grid_line in grid_lines:
                 grid_line.set_alpha(grid_dict["alpha"])
                 grid_line.set_color(grid_dict["color"])
@@ -290,6 +291,8 @@ class PlotsLoader(object):
 
         if properties["minorTickLocator"] == "FixedLocator":
             axis_.set_minor_locator(ticker.FixedLocator(properties["minorTickLocatorValues"]))
+        elif properties["minorTickLocator"] == "AutoMinorLocator":
+            axis_.set_minor_locator(ticker.AutoMinorLocator())
 
         # Update Major and Minor Formatter
         if properties["majorTickFormatter"] == "FixedFormatter":

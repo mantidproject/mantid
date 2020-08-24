@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_REPLICATEMDTEST_H_
-#define MANTID_MDALGORITHMS_REPLICATEMDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -28,8 +27,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
                                          bool transpose = false,
                                          double value = 0.0) {
 
-  IAlgorithm *create =
-      FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
+  auto create = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
   create->setChild(true);
   create->initialize();
 
@@ -87,8 +85,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
       axis = static_cast<int>(op());
     }
 
-    IAlgorithm *transpose =
-        FrameworkManager::Instance().createAlgorithm("TransposeMD");
+    auto transpose = AlgorithmManager::Instance().create("TransposeMD");
     transpose->setChild(true);
     transpose->initialize();
     transpose->setProperty("InputWorkspace", outWs);
@@ -98,7 +95,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
     outWs = transpose->getProperty("OutputWorkspace");
   }
 
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
 }
 } // namespace
 
@@ -446,5 +443,3 @@ public:
     TS_ASSERT(outWS);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_REPLICATEMDTEST_H_ */

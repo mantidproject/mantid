@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLSANSTEST_H_
-#define MANTID_DATAHANDLING_LOADILLSANSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -38,7 +37,7 @@ public:
   static LoadILLSANSTest *createSuite() { return new LoadILLSANSTest(); }
   static void destroySuite(LoadILLSANSTest *suite) { delete suite; }
 
-  void setUp() override {
+  LoadILLSANSTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D11/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D22/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D33/");
@@ -281,5 +280,3 @@ public:
 private:
   LoadILLSANS m_alg;
 };
-
-#endif /* MANTID_DATAHANDLING_LOADILLSANSTEST_H_ */

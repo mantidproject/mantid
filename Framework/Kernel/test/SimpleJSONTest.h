@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,8 +51,6 @@ public:
 
   void test_JSONArray() {
     std::string str = "json failure here";
-    std::istringstream input(str);
-    std::string res;
 
     JSONArray ja;
     TS_ASSERT_THROWS_NOTHING(ja.emplace_back(str));
@@ -64,11 +62,10 @@ public:
   }
 
   void test_JSONObjectWrongStrings() {
-    std::string str = "json failure here";
-    std::istringstream input(str);
+    std::istringstream input;
     std::string res;
 
-    str = "";
+    std::string str = "";
     JSONObject jo;
     TS_ASSERT_THROWS(initFromStream(jo, input), const JSONParseException &);
     TS_ASSERT_THROWS_NOTHING(jo["no_param"].getValue(res));

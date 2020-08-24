@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidPythonInterface/core/Converters/ContainerDtype.h"
@@ -92,6 +92,14 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
           make_function(                                                       \
               &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,        \
               return_value_policy<VectorToNumpy>()))                           \
+      .add_property("filtered_value",                                          \
+                    make_function(&Mantid::Kernel::TimeSeriesProperty<         \
+                                      TYPE>::filteredValuesAsVector,           \
+                                  return_value_policy<VectorToNumpy>()))       \
+      .add_property("filtered_times",                                          \
+                    make_function(&Mantid::Kernel::TimeSeriesProperty<         \
+                                      TYPE>::filteredTimesAsVector,            \
+                                  return_value_policy<VectorToNumpy>()))       \
       .def("addValue",                                                         \
            (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
                                                const TYPE)) &                  \

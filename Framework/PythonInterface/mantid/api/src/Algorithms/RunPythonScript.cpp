@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
-#include "MantidPythonInterface/core/ExtractWorkspace.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/IsNone.h"
 
@@ -169,7 +169,7 @@ std::string RunPythonScript::scriptCode() const {
  * @return A pointer to the output workspace if one was generated. If one was
  * not then this is an empty pointer
  */
-boost::shared_ptr<API::Workspace>
+std::shared_ptr<API::Workspace>
 RunPythonScript::executeScript(const std::string &script) const {
   using namespace API;
   using namespace boost::python;
@@ -239,7 +239,7 @@ boost::python::dict RunPythonScript::buildLocals() const {
  * @return A pointer to the output workspace if created, otherwise an empty
  * pointer
  */
-boost::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
+std::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
     const boost::python::dict &locals) const {
   using namespace API;
   using namespace boost::python;
@@ -249,7 +249,7 @@ boost::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
   if (isNone(pyoutput))
     return Workspace_sptr();
 
-  auto ptrExtract = ExtractWorkspace(pyoutput);
+  auto ptrExtract = ExtractSharedPtr<API::Workspace>(pyoutput);
   if (ptrExtract.check()) {
     return ptrExtract();
   } else {

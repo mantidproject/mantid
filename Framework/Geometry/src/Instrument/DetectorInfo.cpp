@@ -1,13 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include <utility>
+
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -23,12 +25,13 @@ namespace Geometry {
  * argument. */
 DetectorInfo::DetectorInfo(
     std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
-    boost::shared_ptr<const Geometry::Instrument> instrument,
-    boost::shared_ptr<const std::vector<detid_t>> detectorIds,
-    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-        detIdToIndexMap)
-    : m_detectorInfo(std::move(detectorInfo)), m_instrument(instrument),
-      m_detectorIDs(detectorIds), m_detIDToIndex(detIdToIndexMap),
+    std::shared_ptr<const Geometry::Instrument> instrument,
+    std::shared_ptr<const std::vector<detid_t>> detectorIds,
+    std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap)
+    : m_detectorInfo(std::move(detectorInfo)),
+      m_instrument(std::move(instrument)),
+      m_detectorIDs(std::move(detectorIds)),
+      m_detIDToIndex(std::move(detIdToIndexMap)),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
@@ -305,6 +308,36 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   return atan2(dotVertical, dotHorizontal);
 }
 
+std::pair<double, double>
+DetectorInfo::geographicalAngles(const size_t index) const {
+  const auto samplePos = samplePosition();
+  const auto sampleDetVec = position(index) - samplePos;
+  const double upCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
+  const double beamCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
+  const double leftoverCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
+  const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
+  const double lon = std::atan2(leftoverCoord, beamCoord);
+  return std::pair<double, double>(lat, lon);
+}
+
+std::pair<double, double>
+DetectorInfo::geographicalAngles(const std::pair<size_t, size_t> &index) const {
+  const auto samplePos = samplePosition();
+  const auto sampleDetVec = position(index) - samplePos;
+  const double upCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
+  const double beamCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
+  const double leftoverCoord =
+      sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
+  const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
+  const double lon = std::atan2(leftoverCoord, beamCoord);
+  return std::pair<double, double>(lat, lon);
+}
+
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
   return Kernel::toV3D(m_detectorInfo->position(index));
@@ -437,7 +470,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
 }
 
 /// Helper used by SpectrumInfo.
-boost::shared_ptr<const Geometry::IDetector>
+std::shared_ptr<const Geometry::IDetector>
 DetectorInfo::getDetectorPtr(const size_t index) const {
   auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   static_cast<void>(getDetector(index));

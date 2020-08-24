@@ -1,17 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADOFF_H_
-#define MANTID_DATAHANDLING_LOADOFF_H_
-#include "MantidDataHandling/MeshFileIO.h"
+#pragma once
+#include "MantidDataHandling/LoadSingleMesh.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 
-#include <fstream>
 #include <functional>
 #include <unordered_set>
 
@@ -21,13 +19,11 @@ namespace Geometry {
 class MeshObject;
 }
 namespace DataHandling {
-namespace {
-Mantid::Kernel::Logger g_log("LoadOff");
-}
-class DLLExport LoadOff : public MeshFileIO {
+
+class DLLExport LoadOff : public LoadSingleMesh {
 public:
-  LoadOff(std::string filename, ScaleUnits scaleType);
-  std::unique_ptr<Geometry::MeshObject> readOFFshape();
+  LoadOff(const std::string &filename, ScaleUnits scaleType);
+  std::unique_ptr<Geometry::MeshObject> readShape() override;
 
 private:
   std::unique_ptr<Geometry::MeshObject> readOFFMeshObject();
@@ -35,11 +31,8 @@ private:
   void readOFFVertices();
   void readOFFTriangles();
 
-  std::ifstream m_file;
   uint32_t m_nVertices;
   uint32_t m_nTriangles;
 };
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADOFF_H_ */

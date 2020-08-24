@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -52,7 +52,7 @@ void ConvolveWorkspaces::exec() {
 
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
-  Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr outputWS = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create(ws1));
 
   // First check that the workspace are the same size
@@ -70,13 +70,13 @@ void ConvolveWorkspaces::exec() {
     auto &Yout = outputWS->mutableY(i);
     Convolution conv;
 
-    auto res = boost::make_shared<TabulatedFunction>();
+    auto res = std::make_shared<TabulatedFunction>();
     res->setAttributeValue("Workspace", ws1name);
     res->setAttributeValue("WorkspaceIndex", i);
 
     conv.addFunction(res);
 
-    auto fun = boost::make_shared<TabulatedFunction>();
+    auto fun = std::make_shared<TabulatedFunction>();
     fun->setAttributeValue("Workspace", ws2name);
     fun->setAttributeValue("WorkspaceIndex", i);
 

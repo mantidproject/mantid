@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Points.h"
 #include <vector>
 
@@ -17,7 +18,7 @@ namespace Algorithms {
     out by Jack Carpenter and Asfia Huq and implmented in Java by
     Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
  */
-class DLLExport CalculateCarpenterSampleCorrection
+class MANTID_ALGORITHMS_DLL CalculateCarpenterSampleCorrection
     : public API::DistributedDataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -60,10 +61,10 @@ private:
 
   API::MatrixWorkspace_sptr
   createOutputWorkspace(const API::MatrixWorkspace_sptr &inputWS,
-                        const std::string) const;
-  void deleteWorkspace(API::MatrixWorkspace_sptr workspace);
+                        const std::string &) const;
+  void deleteWorkspace(const API::MatrixWorkspace_sptr &workspace);
   API::MatrixWorkspace_sptr
-  setUncertainties(API::MatrixWorkspace_sptr workspace);
+  setUncertainties(const API::MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Algorithms

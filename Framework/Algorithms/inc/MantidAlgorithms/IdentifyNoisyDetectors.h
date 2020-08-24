@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +20,7 @@ namespace Algorithms {
   @author Michael Whitty
   @date 24/01/2011
 */
-class DLLExport IdentifyNoisyDetectors : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL IdentifyNoisyDetectors : public API::Algorithm {
 public:
   const std::string name() const override {
     return "IdentifyNoisyDetectors";
@@ -48,8 +49,8 @@ private:
   void exec() override; ///< Executes the algorithm.
 
   void getStdDev(API::Progress &progress,
-                 Mantid::API::MatrixWorkspace_sptr valid,
-                 Mantid::API::MatrixWorkspace_sptr values);
+                 const Mantid::API::MatrixWorkspace_sptr &valid,
+                 const Mantid::API::MatrixWorkspace_sptr &values);
 };
 } // namespace Algorithms
 } // namespace Mantid

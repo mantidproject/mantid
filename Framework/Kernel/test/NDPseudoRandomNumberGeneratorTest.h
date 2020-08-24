@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,14 +11,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using Mantid::Kernel::NDRandomNumberGenerator;
 
 class NDPseudoRandomNumberGeneratorTest : public CxxTest::TestSuite {
 private:
-  using NDGenerator_sptr = boost::shared_ptr<NDRandomNumberGenerator>;
+  using NDGenerator_sptr = std::shared_ptr<NDRandomNumberGenerator>;
 
 public:
   void test_That_Next_Always_Returns_ND_Size_Array() {
@@ -64,17 +63,16 @@ public:
   }
 
 private:
-  boost::shared_ptr<NDRandomNumberGenerator>
+  std::shared_ptr<NDRandomNumberGenerator>
   createTestGenerator(const size_t seedValue, const double start = -1.0,
                       const double end = -1.0) {
     using namespace Mantid::Kernel;
     using NDMersenneTwister = NDPseudoRandomNumberGenerator<MersenneTwister>;
     const unsigned int ndims(3);
     if (start > 0.0 && end > 0.0)
-      return boost::make_shared<NDMersenneTwister>(ndims, seedValue, start,
-                                                   end);
+      return std::make_shared<NDMersenneTwister>(ndims, seedValue, start, end);
     else
-      return boost::make_shared<NDMersenneTwister>(ndims, seedValue);
+      return std::make_shared<NDMersenneTwister>(ndims, seedValue);
   }
 
   std::vector<std::vector<double>>

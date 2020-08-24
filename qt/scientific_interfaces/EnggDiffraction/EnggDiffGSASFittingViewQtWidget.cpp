@@ -15,16 +15,17 @@
 
 #include <QFileDialog>
 #include <QSettings>
-#include <boost/make_shared.hpp>
+#include <memory>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
-    boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
-    boost::shared_ptr<IEnggDiffractionParam> mainSettings)
-    : m_userMessageProvider(userMessageProvider) {
+    std::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
+    const std::shared_ptr<IEnggDiffractionPythonRunner> &pythonRunner,
+    std::shared_ptr<IEnggDiffractionParam> mainSettings)
+    : m_userMessageProvider(std::move(userMessageProvider)) {
 
   auto multiRunWidgetModel =
       std::make_unique<EnggDiffMultiRunFittingWidgetModel>();
@@ -32,7 +33,7 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
       std::make_unique<EnggDiffMultiRunFittingQtWidget>(pythonRunner);
 
   auto multiRunWidgetPresenter =
-      boost::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(
+      std::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(
           std::move(multiRunWidgetModel), m_multiRunWidgetView.get());
 
   m_multiRunWidgetView->setPresenter(multiRunWidgetPresenter);
@@ -42,7 +43,7 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
 
   auto model = std::make_unique<EnggDiffGSASFittingModel>();
   auto *model_ptr = model.get();
-  m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
+  m_presenter = std::make_shared<EnggDiffGSASFittingPresenter>(
       std::move(model), this, multiRunWidgetPresenter, mainSettings);
   model_ptr->setObserver(m_presenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
@@ -58,7 +59,7 @@ EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
 
 void EnggDiffGSASFittingViewQtWidget::addWidget(
     IEnggDiffMultiRunFittingWidgetView *widget) {
-  QWidget *qWidget = dynamic_cast<QWidget *>(widget);
+  auto *qWidget = dynamic_cast<QWidget *>(widget);
   m_ui.gridLayout_multiRunWidget->addWidget(qWidget, 0, 0);
 }
 

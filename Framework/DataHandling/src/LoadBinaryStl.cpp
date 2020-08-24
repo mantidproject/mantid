@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -24,7 +24,7 @@ uint32_t getNumberTriangles(Kernel::BinaryStreamReader streamReader,
 }
 } // namespace
 
-bool LoadBinaryStl::isBinarySTL(std::string filename) {
+bool LoadBinaryStl::isBinarySTL(const std::string &filename) {
   Poco::File stlFile = Poco::File(filename);
   if (!stlFile.exists()) {
     // if the file cannot be read then it is not a valid binary Stl File
@@ -37,7 +37,7 @@ bool LoadBinaryStl::isBinarySTL(std::string filename) {
     return false;
   }
   uint32_t numberTrianglesLong;
-  std::ifstream myFile(filename.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream myFile(filename.c_str(), openMode);
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   numberTrianglesLong = getNumberTriangles(streamReader, HEADER_SIZE);
   myFile.close();
@@ -51,10 +51,9 @@ bool LoadBinaryStl::isBinarySTL(std::string filename) {
   return true;
 }
 
-std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
-  std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
+std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readShape() {
 
-  Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
+  Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(m_file);
   const auto numberTrianglesLong =
       getNumberTriangles(streamReader, HEADER_SIZE);
   uint32_t nextToRead =
@@ -76,7 +75,7 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   m_vertices.shrink_to_fit();
   m_triangle.shrink_to_fit();
   g_logstl.debug("Read All");
-  myFile.close();
+
   Mantid::Kernel::Material material;
   if (m_setMaterial) {
     g_logstl.information("Setting Material");

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATESAPI_ADSWORKSPACEPROVIDER_H
-#define MANTID_VATESAPI_ADSWORKSPACEPROVIDER_H
+#pragma once
 
 #include "MantidVatesAPI/WorkspaceProvider.h"
 
@@ -35,5 +34,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

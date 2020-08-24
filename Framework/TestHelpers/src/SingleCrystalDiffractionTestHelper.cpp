@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /* Test functions for algorithms for single crystal diffraction
  */
@@ -102,7 +102,7 @@ void WorkspaceBuilder::createInstrument() {
  */
 void WorkspaceBuilder::createPeaksWorkspace() {
   // Create a peaks workspace
-  m_peaksWorkspace = boost::make_shared<PeaksWorkspace>();
+  m_peaksWorkspace = std::make_shared<PeaksWorkspace>();
   // Set the instrument to be the fake rectangular bank above.
   m_peaksWorkspace->setInstrument(m_instrument);
   // Set the oriented lattice for a cubic crystal
@@ -117,7 +117,7 @@ void WorkspaceBuilder::createPeaksWorkspace() {
  */
 void WorkspaceBuilder::createEventWorkspace() {
   // Make an event workspace and add fake peak data
-  m_eventWorkspace = boost::make_shared<EventWorkspace>();
+  m_eventWorkspace = std::make_shared<EventWorkspace>();
   m_eventWorkspace->setInstrument(m_instrument);
   m_eventWorkspace->initialize(m_totalNPixels /*n spectra*/, 3 /* x-size */,
                                3 /* y-size */);

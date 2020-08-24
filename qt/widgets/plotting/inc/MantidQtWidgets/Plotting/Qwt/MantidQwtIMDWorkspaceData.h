@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTAPI_MANTIDQWTIMDWORKSPACEDATA_H
-#define MANTIDQTAPI_MANTIDQWTIMDWORKSPACEDATA_H
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/Qwt/MantidQwtWorkspaceData.h"
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 /** This class is used to plot MDWorkspace line plots.
  * For example, in the LineViewer and via the "Plot MD" menu on workspaces.
@@ -102,7 +101,7 @@ private:
   bool m_isDistribution;
 
   /// Original workspace (for purposes of showing alternative coordinates)
-  boost::weak_ptr<const Mantid::API::IMDWorkspace> m_originalWorkspace;
+  std::weak_ptr<const Mantid::API::IMDWorkspace> m_originalWorkspace;
 
   /// Optional coordinate transformation to go from distance on line to another
   /// coordinate
@@ -116,4 +115,3 @@ private:
   /// or the index into the original workspace dimensions
   int m_currentPlotAxis;
 };
-#endif

@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVOIGT_H_
-#define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVOIGT_H_
+#pragma once
 
 #include "MantidAPI/IPowderDiffPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 #include <complex>
@@ -23,7 +23,7 @@ namespace Functions {
     It will involve the calculation from peak's miller indices
 */
 
-class DLLExport ThermalNeutronBk2BkExpConvPVoigt
+class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpConvPVoigt
     : public API::IPowderDiffPeakFunction {
 public:
   ThermalNeutronBk2BkExpConvPVoigt();
@@ -165,7 +165,7 @@ private:
 
 /// Shared pointer to ThermalNeutronBk2BkExpConvPVoigt peak/function
 using ThermalNeutronBk2BkExpConvPVoigt_sptr =
-    boost::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt>;
+    std::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt>;
 
 //--- Public inline function --------------------------------------------------
 /** Calculate d = a/sqrt(h**2+k**2+l**2)
@@ -184,5 +184,3 @@ inline double calCubicDSpace(double a, int h, int k, int l)
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVOIGT_H_ */

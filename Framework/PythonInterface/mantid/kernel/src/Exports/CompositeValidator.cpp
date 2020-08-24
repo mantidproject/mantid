@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/CompositeValidator.h"
 #include <boost/python/class.hpp>
@@ -52,7 +52,7 @@ void export_CompositeValidator() {
                &createCompositeValidator, default_call_policies(),
                (arg("validators"), arg("relation") = CompositeRelation::AND)))
       .def("add",
-           (void (CompositeValidator::*)(IValidator_sptr)) &
+           (void (CompositeValidator::*)(const IValidator_sptr &)) &
                CompositeValidator::add,
            (arg("self"), arg("other")), "Add another validator to the list");
 }

@@ -1,19 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
-#define MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/V3D.h"
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -26,7 +25,7 @@ namespace MDAlgorithms {
  * @date 2011-03-01 13:14:48.236513
  */
 class DLLExport ConvertToDiffractionMDWorkspace
-    : public BoxControllerSettingsAlgorithm {
+    : public API::BoxControllerSettingsAlgorithm {
 public:
   ConvertToDiffractionMDWorkspace();
 
@@ -88,7 +87,7 @@ private:
   /// Sample position
   Kernel::V3D samplePos;
   /// Progress reporter (shared)
-  boost::shared_ptr<Kernel::ProgressBase> prog;
+  std::shared_ptr<Kernel::ProgressBase> prog;
   /// Matrix. Multiply this by the lab frame Qx, Qy, Qz to get the desired Q or
   /// HKL.
   Kernel::Matrix<double> mat;
@@ -101,5 +100,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_RULESCOMPOBJTEST__
-#define MANTID_RULESCOMPOBJTEST__
+#pragma once
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -171,10 +170,10 @@ private:
     std::string C33 = "px -3.2";
 
     // First create some surfaces
-    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
-    CylSurMap[31] = boost::make_shared<Cylinder>();
-    CylSurMap[32] = boost::make_shared<Plane>();
-    CylSurMap[33] = boost::make_shared<Plane>();
+    std::map<int, std::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = std::make_shared<Cylinder>();
+    CylSurMap[32] = std::make_shared<Plane>();
+    CylSurMap[33] = std::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -196,5 +195,3 @@ private:
 };
 //---------------------------------End of
 // CompObj----------------------------------------
-
-#endif

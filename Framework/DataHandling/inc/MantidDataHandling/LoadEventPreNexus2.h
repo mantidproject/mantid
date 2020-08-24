@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADEVENTPRENEXUS_H_
-#define LOADEVENTPRENEXUS_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <fstream>
 #include <string>
 #include <vector>
@@ -188,7 +188,7 @@ private:
   void readPulseidFile(const std::string &filename, const bool throwError);
 
   void runLoadInstrument(const std::string &eventfilename,
-                         API::MatrixWorkspace_sptr localWorkspace);
+                         const API::MatrixWorkspace_sptr &localWorkspace);
 
   inline void fixPixelId(PixelType &pixel, uint32_t &period) const;
 
@@ -202,7 +202,7 @@ private:
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr &workspace);
 
-  void addToWorkspaceLog(std::string logtitle, size_t mindex);
+  void addToWorkspaceLog(const std::string &logtitle, size_t mindex);
 
   void processImbedLogs();
 
@@ -212,11 +212,10 @@ private:
 
   API::MatrixWorkspace_sptr generateEventDistribtionWorkspace();
 
-  void createOutputWorkspace(const std::string event_filename);
+  void createOutputWorkspace(const std::string &event_filename);
 
   /// Processing the input properties for purpose of investigation
   void processInvestigationInputs();
 };
 } // namespace DataHandling
 } // namespace Mantid
-#endif /*LOADEVENTPRENEXUS_H_*/

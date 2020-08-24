@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import
-
 # std imports
 from unittest import TestCase, main
 
@@ -23,13 +21,14 @@ import numpy as np
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
                                          manage_workspace_names, plot, plot_from_names,
-                                         pcolormesh_from_names)
+                                         pcolormesh_from_names, plot_surface)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -150,6 +149,11 @@ class FunctionsTest(TestCase):
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         pcolormesh_from_names([ws_name])
         self.assertEqual(1, pcolormesh_mock.call_count)
+
+    def test_scale_is_correct_on_pcolourmesh_of_ragged_workspace(self):
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2)
+        fig = pcolormesh_from_names([ws])
+        self.assertEqual((1.8, 2.2), fig.axes[0].images[0].get_clim())
 
     def test_pcolormesh_from_names(self):
         ws_name = 'test_pcolormesh_from_names-1'
@@ -321,6 +325,18 @@ class FunctionsTest(TestCase):
             self.assertEqual(ax.get_xlabel(), err_ax.get_xlabel())
             # Compare title
             self.assertEqual(ax.get_title(), err_ax.get_title())
+
+    def test_colorbar_limits_not_default_values_on_surface_plot_with_monitor(self):
+        ws = CreateSampleWorkspace(NumMonitors=1)
+        fig = plt.figure()
+        plot_surface([ws], fig=fig)
+        ax = fig.get_axes()
+        cmin, cmax = ax[0].collections[0].get_clim()
+
+        # the colorbar limits default to +-0.1 when it can't find max and min of array
+        self.assertNotEqual(cmax, 0.1)
+        self.assertNotEqual(cmin, -0.1)
+
 
 if __name__ == '__main__':
     main()

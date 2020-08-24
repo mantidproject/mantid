@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADISAWDETCAL_H_
-#define MANTID_DATAHANDLING_LOADISAWDETCAL_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -67,15 +66,15 @@ private:
 
   /// Set the center of the supplied detector name
   void center(const double x, const double y, const double z,
-              const std::string &detname, API::Workspace_sptr ws,
+              const std::string &detname, const API::Workspace_sptr &ws,
               Geometry::ComponentInfo &componentInfo);
 
-  Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
+  Geometry::Instrument_sptr getCheckInst(const API::Workspace_sptr &ws);
   std::vector<std::string> getFilenames();
 
   void doRotation(Kernel::V3D rX, Kernel::V3D rY,
                   Geometry::ComponentInfo &componentInfo,
-                  boost::shared_ptr<const Geometry::IComponent> comp,
+                  const std::shared_ptr<const Geometry::IComponent> &comp,
                   bool doWishCorrection = false);
   void applyScalings(
       API::Workspace_sptr &ws,
@@ -84,5 +83,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_DIFFRACTIONEVENTREADDETCAL_H_*/

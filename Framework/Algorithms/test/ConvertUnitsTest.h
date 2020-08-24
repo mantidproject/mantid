@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAlgorithms/ConvertUnits.h"
@@ -139,7 +139,7 @@ public:
     Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve(inputSpace));
-    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+    Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
 
     // make sure input WS is not changed, i.e. still not Histogram
     TS_ASSERT(!input2D->isHistogramData());
@@ -148,8 +148,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Test that X data is still Points (it was converted back)
     TS_ASSERT(!output2D->isHistogramData());
@@ -227,15 +226,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         pointsWS = AnalysisDataService::Instance().retrieve(inputSpace));
     Workspace2D_sptr pointsWS2D =
-        boost::dynamic_pointer_cast<Workspace2D>(pointsWS);
+        std::dynamic_pointer_cast<Workspace2D>(pointsWS);
 
     // This is the WS with units converted back to TOF
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Test that X data is still Points (it was converted back)
     TS_ASSERT(!output2D->isHistogramData());
@@ -355,9 +353,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve(inputSpace));
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
-    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
 
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "Wavelength");
@@ -547,9 +544,8 @@ public:
     source->setPos(V3D(0, 0.0, -11.739));
     testInst->add(source);
     testInst->markAsSource(source);
-    // Define a sample as a simple sphere
-    ObjComponent *sample =
-        new ObjComponent("samplePos", IObject_sptr(), testInst.get());
+    // Define a sample position
+    Component *sample = new Component("samplePos", testInst.get());
     testInst->setPos(0.0, 0.0, 0.0);
     testInst->add(sample);
     testInst->markAsSamplePos(sample);
@@ -713,7 +709,7 @@ public:
    * sorting flips the direction
    */
   void do_testExecEvent_RemainsSorted(EventSortType sortType,
-                                      std::string targetUnit) {
+                                      const std::string &targetUnit) {
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
                                                                         false);
@@ -729,7 +725,7 @@ public:
     ConvertUnits conv;
     conv.initialize();
     conv.setProperty("InputWorkspace",
-                     boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+                     std::dynamic_pointer_cast<MatrixWorkspace>(ws));
     conv.setPropertyValue("OutputWorkspace", "out");
     conv.setPropertyValue("Target", targetUnit);
     conv.execute();
@@ -838,10 +834,14 @@ public:
   static void destroySuite(ConvertUnitsTestPerformance *suite) { delete suite; }
 
   void setUp() override {
-    FrameworkManager::Instance().exec(
-        "Load", "Filename=HET15869;OutputWorkspace=hist_tof");
-    FrameworkManager::Instance().exec(
-        "Load", "Filename=CNCS_7860_event;OutputWorkspace=event_tof");
+    auto algo = AlgorithmManager::Instance().create("Load");
+    algo->setPropertyValue("Filename", "HET15869");
+    algo->setPropertyValue("OutputWorkspace", "hist_tof");
+    algo->execute();
+    algo = AlgorithmManager::Instance().create("Load");
+    algo->setPropertyValue("Filename", "CNCS_7860_event");
+    algo->setPropertyValue("OutputWorkspace", "event_tof");
+    algo->execute();
     std::string WSname = "inputWS";
     setup_Points_WS(WSname);
   }
@@ -866,26 +866,32 @@ public:
   }
 
   void test_histogram_workspace() {
-    IAlgorithm *alg;
-    alg = FrameworkManager::Instance().exec(
-        "ConvertUnits",
-        "InputWorkspace=hist_tof;OutputWorkspace=hist_wave;Target=Wavelength");
+    auto alg = AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setPropertyValue("InputWorkspace", "hist_tof");
+    alg->setPropertyValue("OutputWorkspace", "hist_wave");
+    alg->setPropertyValue("Target", "Wavelength");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
-    alg = FrameworkManager::Instance().exec(
-        "ConvertUnits", "InputWorkspace=hist_wave;OutputWorkspace=hist_"
-                        "dSpacing;Target=dSpacing");
+    alg = AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setPropertyValue("InputWorkspace", "hist_tof");
+    alg->setPropertyValue("OutputWorkspace", "hist_dSpacing");
+    alg->setPropertyValue("Target", "dSpacing");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
   }
 
   void test_event_workspace() {
-    IAlgorithm *alg;
-    alg = FrameworkManager::Instance().exec(
-        "ConvertUnits", "InputWorkspace=event_tof;OutputWorkspace=event_wave;"
-                        "Target=Wavelength");
+    auto alg = AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setPropertyValue("InputWorkspace", "event_tof");
+    alg->setPropertyValue("OutputWorkspace", "event_wave");
+    alg->setPropertyValue("Target", "Wavelength");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
-    alg = FrameworkManager::Instance().exec(
-        "ConvertUnits", "InputWorkspace=event_wave;OutputWorkspace=event_"
-                        "dSpacing;Target=dSpacing");
+    alg = AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setPropertyValue("InputWorkspace", "event_tof");
+    alg->setPropertyValue("OutputWorkspace", "event_dSpacing");
+    alg->setPropertyValue("Target", "dSpacing");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
   }
 

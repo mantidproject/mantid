@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECFILEFINDERTEST_H
-#define MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECFILEFINDERTEST_H
+#pragma once
 
 #include "MantidDataHandling/SampleEnvironmentFactory.h"
 #include <cxxtest/TestSuite.h>
@@ -142,5 +141,3 @@ private:
   const std::string m_envName = "TestingEnv";
   const std::string m_badName = "BadEnv";
 };
-
-#endif // MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECFILEFINDERTEST_H

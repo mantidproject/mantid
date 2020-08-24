@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/XDataConverter.h"
 
 namespace Mantid {
@@ -21,7 +22,7 @@ namespace Algorithms {
   @author Martyn Gigg, Tessella plc
   @date 2010-12-21
 */
-class DLLExport ConvertToHistogram : public XDataConverter {
+class MANTID_ALGORITHMS_DLL ConvertToHistogram : public XDataConverter {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConvertToHistogram"; }

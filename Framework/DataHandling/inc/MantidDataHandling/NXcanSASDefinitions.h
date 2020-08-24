@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_NXCANSASDEFINITIONS_H_
-#define MANTID_DATAHANDLING_NXCANSASDEFINITIONS_H_
+#pragma once
 
 #include <string>
 
@@ -41,7 +40,7 @@ const std::string sasEntryClassAttr = "SASentry";
 const std::string nxEntryClassAttr = "NXentry";
 const std::string sasEntryGroupName = "sasentry";
 const std::string sasEntryVersionAttr = "version";
-const std::string sasEntryVersionAttrValue = "1.0";
+const std::string sasEntryVersionAttrValue = "1.1";
 const std::string sasEntryDefinition = "definition";
 const std::string sasEntryDefinitionFormat = "NXcanSAS";
 const std::string sasEntryTitle = "title";
@@ -79,7 +78,7 @@ const std::string sasInstrumentSourceClassAttr = "SASsource";
 const std::string nxInstrumentSourceClassAttr = "NXsource";
 
 const std::string sasInstrumentSourceGroupName = "sassource";
-const std::string sasInstrumentSourceRadiation = "radiation";
+const std::string sasInstrumentSourceRadiation = "type";
 
 const std::string sasInstrumentCollimationClassAttr = "SAScollimation";
 const std::string nxInstrumentCollimationClassAttr = "NXcollimator";
@@ -140,4 +139,3 @@ const std::string sasTransmissionSpectrumTdev = "Tdev";
 } // namespace NXcanSAS
 } // namespace DataHandling
 } // namespace Mantid
-#endif

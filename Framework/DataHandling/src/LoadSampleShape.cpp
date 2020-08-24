@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
@@ -13,9 +13,9 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/Workspace.h"
 
 #include "MantidKernel/ArrayProperty.h"
 
@@ -23,6 +23,10 @@
 
 namespace Mantid {
 namespace DataHandling {
+
+namespace {
+double DegreesToRadians(double angle) { return angle * M_PI / 180; }
+} // namespace
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadSampleShape)
@@ -32,13 +36,13 @@ using namespace API;
 using namespace Geometry;
 
 void LoadSampleShape::init() {
-  auto wsValidator = boost::make_shared<API::InstrumentValidator>();
+  auto wsValidator = std::make_shared<API::InstrumentValidator>();
   ;
 
   // input workspace
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input, wsValidator),
+      std::make_unique<WorkspaceProperty<Workspace>>(
+          "InputWorkspace", "", Direction::Input, wsValidator),
       "The name of the workspace containing the instrument to add the shape");
 
   // shape file
@@ -50,59 +54,71 @@ void LoadSampleShape::init() {
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
 
+  // Rotation angles
+  declareProperty("XDegrees", 0.0, "The degrees to rotate on the x axis by");
+  declareProperty("YDegrees", 0.0, "The degrees to rotate on the y axis by");
+  declareProperty("ZDegrees", 0.0, "The degrees to rotate on the z axis by");
+
+  // Vector to translate mesh
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
+      "Vector by which to translate the loaded sample shape");
+
   // Output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will contain the loaded "
                   "shape of the sample");
 }
 
 void LoadSampleShape::exec() {
 
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  Workspace_const_sptr inputWS = getProperty("InputWorkspace");
+  Workspace_sptr outputWS = getProperty("OutputWorkspace");
 
   if (inputWS != outputWS) {
     outputWS = inputWS->clone();
   }
 
+  auto ei = std::dynamic_pointer_cast<ExperimentInfo>(outputWS);
+  if (!ei)
+    throw std::invalid_argument("Wrong type of input workspace");
+
   const std::string filename = getProperty("Filename");
 
   const std::string filetype = filename.substr(filename.size() - 3);
 
-  boost::shared_ptr<MeshObject> shape = nullptr;
+  std::shared_ptr<MeshObject> shape = nullptr;
   const std::string scaleProperty = getPropertyValue("Scale");
-  const ScaleUnits scaleType = getScaleType(scaleProperty);
+  const ScaleUnits scaleType = getScaleTypeFromStr(scaleProperty);
 
+  std::unique_ptr<LoadSingleMesh> reader = nullptr;
   if (filetype == "off") {
-    auto offReader = LoadOff(filename, scaleType);
-    shape = offReader.readOFFshape();
+    reader = std::make_unique<LoadOff>(filename, scaleType);
+    shape = reader->readShape();
   } else {
-    std::unique_ptr<LoadStl> reader =
-        LoadStlFactory::createReader(filename, scaleType);
-    shape = reader->readStl();
+    reader = LoadStlFactory::createReader(filename, scaleType);
+    shape = reader->readShape();
   }
-  // rotate shape
-  rotate(*shape, inputWS);
+
+  const double xRotation = DegreesToRadians(getProperty("xDegrees"));
+  const double yRotation = DegreesToRadians(getProperty("yDegrees"));
+  const double zRotation = DegreesToRadians(getProperty("zDegrees"));
+  shape = reader->rotate(shape, xRotation, yRotation, zRotation);
+
+  const std::vector<double> translationVector =
+      getProperty("TranslationVector");
+  shape = reader->translate(shape, translationVector);
+
+  // rotate shape according to goniometer
+  shape->rotate(ei->run().getGoniometer().getR());
 
   // Put shape into sample.
-  Sample &sample = outputWS->mutableSample();
+  Sample &sample = ei->mutableSample();
   sample.setShape(shape);
 
   // Set output workspace
   setProperty("OutputWorkspace", outputWS);
-}
-
-/**
- * Rotates the Shape by a provided matrix
- * @param sampleMesh The Shape to rotate
- * @param inputWS The workspace to get the rotation from
- * @returns a shared pointer to the newly rotated Shape
- */
-void rotate(MeshObject &sampleMesh, MatrixWorkspace_const_sptr inputWS) {
-  const std::vector<double> rotationMatrix =
-      inputWS->run().getGoniometer().getR();
-  sampleMesh.rotate(rotationMatrix);
 }
 
 } // namespace DataHandling

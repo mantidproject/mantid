@@ -1,21 +1,22 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
+#pragma once
 
 #include "IndirectFitAnalysisTab.h"
 #include "MSDFitModel.h"
-#include "ui_MSDFit.h"
+#include "ui_IndirectFitTab.h"
 
 #include "MantidAPI/IFunction.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+class IDAFunctionParameterEstimation;
+
 class DLLExport MSDFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
@@ -28,6 +29,7 @@ public:
 
 protected slots:
   void runClicked();
+  void fitFunctionChanged();
 
 protected:
   void setRunIsRunning(bool running) override;
@@ -36,11 +38,11 @@ protected:
 private:
   void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
+  std::string fitTypeString() const;
   MSDFitModel *m_msdFittingModel;
-  std::unique_ptr<Ui::MSDFit> m_uiForm;
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
+  IDAFunctionParameterEstimation createParameterEstimation() const;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_ */

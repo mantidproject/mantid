@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ChangeQConvention.h"
 #include "MantidAPI/CoordTransform.h"
@@ -53,7 +53,7 @@ void ChangeQConvention::exec() {
 
   Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
   transform_alg->setProperty("InputWorkspace",
-                             boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+                             std::dynamic_pointer_cast<IMDWorkspace>(ws));
   transform_alg->setProperty("Scaling", "-1.0");
   transform_alg->executeAsChildAlg();
   ws = transform_alg->getProperty("OutputWorkspace");

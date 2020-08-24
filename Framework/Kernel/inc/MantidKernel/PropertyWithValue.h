@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -37,12 +37,12 @@ namespace Kernel {
 template <typename TYPE> class DLLExport PropertyWithValue : public Property {
 public:
   PropertyWithValue(
-      std::string name, TYPE defaultValue,
+      const std::string &name, TYPE defaultValue,
       IValidator_sptr validator = IValidator_sptr(new NullValidator),
       const unsigned int direction = Direction::Input);
-  PropertyWithValue(std::string name, TYPE defaultValue,
+  PropertyWithValue(const std::string &name, TYPE defaultValue,
                     const unsigned int direction);
-  PropertyWithValue(std::string name, TYPE defaultValue,
+  PropertyWithValue(const std::string &name, TYPE defaultValue,
                     const std::string &defaultValueStr,
                     IValidator_sptr validator, const unsigned int direction);
   PropertyWithValue(const PropertyWithValue<TYPE> &right);
@@ -53,13 +53,13 @@ public:
   std::string valueAsPrettyStr(const size_t maxLength = 0,
                                const bool collapseLists = true) const override;
   Json::Value valueAsJson() const override;
-  virtual bool operator==(const PropertyWithValue<TYPE> &rhs) const;
-  virtual bool operator!=(const PropertyWithValue<TYPE> &rhs) const;
+  bool operator==(const PropertyWithValue<TYPE> &rhs) const;
+  bool operator!=(const PropertyWithValue<TYPE> &rhs) const;
   int size() const override;
   std::string getDefault() const override;
   std::string setValue(const std::string &value) override;
   std::string setValueFromJson(const Json::Value &value) override;
-  std::string setDataItem(const boost::shared_ptr<DataItem> data) override;
+  std::string setDataItem(const std::shared_ptr<DataItem> &data) override;
   PropertyWithValue &operator=(const PropertyWithValue &right);
   PropertyWithValue &operator+=(Property const *right) override;
   virtual PropertyWithValue &operator=(const TYPE &value);

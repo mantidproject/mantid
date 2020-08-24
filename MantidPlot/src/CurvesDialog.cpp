@@ -56,7 +56,8 @@
 
 using namespace MantidQt::API;
 
-CurvesDialog::CurvesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl)
+CurvesDialog::CurvesDialog(ApplicationWindow *app, Graph *g,
+                           const Qt::WFlags &fl)
     : QDialog(g, fl), d_app(app), d_graph(g) {
   if (!app) {
     throw std::logic_error(

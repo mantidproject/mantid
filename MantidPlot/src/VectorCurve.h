@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef VECTORCURVE_H
-#define VECTORCURVE_H
+#pragma once
 
 #include "PlotCurve.h"
 #include <qwt_plot.h>
@@ -104,5 +103,3 @@ protected:
   QString d_end_x_a;
   QString d_end_y_m;
 };
-
-#endif

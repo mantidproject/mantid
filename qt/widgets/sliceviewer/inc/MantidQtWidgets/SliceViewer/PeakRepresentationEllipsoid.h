@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
-#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
+#pragma once
 
 #include "MantidKernel/V2D.h"
 #include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
@@ -19,10 +18,10 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid
     : public PeakRepresentation {
 public:
   PeakRepresentationEllipsoid(
-      const Mantid::Kernel::V3D &origin, const std::vector<double> peakRadii,
-      const std::vector<double> backgroundInnerRadii,
-      const std::vector<double> backgroundOuterRadii,
-      const std::vector<Mantid::Kernel::V3D> directions,
+      const Mantid::Kernel::V3D &origin, const std::vector<double> &peakRadii,
+      const std::vector<double> &backgroundInnerRadii,
+      const std::vector<double> &backgroundOuterRadii,
+      const std::vector<Mantid::Kernel::V3D> &directions,
       std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
           calculator);
 
@@ -115,4 +114,3 @@ private:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif

@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef VTKDATASET_TO_GEOMETRY_TEST_H_
-#define VTKDATASET_TO_GEOMETRY_TEST_H_
+#pragma once
 
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 
@@ -317,5 +315,3 @@ public:
         A.getNonMappedDimensions().size(), B.getNonMappedDimensions().size());
   }
 };
-
-#endif

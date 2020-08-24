@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_CONVFITDATATABLEPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_CONVFITDATATABLEPRESENTER_H_
+#pragma once
 
 #include "ConvFitModel.h"
 #include "IndirectDataTablePresenter.h"
@@ -28,23 +27,16 @@ public:
   ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable);
 
 protected:
-  void addTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                     TableRowIndex row) override;
-  void updateTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                        TableRowIndex row) override;
+  void addTableEntry(FitDomainIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
-  std::string getResolutionName(TableRowIndex row) const;
-
-  ConvFitModel *m_convFitModel;
+  std::string getResolutionName(FitDomainIndex row) const;
 };
 
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACES_CONVFITDATATABLEPRESENTER_H_ */

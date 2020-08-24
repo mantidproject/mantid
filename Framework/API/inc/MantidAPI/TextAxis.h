@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -15,7 +15,7 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <string>
@@ -60,8 +60,6 @@ public:
   double getMax() const override;
 
 private:
-  /// Private, undefined copy assignment operator
-  const TextAxis &operator=(const TextAxis &);
   /// A vector holding the axis values for the axis.
   std::vector<std::string> m_values;
 };

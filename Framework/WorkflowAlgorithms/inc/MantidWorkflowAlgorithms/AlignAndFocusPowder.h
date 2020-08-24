@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_AlignAndFocusPowder_H_
-#define MANTID_ALGORITHM_AlignAndFocusPowder_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -76,23 +75,22 @@ private:
                    const std::string &groupFilename);
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
 
-  API::MatrixWorkspace_sptr conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
-                                              API::MatrixWorkspace_sptr ws2,
-                                              size_t offset);
+  API::MatrixWorkspace_sptr
+  conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
+                    const API::MatrixWorkspace_sptr &ws2, size_t offset);
 
   /// Call diffraction focus to a matrix workspace.
   API::MatrixWorkspace_sptr diffractionFocus(API::MatrixWorkspace_sptr ws);
 
   /// Convert units
   API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws,
-                                         std::string target);
+                                         const std::string &target);
 
   /// Call edit instrument geometry
-  API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws,
-                                           std::vector<double> polars,
-                                           std::vector<specnum_t> specids,
-                                           std::vector<double> l2s,
-                                           std::vector<double> phis);
+  API::MatrixWorkspace_sptr editInstrument(
+      API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
+      const std::vector<specnum_t> &specids, const std::vector<double> &l2s,
+      const std::vector<double> &phis);
   void convertOffsetsToCal(DataObjects::OffsetsWorkspace_sptr &offsetsWS);
   double getVecPropertyFromPmOrSelf(const std::string &name,
                                     std::vector<double> &avec);
@@ -124,7 +122,7 @@ private:
   double tmin{0.0};
   double tmax{0.0};
   bool m_preserveEvents{false};
-  void doSortEvents(Mantid::API::Workspace_sptr ws);
+  void doSortEvents(const Mantid::API::Workspace_sptr &ws);
 
   /// Low resolution TOF matrix workspace
   API::MatrixWorkspace_sptr m_lowResW;
@@ -140,5 +138,3 @@ private:
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_AlignAndFocusPowder_H_*/

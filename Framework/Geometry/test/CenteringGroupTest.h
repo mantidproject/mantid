@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_CENTERINGGROUPTEST_H_
-#define MANTID_GEOMETRY_CENTERINGGROUPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -78,7 +77,7 @@ private:
     }
 
     CenteringGroup_const_sptr centeringGroup =
-        boost::dynamic_pointer_cast<const CenteringGroup>(group);
+        std::dynamic_pointer_cast<const CenteringGroup>(group);
     TSM_ASSERT("Could not cast to pointer in " + symbol, centeringGroup);
     TSM_ASSERT_EQUALS("CenteringType did not match for " + symbol,
                       centeringGroup->getType(), expectedCenteringType);
@@ -93,5 +92,3 @@ private:
            collection.end();
   }
 };
-
-#endif /* MANTID_GEOMETRY_CENTERINGGROUPTEST_H_ */

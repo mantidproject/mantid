@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -38,8 +38,7 @@ public:
       // Set up a small workspace for testing
       Workspace_sptr space =
           WorkspaceFactory::Instance().create("Workspace2D", 5, 6, 5);
-      Workspace2D_sptr space2D =
-          boost::dynamic_pointer_cast<Workspace2D>(space);
+      Workspace2D_sptr space2D = std::dynamic_pointer_cast<Workspace2D>(space);
       std::vector<double> a(25), e(25);
       for (int i = 0; i < 25; ++i) {
         a[i] = i;
@@ -86,9 +85,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMax", "1"));
     TS_ASSERT_THROWS_NOTHING(crop.execute());
     TS_ASSERT(!crop.isExecuted());
-    TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMax", "2.5"));
-    TS_ASSERT_THROWS_NOTHING(crop.execute());
-    TS_ASSERT(!crop.isExecuted());
     TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMax", "5"));
     TS_ASSERT_THROWS_NOTHING(
         crop.setPropertyValue("StartWorkspaceIndex", "10"));
@@ -103,7 +99,7 @@ public:
     TS_ASSERT(!crop.isExecuted());
   }
 
-  void makeFakeEventWorkspace(std::string wsName) {
+  void makeFakeEventWorkspace(const std::string &wsName) {
     // Make an event workspace with 2 events in each bin.
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createEventWorkspace(36, 50, 50, 0.0, 2., 2);
@@ -328,7 +324,7 @@ public:
     CropWorkspace crop4;
     TS_ASSERT_THROWS_NOTHING(crop4.initialize());
     TS_ASSERT_THROWS_NOTHING(crop4.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(input)));
+        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(input)));
     TS_ASSERT_THROWS_NOTHING(
         crop4.setPropertyValue("OutputWorkspace", "raggedOut"));
     TS_ASSERT_THROWS_NOTHING(crop4.setPropertyValue("XMin", "2.9"));

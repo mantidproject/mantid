@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TIMESTEP_TO_TIMESTEP_TEST_H_
-#define TIMESTEP_TO_TIMESTEP_TEST_H_
+#pragma once
 
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include <cxxtest/TestSuite.h>
@@ -22,5 +21,3 @@ public:
         proxy(argument));
   }
 };
-
-#endif

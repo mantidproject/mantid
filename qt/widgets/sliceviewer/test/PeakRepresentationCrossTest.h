@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
-#define SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
+#pragma once
 
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
 #include "MockObjects.h"
@@ -42,7 +41,7 @@ public:
     PeakRepresentationCross peak(origin, maxZ, minZ);
 
     /* Provide a mocked transform */
-    MockPeakTransform *mockTransform = new MockPeakTransform;
+    auto *mockTransform = new MockPeakTransform;
     EXPECT_CALL(*mockTransform, transform(_))
         .Times(1)
         .WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
@@ -188,11 +187,10 @@ public:
 
 class PeakRepresentationCrossTestPerformance : public CxxTest::TestSuite {
 private:
-  using VecPeakRepCross =
-      std::vector<boost::shared_ptr<PeakRepresentationCross>>;
+  using VecPeakRepCross = std::vector<std::shared_ptr<PeakRepresentationCross>>;
 
   using VecPeakRepCrossWrapped = std::vector<
-      boost::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>;
+      std::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>;
 
   /// Collection to store a large number of PeakRepresentationCross.
   VecPeakRepCross m_peaks;
@@ -215,9 +213,9 @@ public:
       for (int y = 0; y < sizeInAxis; ++y) {
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
-          m_peaks.emplace_back(boost::make_shared<
-                               MantidQt::SliceViewer::PeakRepresentationCross>(
-              peakOrigin, maxZ, minZ));
+          m_peaks.emplace_back(
+              std::make_shared<MantidQt::SliceViewer::PeakRepresentationCross>(
+                  peakOrigin, maxZ, minZ));
         }
       }
     }
@@ -279,5 +277,3 @@ public:
     }
   }
 };
-
-#endif

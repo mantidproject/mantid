@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,8 +10,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/System.h"
 #include <boost/function.hpp>
 
 // To be compatible with VSC Express edition that does not have tr1
@@ -29,7 +29,7 @@ This algorithm is used to select/deselect detectors in a *.cal file.
 Laboratory
  @date 06/07/2009
  */
-class DLLExport MaskDetectorsIf : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaskDetectorsIf : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MaskDetectorsIf"; }
@@ -41,7 +41,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"MaskDetectors", "ClearMaskedSpectra"};
+    return {"MaskDetectors"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {

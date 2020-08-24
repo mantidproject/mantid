@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes
-from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets, QtGui, QtCore
 import sys
 import mantid
@@ -158,16 +157,30 @@ class ClassicUBInputWidget(QtWidgets.QWidget):
         self._editvz.setText(QString(format(self.latt_vz,'.5f')))
 
     def check_state_orientation(self, *dummy_args, **dummy_kwargs):
-        edits=[self._editux,self._edituy,self._edituz,self._editvx,self._editvy,self._editvz]
-        uvector=numpy.array([float(self._editux.text()),float(self._edituy.text()),float(self._edituz.text())])
-        vvector=numpy.array([float(self._editvx.text()),float(self._editvy.text()),float(self._editvz.text())])
-        if numpy.linalg.norm(numpy.cross(uvector,vvector))>1e-5:
-            #change all colors to white
-            for edit in edits:
-                edit.setStyleSheet('QLineEdit { background-color: #ffffff }')
-            self.validateAll()
+        senderWidget = self.sender()
+        validator = senderWidget.validator()
+        state = validator.validate(senderWidget.text(), 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            color = '#ffffff'
+        elif state == QtGui.QValidator.Intermediate:
+            color = '#ffaaaa'
         else:
-            self.sender().setStyleSheet('QLineEdit { background-color: #ff0000 }')
+            color = '#ff0000'
+        senderWidget.setStyleSheet('QLineEdit { background-color: %s }' % color)
+        if state == QtGui.QValidator.Acceptable:
+            edits=[self._editux,self._edituy,self._edituz,self._editvx,self._editvy,self._editvz]
+            try:
+                uvector=numpy.array([float(self._editux.text()),float(self._edituy.text()),float(self._edituz.text())])
+                vvector=numpy.array([float(self._editvx.text()),float(self._editvy.text()),float(self._editvz.text())])
+                if numpy.linalg.norm(numpy.cross(uvector,vvector))>1e-5:
+                    #change all colors to white
+                    for edit in edits:
+                        edit.setStyleSheet('QLineEdit { background-color: #ffffff }')
+                    self.validateAll()
+                else:
+                    self.sender().setStyleSheet('QLineEdit { background-color: #ff0000 }')
+            except ValueError:
+                pass  # one of the edits is already not in an acceptable state
 
     def check_state_latt(self, *dummy_args, **dummy_kwargs):
         senderWidget = self.sender()

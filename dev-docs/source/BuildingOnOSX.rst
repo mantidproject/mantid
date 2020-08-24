@@ -46,31 +46,15 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
    brew cask install xquartz
    brew cask install mactex
 
-5. Reset brew formula repo back to before Python 2 removal for required packages
+5. Install ``mantid-developer`` formula (this may take a while depending on your network speed)
 
 .. code-block:: sh
 
-   cd /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core
-   git reset --hard 8f1d612d9e179c0d91ecd09853854e42281bd313
-   cd -
+   brew install mantid-developer
 
-6. Disable homebrew update and install ``mantid-developer`` formula (this may take a while depending on your network speed)
+6. Homebrew can stop early for reasons that are unclear. Repeat the above command until Homebrew states: *Warning: mantidproject/mantid/mantid-developer ?.? is already installed and up-to-date*.
 
-.. code-block:: sh
-
-   HOMEBREW_NO_AUTO_UPDATE=1 brew install mantid-developer
-
-7. Homebrew can stop early for reasons that are unclear. Repeat the above command until Homebrew states: *Warning: mantidproject/mantid/mantid-developer ?.? is already installed and up-to-date*.
-
-8. Pin libraries that depend on Python 2 and libmxml and NeXus is not compatible with v3:
-
-.. code-block:: sh
-
-   brew pin libmxml
-   brew pin sip
-   brew pin pyqt
-
-9. Unlink ``qt@4`` from ``/usr/local`` to avoid cross talk with Qt5 and ensure the webkit can be found when not linked
+7. Unlink ``qt@4`` from ``/usr/local`` to avoid cross talk with Qt5 and ensure the webkit can be found when not linked
 
 .. code-block:: sh
 
@@ -79,13 +63,31 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
    ln -s /usr/local/opt/qt-webkit@2.3/include/QtWebKit /usr/local/opt/qt@4/include/QtWebKit
    ln -s /usr/local/opt/qt-webkit@2.3/lib/QtWebKit.framework /usr/local/opt/qt@4/lib/QtWebKit.framework
 
-10. Check that ``which python`` returns a Python in ``/usr/local`` and not system Python.
+8. Unlink ``qscintilla2`` and ``qscintilla2qt4``
+
+.. code-block:: sh
+
+   brew unlink qscintilla2
+   brew unlink qscintilla2qt4
+
+9. Python is now keg-only. Add the appropriate version to ``PATH`` in shell profile and restart the terminal:
+
+.. code-block:: sh
+
+   # Assume we are using bash
+   echo 'export PATH="/usr/local/opt/python@3.8/bin:$PATH"' >> ~/.bash_profile
+
+10. Downgrade setuptools to 48.0.0 until https://github.com/mantidproject/mantid/issues/29010 is fixed.
+
+.. code-block:: sh
+
+   python3 -m pip install setuptools==48.0.0  
 
 11. Install python requirements
 
 .. code-block:: sh
 
-   python -m pip install -r /usr/local/Homebrew/Library/Taps/mantidproject/homebrew-mantid/requirements.txt
+   python3 -m pip install -r /usr/local/Homebrew/Library/Taps/mantidproject/homebrew-mantid/requirements.txt
 
 
 Instructions for Historic Versions

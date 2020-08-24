@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -22,51 +22,51 @@ DLLExport ResultType executeBinaryOperation(
     bool rethrow = false);
 } // namespace OperatorOverloads
 
-bool MANTID_API_DLL equals(const MatrixWorkspace_sptr lhs,
-                           const MatrixWorkspace_sptr rhs,
+bool MANTID_API_DLL equals(const MatrixWorkspace_sptr &lhs,
+                           const MatrixWorkspace_sptr &rhs,
                            double tolerance = 0.0);
 
 // Workspace operator overloads
-MatrixWorkspace_sptr MANTID_API_DLL operator+(const MatrixWorkspace_sptr lhs,
-                                              const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr MANTID_API_DLL operator-(const MatrixWorkspace_sptr lhs,
-                                              const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr MANTID_API_DLL operator*(const MatrixWorkspace_sptr lhs,
-                                              const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr MANTID_API_DLL operator/(const MatrixWorkspace_sptr lhs,
-                                              const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator+(const MatrixWorkspace_sptr &lhs,
+                                              const MatrixWorkspace_sptr &rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator-(const MatrixWorkspace_sptr &lhs,
+                                              const MatrixWorkspace_sptr &rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator*(const MatrixWorkspace_sptr &lhs,
+                                              const MatrixWorkspace_sptr &rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator/(const MatrixWorkspace_sptr &lhs,
+                                              const MatrixWorkspace_sptr &rhs);
 
-MatrixWorkspace_sptr MANTID_API_DLL operator+(const MatrixWorkspace_sptr lhs,
+MatrixWorkspace_sptr MANTID_API_DLL operator+(const MatrixWorkspace_sptr &lhs,
                                               const double &rhsValue);
-MatrixWorkspace_sptr MANTID_API_DLL operator-(const MatrixWorkspace_sptr lhs,
+MatrixWorkspace_sptr MANTID_API_DLL operator-(const MatrixWorkspace_sptr &lhs,
                                               const double &rhsValue);
 MatrixWorkspace_sptr MANTID_API_DLL operator-(const double &lhsValue,
-                                              const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr MANTID_API_DLL operator*(const MatrixWorkspace_sptr lhs,
+                                              const MatrixWorkspace_sptr &rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator*(const MatrixWorkspace_sptr &lhs,
                                               const double &rhsValue);
 MatrixWorkspace_sptr MANTID_API_DLL operator*(const double &lhsValue,
-                                              const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr MANTID_API_DLL operator/(const MatrixWorkspace_sptr lhs,
+                                              const MatrixWorkspace_sptr &rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator/(const MatrixWorkspace_sptr &lhs,
                                               const double &rhsValue);
 MatrixWorkspace_sptr MANTID_API_DLL operator/(const double &lhsValue,
-                                              const MatrixWorkspace_sptr rhs);
+                                              const MatrixWorkspace_sptr &rhs);
 
-MatrixWorkspace_sptr MANTID_API_DLL operator+=(const MatrixWorkspace_sptr lhs,
-                                               const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr MANTID_API_DLL operator-=(const MatrixWorkspace_sptr lhs,
-                                               const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr MANTID_API_DLL operator*=(const MatrixWorkspace_sptr lhs,
-                                               const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr MANTID_API_DLL operator/=(const MatrixWorkspace_sptr lhs,
-                                               const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator+=(const MatrixWorkspace_sptr &lhs,
+                                               const MatrixWorkspace_sptr &rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator-=(const MatrixWorkspace_sptr &lhs,
+                                               const MatrixWorkspace_sptr &rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator*=(const MatrixWorkspace_sptr &lhs,
+                                               const MatrixWorkspace_sptr &rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator/=(const MatrixWorkspace_sptr &lhs,
+                                               const MatrixWorkspace_sptr &rhs);
 
-MatrixWorkspace_sptr MANTID_API_DLL operator+=(const MatrixWorkspace_sptr lhs,
+MatrixWorkspace_sptr MANTID_API_DLL operator+=(const MatrixWorkspace_sptr &lhs,
                                                const double &rhsValue);
-MatrixWorkspace_sptr MANTID_API_DLL operator-=(const MatrixWorkspace_sptr lhs,
+MatrixWorkspace_sptr MANTID_API_DLL operator-=(const MatrixWorkspace_sptr &lhs,
                                                const double &rhsValue);
-MatrixWorkspace_sptr MANTID_API_DLL operator*=(const MatrixWorkspace_sptr lhs,
+MatrixWorkspace_sptr MANTID_API_DLL operator*=(const MatrixWorkspace_sptr &lhs,
                                                const double &rhsValue);
-MatrixWorkspace_sptr MANTID_API_DLL operator/=(const MatrixWorkspace_sptr lhs,
+MatrixWorkspace_sptr MANTID_API_DLL operator/=(const MatrixWorkspace_sptr &lhs,
                                                const double &rhsValue);
 
 /** A collection of static functions for use with workspaces
@@ -83,7 +83,7 @@ struct MANTID_API_DLL WorkspaceHelpers {
   static bool sharedXData(const MatrixWorkspace &WS);
   // Divides the data in a workspace by the bin width to make it a distribution
   // (or the reverse)
-  static void makeDistribution(MatrixWorkspace_sptr workspace,
+  static void makeDistribution(const MatrixWorkspace_sptr &workspace,
                                const bool forwards = true);
 };
 

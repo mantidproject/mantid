@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_FITOPTIONSBROWSER_H_
-#define MANTIDWIDGETS_FITOPTIONSBROWSER_H_
+#pragma once
 
 #include "DllOption.h"
 
@@ -65,7 +64,7 @@ public:
   void setLogNames(const QStringList &logNames);
   void setParameterNamesForPlotting(const QStringList &parNames);
   QString getParameterToPlot() const;
-  bool addPropertyToBlacklist(QString);
+  bool addPropertyToBlacklist(const QString &);
 
 signals:
   void changedToSequentialFitting();
@@ -190,5 +189,3 @@ private:
 } // namespace MantidWidgets
 
 } // namespace MantidQt
-
-#endif /*MANTIDWIDGETS_FITOPTIONSBROWSER_H_*/

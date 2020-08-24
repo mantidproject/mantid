@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -60,7 +60,7 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w)
     : QGroupBox(w), m_execDurationlabel(nullptr), m_execDurationEdit(nullptr),
       m_Datelabel(nullptr), m_execDateTimeEdit(nullptr), m_algexecDuration() {}
 
-AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
+AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(const QString &title, QWidget *w)
     : QGroupBox(title, w), m_execDurationlabel(nullptr),
       m_execDurationEdit(nullptr), m_Datelabel(nullptr),
       m_execDateTimeEdit(nullptr), m_algexecDuration() {
@@ -80,7 +80,7 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
   if (m_Datelabel)
     m_Datelabel->setBuddy(m_execDateTimeEdit);
 
-  QFormLayout *formLayout = new QFormLayout;
+  auto *formLayout = new QFormLayout;
   if (formLayout) {
     formLayout->addRow(m_execDurationlabel, m_execDurationEdit);
     formLayout->addRow(m_Datelabel, m_execDateTimeEdit);
@@ -135,7 +135,7 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QWidget *w)
       m_osVersionLabel(nullptr), m_osVersionEdit(nullptr),
       m_frmworkVersionLabel(nullptr), m_frmwkVersnEdit(nullptr) {}
 
-AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title, QWidget *w)
+AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(const QString &title, QWidget *w)
     : QGroupBox(title, w), m_osNameLabel(nullptr), m_osNameEdit(nullptr),
       m_osVersionLabel(nullptr), m_osVersionEdit(nullptr),
       m_frmworkVersionLabel(nullptr), m_frmwkVersnEdit(nullptr) {
@@ -165,7 +165,7 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title, QWidget *w)
   if (m_frmworkVersionLabel)
     m_frmworkVersionLabel->setBuddy(m_frmwkVersnEdit);
 
-  QFormLayout *formLayout = new QFormLayout();
+  auto *formLayout = new QFormLayout();
   if (formLayout) {
     formLayout->addRow(m_osNameLabel, m_osNameEdit);
     formLayout->addRow(m_osVersionLabel, m_osVersionEdit);
@@ -202,7 +202,7 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
 }
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(
-    QWidget *parent, const boost::shared_ptr<const Workspace> wsptr)
+    QWidget *parent, const std::shared_ptr<const Workspace> &wsptr)
     : QDialog(parent), m_algHist(wsptr->getHistory()),
       m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
       m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
@@ -262,7 +262,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
           SLOT(doRoll(int)));
 
   // The tree and the history details layout
-  QHBoxLayout *treeLayout = new QHBoxLayout;
+  auto *treeLayout = new QHBoxLayout;
   treeLayout->addWidget(m_Historytree, 3); // History stretches 1
   treeLayout->addWidget(m_histPropWindow->m_histpropTree,
                         5); // Properties gets more space
@@ -275,7 +275,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     m_envHistGrpBox =
         createEnvHistGrpBox(wsptr->getHistory().getEnvironmentHistory());
 
-  QHBoxLayout *environmentLayout = new QHBoxLayout;
+  auto *environmentLayout = new QHBoxLayout;
   environmentLayout->addWidget(m_execSumGrpBox, 1);
   environmentLayout->addWidget(m_envHistGrpBox, 2);
 
@@ -297,16 +297,22 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   connect(m_scriptButtonClipboard, SIGNAL(clicked()), this,
           SLOT(copytoClipboard()));
 
-  QHBoxLayout *buttonLayout = new QHBoxLayout;
+  auto *buttonLayout = new QHBoxLayout;
   buttonLayout->addStretch(1); // Align the button to the right
   buttonLayout->addWidget(m_scriptVersionLabel);
   buttonLayout->addWidget(m_scriptComboMode);
   buttonLayout->addWidget(m_scriptButtonFile);
   buttonLayout->addWidget(m_scriptButtonClipboard);
 
+  // Unroll all checkbox below tree layout
+  m_unrollAllHistoryCheckbox = new QCheckBox("Unroll All Algorithms", this);
+  connect(m_unrollAllHistoryCheckbox, SIGNAL(stateChanged(int)), this,
+          SLOT(unrollAll(int)));
+
   // Main layout
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   mainLayout->addLayout(treeLayout);
+  mainLayout->addWidget(m_unrollAllHistoryCheckbox);
   mainLayout->addLayout(environmentLayout);
   mainLayout->addLayout(buttonLayout);
 }
@@ -464,13 +470,13 @@ void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(
 }
 
 void AlgorithmHistoryWindow::updateAll(
-    Mantid::API::AlgorithmHistory_const_sptr algHistory) {
+    const Mantid::API::AlgorithmHistory_const_sptr &algHistory) {
   updateAlgHistoryProperties(algHistory);
   updateExecSummaryGrpBox(algHistory);
 }
 
 void AlgorithmHistoryWindow::updateAlgHistoryProperties(
-    AlgorithmHistory_const_sptr algHistory) {
+    const AlgorithmHistory_const_sptr &algHistory) {
   PropertyHistories histProp = algHistory->getProperties();
   if (m_histPropWindow) {
     m_histPropWindow->setAlgProperties(histProp);
@@ -480,7 +486,7 @@ void AlgorithmHistoryWindow::updateAlgHistoryProperties(
 }
 
 void AlgorithmHistoryWindow::updateExecSummaryGrpBox(
-    AlgorithmHistory_const_sptr algHistory) {
+    const AlgorithmHistory_const_sptr &algHistory) {
   // getting the selected algorithm at pos from History vector
   double duration = algHistory->executionDuration();
   Mantid::Types::Core::DateAndTime date = algHistory->executionDate();
@@ -508,6 +514,20 @@ void AlgorithmHistoryWindow::doUnroll(const std::vector<int> &unrollIndicies) {
 }
 
 void AlgorithmHistoryWindow::doRoll(int index) { m_view->roll(index); }
+
+void AlgorithmHistoryWindow::unrollAll(int state) {
+  // Iterate all items in tree which have child algorithms to be unrolled
+  QTreeWidgetItemIterator it(m_Historytree,
+                             QTreeWidgetItemIterator::HasChildren);
+  while (*it) {
+    // set state of unroll based on checkbox sate
+    if (state == Qt::Checked)
+      (*it)->setCheckState(1, Qt::Checked);
+    else
+      (*it)->setCheckState(1, Qt::Unchecked);
+    ++it;
+  }
+}
 
 //--------------------------------------------------------------------------------------------------
 // AlgHistoryProperties Definitions
@@ -766,7 +786,8 @@ void AlgHistoryTreeWidget::populateAlgHistoryTreeWidget(
 }
 
 void AlgHistoryTreeWidget::populateNestedHistory(
-    AlgHistoryItem *parentWidget, Mantid::API::AlgorithmHistory_sptr history) {
+    AlgHistoryItem *parentWidget,
+    const Mantid::API::AlgorithmHistory_sptr &history) {
   const Mantid::API::AlgorithmHistories &entries = history->getChildHistories();
   if (history->childHistorySize() > 0) {
     parentWidget->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable |

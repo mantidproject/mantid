@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Axis.h"
@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <limits>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -70,7 +71,7 @@ IFunction::~IFunction() { m_attrs.clear(); }
 /**
  * Virtual copy constructor
  */
-boost::shared_ptr<IFunction> IFunction::clone() const {
+std::shared_ptr<IFunction> IFunction::clone() const {
   auto clonedFunction =
       FunctionFactory::Instance().createInitialized(this->asString());
   for (size_t i = 0; i < this->nParams(); i++) {
@@ -86,8 +87,8 @@ boost::shared_ptr<IFunction> IFunction::clone() const {
  * function evaluation
  */
 void IFunction::setProgressReporter(
-    boost::shared_ptr<Kernel::ProgressBase> reporter) {
-  m_progReporter = reporter;
+    std::shared_ptr<Kernel::ProgressBase> reporter) {
+  m_progReporter = std::move(reporter);
   m_progReporter->setNotifyStep(0.01);
 }
 
@@ -558,10 +559,11 @@ std::vector<std::string> IFunction::getParameterNames() const {
  * @param handler :: A new handler
  */
 void IFunction::setHandler(std::unique_ptr<FunctionHandler> handler) {
-  m_handler = std::move(handler);
   if (handler && handler->function().get() != this) {
     throw std::runtime_error("Function handler points to a different function");
   }
+
+  m_handler = std::move(handler);
   m_handler->init();
 }
 
@@ -655,13 +657,6 @@ private:
   bool m_quoteString;
 };
 } // namespace
-
-/// Copy assignment. Do not copy m_quoteValue flag.
-/// @param attr :: The attribute to copy from.
-IFunction::Attribute &IFunction::Attribute::operator=(const Attribute &attr) {
-  m_data = attr.m_data;
-  return *this;
-}
 
 std::string IFunction::Attribute::value() const {
   AttValue tmp(m_quoteValue);
@@ -1048,7 +1043,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
  * @param endX :: The upper bin index
  */
 void IFunction::setMatrixWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
     double startX, double endX) {
   UNUSED_ARG(startX);
   UNUSED_ARG(endX);
@@ -1242,7 +1237,7 @@ void IFunction::setMatrixWorkspace(
  *  @return converted value
  */
 double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
-                               boost::shared_ptr<const MatrixWorkspace> ws,
+                               const std::shared_ptr<const MatrixWorkspace> &ws,
                                size_t wsIndex) const {
   // only required if formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
@@ -1271,7 +1266,7 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
  */
 void IFunction::convertValue(std::vector<double> &values,
                              Kernel::Unit_sptr &outUnit,
-                             boost::shared_ptr<const MatrixWorkspace> ws,
+                             const std::shared_ptr<const MatrixWorkspace> &ws,
                              size_t wsIndex) const {
   // only required if  formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
@@ -1304,7 +1299,7 @@ void IFunction::convertValue(std::vector<double> &values,
     auto emode = static_cast<int>(ws->getEMode());
     double efixed(0.0);
     try {
-      boost::shared_ptr<const Geometry::IDetector> det(
+      std::shared_ptr<const Geometry::IDetector> det(
           &spectrumInfo.detector(wsIndex), NoDeleting());
       efixed = ws->getEFixed(det);
     } catch (std::exception &) {
@@ -1361,9 +1356,10 @@ IFunction_sptr IFunction::getFunction(std::size_t) const {
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
   names.reserve(m_attrs.size());
-  for (const auto &attr : m_attrs) {
-    names.emplace_back(attr.first);
-  }
+
+  std::transform(m_attrs.begin(), m_attrs.end(), std::back_inserter(names),
+                 [](const auto &attr) { return attr.first; });
+
   return names;
 }
 
@@ -1447,7 +1443,7 @@ void IFunction::storeReadOnlyAttribute(
  * @param covar :: A matrix to set.
  */
 void IFunction::setCovarianceMatrix(
-    boost::shared_ptr<Kernel::Matrix<double>> covar) {
+    const std::shared_ptr<Kernel::Matrix<double>> &covar) {
   // the matrix shouldn't be empty
   if (!covar) {
     throw std::invalid_argument(
@@ -1600,11 +1596,11 @@ namespace Mantid {
 namespace Kernel {
 
 template <>
-MANTID_API_DLL boost::shared_ptr<Mantid::API::IFunction>
-IPropertyManager::getValue<boost::shared_ptr<Mantid::API::IFunction>>(
+MANTID_API_DLL std::shared_ptr<Mantid::API::IFunction>
+IPropertyManager::getValue<std::shared_ptr<Mantid::API::IFunction>>(
     const std::string &name) const {
   auto *prop = dynamic_cast<
-      PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
+      PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(
       getPointerToProperty(name));
   if (prop) {
     return *prop;
@@ -1616,11 +1612,11 @@ IPropertyManager::getValue<boost::shared_ptr<Mantid::API::IFunction>>(
 }
 
 template <>
-MANTID_API_DLL boost::shared_ptr<const Mantid::API::IFunction>
-IPropertyManager::getValue<boost::shared_ptr<const Mantid::API::IFunction>>(
+MANTID_API_DLL std::shared_ptr<const Mantid::API::IFunction>
+IPropertyManager::getValue<std::shared_ptr<const Mantid::API::IFunction>>(
     const std::string &name) const {
   auto *prop = dynamic_cast<
-      PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
+      PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(
       getPointerToProperty(name));
   if (prop) {
     return prop->operator()();

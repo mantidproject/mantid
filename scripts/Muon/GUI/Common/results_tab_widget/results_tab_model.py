@@ -1,17 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, division, unicode_literals)
-
 from mantid.api import AnalysisDataService as ads, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 from enum import Enum
-
-from mantidqt.utils.observer_pattern import GenericObserver
 
 # Constants
 DEFAULT_TABLE_NAME = 'ResultsTable'
@@ -54,8 +50,6 @@ class ResultsTabModel(object):
         self._selected_fit_function = None
 
         self._update_selected_fit_function()
-        self._new_fit_observer = GenericObserver(self._on_new_fit_performed)
-        fitting_context.new_fit_results_notifier.add_subscriber(self._new_fit_observer)
 
     def results_table_name(self):
         """Return the current name of the results table"""
@@ -218,9 +212,7 @@ class ResultsTabModel(object):
                 missing_msg.append("  Fit '{}' is missing the logs {}".format(
                     fit.parameters.parameter_workspace_name, missing))
         if missing_msg:
-            raise RuntimeError(
-                "The logs for each selected fit do not match:\n" +
-                "\n".join(missing_msg))
+            raise RuntimeError("The logs for each selected fit do not match:\n" + "\n".join(missing_msg))
 
     def _raise_if_result_selection_is_invalid(self, results_selection):
         """
@@ -285,19 +277,19 @@ class ResultsTabModel(object):
                                 TableColumnType.YErr.value)
         return table
 
-    # Private API
-    def _on_new_fit_performed(self):
+    def on_new_fit_performed(self):
         """Called when a new fit has been added to the context.
         The function name is set to the name fit if it is the first time"""
         self._update_selected_fit_function()
 
+    # Private API
     def _update_selected_fit_function(self):
         """
         If there are fits present then set the selected function name or else
         clear it
         """
         if len(self._fit_context) > 0:
-            function_name = self._fit_context.fit_list[0].fit_function_name
+            function_name = self._fit_context.fit_list[-1].fit_function_name
         else:
             function_name = None
 

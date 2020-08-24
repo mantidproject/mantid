@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -24,7 +24,11 @@ public:
   PropertyManagerProperty(const std::string &name,
                           const ValueType &defaultValue,
                           unsigned int direction = Direction::Input);
+
+  PropertyManagerProperty(const PropertyManagerProperty &) = default;
+  PropertyManagerProperty &operator=(const PropertyManagerProperty &) = default;
   using BaseClass::operator=;
+
   PropertyManagerProperty *clone() const override {
     return new PropertyManagerProperty(*this);
   }

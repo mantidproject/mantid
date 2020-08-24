@@ -1,10 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 # v0.2 obtained on March 12, 2019
 """
 Modification of Chris Beaumont's mpl-modest-image package to allow the use of
 set_extent.
 """
-from __future__ import print_function, division
-
 import matplotlib
 rcParams = matplotlib.rcParams
 
@@ -50,7 +54,7 @@ class ModestImage(mi.AxesImage):
         ACCEPTS: numpy/PIL Image A
         """
         self._full_res = A
-        self._A = A
+        self._A = cbook.safe_masked_invalid(A)
 
         if self._A.dtype != np.uint8 and not np.can_cast(self._A.dtype,
                                                          np.float):

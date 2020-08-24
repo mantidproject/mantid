@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADMASKTEST_H_
-#define MANTID_DATAHANDLING_LOADMASKTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -14,6 +13,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -287,7 +287,7 @@ public:
     masker->setProperty("SpectraList", masked_spectra);
     masker->execute();
     Workspace_sptr tsource = masker->getProperty("Workspace");
-    source = boost::dynamic_pointer_cast<MatrixWorkspace>(tsource);
+    source = std::dynamic_pointer_cast<MatrixWorkspace>(tsource);
     TS_ASSERT(source);
 
     /* This is proper way of extracting mask this but does not work from
@@ -364,7 +364,7 @@ public:
     TS_ASSERT(source);
 
     std::string IDF_name =
-        API::ExperimentInfo::getInstrumentFilename("MARI", "");
+        API::InstrumentFileFinder::getInstrumentFilename("MARI", "");
 
     /*Fake export mask algorithm: */
     std::string mask_contents("4 10-12 100 110 120 130 140 200 300");
@@ -516,9 +516,9 @@ public:
   /*
    * Create a masking file
    */
-  ScopedFileHelper::ScopedFile genMaskingFile(std::string maskfilename,
+  ScopedFileHelper::ScopedFile genMaskingFile(const std::string &maskfilename,
                                               std::vector<int> detids,
-                                              std::vector<int> banks) {
+                                              const std::vector<int> &banks) {
     std::stringstream ss;
 
     // 1. Header
@@ -552,8 +552,8 @@ public:
    * Create an ISIS format masking file
    */
   ScopedFileHelper::ScopedFile
-  genISISMaskingFile(std::string maskfilename,
-                     std::vector<specnum_t> singlespectra,
+  genISISMaskingFile(const std::string &maskfilename,
+                     const std::vector<specnum_t> &singlespectra,
                      std::vector<specnum_t> pairspectra) {
     std::stringstream ss;
 
@@ -607,5 +607,3 @@ public:
 private:
   LoadMask loadFile;
 };
-
-#endif /* MANTID_DATAHANDLING_LOADMASKINGFILETEST_H_ */

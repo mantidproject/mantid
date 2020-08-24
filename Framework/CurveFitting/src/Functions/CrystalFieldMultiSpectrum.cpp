@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
@@ -125,10 +125,12 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
   if (!m_target) {
     buildTargetFunction();
+
+    if (!m_target) {
+      throw std::runtime_error("Failed to build target function.");
+    }
   }
-  if (!m_target) {
-    throw std::runtime_error("Failed to build target function.");
-  }
+
   return m_target->getNumberDomains();
 }
 
@@ -164,7 +166,9 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         }
       }
     }
-    FunctionGenerator::setAttribute("FWHMs", Attribute(new_fwhm));
+    Attribute newVal = attr;
+    newVal.setVector(new_fwhm);
+    FunctionGenerator::setAttribute("FWHMs", newVal);
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       const auto suffix = std::to_string(iSpec);
       declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
@@ -390,7 +394,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     IFunction_sptr retval = IFunction_sptr(new CrystalFieldMagnetisation);
     auto &spectrum = dynamic_cast<CrystalFieldMagnetisation &>(*retval);
     spectrum.setHamiltonian(ham, nre);
-    spectrum.setAttribute("Temperature", Attribute(temperature));
+    spectrum.setAttributeValue("Temperature", temperature);
     const auto suffix = std::to_string(iSpec);
     spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
     spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));

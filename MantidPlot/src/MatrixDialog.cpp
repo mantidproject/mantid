@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : MatrixDialog.cpp
@@ -26,7 +26,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-MatrixDialog::MatrixDialog(QWidget *parent, Qt::WFlags fl)
+MatrixDialog::MatrixDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), d_matrix(nullptr) {
   setWindowTitle(tr("MantidPlot - Matrix Properties"));
 

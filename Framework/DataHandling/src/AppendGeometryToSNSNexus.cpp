@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/AppendGeometryToSNSNexus.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -144,7 +145,7 @@ void AppendGeometryToSNSNexus::exec() {
   // Now what is the instrument definition filename ?
   // TODO: Modify to use /entry/instrument/instrument_xml/data after
   // establishing a way to maintain ADARA Geometry Packet
-  m_idf_filename = ExperimentInfo::getInstrumentFilename(m_instrument);
+  m_idf_filename = InstrumentFileFinder::getInstrumentFilename(m_instrument);
   g_log.debug() << "Loading instrument definition from " << m_idf_filename
                 << ".\n";
 
@@ -360,8 +361,8 @@ AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
  */
 
 bool AppendGeometryToSNSNexus::runLoadInstrument(
-    const std::string &idf_filename, API::MatrixWorkspace_sptr localWorkspace,
-    Algorithm *alg) {
+    const std::string &idf_filename,
+    const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 1, true);
 
   // Execute the Child Algorithm.
@@ -399,8 +400,8 @@ bool AppendGeometryToSNSNexus::runLoadInstrument(
  * @return true if successful.
  */
 bool AppendGeometryToSNSNexus::runLoadNexusLogs(
-    const std::string &nexusFileName, API::MatrixWorkspace_sptr localWorkspace,
-    Algorithm *alg) {
+    const std::string &nexusFileName,
+    const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
   IAlgorithm_sptr loadLogs =
       alg->createChildAlgorithm("LoadNexusLogs", 0, 1, true);
 

@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MdiSubWindow_H
-#define MdiSubWindow_H
+#pragma once
 
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
@@ -50,7 +49,7 @@ class Folder;
 class MdiSubWindowParent_t : public QFrame {
   Q_OBJECT
 public:
-  MdiSubWindowParent_t(QWidget *parent, Qt::WFlags f = nullptr)
+  MdiSubWindowParent_t(QWidget *parent, const Qt::WFlags &f = nullptr)
       : QFrame(parent, f), m_widget(nullptr) {}
   void setWidget(QWidget *w) {
     if (w == nullptr) { // removing widget
@@ -125,13 +124,13 @@ public:
    * \sa setCaptionPolicy(), captionPolicy()
    */
   MdiSubWindow(QWidget *parent, const QString &label = QString(),
-               const QString &name = QString(), Qt::WFlags f = nullptr);
+               const QString &name = QString(), const Qt::WFlags &f = nullptr);
 
   MdiSubWindow();
 
   /// Setup the window without constructor
   void init(QWidget *parent, const QString &label, const QString &name,
-            Qt::WFlags flags);
+            const Qt::WFlags &flags);
 
   //! Possible window captions.
   enum CaptionPolicy {
@@ -371,5 +370,3 @@ using MDIWindowList = QList<MdiSubWindow *>;
 // Helper macro to subscribe a class to the factory with the same name as the
 // class name
 #define DECLARE_WINDOW(classname) DECLARE_WINDOW_WITH_NAME(classname, classname)
-
-#endif

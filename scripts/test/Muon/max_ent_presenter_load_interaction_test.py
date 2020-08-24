@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid.api import FileFinder
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtCore
 
@@ -60,7 +58,7 @@ class MaxEntPresenterTest(unittest.TestCase):
     def test_get_workspace_names_sets_comboboxes_appropriately(self):
         self.presenter.getWorkspaceNames()
 
-        self.assertEquals(retrieve_combobox_info(self.view.ws), ['MUSR22725_raw_data MA'])
+        self.assertEquals(retrieve_combobox_info(self.view.ws), ['MUSR22725_raw_data FD'])
         self.assertEquals(retrieve_combobox_info(self.view.N_points),
                           ['2048', '4096', '8192', '16384', '32768', '65536',
                            '131072', '262144', '524288', '1048576'])
@@ -80,7 +78,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEqual(parameters, {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04, 'FirstGoodTime': 0.11,
                                        'FitDeadTime': True, 'InnerIterations': 10,
                                        'InputDeadTimeTable': 'deadtime_table_name',
-                                       'InputWorkspace': 'MUSR22725_raw_data MA',
+                                       'InputWorkspace': 'MUSR22725_raw_data FD',
                                        'LastGoodTime': 13.25, 'MaxField': 1000.0, 'Npts': 2048, 'OuterIterations': 10})
 
     def test_update_phase_table_options_adds_correct_options_to_view_item(self):
@@ -106,7 +104,7 @@ class MaxEntPresenterTest(unittest.TestCase):
 
         self.presenter.add_maxent_workspace_to_ADS('MUSR22725_MaxEnt', 'maxent_workspace', mock.MagicMock())
 
-        workspace_wrapper_mock.assert_called_once_with('MUSR22725 Maxent MA/MUSR22725_MaxEnt; MaxEnt')
+        workspace_wrapper_mock.assert_called_once_with('MUSR22725 MaxEnt FD/MUSR22725_MaxEnt; MaxEnt')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
     def test_get_output_options_defaults_returns_correctly(self):

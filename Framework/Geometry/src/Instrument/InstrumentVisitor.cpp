@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -21,23 +21,23 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
 namespace Geometry {
 
 namespace {
-boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+std::shared_ptr<const std::unordered_map<detid_t, size_t>>
 makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
 
   const size_t nDetIds = detIds.size();
-  auto detIdToIndex = boost::make_shared<std::unordered_map<detid_t, size_t>>();
+  auto detIdToIndex = std::make_shared<std::unordered_map<detid_t, size_t>>();
   detIdToIndex->reserve(nDetIds);
   for (size_t i = 0; i < nDetIds; ++i) {
     (*detIdToIndex)[detIds[i]] = i;
   }
-  return std::move(detIdToIndex);
+  return detIdToIndex;
 }
 
 void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
@@ -65,48 +65,44 @@ bool hasValidShape(const ObjCompAssembly &obj) {
  * @param instrument : Instrument being visited
  */
 InstrumentVisitor::InstrumentVisitor(
-    boost::shared_ptr<const Instrument> instrument)
-    : m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
+    std::shared_ptr<const Instrument> instrument)
+    : m_orderedDetectorIds(std::make_shared<std::vector<detid_t>>(
           instrument->getDetectorIDs(false /*Do not skip monitors*/))),
-      m_componentIds(boost::make_shared<std::vector<ComponentID>>(
+      m_componentIds(std::make_shared<std::vector<ComponentID>>(
           m_orderedDetectorIds->size(), nullptr)),
-      m_assemblySortedDetectorIndices(
-          boost::make_shared<std::vector<size_t>>()),
-      m_assemblySortedComponentIndices(
-          boost::make_shared<std::vector<size_t>>()),
-      m_parentComponentIndices(boost::make_shared<std::vector<size_t>>(
+      m_assemblySortedDetectorIndices(std::make_shared<std::vector<size_t>>()),
+      m_assemblySortedComponentIndices(std::make_shared<std::vector<size_t>>()),
+      m_parentComponentIndices(std::make_shared<std::vector<size_t>>(
           m_orderedDetectorIds->size(), 0)),
-      m_children(boost::make_shared<std::vector<std::vector<size_t>>>()),
+      m_children(std::make_shared<std::vector<std::vector<size_t>>>()),
       m_detectorRanges(
-          boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
+          std::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
-          boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
+          std::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentIdToIndexMap(
-          boost::make_shared<
+          std::make_shared<
               std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
-      m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
-      m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
+      m_positions(std::make_shared<std::vector<Eigen::Vector3d>>()),
+      m_detectorPositions(std::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size())),
-      m_rotations(boost::make_shared<
+      m_rotations(std::make_shared<
                   std::vector<Eigen::Quaterniond,
                               Eigen::aligned_allocator<Eigen::Quaterniond>>>()),
       m_detectorRotations(
-          boost::make_shared<
+          std::make_shared<
               std::vector<Eigen::Quaterniond,
                           Eigen::aligned_allocator<Eigen::Quaterniond>>>(
               m_orderedDetectorIds->size())),
-      m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
+      m_monitorIndices(std::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr),
-      m_nullShape(boost::make_shared<const CSGObject>()),
-      m_shapes(
-          boost::make_shared<std::vector<boost::shared_ptr<const IObject>>>(
-              m_orderedDetectorIds->size(), m_nullShape)),
-      m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
+      m_nullShape(std::make_shared<const CSGObject>()),
+      m_shapes(std::make_shared<std::vector<std::shared_ptr<const IObject>>>(
+          m_orderedDetectorIds->size(), m_nullShape)),
+      m_scaleFactors(std::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
-      m_componentType(
-          boost::make_shared<std::vector<Beamline::ComponentType>>()),
-      m_names(boost::make_shared<std::vector<std::string>>(
+      m_componentType(std::make_shared<std::vector<Beamline::ComponentType>>()),
+      m_names(std::make_shared<std::vector<std::string>>(
           m_orderedDetectorIds->size())) {
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
@@ -382,7 +378,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
  * indices
  * since all detectors are components but not all components are detectors
  */
-boost::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
+std::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
 InstrumentVisitor::componentIds() const {
   return m_componentIds;
 }
@@ -396,13 +392,13 @@ size_t InstrumentVisitor::size() const { return m_componentIds->size(); }
 
 bool InstrumentVisitor::isEmpty() const { return size() == 0; }
 
-boost::shared_ptr<
+std::shared_ptr<
     const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
 InstrumentVisitor::componentIdToIndexMap() const {
   return m_componentIdToIndexMap;
 }
 
-boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+std::shared_ptr<const std::unordered_map<detid_t, size_t>>
 InstrumentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
 }
@@ -422,7 +418,7 @@ InstrumentVisitor::detectorInfo() const {
       *m_detectorPositions, *m_detectorRotations, *m_monitorIndices);
 }
 
-boost::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const {
+std::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const {
   return m_orderedDetectorIds;
 }
 
@@ -447,9 +443,9 @@ InstrumentVisitor::makeWrappers(const Instrument &instrument,
   // Visitee instrument is base instrument if no ParameterMap
   const auto visiteeInstrument =
       pmap ? ParComponentFactory::createInstrument(
-                 boost::shared_ptr<const Instrument>(&instrument, NoDeleting()),
-                 boost::shared_ptr<ParameterMap>(pmap, NoDeleting()))
-           : boost::shared_ptr<const Instrument>(&instrument, NoDeleting());
+                 std::shared_ptr<const Instrument>(&instrument, NoDeleting()),
+                 std::shared_ptr<ParameterMap>(pmap, NoDeleting()))
+           : std::shared_ptr<const Instrument>(&instrument, NoDeleting());
   InstrumentVisitor visitor(visiteeInstrument);
   visitor.walkInstrument();
   return visitor.makeWrappers();

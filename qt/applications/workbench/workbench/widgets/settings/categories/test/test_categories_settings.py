@@ -1,19 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-from __future__ import absolute_import, unicode_literals
-
 import unittest
 
-from mantid.py3compat.mock import call, Mock, patch, ANY
+from unittest.mock import call, Mock, patch, ANY
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.mocks.mock_qt import MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictMock
-from workbench.widgets.settings.categories.presenter import CategoriesSettings
+from workbench.widgets.settings.categories.presenter import CategoriesSettings, CategoryProperties
 from mantid.api import AlgorithmFactoryImpl
 
 from qtpy.QtCore import Qt
@@ -134,7 +132,7 @@ class CategoriesSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.set_hidden_algorithms_string(None)
-        mock_ConfigService.setString.assert_called_once_with(presenter.HIDDEN_ALGORITHMS,
+        mock_ConfigService.setString.assert_called_once_with(CategoryProperties.HIDDEN_ALGORITHMS.value,
                                                              ';'.join(hidden_algorthim_string))
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
@@ -165,5 +163,5 @@ class CategoriesSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
         presenter._create_hidden_categories_string = Mock(return_value=hidden_interface_string)
         presenter.set_hidden_interfaces_string(None)
-        mock_ConfigService.setString.assert_called_once_with(presenter.HIDDEN_INTERFACES,
+        mock_ConfigService.setString.assert_called_once_with(CategoryProperties.HIDDEN_INTERFACES.value,
                                                              ';'.join(hidden_interface_string))

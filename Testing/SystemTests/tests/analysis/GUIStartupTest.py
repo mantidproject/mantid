@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import os
-import platform
 import subprocess
+import sys
 import systemtesting
 import mantid
 
@@ -29,13 +28,13 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
             f.write('import mantid\n'
                     'print("Hello Mantid")\n')
         # get the mantidplot executable
-        current_platform = platform.platform()
+        current_platform = sys.platform
         mantid_init_dirname = os.path.dirname(os.path.abspath(mantid.__file__))
-        if 'Linux' in current_platform:
+        if 'linux' in current_platform:
             mantid_exe = os.path.join(mantid_init_dirname, "../launch_mantidplot.sh")
-        elif 'Darwin' in current_platform:
+        elif 'darwin' in current_platform:
             mantid_exe = os.path.join(mantid_init_dirname, "../MantidPlot")
-        elif 'Windows' in current_platform:
+        elif 'win32' in current_platform:
             mantid_exe = 'wscript.exe {}'.format(os.path.join(mantid_init_dirname,
                                                               "../bin/launch_mantidplot.vbs"))
         else:

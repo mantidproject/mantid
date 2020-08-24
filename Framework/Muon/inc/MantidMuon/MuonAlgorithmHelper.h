@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -55,7 +55,7 @@ namespace MuonAlgorithmHelper {
 
 /// Returns a first period MatrixWorkspace in a run workspace
 MANTID_MUON_DLL Mantid::API::MatrixWorkspace_sptr
-firstPeriod(API::Workspace_sptr ws);
+firstPeriod(const API::Workspace_sptr &ws);
 
 /// Get a run label for a workspace
 MANTID_MUON_DLL std::string getRunLabel(API::Workspace_sptr ws);
@@ -89,15 +89,15 @@ generateWorkspaceName(const Muon::DatasetParams &params);
 /// Find all the detector IDs contained inside a workspace (either matrix or
 /// group) and return as an ordered set.
 MANTID_MUON_DLL std::set<Mantid::detid_t>
-getAllDetectorIDsFromWorkspace(Mantid::API::Workspace_sptr ws);
+getAllDetectorIDsFromWorkspace(const Mantid::API::Workspace_sptr &ws);
 
 /// Find all the detector IDs contained inside a group workspace
 MANTID_MUON_DLL std::set<Mantid::detid_t>
-getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws);
+getAllDetectorIDsFromGroupWorkspace(const Mantid::API::WorkspaceGroup_sptr &ws);
 
 /// Find all the detector IDs contained inside a matrix workspace
-MANTID_MUON_DLL std::set<Mantid::detid_t>
-getAllDetectorIDsFromMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+MANTID_MUON_DLL std::set<Mantid::detid_t> getAllDetectorIDsFromMatrixWorkspace(
+    const Mantid::API::MatrixWorkspace_sptr &ws);
 
 /// Find all the detector IDs contained inside a grouping object and return as a
 /// vector of ints
@@ -108,7 +108,7 @@ getAllDetectorIDsFromGroup(const API::Grouping &grouping);
 /// workspace. Workspace can be matrix or group type.
 MANTID_MUON_DLL bool
 checkGroupDetectorsInWorkspace(const API::Grouping &grouping,
-                               API::Workspace_sptr ws);
+                               const API::Workspace_sptr &ws);
 
 /// Checks that all of the entries of a vector are contained in a set.
 MANTID_MUON_DLL bool checkItemsInSet(const std::vector<int> &items,
@@ -142,9 +142,9 @@ subtractWorkspaces(const Mantid::API::MatrixWorkspace_sptr &lhs,
 MANTID_MUON_DLL Mantid::API::MatrixWorkspace_sptr
 extractSpectrum(const Mantid::API::Workspace_sptr &inputWS, const int index);
 
-MANTID_MUON_DLL void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
-                                  const std::string &logName,
-                                  const std::string &logValue);
+MANTID_MUON_DLL void
+addSampleLog(const Mantid::API::MatrixWorkspace_sptr &workspace,
+             const std::string &logName, const std::string &logValue);
 
 MANTID_MUON_DLL bool isAlphanumericOrUnderscore(char character);
 

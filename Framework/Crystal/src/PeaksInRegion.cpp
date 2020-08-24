@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeaksInRegion.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -41,7 +41,7 @@ void PeaksInRegion::init() {
 
   this->initBaseProperties();
 
-  auto mandatoryExtents = boost::make_shared<
+  auto mandatoryExtents = std::make_shared<
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   std::vector<double> extents(2, 0);

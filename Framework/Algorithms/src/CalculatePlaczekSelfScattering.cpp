@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
 #include "MantidAPI/Axis.h"
@@ -21,7 +21,7 @@ namespace Mantid {
 namespace Algorithms {
 
 std::map<std::string, std::map<std::string, double>>
-getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
+getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr &ws) {
   // get sample information : mass, total scattering length, and concentration
   // of each species
   double totalStoich = 0.0;
@@ -64,6 +64,8 @@ void CalculatePlaczekSelfScattering::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "Workspace with the Self scattering correction");
+  declareProperty("CrystalDensity", EMPTY_DBL(),
+                  "The crystalographic density of the sample material.");
 }
 //----------------------------------------------------------------------------------------------
 /** Validate inputs.
@@ -91,7 +93,6 @@ CalculatePlaczekSelfScattering::validateInputs() {
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpecta");
-  API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
   constexpr double factor =
       1.0 / 1.66053906660e-27; // atomic mass unit-kilogram relationship
   constexpr double neutronMass = factor * 1.674927471e-27; // neutron mass
@@ -99,10 +100,19 @@ void CalculatePlaczekSelfScattering::exec() {
   // of each species
   auto atomSpecies = getSampleSpeciesInfo(inWS);
   // calculate summation term w/ neutron mass over molecular mass ratio
-  double summationTerm = 0.0;
-  for (auto atom : atomSpecies) {
-    summationTerm += atom.second["concentration"] * atom.second["bSqrdBar"] *
+
+  auto sumLambda = [&neutronMass](double sum, auto &atom) {
+    return sum + atom.second["concentration"] * atom.second["bSqrdBar"] *
                      neutronMass / atom.second["mass"];
+  };
+  double summationTerm =
+      std::accumulate(atomSpecies.begin(), atomSpecies.end(), 0.0, sumLambda);
+
+  double numberDensity = inWS->sample().getMaterial().numberDensity();
+  double crystalDensity = getProperty("CrystalDensity");
+  double densityRatio = 1.0;
+  if (crystalDensity > 0) {
+    densityRatio = numberDensity / crystalDensity;
   }
   // get incident spectrum and 1st derivative
   const MantidVec xLambda = incidentWS->readX(0);
@@ -166,7 +176,7 @@ void CalculatePlaczekSelfScattering::exec() {
             2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 *
             summationTerm;
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
-        y[xIndex] = 1 + inelasticPlaczekSelfCorrection;
+        y[xIndex] = (1 + inelasticPlaczekSelfCorrection) * densityRatio;
       }
       x.back() = wavelength.singleToTOF(xLambda.back());
     } else {

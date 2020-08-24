@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADPSIMUONBINTEST_H_
-#define MANTID_DATAHANDLING_LOADPSIMUONBINTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -93,8 +92,10 @@ public:
     TS_ASSERT_EQUALS(ws->y(0).size(), 10240);
     TS_ASSERT_EQUALS(ws->e(0).size(), 10240);
 
+    // Check that each spectra is shifted by the correct time zero
     TS_ASSERT_DELTA(ws->x(0)[0], -0.160, 0.001);
-    TS_ASSERT_DELTA(ws->x(0)[10240], 9.84, 0.001);
+
+    TS_ASSERT_DELTA(ws->x(0)[10240], 9.84, 0.01);
     TS_ASSERT_EQUALS(ws->y(0)[0], 24);
     TS_ASSERT_EQUALS(ws->y(0)[10239], 44);
     TS_ASSERT_EQUALS(ws->e(0)[0], std::sqrt(ws->y(0)[0]));
@@ -188,6 +189,44 @@ public:
                      "2011-Jul-04 10:40:23  314.46")
   }
 
+  void test_time_zero_list_loaded_correctly() {
+    LoadPSIMuonBin alg;
+    alg.initialize();
+    alg.isInitialized();
+    alg.setProperty("SearchForTempFile", false);
+
+    alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
+    alg.setProperty("OutputWorkspace", "ws");
+    alg.execute();
+
+    std::vector<double> timeZeroList = alg.getProperty("TimeZeroList");
+    TS_ASSERT_EQUALS(timeZeroList.size(), 4);
+    TS_ASSERT_DELTA(timeZeroList[0], 0.1582, 0.0001);
+    TS_ASSERT_DELTA(timeZeroList[1], 0.1553, 0.0001);
+    TS_ASSERT_DELTA(timeZeroList[2], 0.1592, 0.0001);
+    TS_ASSERT_DELTA(timeZeroList[3], 0.1602, 0.0001);
+
+    AnalysisDataService::Instance().remove("ws");
+  }
+
+  void test_uncorected_time_loaded_if_corrected_time_flag_is_false() {
+    LoadPSIMuonBin alg;
+    alg.initialize();
+    alg.isInitialized();
+    alg.setProperty("SearchForTempFile", false);
+    alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
+    alg.setProperty("OutputWorkspace", "ws");
+    alg.setProperty("CorrectTime", false);
+    alg.execute();
+
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
+
+    TS_ASSERT_DELTA(ws->x(0)[0], 0.0, 0.001);
+    TS_ASSERT_DELTA(ws->x(0)[10240], 10.0, 0.001);
+  }
+
 private:
   std::string getTestFilePath(const std::string &filename) {
     const std::string filepath =
@@ -196,5 +235,3 @@ private:
     return filepath;
   }
 };
-
-#endif /* MANTID_DATAHANDLING_LOADPSIMUONBINTEST_H_ */

@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
@@ -56,9 +55,12 @@ void AlgorithmProgressWidget::showDetailsDialog() {
   }
 }
 
-void AlgorithmProgressWidget::updateProgress(double progress,
-                                             const QString &message) {
-  m_presenter->setProgressBar(m_progressBar, progress, message);
+void AlgorithmProgressWidget::updateProgress(const double progress,
+                                             const QString &message,
+                                             const double estimatedTime,
+                                             const int progressPrecision) {
+  m_presenter->setProgressBar(m_progressBar, progress, message, estimatedTime,
+                              progressPrecision);
 }
 
 void AlgorithmProgressWidget::blockUpdates(bool block) {

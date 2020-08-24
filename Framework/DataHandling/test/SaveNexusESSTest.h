@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVENEXUSESSTEST_H_
-#define MANTID_DATAHANDLING_SAVENEXUSESSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -34,7 +33,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
 namespace {
-template <typename T> void do_execute(const std::string filename, T &ws) {
+template <typename T> void do_execute(const std::string &filename, T &ws) {
   SaveNexusESS alg;
   alg.setChild(true);
   alg.setRethrows(true);
@@ -57,7 +56,7 @@ Mantid::API::MatrixWorkspace_sptr reload(const std::string &filename) {
   loader.execute();
   Workspace_sptr out = loader.getProperty("OutputWorkspace");
   auto matrixWSOut =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
   return matrixWSOut;
 }
 
@@ -262,5 +261,3 @@ public:
     auto ws_out = test_utility::reload(handle.fullPath());
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVENEXUSESSTEST_H_ */

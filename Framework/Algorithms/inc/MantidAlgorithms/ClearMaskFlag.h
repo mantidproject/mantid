@@ -1,20 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** ClearMaskFlag : Delete the mask flag/bit on all spectra in a workspace
  */
-class DLLExport ClearMaskFlag : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ClearMaskFlag : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

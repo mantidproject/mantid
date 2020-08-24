@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
 
   include_directories(../../DataHandling/inc ../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build these
@@ -23,8 +22,8 @@ if(CXXTEST_FOUND)
                         DataHandling
                         MDAlgorithms
                         Nexus
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
   add_dependencies(CrystalTest Algorithms CurveFitting)
   add_dependencies(FrameworkTests CrystalTest)
   # Test data

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/Axis.h"
@@ -21,7 +21,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -77,9 +77,9 @@ void BinaryOperation::init() {
 bool BinaryOperation::handleSpecialDivideMinus() {
   // Is the LHS operand a single number?
   WorkspaceSingleValue_const_sptr lhs_singleVal =
-      boost::dynamic_pointer_cast<const WorkspaceSingleValue>(m_lhs);
+      std::dynamic_pointer_cast<const WorkspaceSingleValue>(m_lhs);
   WorkspaceSingleValue_const_sptr rhs_singleVal =
-      boost::dynamic_pointer_cast<const WorkspaceSingleValue>(m_rhs);
+      std::dynamic_pointer_cast<const WorkspaceSingleValue>(m_rhs);
 
   if (lhs_singleVal) {
     MatrixWorkspace_sptr out = getProperty("OutputWorkspace");
@@ -88,7 +88,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       // workspace ^ -1
       IAlgorithm_sptr pow = this->createChildAlgorithm("Power", 0.0, 0.5, true);
       pow->setProperty("InputWorkspace",
-                       boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
+                       std::const_pointer_cast<MatrixWorkspace>(m_rhs));
       pow->setProperty("Exponent", -1.0);
       pow->setProperty("OutputWorkspace", out);
       pow->executeAsChildAlg();
@@ -99,7 +99,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
           this->createChildAlgorithm("Multiply", 0.5, 1.0, true);
       mult->setProperty(inputPropName1(), out); //(workspace^-1)
       mult->setProperty(inputPropName2(),
-                        boost::const_pointer_cast<MatrixWorkspace>(
+                        std::const_pointer_cast<MatrixWorkspace>(
                             m_lhs)); // (1.0) or other number
       mult->setProperty(outputPropName(), out);
       mult->executeAsChildAlg();
@@ -117,7 +117,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       IAlgorithm_sptr mult =
           this->createChildAlgorithm("Multiply", 0.0, 0.5, true);
       mult->setProperty(inputPropName1(),
-                        boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
+                        std::const_pointer_cast<MatrixWorkspace>(m_rhs));
       mult->setProperty(inputPropName2(), minusOne);
       mult->setProperty("OutputWorkspace", out);
       mult->executeAsChildAlg();
@@ -127,7 +127,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       IAlgorithm_sptr plus = this->createChildAlgorithm("Plus", 0.5, 1.0, true);
       plus->setProperty(inputPropName1(), out); //(workspace^-1)
       plus->setProperty(inputPropName2(),
-                        boost::const_pointer_cast<MatrixWorkspace>(
+                        std::const_pointer_cast<MatrixWorkspace>(
                             m_lhs)); // (1.0) or other number
       plus->setProperty(outputPropName(), out);
       plus->executeAsChildAlg();
@@ -160,8 +160,8 @@ void BinaryOperation::exec() {
     return;
 
   // Cast to EventWorkspace pointers
-  m_elhs = boost::dynamic_pointer_cast<const EventWorkspace>(m_lhs);
-  m_erhs = boost::dynamic_pointer_cast<const EventWorkspace>(m_rhs);
+  m_elhs = std::dynamic_pointer_cast<const EventWorkspace>(m_lhs);
+  m_erhs = std::dynamic_pointer_cast<const EventWorkspace>(m_rhs);
 
   // We can clear the RHS workspace if it is an event,
   //  and we are not doing mismatched spectra (in which case you might clear it
@@ -179,7 +179,7 @@ void BinaryOperation::exec() {
 
   // Get the output workspace
   m_out = getProperty(outputPropName());
-  m_eout = boost::dynamic_pointer_cast<EventWorkspace>(m_out);
+  m_eout = std::dynamic_pointer_cast<EventWorkspace>(m_out);
 
   // Make a check of what will be needed to setup the workspaces, based on the
   // input types.
@@ -224,7 +224,7 @@ void BinaryOperation::exec() {
       // You HAVE to copy the data from lhs to to the output!
       m_out = m_lhs->clone();
       // Make sure m_eout still points to the same as m_out;
-      m_eout = boost::dynamic_pointer_cast<EventWorkspace>(m_out);
+      m_eout = std::dynamic_pointer_cast<EventWorkspace>(m_out);
     }
 
     // Always clear the MRUs.
@@ -795,7 +795,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
  *  @param out :: The result workspace
  */
 void BinaryOperation::propagateBinMasks(
-    const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out) {
+    const API::MatrixWorkspace_const_sptr &rhs,
+    const API::MatrixWorkspace_sptr &out) {
   const int64_t outHists = out->getNumberHistograms();
   const int64_t rhsHists = rhs->getNumberHistograms();
   for (int64_t i = 0; i < outHists; ++i) {
@@ -876,10 +877,10 @@ void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
  * @return OperandType describing what type of workspace it will be operated as.
  */
 OperandType
-BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr ws) {
+BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr &ws) {
   // An event workspace?
   EventWorkspace_const_sptr ews =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws);
   if (ews)
     return eEventList;
 
@@ -935,7 +936,7 @@ BinaryOperation::buildBinaryOperationTable(
   //  First int = workspace index in the EW being added
   //  Second int = workspace index to which it will be added in the OUTPUT EW.
   //  -1 if it should add a new entry at the end.
-  auto table = boost::make_shared<BinaryOperationTable>();
+  auto table = std::make_shared<BinaryOperationTable>();
 
   auto rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
   auto lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
@@ -1048,7 +1049,7 @@ Parallel::ExecutionMode BinaryOperation::getParallelExecutionMode(
   // Mode <X> times Cloned is ok if the cloned workspace is WorkspaceSingleValue
   if (rhs == Parallel::StorageMode::Cloned) {
     API::MatrixWorkspace_const_sptr ws = getProperty(inputPropName2());
-    if (boost::dynamic_pointer_cast<const WorkspaceSingleValue>(ws))
+    if (std::dynamic_pointer_cast<const WorkspaceSingleValue>(ws))
       return getCorrespondingExecutionMode(lhs);
   }
   // Other options are not ok (e.g., MasterOnly times Distributed)

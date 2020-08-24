@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : Graph3D.cpp
@@ -107,7 +107,7 @@ Triple UserParametricSurface::operator()(double u, double v) {
 }
 
 Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name,
-                 Qt::WFlags f)
+                 const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f) {
   initPlot();
 }
@@ -2346,7 +2346,7 @@ void Graph3D::setDataColorMap(const QString &fileName) {
   sp->updateGL();
 }
 
-bool Graph3D::openColorMap(ColorVector &cv, QString fname) {
+bool Graph3D::openColorMap(ColorVector &cv, const QString &fname) {
   if (fname.isEmpty())
     return false;
 

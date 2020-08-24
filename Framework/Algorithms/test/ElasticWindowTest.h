@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -17,7 +17,6 @@
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/SetInstrumentParameter.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -202,7 +201,7 @@ private:
    *
    * @param ws Workspace to test
    */
-  void verifyQworkspace(MatrixWorkspace_sptr ws) {
+  void verifyQworkspace(const MatrixWorkspace_sptr &ws) {
     std::string unitID = ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "MomentumTransfer");
   }
@@ -212,7 +211,7 @@ private:
    *
    * @param ws Workspace to test
    */
-  void verifyQ2workspace(MatrixWorkspace_sptr ws) {
+  void verifyQ2workspace(const MatrixWorkspace_sptr &ws) {
     std::string unitID = ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "QSquared");
   }

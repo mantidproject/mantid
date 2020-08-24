@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
 
   @date 2012-06-04
 */
-class DLLExport MaskBinsFromTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaskBinsFromTable : public API::Algorithm {
 public:
   MaskBinsFromTable();
 
@@ -43,14 +43,15 @@ private:
   void exec() override;
 
   /// Process input Mask bin TableWorkspace.
-  void processMaskBinWorkspace(DataObjects::TableWorkspace_sptr masktblws,
-                               API::MatrixWorkspace_sptr dataws);
+  void
+  processMaskBinWorkspace(const DataObjects::TableWorkspace_sptr &masktblws,
+                          const API::MatrixWorkspace_sptr &dataws);
   /// Call MaskBins
-  void maskBins(API::MatrixWorkspace_sptr dataws);
+  void maskBins(const API::MatrixWorkspace_sptr &dataws);
   /// Convert a list of detector IDs list (string) to a list of
   /// spectra/workspace indexes list
-  std::string convertToSpectraList(API::MatrixWorkspace_sptr dataws,
-                                   std::string detidliststr);
+  std::string convertToSpectraList(const API::MatrixWorkspace_sptr &dataws,
+                                   const std::string &detidliststr);
 
   /// Column indexes of XMin, XMax, SpectraList, DetectorIDsList
   int id_xmin, id_xmax, id_spec, id_dets;

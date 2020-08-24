@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PDFFourierTransform.h"
 #include "MantidAPI/Axis.h"
@@ -67,7 +67,7 @@ const std::string PDFFourierTransform::category() const {
 /** Initialize the algorithm's properties.
  */
 void PDFFourierTransform::init() {
-  auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
+  auto uv = std::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input, uv),
@@ -83,10 +83,10 @@ void PDFFourierTransform::init() {
   inputTypes.emplace_back(S_OF_Q_MINUS_ONE);
   inputTypes.emplace_back(Q_S_OF_Q_MINUS_ONE);
   declareProperty("InputSofQType", S_OF_Q,
-                  boost::make_shared<StringListValidator>(inputTypes),
+                  std::make_shared<StringListValidator>(inputTypes),
                   "To identify whether input function");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty(
@@ -104,7 +104,7 @@ void PDFFourierTransform::init() {
   outputTypes.emplace_back(LITTLE_G_OF_R);
   outputTypes.emplace_back(RDF_OF_R);
   declareProperty("PDFType", BIG_G_OF_R,
-                  boost::make_shared<StringListValidator>(outputTypes),
+                  std::make_shared<StringListValidator>(outputTypes),
                   "Type of output PDF including G(r)");
 
   declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,

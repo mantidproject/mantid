@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This algorithm takes a MDHistoWorkspace and allows to select a slab out of
@@ -48,11 +48,11 @@ private:
 
   unsigned int m_rank;
   std::vector<int> m_dim;
-  void cutData(Mantid::API::IMDHistoWorkspace_sptr inWS,
-               Mantid::API::IMDHistoWorkspace_sptr outWS,
+  void cutData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+               const Mantid::API::IMDHistoWorkspace_sptr &outWS,
                Mantid::coord_t *sourceDim, Mantid::coord_t *targetDim,
                std::vector<int> start, std::vector<int> end, unsigned int dim);
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                    Mantid::API::IMDHistoWorkspace_sptr outws);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
 };

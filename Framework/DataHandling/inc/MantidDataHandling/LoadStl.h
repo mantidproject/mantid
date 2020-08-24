@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADSTL_H_
-#define MANTID_DATAHANDLING_LOADSTL_H_
+#pragma once
 #include "MantidDataHandling/LoadSampleShape.h"
-#include "MantidDataHandling/MeshFileIO.h"
+#include "MantidDataHandling/LoadSingleMesh.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
@@ -15,6 +14,10 @@
 #include <boost/functional/hash.hpp>
 #include <functional>
 #include <unordered_set>
+#include <utility>
+
+#include <utility>
+
 namespace {
 Mantid::Kernel::Logger g_logstl("LoadStl");
 }
@@ -43,21 +46,20 @@ struct V3DTrueComparator {
   }
 };
 
-class DLLExport LoadStl : public MeshFileIO {
+class DLLExport LoadStl : public LoadSingleMesh {
 public:
-  LoadStl(std::string filename, ScaleUnits scaleType)
-      : MeshFileIO(scaleType), m_filename(filename), m_setMaterial(false) {}
-  LoadStl(std::string filename, ScaleUnits scaleType,
-          ReadMaterial::MaterialParameters params)
-      : MeshFileIO(scaleType), m_filename(filename), m_setMaterial(true),
-        m_params(params) {}
-  virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
+  LoadStl(std::string filename, std::ios_base::openmode mode,
+          ScaleUnits scaleType)
+      : LoadSingleMesh(filename, mode, scaleType), m_setMaterial(false) {}
+  LoadStl(std::string filename, std::ios_base::openmode mode,
+          ScaleUnits scaleType, ReadMaterial::MaterialParameters params)
+      : LoadSingleMesh(filename, mode, scaleType), m_setMaterial(true),
+        m_params(std::move(std::move(params))) {}
   virtual ~LoadStl() = default;
 
 protected:
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;
   void changeToVector();
-  const std::string m_filename;
   bool m_setMaterial;
   ReadMaterial::MaterialParameters m_params;
   std::unordered_set<std::pair<Kernel::V3D, uint32_t>, HashV3DPair,
@@ -67,4 +69,3 @@ protected:
 
 } // namespace DataHandling
 } // namespace Mantid
-#endif /* MANTID_DATAHANDLING_LOADSTL_H_ */

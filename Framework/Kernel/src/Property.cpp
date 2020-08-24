@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Property.h"
 
@@ -363,50 +363,50 @@ std::string getUnmangledTypeName(const std::type_info &type) {
                         string("optional boolean"));
 
     // Workspaces
-    typestrings.emplace(typeid(boost::shared_ptr<Workspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<Workspace>).name(),
                         string("Workspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<MatrixWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<MatrixWorkspace>).name(),
                         string("MatrixWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<ITableWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<ITableWorkspace>).name(),
                         string("TableWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<IMDWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<IMDWorkspace>).name(),
                         string("IMDWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<IMDEventWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<IMDEventWorkspace>).name(),
                         string("MDEventWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<IEventWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<IEventWorkspace>).name(),
                         string("IEventWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<Workspace2D>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<Workspace2D>).name(),
                         string("Workspace2D"));
-    typestrings.emplace(typeid(boost::shared_ptr<EventWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<EventWorkspace>).name(),
                         string("EventWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<PeaksWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<PeaksWorkspace>).name(),
                         string("PeaksWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<IPeaksWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<IPeaksWorkspace>).name(),
                         string("IPeaksWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<GroupingWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<GroupingWorkspace>).name(),
                         string("GroupingWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<WorkspaceGroup>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<WorkspaceGroup>).name(),
                         string("WorkspaceGroup"));
-    typestrings.emplace(typeid(boost::shared_ptr<OffsetsWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<OffsetsWorkspace>).name(),
                         string("OffsetsWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<MaskWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<MaskWorkspace>).name(),
                         string("MaskWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<SpecialWorkspace2D>).name(),
                         string("SpecialWorkspace2D"));
-    typestrings.emplace(typeid(boost::shared_ptr<IMDHistoWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<IMDHistoWorkspace>).name(),
                         string("IMDHistoWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<SplittersWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<SplittersWorkspace>).name(),
                         string("SplittersWorkspace"));
-    typestrings.emplace(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<SpecialWorkspace2D>).name(),
                         string("SpecialWorkspace2D"));
-    typestrings.emplace(typeid(boost::shared_ptr<TableWorkspace>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<TableWorkspace>).name(),
                         string("TableWorkspace"));
     // FunctionProperty
-    typestrings.emplace(typeid(boost::shared_ptr<IFunction>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<IFunction>).name(),
                         string("Function"));
-    typestrings.emplace(typeid(boost::shared_ptr<IAlgorithm>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<IAlgorithm>).name(),
                         string("IAlgorithm"));
-    typestrings.emplace(typeid(boost::shared_ptr<PropertyManager>).name(),
+    typestrings.emplace(typeid(std::shared_ptr<PropertyManager>).name(),
                         string("Dictionary"));
   }
   auto mitr = typestrings.find(type.name());

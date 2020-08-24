@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyTransmissionCorrection.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -38,7 +38,7 @@ const std::string TRANSMISSION_ERROR("TransmissionError");
 } // namespace
 
 void ApplyTransmissionCorrection::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   declareProperty(
@@ -59,7 +59,7 @@ void ApplyTransmissionCorrection::init() {
       PropertyNames::TRANSMISSION_VALUE, EMPTY_DBL(),
       "Transmission value to apply to all wavelengths. If specified, "
       "TransmissionWorkspace will not be used.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(PropertyNames::TRANSMISSION_ERROR, 0.0, mustBePositive,
                   "The error on the transmission value (default 0.0)");

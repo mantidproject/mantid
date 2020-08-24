@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FUNCTIONDOMAIN1DSPECTRUMCREATOR_H_
-#define MANTID_CURVEFITTING_FUNCTIONDOMAIN1DSPECTRUMCREATOR_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -33,15 +33,16 @@ namespace CurveFitting {
 
   */
 
-class DLLExport FunctionDomain1DSpectrumCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL FunctionDomain1DSpectrumCreator
+    : public API::IDomainCreator {
 public:
   FunctionDomain1DSpectrumCreator();
 
   void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
   void setWorkspaceIndex(size_t workspaceIndex);
 
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                    std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
 
   size_t getDomainSize() const override;
@@ -56,5 +57,3 @@ protected:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_FUNCTIONDOMAIN1DSPECTRUMCREATOR_H_ */

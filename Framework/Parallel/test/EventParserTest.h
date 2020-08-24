@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidParallel/IO/EventParser.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 using namespace Mantid;
@@ -53,14 +53,14 @@ public:
     return range;
   }
 
-  boost::shared_ptr<EventParser<TimeOffsetType>> generateTestParser() {
+  std::shared_ptr<EventParser<TimeOffsetType>> generateTestParser() {
     test_event_lists.clear();
     test_event_lists.resize(m_referenceEventLists.size());
     std::vector<std::vector<TofEvent> *> eventLists;
     for (auto &eventList : test_event_lists)
       eventLists.emplace_back(&eventList);
     Parallel::Communicator comm;
-    return boost::make_shared<EventParser<TimeOffsetType>>(
+    return std::make_shared<EventParser<TimeOffsetType>>(
         comm, std::vector<std::vector<int>>{}, m_bank_offsets, eventLists);
   }
 
@@ -450,7 +450,7 @@ private:
   std::vector<std::vector<int32_t>> event_ids;
   std::vector<std::vector<double>> event_time_offsets;
   anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen;
-  boost::shared_ptr<EventParser<double>> parser;
+  std::shared_ptr<EventParser<double>> parser;
   std::vector<std::vector<EventParser<double>::Event>> rankData;
   std::vector<std::vector<TofEvent>> m_eventLists{NUM_BANKS * 1000};
   std::vector<std::vector<TofEvent> *> m_eventListPtrs;

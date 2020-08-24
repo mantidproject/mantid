@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_PARAMETERESTIMATION_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_PARAMETERESTIMATION_H_
+#pragma once
 
 #include "MantidKernel/cow_ptr.h"
 #include <functional>
@@ -23,10 +22,9 @@ struct DataForParameterEstimation {
 using DataForParameterEstimationCollection =
     std::vector<DataForParameterEstimation>;
 using EstimationDataSelector = std::function<DataForParameterEstimation(
-    const Mantid::MantidVec &x, const Mantid::MantidVec &y)>;
+    const Mantid::MantidVec &x, const Mantid::MantidVec &y,
+    const std::pair<double, double> range)>;
 
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_PARAMETERESTIMATION_H_ */

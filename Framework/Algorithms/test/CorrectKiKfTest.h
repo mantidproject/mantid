@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -169,10 +169,10 @@ public:
 
     EventWorkspace_sptr in_ws, out_ws;
     TS_ASSERT_THROWS_NOTHING(
-        in_ws = boost::dynamic_pointer_cast<EventWorkspace>(
+        in_ws = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve(inputEvWSname)));
     TS_ASSERT_THROWS_NOTHING(
-        out_ws = boost::dynamic_pointer_cast<EventWorkspace>(
+        out_ws = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve(outputEvWSname)));
 
     TS_ASSERT(out_ws);
@@ -227,7 +227,7 @@ public:
 
     MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Workspace2D>(
+        result = std::dynamic_pointer_cast<Workspace2D>(
             AnalysisDataService::Instance().retrieve(finalWS)));
 
     TS_ASSERT_DELTA(result->x(0)[1976], 1.18785, 0.0001);

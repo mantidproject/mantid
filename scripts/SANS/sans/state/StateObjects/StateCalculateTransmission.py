@@ -1,18 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """State describing the calculation of the transmission for SANS reduction."""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 import abc
-from six import with_metaclass, itervalues, add_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
@@ -23,7 +21,7 @@ from sans.state.state_functions import (is_pure_none_or_not_none, validation_mes
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
-class StateTransmissionFit(with_metaclass(JsonSerializable)):
+class StateTransmissionFit(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
@@ -59,7 +57,7 @@ class StateTransmissionFit(with_metaclass(JsonSerializable)):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-class StateCalculateTransmission(with_metaclass(JsonSerializable)):
+class StateCalculateTransmission(metaclass=JsonSerializable):
     def __init__(self):
         super(StateCalculateTransmission, self).__init__()
         # -----------------------
@@ -257,7 +255,7 @@ class StateCalculateTransmission(with_metaclass(JsonSerializable)):
                                                     "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
                         is_invalid.update(entry)
 
-        for fit_type in itervalues(self.fit):
+        for fit_type in self.fit.values():
             fit_type.validate()
 
         if is_invalid:
@@ -337,8 +335,7 @@ def set_default_monitors(calculate_transmission_info, data_info):
 # ---------------------------------------
 # State builders
 # ---------------------------------------
-@add_metaclass(abc.ABCMeta)
-class StateCalculateTransmissionBuilderCommon(object):
+class StateCalculateTransmissionBuilderCommon(object, metaclass=abc.ABCMeta):
     def __init__(self, state):
         self.state = state
 

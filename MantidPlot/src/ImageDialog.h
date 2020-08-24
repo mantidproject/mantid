@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef IMAGEDIALOG_H
-#define IMAGEDIALOG_H
+#pragma once
 
 #include <QCheckBox>
 #include <QDialog>
@@ -40,7 +39,7 @@ class ImageDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ImageDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  ImageDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
   void setOrigin(const QPoint &o);
   void setSize(const QSize &size);
@@ -64,5 +63,3 @@ private:
   QSpinBox *boxX, *boxY, *boxWidth, *boxHeight;
   QCheckBox *keepRatioBox;
 };
-
-#endif // IMAGEDIALOG_H

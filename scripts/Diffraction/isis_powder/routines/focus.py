@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import WorkspaceGroup
 import mantid.simpleapi as mantid
 
@@ -193,8 +192,8 @@ def _test_splined_vanadium_exists(instrument, run_details):
     # Check the necessary splined vanadium file has been created
     if not os.path.isfile(run_details.splined_vanadium_file_path):
         raise ValueError("Processed vanadium runs not found at this path: "
-                         + str(run_details.splined_vanadium_file_path) +
-                         " \nHave you run the method to create a Vanadium spline with these settings yet?\n")
+                         + str(run_details.splined_vanadium_file_path)
+                         + " \nHave you run the method to create a Vanadium spline with these settings yet?\n")
 
 
 def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace, min_value, max_value):

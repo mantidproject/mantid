@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,too-many-public-methods
-from __future__ import (absolute_import, division, print_function)
 from qtpy import QtGui, QtCore, QtWidgets
 import sys
 import mantid
@@ -96,25 +95,22 @@ class GonioTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             if column<=1:
-                try:
-                    val=str(value.toString()) #QVariant
-                except AttributeError:
-                    val=str(value) #string
+                val=str(value)
                 if column==0:
                     self.labels[row]=val
                 else:
                     self.dirstrings[row]=val
             elif column==2:
                 try:
-                    val=value.toInt()[0] #QVariant
-                except AttributeError:
-                    val=int(value) #string
+                    val=int(value)
+                except ValueError:
+                    return False
                 self.senses[row]=val
             else:
                 try:
-                    val=value.toFloat()[0] #QVariant
-                except AttributeError:
-                    val=float(value) #string
+                    val=float(value)
+                except ValueError:
+                    return False
                 if column==3:
                     self.minvalues[row]=val
                 elif column==4:

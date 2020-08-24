@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtTemplateBrowser.h"
 
@@ -340,6 +340,8 @@ void IqtTemplateBrowser::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_presenter.updateParameterEstimationData(std::move(data));
 }
+
+void IqtTemplateBrowser::estimateFunctionParameters() {}
 
 void IqtTemplateBrowser::setBackgroundA0(double value) {
   m_presenter.setBackgroundA0(value);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -56,7 +56,7 @@ public:
     TS_ASSERT_EQUALS(sum, 18816);
 
     // test dimensions
-    boost::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
+    std::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
     TS_ASSERT_EQUALS(dimi->getNBins(), 360);
     TS_ASSERT_DELTA(dimi->getMinimum(), 32471.4, .1);
     TS_ASSERT_DELTA(dimi->getMaximum(), 194590.43, .1);

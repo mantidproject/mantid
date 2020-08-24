@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveReflectometryAscii.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,11 +20,11 @@
 
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <iomanip>
 #include <limits>
 #include <map>
+#include <memory>
 #include <stdexcept>
 
 namespace Mantid {
@@ -47,7 +47,7 @@ void SaveReflectometryAscii::init() {
       "The output filename");
   std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
   declareProperty("FileExtension", ".mft",
-                  boost::make_shared<StringListValidator>(extension),
+                  std::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
   auto mft = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
                                                    "mft");
@@ -70,7 +70,7 @@ void SaveReflectometryAscii::init() {
                       std::make_unique<VisibleWhenProperty>(
                           "FileExtension", IS_EQUAL_TO, "custom"));
   declareProperty("Separator", "tab",
-                  boost::make_shared<StringListValidator>(separator),
+                  std::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");
   setPropertySettings("Separator", std::make_unique<VisibleWhenProperty>(
                                        "FileExtension", IS_EQUAL_TO, "custom"));
@@ -141,7 +141,7 @@ void SaveReflectometryAscii::separator() {
  * @param write :: if true, write string
  * @param s :: string
  */
-bool SaveReflectometryAscii::writeString(bool write, std::string s) {
+bool SaveReflectometryAscii::writeString(bool write, const std::string &s) {
   if (write) {
     if (m_ext == "custom" || m_ext == ".txt")
       m_file << m_sep << s;
@@ -172,7 +172,7 @@ void SaveReflectometryAscii::outputval(double val) {
 /** Write formatted line of data
  *  @param val :: a string value to be written
  */
-void SaveReflectometryAscii::outputval(std::string val) {
+void SaveReflectometryAscii::outputval(const std::string &val) {
   m_file << std::setw(28) << val;
 }
 
@@ -201,8 +201,8 @@ std::string SaveReflectometryAscii::sampleLogUnit(const std::string &logName) {
  *  @param logName :: the name of a SampleLog entry to get its value from
  *  @param logNameFixed :: the name of the SampleLog entry defined by the header
  */
-void SaveReflectometryAscii::writeInfo(const std::string logName,
-                                       const std::string logNameFixed) {
+void SaveReflectometryAscii::writeInfo(const std::string &logName,
+                                       const std::string &logNameFixed) {
   const std::string logValue = sampleLogValue(logName);
   const std::string logUnit = sampleLogUnit(logName);
   if (!logNameFixed.empty()) {
@@ -255,7 +255,7 @@ void SaveReflectometryAscii::header() {
 }
 
 /// Check file
-void SaveReflectometryAscii::checkFile(const std::string filename) {
+void SaveReflectometryAscii::checkFile(const std::string &filename) {
   if (Poco::File(filename).exists()) {
     g_log.warning("File already exists and will be overwritten");
     try {
@@ -295,7 +295,7 @@ bool SaveReflectometryAscii::checkGroups() {
       if (i->getName().empty())
         g_log.warning("InputWorkspace must have a name, skip");
       else {
-        const auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(i);
+        const auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(i);
         if (!ws)
           g_log.warning("WorkspaceGroup must contain MatrixWorkspaces, skip");
         else {

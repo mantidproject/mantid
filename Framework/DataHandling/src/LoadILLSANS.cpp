@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLSANS.h"
 #include "MantidAPI/Axis.h"
@@ -16,7 +16,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -100,6 +102,11 @@ void LoadILLSANS::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace");
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0);
+  declareProperty("Wavelength", 0.0, mustBePositive,
+                  "The wavelength of the experiment. Used only for D16. Will "
+                  "override the nexus' value if there is one.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -107,6 +114,7 @@ void LoadILLSANS::init() {
  */
 void LoadILLSANS::exec() {
   const std::string filename = getPropertyValue("Filename");
+  m_isD16Omega = false;
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath =
@@ -224,15 +232,32 @@ LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
 void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
                                 const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
-  NXData dataGroup = firstEntry.openNXData("data");
+  std::string path;
+  if (firstEntry.containsGroup("data")) {
+    path = "data";
+  } else {
+    path = "data_scan/detector_data/data";
+  }
+  NXData dataGroup = firstEntry.openNXData(path);
   NXInt data = dataGroup.openIntData();
   data.load();
-  const size_t numberOfHistograms =
-      static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
+  size_t numberOfHistograms;
+
+  m_isD16Omega =
+      (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16");
+
+  if (m_isD16Omega) {
+    numberOfHistograms =
+        static_cast<size_t>(data.dim1() * data.dim2()) + N_MONITORS;
+  } else {
+    numberOfHistograms =
+        static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
+  }
   createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
-  size_t nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
+
+  size_t nextIndex;
+  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
   nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
     m_resMode = "low";
@@ -397,6 +422,10 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       const HistogramData::Counts histoCounts(data(), data() + data.dim2());
       m_localWorkspace->setHistogram(firstIndex, std::move(histoBinEdges),
                                      std::move(histoCounts));
+      if (m_isD16Omega) {
+        m_localWorkspace->setPoints(firstIndex,
+                                    HistogramData::Points(histoBinEdges));
+      }
       // Add average monitor counts to a property:
       double averageMonitorCounts =
           std::accumulate(data(), data() + data.dim2(), 0) /
@@ -417,17 +446,36 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     size_t firstIndex = 0) {
 
   // Workaround to get the number of tubes / pixels
-  const size_t numberOfTubes = data.dim0();
-  const size_t numberOfPixelsPerTube = data.dim1();
+  int numberOfTubes;
+  int histogramWidth;
+
+  if (m_isD16Omega) {
+    // D16 with omega scan case
+    numberOfTubes = data.dim2();
+    histogramWidth = data.dim0();
+  } else {
+    numberOfTubes = data.dim0();
+    histogramWidth = data.dim2();
+  }
+  const int numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
-    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
-      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+  for (int i = 0; i < numberOfTubes; ++i) {
+    for (int j = 0; j < numberOfPixelsPerTube; ++j) {
+      int *data_p;
+      if (m_isD16Omega) {
+        data_p = &data(0, i, j);
+      } else {
+        data_p = &data(i, j, 0);
+      }
       const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
-      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
+      const HistogramData::Counts histoCounts(data_p, data_p + histogramWidth);
       m_localWorkspace->setHistogram(index, binEdges, std::move(histoCounts));
+      if (m_isD16Omega) {
+        const HistogramData::Points histoPoints(binEdges);
+        m_localWorkspace->setPoints(index, std::move(histoPoints));
+      }
     }
   }
 
@@ -647,12 +695,18 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   }
 
   double wavelength;
-  if (m_instrumentName == "D16") {
-    wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
+  if (getPointerToProperty("Wavelength")->isDefault()) {
+    if (m_instrumentName == "D16") {
+      wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
+    } else {
+      wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
+    }
+    g_log.debug() << "Wavelength found in the nexus file: " << wavelength
+                  << '\n';
   } else {
-    wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
+    wavelength = getProperty("Wavelength");
   }
-  g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
+
   // round the wavelength to avoid unnecessary rebinning during merge runs
   wavelength = std::round(wavelength * 100) / 100.;
 
@@ -675,12 +729,12 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
       } catch (const std::runtime_error &) {
         if (m_instrumentName == "D16")
           wavelengthRes = 1;
-        g_log.notice() << "Could not find wavelength resolution, assuming "
-                       << wavelengthRes << "%.\n";
+        g_log.information() << "Could not find wavelength resolution, assuming "
+                            << wavelengthRes << "%.\n";
       }
     }
-    // round also the wavelength res to avoid unnecessary rebinning during merge
-    // runs
+    // round also the wavelength res to avoid unnecessary rebinning during
+    // merge runs
     wavelengthRes = std::round(wavelengthRes * 100) / 100.;
     runDetails.addProperty<double>("wavelength", wavelength);
     double ei = m_loader.calculateEnergy(wavelength);
@@ -731,7 +785,8 @@ void LoadILLSANS::adjustTOF() {
 
   // Try to set sensible (but not strictly physical) wavelength axes for
   // monitors
-  // Normalisation is done by acquisition time, so these axes should not be used
+  // Normalisation is done by acquisition time, so these axes should not be
+  // used
   auto firstPixel = m_localWorkspace->histogram(0).dataX();
   const double l2 = specInfo.l2(0);
   const double monitor2 = -specInfo.position(nHist - 1).Z();
@@ -772,8 +827,7 @@ void LoadILLSANS::setPixelSize() {
       (m_instrumentName == "D33") ? "back_detector" : "detector";
   auto detector = instrument->getComponentByName(component);
   auto rectangle =
-      boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
-          detector);
+      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(detector);
   if (rectangle) {
     const double dx = rectangle->xstep();
     const double dy = rectangle->ystep();

@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2000 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidKernel/WarningSuppressions.h"
 // ignore warnings in gSOAP
 // Long-term solution is to use gSOAP as an external library or external
@@ -14,6 +13,7 @@ GNU_DIAG_OFF("format-overflow")
 GNU_DIAG_OFF("format-truncation")
 GNU_DIAG_OFF("implicit-fallthrough")
 GNU_DIAG_OFF("cast-align")
+GNU_DIAG_OFF("deprecated-copy")
 
 /*
   stdsoap2.c[pp] 2.8.15
@@ -16592,3 +16592,4 @@ GNU_DIAG_ON("format-overflow")
 GNU_DIAG_ON("format-truncation")
 GNU_DIAG_ON("implicit-fallthrough")
 GNU_DIAG_ON("cast-align")
+GNU_DIAG_OFF("deprecated-copy")

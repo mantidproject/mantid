@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 #include <utility> // std::pair
 
@@ -26,8 +26,9 @@ namespace Algorithms {
  represent the time channel number.
  This algorithm converts the channel number to time of flight
  */
-class DLLExport ConvertEmptyToTof : public API::Algorithm,
-                                    public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL ConvertEmptyToTof
+    : public API::Algorithm,
+      public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -57,7 +58,8 @@ private:
   bool areEqual(double, double, double);
   int roundUp(double);
   std::vector<double> makeTofAxis(int, double, size_t, double);
-  void setTofInWS(const std::vector<double> &, API::MatrixWorkspace_sptr);
+  void setTofInWS(const std::vector<double> &,
+                  const API::MatrixWorkspace_sptr &);
 
   DataObjects::Workspace2D_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outputWS;

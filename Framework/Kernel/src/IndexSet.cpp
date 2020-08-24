@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <set>
 
@@ -30,7 +30,7 @@ IndexSet::IndexSet(int64_t min, int64_t max, size_t fullRange) {
 
 /// Constructor for a set containing all specified indices. Range is verified at
 /// construction time and duplicates are removed.
-IndexSet::IndexSet(const std::vector<size_t> indices, size_t fullRange)
+IndexSet::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
     : m_isRange(false) {
   // We use a set to create unique and ordered indices.
   std::set<size_t> index_set;

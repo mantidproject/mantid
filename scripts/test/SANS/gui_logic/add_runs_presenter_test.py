@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import unittest
@@ -10,7 +10,7 @@ import unittest
 from assert_called import assert_called
 from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.models import SumRunsModel
 from sans.gui_logic.models.SumRunsModel import SumRunsModel
@@ -178,6 +178,7 @@ def create_mocked_runs(start, len):
     for x, mock_instance in enumerate(run_selection):
         mock_instance.display_name.return_value = start + x
     return run_selection
+
 
 class BaseFileNameTest(AddRunsPagePresenterTestCase):
     def setUp(self):
@@ -369,6 +370,8 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
     def test_that_if_output_directory_is_empty_default_save_directory_is_used_instead(self):
         default_dir = os.path.join("default", "save", "directory")
         ConfigService["defaultsave.directory"] = default_dir
+        # ConfigService may do some conversion in the background.
+        default_dir = ConfigService["defaultsave.directory"]
 
         output_dir = self.presenter.set_output_directory("")
         ConfigService["defaultsave.directory"] = ""

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTMODEL_H_
-#define MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTMODEL_H_
+#pragma once
 
 #include "DllOption.h"
 
@@ -15,21 +14,46 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentModel {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IBaseCustomInstrumentModel {
+
+public:
+  IBaseCustomInstrumentModel(){};
+  virtual ~IBaseCustomInstrumentModel(){};
+  virtual void loadEmptyInstrument() = 0;
+  virtual std::pair<int, std::string> loadData(const std::string &name) = 0;
+  virtual void setCurrentRun(int &run) = 0;
+  virtual int getCurrentRun() = 0;
+  virtual void rename() = 0;
+  virtual void remove() = 0;
+  virtual std::string dataFileName() = 0;
+  virtual int currentRun() = 0;
+  virtual bool isErrorCode(const int run) = 0;
+  virtual const std::string getInstrument() = 0;
+  virtual const std::string getTmpName() = 0;
+  virtual const std::string getWSName() = 0;
+};
+
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentModel
+    : public virtual IBaseCustomInstrumentModel {
 
 public:
   BaseCustomInstrumentModel();
+  BaseCustomInstrumentModel(const std::string &tmpName,
+                            const std::string instrumentName,
+                            const std::string wsName);
   ~BaseCustomInstrumentModel(){};
-  virtual void loadEmptyInstrument();
-  virtual std::pair<int, std::string> loadData(const std::string &name);
-  void setCurrentRun(int &run) { m_currentRun = run; };
-  int getCurrentRun() { return m_currentRun; };
-  void rename();
-  void remove();
-  std::string dataFileName();
-  int currentRun();
-  bool isErrorCode(const int run);
-  const std::string getInstrument() { return m_instrumentName; };
+  void loadEmptyInstrument() override;
+  std::pair<int, std::string> loadData(const std::string &name) override;
+  void setCurrentRun(int &run) override { m_currentRun = run; };
+  int getCurrentRun() override { return m_currentRun; };
+  void rename() override;
+  void remove() override;
+  std::string dataFileName() override;
+  int currentRun() override;
+  bool isErrorCode(const int run) override;
+  const std::string getInstrument() override { return m_instrumentName; };
+  const std::string getTmpName() override { return m_tmpName; };
+  const std::string getWSName() override { return m_wsName; };
 
 protected:
   int m_currentRun;
@@ -40,5 +64,3 @@ protected:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTMODEL_H_ */

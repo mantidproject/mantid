@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import os
 import tempfile
 import unittest
@@ -19,7 +17,8 @@ from qtpy.QtWidgets import QMessageBox
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
-from mantid.py3compat import mock
+from unittest import mock
+from mantid.plots.mantidaxes import MantidAxes
 from mantidqt.project.project import Project
 from mantidqt.utils.qt.testing import start_qapplication
 
@@ -57,20 +56,21 @@ class ProjectTest(unittest.TestCase):
         self._folders_to_remove.clear()
 
     def test_save_calls_save_as_when_last_location_is_not_none(self):
-        self.project.save_as = mock.MagicMock()
+        self.project.open_project_save_dialog = mock.MagicMock()
         self.project.save()
-        self.assertEqual(self.project.save_as.call_count, 1)
+        self.assertEqual(self.project.open_project_save_dialog.call_count, 1)
 
     def test_save_does_not_call_save_as_when_last_location_is_not_none(self):
-        self.project.save_as = mock.MagicMock()
+        self.project.open_project_save_dialog = mock.MagicMock()
         self.project.last_project_location = "1"
-        self.assertEqual(self.project.save_as.call_count, 0)
+        self.assertEqual(self.project.open_project_save_dialog.call_count, 0)
 
     def test_save_saves_project_successfully(self):
         temp_file_path = tempfile.mkdtemp()
         self._folders_to_remove.add(temp_file_path)
         working_file = os.path.join(temp_file_path, "temp" + ".mtdproj")
         self.project.last_project_location = working_file
+        self.project.remember_workspace_saving_option = True
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project._offer_overwriting_gui = mock.MagicMock(return_value=QMessageBox.Yes)
 
@@ -87,12 +87,10 @@ class ProjectTest(unittest.TestCase):
         self._folders_to_remove.add(temp_file_path)
         working_file = os.path.join(temp_file_path, "temp" + ".mtdproj")
         working_directory = os.path.dirname(working_file)
-        self.project._save_file_dialog = mock.MagicMock(return_value=working_file)
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
-        self.project.save_as()
+        self.project.save_as(working_file)
 
-        self.assertEqual(self.project._save_file_dialog.call_count, 1)
         self.assertTrue(os.path.isfile(working_file))
         self.assertTrue(os.path.isdir(working_directory))
         file_list = os.listdir(working_directory)
@@ -103,11 +101,9 @@ class ProjectTest(unittest.TestCase):
         working_directory = tempfile.mkdtemp()
         self._folders_to_remove.add(working_directory)
         return_value_for_load = os.path.join(working_directory, os.path.basename(working_directory) + ".mtdproj")
-        self.project._save_file_dialog = mock.MagicMock(return_value=return_value_for_load)
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project.save_as()
+        self.project.save_as(return_value_for_load)
 
-        self.assertEqual(self.project._save_file_dialog.call_count, 1)
         ADS.clear()
 
         self.project._load_file_dialog = mock.MagicMock(return_value=return_value_for_load)
@@ -248,6 +244,68 @@ class ProjectTest(unittest.TestCase):
                                  workspace_to_save=['newGroup', 'ws3'],
                                  plots_to_save="mocked_figs",
                                  interfaces_to_save="mocked_interfaces")
+
+    @staticmethod
+    def create_altered_and_unaltered_mock_workspaces():
+        # Create a mock unaltered workspace so it's history only contains Load.
+        unaltered_workspace = mock.Mock()
+        unaltered_workspace_history = mock.Mock()
+        unaltered_workspace.getHistory.return_value = unaltered_workspace_history
+        unaltered_workspace_history.size.return_value = 1
+        unaltered_workspace_history.getAlgorithm(0).name.return_value = "Load"
+
+        # Create a mock altered workspaces with history length > 1.
+        altered_workspace = mock.Mock()
+        altered_workspace.name.return_value = "altered_workspace"
+        altered_workspace_history = mock.Mock()
+        altered_workspace.getHistory.return_value = altered_workspace_history
+        altered_workspace_history.size.return_value = 2
+
+        return [altered_workspace, unaltered_workspace]
+
+    @mock.patch('mantidqt.project.project.AnalysisDataService')
+    def test_filter_unaltered_workspaces_function_removes_workspaces_that_have_only_been_loaded(self, mock_ads):
+        workspaces = self.create_altered_and_unaltered_mock_workspaces()
+
+        # When retrieveWorkspaces is called just return what is passed in.
+        mock_ads.retrieveWorkspaces = lambda x: x
+
+        altered_workspaces = self.project._filter_unaltered_workspaces(workspaces)
+
+        self.assertEqual(len(altered_workspaces), 1)
+        self.assertEqual(altered_workspaces[0], "altered_workspace")
+
+    @mock.patch('mantidqt.project.project.AnalysisDataService')
+    def test_filter_plots_removes_plots_that_use_unaltered_workspaces(self, mock_ads):
+        workspaces = self.create_altered_and_unaltered_mock_workspaces()
+
+        # When retrieveWorkspaces is called just return what is passed in.
+        mock_ads.retrieveWorkspaces = lambda x: x
+
+        # Create a plot for each workspace
+        figure_managers = {}
+        for i, ws in enumerate(workspaces):
+            fig_manager = mock.Mock()
+            mock_ax = mock.Mock(spec=MantidAxes)
+            mock_ax.tracked_workspaces = [ws]
+            fig_manager.canvas.figure.axes = [mock_ax]
+
+            figure_managers[i] = fig_manager
+
+        filtered_figure_managers = self.project._filter_plots_with_unaltered_workspaces(
+            plots=figure_managers, workspaces=[workspaces[0]])
+
+        self.assertEqual(len(filtered_figure_managers), 1)
+
+    def test_saving_project_with_save_altered_workspaces_only_calls_filter_functions(self):
+        self.project.save_altered_workspaces_only = True
+        self.project._filter_plots_with_unaltered_workspaces = mock.Mock()
+        self.project._filter_unaltered_workspaces = mock.Mock(return_value=[])
+
+        self.project._save()
+
+        self.project._filter_plots_with_unaltered_workspaces.assert_called_once()
+        self.project._filter_unaltered_workspaces.assert_called_once()
 
 
 if __name__ == "__main__":

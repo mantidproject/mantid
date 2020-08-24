@@ -1,17 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
-#define MANTIDQT_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h"
-#include <boost/weak_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {
@@ -93,4 +91,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQT_MANTIDWIDGETS_WORKSPACEPRESENTER_H_

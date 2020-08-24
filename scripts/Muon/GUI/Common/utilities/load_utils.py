@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup, AnalysisDataService
@@ -220,7 +218,8 @@ def load_workspace_from_filename(filename,
         for table in deadtime_tables[1:]:
             DeleteWorkspace(Workspace=table)
 
-        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 3)
+        print("hiii", )
         UnGroupWorkspace(load_result["DeadTimeTable"])
         load_result["DeadTimeTable"] = None
         UnGroupWorkspace(workspace.name())
@@ -233,7 +232,7 @@ def load_workspace_from_filename(filename,
 
         load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
         load_result["DeadTimeTable"] = None
-        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 3)
 
     return load_result, run, filename, psi_data
 

@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module coordinate file access and information extraction from files."""
 
 # pylint: disable=too-few-public-methods, invalid-name
 
-from __future__ import (absolute_import, division, print_function)
 import os
 import h5py as h5
 import re
@@ -18,8 +17,6 @@ from mantid.kernel import (DateAndTime, ConfigService, Logger)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
 from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
-from six import with_metaclass
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants
 # ----------------------------------------------------------------------------------------------------------------------
@@ -449,8 +446,8 @@ def get_added_nexus_information(file_name):  # noqa
     def check_if_event_mode(entry):
         return "event_workspace" in list(entry.keys())
 
-    def get_workspace_name(entry):
-        return entry["workspace_name"][0].decode("utf-8")
+    def get_workspace_name(entry, file_name):
+        return entry[WORKSPACE_NAME][0].decode("utf-8") if WORKSPACE_NAME in entry else file_name
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)
@@ -465,7 +462,7 @@ def get_added_nexus_information(file_name):  # noqa
         altered_names = [ws_name.replace(ADDED_SUFFIX, ADDED_MONITOR_SUFFIX) for ws_name in workspace_names]
         return all([ws_name in monitor_workspace_names for ws_name in altered_names])
 
-    def get_added_event_info(h5_file_handle, key_collection):
+    def get_added_event_info(h5_file_handle, key_collection, file_name):
         """
         We expect to find one event workspace and one histogram workspace per period
         """
@@ -474,7 +471,7 @@ def get_added_nexus_information(file_name):  # noqa
         for key in key_collection:
             entry = h5_file_handle[key]
             is_event_mode = check_if_event_mode(entry)
-            workspace_name = get_workspace_name(entry)
+            workspace_name = get_workspace_name(entry, file_name)
             if is_event_mode:
                 workspace_names.append(workspace_name)
             else:
@@ -519,7 +516,7 @@ def get_added_nexus_information(file_name):  # noqa
 
                 # Check if entries are added event data, if we don't have a hit, then it can always be
                 # added histogram data
-                is_added_event_file, number_of_periods_event = get_added_event_info(h5_file, top_level_keys)
+                is_added_event_file, number_of_periods_event = get_added_event_info(h5_file, top_level_keys, file_name)
                 is_added_histogram_file, number_of_periods_histogram = get_added_histogram_info(h5_file, top_level_keys)
 
                 if is_added_event_file:
@@ -719,7 +716,7 @@ def get_geometry_information_raw(file_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # SANS file Information
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSFileInformation(with_metaclass(ABCMeta, object)):
+class SANSFileInformation(metaclass=ABCMeta):
     logger = Logger("SANS")
 
     def __init__(self, full_file_name):

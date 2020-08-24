@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLINDIRECT2_H_
-#define MANTID_DATAHANDLING_LOADILLINDIRECT2_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -44,12 +44,13 @@ private:
   void initWorkSpace();
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
-  void loadNexusEntriesIntoProperties(std::string nexusfilename);
+  void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry);
   void runLoadInstrument();
   void moveComponent(const std::string &, double);
   void moveSingleDetectors(NeXus::NXEntry &entry);
   void rotateTubes();
+  std::string getInstrumentFilePath();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
@@ -63,6 +64,9 @@ private:
   size_t m_numberOfMonitors{1};        // number of monitors
   std::set<int> m_activeSDIndices;     // set of Single Detector indices,
                                        // that were actually active
+  bool m_bats{false};                  // A flag marking the BATS mode
+  size_t m_firstTubeAngleRounded{
+      251}; // A flag holding the rounded angle of the first tube
 
   std::vector<std::string> m_supportedInstruments{"IN16B"};
   LoadHelper m_loader;
@@ -70,5 +74,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADILLINDIRECT2_H_ */

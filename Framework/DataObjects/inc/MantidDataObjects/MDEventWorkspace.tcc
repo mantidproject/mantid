@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/MDBox.h"
@@ -822,7 +822,7 @@ TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
         auto box = this->data->getBoxAtCoord(ws_pos.getBareArray());
 
         // If the box is not masked then record the signal and error here
-        if (!box->getIsMasked()) {
+        if (box && !box->getIsMasked()) {
           line.x.emplace_back(line_pos);
           signal_t signal = this->getNormalizedSignal(box, normalize);
           if (std::isinf(signal)) {

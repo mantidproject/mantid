@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/Shape2DCollection.h"
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -128,8 +128,6 @@ void Shape2DCollection::removeShapes(const QList<Shape2D *> &shapeList) {
   }
 }
 
-/**
- */
 void Shape2DCollection::setWindow(const RectF &surface,
                                   const QRect &viewport) const {
   m_viewport = viewport;
@@ -180,6 +178,8 @@ Shape2D *Shape2DCollection::createShape(const QString &type, int x,
     return new Shape2DEllipse(p, 0.0);
   } else if (type.toLower() == "rectangle") {
     return new Shape2DRectangle(p, QSizeF(0, 0));
+  } else if (type.toLower() == "sector") {
+    return new Shape2DSector(0.001, 0.002, 0, M_PI / 2, p);
   } else if (type.toLower() == "free") {
     return new Shape2DFree(p);
   }
@@ -566,7 +566,8 @@ double Shape2DCollection::getCurrentDouble(const QString &prop) const {
 
 void Shape2DCollection::setCurrentDouble(const QString &prop, double value) {
   if (m_currentShape) {
-    return m_currentShape->setDouble(prop, value);
+    m_currentShape->setDouble(prop, value);
+    emit shapeChanged();
   }
 }
 
@@ -587,7 +588,8 @@ QPointF Shape2DCollection::getCurrentPoint(const QString &prop) const {
 void Shape2DCollection::setCurrentPoint(const QString &prop,
                                         const QPointF &value) {
   if (m_currentShape) {
-    return m_currentShape->setPoint(prop, value);
+    m_currentShape->setPoint(prop, value);
+    emit shapeChanged();
   }
 }
 
@@ -601,6 +603,7 @@ RectF Shape2DCollection::getCurrentBoundingRect() const {
 void Shape2DCollection::setCurrentBoundingRect(const RectF &rect) {
   if (m_currentShape) {
     m_currentShape->setBoundingRect(rect);
+    emit shapeChanged();
   }
 }
 
@@ -679,7 +682,7 @@ void Shape2DCollection::saveToTableWorkspace() {
  * @param ws :: table workspace to load shapes from.
  */
 void Shape2DCollection::loadFromTableWorkspace(
-    Mantid::API::ITableWorkspace_const_sptr ws) {
+    const Mantid::API::ITableWorkspace_const_sptr &ws) {
   using namespace Mantid::API;
   auto columnNames = ws->getColumnNames();
 

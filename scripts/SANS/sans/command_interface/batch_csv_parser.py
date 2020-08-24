@@ -1,17 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import csv
 import re
 from csv import reader
 from enum import Enum
 
-from mantid.py3compat import csv_open_type
 from sans.common.constants import ALL_PERIODS
 from sans.common.file_information import find_full_file_path
 from sans.gui_logic.models.RowEntries import RowEntries
@@ -72,7 +69,7 @@ class BatchCsvParser(object):
         for row in rows:
             to_write.append(self._convert_row_to_list(row))
 
-        with open(file_path, csv_open_type) as outfile:
+        with open(file_path, "w", newline="") as outfile:
             writer_handle = csv.writer(outfile)
             for line in to_write:
                 writer_handle.writerow(line)

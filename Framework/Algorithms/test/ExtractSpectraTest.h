@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -77,6 +77,11 @@ void run_parallel_WorkspaceIndexRange(const Parallel::Communicator &comm) {
 } // namespace
 
 class ExtractSpectraTest : public CxxTest::TestSuite {
+private:
+  const size_t nSpec{5};
+  const size_t nBins{6};
+  const std::string outWSName{"ExtractSpectraTest_OutputWS"};
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -85,9 +90,6 @@ public:
     AnalysisDataService::Instance().clear();
     delete suite;
   }
-
-  ExtractSpectraTest()
-      : nSpec(5), nBins(6), outWSName("ExtractSpectraTest_OutputWS") {}
 
   void test_Init() {
     ExtractSpectra alg;
@@ -114,7 +116,7 @@ public:
 
   // ---- test histo ----
 
-  void test_x_range() {
+  void test_x_range_more_than_one_bin() {
     Parameters params;
     params.setXRange();
 
@@ -124,6 +126,37 @@ public:
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
     params.testXRange(*ws);
+  }
+
+  void test_equal_x_range_extracts_single_bin_histogram() {
+    Parameters params;
+    params.XMin = 3.4;
+    params.XMax = 3.4;
+
+    const auto ws = runAlgorithm(params);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(1)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(2)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(3)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(4)[0], 3.0);
+  }
+
+  void test_equal_x_range_extracts_single_pt_points() {
+    Parameters params("points");
+    params.XMin = 3.4;
+    params.XMax = 3.4;
+
+    const auto ws = runAlgorithm(params);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+    // finds closest point
+    TS_ASSERT_EQUALS(ws->x(0)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(1)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(2)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(3)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(4)[0], 3.0);
   }
 
   void test_index_range() {
@@ -452,14 +485,12 @@ public:
 private:
   // -----------------------  helper methods ------------------------
 
-  const size_t nSpec;
-  const size_t nBins;
-  const std::string outWSName;
-
   MatrixWorkspace_sptr
   createInputWorkspace(const std::string &workspaceType) const {
     if (workspaceType == "histo")
       return createInputWorkspaceHisto();
+    else if (workspaceType == "points")
+      return createInputWorkspacePoints();
     else if (workspaceType == "event")
       return createInputWorkspaceEvent();
     else if (workspaceType == "histo-ragged")
@@ -481,6 +512,20 @@ private:
         "Workspace2D", nSpec, nBins + 1, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
       for (size_t k = 0; k <= nBins; ++k) {
+        space->mutableX(j)[k] = double(k);
+      }
+      space->mutableY(j) = HistogramData::HistogramY(nBins, double(j));
+      space->mutableE(j) = HistogramData::HistogramE(nBins, sqrt(double(j)));
+    }
+    return space;
+  }
+
+  MatrixWorkspace_sptr createInputWorkspacePoints() const {
+    // Set up a small workspace for testing
+    MatrixWorkspace_sptr space =
+        WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins, nBins);
+    for (size_t j = 0; j < nSpec; ++j) {
+      for (size_t k = 0; k < nBins; ++k) {
         space->mutableX(j)[k] = double(k);
       }
       space->mutableY(j) = HistogramData::HistogramY(nBins, double(j));
@@ -544,7 +589,7 @@ private:
   }
 
   MatrixWorkspace_sptr
-  createInputWithDetectors(std::string workspaceType) const {
+  createInputWithDetectors(const std::string &workspaceType) const {
     MatrixWorkspace_sptr ws;
 
     // Set the type of underlying workspace
@@ -718,11 +763,12 @@ private:
   };
 
   MatrixWorkspace_sptr runAlgorithm(const Parameters &params,
-                                    bool expectSuccess = true) const {
+                                    bool expectExecuteSuccess = true) const {
     auto ws = createInputWorkspace(params.wsType);
     ExtractSpectra alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
+
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
@@ -750,13 +796,12 @@ private:
           alg.setProperty("DetectorList", params.DetectorList));
     }
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-
-    if (expectSuccess) {
+    if (expectExecuteSuccess) {
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
       TS_ASSERT(alg.isExecuted());
 
-      // Retrieve the workspace from data service. TODO: Change to your desired
-      // type
+      // Retrieve the workspace from data service. TODO: Change to your
+      // desired type
       MatrixWorkspace_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
           ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -772,8 +817,9 @@ private:
 
 class ExtractSpectraTestPerformance : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
+  // This pair of boilerplate methods prevent the suite being created
+  // statically This means the constructor isn't called when running other
+  // tests
   static ExtractSpectraTestPerformance *createSuite() {
     return new ExtractSpectraTestPerformance();
   }

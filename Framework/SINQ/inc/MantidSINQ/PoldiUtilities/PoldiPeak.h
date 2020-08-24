@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -24,7 +24,7 @@ namespace Poldi {
 
 class PoldiPeak;
 
-using PoldiPeak_sptr = boost::shared_ptr<PoldiPeak>;
+using PoldiPeak_sptr = std::shared_ptr<PoldiPeak>;
 
 class MANTID_SINQ_DLL PoldiPeak {
 public:

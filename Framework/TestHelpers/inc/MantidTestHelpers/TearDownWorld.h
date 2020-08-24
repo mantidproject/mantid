@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TEARDOWNWORLD_H_
-#define TEARDOWNWORLD_H_
+#pragma once
 
 #include <cxxtest/GlobalFixture.h>
 
@@ -40,5 +39,3 @@ class ClearADS : public CxxTest::GlobalFixture {
 class ClearPropertyManagerDataService : public CxxTest::GlobalFixture {
   bool tearDownWorld() override;
 };
-
-#endif // TEARDOWNWORLD_H_

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SavePresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
@@ -31,15 +31,24 @@ using namespace Mantid::API;
  */
 SavePresenter::SavePresenter(ISaveView *view,
                              std::unique_ptr<IAsciiSaver> saver)
-    : m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
+    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)),
+      m_shouldAutosave(false) {
 
   m_view->subscribe(this);
   populateWorkspaceList();
   suggestSaveDir();
+  // this call needs to come last in order to avoid notifySettingsChanged being
+  // called with a nullptr, i.e. before the main presenter is accepted
+  m_view->connectSaveSettingsWidgets();
 }
 
 void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
+}
+
+void SavePresenter::notifySettingsChanged() {
+  m_mainPresenter->setBatchUnsaved();
+  updateWidgetEnabledState();
 }
 
 void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }
@@ -64,19 +73,51 @@ bool SavePresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
 
+/** Tells the view to enable/disable certain widgets based on the
+ * selected file format
+ */
+void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
+  auto const fileFormat = formatFromIndex(m_view->getFileFormatIndex());
+  // Enable/disable the log list for formats that include the header.
+  // Note that at the moment the log list is used in SaveReflectometryAscii for
+  // ILLCosmos (MFT) but I'm not sure if it should be.
+  if ((fileFormat == NamedFormat::Custom && m_view->getHeaderCheck()) ||
+      fileFormat == NamedFormat::ILLCosmos)
+    m_view->enableLogList();
+  else
+    m_view->disableLogList();
+  // Everything else is enabled for Custom and disabled otherwise
+  if (fileFormat == NamedFormat::Custom) {
+    m_view->enableHeaderCheckBox();
+    m_view->enableQResolutionCheckBox();
+    m_view->enableSeparatorButtonGroup();
+  } else {
+    m_view->disableHeaderCheckBox();
+    m_view->disableQResolutionCheckBox();
+    m_view->disableSeparatorButtonGroup();
+  }
+}
+
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
  */
 void SavePresenter::updateWidgetEnabledState() const {
   if (isProcessing() || isAutoreducing()) {
     m_view->disableAutosaveControls();
-    if (shouldAutosave())
-      m_view->disableFileFormatAndLocationControls();
-    else
-      m_view->enableFileFormatAndLocationControls();
+    if (shouldAutosave()) {
+      m_view->disableFileFormatControls();
+      m_view->disableLocationControls();
+      updateWidgetStateBasedOnFileFormat();
+    } else {
+      m_view->enableFileFormatControls();
+      m_view->enableLocationControls();
+      updateWidgetStateBasedOnFileFormat();
+    }
   } else {
     m_view->enableAutosaveControls();
-    m_view->enableFileFormatAndLocationControls();
+    m_view->enableFileFormatControls();
+    m_view->enableLocationControls();
+    updateWidgetStateBasedOnFileFormat();
   }
 }
 
@@ -135,7 +176,7 @@ void SavePresenter::filterWorkspaceNames() {
       boost::regex rgx(filter);
       it = std::copy_if(
           wsNames.begin(), wsNames.end(), validNames.begin(),
-          [rgx](std::string s) { return boost::regex_search(s, rgx); });
+          [rgx](const std::string &s) { return boost::regex_search(s, rgx); });
       m_view->showFilterEditValid();
     } catch (boost::regex_error &) {
       m_view->showFilterEditInvalid();
@@ -143,7 +184,7 @@ void SavePresenter::filterWorkspaceNames() {
   } else {
     // Otherwise simply add names where the filter string is found in
     it = std::copy_if(wsNames.begin(), wsNames.end(), validNames.begin(),
-                      [filter](std::string s) {
+                      [filter](const std::string &s) {
                         return s.find(filter) != std::string::npos;
                       });
   }
@@ -201,7 +242,7 @@ FileFormatOptions SavePresenter::getSaveParametersFromView() const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
       /*prefix=*/m_view->getPrefix(),
-      /*includeTitle=*/m_view->getTitleCheck(),
+      /*includeHeader=*/m_view->getHeaderCheck(),
       /*separator=*/m_view->getSeparator(),
       /*includeQResolution=*/m_view->getQResolutionCheck());
 }

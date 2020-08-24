@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataPresenter.h"
 #include "ConvFitAddWorkspaceDialog.h"
@@ -86,7 +86,7 @@ ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
   dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
-  return std::move(dialog);
+  return dialog;
 }
 
 void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(

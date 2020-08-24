@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MULTI_PEAK_FIT_TOOL
-#define MULTI_PEAK_FIT_TOOL
+#pragma once
 
 #include "MultiPeakFit.h"
 #include "PlotToolInterface.h"
@@ -76,5 +75,3 @@ private:
   MultiPeakFit *d_fit;
   QwtPlotCurve *d_curve;
 };
-
-#endif // ifndef MULTI_PEAK_FIT_TOOL

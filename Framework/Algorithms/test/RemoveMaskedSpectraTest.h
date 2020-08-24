@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -106,7 +106,7 @@ private:
     return space;
   }
 
-  void maskWorkspace(MatrixWorkspace_sptr ws) {
+  void maskWorkspace(const MatrixWorkspace_sptr &ws) {
     std::vector<int> spectra(3);
     spectra[0] = 1;
     spectra[1] = 3;
@@ -119,8 +119,8 @@ private:
   }
 
   MatrixWorkspace_sptr
-  runAlgorithm(MatrixWorkspace_sptr inputWS,
-               MatrixWorkspace_sptr maskedWS = MatrixWorkspace_sptr()) {
+  runAlgorithm(const MatrixWorkspace_sptr &inputWS,
+               const MatrixWorkspace_sptr &maskedWS = MatrixWorkspace_sptr()) {
     // Name of the output workspace.
     std::string outWSName("RemoveMaskedSpectraTest_OutputWS");
 

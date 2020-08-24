@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 '''
 Data object for a TestResult
@@ -21,20 +21,29 @@ import sqlresults
 import numpy as np
 
 
+# Copy of that in systemtesting.py as there is no place to share it easily and its tiny and unlikely to change
+def linux_distro_description():
+    """Human readable string for linux distro description
+    """
+    try:
+        lsb_descr = subprocess.check_output('lsb_release --description', shell=True,
+                                            stderr=subprocess.STDOUT).decode('utf-8')
+        return lsb_descr.strip()[len('Description:')+1:].strip()
+    except subprocess.CalledProcessError as exc:
+        return f'Unknown distribution: lsb_release -d failed {exc}'
 
 
-#########################################################################
-#########################################################################
 def envAsString():
-    """ Return the environment as a string """
-    if os.name == 'nt':
+    platform_name = sys.platform
+    if platform_name == 'win32':
         system = platform.system().lower()[:3]
         arch = platform.architecture()[0][:2]
         env = system + arch
-    elif os.name == 'mac':
+    elif platform_name == 'darwin':
         env = platform.mac_ver()[0]
     else:
-        env = " ".join(platform.dist())
+        # assume linux
+        env = linux_distro_description()
     return env
     
     

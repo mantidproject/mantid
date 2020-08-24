@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -37,13 +37,13 @@ MANTID_PARALLEL_DLL void
 load(const Communicator &communicator, const std::string &filename,
      const std::string &groupName, const std::vector<std::string> &bankNames,
      const std::vector<int32_t> &bankOffsets,
-     std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
+     const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
 
 MANTID_PARALLEL_DLL void
 load(const std::string &filename, const std::string &groupName,
      const std::vector<std::string> &bankNames,
      const std::vector<int32_t> &bankOffsets,
-     std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
+     const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists,
      bool precalcEvents);
 
 } // namespace EventLoader

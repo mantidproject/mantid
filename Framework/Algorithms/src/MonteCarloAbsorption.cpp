@@ -1,32 +1,27 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidHistogramData/Histogram.h"
-#include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
@@ -90,7 +85,7 @@ DECLARE_ALGORITHM(MonteCarloAbsorption)
  */
 void MonteCarloAbsorption::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
@@ -102,25 +97,25 @@ void MonteCarloAbsorption::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
 
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
-                  "attempted (default: all points)");
+                  "attempted if ResimulateTracksForDifferentWavelengths=true");
   declareProperty(
       "EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
       "The number of \"neutron\" events to generate per simulated point");
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
 
-  InterpolationOption interpolateOpt;
-  declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
+  auto interpolateOpt = createInterpolateOption();
+  declareProperty(interpolateOpt->property(), interpolateOpt->propertyDoc());
   declareProperty("SparseInstrument", false,
                   "Enable simulation on special "
                   "instrument with a sparse grid of "
                   "detectors interpolating the "
                   "results to the real instrument.");
-  auto threeOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto threeOrMore = std::make_shared<Kernel::BoundedValidator<int>>();
   threeOrMore->setLower(3);
   declareProperty(
       "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
@@ -129,7 +124,7 @@ void MonteCarloAbsorption::init() {
       "NumberOfDetectorRows",
       std::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
-  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto twoOrMore = std::make_shared<Kernel::BoundedValidator<int>>();
   twoOrMore->setLower(2);
   declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
                   twoOrMore,
@@ -156,6 +151,15 @@ void MonteCarloAbsorption::init() {
                       std::make_unique<EnabledWhenProperty>(
                           "ResimulateTracksForDifferentWavelengths",
                           ePropertyCriterion::IS_NOT_DEFAULT));
+  auto scatteringOptionValidator = std::make_shared<StringListValidator>();
+  scatteringOptionValidator->addAllowedValue("SampleAndEnvironment");
+  scatteringOptionValidator->addAllowedValue("SampleOnly");
+  scatteringOptionValidator->addAllowedValue("EnvironmentOnly");
+  declareProperty(
+      "SimulateScatteringPointIn", "SampleAndEnvironment",
+      "Simulate the scattering point in the vicinity of the sample or its "
+      "environment or both (default).",
+      scatteringOptionValidator);
 }
 
 /**
@@ -171,10 +175,19 @@ void MonteCarloAbsorption::exec() {
   interpolateOpt.set(getPropertyValue("Interpolation"));
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
+  auto simulatePointsIn =
+      MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT;
+  const auto pointsInProperty = getPropertyValue("SimulateScatteringPointIn");
+  if (pointsInProperty == "SampleOnly") {
+    simulatePointsIn = MCInteractionVolume::ScatteringPointVicinity::SAMPLEONLY;
+  } else if (pointsInProperty == "EnvironmentOnly") {
+    simulatePointsIn =
+        MCInteractionVolume::ScatteringPointVicinity::ENVIRONMENTONLY;
+  }
   auto outputWS =
       doSimulation(*inputWS, static_cast<size_t>(nevents), resimulateTracks,
                    seed, interpolateOpt, useSparseInstrument,
-                   static_cast<size_t>(maxScatterPtAttempts));
+                   static_cast<size_t>(maxScatterPtAttempts), simulatePointsIn);
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
@@ -201,6 +214,77 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
 }
 
 /**
+ * Factory method to return an instance of the required interaction volume
+ * class
+ * @param sample A reference to the object defining details of the sample
+ * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object
+ * @param pointsIn Where to generate the scattering point in
+ * @return a pointer to an MCAbsorptionStrategy object
+ */
+std::shared_ptr<IMCInteractionVolume>
+MonteCarloAbsorption::createInteractionVolume(
+    const API::Sample &sample, const size_t maxScatterPtAttempts,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
+  auto interactionVol = std::make_shared<MCInteractionVolume>(
+      sample, maxScatterPtAttempts, pointsIn);
+  return interactionVol;
+}
+
+/**
+ * Factory method to return an instance of the required absorption strategy
+ * class
+ * @param interactionVol The interaction volume object to inject into the
+ * strategy
+ * @param beamProfile A reference to the object the beam profile
+ * @param EMode The energy mode of the instrument
+ * @param nevents The number of Monte Carlo events used in the simulation
+ * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object
+ * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
+ * wavelength point or not
+ * @return a pointer to an MCAbsorptionStrategy object
+ */
+std::shared_ptr<IMCAbsorptionStrategy> MonteCarloAbsorption::createStrategy(
+    IMCInteractionVolume &interactionVol, const IBeamProfile &beamProfile,
+    Kernel::DeltaEMode::Type EMode, const size_t nevents,
+    const size_t maxScatterPtAttempts,
+    const bool regenerateTracksForEachLambda) {
+  auto MCAbs = std::make_shared<MCAbsorptionStrategy>(
+      interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
+      regenerateTracksForEachLambda);
+  return MCAbs;
+}
+
+/**
+ * Factory method to return an instance of the required SparseInstrument class
+ * @param modelWS The full workspace that the sparse one will be based on
+ * @param wavelengthPoints The number of wavelength points to include in the
+ * histograms in the sparse workspace
+ * @param rows The number of rows of detectors to create
+ * @param columns The number of columns of detectors to create
+ * @return a pointer to an SparseInstrument object
+ */
+std::shared_ptr<SparseWorkspace> MonteCarloAbsorption::createSparseWorkspace(
+    const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints,
+    const size_t rows, const size_t columns) {
+  auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints,
+                                                    rows, columns);
+  return sparseWS;
+}
+
+/**
+ * Factory method to return an instance of the required InterpolationOption
+ * class
+ * @return a pointer to an InterpolationOption object
+ */
+std::unique_ptr<InterpolationOption>
+MonteCarloAbsorption::createInterpolateOption() {
+  auto interpolationOpt = std::make_unique<InterpolationOption>();
+  return interpolationOpt;
+}
+
+/**
  * Run the simulation over the whole input workspace
  * @param inputWS A reference to the input workspace
  * @param nevents Number of MC events per wavelength point to simulate
@@ -211,13 +295,15 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  * @param useSparseInstrument If true, use sparse instrument in simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a
  * scatter point within the object
+ * @param pointsIn Where to simulate the scattering point in
  * @return A new workspace containing the correction factors & errors
  */
 MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     const MatrixWorkspace &inputWS, const size_t nevents,
     const bool resimulateTracksForDiffWavelengths, const int seed,
     const InterpolationOption &interpolateOpt, const bool useSparseInstrument,
-    const size_t maxScatterPtAttempts) {
+    const size_t maxScatterPtAttempts,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
   auto outputWS = createOutputWorkspace(inputWS);
   const auto inputNbins = static_cast<int>(inputWS.blocksize());
 
@@ -236,14 +322,12 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   } else {
     nlambda = inputNbins;
   }
-  std::unique_ptr<const DetectorGridDefinition> detGrid;
-  MatrixWorkspace_uptr sparseWS;
+  SparseWorkspace_sptr sparseWS;
   if (useSparseInstrument) {
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    detGrid = SparseInstrument::createDetectorGridDefinition(
-        inputWS, latitudinalDets, longitudinalDets);
-    sparseWS = SparseInstrument::createSparseWS(inputWS, *detGrid, nlambda);
+    sparseWS = createSparseWorkspace(inputWS, nlambda, latitudinalDets,
+                                     longitudinalDets);
   }
   MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
   const MatrixWorkspace &instrumentWS =
@@ -261,9 +345,11 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  MCAbsorptionStrategy strategy(
-      *beamProfile, inputWS.sample(), efixed.emode(), nevents, nlambda,
-      maxScatterPtAttempts, useSparseInstrument, interpolateOpt, false, g_log);
+  auto interactionVolume =
+      createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn);
+  auto strategy =
+      createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents,
+                     maxScatterPtAttempts, resimulateTracksForDiffWavelengths);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 
@@ -274,20 +360,69 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     auto &outE = simulationWS.mutableE(i);
     // The input was cloned so clear the errors out
     outE = 0.0;
-    // Final detector position
-    if (!spectrumInfo.hasDetectors(i)) {
+
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i)) {
       continue;
     }
     // Per spectrum values
     const auto &detPos = spectrumInfo.position(i);
     const double lambdaFixed =
         toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
-    MersenneTwister rng(seed);
+    MersenneTwister rng(seed + int(i));
 
-    const auto lambdas = simulationWS.points(i);
+    const auto lambdas = simulationWS.points(i).rawData();
 
-    strategy.calculate(rng, detPos, lambdas, lambdaFixed,
-                       simulationWS.getSpectrum(i));
+    const auto nbins = lambdas.size();
+    const size_t lambdaStepSize = nbins / nlambda;
+
+    std::vector<double> packedLambdas;
+    std::vector<double> packedAttFactors;
+    std::vector<double> packedAttFactorErrors;
+
+    for (size_t j = 0; j < nbins; j += lambdaStepSize) {
+      packedLambdas.push_back(lambdas[j]);
+      packedAttFactors.push_back(0);
+      packedAttFactorErrors.push_back(0);
+      // Ensure we have the last point for the interpolation
+      if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins && j + 1 != nbins) {
+        j = nbins - lambdaStepSize - 1;
+      }
+    }
+    MCInteractionStatistics detStatistics(spectrumInfo.detector(i).getID(),
+                                          inputWS.sample());
+
+    strategy->calculate(rng, detPos, packedLambdas, lambdaFixed,
+                        packedAttFactors, packedAttFactorErrors, detStatistics);
+
+    if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug(detStatistics.generateScatterPointStats());
+    }
+
+    for (size_t j = 0; j < packedLambdas.size(); j++) {
+      simulationWS.getSpectrum(i)
+          .dataY()[simulationWS.yIndexOfX(packedLambdas[j], i)] =
+          packedAttFactors[j];
+
+      simulationWS.getSpectrum(i)
+          .dataE()[simulationWS.yIndexOfX(packedLambdas[j], i)] =
+          packedAttFactorErrors[j];
+    }
+
+    // Interpolate through points not simulated. Simulation WS only has
+    // reduced X values if using sparse instrument so no interpolation required
+
+    if (!useSparseInstrument && lambdaStepSize > 1) {
+      auto histnew = simulationWS.histogram(i);
+
+      if (lambdaStepSize < nbins) {
+        interpolateOpt.applyInplace(histnew, lambdaStepSize);
+      } else {
+        std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
+                  histnew.y()[0]);
+      }
+      outputWS->setHistogram(i, histnew);
+    }
+
     prog.report(reportMsg);
 
     if (!useSparseInstrument) {
@@ -299,7 +434,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (useSparseInstrument) {
-    interpolateFromSparse(*outputWS, simulationWS, interpolateOpt, *detGrid);
+    interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
   }
 
   return outputWS;
@@ -346,23 +481,17 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
 }
 
 void MonteCarloAbsorption::interpolateFromSparse(
-    MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS,
-    const Mantid::Algorithms::InterpolationOption &interpOpt,
-    const DetectorGridDefinition &detGrid) {
+    MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
+    const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
-  const auto samplePos = spectrumInfo.samplePosition();
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    const auto detPos = spectrumInfo.position(i) - samplePos;
     double lat, lon;
-    std::tie(lat, lon) =
-        SparseInstrument::geographicalAngles(detPos, *refFrame);
-    const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
+    std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
     const auto spatiallyInterpHisto =
-        SparseInstrument::interpolateFromDetectorGrid(lat, lon, sparseWS,
-                                                      nearestIndices);
+        sparseWS.interpolateFromDetectorGrid(lat, lon);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);

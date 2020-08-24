@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -17,12 +17,12 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/python/class.hpp>
@@ -157,7 +157,7 @@ public:
         alg->initialize();
         alg->setPropertyValue("InstrumentName", instrumentName);
         alg->setPropertyValue("InstrumentXML", instrumentXML);
-        alg->setProperty("Workspace", boost::shared_ptr<Workspace2D>(
+        alg->setProperty("Workspace", std::shared_ptr<Workspace2D>(
                                           &ws, [](Workspace2D *) {}));
         alg->setProperty("RewriteSpectraMap",
                          Mantid::Kernel::OptionalBool(false));
@@ -174,8 +174,8 @@ public:
   }
 };
 
-boost::shared_ptr<Mantid::API::Workspace> makeWorkspace2D() {
-  return boost::make_shared<Workspace2D>();
+std::shared_ptr<Mantid::API::Workspace> makeWorkspace2D() {
+  return std::make_shared<Workspace2D>();
 }
 
 void export_Workspace2D() {

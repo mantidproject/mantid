@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 #include "MantidKernel/Logger.h"
@@ -31,7 +31,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
   // Disable "Browse" button - use case is that first run will always be the one
   // selected on front tab. User will type in the runs they want rather than
   // using the Browse button. (If they want to "Browse" they can use front tab).
-  m_ui.runs->doButtonOpt(API::MWRunFiles::ButtonOpts::None);
+  m_ui.runs->doButtonOpt(API::FileFinderWidget::ButtonOpts::None);
 }
 
 /**

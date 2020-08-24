@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegratePeaksCWSD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -368,7 +368,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
  * @param maskws
  */
 std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
-    DataObjects::MaskWorkspace_const_sptr maskws) {
+    const DataObjects::MaskWorkspace_const_sptr &maskws) {
   std::vector<detid_t> vecMaskedDetID;
 
   // Add the detector IDs of all masked detector to a vector
@@ -431,7 +431,7 @@ void IntegratePeaksCWSD::mergePeaks() {
 DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createOutputs() {
   // clone the original peaks workspace
   DataObjects::PeaksWorkspace_sptr outws =
-      boost::shared_ptr<DataObjects::PeaksWorkspace>(
+      std::shared_ptr<DataObjects::PeaksWorkspace>(
           m_peaksWS->clone().release());
 
   size_t num_peaks = outws->getNumberPeaks();
@@ -452,13 +452,12 @@ DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createOutputs() {
  * @param mdws :: source MDEventWorkspace where the run numbers come from
  * @return
  */
-DataObjects::PeaksWorkspace_sptr
-IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
-                                        API::IMDEventWorkspace_sptr mdws) {
+DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createPeakworkspace(
+    Kernel::V3D peakCenter, const API::IMDEventWorkspace_sptr &mdws) {
   g_log.notice("Create peak workspace for output ... ...");
   // new peak workspace
   DataObjects::PeaksWorkspace_sptr peakws =
-      boost::make_shared<DataObjects::PeaksWorkspace>();
+      std::make_shared<DataObjects::PeaksWorkspace>();
 
   // get number of runs
   size_t numruns = mdws->getNumExperimentInfo();

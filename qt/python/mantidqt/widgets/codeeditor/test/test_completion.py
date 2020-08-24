@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, unicode_literals)
-
 import re
 import unittest
 
@@ -14,7 +12,7 @@ import matplotlib.pyplot as plt  # noqa
 import numpy as np  # noqa
 
 from mantid.simpleapi import Rebin  # noqa  # needed so sys.modules can pick up Rebin
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 from mantidqt.widgets.codeeditor.completion import (CodeCompleter, generate_call_tips, get_function_spec,
                                                     get_builtin_argspec, get_module_import_alias)
 from testhelpers import assertRaisesNothing
@@ -28,8 +26,9 @@ class CodeCompletionTest(unittest.TestCase):
     def _run_check_call_tip_generated(self, script_text, call_tip_regex):
         completer = self._get_completer(script_text)
         update_completion_api_mock = completer.editor.updateCompletionAPI
-        call_tips = update_completion_api_mock.call_args_list[0][0][0]
-        self.assertEqual(1, update_completion_api_mock.call_count)
+        completer._add_simpleapi_to_completions_if_required()
+        call_tips = update_completion_api_mock.call_args_list[1][0][0]
+        self.assertEqual(2, update_completion_api_mock.call_count)
         self.assertGreater(len(call_tips), 1)
         self.assertTrue(re.search(call_tip_regex, ' '.join(call_tips)))
 
@@ -42,18 +41,18 @@ class CodeCompletionTest(unittest.TestCase):
 
     def test_Rebin_call_tips_generated_on_construction_when_api_import_in_script(self):
         self._run_check_call_tip_generated("from mantid.simpleapi import *\n# My code",
-                                           "Rebin\(InputWorkspace, .*\)")
+                                           r"Rebin\(InputWorkspace, .*\)")
 
     def test_numpy_call_tips_generated_if_numpy_imported_in_script(self):
         self._run_check_call_tip_generated("import numpy as np\n# My code",
-                                           "np\.asarray\(a, \[dtype\], .*\)")
+                                           r"np\.asarray\(a, \[dtype\], .*\)")
 
     def test_call_tips_generated_if_syntax_errors_in_script(self):
         self._run_check_call_tip_generated("from mantid.simpleapi import *\n print 'Hello', 'World'", "Rebin")
 
     def test_pyplot_call_tips_generated_if_imported_in_script(self):
         self._run_check_call_tip_generated("import matplotlib.pyplot as plt\n# My code",
-                                           "plt\.figure\(\[num\], .*\)")
+                                           r"plt\.figure\(\[num\], .*\)")
 
     def test_simple_api_call_tips_not_generated_on_construction_if_api_import_not_in_script(self):
         self._run_check_call_tip_not_generated("import numpy as np\n# My code", "Rebin")

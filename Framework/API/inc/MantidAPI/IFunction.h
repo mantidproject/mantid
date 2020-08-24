@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IFUNCTION_H_
-#define MANTID_API_IFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -20,11 +19,13 @@
 #include "MantidKernel/Unit.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
+#include <memory>
 #endif
 
 #include <string>
+#include <utility>
+
 #include <vector>
 
 #ifdef _WIN32
@@ -240,8 +241,6 @@ public:
     /// Create vector attribute
     explicit Attribute(const std::vector<double> &v)
         : m_data(v), m_quoteValue(false) {}
-    /// Copy assignment
-    Attribute &operator=(const Attribute &attr);
 
     /// Apply an attribute visitor
     template <typename T> T apply(AttributeVisitor<T> &v) {
@@ -286,6 +285,11 @@ public:
     void setBool(const bool &);
     /// Sets new value if attribute is a vector
     void setVector(const std::vector<double> &);
+    template <typename T>
+    // Set value
+    void setValue(const T &v) {
+      m_data = v;
+    }
     /// Set value from a string.
     void fromString(const std::string &str);
 
@@ -294,7 +298,7 @@ public:
     mutable boost::variant<std::string, int, double, bool, std::vector<double>>
         m_data;
     /// Flag indicating if the string value should be returned quoted
-    bool m_quoteValue;
+    bool m_quoteValue = false;
   };
 
   //---------------------------------------------------------//
@@ -313,15 +317,15 @@ public:
   /// Writes itself into a string
   std::string asString() const;
   /// Virtual copy constructor
-  virtual boost::shared_ptr<IFunction> clone() const;
+  virtual std::shared_ptr<IFunction> clone() const;
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {
+  virtual void setWorkspace(std::shared_ptr<const Workspace> ws) {
     UNUSED_ARG(ws);
   }
   /// Set matrix workspace
   virtual void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
+  setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
                      size_t wi, double startX, double endX);
   /// Iinialize the function
   virtual void initialize() { this->init(); }
@@ -330,7 +334,7 @@ public:
   virtual int64_t estimateNoProgressCalls() const { return 1; }
 
   /// Attach a progress reporter
-  void setProgressReporter(boost::shared_ptr<Kernel::ProgressBase> reporter);
+  void setProgressReporter(std::shared_ptr<Kernel::ProgressBase> reporter);
   /// Reports progress with an optional message
   void reportProgress(const std::string &msg = "") const;
   /// Returns true if a progress reporter is set & evalaution has been requested
@@ -500,14 +504,18 @@ public:
   /// Set an attribute value
   template <typename T>
   void setAttributeValue(const std::string &attName, const T &value) {
-    setAttribute(attName, Attribute(value));
+    // Since we can't know T and we would rather not create a universal setter
+    // copy and replace in-place
+    auto attr = getAttribute(attName);
+    attr.setValue(value);
+    setAttribute(attName, attr);
   }
   void setAttributeValue(const std::string &attName, const char *value);
   void setAttributeValue(const std::string &attName, const std::string &value);
   //@}
 
   /// Returns the pointer to i-th child function
-  virtual boost::shared_ptr<IFunction> getFunction(size_t i) const;
+  virtual std::shared_ptr<IFunction> getFunction(size_t i) const;
   /// Number of child functions
   virtual std::size_t nFunctions() const { return 0; }
   /// Set up the function for a fit.
@@ -517,14 +525,15 @@ public:
   /// Get number of domains required by this function
   virtual size_t getNumberDomains() const;
   /// Split this function (if needed) into a list of independent functions.
-  virtual std::vector<boost::shared_ptr<IFunction>>
+  virtual std::vector<std::shared_ptr<IFunction>>
   createEquivalentFunctions() const;
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Set the covariance matrix
-  void setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar);
+  void
+  setCovarianceMatrix(const std::shared_ptr<Kernel::Matrix<double>> &covar);
   /// Get the covariance matrix
-  boost::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const {
+  std::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const {
     return m_covar;
   }
   /// Set the chi^2
@@ -563,11 +572,11 @@ protected:
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws)
   double convertValue(double value, Kernel::Unit_sptr &outUnit,
-                      boost::shared_ptr<const MatrixWorkspace> ws,
+                      const std::shared_ptr<const MatrixWorkspace> &ws,
                       size_t wsIndex) const;
 
   void convertValue(std::vector<double> &values, Kernel::Unit_sptr &outUnit,
-                    boost::shared_ptr<const MatrixWorkspace> ws,
+                    const std::shared_ptr<const MatrixWorkspace> &ws,
                     size_t wsIndex) const;
 
   /// Override to declare function attributes
@@ -604,13 +613,13 @@ protected:
   std::unique_ptr<FunctionHandler> m_handler;
 
   /// Pointer to the progress handler
-  boost::shared_ptr<Kernel::ProgressBase> m_progReporter;
+  std::shared_ptr<Kernel::ProgressBase> m_progReporter;
 
 private:
   /// The declared attributes
   std::map<std::string, API::IFunction::Attribute> m_attrs;
   /// The covariance matrix of the fitting parameters
-  boost::shared_ptr<Kernel::Matrix<double>> m_covar;
+  std::shared_ptr<Kernel::Matrix<double>> m_covar;
   /// The chi-squared of the last fit
   double m_chiSquared;
   /// Holds parameter ties
@@ -622,9 +631,9 @@ private:
 };
 
 /// shared pointer to the function base class
-using IFunction_sptr = boost::shared_ptr<IFunction>;
+using IFunction_sptr = std::shared_ptr<IFunction>;
 /// shared pointer to the function base class (const version)
-using IFunction_const_sptr = boost::shared_ptr<const IFunction>;
+using IFunction_const_sptr = std::shared_ptr<const IFunction>;
 
 /**
  * Classes inherited from FunctionHandler will handle the function.
@@ -636,7 +645,7 @@ using IFunction_const_sptr = boost::shared_ptr<const IFunction>;
 class FunctionHandler {
 public:
   /// Constructor
-  FunctionHandler(IFunction_sptr fun) : m_fun(fun) {}
+  FunctionHandler(IFunction_sptr fun) : m_fun(std::move(fun)) {}
   /// Virtual destructor
   virtual ~FunctionHandler() = default;
   /// abstract init method. It is called after setting handler to the function
@@ -650,5 +659,3 @@ protected:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_IFUNCTION_H_*/

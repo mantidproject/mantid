@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import inspect
 import os
 import testhelpers
@@ -13,7 +12,7 @@ import unittest
 
 from mantid.kernel import (ConfigService, ConfigServiceImpl, config,
                            std_vector_str, FacilityInfo, InstrumentInfo)
-import six
+
 
 class ConfigServiceTest(unittest.TestCase):
 
@@ -65,7 +64,7 @@ class ConfigServiceTest(unittest.TestCase):
         self.assertRaises(RuntimeError, config.getInstrument, "MadeUpInstrument")
 
     def test_service_acts_like_dictionary(self):
-        test_prop = "algorithms.retained"
+        test_prop = "projectRecovery.secondsBetween"
         self.assertTrue(config.hasProperty(test_prop))
         dictcall = config[test_prop]
         fncall = config.getString(test_prop)
@@ -111,12 +110,13 @@ class ConfigServiceTest(unittest.TestCase):
     def test_appending_paths(self):
         new_path_list = self._setup_test_areas()
         try:
-            config.appendDataSearchDir(six.text_type(new_path_list[0]))
+            num_of_dirs = len(config.getDataSearchDirs())
+            config.appendDataSearchDir(str(new_path_list[0]))
             updated_paths = config.getDataSearchDirs()
         finally:
             self._clean_up_test_areas()
 
-        self.assertEqual(4, len(updated_paths))
+        self.assertEqual(num_of_dirs+1, len(updated_paths))
 
     def test_setting_log_channel_levels(self):
         testhelpers.assertRaisesNothing(self, config.setLogLevel, 4, True)
@@ -156,16 +156,14 @@ class ConfigServiceTest(unittest.TestCase):
                            'maskFiles.directory',
                            'pythonalgorithms.refresh.allowed',
                            'sliceviewer.nonorthogonal',
-                           'usersearch.directories',
 
                            ########## TODO should these be documented?
                            'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',
                            'logging.channels.consoleChannel.class', 'logging.channels.consoleChannel.formatter', 'logging.formatters.f1.class', 'logging.formatters.f1.pattern', 'logging.formatters.f1.times', 'logging.loggers.root.channel.channel1', 'logging.loggers.root.channel.class',
                            'MantidOptions.ReusePlotInstances',
                            'mantidqt.python_interfaces', 'mantidqt.python_interfaces_directory',
-                           'paraview.ignore', 'paraview.path', 'paraview.pythonpaths', 'pvplugins.directory',
-                           'python.plugins.directories',
-                       ]
+                           'paraview.ignore', 'paraview.path', 'paraview.pythonpaths', 'pvplugins.directory'
+                           ]
 
         # create the list of things
         undocumented = []

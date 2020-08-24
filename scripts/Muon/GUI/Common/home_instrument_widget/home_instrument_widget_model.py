@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from decimal import Decimal, InvalidOperation
 from mantid import api
 from mantid.api import ITableWorkspace
@@ -25,6 +23,8 @@ class InstrumentWidgetModel(object):
         self._data = context.data_context
         self._context = context
         self._context.gui_context['RebinType'] = 'None'
+        self._context.gui_context['DoublePulseTime'] = 0.33
+        self._context.gui_context['DoublePulseEnabled'] = False
 
     def clear_data(self):
         """When e.g. instrument changed"""
@@ -78,6 +78,12 @@ class InstrumentWidgetModel(object):
 
     def set_user_last_good_data(self, last_good_data):
         self._context.gui_context.update_and_send_signal(LastGoodData=last_good_data)
+
+    def set_double_pulse_time(self, double_pulse_time):
+        self._context.gui_context.update_and_send_non_calculation_signal(DoublePulseTime=double_pulse_time)
+
+    def set_double_pulse_enabled(self, enabled):
+        self._context.gui_context.update_and_send_non_calculation_signal(DoublePulseEnabled=enabled)
 
     def get_dead_time_table_from_data(self):
         dead_time_name = self._data.current_data["DataDeadTimeTable"]

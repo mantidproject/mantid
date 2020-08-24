@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONVERT_TO_MDALGORITHMS_H_
-#define MANTID_MDALGORITHMS_CONVERT_TO_MDALGORITHMS_H_
+#pragma once
 
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
@@ -61,8 +60,8 @@ private:
   /// progress reporter
   boost::scoped_ptr<API::Progress> m_Progress;
 
-  void setupFileBackend(std::string filebackPath,
-                        API::IMDEventWorkspace_sptr outputWS);
+  void setupFileBackend(const std::string &filebackPath,
+                        const API::IMDEventWorkspace_sptr &outputWS);
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 protected: // for testing, otherwise private:
@@ -70,18 +69,18 @@ protected: // for testing, otherwise private:
   Mantid::API::MatrixWorkspace_sptr m_InWS2D;
   // TODO: This will eventually go. ///The pointer to class which keeps output
   // MD workspace and is responsible for adding data to N-dimensional workspace;
-  boost::shared_ptr<MDAlgorithms::MDEventWSWrapper> m_OutWSWrapper;
+  std::shared_ptr<MDAlgorithms::MDEventWSWrapper> m_OutWSWrapper;
 
   // Workflow helpers:
   /**Check if target workspace new or existing one and we need to create new
    * workspace*/
-  bool doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws);
+  bool doWeNeedNewTargetWorkspace(const API::IMDEventWorkspace_sptr &spws);
   /**Create new MD workspace using existing parameters for algorithm */
   API::IMDEventWorkspace_sptr
   createNewMDWorkspace(const MDAlgorithms::MDWSDescription &targWSDescr,
                        const bool filebackend, const std::string &filename);
 
-  bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,
+  bool buildTargetWSDescription(const API::IMDEventWorkspace_sptr &spws,
                                 const std::string &QModReq,
                                 const std::string &dEModReq,
                                 const std::vector<std::string> &otherDimNames,
@@ -107,10 +106,8 @@ protected: // for testing, otherwise private:
                   std::vector<double> &minVal, std::vector<double> &maxVal);
 
   /// Sets up the top level splitting, i.e. of level 0, for the box controller
-  void setupTopLevelSplitting(Mantid::API::BoxController_sptr bc);
+  void setupTopLevelSplitting(const Mantid::API::BoxController_sptr &bc);
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

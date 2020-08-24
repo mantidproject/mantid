@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 
@@ -74,7 +74,10 @@ void FunctionQDepends::setAttribute(const std::string &attName,
         attValue.asInt())}; // ah!, the "joys" of C++ strong typing.
     if (!m_vQ.empty() && wi < m_vQ.size()) {
       Mantid::API::IFunction::setAttribute(attName, attValue);
-      Mantid::API::IFunction::setAttribute("Q", Attribute(m_vQ.at(wi)));
+      auto qAttr = getAttribute("Q");
+      qAttr.setDouble(m_vQ.at(wi));
+      // Can't call setAttributeValue, as it will recurse back into here
+      Mantid::API::IFunction::setAttribute("Q", qAttr);
     }
   }
   // Q can be manually changed by user only if list of Q values is empty
@@ -96,14 +99,14 @@ void FunctionQDepends::setAttribute(const std::string &attName,
  * @param endX unused
  */
 void FunctionQDepends::setMatrixWorkspace(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
+    std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
     double startX, double endX) {
   UNUSED_ARG(startX);
   UNUSED_ARG(endX);
   // reset attributes if new workspace is passed
   if (!m_vQ.empty()) {
-    Mantid::API::IFunction::setAttribute("WorkspaceIndex", Attr(EMPTY_INT()));
-    Mantid::API::IFunction::setAttribute("Q", Attr(EMPTY_DBL()));
+    Mantid::API::IFunction::setAttributeValue("WorkspaceIndex", EMPTY_INT());
+    Mantid::API::IFunction::setAttributeValue("Q", EMPTY_DBL());
   }
   // Obtain Q values from the passed workspace, if possible. m_vQ will be
   // cleared if unsuccessful.
@@ -111,7 +114,7 @@ void FunctionQDepends::setMatrixWorkspace(
     m_vQ = this->extractQValues(*workspace);
   }
   if (!m_vQ.empty()) {
-    this->setAttribute("WorkspaceIndex", Attr(static_cast<int>(wi)));
+    this->setAttributeValue("WorkspaceIndex", static_cast<int>(wi));
   }
 }
 
@@ -132,7 +135,7 @@ std::vector<double> FunctionQDepends::extractQValues(
   auto axis_ptr =
       dynamic_cast<Mantid::API::NumericAxis *>(workspace.getAxis(1));
   if (axis_ptr) {
-    const boost::shared_ptr<Kernel::Unit> &unit_ptr = axis_ptr->unit();
+    const std::shared_ptr<Kernel::Unit> &unit_ptr = axis_ptr->unit();
     if (unit_ptr->unitID() == "MomentumTransfer") {
       qs = axis_ptr->getValues();
     }

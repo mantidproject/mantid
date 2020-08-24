@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,10 +31,6 @@ public:
   std::string osVersion() const;
   /// print contents of object
   void printSelf(std::ostream &, const int indent = 0) const;
-
-private:
-  /// Private, unimplemented copy assignment operator
-  EnvironmentHistory &operator=(const EnvironmentHistory &);
 };
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,

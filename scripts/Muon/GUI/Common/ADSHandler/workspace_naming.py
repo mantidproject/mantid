@@ -1,16 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import re
 
 group_str = "; Group; "
 pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad'
 TF_ASYMMETRY_PREFIX = "TFAsymmetry"
+REBIN_STR = 'Rebin'
+FFT_STR = 'FFT'
+MAXENT_STR = 'MaxEnt'
 
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
@@ -36,7 +38,7 @@ def get_group_data_workspace_name(context, group_name, run, rebin):
         name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
 
     if rebin:
-        name += ' Rebin;'
+        name += "".join([' ', REBIN_STR, ';'])
 
     name += context.workspace_suffix
 
@@ -51,7 +53,7 @@ def get_group_asymmetry_name(context, group_name, run, rebin):
         name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry;"
 
     if rebin:
-        name += ' Rebin;'
+        name += "".join([' ', REBIN_STR, ';'])
 
     name += context.workspace_suffix
     return name
@@ -65,7 +67,7 @@ def get_pair_asymmetry_name(context, pair_name, run, rebin):
         name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
 
     if rebin:
-        name += ' Rebin;'
+        name += "".join([' ', REBIN_STR, ';'])
 
     name += context.workspace_suffix
     return name
@@ -97,7 +99,7 @@ def get_pair_data_workspace_name(context, pair_name, run, rebin):
         name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
 
     if rebin:
-        name += ' Rebin;'
+        name += "".join([' ', REBIN_STR, ';'])
 
     name += context.workspace_suffix
 
@@ -153,7 +155,7 @@ def get_phase_table_workspace_group_name(insertion_workspace_name, instrument, w
 
 def get_fft_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' FFT' + workspace_suffix + '/'
+    group = get_base_run_name(run, instrument) + "".join([' ', FFT_STR]) + workspace_suffix + '/'
 
     return group
 
@@ -174,17 +176,29 @@ def get_fft_workspace_name(input_workspace, imaginary_input_workspace):
 
 
 def get_maxent_workspace_name(input_workspace):
-    return input_workspace + '; MaxEnt'
+    return input_workspace + "".join(['; ', MAXENT_STR])
+
+
+def get_fft_component_from_workspace_name(input_workspace):
+    if 'FD_Re' in input_workspace:
+        fft_component = "".join([FFT_STR, ';', 'Re'])
+    elif 'FD_Im' in input_workspace:
+        fft_component = "".join([FFT_STR, ';', 'Im'])
+    else:
+        fft_component = "".join([FFT_STR, ';', 'Mod'])
+
+    return fft_component
 
 
 def get_run_number_from_workspace_name(workspace_name, instrument):
     run = re.findall(r'%s(\d+)' % instrument, workspace_name)
-    return run[0]
+    if run:
+        return run[0]
 
 
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' Maxent' + workspace_suffix + '/'
+    group = get_base_run_name(run, instrument) + "".join([' ', MAXENT_STR]) + workspace_suffix + '/'
 
     return group
 
@@ -200,6 +214,16 @@ def create_fitted_workspace_name(input_workspace_name, function_name):
     return name, directory
 
 
+def get_fit_function_name_from_workspace(workspace_name):
+    workspace_labels = workspace_name.split(';')
+    try:
+        fitted_index = workspace_labels.index(" Fitted")
+        function_name = workspace_labels[fitted_index + 1]
+        return function_name.strip()
+    except ValueError:
+        return None
+
+
 def create_multi_domain_fitted_workspace_name(input_workspace, function_name):
     directory = input_workspace + '; Fitted;' + function_name + '/'
     name = input_workspace + '+ ...; Fitted;' + function_name
@@ -212,3 +236,17 @@ def create_parameter_table_name(input_workspace_name, function_name):
     name = input_workspace_name + '; Fitted Parameters;' + function_name
 
     return name, directory
+
+
+def remove_rebin_from_name(name):
+    if REBIN_STR not in name:
+        return name
+    index =  [ch.start() for ch in re.finditer(r";",name)]
+    return name[:index[-2]]+name[index[-1]:]
+
+
+def add_rebin_to_name(name):
+    if REBIN_STR in name:
+        return name
+    index =  [ch.start() for ch in re.finditer(r";",name)]
+    return name[:index[-1]]+"; "+REBIN_STR+name[index[-1]:]

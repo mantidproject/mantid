@@ -2,10 +2,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 import os
 import sys
 
@@ -69,11 +68,7 @@ Changes
    *
 
 - :doc:`Framework <framework>`
-- :doc:`General UI & Usability <ui>`
-
-  - :doc:`MantidPlot <mantidplot>`
-
-  - :doc:`MantidWorkbench <mantidworkbench>`
+- :doc:`Mantid Workbench <mantidworkbench>`
 - :doc:`Diffraction <diffraction>`
 - :doc:`Muon Analysis <muon>`
 - Low Q
@@ -122,10 +117,7 @@ Data Objects
 
 Python
 ------
-''',
-    'ui.rst':'''======================
-UI & Usability Changes
-======================
+
 
 .. contents:: Table of Contents
    :local:
@@ -137,10 +129,6 @@ UI & Usability Changes
 Installation
 ------------
 
-MantidPlot
-----------
-
-See :doc:`mantidplot`.
 
 MantidWorkbench
 ---------------
@@ -149,13 +137,6 @@ See :doc:`mantidworkbench`.
 
 SliceViewer and Vates Simple Interface
 --------------------------------------
-''',
-    'mantidplot.rst':'''==================
-MantidPlot Changes
-==================
-
-.. contents:: Table of Contents
-   :local:
 
 Improvements
 ############
@@ -163,9 +144,9 @@ Improvements
 Bugfixes
 ########
 ''',
-    'mantidworkbench.rst':'''=======================
-MantidWorkbench Changes
-=======================
+    'mantidworkbench.rst':'''==================
+Mantid Workbench Changes
+========================
 
 .. contents:: Table of Contents
    :local:

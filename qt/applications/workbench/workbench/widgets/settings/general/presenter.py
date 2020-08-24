@@ -1,32 +1,25 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
 #
 #
-from __future__ import absolute_import, unicode_literals
-
 from mantid.kernel import ConfigService
 from workbench.config import CONF
 from workbench.widgets.settings.general.view import GeneralSettingsView
 
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QFontDatabase
+from enum import Enum
 
 
-class GeneralSettings(object):
-    """
-    Presenter of the General settings section. It handles all changes to options
-    within the section, and updates the ConfigService and workbench CONF accordingly.
-
-    If new options are added to the General settings, their events when changed should
-    be handled here.
-    """
-
+class GeneralProperties(Enum):
     CRYSTALLOGRAPY_CONV = "Q.convention"
     FONT = "MainWindow/font"
+    FACILITY = "default.facility"
     INSTRUMENT = "default.instrument"
     OPENGL = "MantidOptions.InstrumentView.UseOpenGL"
     SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
@@ -39,6 +32,16 @@ class GeneralSettings(object):
     USE_NOTIFICATIONS = 'Notifications.Enabled'
     USER_LAYOUT = "MainWindow/user_layouts"
 
+
+class GeneralSettings(object):
+    """
+    Presenter of the General settings section. It handles all changes to options
+    within the section, and updates the ConfigService and workbench CONF accordingly.
+
+    If new options are added to the General settings, their events when changed should
+    be handled here.
+    """
+
     def __init__(self, parent, view=None):
         self.view = view if view else GeneralSettingsView(parent, self)
         self.parent = parent
@@ -47,9 +50,7 @@ class GeneralSettings(object):
         self.setup_facilities_group()
         self.setup_checkbox_signals()
         self.setup_general_group()
-
         self.setup_layout_options()
-
         self.setup_confirmations()
 
     def setup_facilities_group(self):
@@ -74,20 +75,34 @@ class GeneralSettings(object):
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
 
+    def update_facilities_group(self):
+        default_facility = ConfigService.getFacility().name()
+        if not self.view.facility.findText(default_facility) == -1:
+            self.view.instrument.blockSignals(True)
+            self.view.facility.setCurrentIndex(self.view.facility.findText(default_facility))
+            self.action_facility_changed(default_facility)
+            self.view.instrument.blockSignals(False)
+
+        instrument = ConfigService.getString(GeneralProperties.INSTRUMENT.value)
+        if not self.view.instrument.findText(instrument) == -1:
+            self.view.instrument.setCurrentIndex(self.view.instrument.findText(instrument))
+
     def setup_general_group(self):
         self.view.main_font.clicked.connect(self.action_main_font_button_clicked)
 
     def action_main_font_button_clicked(self):
-        font_dialog = self.view.create_font_dialog(self.parent)
+        font = None
+        if CONF.has(GeneralProperties.FONT.value):
+            font_string = CONF.get(GeneralProperties.FONT.value).split(',')
+            if len(font_string) > 2:
+                font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
+        font_dialog = self.view.create_font_dialog(self.parent, font)
         font_dialog.fontSelected.connect(self.action_font_selected)
 
     def action_font_selected(self, font):
-        CONF.set(self.FONT, font.toString())
+        CONF.set(GeneralProperties.FONT.value, font.toString())
 
     def setup_checkbox_signals(self):
-        self.view.show_invisible_workspaces.setChecked(
-            "true" == ConfigService.getString(self.SHOW_INVISIBLE_WORKSPACES).lower())
-
         self.view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
         self.view.project_recovery_enabled.stateChanged.connect(self.action_project_recovery_enabled)
         self.view.time_between_recovery.valueChanged.connect(self.action_time_between_recovery)
@@ -115,30 +130,31 @@ class GeneralSettings(object):
         self.view.use_notifications.stateChanged.connect(self.action_use_notifications_modified)
 
     def action_prompt_save_on_close(self, state):
-        CONF.set(self.PROMPT_SAVE_ON_CLOSE, bool(state))
+        CONF.set(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, bool(state))
 
     def action_prompt_save_editor_modified(self, state):
-        CONF.set(self.PROMPT_SAVE_EDITOR_MODIFIED, bool(state))
+        CONF.set(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, bool(state))
 
     def action_prompt_deleting_workspace(self, state):
-        CONF.set(self.PROMPT_ON_DELETING_WORKSPACE, bool(state))
+        CONF.set(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, bool(state))
 
     def action_use_notifications_modified(self, state):
-        ConfigService.setString(self.USE_NOTIFICATIONS, "On" if bool(state) else "Off")
+        ConfigService.setString(GeneralProperties.USE_NOTIFICATIONS.value, "On" if bool(state) else "Off")
 
     def load_current_setting_values(self):
-        self.view.prompt_save_on_close.setChecked(bool(CONF.get(self.PROMPT_SAVE_ON_CLOSE)))
-        self.view.prompt_save_editor_modified.setChecked(bool(CONF.get(self.PROMPT_SAVE_EDITOR_MODIFIED)))
-        self.view.prompt_deleting_workspaces.setChecked(bool(CONF.get(self.PROMPT_ON_DELETING_WORKSPACE)))
+        self.view.prompt_save_on_close.setChecked(bool(CONF.get(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value)))
+        self.view.prompt_save_editor_modified.setChecked(bool(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value)))
+        self.view.prompt_deleting_workspaces.setChecked(bool(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value)))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised
-        pr_enabled = ("true" == ConfigService.getString(self.PR_RECOVERY_ENABLED).lower())
-        pr_time_between_recovery = int(ConfigService.getString(self.PR_TIME_BETWEEN_RECOVERY))
-        pr_number_checkpoints = int(ConfigService.getString(self.PR_NUMBER_OF_CHECKPOINTS))
-        use_notifications_setting = ("on" == ConfigService.getString(self.USE_NOTIFICATIONS).lower())
-        crystallography_convention = ("Crystallography" == ConfigService.getString(self.CRYSTALLOGRAPY_CONV))
-        use_open_gl = ("on" == ConfigService.getString(self.OPENGL).lower())
+        pr_enabled = ("true" == ConfigService.getString(GeneralProperties.PR_RECOVERY_ENABLED.value).lower())
+        pr_time_between_recovery = int(ConfigService.getString(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value))
+        pr_number_checkpoints = int(ConfigService.getString(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value))
+        use_notifications_setting = ("on" == ConfigService.getString(GeneralProperties.USE_NOTIFICATIONS.value).lower())
+        crystallography_convention = ("Crystallography" == ConfigService.getString(GeneralProperties.CRYSTALLOGRAPY_CONV.value))
+        use_open_gl = ("on" == ConfigService.getString(GeneralProperties.OPENGL.value).lower())
+        invisible_workspaces = ("true" == ConfigService.getString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower())
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -146,29 +162,30 @@ class GeneralSettings(object):
         self.view.use_notifications.setChecked(use_notifications_setting)
         self.view.crystallography_convention.setChecked(crystallography_convention)
         self.view.use_open_gl.setChecked(use_open_gl)
+        self.view.show_invisible_workspaces.setChecked(invisible_workspaces)
 
     def action_project_recovery_enabled(self, state):
-        ConfigService.setString(self.PR_RECOVERY_ENABLED, str(bool(state)))
+        ConfigService.setString(GeneralProperties.PR_RECOVERY_ENABLED.value, str(bool(state)))
 
     def action_time_between_recovery(self, value):
-        ConfigService.setString(self.PR_TIME_BETWEEN_RECOVERY, str(value))
+        ConfigService.setString(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value, str(value))
 
     def action_total_number_checkpoints(self, value):
-        ConfigService.setString(self.PR_NUMBER_OF_CHECKPOINTS, str(value))
+        ConfigService.setString(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value, str(value))
 
     def action_crystallography_convention(self, state):
-        ConfigService.setString(self.CRYSTALLOGRAPY_CONV, "Crystallography" if state == Qt.Checked else "Inelastic")
+        ConfigService.setString(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography" if state == Qt.Checked else "Inelastic")
 
     def action_instrument_changed(self, new_instrument):
-        current_value = ConfigService.getString(self.INSTRUMENT)
+        current_value = ConfigService.getString(GeneralProperties.INSTRUMENT.value)
         if new_instrument != current_value:
-            ConfigService.setString(self.INSTRUMENT, new_instrument)
+            ConfigService.setString(GeneralProperties.INSTRUMENT.value, new_instrument)
 
     def action_show_invisible_workspaces(self, state):
-        ConfigService.setString(self.SHOW_INVISIBLE_WORKSPACES, str(bool(state)))
+        ConfigService.setString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, str(bool(state)))
 
     def action_use_open_gl(self, state):
-        ConfigService.setString(self.OPENGL, "On" if bool(state) else "Off")
+        ConfigService.setString(GeneralProperties.OPENGL.value, "On" if bool(state) else "Off")
 
     def setup_layout_options(self):
         self.fill_layout_display()
@@ -185,7 +202,7 @@ class GeneralSettings(object):
 
     def get_layout_dict(self):
         try:
-            layout_list = CONF.get(self.USER_LAYOUT)
+            layout_list = CONF.get(GeneralProperties.USER_LAYOUT.value)
         except KeyError:
             layout_list = {}
         return layout_list
@@ -195,7 +212,7 @@ class GeneralSettings(object):
         if filename != "":
             layout_dict = self.get_layout_dict()
             layout_dict[filename] = self.parent.saveState()
-            CONF.set(self.USER_LAYOUT, layout_dict)
+            CONF.set(GeneralProperties.USER_LAYOUT.value, layout_dict)
             self.view.new_layout_name.clear()
             self.fill_layout_display()
             self.parent.populate_layout_menu()
@@ -213,7 +230,7 @@ class GeneralSettings(object):
             layout = item.text()
             layout_dict = self.get_layout_dict()
             layout_dict.pop(layout, None)
-            CONF.set(self.USER_LAYOUT, layout_dict)
+            CONF.set(GeneralProperties.USER_LAYOUT.value, layout_dict)
             self.fill_layout_display()
             self.parent.populate_layout_menu()
 
@@ -221,3 +238,8 @@ class GeneralSettings(object):
         # scroll the settings to the layout box. High yMargin ensures the box is always at the top of the window.
         self.view.scrollArea.ensureWidgetVisible(self.view.new_layout_name, yMargin=1000)
         self.view.new_layout_name.setFocus()
+
+    def update_properties(self):
+        self.load_current_setting_values()
+        self.update_facilities_group()
+        self.fill_layout_display()

@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLTOF2_H_
-#define MANTID_DATAHANDLING_LOADILLTOF2_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -59,7 +59,8 @@ private:
 
   void loadTimeDetails(NeXus::NXEntry &entry);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
-                                const std::vector<std::vector<int>> &);
+                                const std::vector<std::vector<int>> &,
+                                bool convertToTOF);
   void loadSpectra(size_t &spec, const size_t numberOfTubes,
                    const std::vector<Mantid::detid_t> &detectorIDs,
                    const NeXus::NXInt &data, Mantid::API::Progress &progress);
@@ -91,5 +92,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADILLTOF2_H_*/

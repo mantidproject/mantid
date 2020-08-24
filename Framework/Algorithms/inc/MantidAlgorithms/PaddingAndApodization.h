@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -33,7 +34,7 @@ Required Properties:
 @author Anthony Lim
 @date 10/08/2017
 */
-class DLLExport PaddingAndApodization : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PaddingAndApodization : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PaddingAndApodization"; }
@@ -52,7 +53,7 @@ private:
   void init() override;
   void exec() override;
   using fptr = double (*)(const double, const double);
-  fptr getApodizationFunction(const std::string method);
+  fptr getApodizationFunction(const std::string &method);
   HistogramData::Histogram
   applyApodizationFunction(const HistogramData::Histogram &histogram,
                            const double decayConstant, fptr function);

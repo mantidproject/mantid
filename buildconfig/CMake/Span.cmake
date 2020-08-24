@@ -1,12 +1,20 @@
-include(ExternalProject)
+include(FetchContent)
+message(STATUS "Using external tcbrindle/span")
 
-message(STATUS "Using tcbrindle/span in ExternalProject")
+find_package(Git)
 
-# Download and unpack Eigen at configure time
-configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/Span.in ${CMAKE_BINARY_DIR}/extern-span/CMakeLists.txt)
+set ( _apply_flags --ignore-space-change --whitespace=fix )
 
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-span )
-execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-span )
+FetchContent_Declare(
+  span
+  GIT_REPOSITORY https://github.com/tcbrindle/span.git
+  GIT_TAG        08cb4bf0e06c0e36f7e2b64e488ede711a8bb5ad
+  PATCH_COMMAND     "${GIT_EXECUTABLE}" reset --hard ${_tag}
+    COMMAND "${GIT_EXECUTABLE}" apply ${_apply_flags} "${CMAKE_SOURCE_DIR}/buildconfig/CMake/span_disable_testing.patch"
+)
 
-set(SPAN_INCLUDE_DIR "${CMAKE_BINARY_DIR}/extern-span/span-prefix/src/span/include" CACHE PATH "")
-
+FetchContent_GetProperties(span)
+if(NOT span_POPULATED)
+  FetchContent_Populate(span)
+  add_subdirectory(${span_SOURCE_DIR} ${span_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()

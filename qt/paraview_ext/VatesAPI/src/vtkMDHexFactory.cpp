@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 
@@ -215,7 +215,7 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
       // Slice from >3D down to 3D
       this->slice = true;
       this->sliceMask = std::make_unique<bool[]>(nd);
-      this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
+      this->sliceImplicitFunction = std::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions
       for (size_t d = 0; d < nd; d++)

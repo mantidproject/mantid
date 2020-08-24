@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -25,14 +24,15 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
-// clang-format off
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-// clang-format on
+#include <nexus/NeXusFile.hpp>
 
-#include <cxxtest/TestSuite.h>
-#include <boost/regex.hpp>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
+#include <boost/regex.hpp>
+#include <cxxtest/TestSuite.h>
 
 #include <set>
 #include <unordered_map>
@@ -54,7 +54,7 @@ public:
 
   void test_GetInstrument_default() {
     ExperimentInfo ws;
-    boost::shared_ptr<const Instrument> i = ws.getInstrument();
+    std::shared_ptr<const Instrument> i = ws.getInstrument();
     TSM_ASSERT("ExperimentInfo gets a default, empty Instrument.", i);
     TS_ASSERT(i->isEmptyInstrument());
     TS_ASSERT_EQUALS(ws.getInstrument()->type(), "Instrument");
@@ -65,17 +65,17 @@ public:
 
   void test_GetSetInstrument_default() {
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
     // Instruments don't point to the same base place since you get back a
     // parameterized one
-    boost::shared_ptr<const Instrument> inst2 = ws.getInstrument();
+    std::shared_ptr<const Instrument> inst2 = ws.getInstrument();
     TS_ASSERT_EQUALS(inst2->getName(), "MyTestInst");
 
     // But the base instrument does!
-    boost::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
+    std::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
     TS_ASSERT_EQUALS(inst3.get(), inst1.get());
     TS_ASSERT_EQUALS(inst3->getName(), "MyTestInst");
   }
@@ -211,7 +211,7 @@ public:
     ws.mutableSample().setName("test");
     ws.mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -226,7 +226,7 @@ public:
     ws.mutableSample().setName("test");
     ws.mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -241,7 +241,7 @@ public:
     ws.mutableSample().setName("test");
     ws.mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -352,148 +352,12 @@ public:
     TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
   }
 
-  struct fromToEntry {
-    std::string path;
-    DateAndTime from;
-    DateAndTime to;
-  };
-
-  // Test that all the IDFs contain valid-to and valid-from dates and that
-  // for a single instrument none of the valid-from dates are equal
-  void testAllDatesInIDFs() {
-    ExperimentInfo helper;
-
-    // Collect all IDF filenames and put them in a multimap where the instrument
-    // identifier is the key
-    std::unordered_multimap<std::string, fromToEntry> idfFiles;
-    std::unordered_set<std::string> idfIdentifiers;
-
-    boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
-    Poco::DirectoryIterator end_iter;
-    for (Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString(
-             "instrumentDefinition.directory"));
-         dir_itr != end_iter; ++dir_itr) {
-      if (!Poco::File(dir_itr->path()).isFile())
-        continue;
-
-      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-
-      if (boost::regex_match(l_filenamePart, regex)) {
-        std::string validFrom, validTo;
-        helper.getValidFromTo(dir_itr->path(), validFrom, validTo);
-
-        size_t found;
-        found = l_filenamePart.find("_Definition");
-        fromToEntry ft;
-        ft.path = dir_itr->path();
-        ft.from.setFromISO8601(validFrom);
-        // Valid TO is optional
-        if (validTo.length() > 0)
-          ft.to.setFromISO8601(validTo);
-        else
-          ft.to.setFromISO8601("2100-01-01T00:00:00");
-
-        idfFiles.emplace(l_filenamePart.substr(0, found), ft);
-        idfIdentifiers.insert(l_filenamePart.substr(0, found));
-      }
-    }
-
-    // iterator to browse through the multimap: paramInfoFromIDF
-    std::unordered_multimap<std::string, fromToEntry>::const_iterator it1, it2;
-    std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
-              std::unordered_multimap<std::string, fromToEntry>::iterator>
-        ret;
-
-    for (const auto &idfIdentifier : idfIdentifiers) {
-      ret = idfFiles.equal_range(idfIdentifier);
-      for (it1 = ret.first; it1 != ret.second; ++it1) {
-        for (it2 = ret.first; it2 != ret.second; ++it2) {
-          if (it1 != it2) {
-            // some more intelligent stuff here later
-            std::stringstream messageBuffer;
-            messageBuffer
-                << "Two IDFs for one instrument have equal valid-from dates"
-                << "IDFs are: " << it1->first << " and " << it2->first
-                << " Date One: " << it1->second.from.toFormattedString()
-                << " Date Two: " << it2->second.from.toFormattedString();
-            TSM_ASSERT_DIFFERS(messageBuffer.str(), it2->second.from,
-                               it1->second.from);
-          }
-        }
-      }
-    }
-  }
-
-  //
-  void testHelperFunctions() {
-    ConfigService::Instance().updateFacilities();
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
-    TS_ASSERT(!boevs.empty());
-  }
-
-  //
-  void testHelper_TOPAZ_No_To_Date() {
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
-    TS_ASSERT(!boevs.empty());
-  }
-
-  void testHelper_ValidDateOverlap() {
-    const std::string instDir =
-        ConfigService::Instance().getInstrumentDirectory();
-    const std::string testDir = instDir + "unit_testing";
-    ConfigService::Instance().setString("instrumentDefinition.directory",
-                                        testDir);
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
-    boevs = helper.getInstrumentFilename("ARGUS", "1909-03-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST2_ValidDateOverlap"), std::string::npos);
-    boevs = helper.getInstrumentFilename("ARGUS", "1909-05-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
-    ConfigService::Instance().setString("instrumentDefinition.directory",
-                                        instDir);
-
-    std::vector<std::string> formats = {"xml"};
-    std::vector<std::string> dirs;
-    dirs.emplace_back(testDir);
-    std::vector<std::string> fnames = helper.getResourceFilenames(
-        "ARGUS", formats, dirs, "1909-01-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_EQUALS(fnames.size(), 1);
-    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
-                                         "1909-03-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST2_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_DIFFERS(fnames[1].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
-                                         "1909-05-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_EQUALS(fnames.size(), 1);
-  }
-
-  void test_nexus_geometry_getInstrumentFilename() {
-    const std::string instrumentName = "LOKI";
-    ExperimentInfo info;
-    const auto path = info.getInstrumentFilename(instrumentName, "");
-    TS_ASSERT(!path.empty());
-    TS_ASSERT(
-        boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
-  }
-
   void test_nexus() {
     std::string filename = "ExperimentInfoTest1.nxs";
     NexusTestHelper th(true);
     th.createFile(filename);
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("GEM");
     inst1->setFilename("GEM_Definition.xml");
     inst1->setXmlText("");
@@ -519,7 +383,7 @@ public:
     NexusTestHelper th(true);
     th.createFile(filename);
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("");
     inst1->setFilename("");
     inst1->setXmlText("");
@@ -721,7 +585,7 @@ public:
 
     // Test one of the bank rows
     auto bankRowID =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
+        std::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
             ->getChild(0)
             ->getComponentID();
     auto allRowDetectorIndexes =
@@ -880,14 +744,14 @@ private:
   }
 
   Instrument_sptr
-  addInstrumentWithIndirectEmodeParameter(ExperimentInfo_sptr exptInfo) {
+  addInstrumentWithIndirectEmodeParameter(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst = addInstrument(exptInfo);
     exptInfo->instrumentParameters().addString(inst.get(), "deltaE-mode",
                                                "indirect");
     return inst;
   }
 
-  Instrument_sptr addInstrument(ExperimentInfo_sptr exptInfo) {
+  Instrument_sptr addInstrument(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(1);
     exptInfo->setInstrument(inst);
@@ -897,8 +761,8 @@ private:
 
 class ExperimentInfoTestPerformance : public CxxTest::TestSuite {
 private:
-  boost::shared_ptr<Mantid::Geometry::Instrument> m_bareInstrument;
-  boost::shared_ptr<const Mantid::Geometry::Instrument> m_provisionedInstrument;
+  std::shared_ptr<Mantid::Geometry::Instrument> m_bareInstrument;
+  std::shared_ptr<const Mantid::Geometry::Instrument> m_provisionedInstrument;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

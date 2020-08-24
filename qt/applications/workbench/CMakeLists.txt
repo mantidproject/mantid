@@ -1,21 +1,71 @@
-# Create egg link to binary output directory
-if(WIN32)
-  # handled separately below
-  set(_exclude_on_install "resources\.pyc?")
+# First generate rules for the the workbench application itself
+# egg link name has to match that in setup.py name or Visual Studio generates
+# a warning that the output filename of the target does not match
+# the output that is produced by setuptools.
+if(APPLE OR WIN32)
+  if(WIN32)
+    # handled separately below
+    set(_exclude_on_install "resources\.pyc?")
+  endif()
+  add_python_package(workbench
+    EXECUTABLE
+    EGGLINKNAME MantidWorkbench
+    EXCLUDE_FROM_INSTALL ${_exclude_on_install}
+    INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
+  )
+  # Allow VS to start workbench for debugging
+  set_target_properties(workbench PROPERTIES
+                        VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
+                        VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
+                        VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
 else()
-  set(_exclude_on_install "")
+  add_python_package(workbench
+    EXECUTABLE
+    EGGLINKNAME MantidWorkbench
+    INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
+    INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
+  )
 endif()
-add_python_package(workbench
-  EXECUTABLE
-  EXCLUDE_FROM_INSTALL ${_exclude_on_install}
-  INSTALL_LIB_DIRS "${WORKBENCH_LIB_DIR}"
-  INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
-)
 
+# Wrapper launchers: See mantidworkbench.cpp:main for their function
+if(APPLE OR WIN32)
+  # development version
+  add_executable(MantidWorkbench mantidworkbench.cpp)
+  target_compile_definitions(MantidWorkbench 
+    PRIVATE
+    -DPYTHON_EXECUTABLE_PATH="${Python_EXECUTABLE}")
+  target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
+  set_target_properties(MantidWorkbench PROPERTIES
+                        VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
+
+  # packaged version - creates a GUI application on Windows without a console
+  add_executable(MantidWorkbenchInstalled WIN32 mantidworkbench.cpp)
+  if(WIN32)
+    set(_py_exe "pythonw.exe")
+    set(_qt_plugins "..\\\\plugins\\\\qt5")
+  else()
+    set(_py_exe "python")
+    set(_qt_plugins "../PlugIns")
+  endif()
+  set_target_properties(MantidWorkbenchInstalled
+                        PROPERTIES
+                        OUTPUT_NAME MantidWorkbench
+                        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  target_compile_definitions(MantidWorkbenchInstalled
+    PRIVATE 
+    -DPYTHON_EXECUTABLE_PATH="${_py_exe}"
+    -DQT_PLUGIN_PATH="${_qt_plugins}")
+  target_link_libraries(MantidWorkbenchInstalled PRIVATE Boost::filesystem)
+  if(WIN32)
+    target_link_libraries(MantidWorkbenchInstalled PRIVATE Qt5::WinMain)
+  endif()
+  install(TARGETS MantidWorkbenchInstalled
+          DESTINATION ${WORKBENCH_BIN_DIR})
+endif()
+
+# process resources files 
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
-
 if (WIN32)
-
   function (CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
     # Set path and file content variables
     set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
@@ -63,14 +113,39 @@ endif()
 # Dependency chain
 add_dependencies(workbench workbench_resources mantidqt)
 
-# ctest targets
+# macOS package fixes
+if(APPLE)
+  # create Info.plist
+  set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
+  set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
+  set ( MAC_BUNDLE_ICON MantidWorkbench.icns )
+  set ( MAC_BUNDLE_NAME MantidWorkbench )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
+                   @ONLY )
+
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
+install (CODE "
+    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
+                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${Python_EXECUTABLE} ${ParaView_DIR}
+                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
+    if(NOT install_name_tool_result EQUAL 0)
+      message(\"\${_out}\")
+      message(FATAL_ERROR \"Package script failed!!!\n\")
+    endif()
+")
+endif()
+
+# Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
     workbench/test/test_import.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfitting.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgenerator.py
     workbench/plotting/test/test_figureerrorsmanager.py
     workbench/plotting/test/test_figureinteraction.py
@@ -78,6 +153,7 @@ set(TEST_FILES
     workbench/plotting/test/test_figurewindow.py
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plotting/test/test_propertiesdialog.py
+    workbench/plotting/test/test_plothelppages.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py
@@ -86,9 +162,13 @@ set(TEST_FILES
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py
+    workbench/widgets/settings/test/test_settings_model.py
     workbench/widgets/settings/test/test_settings_presenter.py
     workbench/widgets/settings/test/test_settings_view.py
     workbench/widgets/settings/general/test/test_general_settings.py
+    workbench/widgets/settings/plots/test/test_plot_settings.py
+    workbench/widgets/settings/categories/test/test_categories_settings.py
+    workbench/widgets/settings/fitting/test/test_fitting_settings.py
     workbench/projectrecovery/test/test_projectrecovery.py
     workbench/projectrecovery/test/test_projectrecoveryloader.py
     workbench/projectrecovery/test/test_projectrecoverysaver.py
@@ -102,26 +182,3 @@ set(PYUNITTEST_QT_API pyqt5)
 pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}
   workbench ${TEST_FILES}
 )
-
-# Install MantidWorkbench for OSX
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
-  set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
-  set ( MAC_BUNDLE_ICON MantidWorkbench.icns )
-  set ( MAC_BUNDLE_NAME MantidWorkbench )
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
-                   @ONLY )
-
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
-install (CODE "
-    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${PYTHON_EXECUTABLE} ${ParaView_DIR}
-                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
-    if(NOT install_name_tool_result EQUAL 0)
-      message(\"\${_out}\")
-      message(FATAL_ERROR \"Package script failed!!!\n\")
-    endif()
-")
-
-endif()

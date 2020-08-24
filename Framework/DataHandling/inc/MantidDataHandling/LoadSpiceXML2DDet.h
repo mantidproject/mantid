@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADSPICEXML2DDET_H_
-#define MANTID_DATAHANDLING_LOADSPICEXML2DDET_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -97,22 +96,25 @@ private:
 
   /// Set up sample logs from table workspace loaded where SPICE data file is
   /// loaded
-  void setupSampleLogFromSpiceTable(API::MatrixWorkspace_sptr matrixws,
-                                    API::ITableWorkspace_sptr spicetablews,
-                                    int ptnumber);
+  void
+  setupSampleLogFromSpiceTable(const API::MatrixWorkspace_sptr &matrixws,
+                               const API::ITableWorkspace_sptr &spicetablews,
+                               int ptnumber);
 
   /// Set up sample logs in the output workspace
-  bool setupSampleLogs(API::MatrixWorkspace_sptr outws);
+  bool setupSampleLogs(const API::MatrixWorkspace_sptr &outws);
 
   /// Load instrument
   void loadInstrument(API::MatrixWorkspace_sptr matrixws,
                       const std::string &idffilename);
 
   /// Get wavelength from workspace
-  bool getHB3AWavelength(API::MatrixWorkspace_sptr dataws, double &wavelength);
+  bool getHB3AWavelength(const API::MatrixWorkspace_sptr &dataws,
+                         double &wavelength);
 
   /// Set output workspace's X-axs as lab-frame Q space
-  void setXtoLabQ(API::MatrixWorkspace_sptr dataws, const double &wavelength);
+  void setXtoLabQ(const API::MatrixWorkspace_sptr &dataws,
+                  const double &wavelength);
 
   /// SPICE detector XML file
   std::string m_detXMLFileName;
@@ -142,5 +144,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADSPICEXML2DDET_H_ */

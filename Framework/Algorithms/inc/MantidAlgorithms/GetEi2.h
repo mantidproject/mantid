@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,7 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 //----------------------------------------------------------------------
@@ -45,7 +45,7 @@ namespace Algorithms {
   National Laboratory
     @date 31/03/2010
 */
-class DLLExport GetEi2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetEi2 : public API::Algorithm {
 public:
   /// Default constructor
   GetEi2();
@@ -84,16 +84,15 @@ private:
   API::MatrixWorkspace_sptr
   extractSpectrum(const size_t ws_index, const double start, const double end);
   /// Calculate peak width
-  double calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
-                                        const double prominence,
-                                        std::vector<double> &peak_x,
-                                        std::vector<double> &peak_y,
-                                        std::vector<double> &peak_e) const;
+  double calculatePeakWidthAtHalfHeight(
+      const API::MatrixWorkspace_sptr &data_ws, const double prominence,
+      std::vector<double> &peak_x, std::vector<double> &peak_y,
+      std::vector<double> &peak_e) const;
   /// Calculate the value of the first moment of the given spectrum
-  double calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws,
+  double calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
                               const double prominence);
   /// Rebin the given workspace using the given parameters
-  API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr monitor_ws,
+  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &monitor_ws,
                                   const double first, const double width,
                                   const double end);
   /// Integrate the point data

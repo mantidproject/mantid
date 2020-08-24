@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
-#define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -42,7 +41,7 @@ public:
   void updateMetadata(const size_t &newIndex);
   std::pair<double, double> getErange();
 
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_ws;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> m_ws;
   const std::string m_name;
   double m_energy;
   std::string m_label;
@@ -59,7 +58,7 @@ public:
 protected:
   void preDeleteHandle(
       const std::string &workspaceName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 signals:
   void signalSlicesLoaded(const QString &workspaceName);
@@ -95,4 +94,3 @@ private:
 } // namespace DynamicPDF
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_

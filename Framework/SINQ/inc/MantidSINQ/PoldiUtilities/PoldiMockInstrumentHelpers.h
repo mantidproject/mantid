@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -131,7 +131,7 @@ class PoldiAbstractFakeInstrument : public Instrument {
 public:
   PoldiAbstractFakeInstrument() {}
 
-  boost::shared_ptr<const IComponent>
+  std::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const override {
     UNUSED_ARG(cname);
     UNUSED_ARG(nlevels);
@@ -139,16 +139,15 @@ public:
     return getComponentByNameFake();
   }
 
-  virtual boost::shared_ptr<const IComponent>
-  getComponentByNameFake() const = 0;
+  virtual std::shared_ptr<const IComponent> getComponentByNameFake() const = 0;
 };
 
 class PoldiValidSourceFakeInstrument : public PoldiAbstractFakeInstrument {
 public:
   PoldiValidSourceFakeInstrument() : PoldiAbstractFakeInstrument() {}
 
-  boost::shared_ptr<const IComponent> getComponentByNameFake() const override {
-    return boost::make_shared<PoldiFakeSourceComponent>();
+  std::shared_ptr<const IComponent> getComponentByNameFake() const override {
+    return std::make_shared<PoldiFakeSourceComponent>();
   }
 };
 
@@ -156,8 +155,8 @@ class PoldiInvalidSourceFakeInstrument : public PoldiAbstractFakeInstrument {
 public:
   PoldiInvalidSourceFakeInstrument() : PoldiAbstractFakeInstrument() {}
 
-  boost::shared_ptr<const IComponent> getComponentByNameFake() const override {
-    return boost::shared_ptr<const IComponent>();
+  std::shared_ptr<const IComponent> getComponentByNameFake() const override {
+    return std::shared_ptr<const IComponent>();
   }
 };
 
@@ -413,7 +412,7 @@ public:
    */
   static DataObjects::TableWorkspace_sptr createPoldiPeakTableWorkspace() {
     DataObjects::TableWorkspace_sptr tableWs =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             API::WorkspaceFactory::Instance().createTable());
     tableWs->addColumn("str", "HKL");
     tableWs->addColumn("double", "d");

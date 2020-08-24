@@ -2,13 +2,12 @@
 
 set(MODULE_TEMPLATE src/api.cpp.in)
 
-# Files containing export definitions, these are automatically processed
-# -- Do NOT sort this list. The order defines the order in which the export
+# Files containing export definitions, these are automatically processed -- Do
+# NOT sort this list. The order defines the order in which the export
 # definitions occur and some depend on their base classes being exported first
 set(EXPORT_FILES
     src/Exports/IAlgorithm.cpp
     src/Exports/AlgorithmObserver.cpp
-    src/Exports/AlgorithmProxy.cpp
     src/Exports/AlgorithmHistory.cpp
     src/Exports/CatalogManager.cpp
     src/Exports/CatalogSession.cpp
@@ -20,6 +19,7 @@ set(EXPORT_FILES
     src/Exports/AlgorithmManager.cpp
     src/Exports/AnalysisDataService.cpp
     src/Exports/FileProperty.cpp
+    src/Exports/InstrumentFileFinder.cpp
     src/Exports/MultipleFileProperty.cpp
     src/Exports/FrameworkManager.cpp
     src/Exports/ISpectrum.cpp
@@ -81,7 +81,8 @@ set(EXPORT_FILES
     src/Exports/SpectrumInfoIterator.cpp
     src/Exports/SpectrumInfoPythonIterator.cpp
     src/Exports/AnalysisDataServiceObserver.cpp
-    src/Exports/Citation.cpp)
+    src/Exports/Citation.cpp
+)
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
@@ -97,7 +98,8 @@ set(SRC_FILES
     src/PythonAlgorithm/DataProcessorAdapter.cpp
     src/CloneMatrixWorkspace.cpp
     src/Exports/AlgorithmFactoryObserverAdapter.cpp
-    src/Exports/AnalysisDataServiceObserverAdapter.cpp)
+    src/Exports/AnalysisDataServiceObserverAdapter.cpp
+)
 
 set(INC_FILES
     inc/MantidPythonInterface/api/Algorithms/AlgorithmFactoryObserverAdapter.h
@@ -111,55 +113,42 @@ set(INC_FILES
     inc/MantidPythonInterface/api/AnalysisDataServiceObserverAdapter.h
     inc/MantidPythonInterface/api/BinaryOperations.h
     inc/MantidPythonInterface/api/CloneMatrixWorkspace.h
+    inc/MantidPythonInterface/api/SpectrumInfoPythonIterator.h
+    inc/MantidPythonInterface/api/RegisterWorkspacePtrToPython.h
     inc/MantidPythonInterface/api/WorkspacePropertyExporter.h
-    inc/MantidPythonInterface/api/SpectrumInfoPythonIterator.h)
+)
 
 # Create the target for this directory
 
-add_library(PythonAPIModule
-            ${EXPORT_FILES}
-            ${MODULE_DEFINITION}
-            ${SRC_FILES}
-            ${INC_FILES}
-            ${PYTHON_INSTALL_FILES})
+add_library(
+  PythonAPIModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES}
+                  ${INC_FILES} ${PYTHON_INSTALL_FILES}
+)
 set_python_properties(PythonAPIModule _api)
 
 target_include_directories(PythonAPIModule PUBLIC inc)
 
 # Add the required dependencies
-target_link_libraries(PythonAPIModule
-                      PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-                              PythonInterfaceCore
-                              PythonGeometryModule
-                              PythonKernelModule
-                              API
-                              Geometry
-                              HistogramData
-                              Indexing
-                              Kernel
-                              Types
-                              ${PYTHON_LIBRARIES}
-                              ${POCO_LIBRARIES}
-                              ${Boost_LIBRARIES})
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(
-    PythonAPIModule
-    PROPERTIES
-      INSTALL_RPATH
-      "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/"
-    )
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(
-    PythonAPIModule
-    PROPERTIES
-      INSTALL_RPATH
-      "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/")
-endif()
+target_link_libraries(
+  PythonAPIModule
+  PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+          PythonInterfaceCore
+          PythonGeometryModule
+          PythonKernelModule
+          API
+          Geometry
+          HistogramData
+          Indexing
+          Kernel
+          Types
+          ${POCO_LIBRARIES}
+          ${Boost_LIBRARIES}
+)
 
 # Installation settings
-mtd_install_targets(TARGETS
-                    PythonAPIModule
-                    INSTALL_DIRS
-                    ${LIB_DIR}/mantid/api
-                    ${WORKBENCH_LIB_DIR}/mantid/api)
+set_target_properties(PythonAPIModule
+    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/")
+mtd_install_targets(
+  TARGETS PythonAPIModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/api
+  ${WORKBENCH_SITE_PACKAGES}/mantid/api
+)

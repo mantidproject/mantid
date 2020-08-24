@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -21,7 +21,7 @@ namespace Crystal {
  * @date 2014-07-24
  */
 
-class DLLExport SaveLauenorm : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SaveLauenorm : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveLauenorm"; };
@@ -44,7 +44,7 @@ private:
   void exec() override;
 
   DataObjects::PeaksWorkspace_sptr ws;
-  void sizeBanks(std::string bankName, int &nCols, int &nRows);
+  void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
 
   const std::vector<std::string> m_typeList{
       "TRICLINIC", "MONOCLINIC",   "ORTHORHOMBIC", "TETRAGONAL",

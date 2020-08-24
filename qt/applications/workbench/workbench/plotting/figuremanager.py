@@ -1,42 +1,46 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
-from __future__ import (absolute_import, unicode_literals)
-
+import copy
+from distutils.version import LooseVersion
+import io
 import sys
 from functools import wraps
-
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import (  # noqa: F401
+    FigureCanvasQTAgg, draw_if_interactive as draw_if_interactive_impl, show as show_impl)
+from matplotlib.collections import LineCollection
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
+from qtpy.QtGui import QImage
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
+from qtpy import QT_VERSION
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
 from mantid.plots import datafunctions, MantidAxes
-from mantid.py3compat import text_type
 from mantidqt.io import open_a_file_dialog
-from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
-from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
+from workbench.config import get_window_config
 from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.plotscriptgenerator import generate_script
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
+from workbench.plotting.plothelppages import PlotHelpPages
 
 
 def _catch_exceptions(func):
@@ -90,22 +94,20 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         # managed via a workspace.
         # See https://github.com/mantidproject/mantid/issues/25135.
         empty_axes = []
+        redraw = False
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                ax.remove_workspace_artists(workspace)
-            # We check for axes type below as a pseudo check for an axes being
-            # a colorbar. Creating a colorfill plot creates 2 axes: one linked
-            # to a workspace, the other a colorbar. Deleting the workspace
-            # deletes the colorfill, but the plot remains open due to the
-            # non-empty colorbar. This solution seems to work for the majority
-            # of cases but could lead to unmanaged figures only containing an
-            # Axes object being closed.
+                to_redraw = ax.remove_workspace_artists(workspace)
+            else:
+                to_redraw = False
+            # Solution for filtering out colorbar axes. Works most of the time.
             if type(ax) is not Axes:
                 empty_axes.append(MantidAxes.is_empty(ax))
+            redraw = redraw | to_redraw
 
         if all(empty_axes):
             self.window.emit_close()
-        else:
+        elif redraw:
             self.canvas.draw()
 
     @_catch_exceptions
@@ -160,21 +162,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     """
     def __init__(self, canvas, num):
+        assert QAppThreadCall.is_qapp_thread(
+        ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
-        # Patch show/destroy to be thread aware
-        self._destroy_orig = self.destroy
-        self.destroy = QAppThreadCall(self._destroy_orig)
-        self._show_orig = self.show
-        self.show = QAppThreadCall(self._show_orig)
-        self._window_activated_orig = self._window_activated
-        self._window_activated = QAppThreadCall(self._window_activated_orig)
-        self.set_window_title_orig = self.set_window_title
-        self.set_window_title = QAppThreadCall(self.set_window_title_orig)
-        self.fig_visibility_changed_orig = self.fig_visibility_changed
-        self.fig_visibility_changed = QAppThreadCall(self.fig_visibility_changed_orig)
 
-        self.window = FigureWindow(canvas)
+        parent, flags = get_window_config()
+        self.window = FigureWindow(canvas, parent=parent, window_flags=flags)
         self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self.destroy)
@@ -206,16 +200,23 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
+            self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
             self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(
                 self.generate_plot_script_clipboard)
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
                 self.generate_plot_script_file)
             self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
-            self.toolbar.sig_waterfall_reverse_order_triggered.connect(self.waterfall_reverse_line_order)
-            self.toolbar.sig_waterfall_offset_amount_triggered.connect(self.launch_waterfall_offset_options)
-            self.toolbar.sig_waterfall_fill_area_triggered.connect(self.launch_waterfall_fill_area_options)
+            self.toolbar.sig_waterfall_reverse_order_triggered.connect(
+                self.waterfall_reverse_line_order)
+            self.toolbar.sig_waterfall_offset_amount_triggered.connect(
+                self.launch_waterfall_offset_options)
+            self.toolbar.sig_waterfall_fill_area_triggered.connect(
+                self.launch_waterfall_fill_area_options)
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
+            self.toolbar.sig_change_line_collection_colour_triggered.connect(
+                self.change_line_collection_colour)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -233,6 +234,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
+        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
+        # 0 argument is arbitrary and has no effect on fit widget size
+        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
+        if QT_VERSION >= LooseVersion("5.6"):
+            self.window.resizeDocks([self.fit_browser], [0], Qt.Horizontal)
         self.fit_browser.hide()
 
         if matplotlib.is_interactive():
@@ -285,19 +291,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar] \
-                or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
-            self._set_fit_enabled(False)
 
-        # For plot-to-script button to show, we must have a MantidAxes with lines in it
-        # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
-        if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
-                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall():
-            self.toolbar.set_generate_plot_script_enabled(False)
-
-        # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
-        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or not self.canvas.figure.get_axes()[0].is_waterfall():
-            self.toolbar.set_waterfall_options_enabled(False)
+        if self.toolbar:
+            self.toolbar.set_buttons_visiblity(self.canvas.figure)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -312,6 +308,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.destroy()
         self._ads_observer.observeAll(False)
         del self._ads_observer
+        # disconnect window events before calling Gcf.destroy. window.close is not guaranteed to
+        # delete the object and do this for us. On macOS it was observed that closing the figure window
+        # would produce an extraneous activated event that would add a new figure to the plots list
+        # right after deleted the old one.
+        self.window.disconnect()
         self._fig_interaction.disconnect()
         self.window.close()
 
@@ -326,12 +327,35 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
 
-    def grid_toggle(self):
+    def launch_plot_help(self):
+        PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
+
+    def copy_to_clipboard(self):
+        """Copy the current figure image to clipboard"""
+        # store the image in a buffer using savefig(), this has the
+        # advantage of applying all the default savefig parameters
+        # such as background color; those would be ignored if you simply
+        # grab the canvas using Qt
+        buf = io.BytesIO()
+        self.canvas.figure.savefig(buf)
+        QApplication.clipboard().setImage(QImage.fromData(buf.getvalue()))
+        buf.close()
+
+    def grid_toggle(self, on):
         """Toggle grid lines on/off"""
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            ax.grid()
+            if type(ax) == Axes:
+                # Colorbar
+                continue
+            elif isinstance(ax, Axes3D):
+                # The grid toggle function for 3D plots doesn't let you choose between major and minor lines.
+                ax.grid(on)
+            else:
+                which = 'both' if hasattr(
+                    ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
+                ax.grid(on, which=which)
         canvas.draw_idle()
 
     def fit_toggle(self):
@@ -353,7 +377,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.toolbar.hold()
 
     def get_window_title(self):
-        return text_type(self.window.windowTitle())
+        return self.window.windowTitle()
 
     def set_window_title(self, title):
         self.window.setWindowTitle(title)
@@ -374,11 +398,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         Gcf.figure_visibility_changed(self.num)
 
-    def _set_fit_enabled(self, on):
-        action = self.toolbar._actions['toggle_fit']
-        action.setEnabled(on)
-        action.setVisible(on)
-
     def generate_plot_script_clipboard(self):
         script = generate_script(self.canvas.figure, exclude_headers=True)
         QApplication.clipboard().setText(script)
@@ -386,20 +405,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def generate_plot_script_file(self):
         script = generate_script(self.canvas.figure)
-        filepath = open_a_file_dialog(
-            parent=self.canvas,
-            default_suffix=".py",
-            file_filter="Python Files (*.py)",
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile
-        )
+        filepath = open_a_file_dialog(parent=self.canvas,
+                                      default_suffix=".py",
+                                      file_filter="Python Files (*.py)",
+                                      accept_mode=QFileDialog.AcceptSave,
+                                      file_mode=QFileDialog.AnyFile)
         if filepath:
             try:
                 with open(filepath, 'w') as f:
                     f.write(script)
             except IOError as io_error:
-                logger.error("Could not write file: {}\n{}"
-                             "".format(filepath, io_error))
+                logger.error("Could not write file: {}\n{}" "".format(filepath, io_error))
 
     def set_figure_zoom_to_display_all(self):
         axes = self.canvas.figure.get_axes()
@@ -411,6 +427,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 if type(ax) is not Axes:
                     if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                         ax.relim()
+                    elif isinstance(ax, Axes3D):
+                        if hasattr(ax, 'original_data'):
+                            ax.collections[0]._vec = copy.deepcopy(ax.original_data)
+                        else:
+                            ax.view_init()
+
                     ax.autoscale()
 
             self.canvas.draw()
@@ -432,6 +454,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if ax.get_legend():
             ax.make_legend()
 
+        self.canvas.draw()
+
     def launch_waterfall_offset_options(self):
         WaterfallPlotOffsetDialogPresenter(self.canvas.figure, parent=self.window)
 
@@ -440,7 +464,16 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def update_toolbar_waterfall_plot(self, is_waterfall):
         self.toolbar.set_waterfall_options_enabled(is_waterfall)
+        self.toolbar.set_fit_enabled(not is_waterfall)
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
+
+    def change_line_collection_colour(self, colour):
+        for col in self.canvas.figure.get_axes()[0].collections:
+            if isinstance(col, LineCollection):
+                col.set_color(colour.name())
+
+        self.canvas.draw()
+
 
 # -----------------------------------------------------------------------------
 # Figure control
@@ -456,7 +489,13 @@ def new_figure_manager(num, *args, **kwargs):
 
 
 def new_figure_manager_given_figure(num, figure):
-    """Create a new figure manager instance for the given figure."""
-    canvas = FigureCanvasQTAgg(figure)
-    manager = FigureManagerWorkbench(canvas, num)
-    return manager
+    """Create a new manager from a num & figure """
+    def _new_figure_manager_given_figure_impl(num, figure):
+        """Create a new figure manager instance for the given figure.
+        Forces all public and non-dunder method calls onto the QApplication thread.
+        """
+        canvas = FigureCanvasQTAgg(figure)
+        return force_method_calls_to_qapp_thread(FigureManagerWorkbench(canvas, num))
+
+    # figure manager & canvas must be created on the QApplication thread
+    return QAppThreadCall(_new_figure_manager_given_figure_impl)(num, figure)

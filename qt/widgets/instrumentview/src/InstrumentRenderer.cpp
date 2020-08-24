@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -366,13 +366,14 @@ void InstrumentRenderer::resetColors() {
   for (size_t det = 0; det < counts.size(); ++det) {
     if (!isMasked(det)) {
       const double integratedValue(counts[det]);
-      if (integratedValue > -1) {
+      if (integratedValue == InstrumentActor::INVALID_VALUE) {
+        m_colors[det] = invalidColor;
+      } else {
         const auto &color = rgba[det];
         m_colors[det] =
             GLColor(qRed(color), qGreen(color), qBlue(color),
                     static_cast<int>(255 * (integratedValue / vmax)));
-      } else
-        m_colors[det] = invalidColor;
+      }
     } else {
       m_colors[det] = maskedColor;
     }

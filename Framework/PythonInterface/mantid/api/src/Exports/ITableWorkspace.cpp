@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
@@ -19,7 +20,6 @@
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/preprocessor/list/for_each.hpp>
 #include <boost/preprocessor/tuple/to_list.hpp>
@@ -82,7 +82,7 @@ namespace {
  * @param typeID The python identifier of the column type.
  * @param row The row to get the value from.
  */
-PyObject *getValue(Mantid::API::Column_const_sptr column,
+PyObject *getValue(const Mantid::API::Column_const_sptr &column,
                    const std::type_info &typeID, const int row) {
   if (typeID.hash_code() == typeid(Mantid::API::Boolean).hash_code()) {
     bool res = column->cell<Mantid::API::Boolean>(row);
@@ -129,7 +129,7 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
  * @param row :: The index of the row
  * @param value :: The value to set
  */
-void setValue(const Column_sptr column, const int row, const object &value) {
+void setValue(const Column_sptr &column, const int row, const object &value) {
   const auto &typeID = column->get_type_info();
 
   // Special case: Treat Mantid Boolean as normal bool
@@ -542,7 +542,7 @@ public:
     return data;
   }
 
-  static void setstate(ITableWorkspace &ws, dict state) {
+  static void setstate(ITableWorkspace &ws, const dict &state) {
     readMetaData(ws, state);
     readData(ws, state);
   }

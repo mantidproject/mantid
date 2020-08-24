@@ -1,20 +1,21 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <exception>
 #include <functional>
 #include <tuple>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
-    PlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model)
+    IPlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model)
     : m_fitObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
 
   m_fitObserver = new VoidObserver();
@@ -42,7 +43,7 @@ void PlotFitAnalysisPanePresenter::doFit() {
 
 void PlotFitAnalysisPanePresenter::addFunction(
     Mantid::API::IFunction_sptr func) {
-  m_view->addFunction(func);
+  m_view->addFunction(std::move(func));
 }
 
 void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {

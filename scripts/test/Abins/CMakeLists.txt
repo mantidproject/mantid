@@ -2,12 +2,10 @@
 set ( TEST_PY_FILES
    AbinsAtomsDataTest.py
    AbinsBroadeningTest.py
-   AbinsCalculateDWSingleCrystalTest.py
-   AbinsCalculatePowderTest.py
+   AbinsPowderCalculatorTest.py
    AbinsCalculateQToscaTest.py
-   AbinsCalculateSingleCrystalTest.py
    AbinsCalculateSPowderTest.py
-   AbinsDWSingleCrystalDataTest.py
+   AbinsDataTest.py
    AbinsFrequencyPowderGeneratorTest.py
    AbinsInstrumentTest.py
    AbinsIOmoduleTest.py
@@ -16,6 +14,7 @@ set ( TEST_PY_FILES
    AbinsLoadCRYSTALTest.py
    AbinsLoadDMOL3Test.py
    AbinsLoadGAUSSIANTest.py
+   AbinsLoadVASPTest.py
    AbinsPowderDataTest.py
    AbinsSDataTest.py
   )

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidAPI/FileProperty.h"
@@ -83,7 +83,7 @@ void LoadParameterFile::exec() {
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // TODO: Refactor to remove the need for the const cast (ticket #8521)
-  Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(
+  Instrument_sptr instrument = std::const_pointer_cast<Instrument>(
       localWorkspace->getInstrument()->baseInstrument());
 
   // Set up the DOM parser and parse xml file

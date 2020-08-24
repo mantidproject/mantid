@@ -123,73 +123,6 @@ static inline void setupTreeViewEditorMargin(QLayout *lt) {
     lt->setContentsMargins(0, 0, DecorationMargin, 0);
 }
 
-// ------------ QtSpinBoxFactory
-
-void QtSpinBoxFactoryPrivate::slotPropertyChanged(QtProperty *property,
-                                                  int value) {
-  if (!m_createdEditors.contains(property))
-    return;
-  QListIterator<QSpinBox *> itEditor(m_createdEditors[property]);
-  while (itEditor.hasNext()) {
-    QSpinBox *editor = itEditor.next();
-    if (editor->value() != value) {
-      editor->blockSignals(true);
-      editor->setValue(value);
-      editor->blockSignals(false);
-    }
-  }
-}
-
-void QtSpinBoxFactoryPrivate::slotRangeChanged(QtProperty *property, int min,
-                                               int max) {
-  if (!m_createdEditors.contains(property))
-    return;
-
-  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
-  if (!manager)
-    return;
-
-  QListIterator<QSpinBox *> itEditor(m_createdEditors[property]);
-  while (itEditor.hasNext()) {
-    QSpinBox *editor = itEditor.next();
-    editor->blockSignals(true);
-    editor->setRange(min, max);
-    editor->setValue(manager->value(property));
-    editor->blockSignals(false);
-  }
-}
-
-void QtSpinBoxFactoryPrivate::slotSingleStepChanged(QtProperty *property,
-                                                    int step) {
-  if (!m_createdEditors.contains(property))
-    return;
-  QListIterator<QSpinBox *> itEditor(m_createdEditors[property]);
-  while (itEditor.hasNext()) {
-    QSpinBox *editor = itEditor.next();
-    editor->blockSignals(true);
-    editor->setSingleStep(step);
-    editor->blockSignals(false);
-  }
-}
-
-void QtSpinBoxFactoryPrivate::slotSetValue(int value) {
-  QObject *object = q_ptr->sender();
-  const QMap<QSpinBox *, QtProperty *>::ConstIterator ecend =
-      m_editorToProperty.constEnd();
-  for (QMap<QSpinBox *, QtProperty *>::ConstIterator itEditor =
-           m_editorToProperty.constBegin();
-       itEditor != ecend; ++itEditor) {
-    if (itEditor.key() == object) {
-      QtProperty *property = itEditor.value();
-      QtIntPropertyManager *manager = q_ptr->propertyManager(property);
-      if (!manager)
-        return;
-      manager->setValue(property, value);
-      return;
-    }
-  }
-}
-
 /**
     \class QtSpinBoxFactory
 
@@ -203,9 +136,9 @@ void QtSpinBoxFactoryPrivate::slotSetValue(int value) {
     Creates a factory with the given \a parent.
 */
 QtSpinBoxFactory::QtSpinBoxFactory(QObject *parent)
-    : QtAbstractEditorFactory<QtIntPropertyManager>(parent) {
+    : QtSpinBoxFactoryBase<QSpinBox>(parent) {
   d_ptr = new QtSpinBoxFactoryPrivate();
-  d_ptr->q_ptr = this;
+  initializeQPtr();
 }
 
 /**
@@ -215,54 +148,31 @@ QtSpinBoxFactory::~QtSpinBoxFactory() {
   qDeleteAll(d_ptr->m_editorToProperty.keys());
   delete d_ptr;
 }
+/**
+    \class QtSpinBoxFactoryNoTimer
+
+    \brief The QtSpinBoxFactory class provides QSpinBox widgets for
+    properties created by QtIntPropertyManager objects. The spinbox has
+    a custom timer event to avoid double incrementing when the slot lags.
+
+    \sa QtAbstractEditorFactory, QtIntPropertyManager
+*/
 
 /**
-    \internal
-
-    Reimplemented from the QtAbstractEditorFactory class.
+    Creates a factory with the given \a parent.
 */
-void QtSpinBoxFactory::connectPropertyManager(QtIntPropertyManager *manager) {
-  connect(manager, SIGNAL(valueChanged(QtProperty *, int)), this,
-          SLOT(slotPropertyChanged(QtProperty *, int)));
-  connect(manager, SIGNAL(rangeChanged(QtProperty *, int, int)), this,
-          SLOT(slotRangeChanged(QtProperty *, int, int)));
-  connect(manager, SIGNAL(singleStepChanged(QtProperty *, int)), this,
-          SLOT(slotSingleStepChanged(QtProperty *, int)));
+QtSpinBoxFactoryNoTimer::QtSpinBoxFactoryNoTimer(QObject *parent)
+    : QtSpinBoxFactoryBase<QSpinBoxNoTimer>(parent) {
+  d_ptr = new QtSpinBoxFactoryNoTimerPrivate();
+  initializeQPtr();
 }
 
 /**
-    \internal
-
-    Reimplemented from the QtAbstractEditorFactory class.
+    Destroys this factory, and all the widgets it has created.
 */
-QWidget *QtSpinBoxFactory::createEditorForManager(QtIntPropertyManager *manager,
-                                                  QtProperty *property,
-                                                  QWidget *parent) {
-  QSpinBox *editor = d_ptr->createEditor(property, parent);
-  editor->setSingleStep(manager->singleStep(property));
-  editor->setRange(manager->minimum(property), manager->maximum(property));
-  editor->setValue(manager->value(property));
-  editor->setKeyboardTracking(false);
-
-  connect(editor, SIGNAL(valueChanged(int)), this, SLOT(slotSetValue(int)));
-  connect(editor, SIGNAL(destroyed(QObject *)), this,
-          SLOT(slotEditorDestroyed(QObject *)));
-  return editor;
-}
-
-/**
-    \internal
-
-    Reimplemented from the QtAbstractEditorFactory class.
-*/
-void QtSpinBoxFactory::disconnectPropertyManager(
-    QtIntPropertyManager *manager) {
-  disconnect(manager, SIGNAL(valueChanged(QtProperty *, int)), this,
-             SLOT(slotPropertyChanged(QtProperty *, int)));
-  disconnect(manager, SIGNAL(rangeChanged(QtProperty *, int, int)), this,
-             SLOT(slotRangeChanged(QtProperty *, int, int)));
-  disconnect(manager, SIGNAL(singleStepChanged(QtProperty *, int)), this,
-             SLOT(slotSingleStepChanged(QtProperty *, int)));
+QtSpinBoxFactoryNoTimer::~QtSpinBoxFactoryNoTimer() {
+  qDeleteAll(d_ptr->m_editorToProperty.keys());
+  delete d_ptr;
 }
 
 // QtSliderFactory
@@ -378,7 +288,7 @@ void QtSliderFactory::connectPropertyManager(QtIntPropertyManager *manager) {
 QWidget *QtSliderFactory::createEditorForManager(QtIntPropertyManager *manager,
                                                  QtProperty *property,
                                                  QWidget *parent) {
-  QSlider *editor = new QSlider(Qt::Horizontal, parent);
+  auto *editor = new QSlider(Qt::Horizontal, parent);
   d_ptr->initializeEditor(property, editor);
   editor->setSingleStep(manager->singleStep(property));
   editor->setRange(manager->minimum(property), manager->maximum(property));
@@ -516,7 +426,7 @@ void QtScrollBarFactory::connectPropertyManager(QtIntPropertyManager *manager) {
 */
 QWidget *QtScrollBarFactory::createEditorForManager(
     QtIntPropertyManager *manager, QtProperty *property, QWidget *parent) {
-  QScrollBar *editor = new QScrollBar(Qt::Horizontal, parent);
+  auto *editor = new QScrollBar(Qt::Horizontal, parent);
   d_ptr->initializeEditor(property, editor);
   editor->setSingleStep(manager->singleStep(property));
   editor->setRange(manager->minimum(property), manager->maximum(property));
@@ -1367,7 +1277,7 @@ void QtKeySequenceEditorFactory::disconnectPropertyManager(
 
 QtCharEdit::QtCharEdit(QWidget *parent)
     : QWidget(parent), m_lineEdit(new QLineEdit(this)) {
-  QHBoxLayout *layout = new QHBoxLayout(this);
+  auto *layout = new QHBoxLayout(this);
   layout->addWidget(m_lineEdit);
   layout->setMargin(0);
   m_lineEdit->installEventFilter(this);
@@ -1379,7 +1289,7 @@ QtCharEdit::QtCharEdit(QWidget *parent)
 
 bool QtCharEdit::eventFilter(QObject *o, QEvent *e) {
   if (o == m_lineEdit && e->type() == QEvent::ContextMenu) {
-    QContextMenuEvent *c = static_cast<QContextMenuEvent *>(e);
+    auto *c = static_cast<QContextMenuEvent *>(e);
     QMenu *menu = m_lineEdit->createStandardContextMenu();
     QList<QAction *> actions = menu->actions();
     QListIterator<QAction *> itAction(actions);
@@ -1395,7 +1305,7 @@ bool QtCharEdit::eventFilter(QObject *o, QEvent *e) {
     QAction *actionBefore = nullptr;
     if (actions.count() > 0)
       actionBefore = actions[0];
-    QAction *clearAction = new QAction(tr("Clear Char"), menu);
+    auto *clearAction = new QAction(tr("Clear Char"), menu);
     menu->insertAction(actionBefore, clearAction);
     menu->insertSeparator(actionBefore);
     clearAction->setEnabled(!m_value.isNull());
@@ -1897,7 +1807,7 @@ void QtCursorEditorFactory::disconnectPropertyManager(
 QtColorEditWidget::QtColorEditWidget(QWidget *parent)
     : QWidget(parent), m_pixmapLabel(new QLabel), m_label(new QLabel),
       m_button(new QToolButton) {
-  QHBoxLayout *lt = new QHBoxLayout(this);
+  auto *lt = new QHBoxLayout(this);
   setupTreeViewEditorMargin(lt);
   lt->setSpacing(0);
   lt->addWidget(m_pixmapLabel);
@@ -2059,7 +1969,7 @@ void QtColorEditorFactory::disconnectPropertyManager(
 QtFontEditWidget::QtFontEditWidget(QWidget *parent)
     : QWidget(parent), m_pixmapLabel(new QLabel), m_label(new QLabel),
       m_button(new QToolButton) {
-  QHBoxLayout *lt = new QHBoxLayout(this);
+  auto *lt = new QHBoxLayout(this);
   setupTreeViewEditorMargin(lt);
   lt->setSpacing(0);
   lt->addWidget(m_pixmapLabel);

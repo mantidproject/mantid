@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -96,8 +96,8 @@ protected:
   finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities,
                       const std::vector<double> &dValues) const;
 
-  boost::shared_ptr<PoldiAbstractDetector> m_detector;
-  boost::shared_ptr<PoldiAbstractChopper> m_chopper;
+  std::shared_ptr<PoldiAbstractDetector> m_detector;
+  std::shared_ptr<PoldiAbstractChopper> m_chopper;
 
   std::pair<double, double> m_wavelengthRange;
 

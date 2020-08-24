@@ -87,6 +87,10 @@ The possible flags are:
 :code:`$outputname`
   The output workspace name (i.e. the value of the OutputWorkspace property).
 
+:code:`$OutputFitStatus`
+  Optional flag determining whether to output fit status and chi square for each fit
+
+
 Usage
 -----
 
@@ -125,6 +129,32 @@ Output:
 .. testoutput:: ExPlotPeakByLogValueSeq
 
     True
+
+.. testcode:: ExPlotPeakByLogValueSeqWithOutputStatus
+
+    import numpy as np
+
+    ws = CreateSampleWorkspace()
+    function = "name=Gaussian,Height=10.0041,PeakCentre=10098.6,Sigma=48.8581;name=FlatBackground,A0=0.3"
+
+    #create string of workspaces to fit (ws,i0; ws,i1, ws,i2 ...)
+    workspaces = [ws.name() + ',i%d' % i for i in range(ws.getNumberHistograms())]
+    workspaces = ';'.join(workspaces)
+
+    peaks, status, chi2 = PlotPeakByLogValue(workspaces, function, Spectrum=1, OutputFitStatus=True)
+
+    # Print status of first 10 fits
+    print("Fit status = {}".format(status[0:10]))
+    print("Fit chi2 = {}".format(chi2[0:10]))
+
+Output:
+
+.. testoutput:: ExPlotPeakByLogValueSeqWithOutputStatus
+
+    Fit status = ['success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success']
+    Fit chi2 = [  5.09648779e-08   6.89426130e-09   9.33124574e-10   1.26539259e-10
+       1.73025195e-11   2.45555803e-12   4.06465408e-13   1.04496124e-13
+       4.79987355e-14   3.01813222e-14]
 
 .. categories::
 

@@ -1,19 +1,23 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFit.h"
-#include "IndirectFunctionBrowser/FQTemplateBrowser.h"
+#include "FQFitConstants.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "JumpFitDataPresenter.h"
 
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -28,40 +32,73 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+namespace {
+constexpr double HBAR = Mantid::PhysicalConstants::h /
+                        Mantid::PhysicalConstants::meV * 1e12 / (2 * M_PI);
+}
+
+std::vector<std::string> FQFIT_HIDDEN_PROPS = std::vector<std::string>(
+    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+     "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
+     "PeakRadius", "PlotParameter"});
+
 JumpFit::JumpFit(QWidget *parent)
     : IndirectFitAnalysisTab(new JumpFitModel, parent),
-      m_uiForm(new Ui::JumpFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  auto templateBrowser = new FQTemplateBrowser;
-  setPlotView(m_uiForm->pvFitPlotView);
+  auto parameterEstimation = createParameterEstimation();
+  auto templateBrowser = new SingleFunctionTemplateBrowser(
+      widthFits,
+      std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
-      m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
-      m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter,
-      templateBrowser));
+      m_jumpFittingModel, m_uiForm->dockArea->m_fitDataView,
+      m_uiForm->dockArea->m_fitDataView->cbParameterType,
+      m_uiForm->dockArea->m_fitDataView->cbParameter,
+      m_uiForm->dockArea->m_fitDataView->lbParameter,
+      m_uiForm->dockArea->m_fitDataView->lbParameterType, templateBrowser));
 
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
+      templateBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(
+      FQFIT_HIDDEN_PROPS);
 
   setEditResultVisible(false);
-  m_uiForm->fitDataView->setStartAndEndHidden(false);
 }
 
 void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
-  m_uiForm->cbParameter->setEnabled(false);
+  m_uiForm->dockArea->m_fitDataView->cbParameter->setEnabled(false);
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+  connect(this, SIGNAL(functionChanged()), this,
+          SLOT(updateModelFitTypeString()));
 }
 
 void JumpFit::updateModelFitTypeString() {
-  m_jumpFittingModel->setFitType(selectedFitType().toStdString());
+  m_jumpFittingModel->setFitType(fitTypeString());
+}
+
+std::string JumpFit::fitTypeString() const {
+  if (!m_jumpFittingModel->getFittingFunction() ||
+      m_jumpFittingModel->getFittingFunction()->nFunctions() == 0) {
+    return "NoCurrentFunction";
+  }
+
+  auto fun = m_jumpFittingModel->getFittingFunction()->getFunction(0);
+  if (fun->nFunctions() == 0) {
+    return fun->name();
+  } else {
+    return "UserDefinedCompositeFunction";
+  }
 }
 
 void JumpFit::runClicked() { runTab(); }
@@ -75,10 +112,108 @@ void JumpFit::setRunEnabled(bool enable) {
 }
 
 EstimationDataSelector JumpFit::getEstimationDataSelector() const {
-  return [](const std::vector<double> &,
-            const std::vector<double> &) -> DataForParameterEstimation {
-    return DataForParameterEstimation{};
-  };
+  return
+      [](const std::vector<double> &x, const std::vector<double> &y,
+         const std::pair<double, double> range) -> DataForParameterEstimation {
+        // Find data thats within range
+        double xmin = range.first;
+        double xmax = range.second;
+
+        // If the two points are equal return empty data
+        if (fabs(xmin - xmax) < 1e-7) {
+          return DataForParameterEstimation{};
+        }
+
+        const auto startItr = std::find_if(
+            x.cbegin(), x.cend(),
+            [xmin](const double &val) -> bool { return val >= (xmin - 1e-7); });
+        auto endItr = std::find_if(
+            x.cbegin(), x.cend(),
+            [xmax](const double &val) -> bool { return val > xmax; });
+
+        if (std::distance(startItr, endItr - 1) < 2)
+          return DataForParameterEstimation{};
+
+        size_t first = std::distance(x.cbegin(), startItr);
+        size_t end = std::distance(x.cbegin(), endItr);
+        size_t m = first + (end - first) / 2;
+
+        return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
+      };
+}
+
+namespace {
+void estimateChudleyElliot(::Mantid::API::IFunction_sptr &function,
+                           const DataForParameterEstimation &estimationData) {
+
+  auto y = estimationData.y;
+  auto x = estimationData.x;
+  if (x.size() != 2 || y.size() != 2) {
+    return;
+  }
+
+  double L = 1.5;
+  double tau = (HBAR / y[1]) * (1 - sin(x[1] * L) / (L * x[1]));
+
+  function->setParameter("L", L);
+  function->setParameter("Tau", tau);
+}
+void estimateHallRoss(::Mantid::API::IFunction_sptr &function,
+                      const DataForParameterEstimation &estimationData) {
+
+  auto y = estimationData.y;
+  auto x = estimationData.x;
+  if (x.size() != 2 || y.size() != 2) {
+    return;
+  }
+
+  double L = 0.2;
+  double tau = (HBAR / y[1]) * (1 - exp((-x[1] * x[1] * L * L) / 2));
+
+  function->setParameter("L", L);
+  function->setParameter("Tau", tau);
+}
+void estimateTeixeiraWater(::Mantid::API::IFunction_sptr &function,
+                           const DataForParameterEstimation &estimationData) {
+
+  auto y = estimationData.y;
+  auto x = estimationData.x;
+  if (x.size() != 2 || y.size() != 2) {
+    return;
+  }
+
+  double L = 1.5;
+  double QL = x[1] * L;
+  double tau = (HBAR / y[1]) * ((QL * QL) / (6 + QL * QL));
+
+  function->setParameter("L", L);
+  function->setParameter("Tau", tau);
+}
+void estimateFickDiffusion(::Mantid::API::IFunction_sptr &function,
+                           const DataForParameterEstimation &estimationData) {
+  auto y = estimationData.y;
+  auto x = estimationData.x;
+  if (x.size() != 2 || y.size() != 2) {
+    return;
+  }
+
+  function->setParameter("D", y[1] / (x[1] * x[1]));
+}
+} // namespace
+
+IDAFunctionParameterEstimation JumpFit::createParameterEstimation() const {
+
+  IDAFunctionParameterEstimation parameterEstimation;
+  parameterEstimation.addParameterEstimationFunction("ChudleyElliot",
+                                                     estimateChudleyElliot);
+  parameterEstimation.addParameterEstimationFunction("HallRoss",
+                                                     estimateHallRoss);
+  parameterEstimation.addParameterEstimationFunction("TeixeiraWater",
+                                                     estimateTeixeiraWater);
+  parameterEstimation.addParameterEstimationFunction("FickDiffusion",
+                                                     estimateFickDiffusion);
+
+  return parameterEstimation;
 }
 
 } // namespace IDA

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidAPI/FileFinder.h"
@@ -276,7 +276,7 @@ void LoadMask::init() {
 
   // 1. Declare property
   declareProperty("Instrument", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
 
   const std::vector<std::string> maskExts{".xml", ".msk"};
@@ -433,8 +433,8 @@ void LoadMask::componentToDetectors(
     }
 
     // b) component -> component assembly --> children (more than detectors)
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
     std::vector<Geometry::IComponent_const_sptr> children;
     asmb->getChildren(children, true);
 
@@ -447,7 +447,7 @@ void LoadMask::componentToDetectors(
     for (const auto &child : children) {
       // c) convert component to detector
       Geometry::IDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
+          std::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
       if (det) {
         detid_t detid = det->getID();

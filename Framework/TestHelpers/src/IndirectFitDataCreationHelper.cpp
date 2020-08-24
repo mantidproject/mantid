@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -54,7 +54,7 @@ createWorkspaceWithBinValues(int const &numberOfSpectra,
 WorkspaceGroup_sptr createGroupWorkspace(std::size_t const &numberOfWorkspaces,
                                          int const &numberOfSpectra,
                                          int const &numberOfBins) {
-  auto groupWorkspace = boost::make_shared<WorkspaceGroup>();
+  auto groupWorkspace = std::make_shared<WorkspaceGroup>();
   for (auto i = 0u; i < numberOfWorkspaces; ++i)
     groupWorkspace->addWorkspace(
         createWorkspace(numberOfSpectra, numberOfBins));
@@ -66,7 +66,7 @@ createGroupWorkspaceWithTextAxes(std::size_t const &numberOfWorkspaces,
                                  std::vector<std::string> const &labels,
                                  int const &numberOfSpectra,
                                  int const &numberOfBins) {
-  auto groupWorkspace = boost::make_shared<WorkspaceGroup>();
+  auto groupWorkspace = std::make_shared<WorkspaceGroup>();
   for (auto i = 0u; i < numberOfWorkspaces; ++i)
     groupWorkspace->addWorkspace(
         createWorkspaceWithTextAxis(numberOfSpectra, labels, numberOfBins));

@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +20,7 @@ namespace Algorithms {
 
   @date 2011-12-22
 */
-class DLLExport ExportTimeSeriesLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ExportTimeSeriesLog : public API::Algorithm {
 public:
   const std::string name() const override { return "ExportTimeSeriesLog"; };
 
@@ -58,7 +58,7 @@ private:
       const double &rel_start_time, size_t &i_start,
       const double &rel_stop_time, size_t &i_stop, const double &time_factor);
 
-  void exportLog(const std::string &logname, const std::string timeunit,
+  void exportLog(const std::string &logname, const std::string &timeunit,
                  const double &starttime, const double &stoptime,
                  const bool exportepoch, bool outputeventws, int numentries,
                  bool cal_first_deriv);

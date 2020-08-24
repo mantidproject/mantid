@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -24,7 +25,7 @@ namespace Algorithms {
  @author Ricardo Ferraz Leal
  @date 30/01/2013
  */
-class DLLExport ConvertToConstantL2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertToConstantL2 : public API::Algorithm {
 public:
   /// Default constructor
   ConvertToConstantL2();
@@ -50,8 +51,8 @@ private:
   void init() override;
   void exec() override;
   void initWorkspaces();
-  double getRunProperty(std::string);
-  double getInstrumentProperty(std::string);
+  double getRunProperty(const std::string &);
+  double getInstrumentProperty(const std::string &);
   double calculateTOF(double);
 
   /// The user selected (input) workspace

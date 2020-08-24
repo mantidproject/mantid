@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/BinaryOperateMasks.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -45,7 +45,7 @@ void BinaryOperateMasks::init() {
           "InputWorkspace2", "", Direction::Input, PropertyMode::Optional),
       "Optional MaskWorkspace 2 for binary operation");
   declareProperty("OperationType", "AND",
-                  boost::make_shared<StringListValidator>(operators),
+                  std::make_shared<StringListValidator>(operators),
                   "Operator for Workspace1 and Workspace2");
   declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
@@ -69,8 +69,8 @@ void BinaryOperateMasks::exec() {
   if (outputws != inputws1) {
     // if the input and output are not the same, then create a new workspace for
     // the output.
-    outputws = boost::make_shared<DataObjects::MaskWorkspace>(
-        inputws1->getInstrument());
+    outputws =
+        std::make_shared<DataObjects::MaskWorkspace>(inputws1->getInstrument());
     outputws->copyFrom(inputws1);
   }
 

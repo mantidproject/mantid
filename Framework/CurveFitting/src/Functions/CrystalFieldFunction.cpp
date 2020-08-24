@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
@@ -22,10 +22,11 @@
 
 #include "MantidKernel/Exception.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <limits>
+#include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -122,7 +123,7 @@ void CrystalFieldFunction::function(const FunctionDomain &domain,
 /// Set the source function
 /// @param source :: New source function.
 void CrystalFieldFunction::setSource(IFunction_sptr source) const {
-  m_source = source;
+  m_source = std::move(source);
 }
 
 size_t CrystalFieldFunction::getNumberDomains() const {
@@ -811,7 +812,7 @@ void CrystalFieldFunction::buildMultiSiteSingleSpectrum() const {
           "CrystalFieldPeaks returned odd number of values.");
     }
 
-    auto ionSpectrum = boost::make_shared<CompositeFunction>();
+    auto ionSpectrum = std::make_shared<CompositeFunction>();
     CrystalFieldUtils::buildSpectrumFunction(
         *ionSpectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
         nRequiredPeaks, fixAllPeaks);
@@ -827,7 +828,7 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
   const auto nSpec = nSpectra();
   std::vector<CompositeFunction *> spectra(nSpec);
   for (size_t i = 0; i < nSpec; ++i) {
-    auto spectrum = boost::make_shared<CompositeFunction>();
+    auto spectrum = std::make_shared<CompositeFunction>();
     spectra[i] = spectrum.get();
     multiDomain->addFunction(spectrum);
     multiDomain->setDomainIndex(i, i);
@@ -835,7 +836,7 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
   auto &physProps = m_control.physProps();
   std::vector<CompositeFunction_sptr> compositePhysProps(physProps.size());
   std::generate(compositePhysProps.begin(), compositePhysProps.end(),
-                []() { return boost::make_shared<CompositeFunction>(); });
+                []() { return std::make_shared<CompositeFunction>(); });
 
   auto &compSource = compositeSource();
   for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
@@ -971,22 +972,22 @@ CrystalFieldFunction::buildPhysprop(int nre,
                                     const std::string &propName) const {
 
   if (propName == "cv") { // HeatCapacity
-    auto propFun = boost::make_shared<CrystalFieldHeatCapacityCalculation>();
+    auto propFun = std::make_shared<CrystalFieldHeatCapacityCalculation>();
     propFun->setEnergy(energies);
     return propFun;
   }
   if (propName == "chi") { // Susceptibility
-    auto propFun = boost::make_shared<CrystalFieldSusceptibilityCalculation>();
+    auto propFun = std::make_shared<CrystalFieldSusceptibilityCalculation>();
     propFun->setEigensystem(energies, waveFunctions, nre);
     return propFun;
   }
   if (propName == "mh") { // Magnetisation
-    auto propFun = boost::make_shared<CrystalFieldMagnetisationCalculation>();
+    auto propFun = std::make_shared<CrystalFieldMagnetisationCalculation>();
     propFun->setHamiltonian(hamiltonian, nre);
     return propFun;
   }
   if (propName == "mt") { // MagneticMoment
-    auto propFun = boost::make_shared<CrystalFieldMomentCalculation>();
+    auto propFun = std::make_shared<CrystalFieldMomentCalculation>();
     propFun->setHamiltonian(hamiltonian, nre);
     return propFun;
   }

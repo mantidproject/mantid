@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractMaskToTable.h"
 #include "MantidAPI/TableRow.h"
@@ -19,8 +19,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-
-using namespace std;
 
 DECLARE_ALGORITHM(ExtractMaskToTable)
 
@@ -56,9 +54,10 @@ void ExtractMaskToTable::exec() {
   // Get input properties
   m_dataWS = getProperty("InputWorkspace");
   if (!m_dataWS)
-    throw runtime_error("InputWorkspace cannot be cast to a MatrixWorkspace.");
+    throw std::runtime_error(
+        "InputWorkspace cannot be cast to a MatrixWorkspace.");
   MaskWorkspace_const_sptr maskws =
-      boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+      std::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
 
   bool m_inputIsMask = false;
   if (maskws) {
@@ -74,18 +73,18 @@ void ExtractMaskToTable::exec() {
   double xmin = getProperty("XMin");
   double xmax = getProperty("XMax");
   if (xmin == EMPTY_DBL() || xmax == EMPTY_DBL() || xmin >= xmax)
-    throw runtime_error(
+    throw std::runtime_error(
         "XMin or XMax cannot be empty.  XMin must be less than XMax.");
 
   // Create and set up output workspace
-  auto outws = boost::make_shared<TableWorkspace>();
+  auto outws = std::make_shared<TableWorkspace>();
   outws->addColumn("double", "XMin");
   outws->addColumn("double", "XMax");
   outws->addColumn("str", "DetectorIDsList");
   setProperty("OutputWorkspace", outws);
 
   // Optionally import the input table workspace
-  vector<detid_t> prevmaskeddetids;
+  std::vector<detid_t> prevmaskeddetids;
   if (m_inputTableWS) {
     g_log.notice("Parse input masking table workspace.");
     prevmaskeddetids = parseMaskTable(m_inputTableWS);
@@ -94,7 +93,7 @@ void ExtractMaskToTable::exec() {
   }
 
   // Extract mask
-  vector<detid_t> maskeddetids;
+  std::vector<detid_t> maskeddetids;
   if (m_inputIsMask)
     maskeddetids = extractMaskFromMaskWorkspace();
   else
@@ -124,7 +123,7 @@ void ExtractMaskToTable::exec() {
  * @returns :: vector of detector IDs that are masked
  */
 std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
-    DataObjects::TableWorkspace_sptr masktablews) {
+    const DataObjects::TableWorkspace_sptr &masktablews) {
   // Output vector
   std::vector<detid_t> maskeddetectorids;
 
@@ -134,8 +133,8 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
                 "must be Xmin, Xmax and Spectrum List.");
     return maskeddetectorids;
   } else {
-    vector<string> colnames = masktablews->getColumnNames();
-    vector<string> chkcolumans(3);
+    std::vector<std::string> colnames = masktablews->getColumnNames();
+    std::vector<std::string> chkcolumans(3);
     chkcolumans[0] = "XMin";
     chkcolumans[1] = "XMax";
     chkcolumans[2] = "DetectorIDsList";
@@ -154,12 +153,12 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
   // Parse each row
   size_t numrows = masktablews->rowCount();
   double xmin, xmax;
-  string specliststr;
+  std::string specliststr;
   for (size_t i = 0; i < numrows; ++i) {
     TableRow tmprow = masktablews->getRow(i);
     tmprow >> xmin >> xmax >> specliststr;
 
-    vector<detid_t> tmpdetidvec = parseStringToVector(specliststr);
+    std::vector<detid_t> tmpdetidvec = parseStringToVector(specliststr);
     maskeddetectorids.insert(maskeddetectorids.end(), tmpdetidvec.begin(),
                              tmpdetidvec.end());
   }
@@ -174,18 +173,18 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
  * @returns :: vector genrated from input string containing the list
  */
 std::vector<detid_t>
-ExtractMaskToTable::parseStringToVector(std::string liststr) {
+ExtractMaskToTable::parseStringToVector(const std::string &liststr) {
   std::vector<detid_t> detidvec;
 
   // Use ArrayProperty to parse the list
   ArrayProperty<int> detlist("i", liststr);
   if (!detlist.isValid().empty()) {
-    stringstream errss;
+    std::stringstream errss;
     errss << "String '" << liststr
           << "' is unable to be converted to a list of detectors IDs. "
           << "Validation mesage: " << detlist.isValid();
     g_log.error(errss.str());
-    throw runtime_error(errss.str());
+    throw std::runtime_error(errss.str());
   }
 
   // Convert from ArrayProperty to detectors list
@@ -211,10 +210,10 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   // Get on hold of instrument
   const auto &detectorInfo = m_dataWS->detectorInfo();
   if (detectorInfo.size() == 0)
-    throw runtime_error("There is no instrument in input workspace.");
+    throw std::runtime_error("There is no instrument in input workspace.");
 
   // Extract
-  const vector<detid_t> &detids = detectorInfo.detectorIDs();
+  const std::vector<detid_t> &detids = detectorInfo.detectorIDs();
 
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     bool masked = detectorInfo.isMasked(i);
@@ -244,7 +243,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
 
   // Go through all spectra to find masked workspace
   MaskWorkspace_const_sptr maskws =
-      boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+      std::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
   size_t numhist = maskws->getNumberHistograms();
   for (size_t i = 0; i < numhist; ++i) {
     // Rule out the spectrum without mask
@@ -264,26 +263,26 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
  * @param targetWS :: table workspace to which the content is copied;
  */
 void ExtractMaskToTable::copyTableWorkspaceContent(
-    TableWorkspace_sptr sourceWS, TableWorkspace_sptr targetWS) {
+    const TableWorkspace_sptr &sourceWS, const TableWorkspace_sptr &targetWS) {
   // Compare the column names.  They must be exactly the same
-  vector<string> sourcecolnames = sourceWS->getColumnNames();
-  vector<string> targetcolnames = targetWS->getColumnNames();
+  std::vector<std::string> sourcecolnames = sourceWS->getColumnNames();
+  std::vector<std::string> targetcolnames = targetWS->getColumnNames();
   if (sourcecolnames.size() != targetcolnames.size()) {
-    stringstream errmsg;
+    std::stringstream errmsg;
     errmsg << "Soruce table workspace " << sourceWS->getName()
            << " has different number of columns (" << sourcecolnames.size()
            << ") than target table workspace's (" << targetcolnames.size()
            << ")";
-    throw runtime_error(errmsg.str());
+    throw std::runtime_error(errmsg.str());
   }
   for (size_t i = 0; i < sourcecolnames.size(); ++i) {
     if (sourcecolnames[i] != targetcolnames[i]) {
-      stringstream errss;
+      std::stringstream errss;
       errss << "Source and target have incompatible column name at column " << i
             << ". "
             << "Column name of source is " << sourcecolnames[i] << "; "
             << "Column name of target is " << targetcolnames[i];
-      throw runtime_error(errss.str());
+      throw std::runtime_error(errss.str());
     }
   }
 
@@ -291,7 +290,7 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
   size_t numrows = sourceWS->rowCount();
   for (size_t i = 0; i < numrows; ++i) {
     double xmin, xmax;
-    string speclist;
+    std::string speclist;
     TableRow tmprow = sourceWS->getRow(i);
     tmprow >> xmin >> xmax >> speclist;
 
@@ -310,14 +309,13 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
  * @param xmax :: maximum x
  * @param prevmaskedids :: vector of previous masked detector IDs
  */
-void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
-                                             vector<detid_t> maskeddetids,
-                                             double xmin, double xmax,
-                                             vector<detid_t> prevmaskedids) {
+void ExtractMaskToTable::addToTableWorkspace(
+    const TableWorkspace_sptr &outws, std::vector<detid_t> maskeddetids,
+    double xmin, double xmax, std::vector<detid_t> prevmaskedids) {
   // Sort vector of detectors ID
   size_t numdetids = maskeddetids.size();
   if (numdetids == 0) {
-    stringstream warnss;
+    std::stringstream warnss;
     warnss << "Attempting to add an empty vector of masked detectors IDs to "
               "output workspace.  Operation failed.";
     g_log.warning(warnss.str());
@@ -342,7 +340,7 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
   }
 
   // Convert vector to string
-  stringstream spectralist;
+  std::stringstream spectralist;
   detid_t previd = maskeddetids[0];
   detid_t headid = maskeddetids[0];
   for (size_t i = 1; i < numdetids; ++i) {
@@ -366,7 +364,7 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
     } else {
       g_log.error() << "Current ID = " << tmpid << ", Previous ID = " << previd
                     << ", Head ID = " << headid << ".\n";
-      throw runtime_error("Impossible!  Programming logic error!");
+      throw std::runtime_error("Impossible!  Programming logic error!");
     }
   } // ENDFOR (i)
 
@@ -377,7 +375,7 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
     spectralist << " " << headid << "-" << previd;
 
   // Add to table workspace
-  string specliststr = spectralist.str();
+  std::string specliststr = spectralist.str();
   TableRow newrow = outws->appendRow();
   newrow << xmin << xmax << specliststr;
 }
@@ -391,11 +389,11 @@ std::vector<detid_t>
 ExtractMaskToTable::subtractVector(std::vector<detid_t> minuend,
                                    std::vector<detid_t> subtrahend) {
   // Define some variables
-  vector<detid_t>::iterator firstsubiter, fiter;
+  std::vector<detid_t>::iterator firstsubiter, fiter;
   firstsubiter = subtrahend.begin();
 
   // Returned
-  vector<detid_t> diff;
+  std::vector<detid_t> diff;
   size_t numminend = minuend.size();
 
   for (size_t i = 0; i < numminend; ++i) {

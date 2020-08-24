@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLOTDIALOG_H
-#define PLOTDIALOG_H
+#pragma once
 
 #include "MultiLayer.h"
 #include <QDialog>
@@ -70,7 +69,7 @@ class PlotDialog : public QDialog {
 
 public:
   PlotDialog(bool showExtended, ApplicationWindow *app, MultiLayer *ml,
-             Qt::WFlags fl = nullptr);
+             const Qt::WFlags &fl = nullptr);
   void initFonts(const QFont &titlefont, const QFont &axesfont,
                  const QFont &numbersfont, const QFont &legendfont);
   void insertColumnsList(const QStringList &names) { columnNames = names; };
@@ -321,5 +320,3 @@ public:
 protected:
   QwtPlotItem *d_curve;
 };
-
-#endif

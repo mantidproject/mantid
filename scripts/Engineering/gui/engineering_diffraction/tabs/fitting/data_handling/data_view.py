@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from qtpy import QtWidgets, QtCore
 
 from mantidqt.utils.qt import load_ui
@@ -18,18 +17,23 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def __init__(self, parent=None):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
-
+        # file finder
         self.finder_data.setLabelText("Focused Run Files")
         self.finder_data.isForRunFiles(False)
         self.finder_data.allowMultipleFiles(True)
         self.finder_data.setFileExtensions([".nxs"])
+        # xunit combo box
+        self.setup_xunit_combobox()
 
     # =================
     # Slot Connectors
     # =================
 
     def set_on_load_clicked(self, slot):
-        self.button_load.clicked.connect(slot)
+        self.button_load.clicked.connect(lambda: slot(self.combo_xunit.currentText()))
+
+    def set_on_xunit_changed(self, slot):
+        self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_xunit.currentText()))
 
     def set_enable_button_connection(self, slot):
         self.sig_enable_load_button.connect(slot)
@@ -39,6 +43,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def set_on_remove_selected_clicked(self, slot):
         self.button_removeSelected.clicked.connect(slot)
+
+    def set_on_plotBG_clicked(self, slot):
+        self.button_plotBG.clicked.connect(slot)
 
     def set_on_table_cell_changed(self, slot):
         self.table_selection.cellChanged.connect(slot)  # Row, Col
@@ -50,7 +57,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
 
-    def add_table_row(self, run_no, bank, checked):
+    def add_table_row(self, run_no, bank, checked, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
 
@@ -69,6 +76,37 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
             check_box.setCheckState(QtCore.Qt.Checked)
         else:
             check_box.setCheckState(QtCore.Qt.Unchecked)
+
+        bgsub_check_box = QtWidgets.QTableWidgetItem()
+        bgsub_check_box.setFlags(bgsub_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
+        bgsub_check_box.setToolTip('Estimate the background using iterative low-pass (smoothing) filter algorithm')
+        self.table_selection.setItem(row_no, 3, bgsub_check_box)
+        if bgsub:
+            bgsub_check_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            bgsub_check_box.setCheckState(QtCore.Qt.Unchecked)
+
+        niter_item = QtWidgets.QTableWidgetItem()
+        niter_item.setData(QtCore.Qt.EditRole, int(niter))
+        niter_item.setFlags(niter_item.flags() | QtCore.Qt.ItemIsEditable)
+        niter_item.setToolTip('The number of iterations in the background estimation')
+        self.table_selection.setItem(row_no, 4, niter_item)
+
+        xwindow_item = QtWidgets.QTableWidgetItem()
+        xwindow_item.setData(QtCore.Qt.EditRole, float(xwindow))
+        xwindow_item.setFlags(xwindow_item.flags() | QtCore.Qt.ItemIsEditable)
+        xwindow_item.setToolTip('The width of the convolution window used for finding the background (in x-axis units)')
+        self.table_selection.setItem(row_no, 5, xwindow_item)
+
+        SG_check_box = QtWidgets.QTableWidgetItem()
+        SG_check_box.setFlags(SG_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
+        SG_check_box.setToolTip(
+            'Apply linear Savitzky–Golay filter before first iteration of background subtraction (recommended)')
+        self.table_selection.setItem(row_no, 6, SG_check_box)
+        if SG:
+            SG_check_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            SG_check_box.setCheckState(QtCore.Qt.Unchecked)
 
     def remove_table_row(self, row_no):
         self.table_selection.removeRow(row_no)
@@ -104,9 +142,26 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def get_item_checked(self, row, col):
         return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
 
+    def read_bg_params_from_table(self, row):
+        isBGsub = self.get_item_checked(row, 3)
+        niter = int(self.get_table_item(row, 4).text())
+        xwindow = float(self.get_table_item(row, 5).text())
+        doSGfilter = self.get_item_checked(row, 6)
+        return [isBGsub, niter, xwindow, doSGfilter]
+
     # =================
     # State Getters
     # =================
 
     def is_searching(self):
         return self.finder_data.isSearching()
+
+    # =================
+    # Internal Setup
+    # =================
+
+    def setup_xunit_combobox(self):
+        self.combo_xunit.setEditable(False)
+        # make TOF default
+        index = self.combo_xunit.findText("TOF")
+        self.combo_xunit.setCurrentIndex(index)

@@ -5,6 +5,7 @@ set(SRC_FILES
     src/ArrayOrderedPairsValidator.cpp
     src/ArrayProperty.cpp
     src/Atom.cpp
+    src/AttenuationProfile.cpp
     src/BinFinder.cpp
     src/BinaryStreamReader.cpp
     src/BinaryStreamWriter.cpp
@@ -76,6 +77,7 @@ set(SRC_FILES
     src/NDRandomNumberGenerator.cpp
     src/NeutronAtom.cpp
     src/NexusDescriptor.cpp
+    src/NexusHDF5Descriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
     src/ParaViewVersion.cpp
@@ -147,6 +149,7 @@ set(INC_FILES
     inc/MantidKernel/ArrayOrderedPairsValidator.h
     inc/MantidKernel/ArrayProperty.h
     inc/MantidKernel/Atom.h
+    inc/MantidKernel/AttenuationProfile.h
     inc/MantidKernel/BinFinder.h
     inc/MantidKernel/BinaryFile.h
     inc/MantidKernel/BinaryStreamReader.h
@@ -241,6 +244,7 @@ set(INC_FILES
     inc/MantidKernel/NetworkProxy.h
     inc/MantidKernel/NeutronAtom.h
     inc/MantidKernel/NexusDescriptor.h
+    inc/MantidKernel/NexusHDF5Descriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/ParaViewVersion.h
@@ -307,7 +311,6 @@ set(INC_FILES
     inc/MantidKernel/VisibleWhenProperty.h
     inc/MantidKernel/WarningSuppressions.h
     inc/MantidKernel/WriteLock.h
-    inc/MantidKernel/XMLInstantiator.h
     inc/MantidKernel/cow_ptr.h
     inc/MantidKernel/make_cow.h
     inc/MantidKernel/normal_distribution.h)
@@ -318,6 +321,7 @@ set(TEST_FILES
     ArrayOrderedPairsValidatorTest.h
     ArrayPropertyTest.h
     AtomTest.h
+    AttenuationProfileTest.h
     BinFinderTest.h
     BinaryFileTest.h
     BinaryStreamReaderTest.h
@@ -396,6 +400,7 @@ set(TEST_FILES
     NearestNeighboursTest.h
     NeutronAtomTest.h
     NexusDescriptorTest.h
+    NexusHDF5DescriptorTest.h
     NullValidatorTest.h
     OptionalBoolTest.h
     ProgressBaseTest.h
@@ -489,9 +494,9 @@ set_target_properties(Kernel
 
 target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
-                                  ${JSONCPP_INCLUDE_DIR}
-                           PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
-                                   ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
+                                  ${JSONCPP_INCLUDE_DIR} ${NEXUS_INCLUDE_DIR}
+                           PRIVATE ${GSL_INCLUDE_DIR}
+			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
@@ -503,11 +508,6 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 
-# For older gcc versions (<4.5) if we do not put stdc++ first then things crash
-# when an exceptions are thrown in Python.
-if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
-  target_link_libraries(Kernel LINK_PRIVATE stdc++)
-endif()
 target_link_libraries(Kernel
                       PUBLIC
                       ${NEXUS_LIBRARIES}
@@ -519,7 +519,10 @@ target_link_libraries(Kernel
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
-                      ${NETWORK_LIBRARIES})
+                      ${NETWORK_LIBRARIES}
+                      span
+                      ${HDF5_LIBRARIES}
+                      )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage
                                                        # queries
@@ -592,6 +595,7 @@ set(UPDATE_INSTRUMENT_DEFINTITIONS "0")
 set(CHECK_FOR_NEW_MANTID_VERSION "0")
 set(ENABLE_USAGE_REPORTS "0")
 set(PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins")
+set(PYTHONPLUGIN_MANIFEST "${CMAKE_BINARY_DIR}/Framework/PythonInterface/plugins/python-plugin-manifest.txt")
 set(
   DATADIRS
   ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
@@ -646,6 +650,7 @@ else()
 endif()
 set(FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins)
 set(PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python")
+set(PYTHONPLUGIN_MANIFEST "${PYTHONPLUGIN_DIRS}/python-plugin-manifest.txt")
 if(MAKE_VATES)
   if(APPLE)
     set(PARAVIEW_PYTHON_PATHS "../Libraries;../Python;")

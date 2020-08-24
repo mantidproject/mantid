@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef EXTENSIBLE_FILE_DIALOG_H
-#define EXTENSIBLE_FILE_DIALOG_H
+#pragma once
 
 #include <QFileDialog>
 #include <QPushButton>
@@ -55,9 +54,10 @@ public:
    * \param extended flag: show/hide the advanced options on start-up
    * \param flags window flags
    */
-  ExtensibleFileDialog(QWidget *parent = nullptr, bool extended = true,
-                       Qt::WFlags flags = Qt::WindowCloseButtonHint |
-                                          Qt::WindowType::WindowTitleHint);
+  ExtensibleFileDialog(
+      QWidget *parent = nullptr, bool extended = true,
+      const Qt::WFlags &flags = Qt::WindowCloseButtonHint |
+                                Qt::WindowType::WindowTitleHint);
   //! Set the extension widget to be displayed when the user presses the toggle
   // button.
   void setExtensionWidget(QWidget *extension);
@@ -87,5 +87,3 @@ private:
   //! The layout row (of the assumed QGridLayout) used for extensions
   int d_extension_row;
 };
-
-#endif // ifndef EXTENSIBLE_FILE_DIALOG_H

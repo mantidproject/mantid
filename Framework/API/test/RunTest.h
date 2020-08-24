@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -39,7 +39,7 @@ public:
   std::string setValue(const std::string &) override { return ""; }
   std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
-  std::string setDataItem(const boost::shared_ptr<DataItem>) override {
+  std::string setDataItem(const std::shared_ptr<DataItem> &) override {
     return "";
   }
   Property &operator+=(Property const *) override { return *this; }
@@ -427,7 +427,7 @@ public:
     TS_ASSERT_EQUALS(runCopy.getGoniometer().getNumberAxes(), 3);
   }
 
-  void addTimeSeriesEntry(Run &runInfo, std::string name, double val) {
+  void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
     TimeSeriesProperty<double> *tsp;
     tsp = new TimeSeriesProperty<double>(name);
     tsp->addValue("2011-05-24T00:00:00", val);
@@ -609,6 +609,65 @@ public:
     TS_ASSERT_DELTA(run3.getProtonCharge(), 1.234, 1e-5);
   }
 
+  void test_equals_when_runs_empty() {
+    Run a{};
+    Run b{a};
+    TS_ASSERT_EQUALS(a, b);
+  }
+
+  void test_equals_when_runs_identical() {
+    Run a{};
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    const DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
+    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    Run b{a};
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equal_when_histogram_bin_boundaries_differ() {
+    Run a{};
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
+    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    Run b{a};
+    b.storeHistogramBinBoundaries({0, 2, 3, 4});
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_properties_differ() {
+    Run a{};
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
+    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    Run b{a};
+    b.removeProperty("Test");
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_goniometer_differ() {
+    Run a{};
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
+    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    Run b{a};
+    Mantid::Kernel::DblMatrix rotation_y{
+        {0, 0, 1, 0, 1, 0, -1, 0, 0}}; // 90 degrees around y axis
+    b.setGoniometer(Goniometer{rotation_y}, false /*do not use log angles*/);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
 private:
   /// Testing bins
   std::vector<double> m_test_energy_bins;
@@ -630,12 +689,9 @@ public:
   }
 
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times() {
-    double value(0.0);
     for (size_t i = 0; i < 20000; ++i) {
-      value = m_testRun.getPropertyAsSingleValue(m_propName);
+      m_testRun.getPropertyAsSingleValue(m_propName);
     }
-    // Enure variable is used so that it is not optimised away by the compiler
-    value += 1.0;
   }
 
   Run m_testRun;

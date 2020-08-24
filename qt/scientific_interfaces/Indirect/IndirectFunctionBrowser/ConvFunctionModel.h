@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_
-#define MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_
+#pragma once
 
 #include "ConvTypes.h"
 #include "DllConfig.h"
@@ -37,6 +36,7 @@ public:
   void setParameter(const QString &paramName, double value) override;
   void setParameterError(const QString &paramName, double value) override;
   FitType getFitType() const;
+  LorentzianType getLorentzianType() const;
   BackgroundType getBackgroundType() const;
   double getParameter(const QString &paramName) const override;
   double getParameterError(const QString &paramName) const override;
@@ -82,6 +82,7 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
 
   void setFitType(FitType fitType);
+  void setLorentzianType(LorentzianType lorentzianType);
   void setDeltaFunction(bool);
   bool hasDeltaFunction() const;
   void setTempCorrection(bool, double value);
@@ -93,8 +94,8 @@ public:
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setResolution(std::string const &name, TableDatasetIndex const &index);
-  void
-  setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setResolution(
+      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setQValues(const std::vector<double> &qValues);
 
   QMap<ParamID, double> getCurrentValues() const;
@@ -104,9 +105,9 @@ public:
 private:
   void clearData();
   void setModel();
-  // QString buildFunctionString() const;
   boost::optional<QString> getLor1Prefix() const;
   boost::optional<QString> getLor2Prefix() const;
+  boost::optional<QString> getFitTypePrefix() const;
   boost::optional<QString> getDeltaPrefix() const;
   boost::optional<QString> getBackgroundPrefix() const;
   void setParameter(ParamID name, double value);
@@ -116,11 +117,14 @@ private:
   boost::optional<QString> getParameterDescription(ParamID name) const;
   boost::optional<QString> getPrefix(ParamID name) const;
   void setCurrentValues(const QMap<ParamID, double> &);
-  void applyParameterFunction(std::function<void(ParamID)> paramFun) const;
+  void
+  applyParameterFunction(const std::function<void(ParamID)> &paramFun) const;
   boost::optional<ParamID> getParameterId(const QString &parName);
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
   std::string buildPeaksFunctionString() const;
+  std::string buildLorentzianPeaksString() const;
+  std::string buildFitTypeString() const;
   std::string buildBackgroundFunctionString() const;
   std::string buildStretchExpFTFunctionString() const;
   std::string buildElasticDiffSphereFunctionString() const;
@@ -131,11 +135,13 @@ private:
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
   int getNumberOfPeaks() const;
-  void checkConvolution(IFunction_sptr fun);
-  void checkSingleFunction(IFunction_sptr fun, bool &isFitTypeSet);
+  void checkConvolution(const IFunction_sptr &fun);
+  void checkSingleFunction(const IFunction_sptr &fun, bool &isLorentzianTypeSet,
+                           bool &isFiTypeSet);
 
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;
+  LorentzianType m_lorentzianType = LorentzianType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
   bool m_hasDeltaFunction = false;
   bool m_hasTempCorrection = false;
@@ -146,7 +152,7 @@ private:
   BackgroundSubType m_backgroundSubtype;
   std::string m_resolutionName;
   TableDatasetIndex m_resolutionIndex;
-  std::vector<std::pair<std::string, int>> m_fitResolutions;
+  std::vector<std::pair<std::string, size_t>> m_fitResolutions;
   std::vector<double> m_qValues;
   bool m_isQDependentFunction = false;
 };
@@ -154,5 +160,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_ */

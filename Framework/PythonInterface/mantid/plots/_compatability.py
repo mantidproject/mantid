@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 # local imports
 from mantid.kernel import Logger
 from mantid.plots.utility import MantidAxType
@@ -21,6 +19,8 @@ LOGGER = Logger("mantid.plots.plotCompatability")
 # ================================================
 # Compatability functions
 # ================================================
+
+
 def plotSpectrum(workspaces, indices=None, distribution=None, error_bars=False,
                  type=None, window=None, clearWindow=None,
                  waterfall=None, spectrum_nums=None):
@@ -97,4 +97,3 @@ def _report_deprecated_parameter(param_name,param_value):
     """Logs a warning message if the parameter value is not None"""
     if param_value is not None:
         LOGGER.warning("The argument '{}' is not supported in workbench and has been ignored".format(param_name))
-

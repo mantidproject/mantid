@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MD_CURVE_H
-#define MANTID_MD_CURVE_H
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCurve.h"
 #include "MantidQtWidgets/Plotting/Qwt/MantidQwtIMDWorkspaceData.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // Forward definitions
 class MantidUI;
@@ -90,7 +89,7 @@ private:
   /// Handles afterReplace notification
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Handle an ADS clear notification
   void clearADSHandle() override { emit removeMe(this); }
@@ -107,5 +106,3 @@ private:
   QString
       m_wsName; ///< Workspace name. If empty the ws isn't in the data service
 };
-
-#endif // MANTID_CURVE_H

@@ -1,19 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import inspect
 import unittest
 
-from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
+from mantid.api import (AlgorithmFactory, IAlgorithm, IEventWorkspace, ITableWorkspace,
                         PythonAlgorithm, MatrixWorkspace, mtd)
 import mantid.simpleapi as simpleapi
 import numpy
-import six
 
 
 class SimpleAPITest(unittest.TestCase):
@@ -190,13 +187,13 @@ class SimpleAPITest(unittest.TestCase):
         if hasattr(inspect, 'signature'):
             method_parameters = list(MatrixWorkspace.rebin.__signature__.parameters)
             self.assertEqual("self", method_parameters[0])
-            self.assertEqual(method_parameters[1:],
-                             list(simpleapi.rebin.__signature__.parameters))
+            self.assertEqual(method_parameters,
+                             list(simpleapi.rebin.__call__.__signature__.parameters))
         else:
-            freefunction_sig = six.get_function_code(simpleapi.rebin).co_varnames
+            freefunction_sig = inspect.getsource(simpleapi.rebin).co_varnames
             expected_method_sig = ['self']
             expected_method_sig.extend(freefunction_sig)
-            self.assertEqual(six.get_function_code(MatrixWorkspace.rebin).co_varnames, tuple(expected_method_sig))
+            self.assertEqual(inspect.getsource(MatrixWorkspace.rebin).co_varnames, tuple(expected_method_sig))
 
     def test_function_attached_as_workpace_method_does_the_same_as_the_free_function(self):
         # Use Rebin as a test
@@ -335,12 +332,12 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_create_algorithm_object_produces_initialized_non_child_alorithm_outside_PyExec(self):
         alg = simpleapi._create_algorithm_object("Rebin")
-        self._is_initialized_test(alg, 1, expected_class=AlgorithmProxy,
+        self._is_initialized_test(alg, 1, expected_class=IAlgorithm,
                                   expected_child=False)
 
     def test_create_algorithm_with_version_produces_initialized_alorithm(self):
         alg = simpleapi._create_algorithm_object("LoadRaw", 3)
-        self._is_initialized_test(alg, 3, expected_class=AlgorithmProxy,
+        self._is_initialized_test(alg, 3, expected_class=IAlgorithm,
                                   expected_child=False)
 
     def test_create_algorithm_produces_child_inside_PyExec(self):

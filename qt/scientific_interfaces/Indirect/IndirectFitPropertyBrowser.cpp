@@ -1,10 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPropertyBrowser.h"
+#include "FitStatusWidget.h"
 #include "FunctionTemplateBrowser.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -46,8 +47,7 @@ namespace IDA {
 IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent)
     : QDockWidget(parent), m_templateBrowser(nullptr),
       m_functionWidget(nullptr) {
-  setFeatures(QDockWidget::DockWidgetFloatable |
-              QDockWidget::DockWidgetMovable);
+  setFeatures(QDockWidget::DockWidgetFloatable);
   setWindowTitle("Fit Function");
 }
 
@@ -85,17 +85,14 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
       nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
   m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("CreateOutput"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("LogValue"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PassWSIndexToFunction"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("ConvolveMembers"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(
-      QString("OutputCompositeMembers"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("OutputWorkspace"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("IgnoreInvalidData"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("Output"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PeakRadius"));
-  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PlotParameter"));
+}
+
+void IndirectFitPropertyBrowser::setHiddenProperties(
+    std::vector<std::string> hiddenProperties) {
+  for (const auto &propertyName : hiddenProperties) {
+    m_fitOptionsBrowser->addPropertyToBlacklist(
+        QString::fromStdString(propertyName));
+  }
 }
 
 bool IndirectFitPropertyBrowser::isFullFunctionBrowserActive() const {
@@ -106,11 +103,11 @@ MultiDomainFunction_sptr IndirectFitPropertyBrowser::getGlobalFunction() const {
   auto fun = isFullFunctionBrowserActive()
                  ? m_functionBrowser->getGlobalFunction()
                  : m_templateBrowser->getGlobalFunction();
-  if (auto temp = boost::dynamic_pointer_cast<MultiDomainFunction>(fun)) {
+  if (auto temp = std::dynamic_pointer_cast<MultiDomainFunction>(fun)) {
     return temp;
   } else if (fun) {
     MultiDomainFunction_sptr multiFunction =
-        boost::make_shared<MultiDomainFunction>();
+        std::make_shared<MultiDomainFunction>();
     multiFunction->addFunction(fun);
     multiFunction->setDomainIndex(0, 0);
     return multiFunction;
@@ -168,6 +165,7 @@ void IndirectFitPropertyBrowser::init() {
   auto w = new QWidget(this);
   m_mainLayout = new QVBoxLayout(w);
   m_mainLayout->setContentsMargins(0, 0, 0, 0);
+
   m_functionWidget = new QStackedWidget(this);
   if (m_templateBrowser) {
     m_functionWidget->insertWidget(0, m_templateBrowser);
@@ -175,7 +173,11 @@ void IndirectFitPropertyBrowser::init() {
     m_browserSwitcher->setObjectName("browserSwitcher");
     connect(m_browserSwitcher, SIGNAL(clicked(bool)), this,
             SLOT(showFullFunctionBrowser(bool)));
-    m_mainLayout->insertWidget(0, m_browserSwitcher);
+    m_fitStatusWidget = new FitStatusWidget(w);
+    m_fitStatusWidget->setObjectName("browserFitStatus");
+    m_fitStatusWidget->hide();
+    m_mainLayout->insertWidget(0, m_fitStatusWidget);
+    m_mainLayout->insertWidget(1, m_browserSwitcher);
   }
   m_functionWidget->addWidget(m_functionBrowser);
   auto splitter = new QSplitter(Qt::Vertical);
@@ -212,7 +214,7 @@ IndirectFitPropertyBrowser::getFittingFunction() const {
     if (getNumberOfDatasets() > 0) {
       return getGlobalFunction();
     } else {
-      auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+      auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
       auto singleFunction = getSingleFunction();
       if (singleFunction) {
         multiDomainFunction->addFunction(singleFunction);
@@ -221,7 +223,7 @@ IndirectFitPropertyBrowser::getFittingFunction() const {
       return multiDomainFunction;
     }
   } catch (const std::invalid_argument &) {
-    return boost::make_shared<MultiDomainFunction>();
+    return std::make_shared<MultiDomainFunction>();
   }
 }
 
@@ -248,6 +250,11 @@ std::string IndirectFitPropertyBrowser::costFunction() const {
 bool IndirectFitPropertyBrowser::convolveMembers() const {
   return m_fitOptionsBrowser->getProperty("ConvolveMembers").toStdString() !=
          "0";
+}
+
+bool IndirectFitPropertyBrowser::outputCompositeMembers() const {
+  return m_fitOptionsBrowser->getProperty("OutputCompositeMembers")
+             .toStdString() != "0";
 }
 
 std::string IndirectFitPropertyBrowser::fitEvaluationType() const {
@@ -289,6 +296,24 @@ void IndirectFitPropertyBrowser::updateMultiDatasetParameters(
     m_templateBrowser->updateMultiDatasetParameters(paramTable);
 }
 
+void IndirectFitPropertyBrowser::updateFitStatusData(
+    const std::vector<std::string> &status,
+    const std::vector<double> &chiSquared) {
+  m_fitStatus = status;
+  m_fitChiSquared = chiSquared;
+  updateFitStatus(currentDataset());
+}
+
+void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
+  if (index.value + 1 > m_fitStatus.size() ||
+      index.value + 1 > m_fitChiSquared.size()) {
+    return;
+  }
+  m_fitStatusWidget->update(m_fitStatus[index.value],
+                            m_fitChiSquared[index.value]);
+  return;
+}
+
 /**
  * @return  The selected fit type in the fit type combo box.
  */
@@ -302,9 +327,22 @@ QString IndirectFitPropertyBrowser::selectedFitType() const {
 /**
  * Sets whether fit members should be convolved with the resolution after a fit.
  *
- * @param convolveMembers If true, members are to be convolved.
+ * @param convolveEnabled: If true, members are to be convolved.
  */
-void IndirectFitPropertyBrowser::setConvolveMembers(bool) {}
+void IndirectFitPropertyBrowser::setConvolveMembers(bool convolveEnabled) {
+  m_fitOptionsBrowser->setProperty("ConvolveMembers",
+                                   QString(convolveEnabled ? "1" : "0"));
+}
+
+/**
+ * Sets whether to output fit members
+ *
+ * @param outputEnabled: If true, fit members are outputted
+ */
+void IndirectFitPropertyBrowser::setOutputCompositeMembers(bool outputEnabled) {
+  m_fitOptionsBrowser->setProperty("OutputCompositeMembers",
+                                   QString(outputEnabled ? "1" : "0"));
+}
 
 /**
  * Clears the functions in this indirect fit property browser.
@@ -318,7 +356,8 @@ void IndirectFitPropertyBrowser::clear() {
  * Updates the plot guess feature in this indirect fit property browser.
  * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess(MatrixWorkspace_const_sptr) {}
+void IndirectFitPropertyBrowser::updatePlotGuess(
+    const MatrixWorkspace_const_sptr &) {}
 
 void IndirectFitPropertyBrowser::setErrorsEnabled(bool enabled) {
   m_functionBrowser->setErrorsEnabled(enabled);
@@ -330,6 +369,10 @@ void IndirectFitPropertyBrowser::updateParameterEstimationData(
   m_templateBrowser->updateParameterEstimationData(std::move(data));
 }
 
+void IndirectFitPropertyBrowser::estimateFunctionParameters() {
+  m_templateBrowser->estimateFunctionParameters();
+}
+
 void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
   if (isFullFunctionBrowserActive()) {
     m_functionBrowser->setBackgroundA0(value);
@@ -338,27 +381,29 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
   }
 }
 
-void IndirectFitPropertyBrowser::setCurrentDataset(TableRowIndex i) {
+void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0)
     return;
+  updateFitStatus(i);
   if (isFullFunctionBrowserActive()) {
-    m_functionBrowser->setCurrentDataset(i.value);
+    m_functionBrowser->setCurrentDataset(static_cast<int>(i.value));
   } else {
-    m_templateBrowser->setCurrentDataset(i.value);
+    m_templateBrowser->setCurrentDataset(static_cast<int>(i.value));
   }
 }
 
-TableRowIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return TableRowIndex{m_functionBrowser->getCurrentDataset()};
+FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
+  return FitDomainIndex{
+      static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
-    TableRowIndex nData, const QStringList &datasetNames,
+    int nData, const QStringList &datasetNames,
     const std::vector<double> &qValues,
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
-  m_functionBrowser->setNumberOfDatasets(nData.value);
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+  m_functionBrowser->setNumberOfDatasets(nData);
   m_functionBrowser->setDatasetNames(datasetNames);
-  m_templateBrowser->setNumberOfDatasets(nData.value);
+  m_templateBrowser->setNumberOfDatasets(nData);
   m_templateBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setQValues(qValues);
   m_templateBrowser->setResolution(fitResolutions);
@@ -387,7 +432,7 @@ void IndirectFitPropertyBrowser::setModelResolution(
 }
 
 void IndirectFitPropertyBrowser::setModelResolution(
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   if (isFullFunctionBrowserActive()) {
     showFullFunctionBrowser(false);
   }

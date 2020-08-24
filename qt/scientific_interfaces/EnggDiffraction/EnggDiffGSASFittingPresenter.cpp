@@ -5,6 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffGSASFittingPresenter.h"
+
+#include <utility>
+
 #include "EnggDiffGSASRefinementMethod.h"
 #include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 
@@ -27,10 +30,11 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     std::unique_ptr<IEnggDiffGSASFittingModel> model,
     IEnggDiffGSASFittingView *view,
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
-    boost::shared_ptr<IEnggDiffractionParam> mainSettings)
-    : m_model(std::move(model)), m_multiRunWidget(multiRunWidget),
-      m_mainSettings(mainSettings), m_view(view), m_viewHasClosed(false) {}
+    std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+    std::shared_ptr<IEnggDiffractionParam> mainSettings)
+    : m_model(std::move(model)), m_multiRunWidget(std::move(multiRunWidget)),
+      m_mainSettings(std::move(mainSettings)), m_view(view),
+      m_viewHasClosed(false) {}
 
 EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {}
 
@@ -113,7 +117,7 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
 GSASIIRefineFitPeaksParameters
 EnggDiffGSASFittingPresenter::collectInputParameters(
     const RunLabel &runLabel,
-    const Mantid::API::MatrixWorkspace_sptr inputWS) const {
+    const Mantid::API::MatrixWorkspace_sptr &inputWS) const {
   const auto refinementMethod = m_view->getRefinementMethod();
   const auto instParamFile = m_view->getInstrumentFileName();
   const auto phaseFiles = m_view->getPhaseFileNames();

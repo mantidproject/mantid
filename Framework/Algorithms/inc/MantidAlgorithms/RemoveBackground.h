@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -35,7 +36,7 @@ from a matrix workspace, expressed in units, different from TOF.
 */
 
 /**Class actually performing background removal from a workspace spectra */
-class DLLExport BackgroundHelper {
+class MANTID_ALGORITHMS_DLL BackgroundHelper {
 public:
   BackgroundHelper();
 
@@ -92,7 +93,7 @@ private:
   double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;
 };
 
-class DLLExport RemoveBackground : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RemoveBackground : public API::Algorithm {
 public:
   RemoveBackground() {}
   RemoveBackground(const RemoveBackground &) = delete;

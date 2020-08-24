@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, print_function, unicode_literals)
-
 from collections import OrderedDict
 from copy import deepcopy
 import datetime
@@ -14,7 +12,7 @@ import unittest
 
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
-from mantid.py3compat import iteritems, mock, string_types
+from unittest import mock
 from mantid.simpleapi import Load
 from mantidqt.utils.qt.testing import start_qapplication
 
@@ -51,7 +49,7 @@ def create_test_fits(input_workspaces,
         'Name': name,
         'Value': value,
         'Error': error
-    } for name, (value, error) in iteritems(parameters)]
+    } for name, (value, error) in parameters.items()]
 
     fits = []
     for name in input_workspaces:
@@ -364,6 +362,21 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertRaises(RuntimeError, model.create_results_table,
                           selected_logs, selected_results)
 
+    def test_that_when_new_fit_is_performed_function_name_is_set_to_lastest_fit_name(self):
+        parameters = OrderedDict([('Height', (100, 0.1)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters, [])
+
+        parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func2 = create_test_fits(('ws2', ), 'func2', parameters, [])
+        model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
+
+        model.on_new_fit_performed()
+
+        self.assertEqual(model.selected_fit_function(), 'func2')
+
+
     # ---------------------- Private helper functions -------------------------
 
     def _assert_table_matches_expected(self, expected_cols, expected_content,
@@ -382,7 +395,7 @@ class ResultsTabModelTest(unittest.TestCase):
             self.assertEqual(len(expected_row), len(actual_row))
             for col_index, expected in enumerate(expected_row):
                 actual = table.cell(row_index, col_index)
-                if isinstance(expected, string_types):
+                if isinstance(expected, str):
                     self.assertEqual(expected, actual)
                 else:
                     # Fit pushes things back/forth through strings so exact match is not possible

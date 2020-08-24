@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTWIDGETRENDERTAB_H_
-#define INSTRUMENTWIDGETRENDERTAB_H_
+#pragma once
 
 #include "ColorBar.h"
 #include "ColorMap.h"
@@ -72,7 +71,7 @@ public slots:
   void changeColorMap(const QString &filename = "");
   void setSurfaceType(int /*index*/);
   void flipUnwrappedView(bool /*on*/);
-  void saveImage(QString filename = "");
+  void saveImage(const QString &filename = "");
 
 private slots:
 
@@ -149,4 +148,3 @@ private: // members
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif /*INSTRUMENTWIDGETRENDERTAB_H_*/

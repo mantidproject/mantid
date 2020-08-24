@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : Plot3DDialog.h
@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLOT3DDIALOG_H
-#define PLOT3DDIALOG_H
+#pragma once
 
 #include "Graph3D.h"
 #include <QCheckBox>
@@ -42,7 +41,7 @@ class Plot3DDialog : public QDialog {
   Q_OBJECT
 
 public:
-  Plot3DDialog(QWidget *parent, Qt::WFlags fl = nullptr);
+  Plot3DDialog(QWidget *parent, const Qt::WFlags &fl = nullptr);
   void setPlot(Graph3D *);
 
   void showTitleTab();
@@ -114,5 +113,3 @@ private:
   double zScale;
   double zoom;
 };
-
-#endif

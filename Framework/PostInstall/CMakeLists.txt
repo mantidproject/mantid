@@ -17,7 +17,7 @@ set(EXCLUDE_REGEX ".*_template")
 set(COMPILE_SCRIPT "message ( \"Byte-compiling Python in ${PACKAGE_ROOT}\")")
 set(
   COMPILE_SCRIPT
-  "${COMPILE_SCRIPT}\n  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -m compileall -q -x \"${EXCLUDE_REGEX}\" \"${PACKAGE_ROOT}\" OUTPUT_QUIET ERROR_QUIET )"
+  "${COMPILE_SCRIPT}\n  execute_process ( COMMAND ${Python_EXECUTABLE} -m compileall -q -x \"${EXCLUDE_REGEX}\" \"${PACKAGE_ROOT}\" OUTPUT_QUIET ERROR_QUIET )"
   )
 
 install(CODE ${COMPILE_SCRIPT})
