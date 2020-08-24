@@ -117,6 +117,11 @@ You may find the following aliases helpful. You can also add your own.
            # Remove all branches starting pr/
            test-pr-remove-all = "!f() { git branch | grep pr/ | xargs git branch -D; }; f"
 
+           # Get into the habit of using add --patch to create focused commits
+           ap = add --patch
+           # Amend the latest commit
+           ca = commit --amend
+
            # Pretty oneline log with a bit more info than git log --oneline
            lg = log --pretty=concise
            # Pretty log showing only commits since master
