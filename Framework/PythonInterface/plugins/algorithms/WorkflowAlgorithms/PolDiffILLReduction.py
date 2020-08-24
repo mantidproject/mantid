@@ -244,12 +244,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                 list_pol = []
                 for numor in numors:
                     list_pol.append('{0}_{1}'.format(numor, direction))
-                MergeRuns(','.join(list_pol), OutputWorkspace='{0}_{1}'.format(ws, direction))
-                names_list.append('{0}_{1}'.format(ws, direction))
-            GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace='tmp')
-            DeleteWorkspace(ws)
-            Divide(LHSWorkspace='tmp', RHSWorkspace=CreateSingleValuedWorkspace(len(numors)), OutputWorkspace=ws)
-            DeleteWorkspace('tmp')
+                SumOverlappingTubes(','.join(list_pol), OutputWorkspace='{0}_{1}'.format(ws[2:], direction), OutputType='1D', ScatteringAngleBinning=0.5, Normalise=True, HeightAxis='-0.1,0.1')
+                names_list.append('{0}_{1}'.format(ws[2:], direction))
+            GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
         return ws
 
     def _normalise(self, ws):
