@@ -296,6 +296,9 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
   //  m_ui.lastRun->setReadOnly(false);
   //}
   
+  const int currentLastRun = extractRunNumber(lastRun());
+  auto currentInput = m_ui.runs->getText().toStdString();
+
   if (state == Qt::Checked) {
     // Set read only
     m_ui.runs->setReadOnly(true);
@@ -308,25 +311,34 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
       return;
     }
 
-    // Update text
-    // Do some checks
-    const int currentLastRun = extractRunNumber(lastRun());
-    const auto currentInput = m_ui.runs->getText();
-
+    // Only make changes if found run > user last run
     if (m_currentAutoRun > currentLastRun) {
       // Save old input
-      m_oldInput = currentInput.toStdString();
+      m_oldInput = currentInput;
+
+      // Do some checks
+      std::size_t found = currentInput.find_last_of("-");
+      QString newInput;
+      // Not found
+      if (found == -1) {
+        // just add to end
+        newInput = QString::fromStdString(currentInput);
+        newInput.append("-");
+        newInput.append(QString::number(m_currentAutoRun));
+      } else {
+        // Remove last run and replace with found last run
+        currentInput.erase(found + 1, currentInput.length() - 1);
+        newInput = QString::fromStdString(currentInput);
+        newInput.append(QString::number(m_currentAutoRun));
+      }
 
       // Update it
-      m_ui.runs->setFileTextWithSearch(QString::number(m_currentAutoRun));
+      m_ui.runs->setFileTextWithSearch(newInput);
     }
 
   } else {
     // Remove read only
     m_ui.runs->setReadOnly(false);
-
-    // Do some checks
-
 
     // Reset text
     m_ui.runs->setFileTextWithSearch(QString::fromStdString(m_oldInput));
@@ -334,6 +346,9 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
 }
 
 int ALCDataLoadingView::extractRunNumber(const std::string& file) {
+  if (file.empty())
+    return -1;
+
   auto returnVal = file;
   // Remove file extension
   returnVal.erase(returnVal.size() - 4);
