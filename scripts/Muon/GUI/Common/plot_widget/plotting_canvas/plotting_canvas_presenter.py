@@ -46,10 +46,10 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self.disable_autoscale_observer = GenericObserver(self._options_presenter.disable_autoscale)
         self._view.toolBar.disable_autoscale_notifier.add_subscriber(self.disable_autoscale_observer)
 
-
     # Interface implementation
     def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
                         autoscale: bool):
+
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
         # Create workspace information named tuple from input list

@@ -11,6 +11,7 @@ from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 from MultiPlotting.multi_plotting_context import *
 from mantidqt.utils.observer_pattern import GenericObserver
 
+
 class MultiPlotWindow(QtWidgets.QMainWindow):
     windowClosedSignal = QtCore.Signal()
 
@@ -195,7 +196,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
         self.disable_autoscale_observer = GenericObserver(self.quickEdit.disable_autoscale)
         self.plots.toolbar.disable_autoscale_notifier.add_subscriber(self.disable_autoscale_observer)
-
 
     def _autoscale_changed(self, _= None):
         if self.quickEdit.check_autoscale_state():

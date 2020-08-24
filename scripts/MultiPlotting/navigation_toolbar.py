@@ -8,6 +8,7 @@ from qtpy import QtGui
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from mantidqt.utils.observer_pattern import GenericObservable
 
+
 class myToolbar(NavigationToolbar):
     # only display the buttons we need
     toolitems = [tool for tool in NavigationToolbar.toolitems if
