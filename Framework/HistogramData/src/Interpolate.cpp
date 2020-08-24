@@ -249,8 +249,6 @@ void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
 
   std::vector<double> secondDeriv(input.size() - 1);
   for (size_t i = 0; i < input.size() - 1; i++) {
-    const auto index2 = ((i + 1) >= nypts ? nypts - 1 : (i + 1));
-
     if (calculateErrors) {
       if (xold.size() < 3) {
         throw std::runtime_error(

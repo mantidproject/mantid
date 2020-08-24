@@ -434,7 +434,7 @@ public:
     auto sparseWS =
         std::make_unique<SparseWorkspaceWrapper>(*ws, wavelengths, 4, 4);
     std::array<double, nDetectors> yvalues = {0., 1., 4.};
-    for (int i = 0; i < indices.size(); i++) {
+    for (size_t i = 0; i < indices.size(); i++) {
       auto &ys = sparseWS->mutableY(indices[i]);
       for (size_t j = 0; j < ys.size(); ++j) {
         ys[j] = yvalues[i];

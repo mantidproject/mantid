@@ -119,7 +119,7 @@ public:
                                             1.};
     std::vector<double> expectedE_interp = {0., 0.125, 0., 0.125, 0.};
     std::vector<double> expectedE(expectedE_source.size());
-    for (auto i = 0; i < expectedE_source.size(); i++) {
+    for (size_t i = 0; i < expectedE_source.size(); i++) {
       expectedE[i] =
           sqrt(pow(expectedE_source[i], 2) + pow(expectedE_interp[i], 2));
     }
