@@ -167,6 +167,28 @@ Output:
    0.16
    0.16
 
+**Example - Test loading a multi period file:**
+
+.. testcode:: LoadMuonNexusV2MultiPeriod
+
+   # Load a multi period file
+   load_muon_alg = LoadMuonNexusV2(Filename="EMU00103767.nxs_v2")
+   # The workspace is the first return value from the Loader.
+   wsGroup = load_muon_alg[0]
+   print("Workspace Group has  {}  workspaces".format(wsGroup.getNumberOfEntries()))
+   for i in range(wsGroup.getNumberOfEntries()):
+       print("Workspace has  {}  spectra".format(wsGroup.getItem(i).getNumberHistograms()))
+
+Output:
+
+.. testoutput:: LoadMuonNexusV2MultiPeriod
+
+   Workspace Group has  4  workspaces
+   Workspace has  96  spectra
+   Workspace has  96  spectra
+   Workspace has  96  spectra
+   Workspace has  96  spectra
+
 .. categories::
 
 .. sourcelink::

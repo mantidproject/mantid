@@ -326,7 +326,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.fitting_calculation_model.result = (fit_function, 'Success', 1.07)
 
         self.presenter.handle_finished()
-
+        self.view.setEnabled(True)
         self.assertEqual(self.view.undo_fit_button.isEnabled(), True)
 
     def test_after_fit_fit_cache_is_populated_for_after_fit(self):
@@ -686,6 +686,18 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.handle_new_data_loaded()
 
         self.presenter.model.create_ws_fit_function_map.assert_called_once_with()
+
+    def test_that_handle_function_structure_changed_calls_handle_display_workspace_changed_if_function_empty(self):
+        self.presenter.handle_display_workspace_changed = mock.MagicMock()
+
+        self.presenter.handle_function_structure_changed()
+
+        self.presenter.handle_display_workspace_changed.assert_called_once_with()
+
+    def test_that_calling_handle_function_structure_changed_with_no_fit_function_and_no_data_sets_stores_fit_function_list_correctly(self):
+        self.presenter.handle_function_structure_changed()
+
+        self.assertEqual(self.presenter._fit_function, [None])
 
 
 if __name__ == '__main__':

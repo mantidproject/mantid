@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
+from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable,GenericObserver
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -66,6 +66,9 @@ class GroupingTabPresenter(object):
         self.gui_variables_observer = GroupingTabPresenter.GuiVariablesChangedObserver(self)
         self.enable_observer = GroupingTabPresenter.EnableObserver(self)
         self.disable_observer = GroupingTabPresenter.DisableObserver(self)
+
+        self.disable_tab_observer = GenericObserver(self.disable_editing_without_notifying_subscribers)
+        self.enable_tab_observer = GenericObserver(self.enable_editing_without_notifying_subscribers)
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
 
@@ -174,6 +177,16 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.enable_editing()
         self.enable_editing_notifier.notify_subscribers()
 
+    def disable_editing_without_notifying_subscribers(self):
+        self._view.set_buttons_enabled(False)
+        self.grouping_table_widget.disable_editing()
+        self.pairing_table_widget.disable_editing()
+
+    def enable_editing_without_notifying_subscribers(self):
+        self._view.set_buttons_enabled(True)
+        self.grouping_table_widget.enable_editing()
+        self.pairing_table_widget.enable_editing()
+
     def calculate_all_data(self):
         self._model.show_all_groups_and_pairs()
 
@@ -185,7 +198,7 @@ class GroupingTabPresenter(object):
         self.update_thread.start()
 
     def error_callback(self, error_message):
-        self.enable_editing_notifier.notify_subscribers()
+        self.enable_editing()
         self._view.display_warning_box(error_message)
 
     def handle_update_finished(self):
