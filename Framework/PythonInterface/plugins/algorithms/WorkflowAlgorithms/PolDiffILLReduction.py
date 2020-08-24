@@ -431,31 +431,31 @@ class PolDiffILLReduction(PythonAlgorithm):
             dataX = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), 3))
             dataY = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), 3))
             for spectrum in range(mtd[ws].getItem(entry_no).getNumberHistograms()):
-                sigma_zp = mtd[ws].getItem(entry_no).readY(spectrum)
-                sigma_zm = mtd[ws].getItem(entry_no+1).readY(spectrum)
+                sigma_z_sf = mtd[ws].getItem(entry_no).readY(spectrum)
+                sigma_z_nsf = mtd[ws].getItem(entry_no+1).readY(spectrum)
                 if nMeasurements == 2:
                     dataY[spectrum][0] = 0 # Magnetic
-                    dataY[spectrum][1] = 2.0 * sigma_zp - sigma_zm  # Nuclear coherent
-                    dataY[spectrum][2] = 2.0 * sigma_zm - sigma_zp # Incoherent
+                    dataY[spectrum][1] = 2.0 * sigma_z_nsf - sigma_z_sf  # Nuclear coherent
+                    dataY[spectrum][2] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
                 elif nMeasurements == 6 or nMeasurements == 10:
-                    sigma_yp = mtd[ws].getItem(entry_no+2).readY(spectrum)
-                    sigma_ym = mtd[ws].getItem(entry_no+3).readY(spectrum)
-                    sigma_xp = mtd[ws].getItem(entry_no+4).readY(spectrum)
-                    sigma_xm = mtd[ws].getItem(entry_no+5).readY(spectrum)
+                    sigma_y_sf = mtd[ws].getItem(entry_no+2).readY(spectrum)
+                    sigma_y_nsf = mtd[ws].getItem(entry_no+3).readY(spectrum)
+                    sigma_x_sf = mtd[ws].getItem(entry_no+4).readY(spectrum)
+                    sigma_x_nsf = mtd[ws].getItem(entry_no+5).readY(spectrum)
                     if nMeasurements == 6:
                         # Magnetic component
-                        dataY[spectrum][0] = 2.0 * (2.0 * sigma_zp - sigma_xp - sigma_yp )
+                        dataY[spectrum][0] = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
                         # Nuclear coherent
-                        dataY[spectrum][1] = (2.0*(sigma_xp + sigma_yp + sigma_zp) - sigma_xm - sigma_ym - sigma_zm ) / 6.0
+                        dataY[spectrum][1] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf) - sigma_x_sf - sigma_y_sf - sigma_z_sf ) / 6.0
                         # Incoherent
-                        dataY[spectrum][2] = sigma_zp + sigma_zm - dataY[spectrum][1]
+                        dataY[spectrum][2] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - dataY[spectrum][0]
                     else:
-                        sigma_xmyp = mtd[ws].getItem(entry_no+6).readY(spectrum)
-                        sigma_xmym = mtd[ws].getItem(entry_no+7).readY(spectrum)
-                        sigma_xpyp = mtd[ws].getItem(entry_no+8).readY(spectrum)
-                        sigma_xpyp = mtd[ws].getItem(entry_no+9).readY(spectrum)
+                        sigma_xmy_sf = mtd[ws].getItem(entry_no+6).readY(spectrum)
+                        sigma_xmy_nsf = mtd[ws].getItem(entry_no+7).readY(spectrum)
+                        sigma_xpy_sf = mtd[ws].getItem(entry_no+8).readY(spectrum)
+                        sigma_xpy_nsf = mtd[ws].getItem(entry_no+9).readY(spectrum)
 
-                        raise RuntimeError('10-point method has not been implemented')
+                        raise RuntimeError('10-point method has not been implemented yet')
 
                 dataX[spectrum] = range(3)
                 dataE = np.sqrt(dataY)
