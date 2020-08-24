@@ -396,6 +396,12 @@ class GroupingTablePresenterTest(unittest.TestCase):
         num_periods_dict = {'[84447]': 4, '[84448]': 4, '[84449]': 4, '[84450]':2, '[84451]' :1}
         return num_periods_dict[str(run)]
 
+    def test_when_adding_group_to_empty_table_it_is_selected(self):
+        self.presenter.add_group(MuonGroup('group_1', [1,2,3,4]))
+        self.presenter.add_group(MuonGroup('group_2', [1,2,3,4]))
+
+        self.assertEquals(self.model.selected_groups, ['group_1'])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -119,8 +119,9 @@ class GroupingTablePresenter(object):
             if self._view.num_rows() >= maximum_number_of_groups:
                 self._view.warning_popup("Cannot add more than {} groups.".format(maximum_number_of_groups))
                 return
-            # self.add_group_to_view(group)
             self.add_group_to_model(group)
+            if len(self._model.group_names + self._model.pair_names) == 1:
+                self._model.add_group_to_analysis(group.name)
             self.update_view_from_model()
             self.notify_data_changed()
         except ValueError as error:
@@ -224,6 +225,7 @@ class GroupingTablePresenter(object):
 
     def to_analyse_data_checkbox_changed(self, state, row, group_name):
         group_added = True if state == 2 else False
+
         if group_added:
             self._model.add_group_to_analysis(group_name)
         else:
