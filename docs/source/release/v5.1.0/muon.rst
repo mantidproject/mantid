@@ -34,7 +34,7 @@ New Features
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
 - Added multi-period support to the LoadMuonNexusV2 algorithm.
 - Added two buttons to the Muon analysis and Frequency domain analysis plot toolbar to allow users to show major and minor gridlines.
-
+- Added a Plot difference checkbox to the Muon Analysis GUI, which allows user to choose whether the fit difference curve is shown.
 
 Improvements
 -------------
