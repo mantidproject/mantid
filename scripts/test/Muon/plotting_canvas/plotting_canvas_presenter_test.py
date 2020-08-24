@@ -180,6 +180,11 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.figure_options.set_plot_x_range.assert_called_once_with(xlims)
         self.figure_options.set_plot_y_range.assert_called_once_with(ylims)
 
+    def test_create_tiled_plot_correctly_handles_empty_key_list(self):
+        self.presenter.create_tiled_plot([], 'Group, Pair')
+
+        self.view.create_new_plot_canvas.assert_called_once_with(1)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
