@@ -276,23 +276,23 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
 
     for (size_t i = is; i <= ie; i++) {
       // Get complete run name
-      std::ostringstream fn, fnn;
-      fnn << std::setw(m_filenameZeros) << std::setfill('0') << i;
-      fn << m_filenameBase << fnn.str() << m_filenameExt;
+      std::ostringstream file, fileRunNumber;
+      fileRunNumber << std::setw(m_filenameZeros) << std::setfill('0') << i;
+      file << m_filenameBase << fileRunNumber.str() << m_filenameExt;
 
       // Check if file exists
-      if (!Poco::File(fn.str()).exists()) {
-        m_log.warning() << "File " << fn.str() << " not found\n";
+      if (!Poco::File(file.str()).exists()) {
+        m_log.warning() << "File " << file.str() << " not found\n";
       } else {
-        m_fileNames.emplace_back(fn.str());
+        m_fileNames.emplace_back(file.str());
       }
     }
   }
 
   // Extract run numbers for all runs and map to filenames
-  for (const auto &n : m_fileNames) {
-    const int runNumber = extractRunNumberFromRunName(n);
-    m_rmap[n] = runNumber;
+  for (const auto &filename : m_fileNames) {
+    const int runNumber = extractRunNumberFromRunName(filename);
+    m_rmap[filename] = runNumber;
   }
 
   // Reset first and last to first and last elements of the map
