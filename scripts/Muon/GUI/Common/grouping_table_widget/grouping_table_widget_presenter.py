@@ -77,8 +77,15 @@ class GroupingTablePresenter(object):
         self._view.warning_popup("Invalid detector list.")
         return False
 
-    def validate_periods(self, text):
-        period_list = run_utils.run_string_to_list(text)
+    def validate_periods(self, period_text):
+        try:
+            period_list = run_utils.run_string_to_list(period_text)
+        except IndexError:
+            self._view.warning_popup("Entered period range in invalid format."
+                                     " Valid format is a comma seperated list of numbers or dash seperated ranges e.g. 1,3-5")
+            # An IndexError thrown here implies that the input string is not a valid
+            # number list.
+            return False
         invalid_runs = []
         current_runs = self._model._context.current_runs
 
@@ -86,17 +93,18 @@ class GroupingTablePresenter(object):
             for period in period_list:
                 if period < 1:
                     invalid_runs.append(run)
+                    break
                 elif self._model._context.num_periods(run) < period:
                     invalid_runs.append(run)
+                    break
 
         if not invalid_runs:
             return True
         elif len(invalid_runs) == len(current_runs):
-            self._view.warning_popup("One of the periods specified missing from all runs")
+            self._view.warning_popup("One or more of the periods specified missing from all runs")
             return False
         else:
             # TODO need to add in some logic here to turn the group row yellow if some but not all runs have correct periods.
-            # run_string = run_utils.run_list_to_string(run_utils.flatten_run_list(invalid_runs))
             return True
 
     def disable_editing(self):
@@ -174,11 +182,15 @@ class GroupingTablePresenter(object):
         if col == inverse_group_table_columns['periods'] and not self.validate_periods(changed_item.text()):
             update_model = False
 
-        if update_model:
-            try:
-                self.update_model_from_view()
-            except ValueError as error:
-                self._view.warning_popup(error)
+        if not update_model:
+            # Reset the view back to model values and exit early as the changes are invalid.
+            self.update_view_from_model()
+            return
+
+        try:
+            self.update_model_from_view()
+        except ValueError as error:
+            self._view.warning_popup(error)
 
         # if the column containing the "to_analyse" flag is changed, then we don't need to update anything group related
         if col != inverse_group_table_columns['to_analyse']:

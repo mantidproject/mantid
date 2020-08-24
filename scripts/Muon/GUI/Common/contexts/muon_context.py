@@ -241,14 +241,14 @@ class MuonContext(object):
                     # Multi-period data
                     for i, single_ws in enumerate(loaded_workspace):
                         name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                                       True,
+                                                                       multi_period=True,
                                                                        period=str(i + 1),
                                                                        workspace_suffix=self.workspace_suffix)
                         single_ws.show(name)
                 else:
                     # Single period data
                     name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                                   False,
+                                                                   multi_period=False,
                                                                    workspace_suffix=self.workspace_suffix)
                     loaded_workspace[0].show(name)
 

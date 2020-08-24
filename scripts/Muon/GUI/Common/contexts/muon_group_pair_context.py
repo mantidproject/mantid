@@ -222,12 +222,12 @@ class MuonGroupPairContext(object):
             periods = range(num_periods + 1)[1:]
             self._groups = []
             self._pairs = []
-            for group in default_groups:
-                for period in periods:
+            for period in periods:
+                for group in default_groups:
                     self._groups.append(MuonGroup(group.name + str(period), group.detectors, [period]))
 
-            for pair in default_pairs:
-                for period in periods:
+            for period in periods:
+                for pair in default_pairs:
                     self._pairs.append(MuonPair(pair.name + str(period), pair.forward_group + str(period),
                                        pair.backward_group + str(period), pair.alpha))
 

@@ -393,25 +393,10 @@ class GroupingTableView(QtWidgets.QWidget):
         self.remove_group_button.setEnabled(False)
 
     def _disable_all_table_items(self):
-        # for row in range(self.num_rows()):
-        #     for col in range(self.num_cols()):
-        #         item = self.grouping_table.item(row, col)
-        #         item.setFlags(QtCore.Qt.ItemIsSelectable)
         self.grouping_table.setEnabled(False)
 
     def _enable_all_table_items(self):
         self.grouping_table.setEnabled(True)
-        # for row in range(self.num_rows()):
-        #     for col in range(self.num_cols()):
-        #         item = self.grouping_table.item(row, col)
-        #         if group_table_columns[col] == 'detector_ids':
-        #             item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
-
-        #         elif group_table_columns[col] == 'to_analyse':
-        #             item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-        #         else:
-        #             # Group name and number of detectors should remain un-editable
-        #             item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
 
     def get_group_range(self):
         return str(self.group_range_min.text()), str(self.group_range_max.text())

@@ -12,7 +12,6 @@ from qtpy.QtWidgets import QWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView, inverse_group_table_columns
-from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonGroup
 from mantidqt.utils.observer_pattern import Observer
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
@@ -370,16 +369,32 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be greater than minimum')
         self.assertEqual(self.view.warning_popup.call_count, 2)
 
-    def test_that_valid_period_strings_assessed_as_valid(self): 
-        self.data_context.num_periods = self._fake_num_periods
+    def test_that_periods_invalid_for_all_runs_return_invalid(self):
+        self.presenter._model._context = mock.MagicMock()
+        self.presenter._model._context.current_runs = [[84447], [84448], [84449], [84450], [84451]]
+        self.presenter._model._context.num_periods = self._fake_num_periods
 
-        valid = self.presenter.validate_periods('84447-9')
+        valid = self.presenter.validate_periods('1-5')
 
-        self.assertTrue(valid>0)
+        self.assertFalse(valid)
+
+    def test_that_period_valid_for_at_least_one_run_returns_valid(self):
+        self.presenter._model._context = mock.MagicMock()
+        self.presenter._model._context.current_runs = [[84449], [84450], [84451]]
+        self.presenter._model._context.num_periods = self._fake_num_periods
+
+        valid = self.presenter.validate_periods('1-4')
+
+        self.assertTrue(valid)
+
+    def test_that_period_string_containing_not_matching_run_entry_regex_returns_invalid(self):
+        valid = self.presenter.validate_periods('Invalid string')
+
+        self.assertFalse(valid)
 
     def _fake_num_periods(self, run):
-        num_periods_dict = {84447: 4, 84448: 4, 84449: 4, 84450:2, 84451:1}
-        return num_periods_dict[run]
+        num_periods_dict = {'[84447]': 4, '[84448]': 4, '[84449]': 4, '[84450]':2, '[84451]' :1}
+        return num_periods_dict[str(run)]
 
 
 if __name__ == '__main__':
