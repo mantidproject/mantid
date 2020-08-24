@@ -34,7 +34,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <layout class="QGridLayout" name="firstLastLayout">
+           <layout class="QGridLayout" name="runLayout">
             <property name="leftMargin">
              <number>9</number>
             </property>
@@ -639,8 +639,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="deadTimeCorrType"/>
   <buttongroup name="calculationType"/>
   <buttongroup name="detectorGroupingType"/>
+  <buttongroup name="deadTimeCorrType"/>
  </buttongroups>
 </ui>
