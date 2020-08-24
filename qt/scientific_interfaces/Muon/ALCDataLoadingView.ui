@@ -38,6 +38,9 @@
             <property name="leftMargin">
              <number>9</number>
             </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
             <item row="0" column="1">
              <widget class="MantidQt::API::FileFinderWidget" name="runs" native="true">
               <property name="sizePolicy">
@@ -639,8 +642,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="calculationType"/>
   <buttongroup name="detectorGroupingType"/>
+  <buttongroup name="calculationType"/>
   <buttongroup name="deadTimeCorrType"/>
  </buttongroups>
 </ui>

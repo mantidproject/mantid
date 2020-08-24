@@ -102,6 +102,8 @@ private:
   std::string m_currentAutoFile;
 
   int m_currentAutoRun;
+
+  std::string m_oldInput;
 };
 
 } // namespace CustomInterfaces

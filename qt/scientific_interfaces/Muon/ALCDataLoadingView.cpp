@@ -72,9 +72,8 @@ std::string ALCDataLoadingView::lastRun() const {
     const auto files = m_ui.runs->getFilenames();
     if (!files.empty())
       return files.back().toStdString();
-  } else {
-    return "";
   }
+  return "";
 }
 
 std::vector<std::string> ALCDataLoadingView::getRuns() const {
@@ -296,40 +295,42 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
   //  m_ui.lastRun->setFileTextWithSearch(m_currentAutoFile.c_str());
   //  m_ui.lastRun->setReadOnly(false);
   //}
-
-  emit runAutoCheckedChanged(state); // Presenter sets auto run number
-
-  if (m_currentAutoRun == -1)
-    return;
-
-  const int currentLastRun = extractRunNumber(lastRun());
-  const auto currentText = m_ui.runs->getText();
-  auto newText = currentText;
-  QString autoEndRun = "-";
-  autoEndRun.append(QString::number(m_currentAutoRun));
-
+  
   if (state == Qt::Checked) {
-    if (m_currentAutoRun > currentLastRun) {
-      std::cout << "current auto - " << m_currentAutoRun << std::endl;
-      std::cout << "current last - " << currentLastRun << std::endl;
-      // Checks on text
-      // Need to know if ends with -NUMBER
-
-      newText.append("-");
-      newText.append(QString::number(m_currentAutoRun));
-    }
+    // Set read only
     m_ui.runs->setReadOnly(true);
-  } else {
-    // If auto on end remove
-    if (currentText.contains(autoEndRun)) {
-      // remove size of auto run and -
-      newText.remove(autoEndRun);
-    }
-    m_ui.runs->setReadOnly(false);
-  }
 
-  // Set new text and search new files
-  m_ui.runs->setFileTextWithSearch(newText);
+    // Update auto run
+    emit runAutoCheckedChanged(state); 
+
+    // Check for failure
+    if (m_currentAutoRun == -1) {
+      return;
+    }
+
+    // Update text
+    // Do some checks
+    const int currentLastRun = extractRunNumber(lastRun());
+    const auto currentInput = m_ui.runs->getText();
+
+    if (m_currentAutoRun > currentLastRun) {
+      // Save old input
+      m_oldInput = currentInput.toStdString();
+
+      // Update it
+      m_ui.runs->setFileTextWithSearch(QString::number(m_currentAutoRun));
+    }
+
+  } else {
+    // Remove read only
+    m_ui.runs->setReadOnly(false);
+
+    // Do some checks
+
+
+    // Reset text
+    m_ui.runs->setFileTextWithSearch(QString::fromStdString(m_oldInput));
+  }
 }
 
 int ALCDataLoadingView::extractRunNumber(const std::string& file) {
