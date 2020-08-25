@@ -334,8 +334,11 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
 
       // Update it
       m_ui.runs->setFileTextWithSearch(newInput);
-    }
 
+      /*if (!m_ui.runs->getFileProblem().isEmpty()) {
+        displayError("Error with files : " +
+                     m_ui.runs->getFileProblem().toStdString());*/
+    }
   } else {
     // Remove read only
     m_ui.runs->setReadOnly(false);
