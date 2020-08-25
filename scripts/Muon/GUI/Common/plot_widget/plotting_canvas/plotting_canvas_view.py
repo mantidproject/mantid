@@ -207,14 +207,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def set_axes_limits(self, xlim, ylim):
         plt.setp(self.fig.axes, xlim=xlim, ylim=ylim)
 
-    def is_error_plotted(self):
-        #Function is defined in the presenter
-        pass
-
-    def autoscale_y_axes(self):
+    def autoscale_y_axes(self,yerr=0):
         ymin = 1e9
         ymax = -1e9
-        yerr = 0
 
         for axis in self.fig.axes:
             ymin_i, ymax_i = self._get_y_axis_autoscale_limts(axis)
@@ -222,46 +217,21 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 ymin = ymin_i
             if ymax_i > ymax:
                 ymax = ymax_i
-        if self.is_error_plotted():
-            for workspace_info in self._plot_information_list:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_info.workspace_name)
-                axis_number = workspace_info.axis
-                axis = self.fig.axes[axis_number]
-                x_data = workspace.readX(workspace_info.index)
-                limits = axis.get_xlim()
-                index = np.where((x_data >= limits[0] )&( x_data <= limits[1]))
-                max_error = workspace.readE(workspace_info.index)[index].max()
-                if max_error > yerr:
-                    yerr = max_error
 
-            ymax,ymin = ymax + yerr , ymin - yerr
+        ymax,ymin = ymax + yerr , ymin - yerr
 
         plt.setp(self.fig.axes, ylim=[ymin, ymax])
 
-    def autoscale_selected_y_axis(self, axis_number):
+    def autoscale_selected_y_axis(self, axis_number,yerr = 0):
         ymin = 1e9
         ymax = -1e9
-        yerr = 0
         if axis_number >= len(self.fig.axes):
             return
         axis = self.fig.axes[axis_number]
         ymin,ymax = self._get_y_axis_autoscale_limts(axis)
         axis = self.fig.axes[axis_number]
-        if self.is_error_plotted():
-            for workspace_info in self._plot_information_list:
-                if workspace_info.axis != axis_number:
-                    continue
-                workspace = AnalysisDataService.Instance().retrieve(workspace_info.workspace_name)
-                axis_number = workspace_info.axis
-                axis = self.fig.axes[axis_number]
-                x_data = workspace.readX(workspace_info.index)
-                limits = axis.get_xlim()
-                index = np.where((x_data >= limits[0]) & (x_data <= limits[1]))
-                max_error = workspace.readE(workspace_info.index)[index].max()
-                if max_error > yerr:
-                    yerr = max_error
 
-            ymax, ymin = ymax + yerr, ymin - yerr
+        ymax, ymin = ymax + yerr, ymin - yerr
         axis.set_ylim(ymin,ymax)
 
     def set_title(self, axis_number, title):

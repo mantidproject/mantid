@@ -12,6 +12,7 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_inter
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantid import AnalysisDataService
 from mantidqt.utils.observer_pattern import GenericObserver
+import numpy as np
 
 DEFAULT_X_LIMITS = [0, 15]
 DEFAULT_Y_LIMITS = [-1, 1]
@@ -132,14 +133,41 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Returns the matplotlib axes - needed for the external plot button"""
         return self._view.fig.axes
 
+    def get_workspace_info(self):
+        return self._view.plotted_workspace_information
+
     def autoscale_y_axes(self):
-        """Autoscales all y-axes in the figure using the existing x axis"""
-        self._view.autoscale_y_axes()
+        yerr = 0
+        if self._options_presenter.get_errors():
+            for workspace_info in self.get_workspace_info():
+                workspace = AnalysisDataService.Instance().retrieve(workspace_info.workspace_name)
+                axis_number = workspace_info.axis
+                axis = self.get_plot_axes()[axis_number]
+                x_data = workspace.readX(workspace_info.index)
+                limits = axis.get_xlim()
+                index = np.where((x_data >= limits[0])&(x_data <= limits[1]))
+                max_error = workspace.readE(workspace_info.index)[index].max()
+                if max_error > yerr:
+                    yerr = max_error
+        self._view.autoscale_y_axes(yerr)
         self._view.redraw_figure()
 
-    def autoscale_selected_y_axis(self, axis_num):
-        """Autoscales a selected y-axis in the figure using the existing x axis"""
-        self._view.autoscale_selected_y_axis(axis_num)
+    def autoscale_selected_y_axis(self, axis_number):
+        yerr = 0
+        if self._options_presenter.get_errors():
+            for workspace_info in self.get_workspace_info():
+                if workspace_info.axis != axis_number:
+                    continue
+                workspace = AnalysisDataService.Instance().retrieve(workspace_info.workspace_name)
+                axis_number = workspace_info.axis
+                axis = self.get_plot_axes()[axis_number]
+                x_data = workspace.readX(workspace_info.index)
+                limits = axis.get_xlim()
+                index = np.where((x_data >= limits[0]) & (x_data <= limits[1]))
+                max_error = workspace.readE(workspace_info.index)[index].max()
+                if max_error > yerr:
+                    yerr = max_error
+        self._view.autoscale_selected_y_axis(axis_number,yerr)
         self._view.redraw_figure()
 
     def set_axis_limits(self, ax_num, xlims, ylims):
