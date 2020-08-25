@@ -136,10 +136,10 @@ void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
                                        HistogramData::Histogram &out) const {
   switch (m_value) {
   case Value::Linear:
-    interpolateLinearInplace(in, out);
+    interpolateLinearInplace(in, out, true, m_independentErrors);
     return;
   case Value::CSpline:
-    interpolateCSplineInplace(in, out);
+    interpolateCSplineInplace(in, out, true, m_independentErrors);
     return;
   default:
     throw std::runtime_error("InterpolationOption::applyInplace() - "

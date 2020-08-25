@@ -302,7 +302,7 @@ void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
       }
       // calculate interpolation error
       auto interpError =
-          0.5 * (xp - x1) * (x2 - xp) * abs(secondDeriv[index - 1]);
+          0.5 * (xp - x1) * (x2 - xp) * std::abs(secondDeriv[index - 1]);
       // combine the two errors
       enew[i] = sqrt(pow(sourcePointsError, 2) + pow(interpError, 2));
     } else {
