@@ -137,5 +137,6 @@ Bugfixes
 - The workbench launch scripts have been replaced by an executable on macOS & Windows. On Windows this will stop virus scanners
   flagging the old ``launch_workbench.exe`` as a threat and quarantining it.
 - Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
+- Warn users when they attempt to use Generate Recovery Script with no workspaces present.
 
 :ref:`Release 5.1.0 <v5.1.0>`
