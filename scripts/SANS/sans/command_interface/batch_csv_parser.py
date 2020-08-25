@@ -69,7 +69,7 @@ class BatchCsvParser(object):
         for row in rows:
             to_write.append(self._convert_row_to_list(row))
 
-        with open(file_path, "w") as outfile:
+        with open(file_path, "w", newline="") as outfile:
             writer_handle = csv.writer(outfile)
             for line in to_write:
                 writer_handle.writerow(line)

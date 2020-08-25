@@ -64,13 +64,16 @@ class PeaksViewerView(QWidget):
     def selected_index(self):
         return self._selected_index()
 
-    def set_axes_limits(self, xlim, ylim):
+    def set_axes_limits(self, xlim, ylim, auto_transform):
         """
         Set the view limits on the image axes to the given extents
         :param xlim: 2-tuple of (xmin, xmax)
         :param ylim: 2-tuple of (ymin, ymax)
+        :param auto_transform: If True, the limits are transformed into the
+                               rectilinear frame using the transform provided
+                               by the sliceinfo
         """
-        self._sliceinfo_provider.set_axes_limits(xlim, ylim)
+        self._sliceinfo_provider.set_axes_limits(xlim, ylim, auto_transform)
 
     def set_peak_color(self, peak_color):
         """

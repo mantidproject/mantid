@@ -188,22 +188,34 @@ range for the instrument then the red regions may contain valid counts.
 Conversion to Momentum Transfer (Q)
 ###################################
 
-Finally, the output workspace in wavelength is converted to momentum transfer
-(:math:`Q`) using :ref:`algm-ConvertUnits`. The equation used is
-:math:`Q=4\pi sin(\theta_R)/\lambda_v` in the non-flat sample case or
-:math:`Q=4\pi sin(2\theta_R-\theta_0)/\lambda_v` in the divergent beam
-case. This is because the latter needs to take into account the divergence of
-the beam from the assumed direct beam direction.
+Finally, the output workspace in wavelength is converted to momentum transfer,
+:math:`Q=\frac{4\pi}{\lambda}sin(\theta)`. The angle :math:`\theta` used depends on
+the method used.
+
+When summing in wavelength, if ``ThetaIn`` is specified, this is used in the
+conversion to :math:`Q` and the conversion is done using
+:ref:`algm-RefRoi`. Otherwise, :ref:`algm-ConvertUnits` is used. This takes
+:math:`\theta` from the average of the grouped detectors' :math:`2\theta`
+values (note that this is not the same as the :math:`2\theta` of the average
+detector position).
+
+When summing in :math:`Q`, :math:`\theta` is :math:`\theta_R` in the non-flat
+sample case or :math:`2\theta_R-\theta_0` in the divergent beam case. This is
+because the latter needs to take into account the divergence of the beam from
+the assumed direct beam direction. The output workspace is set up with a single
+detector at the relevant :math:`2\theta` so that the conversion can be done
+with :ref:`algm-ConvertUnits`.
 
 .. diagram:: ReflectometryReductionOne_ConvertToMomentum-v2_wkflw.dot
 
-Note that the output workspace in Q is a workspace with native binning, and no
-rebin step is applied to it. If you wish to obtain a rebinned workspace in Q
-you should consider using algorithm :ref:`algm-ReflectometryReductionOneAuto`
-instead, which is a facade over this algorithm and has two extra steps
-(:ref:`algm-Rebin` and :ref:`algm-Scale`) to produce an additional workspace in
-Q with specified binning and scale factor. Please refer to
-:ref:`algm-ReflectometryReductionOneAuto` for more information.
+Note that the output workspace in :math:`Q` is a workspace with native binning,
+and no rebin step is applied to it. If you wish to obtain a rebinned workspace
+in :math:`Q` you should consider using algorithm
+:ref:`algm-ReflectometryReductionOneAuto` instead, which is a facade over this
+algorithm and has two extra steps (:ref:`algm-Rebin` and :ref:`algm-Scale`) to
+produce an additional workspace in :math:`Q` with specified binning and scale
+factor. Please refer to :ref:`algm-ReflectometryReductionOneAuto` for more
+information.
 
 Previous Versions
 -----------------

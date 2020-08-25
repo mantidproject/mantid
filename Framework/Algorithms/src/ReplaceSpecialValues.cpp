@@ -25,7 +25,7 @@ ReplaceSpecialValues::ReplaceSpecialValues()
     : UnaryOperation(), m_NaNValue(0.), m_NaNError(0.), m_InfiniteValue(0.),
       m_InfiniteError(0.), m_bigThreshold(0.), m_bigValue(0.), m_bigError(0.),
       m_performNaNCheck(false), m_performInfiniteCheck(false),
-      m_performBigCheck(false) {}
+      m_performBigCheck(false), m_checkErrors(false) {}
 
 void ReplaceSpecialValues::defineProperties() {
   // NaN properties
@@ -60,6 +60,8 @@ void ReplaceSpecialValues::defineProperties() {
       "The value with which to replace occurrences of 'small' numbers.");
   declareProperty("SmallNumberError", 0.0,
                   "The error value used when replacing a 'small' number");
+  declareProperty("CheckErrorAxis", false,
+                  "Whether or not to also check the error axis values.");
 }
 
 void ReplaceSpecialValues::retrieveProperties() {
@@ -73,6 +75,7 @@ void ReplaceSpecialValues::retrieveProperties() {
   m_smallThreshold = getProperty("SmallNumberThreshold");
   m_smallValue = getProperty("SmallNumberValue");
   m_smallError = getProperty("SmallNumberError");
+  m_checkErrors = getProperty("CheckErrorAxis");
 
   m_performNaNCheck = !checkifPropertyEmpty(m_NaNValue);
   m_performInfiniteCheck = !checkifPropertyEmpty(m_InfiniteValue);
@@ -96,16 +99,21 @@ void ReplaceSpecialValues::performUnaryOperation(const double XIn,
   YOut = YIn;
   EOut = EIn;
 
-  if (m_performNaNCheck && checkIfNan(YIn)) {
+  if (m_performNaNCheck &&
+      (checkIfNan(YIn) || (m_checkErrors && checkIfNan(EIn)))) {
     YOut = m_NaNValue;
     EOut = m_NaNError;
-  } else if (m_performInfiniteCheck && checkIfInfinite(YIn)) {
+  } else if (m_performInfiniteCheck &&
+             (checkIfInfinite(YIn) ||
+              (m_checkErrors && checkIfInfinite(EIn)))) {
     YOut = m_InfiniteValue;
     EOut = m_InfiniteError;
-  } else if (m_performBigCheck && checkIfBig(YIn)) {
+  } else if (m_performBigCheck &&
+             (checkIfBig(YIn) || (m_checkErrors && checkIfBig(EIn)))) {
     YOut = m_bigValue;
     EOut = m_bigError;
-  } else if (m_performSmallCheck && checkIfSmall(YIn)) {
+  } else if (m_performSmallCheck &&
+             (checkIfSmall(YIn) || (m_checkErrors && checkIfSmall(EIn)))) {
     YOut = m_smallValue;
     EOut = m_smallError;
   }

@@ -79,17 +79,18 @@ class MplPainter(object):
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
-    def __init__(self, axes):
+    def __init__(self, view):
         """
-        :param axes: A matplotlib.axes.Axes instance to draw on
+        :param view: An object defining an axes property.
         """
-        if not hasattr(axes, "scatter"):
-            raise ValueError("Expected matplotlib.axes.Axes instance. Found {}.".format(type(axes)))
-        self._axes = axes
+        self._view = view
+        if not hasattr(self._view, "ax"):
+            raise ValueError("Expected to find an 'ax' attribute on the view. Found {}.".format(
+                type(view)))
 
     @property
     def axes(self):
-        return self._axes
+        return self._view.ax
 
     def remove(self, artist):
         """
@@ -109,7 +110,7 @@ class MplPainter(object):
         :param radius: Radius of the circle
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self._axes.add_patch(Circle((x, y), radius, **kwargs))
+        return self.axes.add_patch(Circle((x, y), radius, **kwargs))
 
     def cross(self, x, y, half_width, **kwargs):
         """Draw a cross at the given location
@@ -121,7 +122,7 @@ class MplPainter(object):
         verts = ((x - half_width, y + half_width), (x + half_width, y - half_width),
                  (x + half_width, y + half_width), (x - half_width, y - half_width))
         codes = (Path.MOVETO, Path.LINETO, Path.MOVETO, Path.LINETO)
-        return self._axes.add_patch(PathPatch(Path(verts, codes), **kwargs))
+        return self.axes.add_patch(PathPatch(Path(verts, codes), **kwargs))
 
     def ellipse(self, x, y, width, height, angle=0.0, **kwargs):
         """Draw an ellipse at the given location
@@ -132,7 +133,7 @@ class MplPainter(object):
         :param angle: Angle in degrees w.r.t X axis
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self._axes.add_patch(Ellipse((x, y), width, height, angle, **kwargs))
+        return self.axes.add_patch(Ellipse((x, y), width, height, angle, **kwargs))
 
     def elliptical_shell(self, x, y, outer_width, outer_height, thick, angle=0.0, **kwargs):
         """Draw an ellipse at the given location
@@ -144,7 +145,7 @@ class MplPainter(object):
         :param angle: Angle in degrees w.r.t X axis
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self._axes.add_patch(
+        return self.axes.add_patch(
             EllipticalShell((x, y), outer_width, outer_height, thick, angle, **kwargs))
 
     def shell(self, x, y, outer_radius, thick, **kwargs):
@@ -155,7 +156,7 @@ class MplPainter(object):
         :param thick: The thickness of the shell
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self._axes.add_patch(
+        return self.axes.add_patch(
             Wedge((x, y), outer_radius, theta1=0.0, theta2=360., width=thick, **kwargs))
 
     def bbox(self, artist):
@@ -165,7 +166,7 @@ class MplPainter(object):
         """
         # Use the bounding box of the artist with small amount of padding
         # to set the axis limits
-        to_data_coords = self._axes.transData.inverted()
+        to_data_coords = self.axes.transData.inverted()
         artist_bbox = artist.get_extents()
         return to_data_coords.transform(artist_bbox.min), \
             to_data_coords.transform(artist_bbox.max)

@@ -146,7 +146,7 @@ void Convolution::function(const FunctionDomain &domain,
   auto ixP = static_cast<size_t>(xValues[nData - 1] / dx);
   auto ixN = nData - ixP - 1; // negative x-values (ixP+ixN=nData-1)
 
-  // determine wether to use FFT or Direct calculations
+  // determine whether to use FFT or Direct calculations
   int assymmetry = abs(static_cast<int>(ixP - ixN));
   if (xValues[0] * xValues[nData - 1] < 0 &&
       assymmetry > tolerance * static_cast<double>(ixP + ixN)) {

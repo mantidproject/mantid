@@ -26,7 +26,7 @@ class SliceViewer(object):
         """
         Create a presenter for controlling the slice display for a workspace
         :param ws: Workspace containing data to display and slice
-        :param parent: An optinal parent widget
+        :param parent: An optional parent widget
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
@@ -44,7 +44,7 @@ class SliceViewer(object):
             self.new_plot = self.new_plot_matrix
             self.update_plot_data = self.update_plot_data_matrix
 
-        self.normalization = mantid.api.MDNormalization.NoNormalization
+        self.normalization = False
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent)
@@ -71,6 +71,7 @@ class SliceViewer(object):
         Tell the view to display a new plot of an MDHistoWorkspace
         """
         self.view.data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
+        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
     def new_plot_MDE(self):
         """
@@ -78,17 +79,31 @@ class SliceViewer(object):
         """
         data_view = self.view.data_view
         limits = data_view.get_axes_limits()
-        if data_view.dimensions.transpose:
-            limits = limits[1], limits[0]
+
+        if limits is not None:
+            xlim, ylim = limits
+            # view limits are in orthogonal frame. transform to nonorthogonal
+            # model frame
+            if data_view.nonorthogonal_mode:
+                inv_tr = data_view.nonortho_transform.inv_tr
+                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
+                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
+                xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+            if data_view.dimensions.transpose:
+                limits = ylim, xlim
+            else:
+                limits = xlim, ylim
+
         data_view.plot_MDH(
             self.model.get_ws(
                 slicepoint=self.get_slicepoint(),
                 bin_params=data_view.dimensions.get_bin_params(),
                 limits=limits))
+        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
-        self.view.data_view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
+        self.view.data_view.plot_matrix(self.model.get_ws(), distribution=not self.normalization)
 
     def update_plot_data_MDH(self):
         """
@@ -117,12 +132,12 @@ class SliceViewer(object):
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
         dimensions = self.view.data_view.dimensions
-        return SliceInfo(
-            frame=self.model.get_frame(),
-            point=dimensions.get_slicepoint(),
-            transpose=dimensions.transpose,
-            range=dimensions.get_slicerange(),
-            qflags=dimensions.qflags)
+        return SliceInfo(frame=self.model.get_frame(),
+                         point=dimensions.get_slicepoint(),
+                         transpose=dimensions.transpose,
+                         range=dimensions.get_slicerange(),
+                         qflags=dimensions.qflags,
+                         nonortho_transform=self.view.data_view.nonortho_transform)
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
@@ -154,7 +169,6 @@ class SliceViewer(object):
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
         self.new_plot()
-        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
@@ -167,7 +181,6 @@ class SliceViewer(object):
         data_view = self.view.data_view
         if self.model.can_support_dynamic_rebinning():
             self.new_plot()  # automatically uses current display limits
-            self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
         else:
             data_view.draw_plot()
 
@@ -176,9 +189,21 @@ class SliceViewer(object):
         self.set_axes_limits(*self.model.get_dim_limits(self.get_slicepoint(),
                                                         self.view.data_view.dimensions.transpose))
 
-    def set_axes_limits(self, xlim, ylim):
-        """Set the axes limits on the view"""
-        self.view.data_view.set_axes_limits(xlim, ylim)
+    def set_axes_limits(self, xlim, ylim, auto_transform=True):
+        """Set the axes limits on the view.
+        :param xlim: Limits on the X axis in image coordinates
+        :param ylim: Limits on the Y axis in image coordinates
+        :param auto_transform: If True transform the given limits to the rectilinear
+        coordinate before passing to the view
+        """
+        data_view = self.view.data_view
+        if auto_transform and data_view.nonorthogonal_mode:
+            to_display = data_view.nonortho_transform.tr
+            xmin_p, ymin_p = to_display(xlim[0], ylim[0])
+            xmax_p, ymax_p = to_display(xlim[1], ylim[1])
+            xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+
+        data_view.set_axes_limits(xlim, ylim)
         self.data_limits_changed()
 
     def line_plots(self, state):
@@ -283,26 +308,21 @@ class SliceViewer(object):
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
-            data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
             data_view.create_axes_nonorthogonal(
                 self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
-            self.new_plot()
         else:
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
             data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
-            data_view.enable_tool_button(ToolItemText.OVERLAY_PEAKS)
-            self.new_plot()
+
+        self.new_plot()
 
     def normalization_changed(self, norm_type):
         """
         Notify the presenter that the type of normalization has changed.
         :param norm_type: "By bin width" = volume normalization else no normalization
         """
-        if norm_type == "By bin width":
-            self.normalization = mantid.api.MDNormalization.VolumeNormalization
-        else:
-            self.normalization = mantid.api.MDNormalization.NoNormalization
+        self.normalization = norm_type == "By bin width"
         self.new_plot()
 
     def overlay_peaks_workspaces(self):

@@ -48,6 +48,7 @@ Red Stars
 
 Status Bar
     The status bar shows the calibration run numbers the GUI is currently using.
+	It also displays the save directory (which can be changed in the settings).
 
 Saved File Outputs
     The location of files saved by the GUI during processing will be shown in the mantid

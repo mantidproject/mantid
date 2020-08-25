@@ -361,7 +361,7 @@ class MantidConfigDirectInelastic(object):
         1) Valid for Mantid 3.4 available on 18/05/2015 and expects server
         to have:
         Map/masks folder with layout defined on (e.g. svn checkout)
-        https://svn.isis.rl.ac.uk/InstrumentFiles/trunk
+        https://svn.isis.rl.ac.uk/InstrumentFileFinder/trunk
         2) User scripts folder with layout defined on
         (e.g. git checkout or Mantid script repository set-up):
         git@github.com:mantidproject/scriptrepository.git
@@ -381,7 +381,7 @@ class MantidConfigDirectInelastic(object):
 
     def __init__(self, mantid='/opt/Mantid/', home_dir='/home/',
                  script_repo='/opt/UserScripts/',
-                 map_mask_folder='/usr/local/mprogs/InstrumentFiles/'):
+                 map_mask_folder='/usr/local/mprogs/InstrumentFileFinder/'):
         """Initialize generic config variables and variables specific to a server"""
 
         self._mantid_path = str(mantid)
@@ -775,7 +775,7 @@ class MantidConfigDirectInelastic(object):
         if not os.path.exists(self._map_mask_folder):
             raise RuntimeError(("SERVER ERROR: no correct map/mask folder defined at {0}\n"
                                 "Check out Mantid map/mask files from svn at"
-                                " https://svn.isis.rl.ac.uk/InstrumentFiles/trunk").format(self._map_mask_folder))
+                                " https://svn.isis.rl.ac.uk/InstrumentFileFinder/trunk").format(self._map_mask_folder))
 
     def _init_config(self):
         """Execute Mantid properties setup methods"""
@@ -952,7 +952,7 @@ if __name__ == "__main__":
 
         MantidDir = r"c:\Mantid\_builds\br_master\bin\Release"
         UserScriptRepoDir = os.path.join(analysisDir, "UserScripts")
-        MapMaskDir = os.path.join(analysisDir, "InstrumentFiles")
+        MapMaskDir = os.path.join(analysisDir, "InstrumentFileFinder")
 
         rootDir = os.path.join(base, 'users')
     else:
@@ -960,7 +960,7 @@ if __name__ == "__main__":
         # sys.path.insert(0,'/opt/mantidnightly/scripts/Inelastic/Direct/')
 
         MantidDir = '/opt/Mantid'
-        MapMaskDir = '/usr/local/mprogs/InstrumentFiles/'
+        MapMaskDir = '/usr/local/mprogs/InstrumentFileFinder/'
         UserScriptRepoDir = '/opt/UserScripts'
         home = '/home'
         #
