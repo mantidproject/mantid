@@ -33,17 +33,40 @@ from scipy.optimize import curve_fit
 from scipy import optimize
 from scipy.ndimage import convolve1d
 
-
-# command for the formatting of the printed output
-np.set_printoptions(suppress=True, precision=4, linewidth= 150 )
-
-
-# path to instrument parameter file:
-#ipfile = "C://Users//BTR75544//work//shared//vesuvio//ip2018.par"
-
 #
 #   INITIALISING FUNCTIONS AND USEFUL FUNCTIONS
 #
+
+"""
+A wrapper for the mantid logger to make it take inputs the same way
+as a Python print statement
+
+debug is equivalent to verbose.
+"""
+class logger():
+    def __init__(self, g_log):
+        self._log = g_log
+
+    def get_string(self, *args):
+        string = ""
+        for msg in args:
+            string+=str(msg)+" "
+        return string
+
+    def warning(self, *args):
+        self._log.warning(self.get_string(args))
+
+    def notice(self, *args):
+        self._log.notice(self.get_string(args))
+
+    def debug(self, *args):
+        self._log.debug(self.get_string(args))
+
+def safe_delete_ws(ws):
+    if sapi.AnalysisDataService.doesExist(str(ws)):
+        sapi.DeleteWorkspace(ws)
+    return
+
 def fun_gaussian(x, sigma):
     gaussian = np.exp(-x**2/2/sigma**2)
     gaussian /= np.sqrt(2.*np.pi)*sigma
@@ -53,7 +76,7 @@ def fun_lorentzian(x, gamma):
     lorentzian = gamma/np.pi / (x**2 + gamma**2)
     return lorentzian
 
-def fun_pseudo_voigt(x, sigma, gamma): #input std gaussiana e hwhm lorentziana
+def fun_pseudo_voigt(x, sigma, gamma): #input std gaussian hwhm lorentziana
     fg, fl = 2.*sigma*np.sqrt(2.*np.log(2.)), 2.*gamma #parameters transformed to gaussian and lorentzian FWHM
     f = 0.5346 * fl + np.sqrt(0.2166*fl**2 + fg**2 )
     eta = 1.36603 *fl/f - 0.47719 * (fl/f)**2 + 0.11116 *(fl/f)**3
@@ -62,7 +85,7 @@ def fun_pseudo_voigt(x, sigma, gamma): #input std gaussiana e hwhm lorentziana
     norm=np.sum(pseudo_voigt)*(x[1]-x[0])
     return pseudo_voigt#/np.abs(norm)
 
-def fun_derivative3(x,fun): # Used to evaluate numerically the FSE term.
+def fun_derivative3(x,fun, g_log): # Used to evaluate numerically the FSE term.
     derivative =np.zeros(len(fun))
     denom =np.zeros(len(fun))
     for i in range(6,len(fun)-6):
@@ -79,7 +102,7 @@ def fun_derivative3(x,fun): # Used to evaluate numerically the FSE term.
         if denom[i] != 0:
             derivative[i]= tmp/denom[i]
         else:
-            print("divide by zero")
+            g_log.warning("divide by zero")
     derivative = derivative/1728. #12**3
 
     return derivative
@@ -153,11 +176,9 @@ def load_workspace(ws_name, spectrum):
 #   FITTING FUNCTIONS
 #
 
-# whats ncp?
-def block_fit_ncp(par,first_spectrum,last_spectrum, masses,ws_name,fit_arguments, verbose,IPFile):
-    print( "\n", "Fitting Workspace: ", str(ws_name))
-    if verbose:
-        print ("Fitting parameters are given as: [Intensity Width Centre] for each NCP")
+def block_fit_ncp(par,first_spectrum,last_spectrum, masses,ws_name,fit_arguments, verbose,IPFile, g_log):
+    g_log.notice( "\n"+ "Fitting Workspace: "+ str(ws_name))
+    g_log.debug("Fitting parameters are given as: [Intensity Width Centre] for each NCP")
     widths=np.zeros((len(masses),last_spectrum-first_spectrum+1))
     intensities=np.zeros((len(masses),last_spectrum-first_spectrum+1))
     centres=np.zeros((len(masses),last_spectrum-first_spectrum+1))
@@ -166,17 +187,16 @@ def block_fit_ncp(par,first_spectrum,last_spectrum, masses,ws_name,fit_arguments
     j=0
     for j, spectrum in enumerate(range(first_spectrum,last_spectrum+1)):
         data_x, data_y,data_e = load_workspace(ws_name , spectrum)
-        ncp, fitted_par, result = fit_ncp(par, spectrum, masses, data_x, data_y, data_e, fit_arguments, IPFile)
+        ncp, fitted_par, result = fit_ncp(par, spectrum, masses, data_x, data_y, data_e, fit_arguments, IPFile, g_log)
         for bin in range(len(data_x)-1):
             tof_fit_ws.dataY(j)[bin] = ncp[bin]*(data_x[bin+1]-data_x[bin])
             tof_fit_ws.dataE(j)[bin] = 0.
         # Calculate the reduced chi2 from the fitting Cost function:
         reduced_chi2 = result.fun/(len(data_x) - len(par))        
-        if verbose:
-            if (reduced_chi2 > 1.e-3):
-                print( spectrum, fitted_par, "%.4g" % reduced_chi2)
-            else:
-                print( spectrum, " ... skipping ...")
+        if (reduced_chi2 > 1.e-3):
+            g_log.debug( spectrum, fitted_par, "%.4g" % reduced_chi2)
+        else:
+            g_log.debug( spectrum, " ... skipping ...")
         npars = len(par)/len(masses)
         for m in range(len(masses)):
             if (reduced_chi2>1.e-3):
@@ -192,23 +212,23 @@ def block_fit_ncp(par,first_spectrum,last_spectrum, masses,ws_name,fit_arguments
         spectra[j]=spectrum
     return spectra, widths, intensities, centres
 
-def fit_ncp(par, spectrum, masses, data_x, data_y, data_e, fit_arguments, IPFile):
+def fit_ncp(par, spectrum, masses, data_x, data_y, data_e, fit_arguments, IPFile, g_log):
     boundaries, constraints = fit_arguments[0], fit_arguments[1]
-    result = optimize.minimize(errfunc, par[:], args=(spectrum, masses, data_x, data_y, data_e, IPFile), method='SLSQP', bounds = boundaries, constraints=constraints)
+    result = optimize.minimize(errfunc, par[:], args=(spectrum, masses, data_x, data_y, data_e, IPFile, g_log), method='SLSQP', bounds = boundaries, constraints=constraints)
     fitted_par = result.x
-    ncp = calculate_ncp(fitted_par, spectrum , masses, data_x, IPFile)
+    ncp = calculate_ncp(fitted_par, spectrum , masses, data_x, IPFile, g_log)
     return ncp, fitted_par, result
 
-def errfunc( par ,  spectrum, masses, data_x,  data_y, data_e,IPFile):
+def errfunc( par ,  spectrum, masses, data_x,  data_y, data_e,IPFile, g_log):
     # this function provides the scalar to be minimised, with meaning of the non-reduced chi2
-    ncp = calculate_ncp(par, spectrum , masses, data_x,IPFile)
+    ncp = calculate_ncp(par, spectrum , masses, data_x,IPFile, g_log)
     if (np.sum(data_e) > 0):
         chi2 =  (ncp - data_y)**2/(data_e)**2 # Distance to the target function
     else:
         chi2 =  (ncp - data_y)**2
     return chi2.sum()
 
-def calculate_ncp(par, spectrum , masses, data_x, IPFile):
+def calculate_ncp(par, spectrum , masses, data_x, IPFile, g_log):
     angle, T0, L0, L1 = load_ip_file(spectrum, IPFile)
     mN, Ef, en_to_vel, vf, hbar = load_constants()
     ncp = 0. # initialising the function values
@@ -219,7 +239,7 @@ def calculate_ncp(par, spectrum , masses, data_x, IPFile):
         index = int(m*npars)
         mass, hei , width, centre = masses[m] , par[index], par[1+index], par[2+index]
         E_r = ( hbar * delta_Q )**2 / (2. * mass)
-        y = mass*(delta_E-E_r)/(hbar*hbar*delta_Q) #mass / hbar**2 /delta_Q * (delta_E - E_r)
+        y = mass*(delta_E-E_r)/(hbar*hbar*delta_Q)
 
         if np.isnan(centre) :
             centre = 0. # the line below give error if centre = nan, i.e., if detector is masked
@@ -229,7 +249,7 @@ def calculate_ncp(par, spectrum , masses, data_x, IPFile):
         # definition of the experimental neutron compton profile
         gaussian_width = np.sqrt( width**2 + gaussian_res_width**2 )
         joy = fun_pseudo_voigt(y-centre, gaussian_width, lorentzian_res_width)
-        FSE =  -0.72*fun_derivative3(y,joy)/delta_Q#*(width*width*width*width)/delta_Q # 0.72 is an empirical coefficient. One can alternatively add a fitting parameter for this term.
+        FSE =  -0.72*fun_derivative3(y,joy, g_log)/delta_Q# 0.72 is an empirical coefficient. One can alternatively add a fitting parameter for this term.
         #H4  = some_missing_coefficient *  fun_derivative4(y,joy) /(4.*(width**4)*32.)
         ncp += hei * (joy + FSE ) * E0 * E0**(-0.92) * mass / delta_Q # Here -0.92 is a parameter describing the epithermal flux tail.
     return ncp
@@ -271,7 +291,7 @@ def calculate_resolution(spectrum, data_x, mass, IPFile):
 #
 #       CORRECTION FUNCTIONS
 #
-def calculate_mean_widths_and_intensities(masses,widths,intensities,spectra, verbose):
+def calculate_mean_widths_and_intensities(masses,widths,intensities,spectra, g_log):
     better_widths, better_intensities =np.zeros((len(masses),len(widths[0]))),np.zeros((len(masses),len(widths[0])))
     mean_widths,widths_std,mean_intensity_ratios=np.zeros((len(masses))),np.zeros((len(masses))),np.zeros((len(masses)))
     for m in range(len(masses)):
@@ -289,11 +309,10 @@ def calculate_mean_widths_and_intensities(masses,widths,intensities,spectra, ver
         better_intensities[:,spec]/=normalisation.sum()
     for m in range(len(masses)):
         mean_intensity_ratios[m] = np.nanmean(better_intensities[m])
-    for m in range(len(masses)):
-        print ("\n", "Mass: ", masses[m], " width: ", mean_widths[m], " \pm ", widths_std[m])
+        g_log.notice ("\n", "Mass: ", masses[m], " width: ", mean_widths[m], " \pm ", widths_std[m])
     return mean_widths, mean_intensity_ratios
 
-def calculate_sample_properties(masses,mean_widths,mean_intensity_ratios, mode, verbose):
+def calculate_sample_properties(masses,mean_widths,mean_intensity_ratios, mode, g_log):
     if mode == "GammaBackground":
         profiles=""
         for m in range(len(masses)):
@@ -307,13 +326,11 @@ def calculate_sample_properties(masses,mean_widths,mean_intensity_ratios, mode, 
             MS_properties.append(mean_intensity_ratios[m])
             MS_properties.append(mean_widths[m])
         sample_properties = MS_properties        
-    if verbose:
-        print ("\n", "The sample properties for ",mode," are: ", sample_properties)
+    g_log.debug("\n", "The sample properties for ",mode," are: ", sample_properties)
     return sample_properties
         
-def correct_for_gamma_background(ws_name,first_spectrum,last_spectrum, sample_properties, verbose):
-    if verbose:
-        print( "Evaluating the Gamma Background Correction.")
+def correct_for_gamma_background(ws_name,first_spectrum,last_spectrum, sample_properties, g_log):
+    g_log.debug( "Evaluating the Gamma Background Correction.")
     gamma_background_correction=sapi.CloneWorkspace(ws_name)
     for spec in range(first_spectrum,last_spectrum+1):
         ws_index=gamma_background_correction.getIndexFromSpectrumNumber(spec)
@@ -322,8 +339,8 @@ def correct_for_gamma_background(ws_name,first_spectrum,last_spectrum, sample_pr
             gamma_background_correction.dataY(ws_index)[bin]=tmp_bkg.dataY(0)[bin]
             gamma_background_correction.dataE(ws_index)[bin]=0.
     sapi.RenameWorkspace(InputWorkspace= "gamma_background_correction", OutputWorkspace = str(ws_name)+"_gamma_background")
-    sapi.DeleteWorkspace("tmp_cor")
-    sapi.DeleteWorkspace("tmp_bkg")
+    safe_delete_ws("tmp_cor")
+    safe_delete_ws("tmp_bkg")
     return
 
 def create_slab_geometry(ws_name,vertical_width, horizontal_width, thickness):
@@ -342,13 +359,13 @@ def create_slab_geometry(ws_name,vertical_width, horizontal_width, thickness):
 ############################
 ### functions to fit the NCP in the y space
 ############################
-def subtract_other_masses(ws_name, widths, intensities, centres, spectra, masses, IPFile):
+def subtract_other_masses(ws_name, widths, intensities, centres, spectra, masses, IPFile,g_log):
     hydrogen_ws = sapi.CloneWorkspace(InputWorkspace=ws_name)
     for index in range(len(spectra)): # for each spectrum
         data_x, data_y, data_e = load_workspace(ws_name , spectra[index]) # get the experimental data after the last correction
         for m in range(len(masses)-1): # for all the masses but the first (generally H)
             other_par = (intensities[m+1, index], widths[m+1, index], centres[m+1,index]) # define the input parameters to get the NCPs
-            ncp = calculate_ncp(other_par, spectra[index], [masses[m+1]], data_x, IPFile)
+            ncp = calculate_ncp(other_par, spectra[index], [masses[m+1]], data_x, IPFile, g_log)
             for bin in range(len(data_x)-1):
                 hydrogen_ws.dataY(index)[bin] -= ncp[bin]*(data_x[bin+1]-data_x[bin])
     return hydrogen_ws
@@ -382,9 +399,8 @@ def convert_to_y_space_and_symmetrise(ws_name,mass):
     normalise_workspace(ws_name+"_JoY_sym")
     return max_Y
 
-def correct_for_multiple_scattering(ws_name,first_spectrum,last_spectrum, sample_properties, transmission_guess, multiple_scattering_order, number_of_events, verbose, masses, mean_intensity_ratios):
-    if verbose:
-        print( "Evaluating the Multiple Scattering Correction.")
+def correct_for_multiple_scattering(ws_name,first_spectrum,last_spectrum, sample_properties, transmission_guess, multiple_scattering_order, number_of_events, g_log, masses, mean_intensity_ratios):
+    g_log.debug( "Evaluating the Multiple Scattering Correction.")
     dens, trans = sapi.VesuvioThickness(Masses=masses, Amplitudes=mean_intensity_ratios, TransmissionGuess=transmission_guess,Thickness=0.1)         
     _TotScattering, _MulScattering = sapi.VesuvioCalculateMS(ws_name, NoOfMasses=len(masses), SampleDensity=dens.cell(9,1), 
                                                                         AtomicProperties=sample_properties, BeamRadius=2.5,
@@ -400,10 +416,10 @@ def correct_for_multiple_scattering(ws_name,first_spectrum,last_spectrum, sample
         sapi.Divide(LHSWorkspace = workspace, RHSWorkspace = simulation_normalisation, OutputWorkspace = workspace)
         sapi.Multiply(LHSWorkspace = workspace, RHSWorkspace = data_normalisation, OutputWorkspace = workspace)
         sapi.RenameWorkspace(InputWorkspace = workspace, OutputWorkspace = str(ws_name)+workspace)
-    sapi.DeleteWorkspace(data_normalisation)
-    sapi.DeleteWorkspace(simulation_normalisation)
-    sapi.DeleteWorkspace(trans)
-    sapi.DeleteWorkspace(dens)
+    safe_delete_ws(data_normalisation)
+    safe_delete_ws(simulation_normalisation)
+    safe_delete_ws(trans)
+    safe_delete_ws(dens)
     return
 
 def calculate_mantid_resolutions(ws_name, mass):
@@ -419,15 +435,15 @@ def calculate_mantid_resolutions(ws_name, mass):
             sapi.AppendSpectra("resolution", "tmp", OutputWorkspace= "resolution")
     sapi.SumSpectra(InputWorkspace="resolution",OutputWorkspace="resolution")
     normalise_workspace("resolution")
-    sapi.DeleteWorkspace("tmp")
+    safe_delete_ws("tmp")
     
 
 def normalise_workspace(ws_name):
     tmp_norm = sapi.Integration(ws_name)
     sapi.Divide(LHSWorkspace=ws_name,RHSWorkspace="tmp_norm",OutputWorkspace=ws_name)
-    sapi.DeleteWorkspace("tmp_norm")
+    safe_delete_ws("tmp_norm")
 
-def final_fit(fit_ws_name, constraints,y_range, correct_for_offsets, masses) :
+def final_fit(fit_ws_name, constraints,y_range, correct_for_offsets, masses, g_log) :
     function = """
     composite=Convolution,FixResolution=true,NumDeriv=true;
         name=Resolution,Workspace=resolution,WorkspaceIndex=0,X=(),Y=();
@@ -441,11 +457,11 @@ def final_fit(fit_ws_name, constraints,y_range, correct_for_offsets, masses) :
     sapi.Fit(Function= function, InputWorkspace=fit_ws_name, MaxIterations=2000, Minimizer= minimiser, Output=fit_ws_name,
                 OutputCompositeMembers=True, StartX = y_range[0] , EndX = y_range[1])
     ws = sapi.mtd[fit_ws_name+"_Parameters"]
-    print( "\n Final parameters \n")
-    print( "width: ",ws.cell(0,1)," +/- ",ws.cell(0,2), " A-1 ")
-    print( "c4: ",ws.cell(1,1)," +/- ",ws.cell(1,2), " A-1 ")
+    g_log.notice( "\n Final parameters \n")
+    g_log.notice( "width: ",ws.cell(0,1)," +/- ",ws.cell(0,2), " A-1 ")
+    g_log.notice( "c4: ",ws.cell(1,1)," +/- ",ws.cell(1,2), " A-1 ")
     sigma_to_energy = 1.5 * 2.0445**2 / masses[0] 
-    print( "mean kinetic energy: ",sigma_to_energy*ws.cell(0,1)**2," +/- ", 2.*sigma_to_energy*ws.cell(0,2)*ws.cell(0,1), " meV ")
+    g_log.notice( "mean kinetic energy: ",sigma_to_energy*ws.cell(0,1)**2," +/- ", 2.*sigma_to_energy*ws.cell(0,2)*ws.cell(0,1), " meV ")
     if correct_for_offsets :
         sapi.Scale(InputWorkspace=fit_ws_name,Factor=-ws.cell(4,1),Operation="Add",OutputWorkspace=fit_ws_name+'_cor')
         sapi.Scale(InputWorkspace=fit_ws_name+'_cor',Factor=(2.*np.pi)**(-0.5)/ws.cell(0,1)/ws.cell(3,1),Operation="Multiply",OutputWorkspace=fit_ws_name+'_cor')
@@ -456,11 +472,6 @@ class element:
         self.intensity_low, self.intensity, self.intensity_high = intensity_range[0],intensity_range[1],intensity_range[2]
         self.width_low, self.width, self.width_high = width_range[0],width_range[1],width_range[2]
         self.centre_low, self.centre, self.centre_high = centre_range[0],centre_range[1],centre_range[2]
-
-    def print(self):
-        print(self.mass, "mass")
-        print(self.intensity_low, self.intensity, self.intensity_high, "I")
-        print(self.centre_low, self.centre, self.centre_high, "C")
 
 class constraint: # with reference to the "elements" vector positions
     def __init__(self, lhs_element_position, rhs_element_position, rhs_factor , type):
@@ -496,14 +507,10 @@ def generate_elements(table):
     for row in range(num_rows):
         value = {}
         for name, clean in zip(table_cols, clean_names):
-            print(clean, name)
-            print(table.row(row)[name])
-            print("next")
             data = table.row(row)[name]
             if isinstance(data, float) and data == 9.9e9:
                 data = None
             value[clean] = data
-            print(value[clean])
         intensity = [value["intensitylowerlimit"], value["intensityvalue"], value["intensityupperlimit"]]
         width = [value["widthlowerlimit"], value["widthvalue"], value["widthupperlimit"]]
         centre = [value["centrelowerlimit"], value["centrevalue"], value["centreupperlimit"]]
