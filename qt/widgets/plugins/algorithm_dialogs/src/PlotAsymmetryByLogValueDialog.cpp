@@ -62,8 +62,7 @@ void PlotAsymmetryByLogValueDialog::initLayout() {
   m_uiForm.setupUi(this);
 
   // Tie all the properties
-  tie(m_uiForm.firstRunBox, "FirstRun", m_uiForm.FirstRunLayout);
-  tie(m_uiForm.lastRunBox, "LastRun", m_uiForm.LastRunLayout);
+  tie(m_uiForm.runs, "WorkspaceNames", m_uiForm.runsLayout);
   tie(m_uiForm.logBox, "LogValue");
   tie(m_uiForm.typeBoxLog, "Function");
   tie(m_uiForm.outWSBox, "OutputWorkspace", m_uiForm.OutputWSLayout);
@@ -78,21 +77,14 @@ void PlotAsymmetryByLogValueDialog::initLayout() {
   tie(m_uiForm.dtcFile, "DeadTimeCorrFile");
 
   // Set-up browse button mapping
-  browseButtonMapper->setMapping(m_uiForm.browseFirstButton, "FirstRun");
-  browseButtonMapper->setMapping(m_uiForm.browseLastButton, "LastRun");
   browseButtonMapper->setMapping(m_uiForm.dtcFileBrowseButton,
                                  "DeadTimeCorrFile");
 
   // Connect Browse buttons to the mapper
-  connect(m_uiForm.browseFirstButton, SIGNAL(clicked()), browseButtonMapper,
-          SLOT(map()));
-  connect(m_uiForm.browseLastButton, SIGNAL(clicked()), browseButtonMapper,
-          SLOT(map()));
   connect(m_uiForm.dtcFileBrowseButton, SIGNAL(clicked()), browseButtonMapper,
           SLOT(map()));
 
-  connect(m_uiForm.firstRunBox, SIGNAL(textChanged(const QString &)), this,
-          SLOT(fillLogBox(const QString &)));
+  connect(m_uiForm.runs, SIGNAL(fileFindingFinished()), this, SLOT(fillLogBox()));
 
   connect(m_uiForm.dtcType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(showHideDeadTimeFileWidget(int)));
@@ -103,8 +95,8 @@ void PlotAsymmetryByLogValueDialog::initLayout() {
   fillAndSetComboBox("DeadTimeCorrType", m_uiForm.dtcType);
 
   // Fill log values from the file
-  if (!m_uiForm.firstRunBox->text().isEmpty())
-    fillLogBox(m_uiForm.firstRunBox->text());
+  if (!m_uiForm.runs->getText().isEmpty())
+    fillLogBox();
 
   // So user can enter a custom value
   m_uiForm.logBox->setEditable(true);
@@ -141,8 +133,8 @@ void PlotAsymmetryByLogValueDialog::openFileDialog(
  * Fill m_uiForm.logBox with names of the log values read from one of the input
  * files
  */
-void PlotAsymmetryByLogValueDialog::fillLogBox(const QString & /*unused*/) {
-  QString nexusFileName = m_uiForm.firstRunBox->text();
+void PlotAsymmetryByLogValueDialog::fillLogBox() {
+  QString nexusFileName = m_uiForm.runs->getFirstFilename();
   QFileInfo file(nexusFileName);
   if (!file.exists()) {
     return;

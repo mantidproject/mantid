@@ -48,9 +48,6 @@ Algorithms
 - Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
 - Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
 - Deprecated the RecordPythonScript algorithm
-- Add parameter 'WorkspaceNames' to :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` which accepts a range of runs to be processed.
-   Parameters 'FirstRun' and 'LastRun' are no longer mandatory. Either WorkspaceNames, or FirstRun and LastRun must be supplied for a valid input.
-   Preference is given to WorkspaceNames if FirstRun, LastRun, and WorkspaceNames is supplied. An example of a valid range is '62260-3, 62267, 62270-4'.
 
 Data Handling
 -------------
