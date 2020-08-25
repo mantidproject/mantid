@@ -255,9 +255,8 @@ class MainWindow(QMainWindow):
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
 
-        from qtpy.QtWidgets import QMenu
-        menu_recently_closed_scripts = QMenu("RecentlyClosedScriptsMenu")  # RecentlyClosedScriptsMenu()
-        menu_recently_closed_scripts.addAction("No scripts")
+        menu_recently_closed_scripts = RecentlyClosedScriptsMenu(self)
+        self.editor.editors.sig_tab_closed.connect(menu_recently_closed_scripts.add_script_to_settings)
 
         self.file_menu_actions = [
             action_open, action_load_project, None, action_save_script, action_save_script_as,
