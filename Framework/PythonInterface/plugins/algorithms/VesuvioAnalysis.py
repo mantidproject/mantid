@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
 '''
 This file was last edited by Giovanni Romanelli on 23/05/2020.
 The structure of the script is as follows:
@@ -56,21 +63,20 @@ is not needed as a result of the symmetrisation.
 '''
 
 
-class vesuvioTest(PythonAlgorithm):
+class vesuvioAnalysis(PythonAlgorithm):
     def category(self):
         return "Indirect"
 
     def seeAlso(self):
-        return ["Rebin"]
+        return ["VesuvioCalculateGammaBackground", "ConvertToYSpace","VesuvioThickness", "VesuvioCalculateMS","Integration","VesuvioResolution","Fit",]
 
     def PyInit(self):
         self.declareProperty("AnalysisMode","LoadReduceAnalyse", doc="In the first case, all the algorithm is run. In the second case, the data are not re-loaded, and only the TOF and y-scaling bits are run. In the third case, only the y-scaling final analysis is run.", validator=StringListValidator(["LoadReduceAnalyse","ReduceAnalyse","Analyse"]))
         self.declareProperty(FileProperty("IPFile","ip2018.par", action=FileAction.Load,direction=Direction.Input, extensions=["par"]),doc="The instrument parameter file")
-        #replace with logging later
         self.declareProperty("NumberOfIterations",2, doc="Number of time the reduction is reiterated.", validator=IntListValidator([0,1,2,3,4]))
         self.declareProperty("OutputName", "polyethylene",doc="The base name for the outputs." )
         self.declareProperty("Runs", "38898-38906", doc="List of Vesuvio run numbers (e.g. 20934-20937, 30924)")
-        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed.")
+        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last).")
         self.declareProperty(FloatArrayProperty("TOFRangeVector", [110.,1.5,460.]),doc="In micro seconds (lower bound, binning, upper bound).")
         self.declareProperty("TransmissionGuess", 0.9174, doc="A number from 0 to 1 to represent the experimental transmission value of the sample for epithermal neutrons. This value is used for the multiple scattering corrections. If 1, the multiple scattering correction is not run.",validator=FloatBoundedValidator(0,1) )
         self.declareProperty("MultipleScatteringOrder", 2, doc="Order of multiple scattering events in MC simultation.",validator=IntListValidator([1,2,3,4]))
@@ -79,9 +85,9 @@ class vesuvioTest(PythonAlgorithm):
                                    "",
                                    direction=Direction.Input),doc="Table for Compton profiles")
         self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", [0,1]))
-        self.declareProperty("ConstraintsProfileScatteringCrossSection", "2.*82.03/5.551")
+        self.declareProperty("ConstraintsProfileScatteringCrossSection", "2.*82.03/5.551",doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering cross section. Simple arithmetic can be included but the result may be rounded.")
         self.declareProperty("ConstraintsProfileState", "eq", validator=StringListValidator(["eq","ineq"]))
-        self.declareProperty(IntArrayProperty("SpectraToBeMasked", [173,174,181]))
+        self.declareProperty(IntArrayProperty("SpectraToBeMasked", []))#173,174,181
         self.declareProperty("SubtractResonancesFunction", "", doc="Function for resonance subtraction. Empty means no subtraction.")
         self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles but the first element specified in the elements string. Then such spectra are converted to the Y space of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermte function up to the sixth order.") 
   
@@ -104,14 +110,16 @@ class vesuvioTest(PythonAlgorithm):
         for ch in cross_section:
             print(ch)
             if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
-                issues["ConstraintsProfileScatteringCrossSection"]=" Must be a valid mathmatical expression. "+ch
+                issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
+        spectra = self.getProperty("Spectra").value()
+        if len(spectra) != 2:
+            issues["Spectra"] = "Spectra should be of the form [first, last]"
         return issues
 
     def PyExec(self):
        IPFile = self.getProperty("IPFile").value
-       mylog = self.log()
+       g_log = logger(self.log())
        analysisMode = self.getProperty("AnalysisMode").value
-       verbose=True # If True, prints the value of the fitting parameters for each time-of-flight spectrum
        number_of_iterations =  self.getProperty("NumberOfIterations").value # This is the number of iterations for the reduction analysis in time-of-flight.
        # Parameters of the measurement
        ws_name=self.getProperty("OutputName").value
@@ -129,11 +137,11 @@ class vesuvioTest(PythonAlgorithm):
        # constraint on the intensities of element peaks
        #provide LHS element, RHS element, mult. factor, flag
        # if flag=True inequality; if flag = False equality
-       constraints_profile_num = self.getProperty("ConstraintsProfileNumbers").value # 0,1
+       constraints_profile_num = self.getProperty("ConstraintsProfileNumbers").value
        # check this is valid in the validate inputs
        cross_section = evaluate(self.getProperty("ConstraintsProfileScatteringCrossSection").value)
        state = self.getProperty("ConstraintsProfileState").value
-       C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state)# the type can be either "eq" or "ineq"  
+       C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state) 
        constraints = [C1]
 
        # spectra to be masked
@@ -174,23 +182,23 @@ class vesuvioTest(PythonAlgorithm):
                MaskDetectors(Workspace=ws_to_be_fitted,SpectraList=spectra_to_be_masked)
 
                # Fit and plot where the spectra for the current iteration
-               spectra, widths, intensities, centres = block_fit_ncp(par, first_spectrum,last_spectrum, masses, ws_to_be_fitted, fit_arguments, verbose,IPFile)
+               spectra, widths, intensities, centres = block_fit_ncp(par, first_spectrum,last_spectrum, masses, ws_to_be_fitted, fit_arguments, g_log,IPFile, g_log)
            
                # Calculate mean widths and intensities
-               mean_widths, mean_intensity_ratios = calculate_mean_widths_and_intensities(masses, widths, intensities, spectra, verbose) # at present is not multiplying for 0,9
+               mean_widths, mean_intensity_ratios = calculate_mean_widths_and_intensities(masses, widths, intensities, spectra, g_log) # at present is not multiplying for 0,9
            
                if (number_of_iterations - iteration -1 > 0):
                    # evaluate gamma background correction ---------- This creates a background workspace with name :  str(ws_name)+"_gamma_background"
-                   sample_properties = calculate_sample_properties(masses, mean_widths, mean_intensity_ratios, "GammaBackground", verbose)
-                   correct_for_gamma_background(ws_name, first_spectrum,last_spectrum, sample_properties, verbose)# 
+                   sample_properties = calculate_sample_properties(masses, mean_widths, mean_intensity_ratios, "GammaBackground", g_log)
+                   correct_for_gamma_background(ws_name, first_spectrum,last_spectrum, sample_properties, g_log)# 
                
                    Scale(InputWorkspace = str(ws_name)+"_gamma_background", OutputWorkspace = str(ws_name)+"_gamma_background", 
                                            Factor=0.9, Operation = "Multiply")
                    # evaluate multiple scattering correction --------- This creates a background workspace with name :  str(ws_name)+"_MulScattering"
                    if transmission_guess < 1. :
-                       sample_properties = calculate_sample_properties(masses, mean_widths, mean_intensity_ratios, "MultipleScattering", verbose)
+                       sample_properties = calculate_sample_properties(masses, mean_widths, mean_intensity_ratios, "MultipleScattering", g_log)
                        correct_for_multiple_scattering(ws_name, first_spectrum,last_spectrum, sample_properties, transmission_guess, 
-                                                               multiple_scattering_order, number_of_events,verbose, masses,mean_intensity_ratios)
+                                                               multiple_scattering_order, number_of_events,g_log, masses,mean_intensity_ratios)
                    # Create corrected workspace
                    Minus(LHSWorkspace= ws_name, RHSWorkspace = str(ws_name)+"_gamma_background", 
                                    OutputWorkspace = ws_name+"_cor")
@@ -215,43 +223,22 @@ class vesuvioTest(PythonAlgorithm):
                                       OutputWorkspace=ws_name+"_cor_residuals" )
                else:
                    if fit_hydrogen_in_Y_space:
-                       hydrogen_ws = subtract_other_masses(ws_name+"_cor", widths, intensities, centres, spectra, masses,IPFile)
+                       hydrogen_ws = subtract_other_masses(ws_name+"_cor", widths, intensities, centres, spectra, masses,IPFile,g_log)
                        RenameWorkspace("hydrogen_ws", ws_name+'_H')
                        SumSpectra(InputWorkspace=ws_name+'_H', OutputWorkspace=ws_name+'_H_sum')
                        calculate_mantid_resolutions(ws_name, masses[0])
        
            # Fit of the summed and symmetrised hydrogen neutron Compton profile in its Y space using MANTID.
-           mylog.notice("here "+str(fit_hydrogen_in_Y_space))
            if fit_hydrogen_in_Y_space:
-               mylog.notice("im in")
                #calculate_mantid_resolutions(ws_name, masses[0])
                max_Y = convert_to_y_space_and_symmetrise(ws_name+"_H",masses[0])
                # IT WOULD BE GOOD TO HAVE THE TIES DEFINED IN THE USER SECTION!!! 
                constraints = "   sigma1=3.0,c4=0.0, c6=0.0,A=0.08, B0=0.00, ties = {}".format(y_fit_ties)
                correct_for_offsets = True
                y_range = (-20., 20.)
-               final_fit(ws_name+'_H_JoY_sym', constraints, y_range,correct_for_offsets, masses)
-               mylog.notice("done something")
+               final_fit(ws_name+'_H_JoY_sym', constraints, y_range,correct_for_offsets, masses, g_log)
+           elif "Analyse" in analysisMode:
+               g_log.notice("Did not compute analysis. The YSpaceFitFunctionTies must be stated.")
 
-AlgorithmFactory.subscribe(vesuvioTest)
+AlgorithmFactory.subscribe(vesuvioAnalysis)
     
-"""
-
-    zrh2_H_JoY_sym_Parameters
-
-    
-
-    name          value       error
-
-    f1.sigma     4.29559     0.02
-
-    f1.c4         0              0
-
-    f1.c6         0              0
-    
-    f1.A          0.09          0.0003
-
-    f1.B0        8.8347e-5   0.00015
-
-    
-"""
