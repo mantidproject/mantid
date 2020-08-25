@@ -31,7 +31,7 @@ public:
   /// selected
   virtual std::string lastRun() const = 0;
 
-  /// @return Vector of file names 
+  /// @return Vector of file names
   virtual std::vector<std::string> getRuns() const = 0;
 
   /// Returns the name of the log to use
@@ -73,17 +73,11 @@ public:
   /// disabled
   virtual boost::optional<std::pair<double, double>> timeRange() const = 0;
 
-  /// @return The string "Auto"
-  virtual std::string autoString() const = 0;
-
-  /// If Auto mode on, store name of currently loaded file
-  /// @param file :: [input] name of file loaded
-  virtual void setCurrentAutoFile(const std::string &file) = 0;
-
-  /// @return auto checkbox
-  virtual bool autoIsChecked() const = 0;
-
+  /// Sets the run number found from auto
   virtual void setCurrentAutoRun(const int run) = 0;
+
+  /// Updates runs filefinder widget from auto last run
+  virtual void updateRunsTextFromAuto() = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -136,16 +130,14 @@ signals:
   /// Request to load data
   void loadRequested();
 
-  /// User has selected the first run
-  void firstRunSelected();
+  /// User has changed runs
+  void runsSelected();
 
   /// New data have been loaded
   void dataChanged();
 
-  /// "Auto" box has been checked/unchecked
-  //void lastRunAutoCheckedChanged(int state);
-
-  void runAutoCheckedChanged(int state);
+  /// "Auto" box has been checked
+  void runAutoChecked();
 };
 
 } // namespace CustomInterfaces

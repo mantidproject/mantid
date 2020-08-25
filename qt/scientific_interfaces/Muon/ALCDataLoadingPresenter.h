@@ -50,28 +50,16 @@ private slots:
   /// Updates the list of logs and number of periods
   void updateAvailableInfo();
 
-  /// When directory contents change, set flag
-  void updateDirectoryChangedFlag(const QString &path);
-
-  /// When "Auto" selected/deselected, start/stop watching directory
-  void changeWatchState(int state);
-
-  void updateAutoRun(int state);
+  /// Updates the run number found from auto in the view
+  void updateAutoRun();
 
 signals:
   /// Signal emitted when data get changed
   void dataChanged();
 
-protected:
-  /// Signal emitted when timer event occurs
-  void timerEvent(QTimerEvent *timeup) override;
-
 private:
   /// Load new data and update the view accordingly
   void load(const std::vector<std::string> &files);
-
-  /// Start/stop watching directory
-  void changeWatchState(bool watching);
 
   /// Check custom grouping is sensible
   bool checkCustomGrouping();
@@ -84,15 +72,6 @@ private:
 
   /// Last loaded data workspace
   Mantid::API::MatrixWorkspace_sptr m_loadedData;
-
-  /// Watch a directory for changes
-  QFileSystemWatcher m_watcher;
-
-  /// Flag to indicate directory has had changes since last load
-  std::atomic_bool m_directoryChanged;
-
-  /// ID of timer, if one is running
-  int m_timerID;
 
   /// Number of detectors for current first run
   size_t m_numDetectors;

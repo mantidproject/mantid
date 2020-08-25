@@ -15,9 +15,9 @@
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MuonAnalysisHelper.h"
 
+#include "Poco/File.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
-#include "Poco/File.h"
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -31,19 +31,14 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_directoryChanged(false), m_timerID(), m_numDetectors(0),
-      m_loadingData(false) {}
+    : m_view(view), m_numDetectors(0), m_loadingData(false) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
 
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
-  connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
-  connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
-          SLOT(updateDirectoryChangedFlag(const QString &)));
-  //connect(m_view, SIGNAL(lastRunAutoCheckedChanged(int)),
-          //SLOT(changeWatchState(int)));
-  connect(m_view, SIGNAL(runAutoCheckedChanged(int)), SLOT(updateAutoRun(int)));
+  connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
+  connect(m_view, SIGNAL(runAutoChecked()), SLOT(updateAutoRun()));
 }
 
 /**
@@ -52,121 +47,38 @@ void ALCDataLoadingPresenter::initialize() {
  * If it was "auto", sets up a watcher to automatically reload on new files.
  */
 void ALCDataLoadingPresenter::handleLoadRequested() {
-  //const std::string lastFile(m_view->lastRun());
   std::vector<std::string> files(m_view->getRuns());
 
-  // Check if error
-  if (!files.empty() && files.front() == "error") {
+  // Check not empty
+  if (files.empty()) {
     m_view->displayError("Not a valid expression for runs");
     return;
   }
-
-  // remove any directories the watcher is currently watching
-  //changeWatchState(false);
-  //// Check if input was "Auto"
-  //if (0 == lastFile.compare(m_view->autoString())) {
-  //  // Add path to watcher
-  //  changeWatchState(true);
-  //  // and get the most recent file in the directory to be lastFile
-  //  ALCLatestFileFinder finder(m_view->firstRun());
-  //  lastFile = finder.getMostRecentFile();
-  //  // check it was able to find a lastFile
-  //  if (lastFile.empty()) {
-  //    m_view->displayError(
-  //        "Could not determine a valid list of files (check run directory)");
-  //    return;
-  //  }
-  //  m_view->setCurrentAutoFile(lastFile);
-  //}
 
   // Now perform the load
   load(files);
 }
 
 /**
- * The watched directory has been changed - update flag.
- * @param path :: [input] Path to directory modified (not used)
+ * Called when the auto checkbox is checked
+ * Tries to find the most recent file in the same directory as first
+ * and save the run number
  */
-void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
-  Q_UNUSED(path); // just set the flag, don't need the path
-  m_directoryChanged = true;
-}
+void ALCDataLoadingPresenter::updateAutoRun() {
 
-/**
- * This timer runs every second when we are watching a directory.
- * If any changes have occurred in the meantime, reload.
- * @param timeup :: [input] Qt timer event (not used)
- */
-void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
-  //Q_UNUSED(timeup); // We only have one timer, so not necessary to use this
-
-  //// Check flag for changes
-  //if (m_directoryChanged.load()) {
-  //  // Most recent file in directory
-  //  ALCLatestFileFinder finder(m_view->firstRun());
-  //  std::string lastFile = finder.getMostRecentFile();
-  //  // check it was able to find a lastFile
-  //  if (lastFile.empty()) {
-  //    m_view->displayError(
-  //        "Could not determine a valid list of files (check run directory)");
-  //    return;
-  //  }
-  //  //load(lastFile);
-  //  m_view->setCurrentAutoFile(lastFile);
-  //  // Reset flag
-  //  m_directoryChanged = false;
-  //}
-}
-
-/**
- * Start/stop watching directory for changes
- * @param watching :: [input] True to start watching, false to stop
- */
-void ALCDataLoadingPresenter::changeWatchState(bool watching) {
-  //m_directoryChanged = false;
-  //if (watching) {
-  //  Poco::Path path(m_view->firstRun());
-  //  m_watcher.addPath(QString(path.parent().toString().c_str()));
-  //  m_timerID = startTimer(1000); // 1-second timer
-  //} else {
-  //  if (!m_watcher.directories().empty()) {
-  //    m_watcher.removePaths(m_watcher.directories());
-  //  }
-  //  killTimer(m_timerID);
-  //}
-}
-
-/**
- * Start/stop watching directory for changes
- * (called when Auto checkbox checked/unchecked)
- * @param state :: [input] Member of Qt::CheckState enum
- */
-void ALCDataLoadingPresenter::changeWatchState(int state) {
-  /*if (state == Qt::Checked) {
-    changeWatchState(true);
-  } else {
-    changeWatchState(false);
-  }*/
-}
-
-void ALCDataLoadingPresenter::updateAutoRun(int state) {
- 
-  // find most recent file
-  // update auto run number
+  // Find most recent file from first
   ALCLatestFileFinder finder(m_view->firstRun());
   const auto last = finder.getMostRecentFile();
 
+  // If empty auto cannot be used
   if (last.empty()) {
-    // Error
     m_view->displayError("Could not determine a valid last file.");
     m_view->setCurrentAutoRun(-1);
     return;
   }
 
-  // Update last
+  // Update the auto run in the view
   const int lastRun = m_view->extractRunNumber(last);
-
-  // Send back to view
   m_view->setCurrentAutoRun(lastRun);
 }
 
@@ -178,9 +90,6 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
 
   m_loadingData = true;
   m_view->disableAll();
-  // Use Path.toString() to ensure both are in same (native) format
-  //Poco::Path firstRunPath(m_view->firstRun());
-  //Poco::Path lastRunPath(lastFile);
 
   // Before loading, check custom grouping (if used) is sensible
   const bool groupingOK = checkCustomGrouping();
@@ -246,7 +155,7 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     // Execute async so we can show progress bar
     Poco::ActiveResult<bool> result(alg->executeAsync());
     while (!result.available()) {
-    QCoreApplication::processEvents();
+      QCoreApplication::processEvents();
     }
     if (!result.error().empty()) {
       throw std::runtime_error(result.error());

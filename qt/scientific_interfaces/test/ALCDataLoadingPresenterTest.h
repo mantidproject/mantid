@@ -40,6 +40,7 @@ class MockALCDataLoadingView : public IALCDataLoadingView {
 public:
   MOCK_CONST_METHOD0(firstRun, std::string());
   MOCK_CONST_METHOD0(lastRun, std::string());
+  MOCK_CONST_METHOD0(getRuns, std::vector<std::string>());
   MOCK_CONST_METHOD0(log, std::string());
   MOCK_CONST_METHOD0(function, std::string());
   MOCK_CONST_METHOD0(calculationType, std::string());
@@ -52,7 +53,8 @@ public:
   MOCK_CONST_METHOD0(redPeriod, std::string());
   MOCK_CONST_METHOD0(greenPeriod, std::string());
   MOCK_CONST_METHOD0(subtractIsChecked, bool());
-  MOCK_CONST_METHOD0(autoString, std::string());
+  MOCK_METHOD1(setCurrentAutoRun, void(int));
+  MOCK_METHOD0(updateRunsTextFromAuto, void());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
@@ -68,9 +70,10 @@ public:
   MOCK_METHOD1(checkBoxAutoChanged, void(int));
   MOCK_METHOD1(setCurrentAutoFile, void(const std::string &));
   MOCK_METHOD0(handleFirstFileChanged, void());
+  MOCK_METHOD1(extractRunNumber, int(const std::string &));
 
   void requestLoading() { emit loadRequested(); }
-  void selectFirstRun() { emit firstRunSelected(); }
+  void selectRuns() { emit runsSelected(); }
 };
 
 MATCHER_P4(WorkspaceX, i, j, value, delta, "") {
@@ -103,9 +106,13 @@ public:
     m_presenter = new ALCDataLoadingPresenter(m_view);
     m_presenter->initialize();
 
+    std::vector<std::string> runs = {"MUSR00015189.nxs", "MUSR00015191.nxs",
+                                      "MUSR00015192.nxs"};
+
     // Set some valid default return values for the view mock object getters
     ON_CALL(*m_view, firstRun()).WillByDefault(Return("MUSR00015189.nxs"));
-    ON_CALL(*m_view, lastRun()).WillByDefault(Return("MUSR00015191.nxs"));
+    ON_CALL(*m_view, lastRun()).WillByDefault(Return("MUSR00015192.nxs"));
+    ON_CALL(*m_view, getRuns()).WillByDefault(Return(runs));
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
     ON_CALL(*m_view, function()).WillByDefault(Return("Last"));
@@ -192,7 +199,7 @@ public:
     ON_CALL(*m_view, timeRange())
         .WillByDefault(Return(boost::make_optional(timeRange)));
     EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
-    m_view->selectFirstRun();
+    m_view->selectRuns();
   }
 
   void test_updateAvailableInfo_NotFirstRun() {
@@ -216,7 +223,7 @@ public:
         .WillByDefault(Return(boost::make_optional(timeRange)));
     EXPECT_CALL(*m_view, setTimeLimits(_, _))
         .Times(0); // shouldn't reset time limits
-    m_view->selectFirstRun();
+    m_view->selectRuns();
   }
 
   void test_badCustomGrouping() {
@@ -225,7 +232,7 @@ public:
     // Too many detectors (MUSR has only 64)
     ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("49-96"));
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
-    m_view->selectFirstRun();
+    m_view->selectRuns();
     m_view->requestLoading();
   }
 
@@ -233,7 +240,7 @@ public:
     ON_CALL(*m_view, firstRun()).WillByDefault(Return(""));
     EXPECT_CALL(*m_view,
                 setAvailableLogs(ElementsAre())); // Empty array expected
-    TS_ASSERT_THROWS_NOTHING(m_view->selectFirstRun());
+    TS_ASSERT_THROWS_NOTHING(m_view->selectRuns());
   }
 
   void test_updateAvailableLogs_unsupportedFirstRun() {
@@ -241,7 +248,7 @@ public:
         .WillByDefault(Return("LOQ49886.nxs")); // XXX: not a Muon file
     EXPECT_CALL(*m_view,
                 setAvailableLogs(ElementsAre())); // Empty array expected
-    TS_ASSERT_THROWS_NOTHING(m_view->selectFirstRun());
+    TS_ASSERT_THROWS_NOTHING(m_view->selectRuns());
   }
 
   void test_load_error() {
@@ -307,7 +314,7 @@ public:
                   WorkspaceX(0, 2, 1370, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
                   WorkspaceY(0, 1, 0.143, 1E-3), WorkspaceY(0, 2, 0.128, 1E-3)),
             0));
-    m_view->selectFirstRun();
+    m_view->selectRuns();
     m_view->requestLoading();
   }
 

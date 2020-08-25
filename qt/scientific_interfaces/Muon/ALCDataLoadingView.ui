@@ -67,7 +67,7 @@
             <item row="0" column="2">
              <widget class="QCheckBox" name="runAuto">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, loads all files in directory&lt;/p&gt;&lt;p&gt;and automatically updates as files are added&lt;/p&gt;&lt;p&gt;and removed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, loads all files in directory&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Auto</string>
@@ -643,7 +643,7 @@
  </connections>
  <buttongroups>
   <buttongroup name="detectorGroupingType"/>
-  <buttongroup name="calculationType"/>
   <buttongroup name="deadTimeCorrType"/>
+  <buttongroup name="calculationType"/>
  </buttongroups>
 </ui>

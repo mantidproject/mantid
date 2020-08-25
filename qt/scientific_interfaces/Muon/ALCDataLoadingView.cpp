@@ -9,6 +9,7 @@
 #include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
+#include <Poco/File.h>
 
 #include <QMessageBox>
 
@@ -16,8 +17,6 @@ using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/// This is the string "Auto", used for last file
-const std::string ALCDataLoadingView::g_autoString = "Auto";
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget) : m_widget(widget) {}
 
@@ -29,8 +28,7 @@ void ALCDataLoadingView::initialize() {
   m_ui.logValueSelector->setVisible(true);
   m_ui.logValueSelector->setEnabled(true);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
-  connect(m_ui.runs, SIGNAL(fileFindingFinished()),
-          SIGNAL(firstRunSelected()));
+  connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsSelected()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.runAuto, SIGNAL(stateChanged(int)), this,
           SLOT(checkBoxAutoChanged(int)));
@@ -80,10 +78,8 @@ std::vector<std::string> ALCDataLoadingView::getRuns() const {
   std::vector<std::string> returnFiles;
   if (m_ui.runs->isValid()) {
     const auto fileNames = m_ui.runs->getFilenames();
-    for (const auto &file : fileNames) 
+    for (const auto &file : fileNames)
       returnFiles.emplace_back(file.toStdString());
-  } else {
-    returnFiles.emplace_back("error");
   }
   return returnFiles;
 }
@@ -152,10 +148,6 @@ boost::optional<std::pair<double, double>>
 ALCDataLoadingView::timeRange() const {
   auto range = std::make_pair(m_ui.minTime->value(), m_ui.maxTime->value());
   return boost::make_optional(range);
-}
-
-bool ALCDataLoadingView::autoIsChecked() const {
-  return m_ui.runAuto->isChecked();
 }
 
 void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
@@ -277,94 +269,131 @@ void ALCDataLoadingView::enableAll() {
   m_ui.load->setEnabled(true);
 }
 
+void ALCDataLoadingView::updateRunsTextFromAuto() {
+
+  const int currentLastRun = extractRunNumber(lastRun());
+  auto currentInput = m_ui.runs->getText().toStdString();
+
+  // Only make changes if found run > user last run
+  if (m_currentAutoRun < currentLastRun)
+    return;
+
+  // Save old input
+  m_oldInput = currentInput;
+
+  // Check if range at end
+  std::size_t findRange = currentInput.find_last_of("-");
+  std::size_t findComma = currentInput.find_last_of(",");
+  QString newInput;
+
+  // Remove ending range if at end of input
+  if (findRange != -1 && (findComma == -1 || findRange > findComma)) {
+    currentInput.erase(findRange, currentInput.length() - 1);
+  }
+
+  // Initialise new input
+  newInput = QString::fromStdString(currentInput);
+
+  // Will hold the base path for all runs, used to check which run numbers
+  // exist
+  auto basePath = firstRun();
+
+  // Strip the extension
+  size_t findExt = basePath.find_last_of(".");
+  const auto ext = basePath.substr(findExt);
+  basePath.erase(findExt);
+
+  // Remove the run number part so we are left with just the base path
+  const std::string numPart = std::to_string(currentLastRun);
+  basePath.erase(basePath.length() - numPart.length());
+
+  bool fnf = false; // file not found
+
+  // Check all files valid between current last and auto, remove bad ones
+  for (int i = currentLastRun + 1; i < m_currentAutoRun; ++i) {
+
+    // Try creating a file from base, i and extension
+    Poco::File testFile(basePath + std::to_string(i) + ext);
+
+    // If doesn't exist add range to previous run
+    if (testFile.exists()) {
+
+      if (fnf) { // Means next file found since a file not found
+        // Add comma
+        newInput.append(",");
+        newInput.append(QString::number(i));
+        fnf = false;
+      }
+    } else {
+      newInput.append("-");
+      newInput.append(QString::number(i - 1));
+      fnf = true;
+    }
+  }
+
+  // If true then need a comma instead as file before last is missing
+  if (fnf)
+    newInput.append(",");
+  else
+    newInput.append("-");
+  newInput.append(QString::number(m_currentAutoRun));
+
+  // Update it
+  m_ui.runs->setFileTextWithSearch(newInput);
+}
+
 /**
  * Called when the check state of the "Auto" checkbox changes.
  * Set text before setting read-only to validate the right text.
  * @param state :: [input] Check state - member of Qt::CheckState enum
  */
 void ALCDataLoadingView::checkBoxAutoChanged(int state) {
-  // Tell the presenter about the change
-  //emit lastRunAutoCheckedChanged(state);
-  //if (state == Qt::Checked) {
-  //  // Auto mode on
-  //  m_ui.lastRun->setText(autoString().c_str());
-  //  m_ui.lastRun->setReadOnly(true);
-  //} else {
-  //  // Replace "auto" with the currently loaded file
-  //  // The search is necessary to clear the validator
-  //  m_ui.lastRun->setFileTextWithSearch(m_currentAutoFile.c_str());
-  //  m_ui.lastRun->setReadOnly(false);
-  //}
-  
-  const int currentLastRun = extractRunNumber(lastRun());
-  auto currentInput = m_ui.runs->getText().toStdString();
 
+  // Try to auto fill in rest of runs
   if (state == Qt::Checked) {
     // Set read only
     m_ui.runs->setReadOnly(true);
 
     // Update auto run
-    emit runAutoCheckedChanged(state); 
+    emit runAutoChecked();
 
     // Check for failure
     if (m_currentAutoRun == -1) {
-      return;
+      return; // Error displayed from presenter
     }
 
-    // Only make changes if found run > user last run
-    if (m_currentAutoRun > currentLastRun) {
-      // Save old input
-      m_oldInput = currentInput;
+    // Update runs
+    updateRunsTextFromAuto();
 
-      // Do some checks
-      std::size_t found = currentInput.find_last_of("-");
-      QString newInput;
-      // Not found
-      if (found == -1) {
-        // just add to end
-        newInput = QString::fromStdString(currentInput);
-        newInput.append("-");
-        newInput.append(QString::number(m_currentAutoRun));
-      } else {
-        // Remove last run and replace with found last run
-        currentInput.erase(found + 1, currentInput.length() - 1);
-        newInput = QString::fromStdString(currentInput);
-        newInput.append(QString::number(m_currentAutoRun));
-      }
-
-      // Update it
-      m_ui.runs->setFileTextWithSearch(newInput);
-
-      /*if (!m_ui.runs->getFileProblem().isEmpty()) {
-        displayError("Error with files : " +
-                     m_ui.runs->getFileProblem().toStdString());*/
-    }
   } else {
     // Remove read only
     m_ui.runs->setReadOnly(false);
 
-    // Reset text
+    // Reset text as before auto checked
     m_ui.runs->setFileTextWithSearch(QString::fromStdString(m_oldInput));
   }
 }
 
-int ALCDataLoadingView::extractRunNumber(const std::string& file) {
+/**
+ * Remove the run number from a full file path
+ * @param file :: [input] full path which contains a run number
+ * @return An integer representation of the run number 
+ */
+int ALCDataLoadingView::extractRunNumber(const std::string &file) {
   if (file.empty())
     return -1;
 
   auto returnVal = file;
-  // Remove file extension
-  returnVal.erase(returnVal.size() - 4);
+  // Strip beginning of path to just the run (e.g. MUSR00015189.nxs)
+  std::size_t found = returnVal.find_last_of("/\\");
+  returnVal = returnVal.substr(found + 1);
 
-  std::string base = returnVal;
-  size_t i = base.size() - 1;
-  while (isdigit(base[i]))
-    i--;
-  if (i == base.size() - 1)
-    return -1;
-  base.erase(i + 1);
-  returnVal.erase(0, base.size());
+  // Remove all non-digits
+  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(),
+                               [](auto c) { return !std::isdigit(c); }),
+                returnVal.end());
 
+  // Return run number as int (removes leading 0's)
   return std::stoi(returnVal);
 }
 
