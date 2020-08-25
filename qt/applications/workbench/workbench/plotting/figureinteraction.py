@@ -28,7 +28,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import datafunctions, MantidAxes
+from mantid.plots import datafunctions, MantidAxes, axesfunctions
 from mantid.plots.utility import zoom, MantidAxType
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -724,6 +724,7 @@ class FigureInteraction(object):
 
             if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                 ax.relim()
+                ax.autoscale()
 
             if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
                 colorbar_min = np.nanmin(ax.images[-1].get_array())
@@ -738,7 +739,7 @@ class FigureInteraction(object):
                 if colorbar_log:  # If it had a log scaled colorbar before, put it back.
                     self._change_colorbar_axes(LogNorm)
 
-            ax.autoscale()
+                axesfunctions.update_colorplot_datalimits(ax, ax.images)
 
             datafunctions.set_initial_dimensions(ax)
             if waterfall:
