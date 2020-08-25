@@ -136,11 +136,11 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.context.reset_group_and_pairs_to_default(workspace, 'EMU', 'longitudanal', 2)
 
-        self.assertEquals(self.context.group_names, ['fwd1', 'fwd2', 'bwd1', 'bwd2'])
+        self.assertEquals(self.context.group_names, ['fwd1', 'bwd1', 'fwd2', 'bwd2'])
         self.assertEquals(self.context.pair_names, ['long1', 'long2'])
         self.assertEquals(self.context.groups[0].periods, [1])
-        self.assertEquals(self.context.groups[1].periods, [2])
-        self.assertEquals(self.context.groups[2].periods, [1])
+        self.assertEquals(self.context.groups[1].periods, [1])
+        self.assertEquals(self.context.groups[2].periods, [2])
         self.assertEquals(self.context.pairs[0].forward_group, 'fwd1')
         self.assertEquals(self.context.pairs[0].backward_group, 'bwd1')
         self.assertEquals(self.context.pairs[1].forward_group, 'fwd2')
