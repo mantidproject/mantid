@@ -36,7 +36,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, 
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
                                                  SingleMarkerEditor, GlobalMarkerEditor,
-                                                 ColorbarAxisEditor, ZAxisEditor)
+                                                 ColorbarAxisEditor, ZAxisEditor, LegendEditor)
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
@@ -107,11 +107,11 @@ class FigureInteraction(object):
         if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D) or \
                 len(event.inaxes.images) == 0 and len(event.inaxes.lines) == 0:
             return
-        zoom_factor = 1.05 + abs(event.step)/6
+        zoom_factor = 1.05 + abs(event.step) / 6
         if event.button == 'up':  # zoom in
             zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
         elif event.button == 'down':  # zoom out
-            zoom(event.inaxes, event.xdata, event.ydata, factor=1/zoom_factor)
+            zoom(event.inaxes, event.xdata, event.ydata, factor=1 / zoom_factor)
         event.canvas.draw()
 
     def on_mouse_button_press(self, event):
@@ -244,6 +244,16 @@ class FigureInteraction(object):
                 elif (ax.zaxis.contains(event)[0]
                       or any(tick.contains(event)[0] for tick in ax.get_zticklabels())):
                     move_and_show(ZAxisEditor(canvas, ax))
+            elif ax.get_legend() is not None and ax.get_legend().contains(event)[0]:
+                # We have to set the legend as non draggable else we hold onto the legend
+                # until the mouse button is clicked again
+                ax.get_legend().set_draggable(False)
+                legend_texts = ax.get_legend().get_texts()
+                active_lines = datafunctions.get_legend_handles(ax)
+                for legend_text, curve in zip(legend_texts, active_lines):
+                    if legend_text.contains(event)[0]:
+                        move_and_show(LegendEditor(canvas, legend_text, curve))
+                ax.get_legend().set_draggable(True)
 
     def _show_markers_menu(self, markers, event):
         """
