@@ -26,6 +26,7 @@ SUBPLOT_HSPACE = 0.5
 class PlotsLoader(object):
     def __init__(self):
         self.color_bar_remade = False
+        self.creation_args = {}
 
     def load_plots(self, plots_list):
         if plots_list is None:
@@ -47,17 +48,17 @@ class PlotsLoader(object):
         :param create_plot: Bool; whether or not to make the plot, or to return the figure.
         :return: matplotlib.figure; Only returns if create_plot=False
         """        # Grab creation arguments
-        creation_args = plot_dict["creationArguments"]
+        self.creation_args = plot_dict["creationArguments"]
 
-        if len(creation_args) == 0:
+        if len(self.creation_args) == 0:
             logger.information(
                 "A plot could not be loaded from the save file, as it did not have creation_args. "
                 "The original plot title was: {}".format(plot_dict["label"]))
             return
 
-        fig, axes_matrix, _, _ = create_subplots(len(creation_args))
+        fig, axes_matrix, _, _ = create_subplots(len(self.creation_args))
         axes_list = axes_matrix.flatten().tolist()
-        for ax, cargs_list in zip(axes_list, creation_args):
+        for ax, cargs_list in zip(axes_list, self.creation_args):
             creation_args_copy = copy.deepcopy(cargs_list)
             for cargs in cargs_list:
                 if "workspaces" in cargs:
@@ -147,9 +148,25 @@ class PlotsLoader(object):
         if dic["title"] is not None:
             ax.set_title(dic["title"])
 
+        # Flatten the creation args and get just the label from each dict.
+        # These labels are for lines associated with workspaces.
+        ws_line_labels = [
+            line_dict['label'] for sublist in self.creation_args for line_dict in sublist
+        ]
+
         # Update the lines
         line_list = dic["lines"]
         for line in line_list:
+            if line['label'] not in ws_line_labels:
+                # Then assume this line was created with ax.axvline or hline.
+                points = line['lineData']['data']
+                if points[0][0] == points[1][0]:
+                    # The x-coords of each point matches, this is a vertical line
+                    ax.axvline(points[0][0], ymin=points[0][1], ymax=points[1][1])
+                elif points[0][1] == points[1][1]:
+                    # The y-coords of each point matches, this is a horizontal line
+                    ax.axhline(points[0][1], xmin=points[0][0], xmax=points[1][0])
+
             self.update_lines(ax, line)
 
         # Update/set text

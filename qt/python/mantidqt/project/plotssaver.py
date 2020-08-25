@@ -212,10 +212,22 @@ class PlotsSaver(object):
                      "lineWidth": line.get_linewidth(),
                      "lineStyle": line.get_linestyle(),
                      "markerStyle": self.get_dict_from_marker_style(line),
-                     "errorbars": self.get_dict_for_errorbars(line)}
+                     "errorbars": self.get_dict_for_errorbars(line),
+                     "lineData": self.get_dict_from_line_data(line)
+                     }
         if line_dict["alpha"] is None:
             line_dict["alpha"] = 1
         return line_dict
+
+    def get_dict_from_line_data(self, line):
+        for arg_dict in self.figure_creation_args:
+            if arg_dict['label'] != line.get_label():
+                return {
+                    "exists": True,
+                    "data": line._xy.tolist()
+                }
+            else:
+                return {"exists": False}
 
     def get_dict_for_errorbars(self, line):
         if self.figure_creation_args[0]["function"] == "errorbar":
