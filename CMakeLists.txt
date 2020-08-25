@@ -513,13 +513,13 @@ if(ENABLE_CPACK)
                    ${CPACK_DEBIAN_PACKAGE_DEPENDS})
   endif()
 
-  # soft requirement of tcmalloc if selected
-  if(USE_TCMALLOC)
-    message(STATUS "Adding gperftools to the package requirements")
+  # soft requirement of jemalloc if selected
+  if(USE_JEMALLOC)
+    message(STATUS "Adding jemalloc to the package requirements")
     set(CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0")
+        "${CPACK_RPM_PACKAGE_REQUIRES},libjemalloc1 >= 3.0")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools4 (>= 1.7)")
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS},libjemalloc1 (>= 3.0)")
   endif()
 
   # run cpack configuration

@@ -162,49 +162,30 @@ elif [ -n \"\${TLSESSIONDATA}\" ]; then  # running in thin-linc
   fi
 fi" )
 
-# The scripts need tcmalloc to be resolved to the runtime library as the plain
+# The scripts need jemalloc to be resolved to the runtime library as the plain
 # .so symlink is only present when a -dev/-devel package is present
-if ( TCMALLOC_FOUND )
-  get_filename_component ( TCMALLOC_RUNTIME_LIB ${TCMALLOC_LIBRARIES} REALPATH )
+if ( JEMALLOC_FOUND )
+  get_filename_component ( JEMALLOC_RUNTIME_LIB ${JEMALLOC_LIBRARIES} REALPATH )
   # We only want to use the major version number
-  string( REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" TCMALLOC_RUNTIME_LIB ${TCMALLOC_RUNTIME_LIB} )
+  string( REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" JEMALLOC_RUNTIME_LIB ${JEMALLOC_RUNTIME_LIB} )
 endif ()
 
-# definitions to preload tcmalloc but not if we are using address sanitizer as this confuses things
+# definitions to preload jemalloc but not if we are using address sanitizer as this confuses things
 if ( WITH_ASAN )
-  set ( TCMALLOC_DEFINITIONS
+  set ( JEMALLOC_DEFINITIONS
 "
 LOCAL_PRELOAD=\${LD_PRELOAD}
-TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}
-TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
+"
 )
 else ()
   # Do not indent the string below as it messes up the formatting in the final script
-  set ( TCMALLOC_DEFINITIONS
-"# Define parameters for tcmalloc
-LOCAL_PRELOAD=${TCMALLOC_RUNTIME_LIB}
+  set ( JEMALLOC_DEFINITIONS
+"# Define parameters for jemalloc
+LOCAL_PRELOAD=${JEMALLOC_RUNTIME_LIB}
 if [ -n \"\${LD_PRELOAD}\" ]; then
     LOCAL_PRELOAD=\${LOCAL_PRELOAD}:\${LD_PRELOAD}
 fi
-if [ -z \"\${TCMALLOC_RELEASE_RATE}\" ]; then
-    TCM_RELEASE=10000
-else
-    TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}
-fi
-
-# Define when to report large memory allocation
-if [ -z \"\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}\" ]; then
-    # total available memory
-    TCM_REPORT=\$(grep MemTotal /proc/meminfo --color=never | awk '{print \$2}')
-    # half of available memory
-    TCM_REPORT=`expr 512 \\* \$TCM_REPORT`
-    # minimum is 1GB
-    if [ \${TCM_REPORT} -le 1073741824 ]; then
-        TCM_REPORT=1073741824
-    fi
-else
-    TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}
-fi" )
+" )
 endif()
 
 # chunk of code for launching gdb
