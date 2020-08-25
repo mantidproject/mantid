@@ -84,7 +84,8 @@ void PlotAsymmetryByLogValueDialog::initLayout() {
   connect(m_uiForm.dtcFileBrowseButton, SIGNAL(clicked()), browseButtonMapper,
           SLOT(map()));
 
-  connect(m_uiForm.runs, SIGNAL(fileFindingFinished()), this, SLOT(fillLogBox()));
+  connect(m_uiForm.runs, SIGNAL(fileFindingFinished()), this,
+          SLOT(fillLogBox()));
 
   connect(m_uiForm.dtcType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(showHideDeadTimeFileWidget(int)));
