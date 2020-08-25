@@ -36,6 +36,7 @@ Improvements
   This change introduces two optional outputs from the QENSFit algorithms (fit status and Chi squared), which may be used to monitor the outcome of the fit.
 - Added default parameter estimations to the F(q) tab.
 - The ConvFit tab within the IDA GUI will now output convolved members by default.
+- Added a Help option to the right-click menu in the function browser (in full function view) which brings up a relevant documentation page describing the function.
 
 Bug Fixes
 #########
