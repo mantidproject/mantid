@@ -234,6 +234,9 @@ public:
                      3);
   }
 
+  /// TODO: Add unittests for setActiveWidth and setActiveELSF when mainanence
+  /// makes tests simpler.
+
 private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,

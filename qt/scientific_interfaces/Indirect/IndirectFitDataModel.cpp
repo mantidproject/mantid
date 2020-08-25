@@ -206,9 +206,9 @@ void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
 void IndirectFitDataModel::addWorkspace(
     Mantid::API::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
   if (!m_fittingData->empty()) {
-    for (auto i = m_fittingData->begin(); i != m_fittingData->end(); ++i) {
-      if (equivalentWorkspaces(workspace, i->workspace())) {
-        i->combine(IndirectFitData(workspace, spectra));
+    for (auto i : *m_fittingData) {
+      if (equivalentWorkspaces(workspace, i.workspace())) {
+        i.combine(IndirectFitData(workspace, spectra));
         return;
       }
     }
