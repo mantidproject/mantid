@@ -143,7 +143,7 @@ Once the testing has passed:
 * ``nobugs@nobugsconference.org``
 * ``news@neutronsources.org``
 * ``neutron@neutronsources.org``
-* Also post the contents of the message on General on Slack
+* Also post the contents of the message on Announcements on Slack
 * Add topic to the news page on the `forum <http://forum.mantidproject.org/>`__
 * Close the release milestone in github
 * Remove the patch candidate tag from pull requests (if not already done)
