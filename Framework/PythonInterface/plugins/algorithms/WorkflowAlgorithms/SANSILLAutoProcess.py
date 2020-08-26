@@ -337,8 +337,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     def processTransmissions(self):
         [process_transmission_absorber, transmission_absorber_name] = \
                 needs_processing(self.atransmission, 'Absorber')
+        self.progress.report('Processing transmission absorber')
         if process_transmission_absorber:
-            self.progress.report('Processing transmission absorber')
             SANSILLReduction(Run=self.atransmission,
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
@@ -347,8 +347,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         [process_transmission_beam, transmission_beam_name] = \
             needs_processing(self.btransmission, 'Beam')
         flux_name = transmission_beam_name + '_Flux'
+        self.progress.report('Processing transmission beam')
         if process_transmission_beam:
-            self.progress.report('Processing transmission beam')
             SANSILLReduction(Run=self.btransmission,
                              ProcessAs='Beam',
                              NormaliseBy=self.normalise,
@@ -360,8 +360,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         [process_container_transmission, container_transmission_name] = \
             needs_processing(self.ctransmission, 'Transmission')
+        self.progress.report('Processing container transmission')
         if process_container_transmission:
-            self.progress.report('Processing container transmission')
             SANSILLReduction(Run=self.ctransmission,
                              ProcessAs='Transmission',
                              OutputWorkspace=container_transmission_name,
@@ -373,8 +373,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         [process_sample_transmission, sample_transmission_name] = \
             needs_processing(self.stransmission, 'Transmission')
+        self.progress.report('Processing sample transmission')
         if process_sample_transmission:
-            self.progress.report('Processing sample transmission')
             SANSILLReduction(Run=self.stransmission,
                              ProcessAs='Transmission',
                              OutputWorkspace=sample_transmission_name,
@@ -391,8 +391,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     else self.absorber[0])
         [process_absorber, absorber_name] = \
             needs_processing(absorber, 'Absorber')
+        self.progress.report('Processing absorber')
         if process_absorber:
-            self.progress.report('Processing absorber')
             SANSILLReduction(Run=absorber,
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
@@ -405,8 +405,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 else self.beam[0])
         [process_beam, beam_name] = needs_processing(beam, 'Beam')
         flux_name = beam_name + '_Flux' if not self.flux[0] else ''
+        self.progress.report('Processing beam')
         if process_beam:
-            self.progress.report('Processing beam')
             SANSILLReduction(Run=beam,
                              ProcessAs='Beam',
                              OutputWorkspace=beam_name,
@@ -422,8 +422,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     if len(self.flux) == self.dimensionality
                     else self.flux[0])
             [process_flux, flux_name] = needs_processing(flux, 'Flux')
+            self.progress.report('Processing flux')
             if process_flux:
-                self.progress.report('Processing flux')
                 SANSILLReduction(Run=flux,
                                  ProcessAs='Beam',
                                  OutputWorkspace=flux_name.replace('Flux',
@@ -443,8 +443,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                      else self.container[0])
         [process_container, container_name] = \
             needs_processing(container, 'Container')
+        self.progress.report('Processing container')
         if process_container:
-            self.progress.report('Processing container')
             SANSILLReduction(Run=container,
                              ProcessAs='Container',
                              OutputWorkspace=container_name,
@@ -462,8 +462,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         # this is the default mask, the same for all the distance configurations
         [load_default_mask, default_mask_name] = \
                 needs_loading(self.default_mask, 'DefaultMask')
+        self.progress.report('Loading default mask')
         if load_default_mask:
-            self.progress.report('Loading default mask')
             LoadNexusProcessed(Filename=self.default_mask,
                                OutputWorkspace=default_mask_name)
 
@@ -472,8 +472,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 if len(self.mask) == self.dimensionality
                 else self.mask[0])
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
+        self.progress.report('Loading mask')
         if load_mask:
-            self.progress.report('Loading mask')
             LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
 
         # sensitivity
@@ -486,8 +486,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             [load_sensitivity, sensitivity_name] = \
                 needs_loading(sens, 'Sensitivity')
             sens_input = sensitivity_name
+            self.progress.report('Loading sensitivity')
             if load_sensitivity:
-                self.progress.report('Loading sensitivity')
                 LoadNexusProcessed(Filename=sens,
                                    OutputWorkspace=sensitivity_name)
 
@@ -499,8 +499,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             [load_reference, reference_name] = \
                 needs_loading(reference, 'Reference')
             ref_input = reference_name
+            self.progress.report('Loading reference')
             if load_reference:
-                self.progress.report('Loading reference')
                 LoadNexusProcessed(Filename=reference,
                                    OutputWorkspace=reference_name)
 
