@@ -15,6 +15,7 @@ New
 - The axis tick markers in a plot can be switched between Log and decimal formats independently of the axes scale.
 - Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
 - A default font for plots can now be set in the workbench settings.
+- Added a Recently Closed Scripts sub-menu to the File menu in workbench, it shows all scripts that have recently been closed in descending order.
 
 Improvements
 ############
