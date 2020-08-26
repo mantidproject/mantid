@@ -225,7 +225,7 @@ class BatchCsvParserTest(unittest.TestCase):
         with mock.patch(patchable, mocked_handle):
             parser.save_batch_file(rows=[], file_path=expected_file_path)
 
-        mocked_handle.assert_called_with(expected_file_path, "w")
+        mocked_handle.assert_called_with(expected_file_path, "w", newline="")
 
     def test_parses_row_to_csv_correctly(self):
         test_row = RowEntries()

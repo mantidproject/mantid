@@ -457,58 +457,92 @@ def common_x(arr):
     return np.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False):
-    num_hist = workspace.getNumberHistograms()
-    delta = np.finfo(np.float64).max
-    min_value = np.finfo(np.float64).max
-    max_value = np.finfo(np.float64).min
-    try:
-        sp_info = workspace.spectrumInfo()
-    except:
-        sp_info = None
+def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False,
+                         extent=None, xbins=100, ybins=100, spec_info=None):
+    if spec_info is None:
+        try:
+            spec_info = workspace.spectrumInfo()
+        except:
+            spec_info = None
 
-    for spectrum_index in range(num_hist):
-        if not(sp_info and sp_info.hasDetectors(spectrum_index) and sp_info.isMonitor(spectrum_index)):
-            xtmp = workspace.readX(spectrum_index)
-            if workspace.isHistogramData():
-                # input x is edges
-                xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
-            else:
-                # input x is centers
-                pass
-            min_value = min(min_value, xtmp.min())
-            max_value = max(max_value, xtmp.max())
-            diff = np.diff(xtmp)
-            delta = min(delta, diff.min())
-    xtmp = workspace.readX(0)
-    if delta == np.finfo(np.float64).max:
-        delta = np.diff(xtmp).min()
-    if min_value == np.finfo(np.float64).max:
-        min_value = xtmp.min()
-    if max_value == np.finfo(np.float64).min:
-        max_value = xtmp.max()
-    num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
-    x_centers = np.linspace(min_value, max_value, num=num_edges)
-    y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
-    counts = np.empty([num_hist, num_edges], dtype=np.float64)
+    if extent is None:
+        common_bins = workspace.isCommonBins()
+        delta = np.finfo(np.float64).max
+        min_value = np.finfo(np.float64).max
+        max_value = np.finfo(np.float64).min
 
-    for spectrum_index in range(num_hist):
-        centers, ztmp, _, _ = mantid.plots.datafunctions.get_spectrum(
-            workspace, spectrum_index, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
-        interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
-        if not (sp_info and sp_info.hasDetectors(spectrum_index) and sp_info.isMonitor(spectrum_index)):
-            counts[spectrum_index] = interpolation_function(x_centers)
-        else:
-            counts[spectrum_index, :] = np.nan
+        for spectrum_index in range(workspace.getNumberHistograms()):
+            if not(spec_info and spec_info.hasDetectors(spectrum_index) and spec_info.isMonitor(spectrum_index)):
+                xtmp = workspace.readX(spectrum_index)
+                if workspace.isHistogramData():
+                    # input x is edges
+                    xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
+                else:
+                    # input x is centers
+                    pass
+                min_value = min(min_value, xtmp.min())
+                max_value = max(max_value, xtmp.max())
+                diff = np.diff(xtmp)
+                delta = min(delta, diff.min())
+                if common_bins:
+                    break
+                xtmp = workspace.readX(0)
+        if delta == np.finfo(np.float64).max:
+            delta = np.diff(xtmp).min()
+        if min_value == np.finfo(np.float64).max:
+            min_value = xtmp.min()
+        if max_value == np.finfo(np.float64).min:
+            max_value = xtmp.max()
+        num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
+        x_centers = np.linspace(min_value, max_value, num=num_edges)
+        y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())   
+    else:
+        x_edges = np.linspace(extent[0], extent[1], int(xbins + 1))
+        x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
+        y = np.linspace(extent[2], extent[3], int(ybins))
 
-    if histogram2D:
+    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info)
+
+    if histogram2D and extent is not None:
+        x = x_edges
+    elif histogram2D:
         x = mantid.plots.datafunctions.boundaries_from_points(x_centers)
     else:
         x = x_centers
+
     if transpose:
         return y.T, x.T, counts.T
     else:
         return x, y, counts
+
+
+def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None):
+    counts = np.full([y.size, x.size], np.nan, dtype=np.float64)
+    previous_index = -1
+    index = -1
+    for y_value in y:
+        index += 1
+        try:
+            workspace_index = int(workspace.getAxis(1).indexOfValue(y_value))
+        except IndexError:
+            continue
+        # avoid repeating calculations
+        if previous_index == workspace_index:
+            counts[index, :] = counts[index - 1]
+            continue
+        previous_index = workspace_index
+        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(workspace_index)):
+            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index, normalize_by_bin_width=normalize_by_bin_width,
+                                               withDy=False, withDx=False)
+            interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
+                                              fill_value="extrapolate")
+            # only set values in the range of workspace
+            x_range = np.where((x >= workspace.readX(workspace_index)[0]) &
+                                   (x <= workspace.readX(workspace_index)[-1]))
+            # set values outside x data to nan
+            counts[index, x_range] = interpolation_function(x[x_range])
+    counts = np.ma.masked_invalid(counts, copy=False)
+    return counts
 
 
 def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=False):

@@ -369,7 +369,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     const auto &detPos = spectrumInfo.position(i);
     const double lambdaFixed =
         toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
-    MersenneTwister rng(seed);
+    MersenneTwister rng(seed + int(i));
 
     const auto lambdas = simulationWS.points(i).rawData();
 

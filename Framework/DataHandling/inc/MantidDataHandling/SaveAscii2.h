@@ -58,7 +58,7 @@ public:
     return {"LoadAscii",
             "SaveCSV",
             "SaveDiffFittingAscii",
-            "SaveReflCustomAscii",
+            "SaveReflectometryAscii",
             "SaveOpenGenieAscii",
             "SaveGSS",
             "SaveFocusedXYE"};

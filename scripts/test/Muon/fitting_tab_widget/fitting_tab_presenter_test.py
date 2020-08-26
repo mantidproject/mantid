@@ -117,6 +117,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.function_browser.getDatasetNames(), ['Input Workspace Name'])
 
     def test_fit_clicked_passes_in_correct_arguments_to_model(self):
+        self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.presenter.model.get_function_name.return_value = 'GausOsc'
         self.presenter.get_fit_input_workspaces = mock.MagicMock(
             return_value=['Input Workspace Name_1', 'Input Workspace Name 2'])
@@ -326,7 +327,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.fitting_calculation_model.result = (fit_function, 'Success', 1.07)
 
         self.presenter.handle_finished()
-
+        self.view.setEnabled(True)
         self.assertEqual(self.view.undo_fit_button.isEnabled(), True)
 
     def test_after_fit_fit_cache_is_populated_for_after_fit(self):
@@ -686,6 +687,27 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.handle_new_data_loaded()
 
         self.presenter.model.create_ws_fit_function_map.assert_called_once_with()
+
+    def test_that_handle_function_structure_changed_calls_handle_display_workspace_changed_if_function_empty(self):
+        self.presenter.handle_display_workspace_changed = mock.MagicMock()
+
+        self.presenter.handle_function_structure_changed()
+
+        self.presenter.handle_display_workspace_changed.assert_called_once_with()
+
+    def test_that_calling_handle_function_structure_changed_with_no_fit_function_and_no_data_sets_stores_fit_function_list_correctly(self):
+        self.presenter.handle_function_structure_changed()
+
+        self.assertEqual(self.presenter._fit_function, [None])
+
+    def test_that_handle_fit_clicked_shows_warning_and_returns_before_processing_if_no_data_selected(self):
+        self.presenter.selected_data = []
+        self.presenter.perform_fit = mock.MagicMock()
+
+        self.presenter.handle_fit_clicked()
+
+        self.view.warning_popup.assert_called_once_with('No data selected to fit')
+        self.presenter.perform_fit.assert_not_called()
 
 
 if __name__ == '__main__':

@@ -48,7 +48,7 @@ public:
   virtual std::vector<std::string> getSelectedWorkspaces() const = 0;
   virtual std::vector<std::string> getSelectedParameters() const = 0;
   virtual int getFileFormatIndex() const = 0;
-  virtual bool getTitleCheck() const = 0;
+  virtual bool getHeaderCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
   virtual std::string getSeparator() const = 0;
 
@@ -61,8 +61,19 @@ public:
   virtual void disableAutosaveControls() = 0;
   virtual void enableAutosaveControls() = 0;
 
-  virtual void enableFileFormatAndLocationControls() = 0;
-  virtual void disableFileFormatAndLocationControls() = 0;
+  virtual void enableFileFormatControls() = 0;
+  virtual void disableFileFormatControls() = 0;
+  virtual void enableLocationControls() = 0;
+  virtual void disableLocationControls() = 0;
+
+  virtual void enableLogList() = 0;
+  virtual void disableLogList() = 0;
+  virtual void enableHeaderCheckBox() = 0;
+  virtual void disableHeaderCheckBox() = 0;
+  virtual void enableQResolutionCheckBox() = 0;
+  virtual void disableQResolutionCheckBox() = 0;
+  virtual void enableSeparatorButtonGroup() = 0;
+  virtual void disableSeparatorButtonGroup() = 0;
 
   virtual void showFilterEditValid() = 0;
   virtual void showFilterEditInvalid() = 0;

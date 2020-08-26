@@ -12,7 +12,7 @@ import unittest
 from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.asynchronous import AsyncTask, TaskExitCode
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
 from mantidqt.utils.qt.testing import start_qapplication
 
 
@@ -48,3 +48,19 @@ class QAppThreadCallTest(unittest.TestCase):
     def task(self):
         qappthread_wrap = QAppThreadCall(self.raises_exception)
         qappthread_wrap()
+
+    def test_force_method_calls_to_qapp_thread(self):
+        class Impl:
+            def public(self):
+                pass
+
+            def _private(self):
+                pass
+
+        public_only = force_method_calls_to_qapp_thread(Impl())
+        self.assertTrue(isinstance(public_only.public, QAppThreadCall))
+        self.assertFalse(isinstance(public_only._private, QAppThreadCall))
+
+        all_methods = force_method_calls_to_qapp_thread(Impl(), all_methods=True)
+        self.assertTrue(isinstance(all_methods.public, QAppThreadCall))
+        self.assertTrue(isinstance(all_methods._private, QAppThreadCall))

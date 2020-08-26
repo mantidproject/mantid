@@ -13,7 +13,8 @@ Powder Diffraction
 ------------------
 New features
 ^^^^^^^^^^^^
-- New ``D7`` instrument definition for ILL 
+- New ``D7`` instrument definition for ILL
+- New :ref:`SaveGSSCW <algm-SaveGSSCW>` is implemented for constant wavelength diffractometers.
 
 Improvements
 ^^^^^^^^^^^^
@@ -37,7 +38,7 @@ Engineering Diffraction
 New features
 ^^^^^^^^^^^^
 - New algorithm for estimating background of powder spectra :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` using iterative smoothing.
-- Mantid fitting capability added to fitting tab of Engineering Diffraction UI.
+- Mantid fitting capability added to fitting tab of Engineering Diffraction UI (with simpler fitpropertybrowser providing only relevant options).
 
 Improvements
 ^^^^^^^^^^^^
@@ -45,6 +46,11 @@ Improvements
 - Focusing with the GUI will now generate a CSV containing the averaged values of all numerical sample logs.
 - The currently loaded calibration is now shown at the bottom of the GUI.
 - The location of the saved output files from the GUI is now shown in the messages log.
+- The save directory is now displayed in the status bar of the GUI.
+
+Bugfixes
+^^^^^^^^
+- The Engineering diffraction gui no longer goes behind the workbench window when a plot is clicked on.
 
 Single Crystal Diffraction
 --------------------------

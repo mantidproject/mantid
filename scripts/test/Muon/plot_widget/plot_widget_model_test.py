@@ -103,6 +103,18 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.assertEqual(workspaces, expected_workspaces)
         self.assertEqual(expected_indices, indices)
 
+    def test_get_fit_workspaces_to_plot_returns_correctly_when_plot_diff_is_False(self):
+        fit = FitInformation(mock.MagicMock(), 'GaussOsc',
+                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
+                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+        expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted']
+        expected_indices = [1]
+
+        workspaces, indices = self.model.get_fit_workspace_and_indices(fit,False)
+
+        self.assertEqual(workspaces, expected_workspaces)
+        self.assertEqual(expected_indices, indices)
+
     def test_get_workspace_list_and_indices_to_plot_returns_correctly(self):
         self.model.get_time_workspaces_to_plot = mock.Mock(return_value=["62260;fwd"])
         expected_workspaces = ['62260;fwd']
@@ -137,6 +149,14 @@ class PlotWidgetModelTest(unittest.TestCase):
         keys = self.model.create_tiled_keys(TILED_BY_RUN_TYPE)
 
         self.assertEqual(keys, ['62260', '62261'])
+
+    def test_create_tiled_keys_returns_correctly_for_summed_runs_tiled_by_run(self):
+        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
+        runs = [[62260, 62261]]
+        self.context.data_context.current_runs = runs
+        keys = self.model.create_tiled_keys(TILED_BY_RUN_TYPE)
+
+        self.assertEqual(keys, ['62260-62261'])
 
 
 if __name__ == '__main__':
