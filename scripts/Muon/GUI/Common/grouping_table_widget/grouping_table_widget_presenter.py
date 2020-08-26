@@ -96,8 +96,6 @@ class GroupingTablePresenter(object):
         try:
             period_list = run_utils.run_string_to_list(period_text)
         except IndexError:
-            self._view.warning_popup("Entered period range in invalid format."
-                                     " Valid format is a comma seperated list of numbers or dash seperated ranges e.g. 1,3-5")
             # An IndexError thrown here implies that the input string is not a valid
             # number list.
             return RowValid.invalid_for_all_runs

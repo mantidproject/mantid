@@ -11,6 +11,11 @@ from Muon.GUI.Common import message_box
 
 group_table_columns = {0: 'group_name', 2: 'to_analyse', 3: 'detector_ids', 4: 'number_of_detectors', 1: 'periods'}
 inverse_group_table_columns = {'group_name': 0, 'to_analyse': 2,  'detector_ids': 3,  'number_of_detectors': 4, 'periods': 1}
+table_column_flags = {'group_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+                      'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
+                      'detector_ids': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
+                      'number_of_detectors': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+                      'periods': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable}
 
 
 class GroupingTableView(QtWidgets.QWidget):
@@ -158,44 +163,17 @@ class GroupingTableView(QtWidgets.QWidget):
         q_color = QtGui.QColor(*color, alpha=127)
         q_brush = QtGui.QBrush(q_color)
         for i, entry in enumerate(row_entries):
-            if group_table_columns[i] == 'group_name':
-                group_name_widget = QtWidgets.QTableWidgetItem(entry)
-                group_name_widget.setBackground(q_brush)
-                group_name_widget.setToolTip(tooltip)
-                self.grouping_table.setItem(row_position, i, group_name_widget)
-                group_name_widget.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-
-            if group_table_columns[i] == 'periods':
-                period_widget = QtWidgets.QTableWidgetItem(entry)
-                period_widget.setBackground(q_brush)
-                period_widget.setToolTip(tooltip)
-                self.grouping_table.setItem(row_position, i, period_widget)
-                period_widget.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+            table_item = QtWidgets.QTableWidgetItem(entry)
+            table_item.setBackground(q_brush)
+            table_item.setToolTip(tooltip)
+            self.grouping_table.setItem(row_position, i, table_item)
+            table_item.setFlags(table_column_flags[group_table_columns[i]])
 
             if group_table_columns[i] == 'to_analyse':
-                to_analyse_widget = QtWidgets.QTableWidgetItem(entry)
-                to_analyse_widget.setBackground(q_brush)
-                to_analyse_widget.setToolTip(tooltip)
-                to_analyse_widget.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
                 if entry:
-                    to_analyse_widget.setCheckState(QtCore.Qt.Checked)
+                    table_item.setCheckState(QtCore.Qt.Checked)
                 else:
-                    to_analyse_widget.setCheckState(QtCore.Qt.Unchecked)
-                self.grouping_table.setItem(row_position, i, to_analyse_widget)
-
-            if group_table_columns[i] == 'detector_ids':
-                detector_widget = QtWidgets.QTableWidgetItem(entry)
-                detector_widget.setBackground(q_brush)
-                detector_widget.setToolTip(tooltip)
-                detector_widget.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
-                self.grouping_table.setItem(row_position, i, detector_widget)
-
-            if group_table_columns[i] == 'number_of_detectors':
-                num_detectors_widget = QtWidgets.QTableWidgetItem(entry)
-                num_detectors_widget.setBackground(q_brush)
-                num_detectors_widget.setToolTip(tooltip)
-                num_detectors_widget.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-                self.grouping_table.setItem(row_position, i, num_detectors_widget)
+                    table_item.setCheckState(QtCore.Qt.Unchecked)
 
     def _get_selected_row_indices(self):
         return list(set(index.row() for index in self.grouping_table.selectedIndexes()))
