@@ -24,7 +24,7 @@ row_colors = {RowValid.invalid_for_all_runs: (255, 0, 0), RowValid.valid_for_som
               RowValid.valid_for_all_runs: (255, 255, 255)}
 
 
-row_tooltips = {RowValid.invalid_for_all_runs: 'Warning: Group periods invalid for all runs',
+row_tooltips = {RowValid.invalid_for_all_runs: 'Warning: group periods invalid for all runs',
                 RowValid.valid_for_some_runs: 'Warning: group periods invalid for some runs',
                 RowValid.valid_for_all_runs: ''}
 
