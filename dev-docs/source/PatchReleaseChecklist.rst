@@ -14,7 +14,7 @@ Request
 #######
 
 *  Anyone may request a patch release, but that request must be intially
-   approved ont of the Local PMs.
+   approved by one of the local PMs.
 
 Authorisation
 #############
