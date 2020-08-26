@@ -47,7 +47,7 @@ class RecentlyClosedScriptsMenu(QMenu):
 
     @staticmethod
     def size_path_correctly(path):
-        return path if len(path) < 30 else "..." + path[30:]
+        return path if len(path) < 33 else "..." + path[30:]
 
     def open_script(self, path):
         # Check if it exists, if it doesn't pop up small window saying sorry this doesn't exist, then remove it from
@@ -68,6 +68,7 @@ class RecentlyClosedScriptsMenu(QMenu):
             scripts = CONF.get(RECENT_SCRIPTS_KEY)
             if path in scripts:
                 scripts.remove(path)
+                CONF.set(RECENT_SCRIPTS_KEY, scripts)
 
     @staticmethod
     def load_scripts_from_settings():
@@ -75,7 +76,7 @@ class RecentlyClosedScriptsMenu(QMenu):
         if CONF.has(RECENT_SCRIPTS_KEY):
             scripts = CONF.get(RECENT_SCRIPTS_KEY)
 
-        # Ensure there are no duplicates
+        # Ensure there are no duplicates, general sanitization.
         scripts = list(set(scripts))
 
         return scripts
@@ -87,10 +88,9 @@ class RecentlyClosedScriptsMenu(QMenu):
         scripts = []
         if CONF.has(RECENT_SCRIPTS_KEY):
             scripts = CONF.get(RECENT_SCRIPTS_KEY)
-        scripts.insert(0, path)
 
-        # Ensure there are no duplicates
-        scripts = list(set(scripts))
+        if path not in scripts:
+            scripts.insert(0, path)
 
         if len(scripts) > RECENT_SCRIPT_MAX_NUMBER:
             scripts.pop()
