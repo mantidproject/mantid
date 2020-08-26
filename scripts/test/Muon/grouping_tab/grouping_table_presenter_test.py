@@ -10,7 +10,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, RowValid
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView, inverse_group_table_columns
 from Muon.GUI.Common.muon_group import MuonGroup
 from mantidqt.utils.observer_pattern import Observer
@@ -376,7 +376,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         valid = self.presenter.validate_periods('1-5')
 
-        self.assertFalse(valid)
+        self.assertEquals(RowValid.invalid_for_all_runs, valid)
 
     def test_that_period_valid_for_at_least_one_run_returns_valid(self):
         self.presenter._model._context = mock.MagicMock()
@@ -385,12 +385,12 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         valid = self.presenter.validate_periods('1-4')
 
-        self.assertTrue(valid)
+        self.assertEquals(RowValid.valid_for_some_runs, valid)
 
     def test_that_period_string_containing_not_matching_run_entry_regex_returns_invalid(self):
         valid = self.presenter.validate_periods('Invalid string')
 
-        self.assertFalse(valid)
+        self.assertEquals(RowValid.invalid_for_all_runs, valid)
 
     def _fake_num_periods(self, run):
         num_periods_dict = {'[84447]': 4, '[84448]': 4, '[84449]': 4, '[84450]':2, '[84451]' :1}

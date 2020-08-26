@@ -5,13 +5,28 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-
+from enum import Enum
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import inverse_group_table_columns
 
 maximum_number_of_groups = 20
+
+
+class RowValid(Enum):
+    invalid_for_all_runs = 0
+    valid_for_all_runs = 2
+    valid_for_some_runs = 1
+
+
+row_colors = {RowValid.invalid_for_all_runs: (255, 0, 0), RowValid.valid_for_some_runs: (255, 255, 0),
+              RowValid.valid_for_all_runs: (255, 255, 255)}
+
+
+row_tooltips = {RowValid.invalid_for_all_runs: 'Warning: Group periods invalid for all runs',
+                RowValid.valid_for_some_runs: 'Warning: group periods invalid for some runs',
+                RowValid.valid_for_all_runs: ''}
 
 
 class GroupingTablePresenter(object):
@@ -85,22 +100,23 @@ class GroupingTablePresenter(object):
                                      " Valid format is a comma seperated list of numbers or dash seperated ranges e.g. 1,3-5")
             # An IndexError thrown here implies that the input string is not a valid
             # number list.
-            return False
+            return RowValid.invalid_for_all_runs
+        return self.validate_periods_list(period_list)
+
+    def validate_periods_list(self, periods):
         invalid_runs = []
         current_runs = self._model._context.current_runs
 
         for run in current_runs:
-            if any([period < 1 or self._model._context.num_periods(run) < period for period in period_list]):
+            if any([period < 1 or self._model._context.num_periods(run) < period for period in periods]):
                 invalid_runs.append(run)
 
         if not invalid_runs:
-            return True
+            return RowValid.valid_for_all_runs
         elif len(invalid_runs) == len(current_runs):
-            self._view.warning_popup("One or more of the periods specified missing from all runs")
-            return False
+            return RowValid.invalid_for_all_runs
         else:
-            # TODO need to add in some logic here to turn the group row yellow if some but not all runs have correct periods.
-            return True
+            return RowValid.valid_for_some_runs
 
     def disable_editing(self):
         self._view.disable_editing()
@@ -125,12 +141,12 @@ class GroupingTablePresenter(object):
     def add_group_to_model(self, group):
         self._model.add_group(group)
 
-    def add_group_to_view(self, group, state):
+    def add_group_to_view(self, group, state, color, tooltip):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
         entry = [str(group.name), run_utils.run_list_to_string(group.periods), state, run_utils.run_list_to_string(group.detectors, False),
                  str(group.n_detectors)]
-        self._view.add_entry_to_table(entry)
+        self._view.add_entry_to_table(entry, color, tooltip)
         self._view.enable_updates()
 
     def handle_add_group_button_clicked(self):
@@ -175,7 +191,8 @@ class GroupingTablePresenter(object):
         if col == inverse_group_table_columns['to_analyse']:
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, group_name)
-        if col == inverse_group_table_columns['periods'] and not self.validate_periods(changed_item.text()):
+        if col == inverse_group_table_columns['periods'] and self.validate_periods(changed_item.text()) == RowValid.invalid_for_all_runs:
+            self._view.warning_popup("One or more of the periods specified missing from all runs")
             update_model = False
 
         if not update_model:
@@ -208,7 +225,10 @@ class GroupingTablePresenter(object):
 
         for group in self._model.groups:
             to_analyse = True if group.name in self._model.selected_groups else False
-            self.add_group_to_view(group, to_analyse)
+            display_period_warning = self.validate_periods_list(group.periods)
+            color = row_colors[display_period_warning]
+            tool_tip = row_tooltips[display_period_warning]
+            self.add_group_to_view(group, to_analyse, color, tool_tip)
 
         if self._view.group_range_use_last_data.isChecked():
             self._view.group_range_max.setText(str(self._model.get_last_data_from_file()))
