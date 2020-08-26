@@ -113,14 +113,11 @@ void SaveReflectometryAscii::data() {
     outputval(points[i]);
     outputval(yData[i]);
     outputval(eData[i]);
-    if ((m_ext == "custom" && getProperty("WriteResolution")) ||
-        (m_ext == ".mft") || (m_ext == ".txt")) {
+    if (includeQResolution()) {
       if (m_ws->hasDx(0))
         outputval(m_ws->dx(0)[i]);
-      else {
-        if (m_ext != ".mft")
-          outputval(points[i] * ((points[1] + points[0]) / points[1]));
-      }
+      else
+        outputval(points[i] * ((points[1] + points[0]) / points[1]));
     }
     m_file << '\n';
   }
@@ -135,6 +132,21 @@ void SaveReflectometryAscii::separator() {
     if (sepOption == "space")
       m_sep = ' ';
   }
+}
+
+/// Determine whether to include the Q resolution column in the output
+bool SaveReflectometryAscii::includeQResolution() const {
+  // Always include the resolution for txt format
+  if (m_ext == ".txt")
+    return true;
+  // Only include the resolution for the Custom format if the option is set
+  if (m_ext == "custom" && getProperty("WriteResolution"))
+    return true;
+  // Only include the resolution for MFT if the workspace contains it
+  if (m_ext == ".mft" && m_ws->hasDx(0))
+    return true;
+
+  return false;
 }
 
 /** Write string value
@@ -249,7 +261,7 @@ void SaveReflectometryAscii::header() {
   outputval("q");
   outputval("refl");
   outputval("refl_err");
-  if (m_ws->hasDx(0))
+  if (includeQResolution())
     outputval("q_res (FWHM)");
   m_file << "\n";
 }

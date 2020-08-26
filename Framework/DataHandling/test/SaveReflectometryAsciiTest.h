@@ -696,6 +696,50 @@ public:
     Poco::File(filename).remove();
   }
 
+  void test_calculated_dx_values_with_header_custom() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", "custom"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", true))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists())
+    std::vector<std::string> data;
+    data.reserve(5);
+    data.emplace_back("MFT");
+    data.emplace_back("");
+    data.emplace_back("                           q                        "
+                      "refl                    refl_err                q_res "
+                      "(FWHM)");
+    data.emplace_back("\t3.300000000000000e-01\t"
+                      "3.000000000000000e+00\t1.732050807568877e+00\t"
+                      "6.502941176470588e-01");
+    data.emplace_back("\t3.400000000000000e-01\t"
+                      "6.600000000000000e+00\t2.569046515733026e+00\t"
+                      "6.700000000000000e-01");
+    std::ifstream in(filename);
+    TS_ASSERT(not_empty(in))
+    std::string fullline;
+    auto it = data.begin();
+    while (std::getline(in, fullline)) {
+      if (fullline.find(" : ") == std::string::npos)
+        TS_ASSERT_EQUALS(fullline, *(it++))
+    }
+
+    in.close();
+    Poco::File(filename).remove();
+  }
+
   void test_dx_values_no_header_custom() {
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});

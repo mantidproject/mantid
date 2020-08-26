@@ -69,6 +69,8 @@ private:
   void header();
   /// Determine the separator
   void separator();
+  /// Whether the Q resolution should be included in the output
+  bool includeQResolution() const;
   /// Separator
   char m_sep{'\t'};
   /// Filename
