@@ -15,7 +15,7 @@ class GroupingTabModelTest(unittest.TestCase):
         self._num_periods_store = {62260: 4, 62261: 2, 62263: 1}
         self.context.num_periods = lambda run : self._num_periods_store[run]
 
-    def test_reset_group_and_pairs_to_default_correctly_identifies_minimum_number_of_periods_for_single_run(self):
+    def test_reset_group_and_pairs_to_default_correctly_identifies_maximum_number_of_periods_for_single_run(self):
         self.context.current_runs = [62260]
         model = GroupingTabModel(self.context)
 
@@ -23,13 +23,13 @@ class GroupingTabModelTest(unittest.TestCase):
 
         self.context.group_pair_context.reset_group_and_pairs_to_default.assert_called_once_with(mock.ANY, mock.ANY, mock.ANY, 4)
 
-    def test_reset_group_and_pairs_to_default_correctly_identifies_minimum_number_of_periods_for_multiple_runs(self):
+    def test_reset_group_and_pairs_to_default_correctly_identifies_maximum_number_of_periods_for_multiple_runs(self):
         self.context.current_runs = [62260, 62261, 62263]
         model = GroupingTabModel(self.context)
 
         model.reset_groups_and_pairs_to_default()
 
-        self.context.group_pair_context.reset_group_and_pairs_to_default.assert_called_once_with(mock.ANY, mock.ANY, mock.ANY, 1)
+        self.context.group_pair_context.reset_group_and_pairs_to_default.assert_called_once_with(mock.ANY, mock.ANY, mock.ANY, 4)
 
 
 if __name__ == '__main__':

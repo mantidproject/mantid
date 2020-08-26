@@ -140,10 +140,10 @@ class GroupingTabModel(object):
         return pair
 
     def reset_groups_and_pairs_to_default(self):
-        minimum_number_of_periods = min([self._context.num_periods(run) for run in self._context.current_runs])
+        maximum_number_of_periods = max([self._context.num_periods(run) for run in self._context.current_runs])
 
         self._groups_and_pairs.reset_group_and_pairs_to_default(self._data.current_workspace, self._data.instrument,
-                                                                self._data.main_field_direction, minimum_number_of_periods)
+                                                                self._data.main_field_direction, maximum_number_of_periods)
 
     def reset_selected_groups_and_pairs(self):
         self._groups_and_pairs.reset_selected_groups_and_pairs()

@@ -208,12 +208,12 @@ class MuonContext(object):
             self.data_context.update_current_data()
 
             if not self.group_pair_context.groups:
-                minimum_number_of_periods = min([self.num_periods(run) for run in self.current_runs])
+                maximum_number_of_periods = max([self.num_periods(run) for run in self.current_runs])
                 self.group_pair_context.reset_group_and_pairs_to_default(
                     self.data_context.current_workspace,
                     self.data_context.instrument,
                     self.data_context.main_field_direction,
-                    minimum_number_of_periods)
+                    maximum_number_of_periods)
         else:
             self.data_context.clear()
 
