@@ -230,7 +230,7 @@ Finalise
 * ``nobugs@nobugsconference.org``
 * ``news@neutronsources.org``
 * ``neutron@neutronsources.org``
-* Also post the contents of the message on General on Slack
+* Also post the contents of the message on Announcements on Slack
 * Create a new item on the forum news
 * Close the release milestone on github
 
