@@ -452,6 +452,17 @@ class DataFunctionsTest(unittest.TestCase):
         # check that fails for uneven data
         self.assertRaises(ValueError, funcs.get_matrix_2d_data, self.ws2d_point_uneven, True)
 
+    def test_get_matrix_2d_data_ragged_with_extent(self):
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_point_rag, False, histogram2D=True,
+                                             extent=[2, 4 , 1, 2], xbins=8, ybins=5)
+        np.testing.assert_allclose(x, np.array([2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4]))
+        np.testing.assert_allclose(y, np.array([1, 1.25, 1.5, 1.75, 2.0]))
+
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, False, histogram2D=True,
+                                             extent=[2, 6 , 5, 9], xbins=8, ybins=5)
+        np.testing.assert_allclose(x, np.array([2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]))
+        np.testing.assert_allclose(y, np.array([5, 6, 7, 8, 9]))
+
     def test_get_uneven_data(self):
         # even points
         x, y, z = funcs.get_uneven_data(self.ws2d_point_rag, True)

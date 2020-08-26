@@ -28,7 +28,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import datafunctions, MantidAxes
+from mantid.plots import datafunctions, MantidAxes, axesfunctions
 from mantid.plots.utility import zoom, MantidAxType
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -36,7 +36,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, 
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
                                                  SingleMarkerEditor, GlobalMarkerEditor,
-                                                 ColorbarAxisEditor, ZAxisEditor)
+                                                 ColorbarAxisEditor, ZAxisEditor, LegendEditor)
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
@@ -107,11 +107,11 @@ class FigureInteraction(object):
         if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D) or \
                 len(event.inaxes.images) == 0 and len(event.inaxes.lines) == 0:
             return
-        zoom_factor = 1.05 + abs(event.step)/6
+        zoom_factor = 1.05 + abs(event.step) / 6
         if event.button == 'up':  # zoom in
             zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
         elif event.button == 'down':  # zoom out
-            zoom(event.inaxes, event.xdata, event.ydata, factor=1/zoom_factor)
+            zoom(event.inaxes, event.xdata, event.ydata, factor=1 / zoom_factor)
         event.canvas.draw()
 
     def on_mouse_button_press(self, event):
@@ -244,6 +244,16 @@ class FigureInteraction(object):
                 elif (ax.zaxis.contains(event)[0]
                       or any(tick.contains(event)[0] for tick in ax.get_zticklabels())):
                     move_and_show(ZAxisEditor(canvas, ax))
+            elif ax.get_legend() is not None and ax.get_legend().contains(event)[0]:
+                # We have to set the legend as non draggable else we hold onto the legend
+                # until the mouse button is clicked again
+                ax.get_legend().set_draggable(False)
+                legend_texts = ax.get_legend().get_texts()
+                active_lines = datafunctions.get_legend_handles(ax)
+                for legend_text, curve in zip(legend_texts, active_lines):
+                    if legend_text.contains(event)[0]:
+                        move_and_show(LegendEditor(canvas, legend_text, curve))
+                ax.get_legend().set_draggable(True)
 
     def _show_markers_menu(self, markers, event):
         """
@@ -714,6 +724,7 @@ class FigureInteraction(object):
 
             if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                 ax.relim()
+                ax.autoscale()
 
             if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
                 colorbar_min = np.nanmin(ax.images[-1].get_array())
@@ -728,7 +739,7 @@ class FigureInteraction(object):
                 if colorbar_log:  # If it had a log scaled colorbar before, put it back.
                     self._change_colorbar_axes(LogNorm)
 
-            ax.autoscale()
+                axesfunctions.update_colorplot_datalimits(ax, ax.images)
 
             datafunctions.set_initial_dimensions(ax)
             if waterfall:

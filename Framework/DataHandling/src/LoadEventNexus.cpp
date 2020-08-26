@@ -27,6 +27,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidNexus/NexusIOHelper.h"
 
 #include <H5Cpp.h>
 #include <memory>
@@ -438,11 +439,6 @@ void LoadEventNexus::execLoader() {
 std::pair<DateAndTime, DateAndTime>
 firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
-
-  const auto heldTimeZeroType = file.getInfo().type;
-  // Nexus only requires event_time_zero to be a NXNumber, we support two
-  // possibilities for held type
-
   std::string isooffset; // ISO8601 offset
   DateAndTime offset;
   // According to the Nexus standard, if the offset is not present, it implies
@@ -450,8 +446,8 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   // Unix epoch (https://manual.nexusformat.org/classes/base_classes/NXlog.html)
   if (!file.hasAttr("offset")) {
     offset = DateAndTime("1970-01-01T00:00:00Z");
-    logger.warning("event_time_zero: no ISO8601 offset attribute provided, "
-                   "Using UNIX epoch instead");
+    logger.warning("In firstLastPulseTimes: no ISO8601 offset attribute "
+                   "provided for event_time_zero, using UNIX epoch instead");
   } else {
     file.getAttr("offset", isooffset);
     offset = DateAndTime(isooffset);
@@ -459,44 +455,16 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   std::string units; // time units
   if (file.hasAttr("units"))
     file.getAttr("units", units);
+  // Read in the pulse times
+  auto pulse_times =
+      NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
+  // Remember to close the entry
   file.closeData();
-
-  // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
-  if (heldTimeZeroType == ::NeXus::UINT64) {
-    if (units != "ns")
-      logger.warning(
-          "event_time_zero is uint64_t, but units not in ns. Found to be: " +
-          units);
-    std::vector<uint64_t> nanoseconds;
-    file.readData("event_time_zero", nanoseconds);
-    if (nanoseconds.empty())
-      throw std::runtime_error(
-          "No event time zeros. Cannot establish run start or end");
-    auto absoluteFirst = DateAndTime(int64_t(0), int64_t(nanoseconds.front())) +
-                         offset.totalNanoseconds();
-    auto absoluteLast = DateAndTime(int64_t(0), int64_t(nanoseconds.back())) +
-                        offset.totalNanoseconds();
-    return std::make_pair(absoluteFirst, absoluteLast);
-  } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
-    if (units != "second")
-      logger.warning("event_time_zero is double_t, but units not in seconds. "
-                     "Found to be: " +
-                     units);
-    std::vector<double> seconds;
-    file.readData("event_time_zero", seconds);
-    if (seconds.empty())
-      throw std::runtime_error(
-          "No event time zeros. Cannot establish run start or end");
-    auto absoluteFirst =
-        DateAndTime(seconds.front(), double(0)) + offset.totalNanoseconds();
-    auto absoluteLast =
-        DateAndTime(seconds.back(), double(0)) + offset.totalNanoseconds();
-    return std::make_pair(absoluteFirst, absoluteLast);
-  }
-
-  else {
-    throw std::runtime_error("Unrecognised type for event_time_zero");
-  }
+  // Convert to seconds
+  auto conv = Kernel::Units::timeConversionValue(units, "s");
+  return std::make_pair(
+      DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
+      DateAndTime(pulse_times.back() * conv, 0.0) + offset.totalNanoseconds());
 } // namespace DataHandling
 
 /**
@@ -522,7 +490,7 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
         file.openData("total_counts");
         auto info = file.getInfo();
         file.closeData();
-        if (info.type == NeXus::UINT64) {
+        if (info.type == ::NeXus::UINT64) {
           uint64_t eventCount;
           file.readData("total_counts", eventCount);
           hasTotalCounts = true;
