@@ -269,78 +269,6 @@ void ALCDataLoadingView::enableAll() {
   m_ui.load->setEnabled(true);
 }
 
-void ALCDataLoadingView::updateRunsTextFromAuto() {
-
-  const int currentLastRun = extractRunNumber(lastRun());
-  auto currentInput = m_ui.runs->getText().toStdString();
-
-  // Only make changes if found run > user last run
-  if (m_currentAutoRun < currentLastRun)
-    return;
-
-  // Save old input
-  m_oldInput = currentInput;
-
-  // Check if range at end
-  std::size_t findRange = currentInput.find_last_of("-");
-  std::size_t findComma = currentInput.find_last_of(",");
-  QString newInput;
-
-  // Remove ending range if at end of input
-  if (findRange != -1 && (findComma == -1 || findRange > findComma)) {
-    currentInput.erase(findRange, currentInput.length() - 1);
-  }
-
-  // Initialise new input
-  newInput = QString::fromStdString(currentInput);
-
-  // Will hold the base path for all runs, used to check which run numbers
-  // exist
-  auto basePath = firstRun();
-
-  // Strip the extension
-  size_t findExt = basePath.find_last_of(".");
-  const auto ext = basePath.substr(findExt);
-  basePath.erase(findExt);
-
-  // Remove the run number part so we are left with just the base path
-  const std::string numPart = std::to_string(currentLastRun);
-  basePath.erase(basePath.length() - numPart.length());
-
-  bool fnf = false; // file not found
-
-  // Check all files valid between current last and auto, remove bad ones
-  for (int i = currentLastRun + 1; i < m_currentAutoRun; ++i) {
-
-    // Try creating a file from base, i and extension
-    Poco::File testFile(basePath + std::to_string(i) + ext);
-
-    // If doesn't exist add range to previous run
-    if (testFile.exists()) {
-
-      if (fnf) { // Means next file found since a file not found
-        // Add comma
-        newInput.append(",");
-        newInput.append(QString::number(i));
-        fnf = false;
-      }
-    } else {
-      newInput.append("-");
-      newInput.append(QString::number(i - 1));
-      fnf = true;
-    }
-  }
-
-  // If true then need a comma instead as file before last is missing
-  if (fnf)
-    newInput.append(",");
-  else
-    newInput.append("-");
-  newInput.append(QString::number(m_currentAutoRun));
-
-  // Update it
-  m_ui.runs->setFileTextWithSearch(newInput);
-}
 
 /**
  * Called when the check state of the "Auto" checkbox changes.
@@ -358,19 +286,22 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
     emit runAutoChecked();
 
     // Check for failure
-    if (m_currentAutoRun == -1) {
-      return; // Error displayed from presenter
-    }
+    //if (m_currentAutoRun == -1) {
+    //  return; // Error displayed from presenter
+    //}
 
     // Update runs
-    updateRunsTextFromAuto();
+    //updateRunsTextFromAuto();
 
   } else {
     // Remove read only
     m_ui.runs->setReadOnly(false);
 
     // Reset text as before auto checked
-    m_ui.runs->setFileTextWithSearch(QString::fromStdString(m_oldInput));
+    emit runAutoUnchecked();
+
+    // Reset text as before auto checked
+    //m_ui.runs->setFileTextWithSearch(QString::fromStdString(m_oldInput));
   }
 }
 
@@ -395,6 +326,20 @@ int ALCDataLoadingView::extractRunNumber(const std::string &file) {
 
   // Return run number as int (removes leading 0's)
   return std::stoi(returnVal);
+}
+
+std::string ALCDataLoadingView::getCurrentRunsText() const {
+  return m_ui.runs->getText().toStdString();
+}
+
+void ALCDataLoadingView::setRunsTextWithSearch(const QString &text) {
+  m_ui.runs->setFileTextWithSearch(text);
+}
+
+std::string ALCDataLoadingView::getRunsOldInput() const { return m_oldInput; }
+
+void ALCDataLoadingView::setRunsOldInput(const std::string& oldInput) {
+  m_oldInput = oldInput;
 }
 
 } // namespace CustomInterfaces

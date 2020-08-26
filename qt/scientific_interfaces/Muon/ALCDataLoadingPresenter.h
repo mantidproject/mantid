@@ -53,6 +53,8 @@ private slots:
   /// Updates the run number found from auto in the view
   void updateAutoRun();
 
+  void resetAutoRun();
+
 signals:
   /// Signal emitted when data get changed
   void dataChanged();
@@ -60,6 +62,8 @@ signals:
 private:
   /// Load new data and update the view accordingly
   void load(const std::vector<std::string> &files);
+
+  void updateRunsTextFromAuto(const int autoRun);
 
   /// Check custom grouping is sensible
   bool checkCustomGrouping();

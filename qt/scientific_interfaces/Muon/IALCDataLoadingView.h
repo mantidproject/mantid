@@ -77,7 +77,15 @@ public:
   virtual void setCurrentAutoRun(const int run) = 0;
 
   /// Updates runs filefinder widget from auto last run
-  virtual void updateRunsTextFromAuto() = 0;
+  //virtual void updateRunsTextFromAuto() = 0;
+
+  virtual std::string getCurrentRunsText() const = 0;
+
+  virtual void setRunsTextWithSearch(const QString &text) = 0;
+
+  virtual std::string getRunsOldInput() const = 0;
+
+  virtual void setRunsOldInput(const std::string &oldInput) = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -138,6 +146,9 @@ signals:
 
   /// "Auto" box has been checked
   void runAutoChecked();
+
+  /// "Auto" box has been unchecked
+  void runAutoUnchecked();
 };
 
 } // namespace CustomInterfaces

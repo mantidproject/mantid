@@ -39,6 +39,7 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
   connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
   connect(m_view, SIGNAL(runAutoChecked()), SLOT(updateAutoRun()));
+  connect(m_view, SIGNAL(runAutoUnchecked()), SLOT(resetAutoRun()));
 }
 
 /**
@@ -58,6 +59,89 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   // Now perform the load
   load(files);
 }
+
+
+void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
+
+  const int currentLastRun = m_view->extractRunNumber(m_view->lastRun());
+  //auto currentInput = m_ui.runs->getText().toStdString();
+  auto currentInput = m_view->getCurrentRunsText();
+
+  // Only make changes if found run > user last run
+  if (autoRun < currentLastRun)
+    return;
+
+  // Save old input
+  //m_oldInput = currentInput;
+  m_view->setRunsOldInput(currentInput);
+
+  // Check if range at end
+  std::size_t findRange = currentInput.find_last_of("-");
+  std::size_t findComma = currentInput.find_last_of(",");
+  QString newInput;
+
+  // Remove ending range if at end of input
+  if (findRange != -1 && (findComma == -1 || findRange > findComma)) {
+    currentInput.erase(findRange, currentInput.length() - 1);
+  }
+
+  // Initialise new input
+  newInput = QString::fromStdString(currentInput);
+
+  // Will hold the base path for all runs, used to check which run numbers
+  // exist
+  auto basePath = m_view->firstRun();
+
+  // Strip the extension
+  size_t findExt = basePath.find_last_of(".");
+  const auto ext = basePath.substr(findExt);
+  basePath.erase(findExt);
+
+  // Remove the run number part so we are left with just the base path
+  const std::string numPart = std::to_string(currentLastRun);
+  basePath.erase(basePath.length() - numPart.length());
+
+  bool fnf = false; // file not found
+
+  // Check all files valid between current last and auto, remove bad ones
+  for (int i = currentLastRun + 1; i < autoRun; ++i) {
+
+    // Try creating a file from base, i and extension
+    Poco::File testFile(basePath + std::to_string(i) + ext);
+
+    // If doesn't exist add range to previous run
+    if (testFile.exists()) {
+
+      if (fnf) { // Means next file found since a file not found
+        // Add comma
+        newInput.append(",");
+        newInput.append(QString::number(i));
+        fnf = false;
+      }
+    } else {
+      // Edge case do not add range
+      if (i-1 != currentLastRun && i+1 != autoRun) {
+        newInput.append("-");
+        newInput.append(QString::number(i - 1));
+        fnf = true;
+      } else {
+        fnf = true;
+      }
+    }
+  }
+
+  // If true then need a comma instead as file before last is missing
+  if (fnf)
+    newInput.append(",");
+  else
+    newInput.append("-");
+  newInput.append(QString::number(autoRun));
+
+  // Update it
+  //m_ui.runs->setFileTextWithSearch(newInput);
+  m_view->setRunsTextWithSearch(newInput);
+}
+
 
 /**
  * Called when the auto checkbox is checked
@@ -80,6 +164,13 @@ void ALCDataLoadingPresenter::updateAutoRun() {
   // Update the auto run in the view
   const int lastRun = m_view->extractRunNumber(last);
   m_view->setCurrentAutoRun(lastRun);
+
+  // Update text
+  updateRunsTextFromAuto(lastRun);
+}
+
+void ALCDataLoadingPresenter::resetAutoRun() {
+  m_view->setRunsTextWithSearch(QString::fromStdString(m_view->getRunsOldInput()));
 }
 
 /**

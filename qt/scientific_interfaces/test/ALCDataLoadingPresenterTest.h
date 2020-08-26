@@ -55,6 +55,10 @@ public:
   MOCK_CONST_METHOD0(subtractIsChecked, bool());
   MOCK_METHOD1(setCurrentAutoRun, void(int));
   MOCK_METHOD0(updateRunsTextFromAuto, void());
+  MOCK_CONST_METHOD0(getCurrentRunsText, std::string());
+  MOCK_METHOD1(setRunsTextWithSearch, void(const QString &));
+  MOCK_CONST_METHOD0(getRunsOldInput, std::string());
+  MOCK_METHOD1(setRunsOldInput, void(const std::string &));
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
