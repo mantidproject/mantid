@@ -96,7 +96,7 @@ The errors that the Monte Carlo simulation calculates for different wavelength p
 
 If ResimulateTracksForDifferentWavelengths=True then the errors on the simulated points will be independent and the errors can be combined using standard formulae for combining errors on independent variables.
 
-The error propagation through the spline interpolation is complex because each cubic polynomial is usually expressed as a function of the known y values and a derivative of those y values at the same points (some texts use the first derivative others the second). The error in y and the derivative of y are correlated at a particular x value and the derivatives at different x values are also correlated. So some extra covariances are required in addition to the error (variance) of each y value [#GAR].
+The error propagation through the spline interpolation is complex because each cubic polynomial is usually expressed as a function of the known y values and a derivative of those y values at the same points (some texts use the first derivative others the second). The error in y and the derivative of y are correlated at a particular x value and the derivatives at different x values are also correlated. So some extra covariances are required in addition to the error (variance) of each y value [#GAR]_.
 
 Sparse instrument
 #################
@@ -262,6 +262,7 @@ References
           `https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf <https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf>`_
 .. [#SEV] Severens, Ivo, technische universiteit eindhoven, (2003),
           `https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf <https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf>`_
+
 |
 
 .. categories::
