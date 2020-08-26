@@ -177,12 +177,9 @@ class ColorbarWidget(QWidget):
         Called when a different normalization is selected
         """
         idx = self.norm.currentIndex()
-        scale = NORM_OPTS[idx]
         if NORM_OPTS[idx] == 'Power':
             self.powerscale.show()
             self.powerscale_label.show()
-            if self.powerscale.hasAcceptableInput():
-                scale += "," + self.powerscale.text()
         else:
             self.powerscale.hide()
             self.powerscale_label.hide()

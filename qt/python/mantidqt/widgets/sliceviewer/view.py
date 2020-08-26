@@ -38,6 +38,9 @@ from .zoom import ScrollZoomMixin
 # Constants
 DBLMAX = sys.float_info.max
 
+SCALENORM = "SliceViewer/scale_norm"
+POWERSCALE = "Sliceviewer/scale_norm_power"
+
 
 class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
     pass
@@ -495,23 +498,28 @@ class SliceViewerDataView(QWidget):
 
     def get_default_scale_norm(self):
         scale = 'Linear'
-        if self.conf and self.conf.has("sliceviewer/scale_norm"):
-            scale = self.conf.get("sliceviewer/scale_norm")
+        if self.conf is None:
+            return scale
 
-        if scale == 'Power' and self.conf and self.conf.has("sliceviewer/scale_norm_power"):
-            exponent = self.conf.get("sliceviewer/scale_norm_power")
+        if self.conf.has(SCALENORM):
+            scale = self.conf.get(SCALENORM)
+
+        if scale == 'Power' and self.conf.has(POWERSCALE):
+            exponent = self.conf.get(POWERSCALE)
             scale = (scale, exponent)
 
         return scale
 
     def scale_norm_changed(self):
-        if self.conf:
-            scale = self.colorbar.norm.currentText()
-            self.conf.set("sliceviewer/scale_norm", scale)
+        if self.conf is None:
+            return
 
-            if scale == 'Power':
-                exponent = self.colorbar.powerscale_value
-                self.conf.set("sliceviewer/scale_norm_power", exponent)
+        scale = self.colorbar.norm.currentText()
+        self.conf.set(SCALENORM, scale)
+
+        if scale == 'Power':
+            exponent = self.colorbar.powerscale_value
+            self.conf.set(POWERSCALE, exponent)
 
 
 class SliceViewerView(QWidget):
@@ -589,6 +597,5 @@ class SliceViewerView(QWidget):
 
     # event handlers
     def closeEvent(self, event):
-        self._data_view.colorbar.closeEvent(event)
         self.deleteLater()
         super().closeEvent(event)
