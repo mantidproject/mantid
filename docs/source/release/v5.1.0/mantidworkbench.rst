@@ -14,6 +14,11 @@ New
 - The Sample Transmission Calculator is now implemented in workbench.
 - The axis tick markers in a plot can be switched between Log and decimal formats independently of the axes scale.
 - Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
+- The DrILL (Data reduction for ILL) interface is now available. See the documentation to get
+  more information.
+
+.. figure:: ../../images/drill.png
+   :align: right
 
 Improvements
 ############

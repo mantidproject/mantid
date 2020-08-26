@@ -1,6 +1,9 @@
 DrILL interface
 ===============
 
+.. contents:: Table of Contents
+   :local:
+
 DrILL stands for Data Reduction at ILL. It provides an easy to use interface for
 the reduction of data measured on different ILL instruments. Here are the
 currently supported instruments:
@@ -25,7 +28,7 @@ Interface overview
 
 The DrILL main window is composed of different parts:
 
-.. image:: ../images/drill.png
+.. image:: ../images/drill-numbers.png
    :align: center
 
 spreadsheet like table (1)
@@ -144,3 +147,5 @@ bar (*File* -> *Save...* or *Load...*) one can export or import a Rundex file.
 When saving, the global settings, all the samples and some of the visual setup
 are exported in the rundex file. Symmetrically, the load action imports all
 these data in the current DrILL session.
+
+.. categories:: Interfaces
