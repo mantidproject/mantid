@@ -84,7 +84,11 @@ class MuonDataContext(object):
         return self._loaded_data.num_items() > 0
 
     def is_multi_period(self):
-        return len(self.current_data["OutputWorkspace"]) > 1
+        for run in self.current_runs:
+            if self.num_periods(run) > 1:
+                return True
+
+        return False
 
     @property
     def instrument(self):

@@ -9,6 +9,7 @@ import re
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from mantidqt.utils.observer_pattern import GenericObservable
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import inverse_group_table_columns
 
 maximum_number_of_groups = 20
 
@@ -76,6 +77,31 @@ class GroupingTablePresenter(object):
         self._view.warning_popup("Invalid detector list.")
         return False
 
+    def validate_periods(self, period_text):
+        try:
+            period_list = run_utils.run_string_to_list(period_text)
+        except IndexError:
+            self._view.warning_popup("Entered period range in invalid format."
+                                     " Valid format is a comma seperated list of numbers or dash seperated ranges e.g. 1,3-5")
+            # An IndexError thrown here implies that the input string is not a valid
+            # number list.
+            return False
+        invalid_runs = []
+        current_runs = self._model._context.current_runs
+
+        for run in current_runs:
+            if any([period < 1 or self._model._context.num_periods(run) < period for period in period_list]):
+                invalid_runs.append(run)
+
+        if not invalid_runs:
+            return True
+        elif len(invalid_runs) == len(current_runs):
+            self._view.warning_popup("One or more of the periods specified missing from all runs")
+            return False
+        else:
+            # TODO need to add in some logic here to turn the group row yellow if some but not all runs have correct periods.
+            return True
+
     def disable_editing(self):
         self._view.disable_editing()
 
@@ -92,7 +118,6 @@ class GroupingTablePresenter(object):
             if len(self._model.group_names + self._model.pair_names) == 1:
                 self._model.add_group_to_analysis(group.name)
             self.update_view_from_model()
-            self._view.notify_data_changed()
             self.notify_data_changed()
         except ValueError as error:
             self._view.warning_popup(error)
@@ -103,7 +128,8 @@ class GroupingTablePresenter(object):
     def add_group_to_view(self, group, state):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        entry = [str(group.name), state, run_utils.run_list_to_string(group.detectors, False), str(group.n_detectors)]
+        entry = [str(group.name), run_utils.run_list_to_string(group.periods), state, run_utils.run_list_to_string(group.detectors, False),
+                 str(group.n_detectors)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
@@ -123,7 +149,6 @@ class GroupingTablePresenter(object):
             self.remove_last_row_in_view_and_model()
         else:
             self.remove_selected_rows_in_view_and_model(group_names)
-        self._view.notify_data_changed()
         self.notify_data_changed()
 
     def remove_selected_rows_in_view_and_model(self, group_names):
@@ -141,34 +166,40 @@ class GroupingTablePresenter(object):
 
     def handle_data_change(self, row, col):
         changed_item = self._view.get_table_item(row, col)
-        group_name = self._view.get_table_item(row, 0).text()
+        group_name = self._view.get_table_item(row, inverse_group_table_columns['group_name']).text()
         update_model = True
-        if col == 0 and not self.validate_group_name(changed_item.text()):
+        if col == inverse_group_table_columns['group_name'] and not self.validate_group_name(changed_item.text()):
             update_model = False
-        if col == 2 and not self.validate_detector_ids(changed_item.text()):
+        if col == inverse_group_table_columns['detector_ids'] and not self.validate_detector_ids(changed_item.text()):
             update_model = False
-        if col == 1:
+        if col == inverse_group_table_columns['to_analyse']:
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, group_name)
+        if col == inverse_group_table_columns['periods'] and not self.validate_periods(changed_item.text()):
+            update_model = False
 
-        if update_model:
-            try:
-                self.update_model_from_view()
-            except ValueError as error:
-                self._view.warning_popup(error)
+        if not update_model:
+            # Reset the view back to model values and exit early as the changes are invalid.
+            self.update_view_from_model()
+            return
+
+        try:
+            self.update_model_from_view()
+        except ValueError as error:
+            self._view.warning_popup(error)
 
         # if the column containing the "to_analyse" flag is changed, then we don't need to update anything group related
-        if col != 1:
+        if col != inverse_group_table_columns['to_analyse']:
             self.update_view_from_model()
-            self._view.notify_data_changed()
             self.notify_data_changed()
 
     def update_model_from_view(self):
         table = self._view.get_table_contents()
         self._model.clear_groups()
         for entry in table:
-            detector_list = run_utils.run_string_to_list(str(entry[2]), False)
-            group = MuonGroup(group_name=str(entry[0]), detector_ids=detector_list)
+            detector_list = run_utils.run_string_to_list(str(entry[inverse_group_table_columns['detector_ids']]), False)
+            periods = run_utils.run_string_to_list(str(entry[inverse_group_table_columns['periods']]))
+            group = MuonGroup(group_name=str(entry[0]), detector_ids=detector_list, periods=periods)
             self._model.add_group(group)
 
     def update_view_from_model(self):
