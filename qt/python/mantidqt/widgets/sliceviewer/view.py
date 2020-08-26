@@ -39,7 +39,7 @@ from .zoom import ScrollZoomMixin
 DBLMAX = sys.float_info.max
 
 SCALENORM = "SliceViewer/scale_norm"
-POWERSCALE = "Sliceviewer/scale_norm_power"
+POWERSCALE = "SliceViewer/scale_norm_power"
 
 
 class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
