@@ -123,6 +123,7 @@ public:
     ON_CALL(*m_view, timeRange())
         .WillByDefault(
             Return(boost::make_optional(std::make_pair(-6.0, 32.0))));
+    // Add range for integration
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
     ON_CALL(*m_view, redPeriod()).WillByDefault(Return("1"));
@@ -255,10 +256,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_view->selectRuns());
   }
 
-  void test_load_error(){
-      // Set last run to one of the different instrument - should cause error
-      // within algorithms exec
-      std::vector<std::string> bad{"MUSR000015189.nxs","EMU00006473.nxs"};
+  void test_load_error() {
+    // Set last run to one of the different instrument - should cause error
+    // within algorithms exec
+    std::vector<std::string> bad{"MUSR000015189.nxs", "EMU00006473.nxs"};
     ON_CALL(*m_view, getRuns()).WillByDefault(Return(bad));
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
@@ -266,14 +267,16 @@ public:
   }
 
   void test_load_invalidRun() {
-    ON_CALL(*m_view, firstRun()).WillByDefault(Return(""));
+    std::vector<std::string> emptyVec;
+    ON_CALL(*m_view, getRuns()).WillByDefault(Return(emptyVec));
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     m_view->requestLoading();
   }
 
   void test_load_nonExistentFile() {
-    ON_CALL(*m_view, lastRun()).WillByDefault(Return("non-existent-file"));
+    std::vector<std::string> bad{"non-existent-file"};
+    ON_CALL(*m_view,getRuns()).WillByDefault(Return(bad));
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     m_view->requestLoading();
@@ -347,12 +350,12 @@ public:
     ON_CALL(*m_view, function()).WillByDefault(Return("First"));
     ON_CALL(*m_view, log()).WillByDefault(Return("Field_Danfysik"));
 
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1398.090, 1E-3),
-                                            WorkspaceX(0, 1, 1364.520, 1E-3),
-                                            WorkspaceX(0, 2, 1380.000, 1E-3),
-                                            WorkspaceY(0, 0, 0.15004, 1E-5),
-                                            WorkspaceY(0, 1, 0.12837, 1E-5),
-                                            WorkspaceY(0, 2, 0.10900, 1E-5)),
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1364.520, 1E-3),
+                                            WorkspaceX(0, 1, 1380.000, 1E-3),
+                                            WorkspaceX(0, 2, 1398.090, 1E-3),
+                                            WorkspaceY(0, 0, 0.12492, 1E-5),
+                                            WorkspaceY(0, 1, 0.10353, 1E-5),
+                                            WorkspaceY(0, 2, 0.14734, 1E-5)),
                                       0));
 
     m_view->requestLoading();

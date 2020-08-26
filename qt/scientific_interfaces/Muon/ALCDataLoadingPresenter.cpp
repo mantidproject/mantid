@@ -271,6 +271,15 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     } else {
       assert(m_loadedData->getNumberHistograms() == 4);
     }
+
+    const auto xvalOne = m_loadedData->readX(0)[0];
+    const auto xvalTwo = m_loadedData->readX(0)[1];
+    const auto xvalThree = m_loadedData->readX(0)[2];
+
+    const auto yvalOne = m_loadedData->readY(0)[0];
+    const auto yvalTwo = m_loadedData->readY(0)[1];
+    const auto yvalThree = m_loadedData->readY(0)[2];
+
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_loadedData);
