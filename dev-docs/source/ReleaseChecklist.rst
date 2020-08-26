@@ -34,7 +34,7 @@ Friday, Release-4 weeks (one week before code freeze)
 *  Send an email to beta test users explaining the dates for the
    testing, and stating they will have more detail on the start of the
    first day (cc the Local PMs so they can organise a similar message at their facilities).
-*  Before the code freeze is in place the PM and TSC need to agree the maintenace tasks for the next release period.
+*  Before the code freeze is in place the PM and TSC need to agree the maintenance tasks for the next release period.
 
 Friday, Release-3 weeks
 #######################
