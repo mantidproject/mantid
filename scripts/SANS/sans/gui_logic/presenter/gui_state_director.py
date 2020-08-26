@@ -11,8 +11,12 @@ the main part of the work to an StateDirectorISIS object.
 """
 
 import copy
+import os
 
+from mantid import FileFinder
 from sans.common.file_information import SANSFileInformationBlank
+from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.models.file_loading import FileLoading
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.StateObjects.StateData import get_data_builder
 
@@ -25,32 +29,26 @@ class GuiStateDirector(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def create_state(self, row_entry, file_lookup=True):
+    def create_state(self, row_entry: RowEntries, file_lookup=True, row_user_file: str = None) -> StateGuiModel:
+        """
+        Packs the current GUI options (e.g. settings selection) into a state object for the current row
+        :param row_entry: The associated row entry
+        :param file_lookup: Whether to lookup file information whilst creating state
+        :param row_user_file: (Optional) The name of an overriding user file if one is provided. In this case the
+        GUI options selected will be ignored.
+        :return: A populated StateGuiModel
+        """
+
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         if file_lookup:
             file_information = row_entry.file_information
         else:
             file_information = SANSFileInformationBlank()
 
-        # We want to copy our master GUI state to set any row options (see prototype pattern)
-        gui_state = copy.deepcopy(self._state_gui_model)
+        gui_state = self._load_current_state(file_information, row_user_file)
 
         data_builder = get_data_builder(self._facility, file_information)
-
-        self._set_data_entry(data_builder.set_sample_scatter, row_entry.sample_scatter)
-        self._set_data_period_entry(data_builder.set_sample_scatter_period, row_entry.sample_scatter_period)
-        self._set_data_entry(data_builder.set_sample_transmission, row_entry.sample_transmission)
-        self._set_data_period_entry(data_builder.set_sample_transmission_period, row_entry.sample_transmission_period)  # noqa
-        self._set_data_entry(data_builder.set_sample_direct, row_entry.sample_direct)
-        self._set_data_period_entry(data_builder.set_sample_direct_period, row_entry.sample_direct_period)
-        self._set_data_entry(data_builder.set_can_scatter, row_entry.can_scatter)
-        self._set_data_period_entry(data_builder.set_can_scatter_period, row_entry.can_scatter_period)
-        self._set_data_entry(data_builder.set_can_transmission, row_entry.can_transmission)
-        self._set_data_period_entry(data_builder.set_can_transmission_period, row_entry.can_transmission_period)
-        self._set_data_entry(data_builder.set_can_direct, row_entry.can_direct)
-        self._set_data_period_entry(data_builder.set_can_direct_period, row_entry.can_direct_period)
-
-        data = data_builder.build()
+        self._populate_row_entries(data_builder, row_entry)
 
         # 2. Add elements from the options column
         self._apply_column_options_to_state(row_entry, gui_state)
@@ -59,7 +57,8 @@ class GuiStateDirector(object):
         output_name = row_entry.output_name
         if output_name:
             gui_state.output_name = output_name
-
+        gui_state.save_types = self._state_gui_model.save_types
+        
         if row_entry.sample_thickness:
             gui_state.sample_thickness = float(row_entry.sample_thickness)
         if row_entry.sample_height:
@@ -70,7 +69,36 @@ class GuiStateDirector(object):
             gui_state.sample_shape = row_entry.sample_shape
 
         # 4. Create the rest of the state based on the builder.
-        gui_state.all_states.data = data
+        gui_state.all_states.data = data_builder.build()
+        return gui_state
+
+    def _populate_row_entries(self, data_builder, row_entry):
+        self._set_data_entry(data_builder.set_sample_scatter, row_entry.sample_scatter)
+        self._set_data_period_entry(data_builder.set_sample_scatter_period, row_entry.sample_scatter_period)
+        self._set_data_entry(data_builder.set_sample_transmission, row_entry.sample_transmission)
+        self._set_data_period_entry(data_builder.set_sample_transmission_period,
+                                    row_entry.sample_transmission_period)  # noqa
+        self._set_data_entry(data_builder.set_sample_direct, row_entry.sample_direct)
+        self._set_data_period_entry(data_builder.set_sample_direct_period, row_entry.sample_direct_period)
+        self._set_data_entry(data_builder.set_can_scatter, row_entry.can_scatter)
+        self._set_data_period_entry(data_builder.set_can_scatter_period, row_entry.can_scatter_period)
+        self._set_data_entry(data_builder.set_can_transmission, row_entry.can_transmission)
+        self._set_data_period_entry(data_builder.set_can_transmission_period, row_entry.can_transmission_period)
+        self._set_data_entry(data_builder.set_can_direct, row_entry.can_direct)
+        self._set_data_period_entry(data_builder.set_can_direct_period, row_entry.can_direct_period)
+
+    def _load_current_state(self, file_information, row_user_file):
+        if row_user_file:
+            # Has a custom user file so ignore any settings from GUI
+            user_file_path = FileFinder.getFullPath(row_user_file)
+            if not os.path.exists(user_file_path):
+                raise ValueError(f"The user path {user_file_path}\n"
+                                 " does not exist. Make sure a valid user file has been specified.")
+            state = FileLoading.load_user_file(user_file_path, file_information=file_information)
+            gui_state = StateGuiModel(state)
+        else:
+            # We want to copy our master GUI state to set any row options (see prototype pattern)
+            gui_state = copy.deepcopy(self._state_gui_model)
         return gui_state
 
     @staticmethod

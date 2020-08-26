@@ -936,8 +936,7 @@ class RunTabPresenter(PresenterCommon):
             states, errors = create_states(state_model_with_view_update,
                                            facility=self._facility,
                                            row_entries=row_entries,
-                                           file_lookup=file_lookup,
-                                           user_file=self._view.get_user_file_path())
+                                           file_lookup=file_lookup)
 
         if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")

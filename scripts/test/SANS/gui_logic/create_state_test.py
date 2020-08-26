@@ -7,9 +7,9 @@
 import unittest
 
 from unittest import mock
-from sans.common.enums import (SANSFacility, SaveType, SANSInstrument)
+from sans.common.enums import SANSFacility
 from sans.gui_logic.models.RowEntries import RowEntries
-from sans.gui_logic.models.create_state import (create_states, create_state_from_userfile)
+from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.AllStates import AllStates
 
@@ -38,10 +38,8 @@ class GuiCommonTest(unittest.TestCase):
         states, errors = create_states(self.state_gui_model, SANSFacility.ISIS, row_entries=rows)
         self.assertEqual(2, len(states))
 
-    @mock.patch('sans.gui_logic.models.create_state.create_state_from_userfile')
     @mock.patch('sans.gui_logic.models.create_state._get_thickness_for_row')
-    def test_create_state_from_user_file_if_specified(self, thickness_mock, create_gui_state_mock):
-        create_gui_state_mock.return_value = StateGuiModel(AllStates())
+    def test_create_state_from_user_file_if_specified(self, thickness_mock):
         expected_user_file = 'MaskLOQData.txt'
 
         # Mock out row entry so it does not lookup file information
@@ -53,17 +51,9 @@ class GuiCommonTest(unittest.TestCase):
         states, errors = create_states(self.state_gui_model, row_entries=rows, facility=SANSFacility.ISIS)
 
         self.assertEqual(len(states), 1)
-        create_gui_state_mock.assert_called_once_with(expected_user_file, existing_state=self.state_gui_model,
-                                                      file_information=rows[0].file_information)
+        self.gui_state_director_instance.create_state.assert_called_once_with(
+            mock_row_entry, file_lookup=mock.ANY, row_user_file=expected_user_file)
         thickness_mock.assert_called()
-
-    def test_create_gui_state_from_userfile_adds_save_format_from_gui(self):
-        gui_state = StateGuiModel(AllStates())
-        gui_state.save_types = [SaveType.NX_CAN_SAS]
-
-        row_state = create_state_from_userfile('MaskLOQData.txt', existing_state=gui_state,
-                                               file_information=None)
-        self.assertEqual(gui_state.save_types, row_state.save_types)
 
 
 if __name__ == '__main__':

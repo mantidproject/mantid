@@ -5,14 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
-from sans.gui_logic.models.file_loading import FileLoading
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 
 sans_logger = Logger("SANS")
 
 
-def create_states(state_model, facility, row_entries=None, file_lookup=True, user_file=""):
+def create_states(state_model, facility, row_entries=None, file_lookup=True):
     """
     Here we create the states based on the settings in the models
     :param state_model: the state model object
@@ -27,7 +26,7 @@ def create_states(state_model, facility, row_entries=None, file_lookup=True, use
     for row in row_entries:
         _get_thickness_for_row(row)
 
-        state = _create_row_state(row, state_model, file_lookup, gui_state_director)
+        state = _create_row_state(row, file_lookup, gui_state_director)
         if isinstance(state, StateGuiModel):
             states.update({row: state})
         elif isinstance(state, str):
@@ -64,7 +63,7 @@ def _get_thickness_for_row(row):
         row.sample_shape = file_info.get_shape()
 
 
-def _create_row_state(row_entry, state_model, file_lookup, gui_state_director):
+def _create_row_state(row_entry, file_lookup, gui_state_director):
     sans_logger.information("Generating state for row {}".format(row_entry))
     state = None
 
@@ -76,11 +75,7 @@ def _create_row_state(row_entry, state_model, file_lookup, gui_state_director):
 
         if not row_entry.is_empty():
             row_user_file = row_entry.user_file
-            if row_user_file:
-                state = create_state_from_userfile(row_user_file, existing_state=state_model,
-                                                   file_information=row_entry.file_information)
-            else:
-                state = gui_state_director.create_state(row_entry, file_lookup=file_lookup)
+            state = gui_state_director.create_state(row_entry, file_lookup=file_lookup, row_user_file=row_user_file)
         return state
     except (ValueError, RuntimeError) as e:
         return "{}".format(str(e))
@@ -91,9 +86,3 @@ def __is_empty_row(row, table):
         if value and key in ['sample_scatter']:
             return False
     return True
-
-
-def create_state_from_userfile(row_user_file, existing_state, file_information):
-    state = FileLoading.load_user_file(row_user_file, file_information=file_information)
-    state.save_types = existing_state.save_types
-    return state
