@@ -26,7 +26,7 @@ class SliceViewer(object):
         """
         Create a presenter for controlling the slice display for a workspace
         :param ws: Workspace containing data to display and slice
-        :param parent: An optinal parent widget
+        :param parent: An optional parent widget
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
@@ -44,7 +44,7 @@ class SliceViewer(object):
             self.new_plot = self.new_plot_matrix
             self.update_plot_data = self.update_plot_data_matrix
 
-        self.normalization = mantid.api.MDNormalization.NoNormalization
+        self.normalization = False
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent)
@@ -103,7 +103,7 @@ class SliceViewer(object):
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
-        self.view.data_view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
+        self.view.data_view.plot_matrix(self.model.get_ws(), distribution=not self.normalization)
 
     def update_plot_data_MDH(self):
         """
@@ -322,10 +322,7 @@ class SliceViewer(object):
         Notify the presenter that the type of normalization has changed.
         :param norm_type: "By bin width" = volume normalization else no normalization
         """
-        if norm_type == "By bin width":
-            self.normalization = mantid.api.MDNormalization.VolumeNormalization
-        else:
-            self.normalization = mantid.api.MDNormalization.NoNormalization
+        self.normalization = norm_type == "By bin width"
         self.new_plot()
 
     def overlay_peaks_workspaces(self):

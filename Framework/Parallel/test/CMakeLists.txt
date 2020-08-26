@@ -12,7 +12,6 @@ if(CXXTEST_FOUND)
   target_include_directories(ParallelTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
   target_link_libraries(ParallelTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Parallel
                         gmock

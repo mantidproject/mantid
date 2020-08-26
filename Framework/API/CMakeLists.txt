@@ -544,7 +544,6 @@ target_include_directories(
 target_link_libraries(
   API
   LINK_PRIVATE
-  ${TCMALLOC_LIBRARIES_LINKTIME}
   ${JSONCPP_LIBRARIES}
   ${MANTIDLIBS}
   ${GSL_LIBRARIES}

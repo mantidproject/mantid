@@ -89,6 +89,7 @@ Improvements
 
 - Added an option in the settings to specify the default legend size.
 - Added an option to the settings window to set the default colormap for image plots.
+- Colorfill plots of very large workspaces now take less than 10 seconds to plot
 - Improved loading of python plugins at startup on slow disks.
 - Added a circular sector shape in the Pick and Mask tab of the instrument view.
 - Workbench will now spot if it is about to create the settings window off the available screen, and will move it so it is all visible. This is important as it is a modal dialog and could freeze the application in an unrecoverable way before.
@@ -96,6 +97,7 @@ Improvements
 - Sliceviewer colourmap uses the default colourmap from the settings.
 - Code completions are now loaded when the code editor is first changed.
 - The ExtractFFTSpectrum algorithm has extra properties (Shift, AutoShift, and AcceptXRoundingErrors) to reflect those of the underlying FFT.
+- Legends in 1D plots are now editable in-situ.
 
 Bugfixes
 ########
@@ -140,5 +142,7 @@ Bugfixes
 - Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
 - When running `ExtractFFTSpectrum` with only a real input, there is no longer a blank output on the end of the workspace.
 - `ExtractFFTSpectrum` gives the correct units. 
+- Warn users when they attempt to use Generate Recovery Script with no workspaces present.
+- Fixed a bug with colorfill plot script generation for distribution workspaces.
 
 :ref:`Release 5.1.0 <v5.1.0>`
