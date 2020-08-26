@@ -90,7 +90,13 @@ Interpolation
 #############
 
 The default linear interpolation method will produce an absorption curve that is not smooth. CSpline interpolation
-will produce a smoother result by using a 3rd-order polynomial to approximate the original points. 
+will produce a smoother result by using a 3rd-order polynomial to approximate the original points.
+
+The errors that the Monte Carlo simulation calculates for different wavelength points in a single spectrum may or may not be independent. If the same set of tracks have been used for different wavelengths (ResimulateTracksForDifferentWavelengths=False) then the errors will be correlated. A worst case positive correlation has been assumed giving an error on the interpolated point that is approximately the same as the surrounding simulated points.
+
+If ResimulateTracksForDifferentWavelengths=True then the errors on the simulated points will be independent and the errors can be combined using standard formulae for combining errors on independent variables.
+
+The error propagation through the spline interpolation is complex because each cubic polynomial is usually expressed as a function of the known y values and a derivative of those y values at the same points (some texts use the first derivative others the second). The error in y and the derivative of y are correlated at a particular x value and the derivatives at different x values are also correlated. So some extra covariances are required in addition to the error (variance) of each y value [#GAR].
 
 Sparse instrument
 #################
@@ -132,10 +138,10 @@ and then finally in the latitude direction:
 
    y = \frac{(\phi_2 - \phi) * y_1 + (\phi - \phi_1) * y_2}{\phi_2 - \phi_1}
    
-The errors present in the 4 simulated histograms are propagated through the bilinear formulae given above to give one contribution to the error on the interpolated histogram. The second contribution is the interpolation error (how well the bilinear interpolation matches the actual attenuation factor variation). This is calculated based on the second derivative of the attenuation factor in the :math:`\phi` and :math:`\lambda` directions
+The errors present in the 4 simulated histograms are assumed to be independent and they are propagated through the bilinear formulae given above to give one contribution to the error on the interpolated histogram. The second contribution is the interpolation error (how well the bilinear interpolation matches the actual attenuation factor variation). This is calculated based on the second derivative of the attenuation factor in the :math:`\phi` and :math:`\lambda` directions ([#SEV]_)
 
-Wavelength interpolation
-^^^^^^^^^^^^^^^^^^^^^^^^
+Wavelength interpolation for sparse instruments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The wavelength points for simulation with the sparse instrument are chosen as follows:
 
@@ -252,7 +258,10 @@ References
           `doi: 10.1107/S0365110X57002212 <http://dx.doi.org/10.1107/S0365110X57002212>`_
 .. [#SAB] Sabine, T. M., *International Tables for Crystallography*, Vol. C, Page 609, Ed. Wilson, A. J. C and Prince, E. Kluwer Publishers (2004)
           `doi: 10.1107/97809553602060000103 <http://dx.doi.org/10.1107/97809553602060000103>`_
-
+.. [#GAR] Gardner, James L., *Journal of Research of the National Institute of Standards and Technology*, section 4 (2003),
+          `https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf <https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf>`_
+.. [#SEV] Severens, Ivo, technische universiteit eindhoven, (2003),
+          `https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf <https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf>`_
 |
 
 .. categories::

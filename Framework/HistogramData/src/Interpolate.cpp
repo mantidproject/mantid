@@ -138,8 +138,11 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
 
   // ypp means y prime prime
   std::vector<double> ypp(xs.size() - 2);
+  // would be quicker to solve linear equation rather than invert h but also
+  // need h-1 elements later on
   h.Invert();
   ypp = h * d;
+
   // add in the zero second derivatives at extreme pts to give natural splines
   std::vector<double> ypp_full(xs.size(), 0);
   std::copy(ypp.begin(), ypp.end(), ypp_full.begin() + 1);
@@ -165,9 +168,9 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
           dyppidyk += h[i - 1][k] / (xs[k + 1] - xs[k]);
         }
       }
-      u_ypp_ypp[i] += dyppidyk * dyppidyk * eold[k];
+      u_ypp_ypp[i] += dyppidyk * dyppidyk * pow(eold[k], 2);
       if (k == i) {
-        u_ypp_y[i] = dyppidyk * eold[k];
+        u_ypp_y[i] = dyppidyk * pow(eold[k], 2);
       }
     }
   }

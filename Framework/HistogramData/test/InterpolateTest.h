@@ -186,13 +186,13 @@ public:
     double D = -0.0625;
     expectedE[1] =
         sqrt(A * A * pow(2., 2) + B * B * pow(1., 2) + 2 * A * C * 0 +
-             2 * B * D * 2.8 + C * C * 0 + D * D * 13.92);
+             2 * B * D * 2.8 + C * C * 0 + D * D * 19.36);
     expectedE[3] =
         sqrt(A * A * pow(1., 2) + B * B * pow(1., 2) + 2 * A * C * 2.8 +
-             2 * B * D * 2.8 + C * C * 13.92 + D * D * 13.92);
+             2 * B * D * 2.8 + C * C * 19.36 + D * D * 19.36);
     expectedE[5] =
         sqrt(A * A * pow(1., 2) + B * B * pow(2., 2) + 2 * A * C * 2.8 +
-             2 * B * D * 0 + C * C * 13.92 + D * D * 0);
+             2 * B * D * 0 + C * C * 19.36 + D * D * 0);
     checkData(input, output, {}, expectedE);
   }
 
