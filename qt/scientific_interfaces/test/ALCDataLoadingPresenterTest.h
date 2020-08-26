@@ -111,7 +111,7 @@ public:
     m_presenter->initialize();
 
     std::vector<std::string> runs = {"MUSR00015189.nxs", "MUSR00015191.nxs",
-                                      "MUSR00015192.nxs"};
+                                     "MUSR00015192.nxs"};
 
     // Set some valid default return values for the view mock object getters
     ON_CALL(*m_view, firstRun()).WillByDefault(Return("MUSR00015189.nxs"));
@@ -149,9 +149,9 @@ public:
     EXPECT_CALL(
         *m_view,
         setDataCurve(
-            AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1360, 1E-8),
-                  WorkspaceX(0, 2, 1370, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
-                  WorkspaceY(0, 1, 0.143, 1E-3), WorkspaceY(0, 2, 0.128, 1E-3)),
+            AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1370, 1E-8),
+                  WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
+                  WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
             0));
 
     EXPECT_CALL(*m_view, enableAll());
@@ -164,8 +164,8 @@ public:
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Differential"));
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 3.00349, 1E-3),
-                                            WorkspaceY(0, 1, 2.3779, 1E-3),
-                                            WorkspaceY(0, 2, 2.47935, 1E-3)),
+                                            WorkspaceY(0, 1, 2.47935, 1E-3),
+                                            WorkspaceY(0, 2, 1.85123, 1E-3)),
                                       0));
 
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
@@ -177,8 +177,8 @@ public:
         .WillByDefault(Return(boost::make_optional(std::make_pair(5.0, 10.0))));
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.137, 1E-3),
-                                            WorkspaceY(0, 1, 0.141, 1E-3),
-                                            WorkspaceY(0, 2, 0.111, 1E-3)),
+                                            WorkspaceY(0, 1, 0.111, 1E-3),
+                                            WorkspaceY(0, 2, 0.109, 1E-3)),
                                       0));
 
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
@@ -255,10 +255,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_view->selectRuns());
   }
 
-  void test_load_error() {
-    // Set last run to one of the different instrument - should cause error
-    // within algorithms exec
-    ON_CALL(*m_view, lastRun()).WillByDefault(Return("EMU00006473.nxs"));
+  void test_load_error(){
+      // Set last run to one of the different instrument - should cause error
+      // within algorithms exec
+      std::vector<std::string> bad{"MUSR000015189.nxs","EMU00006473.nxs"};
+    ON_CALL(*m_view, getRuns()).WillByDefault(Return(bad));
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     m_view->requestLoading();
@@ -285,9 +286,9 @@ public:
     EXPECT_CALL(*m_view, deadTimeType()).Times(2);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(0);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.150616, 1E-3),
-                                            WorkspaceY(0, 1, 0.143444, 1E-3),
-                                            WorkspaceY(0, 2, 0.128856, 1E-3)),
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.151202, 1E-3),
+                                            WorkspaceY(0, 1, 0.129347, 1E-3),
+                                            WorkspaceY(0, 2, 0.109803, 1E-3)),
                                       0));
     m_view->requestLoading();
   }
@@ -314,9 +315,9 @@ public:
     EXPECT_CALL(
         *m_view,
         setDataCurve(
-            AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1360, 1E-8),
-                  WorkspaceX(0, 2, 1370, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
-                  WorkspaceY(0, 1, 0.143, 1E-3), WorkspaceY(0, 2, 0.128, 1E-3)),
+            AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1370, 1E-8),
+                  WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
+                  WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
             0));
     m_view->selectRuns();
     m_view->requestLoading();
@@ -333,11 +334,11 @@ public:
     EXPECT_CALL(*m_view, greenPeriod()).Times(1);
     // Check results
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1350, 1E-8),
-                                            WorkspaceX(0, 1, 1360, 1E-8),
-                                            WorkspaceX(0, 2, 1370, 1E-8),
+                                            WorkspaceX(0, 1, 1370, 1E-8),
+                                            WorkspaceX(0, 2, 1380, 1E-8),
                                             WorkspaceY(0, 0, 0.012884, 1E-6),
-                                            WorkspaceY(0, 1, 0.022489, 1E-6),
-                                            WorkspaceY(0, 2, 0.038717, 1E-6)),
+                                            WorkspaceY(0, 1, 0.038717, 1E-6),
+                                            WorkspaceY(0, 2, 0.054546, 1E-6)),
                                       0));
     m_view->requestLoading();
   }
@@ -346,12 +347,12 @@ public:
     ON_CALL(*m_view, function()).WillByDefault(Return("First"));
     ON_CALL(*m_view, log()).WillByDefault(Return("Field_Danfysik"));
 
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1360.200, 1E-3),
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1398.090, 1E-3),
                                             WorkspaceX(0, 1, 1364.520, 1E-3),
-                                            WorkspaceX(0, 2, 1398.090, 1E-3),
-                                            WorkspaceY(0, 0, 0.14289, 1E-5),
+                                            WorkspaceX(0, 2, 1380.000, 1E-3),
+                                            WorkspaceY(0, 0, 0.15004, 1E-5),
                                             WorkspaceY(0, 1, 0.12837, 1E-5),
-                                            WorkspaceY(0, 2, 0.15004, 1E-5)),
+                                            WorkspaceY(0, 2, 0.10900, 1E-5)),
                                       0));
 
     m_view->requestLoading();
