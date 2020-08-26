@@ -232,7 +232,7 @@ Finalise
 * ``neutron@neutronsources.org``
 * Also post the contents of the message on General on Slack
 * Create a new item on the forum news
-* Close the release milestone in the github
+* Close the release milestone on github
 
 Generate DOI (technical tasks)
 ------------------------------
