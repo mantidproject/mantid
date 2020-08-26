@@ -174,10 +174,8 @@ void SaveReflectometryAscii::outputval(double val) {
   if (!inf && !nan) {
     if (m_ext == "custom" || m_ext == ".txt")
       m_file << m_sep << val;
-    else {
-      m_file << std::setw(28);
-      m_file << val;
-    }
+    else
+      m_file << std::setw(28) << val;
   }
 }
 
@@ -185,7 +183,10 @@ void SaveReflectometryAscii::outputval(double val) {
  *  @param val :: a string value to be written
  */
 void SaveReflectometryAscii::outputval(const std::string &val) {
-  m_file << std::setw(28) << val;
+  if (m_ext == "custom" || m_ext == ".txt")
+    m_file << m_sep << val;
+  else
+    m_file << std::setw(28) << val;
 }
 
 /// Retrieve sample log value

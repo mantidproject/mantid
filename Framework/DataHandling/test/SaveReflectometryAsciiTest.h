@@ -674,9 +674,7 @@ public:
     data.reserve(5);
     data.emplace_back("MFT");
     data.emplace_back("");
-    data.emplace_back("                           q                        "
-                      "refl                    refl_err                q_res "
-                      "(FWHM)");
+    data.emplace_back("\tq\trefl\trefl_err\tq_res (FWHM)");
     data.emplace_back("\t3.300000000000000e-01\t"
                       "3.000000000000000e+00\t1.732050807568877e+00\t"
                       "1.100000000000000e+00");
@@ -718,9 +716,7 @@ public:
     data.reserve(5);
     data.emplace_back("MFT");
     data.emplace_back("");
-    data.emplace_back("                           q                        "
-                      "refl                    refl_err                q_res "
-                      "(FWHM)");
+    data.emplace_back("\tq\trefl\trefl_err\tq_res (FWHM)");
     data.emplace_back("\t3.300000000000000e-01\t"
                       "3.000000000000000e+00\t1.732050807568877e+00\t"
                       "6.502941176470588e-01");
