@@ -286,8 +286,6 @@ class MuonContext(object):
             return None
 
     def get_group_and_pair(self, group_and_pair):
-        group = []
-        pair = []
         if group_and_pair == 'All':
             group = self.group_pair_context.group_names
             pair = self.group_pair_context.pair_names
@@ -300,7 +298,6 @@ class MuonContext(object):
         return group, pair
 
     def get_runs(self, runs):
-        run_list = []
         if runs == 'All':
             run_list = self.data_context.current_runs
         else:
