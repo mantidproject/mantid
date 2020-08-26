@@ -90,13 +90,8 @@ class GroupingTablePresenter(object):
         current_runs = self._model._context.current_runs
 
         for run in current_runs:
-            for period in period_list:
-                if period < 1:
-                    invalid_runs.append(run)
-                    break
-                elif self._model._context.num_periods(run) < period:
-                    invalid_runs.append(run)
-                    break
+            if any([period < 1 or self._model._context.num_periods(run) < period for period in period_list]):
+                invalid_runs.append(run)
 
         if not invalid_runs:
             return True
