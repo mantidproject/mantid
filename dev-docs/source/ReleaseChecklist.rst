@@ -46,7 +46,7 @@ Code Freeze
 -----------
 
 *  Post on the General slack channel asking everyone to ensure they
-   have move any incomplete issues, stating the code freeze is in place, and
+   have moved any incomplete issues to the next milestone, stating the code freeze is in place, and
    warning developers that non-blocker tickets will be moved from the
    milestone on Monday morning.
 *  Final Testing afternoon, attempt to drive the pull requests for this
