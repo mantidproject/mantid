@@ -125,9 +125,6 @@ class StateTest(unittest.TestCase):
         state = self._get_state(good_state)
         self.assertIsNone(state.validate())
 
-    # TODO reimplement validator tests in new state objects
-    def test_validators(self):
-        pass
 
 if __name__ == '__main__':
     unittest.main()

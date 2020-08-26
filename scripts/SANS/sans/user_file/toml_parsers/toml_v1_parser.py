@@ -233,7 +233,8 @@ class _TomlV1ParserImpl(object):
             if step_str:
                 state_obj.wavelength_step_type = RangeStepType(step_str)
 
-        # TODO we should not have to set the same attributes on all of these things
+        # For legacy reasons where information is duplicated across our
+        # state objects we set the same thing in 4 different locations.
         set_wavelength(self.calculate_transmission)
         set_wavelength(self.normalize_to_monitor)
         set_wavelength(self.wavelength)
@@ -316,8 +317,6 @@ class _TomlV1ParserImpl(object):
         # This is mandatory so we don't use _get_val
         monitor_dict = transmission_dict["monitor"][monitor_name]
 
-        # TODO this is a nasty data structure we should sort out properly by making the
-        # monitor number agnostic
         if "M5" in monitor_name:
             self.move.monitor_5_offset = self._get_val("shift", monitor_dict, default=0.0)
         else:
@@ -482,6 +481,7 @@ class _TomlV1ParserImpl(object):
         Gets a nested value within the specified dictionary
         :param keys: A list of keys to iterate through the dictionary
         :param dict_to_parse: (Optional) The dict to parse, if None parses the input dict
+        :param default: The default value to use if the given key was not found. If not provided None is used.
         :return: The corresponding value
         """
         if isinstance(keys, str):

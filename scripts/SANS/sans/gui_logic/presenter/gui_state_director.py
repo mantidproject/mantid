@@ -58,7 +58,7 @@ class GuiStateDirector(object):
         if output_name:
             gui_state.output_name = output_name
         gui_state.save_types = self._state_gui_model.save_types
-        
+
         if row_entry.sample_thickness:
             gui_state.sample_thickness = float(row_entry.sample_thickness)
         if row_entry.sample_height:

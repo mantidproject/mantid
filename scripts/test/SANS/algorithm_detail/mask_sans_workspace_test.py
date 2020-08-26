@@ -11,7 +11,7 @@ import unittest
 
 from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, Load, LoadEmptyInstrument, SANSLoad
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
-from sans.common.enums import SANSFacility, CanonicalCoordinates
+from sans.common.enums import SANSFacility
 from sans.common.file_information import SANSFileInformationFactory
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.StateData import get_data_builder

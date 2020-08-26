@@ -15,7 +15,6 @@ from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStep
 from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
-from sans.user_file.settings_tags import (OtherId, LimitsId, simple_range, q_rebin_values)
 
 
 class StateGuiModel(ModelCommon):
@@ -169,7 +168,7 @@ class StateGuiModel(ModelCommon):
     @property
     def reduction_mode(self):
         val = self._user_file_items.reduction.reduction_mode
-        return ReductionMode.LAB if val is None else val
+        return val if val is not None else ReductionMode.LAB
 
     @reduction_mode.setter
     def reduction_mode(self, value):
@@ -254,7 +253,7 @@ class StateGuiModel(ModelCommon):
     @property
     def merge_mask(self):
         val = self._user_file_items.reduction.merge_mask
-        return False if val is None else val
+        return val if val is not None else False
 
     @merge_mask.setter
     def merge_mask(self, value):
@@ -365,7 +364,8 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_range(self):
-        return self.get_simple_element(element_id=OtherId.WAVELENGTH_RANGE, default_value="")
+        val = self.wavelength_range
+        return val if val else ""
 
     @wavelength_range.setter
     def wavelength_range(self, value):
@@ -374,6 +374,7 @@ class StateGuiModel(ModelCommon):
         wavelength_stop = [max(wavelength_stop)] + wavelength_stop
         self.wavelength_min = wavelength_start
         self.wavelength_max = wavelength_stop
+        self.wavelength_range = value
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale properties
@@ -445,38 +446,6 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     # Q Limits
     # ------------------------------------------------------------------------------------------------------------------
-    def _set_q_1d_limits(self, min_value=None, max_value=None, rebin_string=None):
-        element_id = LimitsId.Q
-        if element_id in self._user_file_items:
-            settings = self._user_file_items[element_id]
-        else:
-            settings = [q_rebin_values(min=None, max=None, rebin_string=None)]
-
-        # At this point we have settings with the desired detector type
-        new_settings = []
-        for setting in settings:
-            new_min = min_value if min_value is not None else setting.min
-            new_max = max_value if max_value is not None else setting.max
-            new_rebin_string = rebin_string if rebin_string is not None else setting.rebin_string
-            new_settings.append(q_rebin_values(min=new_min, max=new_max, rebin_string=new_rebin_string))
-        self._user_file_items.update({element_id: new_settings})
-
-    def _set_q_xy_limits(self, stop_value=None, step_value=None, step_type_value=None):
-        element_id = LimitsId.QXY
-        if element_id in self._user_file_items:
-            settings = self._user_file_items[element_id]
-        else:
-            settings = [simple_range(start=None, stop=None, step=None, step_type=None)]
-
-        # At this point we have settings with the desired detector type
-        new_settings = []
-        for setting in settings:
-            new_stop = stop_value if stop_value is not None else setting.stop
-            new_step = step_value if step_value is not None else setting.step
-            new_step_type_value = step_type_value if step_type_value is not None else setting.step_type
-            new_settings.append(simple_range(start=None, stop=new_stop, step=new_step, step_type=new_step_type_value))
-        self._user_file_items.update({element_id: new_settings})
-
     @property
     def q_1d_rebin_string(self):
         val = self._user_file_items.convert_to_q.q_1d_rebin_string

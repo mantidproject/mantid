@@ -720,7 +720,7 @@ class SANSLoadDataISIS(SANSLoadData):
         workspaces = {}
         workspace_monitors = {}
 
-        calibration_file = adjustment_info.calibration if adjustment_info else ""
+        calibration_file = adjustment_info.calibration if adjustment_info else None
 
         for key, value in list(file_infos.items()):
             # Loading

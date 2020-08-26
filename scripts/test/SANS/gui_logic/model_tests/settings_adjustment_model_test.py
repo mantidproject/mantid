@@ -27,6 +27,7 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         mocked.get_number_of_periods.return_value = 0
         mocked.get_idf_file_path.return_value = None
         mocked.get_ipf_file_path.return_value = None
+        mocked.get_run_number.return_value = 0
         return mocked
 
     def test_monitor_5_reported_for_zoom(self):
@@ -37,16 +38,20 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         self.assertTrue(model_under_test.does_instrument_support_monitor_5())
 
     def test_monitor_5_disabled_for_no_inst(self):
-        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.LOQ]}
-        model_under_test = self.create_model(user_file, self.create_mock_inst_file_information(SANSInstrument.LOQ))
+        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.NO_INSTRUMENT]}
+        model_under_test = self.create_model(user_file, self.create_mock_inst_file_information(
+                                                        SANSInstrument.NO_INSTRUMENT))
 
         self.assertFalse(model_under_test.does_instrument_support_monitor_5())
 
-    def test_monitor_5_disabled_for_sans(self):
-        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.SANS2D]}
-        model_under_test = self.create_model(user_file, self.create_mock_inst_file_information(SANSInstrument.SANS2D))
+    def test_monitor_5_disabled_for_other_instruments(self):
+        for inst in SANSInstrument:
+            if inst is SANSInstrument.ZOOM:
+                continue  # We expect monitor 5 here
 
-        self.assertFalse(model_under_test.does_instrument_support_monitor_5())
+            user_file = {DetectorId.INSTRUMENT: [inst]}
+            model_under_test = self.create_model(user_file, self.create_mock_inst_file_information(inst))
+            self.assertFalse(model_under_test.does_instrument_support_monitor_5())
 
     def test_that_can_set_only_interpolation(self):
         state_gui_model = self.create_model({}, self.create_mock_inst_file_information(SANSInstrument.SANS2D))

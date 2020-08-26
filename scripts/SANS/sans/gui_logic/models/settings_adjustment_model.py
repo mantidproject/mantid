@@ -59,6 +59,7 @@ class SettingsAdjustmentModel(ModelCommon):
         if DetectorType.HAB.value in adj_files:
             val = adj_files[DetectorType.HAB.value].pixel_adjustment_file
             return val if val else ""
+        return ""
 
     @pixel_adjustment_det_2.setter
     def pixel_adjustment_det_2(self, value):
@@ -83,6 +84,7 @@ class SettingsAdjustmentModel(ModelCommon):
         if DetectorType.HAB.value in adj_files:
             val = adj_files[DetectorType.HAB.value].wavelength_adjustment_file
             return val if val else ""
+        return ""
 
     @wavelength_adjustment_det_2.setter
     def wavelength_adjustment_det_2(self, value):
@@ -93,7 +95,7 @@ class SettingsAdjustmentModel(ModelCommon):
     # Transmission Fitting
     # ------------------------------------------------------------------------------------------------------------------
 
-    def _get_fit_val(self, data_type : DataType)-> StateTransmissionFit:
+    def _get_fit_val(self, data_type: DataType) -> StateTransmissionFit:
         return self._user_file_items.adjustment.calculate_transmission.fit[data_type.value]
 
     @property
