@@ -110,7 +110,7 @@ void SaveReflectometryAscii::data() {
   const auto &yData = m_ws->y(0);
   const auto &eData = m_ws->e(0);
   for (size_t i = 0; i < m_ws->y(0).size(); ++i) {
-    outputval(points[i]);
+    outputval(points[i], true);
     outputval(yData[i]);
     outputval(eData[i]);
     if (includeQResolution()) {
@@ -149,44 +149,27 @@ bool SaveReflectometryAscii::includeQResolution() const {
   return false;
 }
 
-/** Write string value
- * @param write :: if true, write string
- * @param s :: string
- */
-bool SaveReflectometryAscii::writeString(bool write, const std::string &s) {
-  if (write) {
-    if (m_ext == "custom" || m_ext == ".txt")
-      m_file << m_sep << s;
-    else {
-      m_file << std::setw(28);
-      m_file << s;
-    }
-  }
-  return write;
-}
-
 /** Write formatted line of data
- *  @param val :: the double value to be written
+ *  @param val :: a value to be written
+ *  @param firstColumn :: true if the value is the first column in the output
  */
-void SaveReflectometryAscii::outputval(double val) {
-  bool inf = writeString(std::isinf(val), "inf");
-  bool nan = writeString(std::isnan(val), "nan");
-  if (!inf && !nan) {
-    if (m_ext == "custom" || m_ext == ".txt")
-      m_file << m_sep << val;
-    else
-      m_file << std::setw(28) << val;
+template <typename T>
+void SaveReflectometryAscii::outputval(const T &val, bool firstColumn) {
+  // cppcheck-suppress syntaxError
+  if constexpr (std::is_floating_point<T>::value) {
+    if (std::isinf(val))
+      return outputval("inf", firstColumn);
+    if (std::isnan(val))
+      return outputval("nan", firstColumn);
   }
-}
 
-/** Write formatted line of data
- *  @param val :: a string value to be written
- */
-void SaveReflectometryAscii::outputval(const std::string &val) {
-  if (m_ext == "custom" || m_ext == ".txt")
-    m_file << m_sep << val;
-  else
+  if (m_ext == "custom" || m_ext == ".txt") {
+    if (!firstColumn)
+      m_file << m_sep;
+    m_file << val;
+  } else {
     m_file << std::setw(28) << val;
+  }
 }
 
 /// Retrieve sample log value
@@ -259,7 +242,7 @@ void SaveReflectometryAscii::header() {
          << "40\n";
   m_file << "Number of data points : " << m_ws->y(0).size() << '\n';
   m_file << '\n';
-  outputval("q");
+  outputval("q", true);
   outputval("refl");
   outputval("refl_err");
   if (includeQResolution())
