@@ -148,6 +148,12 @@ Beta Test Closes
 *  At the end of the day email the beta test users thanking them.
 *  PM should review the complete set of release notes
 
+Manual re-testing
+-----------------
+
+*  Is is likely that many changes have been made over the beta test period, therefore redo the unscripted testing
+   following the instructions described `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
+
 Wednesday, Release-2 days
 #########################
 
