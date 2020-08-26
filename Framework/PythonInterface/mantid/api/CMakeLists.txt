@@ -131,7 +131,7 @@ target_include_directories(PythonAPIModule PUBLIC inc)
 # Add the required dependencies
 target_link_libraries(
   PythonAPIModule
-  PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  PRIVATE
           PythonInterfaceCore
           PythonGeometryModule
           PythonKernelModule

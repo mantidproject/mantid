@@ -18,7 +18,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(ReflectometryTest ${TEST_FILES})
   target_link_libraries(ReflectometryTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Algorithms
                         Reflectometry
