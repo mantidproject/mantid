@@ -517,9 +517,9 @@ if(ENABLE_CPACK)
   if(USE_JEMALLOC)
     message(STATUS "Adding jemalloc to the package requirements")
     set(CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},libjemalloc1 >= 3.0")
+        "${CPACK_RPM_PACKAGE_REQUIRES}, jemalloc-devel >= 3.0")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS},libjemalloc1 (>= 3.0)")
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjemalloc-dev (>= 3.0)")
   endif()
 
   # run cpack configuration

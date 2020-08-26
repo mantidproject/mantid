@@ -26,6 +26,7 @@ Requires: graphviz
 Requires: gsl-devel
 Requires: hdf5-devel
 Requires: hdf-devel
+Requires: jemalloc-devel
 Requires: jsoncpp-devel >= 0.7.0
 Requires: librdkafka-devel
 Requires: muParser-devel

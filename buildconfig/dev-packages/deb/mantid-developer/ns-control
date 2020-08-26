@@ -16,6 +16,7 @@ Depends: git,
   graphviz,
   libtbb-dev,
   libgoogle-perftools-dev,
+  libjemalloc-dev
   libboost-all-dev,
   libpoco-dev(>=1.4.6),
   libnexus0-dev,
