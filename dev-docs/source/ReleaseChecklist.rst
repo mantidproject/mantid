@@ -14,23 +14,27 @@ request or perform a patch release look at the
 Timeline
 ########
 
-Releases are normally planned to occur on a Friday, therefore this
+Releases are normally planned to occur on a Monday, therefore this
 page will be refer to days assuming that is correct, if the final
-release day is not planned to be Friday then the names of the days
-will have to be changed
+release day is not planned to be Monday then the names of the days
+will have to be changed.
 
-Friday, Release-4 weeks
-#######################
+.. note::
+   We used to release on a Friday, but changed to a Monday as no support was available over the weekend in case issues
+   were raised with the newly released version.
+
+Friday, Release-4 weeks (one week before code freeze)
+#########################################################
 
 **Task Priorities**: Development, Testing, Documentation.
 
-*  Send an email to Mantid-developers reminding developers of the
+*  Post on the General slack channel reminding developers of the
    impending release and stating that they have only 5 days left before
    the code freeze.
 *  Send an email to beta test users explaining the dates for the
    testing, and stating they will have more detail on the start of the
-   first day.
-*  Invite staff to the release presentation
+   first day (cc the Local PMs so they can organise a similar message at their facilities).
+*  Before the code freeze is in place the PM and TSC need to agree the maintenace tasks for the next release period.
 
 Friday, Release-3 weeks
 #######################
@@ -41,48 +45,73 @@ Documentation.
 Code Freeze
 -----------
 
-*  Send an email to Mantid-developers asking everyone to ensure they
-   have closed their tickets, stating the code freeze is in place, and
-   warning developers that non-blocker tickets will be moved from this
-   release on Monday.
+*  Post on the General slack channel asking everyone to ensure they
+   have move any incomplete issues, stating the code freeze is in place, and
+   warning developers that non-blocker tickets will be moved from the
+   milestone on Monday morning.
 *  Final Testing afternoon, attempt to drive the pull requests for this
    milestone down to 0.
-*  Collect all of the completed, fixed tickets for that iteration.
-*  Parse through the list and short list all of the "major points" that
-   may be important to the users.
 
 Monday, Release-2 weeks & 4 days
 ################################
 
 **Task Priorities**: Blocker bug fixes, Testing, Release Notes.
 
-Unscripted and Final Testing (technical tasks)
-----------------------------------------------
+Clearing the project board
+--------------------------
+
+* Go through the Zenhub project board for the release milestone (not the sprint milestone), ensuring that:
+
+ *  All issues are intended for the release.
+ *  Any new issues are triaged on a daily basis, and allocated to staff.
+ *  Issues that are not important for the release should be moved to a more appropriate milestone.
+    Don't leave anything in the release milestone that is not definitely for that release.
+
+
+Unscripted and Final Testing
+----------------------------
 
 *  Ensure the
    `master build and system
    test <http://builds.mantidproject.org/view/Master%20Builds/>`__
    jobs have passed for all build environments for this release.
-*  Complete any ticket testing remaining from Friday
-*  Run
-   `open-release-testing <http://builds.mantidproject.org/view/All/job/open-release-testing/>`__
-   to create the release branch and prepare build jobs
-*  Check state of all open pull requests for this milestone and decide which should be kept for the release, liase with PM on this. Move any pull requests not targeted for release out of the milestone and run `update-pr-base-branch.py <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__ to update the base branches of those pull requests.
-*  Inform other developers that release-next has been created by adapting/posting the following announcement:
-
-  .. code
-  
-  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: http://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
-
-*  Create a skeleton set of release notes for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``.
+*  Complete any PR testing remaining from Friday
 *  Perform unscripted testing following the instructions described
    `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
-Tuesday, Release- 2 weeks & 3 days
-##################################
+Maintenance
+-----------
+*  Present to the whole development team the maintenance tasks for this release period.
+*  Emphasize the order of work priorities as noted in the task priorities throughout this checklist.
+   Maintenance tasks may need to be paused to work on tasks for the release.
 
-**Task Priorities**: Blocker bug fixes, Testing, Release Presentation
-preparation, Release Notes, Next release development.
+Create the Release Branch (once most PR's are merged)
+-----------------------------------------------------
+
+*  Ensure the
+   `master build and system
+   test <http://builds.mantidproject.org/view/Master%20Builds/>`__
+   jobs have passed for all build environments for this release.
+*  Run
+   `open-release-testing <http://builds.mantidproject.org/view/All/job/open-release-testing/>`__
+   to create the release branch and prepare build jobs
+*  Check state of all open pull requests for this milestone and decide which should be kept for the release,
+   liase with PM on this. Move any pull requests not targeted for release out of the milestone
+   and run `update-pr-base-branch.py <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
+   to update the base branches of those pull requests.
+*  Inform other developers that release-next has been created by adapting/posting the following announcement:
+
+  .. code
+
+  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: http://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
+
+*  Create a skeleton set of release notes on master for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``.
+
+
+Wednesday, Release- 2 weeks & 3 days
+####################################
+
+**Task Priorities**: Blocker bug fixes, Testing, Release Notes,  Maintenance Tasks, Next release development.
 
 Beta Test Open
 --------------
@@ -92,42 +121,55 @@ Beta Test Open
    the current .zip from sourceforge, adding any missing files, and
    resending it.
 *  Send an email to beta test users explaining where to download the
-   installers and how to report issues.
+   installers and how to report issues (cc the Local PMs so they can organise a similar message at their facilities).
 *  Developers to arrange to meet with their beta testers.
+*  Create issues for people to neaten up the release notes and add images etc.
 
-Monday, Release- 4 days
-#######################
+Wednesday, Release- 1 week & 3 days
+###################################
 
-**Task Priorities**: Blocker bug fixes, Testing, Release Presentation
-preparation, Release Notes, Next release development.
+**Task Priorities**: Blocker bug fixes, Testing, Release Notes,  Maintenance Tasks, Next release development.
+
+Beta Test Reminder
+------------------
+
+*  Send an email to beta test users thanking them for there feedback so far and reminding them to feedback as soon as possible
+   and not to send in a list of issues at the end of testing (cc the Local PMs so they can organise a similar message at their facilities).
+
+
+Tuesday, Release- 4 days
+########################
+
+**Task Priorities**: Blocker bug fixes, Testing, Release Notes, Maintenance Tasks, Next release development.
 
 Beta Test Closes
 ----------------
 
 *  At the end of the day email the beta test users thanking them.
+*  PM should review the complete set of release notes
 
 Wednesday, Release-2 days
 #########################
 
-**Task Priorities**: Blocker bug fixes, Testing, Release Notes, Next
+**Task Priorities**: Blocker bug fixes, Testing, Release Notes,  Maintenance Tasks, Next
 release development.
 
 Thursday, Release-1 day
 -----------------------
 
-**Task Priorities**: Blocker bug fixes, Testing, Release Notes, Next
+**Task Priorities**: Blocker bug fixes, Testing, Release Notes,  Maintenance Tasks, Next
 release development.
 
 Final Code Changes
 ------------------
 
 * This is the final day for code changes to the build for blocker
-  tickets
+  issues
 
 Friday, Release day
 ###################
 
-'''Task Priorities''': Blocker bug fixes, Testing, Release Notes, Next
+**Task Priorities**: Blocker bug fixes, Testing, Release Notes,  Maintenance Tasks, Next
 release development.
 
 Release (technical tasks)
@@ -179,12 +221,12 @@ Finalise
 
 * Send an email, including the text of the release notes, to the
   following lists
-* ``mantid-announce@mantidproject.org``
 * ``nobugs@nobugsconference.org``
 * ``news@neutronsources.org``
 * ``neutron@neutronsources.org``
+* Also post the contents of the message on General on Slack
 * Create a new item on the forum news
-* Close the release milestone in the issue tracker
+* Close the release milestone in the github
 
 Generate DOI (technical tasks)
 ------------------------------
@@ -209,13 +251,3 @@ created on GitHub.
   section. The script will prompt for the password. Note that only
   MediaWiki admins have access rights to the page.
 * A corresponding version tag must be present in the Mantid repo.
-
-Next release plan
------------------
-
-* Prepare the Next release plan.
-* Gather user descriptions of priority tickets from developers for the
-  next release.
-* Decide on priority maintenance tasks for the next release.
-* Inject Items from the Facility scientific computing strategic plans.
-* Compile to a document and release
