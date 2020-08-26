@@ -56,6 +56,7 @@ class SliceViewerDataView(QWidget):
         self.can_normalise = can_normalise
         self.nonortho_tr = None
         self.ws_type = dims_info[0]['type']
+        self.conf = conf
 
         self._line_plots = None
         self._image_info_tracker = None
@@ -106,9 +107,11 @@ class SliceViewerDataView(QWidget):
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
-        self.colorbar = ColorbarWidget(self, conf)
+        norm_scale = self.get_default_scale_norm()
+        self.colorbar = ColorbarWidget(self, norm_scale)
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
+        self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
         # make width larger to fit image readout table
         if self.ws_type == 'MDE':
             self.colorbar.setMaximumWidth(155)
@@ -489,6 +492,26 @@ class SliceViewerDataView(QWidget):
         else:
             self.presenter.normalization = mantid.api.MDNormalization.NoNormalization
             self.norm_opts.setCurrentIndex(0)
+
+    def get_default_scale_norm(self):
+        scale = 'Linear'
+        if self.conf and self.conf.has("sliceviewer/scale_norm"):
+            scale = self.conf.get("sliceviewer/scale_norm")
+
+        if scale == 'Power' and self.conf and self.conf.has("sliceviewer/scale_norm_power"):
+            exponent = self.conf.get("sliceviewer/scale_norm_power")
+            scale = (scale, exponent)
+
+        return scale
+
+    def scale_norm_changed(self):
+        if self.conf:
+            scale = self.colorbar.norm.currentText()
+            self.conf.set("sliceviewer/scale_norm", scale)
+
+            if scale == 'Power':
+                exponent = self.colorbar.powerscale_value
+                self.conf.set("sliceviewer/scale_norm_power", exponent)
 
 
 class SliceViewerView(QWidget):
