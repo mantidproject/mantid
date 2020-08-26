@@ -141,13 +141,19 @@ public:
   }
 
   void test_twoTheta() {
-    const auto &detectorInfo = m_workspace.detectorInfo();
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
     TS_ASSERT_DELTA(detectorInfo.twoTheta(0), 0.0199973, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(2), 0.0199973, 1e-6);
     // Monitors
     TS_ASSERT_THROWS(detectorInfo.twoTheta(3), const std::logic_error &);
     TS_ASSERT_THROWS(detectorInfo.twoTheta(4), const std::logic_error &);
+    // Dummy
+    const auto oldPos = detectorInfo.position(0);
+    V3D newPos(0.0, 0.0, 0.0);
+    detectorInfo.setPosition(0, newPos);
+    TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
+    detectorInfo.setPosition(0, oldPos);
   }
 
   // Legacy test via the workspace method detectorTwoTheta(), which might be
@@ -160,13 +166,19 @@ public:
   }
 
   void test_signedTwoTheta() {
-    const auto &detectorInfo = m_workspace.detectorInfo();
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(0), -0.0199973, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(2), 0.0199973, 1e-6);
     // Monitors
     TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(3), const std::logic_error &);
     TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), const std::logic_error &);
+    // Dummy
+    const auto oldPos = detectorInfo.position(0);
+    V3D newPos(0.0, 0.0, 0.0);
+    detectorInfo.setPosition(0, newPos);
+    TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
+    detectorInfo.setPosition(0, oldPos);
   }
 
   void test_geographicalAngles_casualAngles() {
