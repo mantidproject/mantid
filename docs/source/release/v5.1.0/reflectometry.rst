@@ -24,6 +24,7 @@ Improvements
 - Sample waviness term is removed from resolution calculation in incoherent mode in :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 - Flag to enable / disable apply scaling factor from `ScalingFactorFile`, called `ApplyScalingFactor`, added to :ref:`algm-LiquidsReflectometryReduction`.
 - Modified :ref:`algm-LRAutoReduction` to allow the option to autoreduce data with a reference measurement for normalization (instead of only direct beam) using the new :ref:`algm-LRReductionWithReference` algorithm of this release
+- :ref:`algm-SaveReflectometryAscii`: leading separator is no longer included for Custom and ANSTO formats; Custom format header now uses the same separator as the columns and includes the 4th column header if applicable.
   
 Bug fixes
 ---------
