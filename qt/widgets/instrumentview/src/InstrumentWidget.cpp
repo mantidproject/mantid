@@ -1505,8 +1505,12 @@ std::string InstrumentWidget::saveToProject() const {
   tsv.writeLine("SurfaceType") << getSurfaceType();
   tsv.writeSection("surface", getSurface()->saveToProject());
   tsv.writeLine("CurrentTab") << getCurrentTab();
-  tsv.writeLine("EnergyTransfer")
-      << m_xIntegration->getMinimum() << m_xIntegration->getMaximum();
+  if (this->isIntegrable()) {
+    tsv.writeLine("EnergyTransfer")
+        << m_xIntegration->getMinimum() << m_xIntegration->getMaximum() << true;
+  } else {
+    tsv.writeLine("EnergyTransfer") << -1 << -1 << false;
+  }
 
   // serialise widget subsections
   tsv.writeSection("actor", m_instrumentActor->saveToProject());
