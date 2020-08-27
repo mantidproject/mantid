@@ -21,6 +21,7 @@ New Algorithms
 Algorithms
 ----------
 
+- :ref:`ILLD7YIGCalibration <algm-ILLD7YIGCalibration>` new algorithm to perform wavelength and detector position calibration for the ILL D7 instrument.
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can also check the Error axis for unwanted values if the appropriate checkbox is ticked.
 - :ref:`SetSample <algm-SetSample>` is extended to support for composite shapes, such as FlatPlateHolder and HollowCylinderHolder. Also the input validation is made more stringent.
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
