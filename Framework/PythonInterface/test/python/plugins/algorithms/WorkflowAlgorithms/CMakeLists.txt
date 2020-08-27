@@ -38,7 +38,7 @@ set(TEST_PY_FILES
     ISISIndirectDiffractionReductionTest.py
     ISISIndirectEnergyTransferTest.py
     ISISIndirectEnergyTransferWrapperTest.py
-    ILLYIGPositionCalibrationTest.py
+    ILLD7YIGPositionCalibrationTest.py
     LoadWANDTest.py
     MDNormSCDPreprocessIncoherentTest.py
     MolDynTest.py
