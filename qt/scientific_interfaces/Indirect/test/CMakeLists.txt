@@ -47,7 +47,6 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../IndirectDataValidationHelper.cpp
   LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
     CurveFitting
     DataObjects

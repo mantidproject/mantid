@@ -21,6 +21,7 @@ New Algorithms
 Algorithms
 ----------
 
+- :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can also check the Error axis for unwanted values if the appropriate checkbox is ticked.
 - :ref:`SetSample <algm-SetSample>` is extended to support for composite shapes, such as FlatPlateHolder and HollowCylinderHolder. Also the input validation is made more stringent.
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
@@ -49,6 +50,7 @@ Algorithms
 - Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
 - Added alias for GeneratePythonScript as ExportHistory
 - Deprecated the RecordPythonScript algorithm
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now increments the random seed for each detector.
 
 Data Handling
 -------------
