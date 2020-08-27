@@ -555,6 +555,10 @@ class DataFunctionsTest(unittest.TestCase):
         result = funcs.get_distribution(ws, distribution=False)
         self.assertEqual((False, {}), result)
 
+    def test_get_distribution_returns_true_for_distribution_workspace(self):
+        result = funcs.get_distribution(self.ws2d_distribution, distribution=False)
+        self.assertEqual((True, {}), result)
+
     def test_points_from_boundaries_raise_length_less_than_2(self):
         arr = np.array([1])
         self.assertRaises(ValueError, funcs.points_from_boundaries, arr)
