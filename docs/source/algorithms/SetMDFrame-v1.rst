@@ -47,6 +47,15 @@ Usage
     print("The second MDFrame is of type " + mdws.getDimension(1).getMDFrame().name())
     print("The new third MDFrame is of type " + mdws.getDimension(2).getMDFrame().name())
 
+.. testoutput:: SetMDFrameExample
+
+    The first MDFrame is of type QSample
+    The second MDFrame is of type QSample
+    The third MDFrame is of type QSample
+    The new first MDFrame is of type QLab
+    The second MDFrame is of type QSample
+    The new third MDFrame is of type QLab
+
 .. categories::
 
 .. sourcelink::
