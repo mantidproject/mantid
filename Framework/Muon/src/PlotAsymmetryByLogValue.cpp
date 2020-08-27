@@ -191,10 +191,10 @@ void PlotAsymmetryByLogValue::exec() {
 
   // Check input properties to decide whether or not we can reuse previous
   // results, if any
-  size_t is, ie;
-  checkProperties(is, ie);
+  size_t firstRunNumber, lastRunNumber;
+  checkProperties(firstRunNumber, lastRunNumber);
 
-  Progress progress(this, 0, 1, ie - is + 1);
+  Progress progress(this, 0, 1, lastRunNumber - firstRunNumber + 1);
 
   // Loop through runs
   for (const auto &fileName : m_fileNames) {
@@ -234,10 +234,11 @@ void PlotAsymmetryByLogValue::exec() {
 }
 
 /**  Checks input properties and compares them to previous values
- *   @param is :: [output] Number of the first run
- *   @param ie :: [output] Number of the last run
+ *   @param firstRunNumber :: [output] Number of the first run
+ *   @param lastRunNumber :: [output] Number of the last run
  */
-void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
+void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
+                                              size_t &lastRunNumber) {
 
   // Log Value
   m_logName = getPropertyValue("LogValue");
@@ -267,14 +268,14 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
     // Parse run names and get the number of runs
     parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
                   m_filenameZeros);
-    is = std::stoul(firstFN); // starting run number
-    ie = std::stoul(lastFN);  // last run number
-    if (ie < is) {
+    firstRunNumber = std::stoul(firstFN); // starting run number
+    lastRunNumber = std::stoul(lastFN);   // last run number
+    if (lastRunNumber < firstRunNumber) {
       throw std::runtime_error(
           "First run number is greater than last run number");
     }
 
-    for (size_t i = is; i <= ie; i++) {
+    for (size_t i = firstRunNumber; i <= lastRunNumber; i++) {
       // Get complete run name
       std::ostringstream file, fileRunNumber;
       fileRunNumber << std::setw(m_filenameZeros) << std::setfill('0') << i;
@@ -296,8 +297,8 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   }
 
   // Reset first and last to first and last elements of the map
-  is = m_rmap.begin()->second;
-  ie = m_rmap.rbegin()->second;
+  firstRunNumber = m_rmap.begin()->second;
+  lastRunNumber = m_rmap.rbegin()->second;
 
   // Create a string holding all the properties
   std::ostringstream ss;
@@ -332,7 +333,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
             // The first spectrum contains: X -> run number, Y -> log value
             // The second spectrum contains: Y -> redY, E -> redE
             auto run = static_cast<size_t>(prevResults->x(0)[i]);
-            if ((run >= is) && (run <= ie)) {
+            if ((run >= firstRunNumber) && (run <= lastRunNumber)) {
               m_logValue[run] = prevResults->y(0)[i];
               m_redY[run] = prevResults->y(1)[i];
               m_redE[run] = prevResults->e(1)[i];
@@ -347,7 +348,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
             // The fourth spectrum contains: Y -> greenY, E -> greeE
             // The fifth spectrum contains: Y -> sumY, E -> sumE
             auto run = static_cast<size_t>(prevResults->x(0)[i]);
-            if ((run >= is) && (run <= ie)) {
+            if ((run >= firstRunNumber) && (run <= lastRunNumber)) {
               m_logValue[run] = prevResults->y(0)[i];
               m_diffY[run] = prevResults->y(1)[i];
               m_diffE[run] = prevResults->e(1)[i];

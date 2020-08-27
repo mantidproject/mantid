@@ -84,8 +84,8 @@ Output:
 
 .. testoutput:: ExSimpleRange
   :options: +NORMALIZE_WHITESPACE
-
-   Y values (asymmetry): [ 0.14500665  0.11987909  0.06521432]
+  
+   Y values (asymmetry): [ 0.14500665   0.11987909    0.06521432]
    X values (sample magn. field): [ 1350.  1370.  1410.]
 
 **Example - Using both Red and Green periods:**

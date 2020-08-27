@@ -101,7 +101,7 @@ private:
   /// Populate the hidden ws storing current results
   void saveResultsToADS(API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
-  void checkProperties(size_t &is, size_t &ie);
+  void checkProperties(size_t &firstRunNumber, size_t &lastRunNumber);
 
   /// Properties needed to load a run
   /// Stores base name shared by all runs
