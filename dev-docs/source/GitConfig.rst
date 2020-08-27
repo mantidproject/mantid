@@ -69,13 +69,15 @@ You may find the following diff/merge tools helpful:
 
    # Uncomment lines where appropriate for specific OS
    [diff]
-           # Set up a graphical tool for viewing diffs. I like meld because it looks good and does a good job with directory diffs.
+           # Set up a graphical tool for viewing diffs. I like meld because it looks good and
+           # does a good job with directory diffs (but you'll need to install it on Windows)
            tool = meld
    [difftool]
            # Disable the prompt when opening the difftool
            prompt = false
    [merge]
-           # Specify a graphical tool for resolving merge conflicts. I like diffmerge because you can toggle between the merged file and common ancestor
+           # Specify a graphical tool for resolving merge conflicts. I like diffmerge because you
+           # can toggle between the merged file and common ancestor (but you'll need to install it)
            tool = diffmerge
    [difftool "meld"]
            external = meld
