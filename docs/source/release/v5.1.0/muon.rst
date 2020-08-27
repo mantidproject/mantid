@@ -45,6 +45,11 @@ New Features
 - Add parameter 'WorkspaceNames' to :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` which accepts a range of runs to be processed.
   Parameters 'FirstRun' and 'LastRun' are no longer mandatory. Either WorkspaceNames, or FirstRun and LastRun must be supplied for a valid input.
   Preference is given to WorkspaceNames if FirstRun, LastRun, and WorkspaceNames is supplied. An example of a valid range is '62260-3, 62267, 62270-4'.
+- The ALC interface has been updated and now only has a single runs box. Additionally the functionality of 'Auto' has been slightly altered. Checking 
+  Auto no longer means that the data will automatically update as files are added and removed from the directory that contains the data. However, Auto continues 
+  to find the latest run in the data directory and automatically include all files up to the latest during the load process. An example range using MUSR files 
+  which can be entered into the new runs box is '15189-92' which will include all files from 15189 to 15192. Another usage example is '15189-91,15195' which 
+  will load files 15189,15190,15191 and 15195, excluding the rest.
 
 Improvements
 -------------
