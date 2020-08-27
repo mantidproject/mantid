@@ -37,6 +37,12 @@ class AlgorithmFactoryTest(unittest.TestCase):
         self.assertTrue(hasattr(d, 'category'))
         self.assertTrue(hasattr(d, 'version'))
 
+    def test_getDescriptorsWithAlias(self):
+
+        descriptors = AlgorithmFactory.getDescriptors(True, True)
+        result = [d for d in descriptors if (d.name == 'Subtract')]
+        self.assertEqual(1, len(result))
+
     def test_exists_returns_correct_value_for_given_args(self):
         self.assertTrue(AlgorithmFactory.exists('ConvertUnits')) #any version
         self.assertTrue(AlgorithmFactory.exists('ConvertUnits', 1)) #any version
