@@ -158,19 +158,27 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         return result
 
     def setUp(self):
-        self.sample = self.getPropertyValue('SampleRuns').split(',')
-        self.absorber = self.getPropertyValue('AbsorberRuns').split(',')
-        self.beam = self.getPropertyValue('BeamRuns').split(',')
-        self.flux = self.getPropertyValue('FluxRuns').split(',')
-        self.container = self.getPropertyValue('ContainerRuns').split(',')
+        self.sample = self.getPropertyValue('SampleRuns') \
+            .replace(' ', '').split(',')
+        self.absorber = self.getPropertyValue('AbsorberRuns') \
+            .replace(' ', '').split(',')
+        self.beam = self.getPropertyValue('BeamRuns') \
+            .replace(' ', '').split(',')
+        self.flux = self.getPropertyValue('FluxRuns') \
+            .replace(' ', '').split(',')
+        self.container = self.getPropertyValue('ContainerRuns') \
+            .replace(' ', '').split(',')
         self.stransmission = self.getPropertyValue('SampleTransmissionRuns')
         self.ctransmission = self.getPropertyValue('ContainerTransmissionRuns')
         self.btransmission = self.getPropertyValue('TransmissionBeamRuns')
         self.atransmission = self.getPropertyValue('TransmissionAbsorberRuns')
-        self.sensitivity = self.getPropertyValue('SensitivityMaps').split(',')
+        self.sensitivity = self.getPropertyValue('SensitivityMaps') \
+            .replace(' ', '').split(',')
         self.default_mask = self.getPropertyValue('DefaultMaskFile')
-        self.mask = self.getPropertyValue('MaskFiles').split(',')
-        self.reference = self.getPropertyValue('ReferenceFiles').split(',')
+        self.mask = self.getPropertyValue('MaskFiles') \
+            .replace(' ', '').split(',')
+        self.reference = self.getPropertyValue('ReferenceFiles') \
+            .replace(' ', '').split(',')
         self.output = self.getPropertyValue('OutputWorkspace')
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
