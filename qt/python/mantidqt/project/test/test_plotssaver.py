@@ -61,7 +61,8 @@ class PlotsSaverTest(unittest.TestCase):
                                              u'markerSize': 6.0,
                                              u'markerType': u'None',
                                              u'zOrder': 2},
-                            u'errorbars': {u'exists': False}}],
+                            u'errorbars': {u'exists': False},
+                            u'lineData': {u'exists': False}}],
                 u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0),
                                 u'dynamic': True,
                                 u'frameOn': True,
@@ -108,10 +109,12 @@ class PlotsSaverTest(unittest.TestCase):
                             u'useTeX': False}],
                 u'title': u'',
                 u'xAxisTitle': u'',
-                u'yAxisTitle': u''}],
+                u'yAxisTitle': u''},
+            ],
             u'creationArguments': [[{u"workspaces": u"ws1",
                                      u"specNum": 2,
-                                     u"function": u"plot"}]],
+                                     u"function": u"plot",
+                                     u"label": u"ws1: spec 2"}]],
             u'label': u'',
             u'properties': {u'dpi': 100.0,
                             u'figHeight': 4.8,
@@ -132,22 +135,47 @@ class PlotsSaverTest(unittest.TestCase):
         self.assertEqual(return_value, [])
 
     def test_get_dict_from_fig(self):
-        self.fig.axes[0].creation_args = [{u"specNum": 2, "function": "plot"}]
+        self.fig.axes[0].creation_args = [{u"specNum": 2, "function": "plot", "label": "ws1: spec 2"}]
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
 
-        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot"}]]
+        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot", "label": "ws1: spec 2"}]]
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
 
     def test_get_dict_from_axes(self):
-        self.plot_saver.figure_creation_args = [{"function": "plot"}]
+        self.plot_saver.figure_creation_args = [{"function": "plot", "label": "ws1: spec 2"}]
         return_value = self.plot_saver.get_dict_for_axes(self.fig.axes[0])
 
         expected_value = self.loader_plot_dict["axes"][0]
 
         self.maxDiff = None
         self.assertDictEqual(return_value, expected_value)
+
+    def test_line_data_not_saved_for_workspace_line(self):
+        # if a line is associated with a workspace, the line data should NOT be saved
+        self.plot_saver.figure_creation_args = [{"function": "plot", "label": "ws1: spec 2"}]
+        return_value = self.plot_saver.get_dict_from_line_data(self.fig.axes[0].lines[0])
+
+        self.assertEqual(return_value, {"exists": False})
+
+    def test_line_data_is_saved_for_axvline(self):
+        # if the figure contains an axvline, the line data should be saved
+        self.plot_saver.figure_creation_args = [{"function": "plot", "label": "ws1: spec 2"}]
+        self.fig.axes[0].axvline(0, ymin=0, ymax=1)
+
+        return_value = self.plot_saver.get_dict_from_line_data(self.fig.axes[0].lines[1])
+
+        self.assertEqual(return_value, {'exists': True, 'data': [[0.0, 0.0], [0.0, 1.0]]})
+
+    def test_line_data_is_saved_for_axhline(self):
+        # if the figure contains an axvline, the line data should be saved
+        self.plot_saver.figure_creation_args = [{"function": "plot", "label": "ws1: spec 2"}]
+        self.fig.axes[0].axhline(0, xmin=0, xmax=1)
+
+        return_value = self.plot_saver.get_dict_from_line_data(self.fig.axes[0].lines[1])
+
+        self.assertEqual(return_value, {'exists': True, 'data': [[0.0, 0.0], [1.0, 0.0]]})
 
     def test_get_dict_from_axes_properties(self):
         return_value = self.plot_saver.get_dict_from_axes_properties(self.fig.axes[0])
@@ -172,7 +200,7 @@ class PlotsSaverTest(unittest.TestCase):
         self.assertDictEqual(return_value, expected_value)
 
     def test_get_dict_from_line(self):
-        self.plot_saver.figure_creation_args = [{"function": "plot"}]
+        self.plot_saver.figure_creation_args = [{"function": "plot", "label": "ws1: spec 2"}]
         line = self.fig.axes[0].lines[0]
         return_value = self.plot_saver.get_dict_from_line(line, 0)
 
