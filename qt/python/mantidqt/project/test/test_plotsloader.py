@@ -30,7 +30,8 @@ class PlotsLoaderTest(unittest.TestCase):
         self.plots_loader = PlotsLoader()
         plt.plot = mock.MagicMock()
         mantid.plots.axesfunctions.plot = mock.MagicMock()
-        self.dictionary = {u'legend': {u'exists': False}, u'lines': [],
+        self.dictionary = {u'legend': {u'exists': False},
+                           u'lines': [{u'label': 'wsLine'}],
                            u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
                                            u'frameOn': True, u'visible': True,
                                            u'xAxisProperties': {u'fontSize': 10.0,
@@ -96,11 +97,47 @@ class PlotsLoaderTest(unittest.TestCase):
         self.plots_loader.create_text_from_dict = mock.MagicMock()
         self.plots_loader.update_legend = mock.MagicMock()
 
+        # This is set in make_fig, which would be run in production code but not here,
+        # so we must set it ourselves.
+        self.plots_loader.creation_args = [[{"label": "wsLine"}]]
+
         fig = matplotlib.figure.Figure()
+        ax = matplotlib.axes.Axes(fig=fig, rect=[0, 0, 0, 0])
+        ax.axvline = mock.MagicMock()
+        ax.axhline = mock.MagicMock()
         self.plots_loader.restore_fig_axes(matplotlib.axes.Axes(fig=fig, rect=[0, 0, 0, 0]), self.dictionary)
 
+        self.assertEqual(ax.axvline.call_count, 0)
+        self.assertEqual(ax.axhline.call_count, 0)
         self.assertEqual(self.plots_loader.update_properties.call_count, 1)
-        self.assertEqual(self.plots_loader.update_lines.call_count, 0)
+        self.assertEqual(self.plots_loader.update_lines.call_count, 1)
+        self.assertEqual(self.plots_loader.create_text_from_dict.call_count, 0)
+        self.assertEqual(self.plots_loader.update_legend.call_count, 1)
+
+    def test_restore_fig_axes_with_axvline_and_axhline(self):
+        self.plots_loader.update_properties = mock.MagicMock()
+        self.plots_loader.update_lines = mock.MagicMock()
+        self.plots_loader.create_text_from_dict = mock.MagicMock()
+        self.plots_loader.update_legend = mock.MagicMock()
+
+        # This is set in make_fig, which would be run in production code but not here,
+        # so we must set it ourselves.
+        self.plots_loader.creation_args = [[{"label": "wsLine"}]]
+
+        fig = matplotlib.figure.Figure()
+        ax = matplotlib.axes.Axes(fig=fig, rect=[0, 0, 0, 0])
+        ax.axvline = mock.MagicMock()
+        ax.axhline = mock.MagicMock()
+
+        dict = self.dictionary
+        dict['lines'].append({'label': 'vline', 'lineData': {'exists': True, 'data': [[1.0, 0.0], [1.0, 1.0]]}})
+        dict['lines'].append({'label': 'hline', 'lineData': {'exists': True, 'data': [[0.0, 1.0], [1.0, 1.0]]}})
+        self.plots_loader.restore_fig_axes(ax, dict)
+
+        self.assertEqual(ax.axvline.call_count, 1)
+        self.assertEqual(ax.axhline.call_count, 1)
+        self.assertEqual(self.plots_loader.update_properties.call_count, 1)
+        self.assertEqual(self.plots_loader.update_lines.call_count, 3)
         self.assertEqual(self.plots_loader.create_text_from_dict.call_count, 0)
         self.assertEqual(self.plots_loader.update_legend.call_count, 1)
 
