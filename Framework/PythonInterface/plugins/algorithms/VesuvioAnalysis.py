@@ -63,7 +63,7 @@ is not needed as a result of the symmetrisation.
 '''
 
 
-class vesuvioAnalysis(PythonAlgorithm):
+class VesuvioAnalysis(PythonAlgorithm):
     def category(self):
         return "Indirect"
 
@@ -95,7 +95,9 @@ class vesuvioAnalysis(PythonAlgorithm):
         tableCols = ["symbol", "mass(a.u.)", "Intensity lower limit", "Intensity value", "Intensity upper limit", "Width lower limit", "Width value", "Width upper limit", "Centre lower limit", "Centre value", "Centre upper limit"]
         issues = dict()
         table = self.getProperty("ComptonProfile").value
-        if(table.columnCount()!= len(tableCols) or sorted(cleanNames(tableCols))!=sorted(cleanNames(table.getColumnNames())) ):
+        if(not table):
+            issues["ComptonProfile"] = "An elements table should be provided."
+        elif(table.columnCount()!= len(tableCols) or sorted(cleanNames(tableCols))!=sorted(cleanNames(table.getColumnNames())) ):
             issues["ComptonProfile"] = "The table should be of the form: "
             for name in tableCols:
                 issues["ComptonProfile"] += name + ", "
@@ -108,12 +110,23 @@ class vesuvioAnalysis(PythonAlgorithm):
         #check aritmatic is safe
         cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
         for ch in cross_section:
-            print(ch)
             if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
                 issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
-        spectra = self.getProperty("Spectra").value()
+        spectra = self.getProperty("Spectra").value
         if len(spectra) != 2:
             issues["Spectra"] = "Spectra should be of the form [first, last]"
+
+        run_string = self.getProperty("Runs").value
+        for ch in run_string:
+            if ch not in ["-",","] and not ch.isdigit():
+                issues["Runs"]= "Runs are list, can use - for a range or commas to seperate runs. "
+ 
+                
+        masks = self.getProperty("SpectraToBeMasked").value
+        spec = [j for j in range(spectra[0], spectra[1]+1)]
+        for mask in masks:
+            if mask not in spec:
+                issues["SpectraToBeMasked"] = "Masked spectra is not in the loaded spectra."
         return issues
 
     def PyExec(self):
@@ -240,5 +253,5 @@ class vesuvioAnalysis(PythonAlgorithm):
            elif "Analyse" in analysisMode:
                g_log.notice("Did not compute analysis. The YSpaceFitFunctionTies must be stated.")
 
-AlgorithmFactory.subscribe(vesuvioAnalysis)
+AlgorithmFactory.subscribe(VesuvioAnalysis)
     
