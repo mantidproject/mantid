@@ -386,12 +386,3 @@ class GroupingTableView(QtWidgets.QWidget):
     def set_group_range(self, range):
         self.group_range_min.setText(range[0])
         self.group_range_max.setText(range[1])
-
-    # def change_row_color(self, color, row_index):
-    #     for col in range(self.grouping_table.columnCount() - 1):
-    #         table_item = self.grouping_table.item(row_index, col)
-    #         q_color = QtGui.QColor(0, 0, 255, 127)
-    #         q_brush = QtGui.QBrush(q_color)
-    #         table_item.setBackground(q_brush)
-    #         print('Updating color')
-    #         self.grouping_table.setItem(row_index, col, table_item)

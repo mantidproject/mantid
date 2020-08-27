@@ -20,6 +20,7 @@ class RowValid(Enum):
     valid_for_some_runs = 1
 
 
+# Row colours specified in RGB. i.e. (255, 0, 0) is red and (255, 255, 0) is yellow.
 row_colors = {RowValid.invalid_for_all_runs: (255, 0, 0), RowValid.valid_for_some_runs: (255, 255, 0),
               RowValid.valid_for_all_runs: (255, 255, 255)}
 
