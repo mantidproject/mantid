@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import config, mtd, ILLYIGPositionCalibration, Load, LoadILLPolarizedDiffraction
+from mantid.simpleapi import config, mtd, ILLD7YIGPositionCalibration, Load, LoadILLPolarizedDiffraction
 import xml.etree.ElementTree as ET
 import math
 
 
-class ILLYIGPositionCalibrationTest(unittest.TestCase):
+class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
 
     _pixels_per_bank = 44
 
@@ -23,18 +23,18 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
 
     def test_algorithm_with_no_input_workspace_raises_exception(self):
         with self.assertRaises(RuntimeError):
-            ILLYIGPositionCalibration()
+            ILLD7YIGPositionCalibration()
 
     def test_algorithm_with_wrong_approximate_wavelength_raises_exception(self):
         Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
         with self.assertRaises(ValueError):
-            ILLYIGPositionCalibration(ScanWorkspace='shortWavelengthScan', YIGPeaksFile='YIG_peaks.xml',
+            ILLD7YIGPositionCalibration(ScanWorkspace='shortWavelengthScan', YIGPeaksFile='YIG_peaks.xml',
                                       ApproximateWavelength="-1.0")
 
     def test_shortWavelength(self):
         Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
         approximate_wavelength = '3.14' # Angstrom
-        ILLYIGPositionCalibration(ScanWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        ILLD7YIGPositionCalibration(ScanWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_shortWavelength.xml',
                                   MinimalDistanceBetweenPeaks=1.75, BankOffsets="-3,-3,1",
                                   DetectorFitOutput='test_shortWavelength')
@@ -44,7 +44,7 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
     def test_intermediateWavelength(self):
         Load('396442_396831.nxs', OutputWorkspace='intermediateWavelengthScan')
         approximate_wavelength = '4.8' # Angstrom
-        ILLYIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        ILLD7YIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_intermediateWavelength.xml',
                                   MinimalDistanceBetweenPeaks=1.5, BankOffsets="-4,-4,0",
                                   DetectorFitOutput='test_intermediateWavelength')
@@ -54,7 +54,7 @@ class ILLYIGPositionCalibrationTest(unittest.TestCase):
     def test_longWavelength(self):
         Load('394458_394882.nxs', OutputWorkspace='longWavelengthScan')
         approximate_wavelength = '5.7' # Angstrom
-        ILLYIGPositionCalibration(ScanWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        ILLD7YIGPositionCalibration(ScanWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_longWavelength.xml',
                                   MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
                                   DetectorFitOutput='test_longWavelength')

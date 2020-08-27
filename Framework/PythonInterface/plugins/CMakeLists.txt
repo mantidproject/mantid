@@ -202,7 +202,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/FitGaussianPeaks.py
   algorithms/WorkflowAlgorithms/FlatPlatePaalmanPingsCorrection.py
   algorithms/WorkflowAlgorithms/HFIRSANSReduction.py
-  algorithms/WorkflowAlgorithms/ILLYIGPositionCalibration.py
+  algorithms/WorkflowAlgorithms/ILLD7YIGPositionCalibration.py
   algorithms/WorkflowAlgorithms/ILL_utilities.py
   algorithms/WorkflowAlgorithms/IndirectAnnulusAbsorption2.py
   algorithms/WorkflowAlgorithms/IndirectAnnulusAbsorption.py
