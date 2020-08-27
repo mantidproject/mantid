@@ -82,26 +82,26 @@ You may find the following diff/merge tools helpful:
    [difftool "meld"]
            external = meld
            # Windows
-           #cmd = \"C:\\Program Files (x86)\\Meld\\Meld.exe\" "$LOCAL" "$REMOTE"
+           #cmd = "'C:/Program Files (x86)/Meld/Meld.exe' $LOCAL $REMOTE"
            #path = C:/Program Files (x86)/Meld/Meld.exe
    [mergetool "meld"]
            trustExitCode = true
            keepBackup = false
            # Windows
-           #cmd = \"C:\\Program Files (x86)\\Meld\\Meld.exe\" "$LOCAL" "$BASE" "$REMOTE" "--output=$MERGED"  
+           #cmd = "'C:/Program Files (x86)/Meld/Meld.exe' $LOCAL $BASE $REMOTE --output=$MERGED"
            #path = C:/Program Files (x86)/Meld/Meld.exe
    [difftool "diffmerge"]
            # Linux
            #cmd = diffmerge $LOCAL $REMOTE
            # Windows
-           #cmd = C:/Program\\ Files/SourceGear/common/DiffMerge/sgdm.exe \"$LOCAL\" \"$REMOTE\"
+           #cmd = "'C:/Program Files/SourceGear/common/DiffMerge/sgdm.exe' $LOCAL $REMOTE"
    [mergetool "diffmerge"]
            trustExitCode = true
            keepBackup = false
            # Linux
            #cmd = diffmerge -merge -result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
            # Windows
-           #cmd = C:/Program\\ Files/SourceGear/common/DiffMerge/sgdm.exe -merge -result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+           #cmd = "'C:/Program Files/SourceGear/common/DiffMerge/sgdm.exe' -merge -result=$MERGED $LOCAL $BASE $REMOTE"
 
 Useful Aliases
 --------------
