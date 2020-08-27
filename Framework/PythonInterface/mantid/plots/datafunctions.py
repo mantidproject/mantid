@@ -46,13 +46,15 @@ def validate_args(*args, **kwargs):
 
 def get_distribution(workspace, **kwargs):
     """
-    Determine whether or not the data is a distribution. The value in
-    the kwargs wins. Applies to Matrix workspaces only
-
+    Determine whether or not the data is a distribution.
+    If the workspace is a distribution return true,
+    else the value in kwargs wins.
+    Applies to Matrix workspaces only
     :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
     """
-    distribution = kwargs.pop('distribution', workspace.isDistribution())
-    return bool(distribution), kwargs
+    distribution = kwargs.pop('distribution', False)
+    distribution = True if workspace.isDistribution() else bool(distribution)
+    return distribution, kwargs
 
 
 def get_normalize_by_bin_width(workspace, axes, **kwargs):
@@ -237,12 +239,14 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
         try:
             workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
         except RuntimeError:
-            raise RuntimeError('Spectrum Number {0} not found in workspace {1}'.format(spectrum_number,workspace.name()))
+            raise RuntimeError(
+                'Spectrum Number {0} not found in workspace {1}'.format(spectrum_number, workspace.name()))
     elif axis == MantidAxType.SPECTRUM:  # Only get a spectrum number if we're traversing the spectra
         try:
             spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
         except RuntimeError:
-            raise RuntimeError('Workspace index {0} not found in workspace {1}'.format(workspace_index,workspace.name()))
+            raise RuntimeError(
+                'Workspace index {0} not found in workspace {1}'.format(workspace_index, workspace.name()))
 
     return workspace_index, spectrum_number, kwargs
 
@@ -576,7 +580,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
         specInfo = workspace.spectrumInfo()
         for index in range(workspace.getNumberHistograms()):
             if specInfo.isMasked(index) or specInfo.isMonitor(index):
-                z[index,:] = np.nan
+                z[index, :] = np.nan
     except:
         pass
 
@@ -642,7 +646,7 @@ def get_uneven_data(workspace, distribution):
         zvals = workspace.readY(index)
         if workspace.isHistogramData():
             if not distribution:
-                zvals = zvals/(xvals[1:] - xvals[0:-1])
+                zvals = zvals / (xvals[1:] - xvals[0:-1])
         else:
             xvals = boundaries_from_points(xvals)
         if specInfo and specInfo.hasDetectors(index) and (specInfo.isMasked(index) or specInfo.isMonitor(index)):
@@ -713,7 +717,7 @@ def get_sample_log(workspace, **kwargs):
         raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
     Filtered = kwargs.pop('Filtered', True)
     if not Filtered:
-        #these methods access the unfiltered data
+        # these methods access the unfiltered data
         times = tsp.times.astype('datetime64[us]')
         y = tsp.value
     else:
@@ -772,7 +776,7 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
                     dims.append(d)
                 else:
                     title += '{0}={1:.4}; '.format(d.name,
-                                                   (d.getX(indices[n]) + d.getX(indices[n] + 1))/2)
+                                                   (d.getX(indices[n]) + d.getX(indices[n] + 1)) / 2)
         for d in dims:
             axis_title = d.name.replace('DeltaE', r'$\Delta E$')
             axis_unit = d.getUnits().replace('Angstrom^-1', r'$\AA^{-1}$')
@@ -804,17 +808,17 @@ def get_data_from_errorbar_container(err_cont):
     if x_segments:
         x_errs = []
         for vertex in x_segments:
-            x_errs.append((vertex[1][0] - vertex[0][0])/2)
-            x.append((vertex[0][0] + vertex[1][0])/2)
-            y.append((vertex[0][1] + vertex[1][1])/2)
+            x_errs.append((vertex[1][0] - vertex[0][0]) / 2)
+            x.append((vertex[0][0] + vertex[1][0]) / 2)
+            y.append((vertex[0][1] + vertex[1][1]) / 2)
         if y_segments:
-            y_errs = [(vertex[1][1] - vertex[0][1])/2 for vertex in y_segments]
+            y_errs = [(vertex[1][1] - vertex[0][1]) / 2 for vertex in y_segments]
     else:
         y_errs = []
         for vertex in y_segments:
-            y_errs.append((vertex[1][1] - vertex[0][1])/2)
-            x.append((vertex[0][0] + vertex[1][0])/2)
-            y.append((vertex[0][1] + vertex[1][1])/2)
+            y_errs.append((vertex[1][1] - vertex[0][1]) / 2)
+            x.append((vertex[0][0] + vertex[1][0]) / 2)
+            y.append((vertex[0][1] + vertex[1][1]) / 2)
     return x, y, x_errs, y_errs
 
 
@@ -877,6 +881,7 @@ def set_errorbars_hidden(container, hide):
         if bar_lines:
             for line in bar_lines:
                 line.set_visible(not hide)
+
 
 # ====================================================
 # Waterfall plots
@@ -1118,7 +1123,8 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     """
     if vmin <= 0 and scale == LogNorm:
         vmin = 0.0001  # Avoid 0 log scale error
-        mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
+        mantid.kernel.logger.warning(
+            "Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
 
     if vmax <= 0 and scale == LogNorm:
         vmax = 1  # Avoid 0 log scale error

@@ -33,6 +33,7 @@ New Features
 - Updated rounding for time zero and first good data to be 3 decimal places.
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
 - Added multi-period support to the LoadMuonNexusV2 algorithm.
+- Added support for specifying which groups should be used to calculate a group.
 - Added two buttons to the Muon analysis and Frequency domain analysis plot toolbar to allow users to show major and minor gridlines.
 - Added a Plot difference checkbox to the Muon Analysis GUI, which allows user to choose whether the fit difference curve is shown.
 
@@ -64,6 +65,7 @@ Bug fixes
 - Fixed an issue where switching to simultaneous fit mode was occasionally throwing an exception.
 - Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
 - Fixed an issue where mantid crashed when the muon analysis plotting window crashed was resized to be too small.
+- Fixed an issue where groups were all being plotted on the same tiled plot.
 - Fixed an issue with setting the current workspace before adding a function.
 - Fixed an issue with the results tab not updating correctly after multiple fits with different functions.
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis gui was not properly disabling during calculations.

@@ -141,5 +141,6 @@ Bugfixes
 - Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
 - Warn users when they attempt to use Generate Recovery Script with no workspaces present.
 - The y axis labels will now appear in the correct order if imshow is called from a script with origin=upper.
+- Fixed a bug with colorfill plot script generation for distribution workspaces.
 
 :ref:`Release 5.1.0 <v5.1.0>`
