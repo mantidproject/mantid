@@ -146,6 +146,7 @@ Bugfixes
 - When running `ExtractFFTSpectrum` with only a real input, there is no longer a blank output on the end of the workspace.
 - `ExtractFFTSpectrum` gives the correct units. 
 - Warn users when they attempt to use Generate Recovery Script with no workspaces present.
+- The y axis labels will now appear in the correct order if imshow is called from a script with origin=upper.
 - Fixed a bug with colorfill plot script generation for distribution workspaces.
 
 :ref:`Release 5.1.0 <v5.1.0>`

@@ -36,6 +36,7 @@ Improvements
   This change introduces two optional outputs from the QENSFit algorithms (fit status and Chi squared), which may be used to monitor the outcome of the fit.
 - Added default parameter estimations to the F(q) tab.
 - The ConvFit tab within the IDA GUI will now output convolved members by default.
+- Added a Help option to the right-click menu in the function browser (in full function view) which brings up a relevant documentation page describing the function.
 
 Bug Fixes
 #########
@@ -49,5 +50,6 @@ Bug Fixes
   (i.e. free molecules). Previously, data files from such calculations
   would yield a parsing error.
 - Fixed errors with the temperature correction in the ConvFit tab of the Indirect Data Analysis interface. These issues occurred when the function was evaluated at Q=0, where it is undefined.
+- Indirect Data Analysis F(Q) fit multiple workspaces can now load more than one spectra from each workspace.
 
 :ref:`Release 5.1.0 <v5.1.0>`
