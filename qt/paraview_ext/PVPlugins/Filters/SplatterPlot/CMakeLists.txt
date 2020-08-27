@@ -14,7 +14,6 @@ include_directories(SYSTEM ${QWT5_INCLUDE_DIR})
 
 target_link_libraries(MantidParaViewSplatterPlotSMPlugin
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${CORE_MANTIDLIBS}
                       DataObjects
                       VatesAPI

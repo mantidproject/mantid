@@ -147,6 +147,7 @@ set(PYTHON_PLUGINS
   algorithms/SANSSubtract.py
   algorithms/SANSWideAngleCorrection.py
   algorithms/SaveGEMMAUDParamFile.py
+  algorithms/SaveGSSCW.py
   algorithms/SaveNexusPD.py
   algorithms/SaveP2D.py
   algorithms/SavePlot1DAsJson.py

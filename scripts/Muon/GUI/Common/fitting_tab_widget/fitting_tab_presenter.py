@@ -65,6 +65,9 @@ class FittingTabPresenter(object):
 
         self.view.setEnabled(False)
 
+        self.enable_editing_notifier = GenericObservable()
+        self.disable_editing_notifier = GenericObservable()
+
     def disable_view(self):
         self.view.setEnabled(False)
 
@@ -177,17 +180,20 @@ class FittingTabPresenter(object):
         self.model.change_plot_guess(self.view.plot_guess, workspaces, index)
 
     def handle_fit_clicked(self):
+        if len(self.selected_data) < 1:
+            self.view.warning_popup('No data selected to fit')
+            return
         self.perform_fit()
 
     def handle_started(self):
-        self.view.setEnabled(False)
+        self.disable_editing_notifier.notify_subscribers()
         self.thread_success = True
 
     def handle_finished(self):
+        self.enable_editing_notifier.notify_subscribers()
         if not self.thread_success:
             return
 
-        self.view.setEnabled(True)
         fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
         if any([not fit_function, not fit_status, not fit_chi_squared]):
             return
@@ -212,9 +218,9 @@ class FittingTabPresenter(object):
         self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_error(self, error):
+        self.enable_editing_notifier.notify_subscribers()
         self.thread_success = False
         self.view.warning_popup(error)
-        self.view.setEnabled(True)
 
     def handle_start_x_updated(self):
         value = self.view.start_time
@@ -239,6 +245,8 @@ class FittingTabPresenter(object):
         self.model.function_name = self.view.function_name
 
     def handle_function_structure_changed(self):
+        if not self._fit_function[0]:
+            self.handle_display_workspace_changed()
         self.view.plot_guess_checkbox.setChecked(False)
         if self._tf_asymmetry_mode:
             self.view.warning_popup('Cannot change function structure during tf asymmetry mode')
@@ -250,7 +258,8 @@ class FittingTabPresenter(object):
             if self.view.is_simul_fit():
                 self._fit_function = [None]
             else:
-                self._fit_function = [None] * len(self.selected_data)
+                self._fit_function = [None] * len(self.selected_data)\
+                    if self.selected_data else [None]
             self.model.clear_fit_information()
             self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
         else:

@@ -28,7 +28,7 @@ from qtpy import QT_VERSION
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
-from mantid.plots import datafunctions, MantidAxes
+from mantid.plots import datafunctions, MantidAxes, axesfunctions
 from mantidqt.io import open_a_file_dialog
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
@@ -432,6 +432,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                             ax.collections[0]._vec = copy.deepcopy(ax.original_data)
                         else:
                             ax.view_init()
+                    elif ax.images:
+                        axesfunctions.update_colorplot_datalimits(ax, ax.images)
+                        continue
 
                     ax.autoscale()
 

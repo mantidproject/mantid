@@ -83,7 +83,6 @@ target_include_directories(Parallel SYSTEM
                            PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 target_link_libraries(Parallel
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
                       ${HDF5_LIBRARIES}
@@ -119,7 +118,6 @@ target_include_directories(EventParallelLoader SYSTEM
 
 target_link_libraries(EventParallelLoader
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
                       ${HDF5_LIBRARIES}
