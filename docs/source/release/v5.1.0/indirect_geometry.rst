@@ -49,5 +49,6 @@ Bug Fixes
   (i.e. free molecules). Previously, data files from such calculations
   would yield a parsing error.
 - Fixed errors with the temperature correction in the ConvFit tab of the Indirect Data Analysis interface. These issues occurred when the function was evaluated at Q=0, where it is undefined.
+- Indirect Data Analysis F(Q) fit multiple workspaces can now load more than one spectra from each workspace.
 
 :ref:`Release 5.1.0 <v5.1.0>`
