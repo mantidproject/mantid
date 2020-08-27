@@ -1,3 +1,5 @@
+.. _DrILL-ref:
+
 DrILL interface
 ===============
 
