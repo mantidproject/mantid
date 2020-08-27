@@ -380,7 +380,6 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
 /**
  * Loads offsets and slopes for each detector bank from the workspace entry
  * @param workspace : workspace with loaded instrument
- * @param entry : entry containing bank parameters
  * @param bankId : bank ID of the relevant bank
  * @return : vector of the bank slope and offset
  */
