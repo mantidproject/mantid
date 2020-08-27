@@ -281,9 +281,7 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
             if len(single_spectrum_peaks) >= 1:
                 peak_no = 0
                 for peak_intensity, peak_centre_guess, peak_centre_expected in single_spectrum_peaks:
-#                     function = "name=Polynomial, n=2, A0=1e-4, A1=1e-4, A2=1e-5;\n"
-#                     function = "name=LinearBackground, A0=1e-4, A1=1e-4;\n"
-                    function = "name=FlatBackground, A0=1e-4;\n"
+                    function = "name=LinearBackground, A0=1e-4, A1=1e-4;\n"
                     function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
                                                                                                 peak_centre_guess,
                                                                                                 peak_intensity,
