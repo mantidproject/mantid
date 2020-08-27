@@ -64,15 +64,12 @@ public:
   void disableAll() override;
   void enableAll() override;
   void checkBoxAutoChanged(int state) override;
-  //void updateRunsTextFromAuto() override;
   std::string getCurrentRunsText() const override;
   void setRunsTextWithSearch(const QString &text) override;
   std::string getRunsOldInput() const override;
   void setRunsOldInput(const std::string &oldInput) override;
 
-  void setCurrentAutoRun(const int run) override { 
-    m_currentAutoRun = run;
-  }
+  void setCurrentAutoRun(const int run) override { m_currentAutoRun = run; }
 
   int extractRunNumber(const std::string &file) override;
 

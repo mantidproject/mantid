@@ -76,15 +76,16 @@ public:
   /// Sets the run number found from auto
   virtual void setCurrentAutoRun(const int run) = 0;
 
-  /// Updates runs filefinder widget from auto last run
-  //virtual void updateRunsTextFromAuto() = 0;
-
+  /// @return text from ALC interface runs filefinder widget
   virtual std::string getCurrentRunsText() const = 0;
 
+  /// Sets text of runs with a search for files
   virtual void setRunsTextWithSearch(const QString &text) = 0;
 
+  /// @return string which was saved when auto checked
   virtual std::string getRunsOldInput() const = 0;
 
+  /// Sets old input when auto checked
   virtual void setRunsOldInput(const std::string &oldInput) = 0;
 
 public slots:
