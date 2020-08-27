@@ -326,6 +326,13 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.log().information('Skipping empty token run.')
 
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
+        # group wedge workspaces
+        for w in range(self.getProperty('NumberOfWedges').value):
+            wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
+                        for d in range(self.dimensionality)]
+            GroupWorkspaces(InputWorkspaces=wedge_ws,
+                            OutputWorkspace=self.output + "_wedge_" + str(w + 1))
+
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
@@ -533,6 +540,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 )
 
         panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
+        n_wedges = self.getProperty('NumberOfWedges').value
+        if n_wedges:
+            output_wedges = self.output + "_wedge_d" + str(i + 1)
+        else:
+            output_wedges = ""
         panel_ws_group = (panel_outputs + '_' + str(i + 1)
                           if panel_outputs
                           else '')
@@ -550,10 +562,21 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 NumberOfWedges=self.getProperty('NumberOfWedges').value,
                 WedgeAngle=self.getProperty('WedgeAngle').value,
                 WedgeOffset=self.getProperty('WedgeOffset').value,
-                WedgeWorkspace=self.getPropertyValue('WedgeWorkspace'),
+                WedgeWorkspace=output_wedges,
                 AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
                 PanelOutputWorkspaces=panel_ws_group
                 )
+
+        # wedges ungrouping and renaming
+        if n_wedges:
+            wedges_old_names = [output_wedges + "_" + str(w + 1)
+                                for w in range(n_wedges)]
+            wedges_new_names = [self.output + "_wedge_" + str(w + 1)
+                                + "_" + str(i + 1)
+                                for w in range(n_wedges)]
+            UnGroupWorkspace(InputWorkspace=output_wedges)
+            RenameWorkspaces(InputWorkspaces=wedges_old_names,
+                             WorkspaceNames=wedges_new_names)
 
         if self.cleanup:
             DeleteWorkspace(sample_name)
