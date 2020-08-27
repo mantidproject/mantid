@@ -22,7 +22,6 @@ mtd_add_qt_tests(
   LINK_LIBS
     CurveFitting
     DataObjects
-    ${TCMALLOC_LIBRARIES_LINKTIME}
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
     ${CORE_MANTIDLIBS}
@@ -60,7 +59,6 @@ mtd_add_qt_tests(
   LINK_LIBS
     CurveFitting
     DataObjects
-    ${TCMALLOC_LIBRARIES_LINKTIME}
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
     ${CORE_MANTIDLIBS}

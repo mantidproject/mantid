@@ -1,5 +1,6 @@
 set(TEST_PY_FILES
-    AbsorptionShapesTest.py 	
+    AbsorptionShapesTest.py
+    CalculateMuonAsymmetryTest.py
     ConvertToWavelengthTest.py
     CrystalFieldMultiSiteTest.py
     CrystalFieldTest.py
@@ -7,7 +8,6 @@ set(TEST_PY_FILES
     DirectPropertyManagerTest.py
     DirectReductionHelpersTest.py
     DoublePulseFitTest.py
-    ErrorReportPresenterTest.py
     IndirectCommonTests.py
     InelasticDirectDetpackmapTest.py
     ISISDirecInelasticConfigTest.py

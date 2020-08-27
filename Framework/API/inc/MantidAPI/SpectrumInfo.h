@@ -68,6 +68,7 @@ public:
   double twoTheta(const size_t index) const;
   double signedTwoTheta(const size_t index) const;
   double azimuthal(const size_t index) const;
+  std::pair<double, double> geographicalAngles(const size_t index) const;
   Kernel::V3D position(const size_t index) const;
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;

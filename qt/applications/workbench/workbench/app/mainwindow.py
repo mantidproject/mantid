@@ -24,7 +24,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
-                            QSplashScreen)  # noqa
+                            QSplashScreen, QMessageBox)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.interfacemanager import InterfaceManager  # noqa
 from mantidqt.widgets import manageuserdirectories  # noqa
@@ -574,9 +574,15 @@ class MainWindow(QMainWindow):
         self.editor.save_current_file_as()
 
     def generate_script_from_workspaces(self):
-        task = BlockingAsyncTaskWithCallback(target=self._generate_script_from_workspaces,
-                                             blocking_cb=QApplication.processEvents)
-        task.start()
+        if not self.workspacewidget.empty_of_workspaces():
+            task = BlockingAsyncTaskWithCallback(target=self._generate_script_from_workspaces,
+                                                 blocking_cb=QApplication.processEvents)
+            task.start()
+        else:
+            # Tell users they need a workspace to do that
+            QMessageBox().warning(None, "No Workspaces!",
+                                  "In order to generate a recovery script there needs to be some workspaces.",
+                                  QMessageBox.Ok)
 
     def _generate_script_from_workspaces(self):
         script = "from mantid.simpleapi import *\n\n" + get_all_workspace_history_from_ads()

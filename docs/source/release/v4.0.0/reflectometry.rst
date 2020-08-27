@@ -26,7 +26,7 @@ Improvements
 
 - The ILL reduction workflow algorithms were reorganized to allow correct reflectivity calculation in the :literal:`SumInLambda` case.
 - Added flood corrections to :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v2>`. The correction data can be provided either via a flood workspace passed as a property or taken from the parameter file.
-- The four Ascii save algorithms :ref:`algm-SaveANSTOAscii`, :ref:`algm-SaveILLCosmosAscii`, :ref:`algm-SaveReflCustomAscii`, and :ref:`algm-SaveReflThreeColumnAscii` now correctly save x-error and can treat correctly point data and histograms. They are, however, deprecated in favour of :ref:`algm-SaveReflectometryAscii`. Please see :ref:`algm-SaveReflectometryAscii` for more documentation.
+- The four Ascii save algorithms ``SaveANSTOAscii``, ``SaveILLCosmosAscii``, ``SaveReflCustomAscii``, and ``SaveReflThreeColumnAscii`` now correctly save x-error and can treat correctly point data and histograms. They are, however, deprecated in favour of :ref:`algm-SaveReflectometryAscii`. Please see :ref:`algm-SaveReflectometryAscii` for more documentation.
 - :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
 - :ref:`algm-ReflectometryReductionOneAuto` now crops the unbinned output workspace in Q to ``MomentumTransferMin`` and ``MomentumTransferMax``, if specified
 - :ref:`algm-ReflectometryReductionOne`, :ref:`algm-ReflectometryReductionOneAuto`, :ref:`algm-CreateTransmissionWorkspace`, and :ref:`algm-CreateTransmissionWorkspaceAuto` now use spectrum numbers for their processing instructions instead of workspace indices.

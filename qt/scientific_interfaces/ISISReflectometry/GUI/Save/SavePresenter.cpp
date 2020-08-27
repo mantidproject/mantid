@@ -48,6 +48,7 @@ void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
 
 void SavePresenter::notifySettingsChanged() {
   m_mainPresenter->setBatchUnsaved();
+  updateWidgetEnabledState();
 }
 
 void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }
@@ -72,19 +73,51 @@ bool SavePresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
 
+/** Tells the view to enable/disable certain widgets based on the
+ * selected file format
+ */
+void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
+  auto const fileFormat = formatFromIndex(m_view->getFileFormatIndex());
+  // Enable/disable the log list for formats that include the header.
+  // Note that at the moment the log list is used in SaveReflectometryAscii for
+  // ILLCosmos (MFT) but I'm not sure if it should be.
+  if ((fileFormat == NamedFormat::Custom && m_view->getHeaderCheck()) ||
+      fileFormat == NamedFormat::ILLCosmos)
+    m_view->enableLogList();
+  else
+    m_view->disableLogList();
+  // Everything else is enabled for Custom and disabled otherwise
+  if (fileFormat == NamedFormat::Custom) {
+    m_view->enableHeaderCheckBox();
+    m_view->enableQResolutionCheckBox();
+    m_view->enableSeparatorButtonGroup();
+  } else {
+    m_view->disableHeaderCheckBox();
+    m_view->disableQResolutionCheckBox();
+    m_view->disableSeparatorButtonGroup();
+  }
+}
+
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
  */
 void SavePresenter::updateWidgetEnabledState() const {
   if (isProcessing() || isAutoreducing()) {
     m_view->disableAutosaveControls();
-    if (shouldAutosave())
-      m_view->disableFileFormatAndLocationControls();
-    else
-      m_view->enableFileFormatAndLocationControls();
+    if (shouldAutosave()) {
+      m_view->disableFileFormatControls();
+      m_view->disableLocationControls();
+      updateWidgetStateBasedOnFileFormat();
+    } else {
+      m_view->enableFileFormatControls();
+      m_view->enableLocationControls();
+      updateWidgetStateBasedOnFileFormat();
+    }
   } else {
     m_view->enableAutosaveControls();
-    m_view->enableFileFormatAndLocationControls();
+    m_view->enableFileFormatControls();
+    m_view->enableLocationControls();
+    updateWidgetStateBasedOnFileFormat();
   }
 }
 
@@ -209,7 +242,7 @@ FileFormatOptions SavePresenter::getSaveParametersFromView() const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
       /*prefix=*/m_view->getPrefix(),
-      /*includeTitle=*/m_view->getTitleCheck(),
+      /*includeHeader=*/m_view->getHeaderCheck(),
       /*separator=*/m_view->getSeparator(),
       /*includeQResolution=*/m_view->getQResolutionCheck());
 }

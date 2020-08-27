@@ -469,6 +469,9 @@ public:
     void setWorkspaceIndex(int i);
     QStringList getWorkspaceNames();
     void fit();
+    void toggleSettingsBrowserVisible();
+    void removePropertiesFromSettingsBrowser(const QStringList &propsToRemove);
+    void toggleWsListVisible();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
@@ -952,13 +955,32 @@ class ImageInfoWidget : public QTableWidget {
 #include <boost/python/handle.hpp>
 %End
 public:
-    ImageInfoWidget(std::string workspace_type, QWidget *parent = nullptr);
-    void updateTable(const double x, const double y, const double z);
+    ImageInfoWidget(QWidget *parent = nullptr);
+    void cursorAt(const double x, const double y, const double signal);
+    %MethodCode
+    try {
+      sipCpp->cursorAt(a0, a1, a2);
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
     void setWorkspace(SIP_PYOBJECT);
     %MethodCode
     try {
-      auto extractor = Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(boost::python::object(boost::python::handle<>(a0)));
-      sipCpp->setWorkspace(extractor());
+      using boost::python::extract;
+      using Mantid::PythonInterface::ExtractSharedPtr;
+      sipCpp->setWorkspace(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
     } catch(...) {
       sipRaiseUnknownException();
       return NULL;

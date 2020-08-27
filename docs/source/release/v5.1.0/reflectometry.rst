@@ -23,12 +23,18 @@ Improvements
 - Sample waviness term is removed from resolution calculation in incoherent mode in :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 - Flag to enable / disable apply scaling factor from `ScalingFactorFile`, called `ApplyScalingFactor`, added to :ref:`algm-LiquidsReflectometryReduction`.
 - Modified :ref:`algm-LRAutoReduction` to allow the option to autoreduce data with a reference measurement for normalization (instead of only direct beam) using the new :ref:`algm-LRReductionWithReference` algorithm of this release
-
+  
 Bug fixes
 ---------
 
 - :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` has been fixed to update the sample logs of chopper gap and chopper position with correct units regardless the wrong setting in nexus files.
+- The history for :ref:`algm-ReflectometryReductionOne` has been fixed so that the conversion to Q is now always included in the history.
 
+Removed
+-------
+
+- The following deprecated algorithms have been removed: ``SaveANSTOAscii``, ``SaveILLCosmosAscii``, ``SaveReflCustomAscii``, and ``SaveReflThreeColumnAscii``. They have been replaced by :ref:`algm-SaveReflectometryAscii`.
+  
 ISIS Reflectometry Interface
 ############################
 
@@ -54,6 +60,8 @@ New
   :alt: Specify the cycle name in the search interface to get more reliable search results
 
   *Provide cycle name for more reliable search results*
+
+- The output formats from the **Save ASCII** tab now follow standards more rigidly - see :ref:`algm-SaveReflectometryAscii`, which replaces the old deprecated algorithms.
 
 - The **Options** dialog can now be accessed from the Tools menu, controlling the display of warnings and rounding precision.
 

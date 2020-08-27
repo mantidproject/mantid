@@ -13,8 +13,10 @@
 namespace Mantid::PythonInterface {
 
 template <typename T> struct ExtractSharedPtr {
-  ExtractSharedPtr(const boost::python::object &pyvalue);
-  bool check() const;
+  explicit ExtractSharedPtr(const boost::python::object &pyvalue) noexcept
+      : ExtractSharedPtr<T>(pyvalue.ptr()) {}
+  explicit ExtractSharedPtr(PyObject *pyvalue) noexcept;
+  inline bool check() const noexcept { return m_value.get() != nullptr; }
   const std::shared_ptr<T> operator()() const;
 
 private:
@@ -22,18 +24,22 @@ private:
 };
 
 /**
- * @param pyvalue Python object from which to extract
+ * @param pyvalue Python object from which to attempt extraction of an object of
+ * type T
  */
 template <typename T>
-ExtractSharedPtr<T>::ExtractSharedPtr(const boost::python::api::object &pyvalue)
-    : m_value() {
+ExtractSharedPtr<T>::ExtractSharedPtr(PyObject *pyvalue) noexcept : m_value() {
   // Here we assume we want to extract out an existing shared_ptr from a Python
-  // object if one exists. By default, using extract on a shared_ptr/weak_ptr
-  // type causes boost::python to create a *new* shared_ptr object managing the
-  // original resource. This then leads to bad behaviour with two objects
-  // managing the same memory.
+  // object if one exists. Naievly one would just do extract<std::shared_ptr<T>>
+  // but this will create a second shared_ptr managing the same resource and
+  // undefined behaviour when both come to try and delete the same object.
+  //
+  // The correct course of action is to extract a reference to shared_ptr<T>
+  // and this will fail if the object is not a shared_ptr. We also deal with
+  // the case where a weak_ptr may have been handed out by first trying to
+  // extract a reference to weak_ptr<T> and falling back to a reference to
+  // shared_ptr<T> if this fails.
 
-  // Test for a weak pointer first
   using boost::python::extract;
   if (extract<std::weak_ptr<T> &> extractWeakRef(pyvalue);
       extractWeakRef.check()) {
@@ -42,14 +48,6 @@ ExtractSharedPtr<T>::ExtractSharedPtr(const boost::python::api::object &pyvalue)
              extractSharedRef.check()) {
     m_value = extractSharedRef();
   }
-}
-
-/**
- * Check whether the extract can pull out the workspace type
- * @return True if it can be converted, false otherwise
- */
-template <typename T> bool ExtractSharedPtr<T>::check() const {
-  return m_value.get() != nullptr;
 }
 
 /**

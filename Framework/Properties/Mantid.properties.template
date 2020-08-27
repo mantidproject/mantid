@@ -238,6 +238,9 @@ plots.ShowMinorTicks = Off
 # Whether to show minor gridlines on plots
 plots.ShowMinorGridlines = Off
 
+# The default font for matplotlib plots
+plots.font=
+
 # The default scale on 1d plots. Options are Linear or Log
 plots.xAxesScale = Linear
 plots.yAxesScale = Linear

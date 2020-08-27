@@ -5,6 +5,7 @@ set ( TEST_PY_FILES
    AbinsPowderCalculatorTest.py
    AbinsCalculateQToscaTest.py
    AbinsCalculateSPowderTest.py
+   AbinsDataTest.py
    AbinsFrequencyPowderGeneratorTest.py
    AbinsInstrumentTest.py
    AbinsIOmoduleTest.py

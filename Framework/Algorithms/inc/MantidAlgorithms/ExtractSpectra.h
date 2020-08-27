@@ -26,6 +26,7 @@ public:
   }
   const std::string category() const override;
   const std::string summary() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
@@ -35,8 +36,8 @@ private:
 
   void propagateBinMasking(API::MatrixWorkspace &workspace, const int i) const;
   void checkProperties();
-  std::size_t getXMin(const size_t wsIndex = 0);
-  std::size_t getXMax(const size_t wsIndex = 0);
+  std::size_t getXMinIndex(const size_t wsIndex = 0);
+  std::size_t getXMaxIndex(const size_t wsIndex = 0);
   void cropRagged(API::MatrixWorkspace &workspace, int index);
 
   /// The input workspace

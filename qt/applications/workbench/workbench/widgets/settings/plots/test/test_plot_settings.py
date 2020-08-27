@@ -37,6 +37,7 @@ class PlotsSettingsTest(unittest.TestCase):
                                                        call(PlotProperties.SHOW_TITLE.value),
                                                        call(PlotProperties.SHOW_MINOR_TICKS.value),
                                                        call(PlotProperties.SHOW_MINOR_GRIDLINES.value),
+                                                       call(PlotProperties.PLOT_FONT.value),
                                                        call(PlotProperties.X_AXES_SCALE.value),
                                                        call(PlotProperties.Y_AXES_SCALE.value),
                                                        call(PlotProperties.LINE_STYLE.value),
@@ -296,6 +297,21 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_default_colormap_changed()
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.COLORMAP.value, colormap+"_r")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_font_combo_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_font_combo_changed("Helvetica")
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.PLOT_FONT.value, "Helvetica")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_font_combo_changed("Something that is not a font")
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.PLOT_FONT.value,
+                                                             "Something that is not a font")
 
 
 if __name__ == "__main__":

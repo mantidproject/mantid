@@ -11,15 +11,16 @@ from typing import Dict, List, Sequence, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos, SpecialCoordinateSystem
 from mantid.plots.datafunctions import get_indices
-from mantid.simpleapi import BinMD
+from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 import numpy as np
 
+from .roi import extract_cuts_matrix, extract_roi_matrix
 from .sliceinfo import SliceInfo
 from .transform import NonOrthogonalTransform
 
 # Constants
 PROJ_MATRIX_LOG_NAME = "W_MATRIX"
-LOG_BINMD_CALLS = False
+LOG_GET_WS_MDE_ALGORITHM_CALLS = False
 
 
 class WS_TYPE(Enum):
@@ -32,8 +33,7 @@ class SliceViewerModel:
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
-        # For MDH the view will show the original NDE if possible
-        self._selected_ws = ws
+        self._ws = ws
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
                 raise ValueError("workspace must contain at least 2 spectrum")
@@ -43,26 +43,37 @@ class SliceViewerModel:
             if ws.isMDHistoWorkspace():
                 if len(ws.getNonIntegratedDimensions()) < 2:
                     raise ValueError("workspace must have at least 2 non-integrated dimensions")
-                if ws.hasOriginalWorkspace(0):
-                    ws = ws.getOriginalWorkspace(0)
             else:
                 if ws.getNumDims() < 2:
                     raise ValueError("workspace must have at least 2 dimensions")
         else:
             raise ValueError("only works for MatrixWorkspace and MDWorkspace")
 
-        self._ws = ws
-        self._rebinned_name = self.get_ws_name() + '_svrebinned'
+        wsname = self.get_ws_name()
+        self._rebinned_name = wsname + '_svrebinned'
+        self._xcut_name, self._ycut_name = wsname + '_cut_x', wsname + '_cut_y'
+        self._roi_name = wsname + '_roi'
 
-        self.rebin = _noop
-        if self.get_ws_type() == WS_TYPE.MDE:
+        ws_type = self.get_ws_type()
+        if ws_type == WS_TYPE.MDE:
             self.get_ws = self.get_ws_MDE
             self.get_data = self.get_data_MDE
         else:
             self.get_ws = self._get_ws
             self.get_data = self.get_data_MDH
-            if self.get_ws_type() == WS_TYPE.MDH:
-                self.rebin = self.rebin_MDH
+
+        if self.get_ws_type() == WS_TYPE.MDE:
+            self.export_roi_to_workspace = self.export_roi_to_workspace_mdevent
+            self.export_cuts_to_workspace = self.export_cuts_to_workspace_mdevent
+            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_md
+        elif ws_type == WS_TYPE.MDH:
+            self.export_roi_to_workspace = self.export_roi_to_workspace_mdhisto
+            self.export_cuts_to_workspace = self.export_cuts_to_workspace_mdhisto
+            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_md
+        else:
+            self.export_roi_to_workspace = self.export_roi_to_workspace_matrix
+            self.export_cuts_to_workspace = self.export_cuts_to_workspace_matrix
+            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_matrix
 
     def can_normalize_workspace(self) -> bool:
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
@@ -80,8 +91,11 @@ class SliceViewerModel:
             if self.get_frame() != SpecialCoordinateSystem.HKL:
                 return False
 
-            sample = self._get_ws().getExperimentInfo(0).sample()
-            if not sample.hasOrientedLattice():
+            try:
+                sample = self._get_ws().getExperimentInfo(0).sample()
+                if not sample.hasOrientedLattice():
+                    return False
+            except ValueError:
                 return False
 
             return True
@@ -104,12 +118,7 @@ class SliceViewerModel:
         """
         Check if the given workspace can multiple BinMD calls.
         """
-        try:
-            return self.get_ws_type() == WS_TYPE.MDE or self._get_ws().hasOriginalWorkspace(0)
-        except AttributeError:
-            pass
-
-        return False
+        return self.get_ws_type() == WS_TYPE.MDE
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
@@ -122,11 +131,7 @@ class SliceViewerModel:
     def get_title(self) -> str:
         """Return a title for model"""
         ws_name = self.get_ws_name()
-        title = f'Sliceviewer - {ws_name}'
-        selected_name = self._selected_ws.name()
-        if selected_name != ws_name:
-            title += f' (original of {selected_name})'
-        return title
+        return f'Sliceviewer - {ws_name}'
 
     def get_ws_MDE(self,
                    slicepoint: Sequence[Optional[float]],
@@ -140,14 +145,14 @@ class SliceViewerModel:
                        not provided the full extent of each dimension is used
         """
         workspace = self._get_ws()
-        bin_limits = _binning_limits(workspace, slicepoint, limits)
-        params = {'EnableLogging': LOG_BINMD_CALLS}
+        dim_limits = _dimension_limits(workspace, slicepoint, limits)
+        params = {'EnableLogging': LOG_GET_WS_MDE_ALGORITHM_CALLS}
         for n in range(workspace.getNumDims()):
             dimension = workspace.getDimension(n)
             slice_pt = slicepoint[n]
             nbins = bin_params[n]
             if slice_pt is None:
-                dim_min, dim_max = bin_limits[n]
+                dim_min, dim_max = dim_limits[n]
             else:
                 dim_min, dim_max = slice_pt - nbins / 2, slice_pt + nbins / 2
                 nbins = 1
@@ -168,7 +173,8 @@ class SliceViewerModel:
                            in that dimension for the slice.
         :param bin_params: ND sequence containing the number of bins for each dimension
         :param limits: An optional ND sequence containing limits for plotting dimensions. If
-                       not provided the full extent of each dimension is used
+                       not provided the full extent of each dimension is used. The limits
+                       should be provided in the order of the workspace not the display
         :param transpose: If true then transpose the data before returning
         """
         if transpose:
@@ -184,21 +190,10 @@ class SliceViewerModel:
         :param slicepoint: Sequence containing either a float or None where None indicates a display dimension
         :param transpose: A boolean flag indicating if the display dimensions are transposed
         """
+        xindex, yindex = _display_indices(slicepoint, transpose)
         workspace = self._get_ws()
-        assert len(slicepoint) == workspace.getNumDims(
-        ), "Expected len(slicepoint) to match number of workspace dimensions"
-        limits = []
-        for index, pt in enumerate(slicepoint):
-            if pt is None:
-                dimension = workspace.getDimension(index)
-                limits.append((dimension.getMinimum(), dimension.getMaximum()))
-        assert len(
-            limits) == 2, f"There should be exactly 2 display dimensions, found {len(limits)}"
-        xlim, ylim = limits
-        if transpose:
-            ylim, xlim = xlim, ylim
-
-        return xlim, ylim
+        xdim, ydim = workspace.getDimension(xindex), workspace.getDimension(yindex)
+        return (xdim.getMinimum(), xdim.getMaximum()), (ydim.getMinimum(), ydim.getMaximum())
 
     def get_dim_info(self, n: int) -> dict:
         """
@@ -252,57 +247,301 @@ class SliceViewerModel:
             # assume orthogonal projection
             proj_matrix = np.diag([1., 1., 1.])
 
-        display_indices = slice_info.transform([0, 1, 2])
+        display_indices = slice_info.transform([0, 1, 2]).astype(int)
         return NonOrthogonalTransform.from_lattice(lattice,
                                                    x_proj=proj_matrix[:, display_indices[0]],
                                                    y_proj=proj_matrix[:, display_indices[1]])
 
-    def rebin_MDH(self, slicepoint: Sequence[Optional[float]], limits: Sequence[tuple]):
-        """Rebin an MDHistoWorkspace by going back to the original MDEventWorkspace but setting
-        new limits on the output extents. It replaces the internal workspace object with the new
-        MDHistoWorkspace generated.
-        :param slicepoint: ND sequence of either None or float. A float defines the point
-                        in that dimension for the slice.
-        :param bin_params: ND sequence containing the number of bins for each dimension
-        :param limits: An optional 2-tuple sequence containing limits for plotting dimensions. If
-                       not provided the full extent of each dimension is used
+    def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
+                                        bin_params: Sequence[float], limits: tuple,
+                                        transpose: bool):
         """
-        def to_str(seq: Sequence):
-            return ','.join(map(str, seq))
-
-        # BinMD requires non-axis aligned binning when binning an MDHistoWorkspace from the original
-        # MDEventWorkspace
+        Export 2D roi to a separate workspace.
+        :param slicepoint: ND sequence of either None or float. A float defines the point
+                           in that dimension for the slice.
+        :param bin_params: ND sequence containing the number of bins for each dimension
+        :param limits: An optional ND sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        :param transpose: If true the limits are transposed w.r.t the data
+        """
         workspace = self._get_ws()
-        limits = _binning_limits(workspace, slicepoint, limits)
-        ndims = workspace.getNumDims()
-        ws_basis = np.eye(ndims)
-        output_extents, output_bins = [], []
-        params = {'AxisAligned': False, 'EnableLogging': LOG_BINMD_CALLS}
-        for n in range(ndims):
-            dimension = workspace.getDimension(n)
-            basis_vec_n = to_str(ws_basis[:, n])
-            nbins = dimension.getNBins()
-            dim_min, dim_max = limits[n]
-            params[f'BasisVector{n}'] = f'{dimension.name},{dimension.getUnits()},{basis_vec_n}'
-            output_extents.append(dim_min)
-            output_extents.append(dim_max)
-            output_bins.append(nbins)
-        params['OutputExtents'] = to_str(output_extents)
-        params['OutputBins'] = to_str(output_bins)
+        if transpose:
+            limits = limits[1], limits[0]
+        params, xindex, yindex = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
+        params['OutputWorkspace'] = self._roi_name
+        roi_ws = BinMD(InputWorkspace=self._get_ws(), **params)
+        roi_ws.clearOriginalWorkspaces()
+        if transpose:
+            _inplace_transposemd(self._roi_name, axes=[yindex, xindex])
 
-        self._ws = BinMD(InputWorkspace=self._get_ws(),
-                         OutputWorkspace=self._rebinned_name,
-                         **params)
+        return f'ROI created: {self._roi_name}'
+
+    def export_cuts_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
+                                         bin_params: Sequence[float], limits: tuple,
+                                         transpose: bool, cut: str):
+        """
+        Export 1D cuts in the X/Y direction for the extent.
+        :param slicepoint: ND sequence of either None or float. A float defines the point
+                           in that dimension for the slice.
+        :param bin_params: ND sequence containing the number of bins for each dimension.
+        :param limits: An optional ND sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        :param transpose: If true then the limits are transposed w.r.t to the data
+        :param cut: A string denoting which type to export. Options=s,c,x,y.
+        """
+        workspace = self._get_ws()
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
+        xcut_name, ycut_name, help_msg = self._cut_names(cut)
+        params, xindex, yindex = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
+        output_bins = params['OutputBins']
+        xbins, ybins = output_bins[xindex], output_bins[yindex]
+        if transpose:
+            xindex, yindex = yindex, xindex
+            xbins, ybins = ybins, xbins
+
+        if xcut_name:
+            params['OutputWorkspace'] = xcut_name
+            output_bins[xindex] = xbins
+            output_bins[yindex] = 1
+            params['OutputBins'] = output_bins
+            BinMD(InputWorkspace=self._get_ws(), **params)
+            _keep_dimensions(xcut_name, xindex)
+        if ycut_name:
+            params['OutputWorkspace'] = ycut_name
+            output_bins[xindex] = 1
+            output_bins[yindex] = ybins
+            params['OutputBins'] = output_bins
+            BinMD(InputWorkspace=self._get_ws(), **params)
+            _keep_dimensions(ycut_name, yindex)
+
+        return help_msg
+
+    def export_roi_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
+                                        bin_params: Sequence[float], limits: tuple,
+                                        transpose: bool):
+        """
+        Export 2D ROI to a workspace.
+        :param slicepoint: ND sequence of either None or float. A float defines the point
+                           in that dimension for the slice.
+        :param bin_params: ND sequence containing the number of bins for each dimension. Can be None for HistoWorkspaces
+        :param limits: An optional ND sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        :param transpose: If true then the limits are transposed w.r.t to the data
+        """
+        workspace = self._get_ws()
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
+        xindex, yindex = _display_indices(slicepoint)
+        dim_limits = _dimension_limits(workspace, slicepoint, limits)
+        # Construct paramters to integrate everything first and overrid per cut
+        params = {f'P{n+1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
+
+        xdim_min, xdim_max = dim_limits[xindex]
+        ydim_min, ydim_max = dim_limits[yindex]
+        params['OutputWorkspace'] = self._roi_name
+        params[f'P{xindex+1}Bin'] = [xdim_min, 0, xdim_max]
+        params[f'P{yindex+1}Bin'] = [ydim_min, 0, ydim_max]
+        IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
+        if transpose:
+            _inplace_transposemd(self._roi_name, axes=[yindex, xindex])
+
+        return f'ROI created: {self._roi_name}'
+
+    def export_cuts_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
+                                         bin_params: Sequence[float], limits: tuple,
+                                         transpose: bool, cut: str):
+        """
+        Export 1D cuts in the X/Y direction for the extent.
+        :param slicepoint: ND sequence of either None or float. A float defines the point
+                           in that dimension for the slice.
+        :param bin_params: ND sequence containing the number of bins for each dimension. Can be None for HistoWorkspaces
+        :param limits: An optional ND sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        :param transpose: If true then the limits are transposed w.r.t to the data
+        :param cut: A string denoting which type to export. Options=c,x,y.
+        """
+        workspace = self._get_ws()
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
+        dim_limits = _dimension_limits(workspace, slicepoint, limits)
+        # Construct paramters to integrate everything first and overrid per cut
+        params = {f'P{n+1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
+        xindex, yindex = _display_indices(slicepoint, transpose)
+
+        xcut_name, ycut_name, help_msg = self._cut_names(cut)
+        xdim_min, xdim_max = dim_limits[xindex]
+        ydim_min, ydim_max = dim_limits[yindex]
+        if xcut_name:
+            params['OutputWorkspace'] = xcut_name
+            params[f'P{xindex+1}Bin'] = [xdim_min, 0, xdim_max]
+            IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
+            _keep_dimensions(xcut_name, xindex)
+        if ycut_name:
+            params['OutputWorkspace'] = ycut_name
+            params[f'P{xindex+1}Bin'] = [xdim_min, xdim_max]
+            params[f'P{yindex+1}Bin'] = [ydim_min, 0, ydim_max]
+            IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
+            _keep_dimensions(ycut_name, yindex)
+
+        return help_msg
+
+    def export_cuts_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple,
+                                        transpose: bool, cut: str):
+        """
+        Export 1D cuts in the X/Y direction for the extent. Signature matches other export functions.
+        slicepoint, bin_params are unused
+        :param limits: An optional ND sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        :param transpose: If true then the limits are transposed .w.r.t. the data
+        :param cut: A string denoting which cut to export. Options=c,x,y.
+        """
+        workspace = self._get_ws()
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
+        yaxis = workspace.getAxis(1)
+        (xmin, xmax), (ymin, ymax) = limits[0], limits[1]
+        xcut_name, ycut_name, help_msg = self._cut_names(cut)
+        if transpose:
+            xcut_name, ycut_name = ycut_name, xcut_name
+
+        if yaxis.isSpectra() or yaxis.isNumeric():
+            extract_cuts_matrix(workspace, xmin, xmax, ymin, ymax, xcut_name, ycut_name)
+        else:
+            help_msg = 'Unknown Y axis type. Unable to perform cuts'
+
+        return help_msg
+
+    def export_roi_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple,
+                                       transpose: bool):
+        """
+        Export 2D region as a workspace. Signature matches other export functions
+        slicepoint, bin_params are unused
+        :param limits: An ND sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        :param transpose:  If true then the limits are transposed .w.r.t. the data
+        """
+        if transpose:
+            # swap back to model order
+            limits = limits[1], limits[0]
+        extract_roi_matrix(self._get_ws(), *limits[0], *limits[1], transpose, self._roi_name)
+        return f'ROI created: {self._roi_name}'
+
+    def export_pixel_cut_to_workspace_md(self, slicepoint, bin_params, pos: tuple, transpose: bool,
+                                         axis: str):
+        """
+        Export a single row/column as a workspace. Signature matches other export functions
+        slicepoint, bin_params are unused
+        :param pos: A 2-tuple containing the position of the pixel whose row/column should be exported
+        :param transpose:  If true then the limits are transposed .w.r.t. the data
+        :param axis: A string 'x' or 'y' identifying the axis to cut along
+        """
+        # Form single pixel limits for a cut
+        xindex, yindex = _display_indices(slicepoint, transpose)
+        workspace = self._get_ws()
+        deltax, deltay = workspace.getDimension(xindex).getBinWidth(), \
+            workspace.getDimension(yindex).getBinWidth()
+        xpos, ypos = pos
+        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay,
+                                                              ypos + 0.5 * deltay)
+        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose,
+                                                     axis)
+
+    def export_pixel_cut_to_workspace_matrix(self, slicepoint, bin_params, pos: tuple,
+                                             transpose: bool, axis: str):
+        """
+        Export a single row/column as a workspace. Signature matches other export functions
+        slicepoint, bin_params are unused
+        :param pos: A 2-tuple containing the position of the pixel whose row/column should be exported
+        :param transpose:  If true then the limits are transposed .w.r.t. the data
+        :param axis: A string 'x' or 'y' identifying the axis to cut along
+        """
+        workspace = self._get_ws()
+        xpos, ypos = pos
+        if transpose:
+            # swap back to model order
+            xpos, ypos = ypos, xpos
+
+        xcut_name, ycut_name, help_msg = self._cut_names(axis)
+        if transpose:
+            xcut_name, ycut_name = ycut_name, xcut_name
+        if xcut_name:
+            extract_roi_matrix(workspace, None, None, ypos, ypos, False, xcut_name)
+        if ycut_name:
+            extract_roi_matrix(workspace, xpos, xpos, None, None, True, ycut_name)
+
+        return help_msg
 
     # private api
     def _get_ws(self):
         return self._ws
 
+    def _cut_names(self, cut: str):
+        """
+        Return 3-tuple of xcut_name,ycut_name,status message depending on the cut type request.
+        :param cut: Single letter denoting the cut type: x, y, c
+        :raises RuntimeError: if an unkown cut type is requested
+        """
+        xcut_name, ycut_name = self._xcut_name, self._ycut_name
+        if cut == 'x':
+            ycut_name = ''
+            help_msg = f'Cut along X created: {xcut_name}'
+        elif cut == 'y':
+            xcut_name = ''
+            help_msg = f'Cut along Y created: {ycut_name}'
+        elif cut == 'c':
+            help_msg = f'Cuts along X/Y created: {xcut_name} & {ycut_name}'
+        else:
+            raise RuntimeError(f'Unknown cut requested {cut}')
 
-# Private functions
-def _binning_limits(workspace,
-                    slicepoint: Sequence[Optional[float]],
-                    limits: Optional[Sequence[tuple]] = None):
+        return xcut_name, ycut_name, help_msg
+
+
+# private functions
+def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
+                          bin_params: Optional[Sequence[float]], limits: tuple):
+    """
+    Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
+    :param workspace: MDEventWorkspace that is to be binned
+    :param slicepoint: ND sequence of either None or float. A float defines the point
+                    in that dimension for the slice.
+    :param bin_params: A list of binning paramaters for each dimension or thickness for slicing dimensions
+    :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
+                    not provided the full extent of each dimension is used.
+    """
+    xindex, yindex = _display_indices(slicepoint)
+    dim_limits = _dimension_limits(workspace, slicepoint, limits)
+    ndims = workspace.getNumDims()
+    ws_basis = np.eye(ndims)
+    output_extents, output_bins = [], []
+    params = {'AxisAligned': False}
+    for n in range(ndims):
+        dimension = workspace.getDimension(n)
+        basis_vec_n = _to_str(ws_basis[:, n])
+        slice_pt = slicepoint[n]
+        nbins = bin_params[n] if bin_params is not None else dimension.getNBins()
+        if slice_pt is None:
+            dim_min, dim_max = dim_limits[n]
+        else:
+            dim_min, dim_max = slice_pt - nbins / 2, slice_pt + nbins / 2
+            nbins = 1
+        params[f'BasisVector{n}'] = f'{dimension.name},{dimension.getUnits()},{basis_vec_n}'
+        output_extents.append(dim_min)
+        output_extents.append(dim_max)
+        output_bins.append(nbins)
+    params['OutputExtents'] = output_extents
+    params['OutputBins'] = output_bins
+
+    return params, xindex, yindex
+
+
+def _dimension_limits(workspace,
+                      slicepoint: Sequence[Optional[float]],
+                      limits: Optional[Sequence[tuple]] = None):
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
     :param workspace: MDEventWorkspace that is to be binned
@@ -311,16 +550,51 @@ def _binning_limits(workspace,
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     """
-    bin_limits = [(dim.getMinimum(), dim.getMaximum())
+    dim_limits = [(dim.getMinimum(), dim.getMaximum())
                   for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
+    xindex, yindex = _display_indices(slicepoint)
     if limits is not None:
-        display_idx = slicepoint.index(None)
-        bin_limits[display_idx] = limits[0]
-        bin_limits[slicepoint.index(None, display_idx + 1)] = limits[1]
+        dim_limits[xindex] = limits[0]
+        dim_limits[yindex] = limits[1]
 
-    return bin_limits
+    return dim_limits
 
 
-def _noop(*args, **kwargs):
-    """A noop function
+def _display_indices(slicepoint: Sequence[Optional[float]], transpose: bool = False):
     """
+    Given a slicepoint sequence return the indices of the display
+    dimensions.
+    :param slicepoint: ND sequence of either None or float. A float defines the point
+                    in that dimension for the slice.
+    :param transpose: If True then swap the indices before return
+    """
+    xindex = slicepoint.index(None)
+    yindex = slicepoint.index(None, xindex + 1)
+    if transpose:
+        return yindex, xindex
+    else:
+        return xindex, yindex
+
+
+def _keep_dimensions(workspace, index):
+    """
+    Drop other dimensions than that specified
+    :param workspace: A reference to an MD workspace
+    :param index: The index of the only dimension to keep in the workspace
+    """
+    # Transpose is able to do this for us
+    _inplace_transposemd(workspace, axes=[index])
+
+
+def _inplace_transposemd(workspace, axes):
+    """Transpose a workspace inplace
+    :param workspace: A reference to an MD workspace
+    :param axes: The axes parameter for TransposeMD
+    """
+    TransposeMD(InputWorkspace=workspace, OutputWorkspace=workspace, Axes=axes)
+
+
+def _to_str(seq: Sequence):
+    """Given a sequence turn it into a comma-separate string of each element
+    """
+    return ','.join(map(str, seq))

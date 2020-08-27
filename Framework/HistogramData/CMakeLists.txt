@@ -133,7 +133,6 @@ set_property(TARGET HistogramData PROPERTY FOLDER "MantidFramework")
 target_include_directories (HistogramData SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(HistogramData
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       Kernel
                       ${MANTIDLIBS})
