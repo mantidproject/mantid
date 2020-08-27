@@ -24,6 +24,8 @@ Improvements
 
 - The plot selection dialog now correctly shows the full range of valid spectra to plot, not just the min to max range.
 - We have added a Copy to Clipboard button to the plot window.
+- Any changes in the settings menu (currently only changing the default font) that require a restart will be detailed in
+  a pop up notification when leaving the settings window.
 - Tile plots are now reloaded correctly by project recovery.
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
