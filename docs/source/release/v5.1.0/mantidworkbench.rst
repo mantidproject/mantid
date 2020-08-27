@@ -141,4 +141,5 @@ Bugfixes
 - Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
 - Warn users when they attempt to use Generate Recovery Script with no workspaces present.
 - Use Jemalloc for memory allocation on Linux so memory can be released to the system.
+
 :ref:`Release 5.1.0 <v5.1.0>`
