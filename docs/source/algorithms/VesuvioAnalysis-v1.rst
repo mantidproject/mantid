@@ -8,17 +8,19 @@
 
 Description
 -----------
-This algorithm has been developed by Giovanni Romanelli for Vesuvio experiments.
+This algorithm allows the loading, reduction, and analysis of data obtained using Deep Inelastic Neutron Scattering (DINS), also referred to as Neutron Compton Scattering (NCS), at the VESUVIO spectrometer. 
+The algorithm has been developed by the VESUVIO Instrument Scientists, Giovanni Romanelli and Matthew Krzystyniak.
+A previous version of the algorithm was described in: G. Romanelli et al.; Journal of Physics: Conf. Series 1055 (2018) 012016.
 
-The algorithm can can load, reduce and analyse Vesuvio data. 
-Vesuvio is used for Deep Inelastic Neutron Scattering (DINS), which is also refered to as Neutron Compton Scattering (NCS).
-This allows direct measurments of nuclear kinetic energies and momentum distributions. 
-From these it is possible to examine the nuclear quantum effects and anhominicity. 
-The spectroscopic result are different depending on the masses of the elements.
+DINS allows the direct measurements of nuclear kinetic energies and momentum distributions, thus accessing the importance of nuclear quantum effects in condensed-matter systems, as well as the degree of anisotropy and anharmonicity in the local potentials affecting nuclei. 
+DINS data appear as a collection of mass-resolved peaks (Neutron Compton Profiles, NCPs), that are fitted independently in the time-of-flight spectra, using the formalism of the Impulse Approximation and the y-scaling introduced by G. B. West. 
 
-The analysed data represents the kinetic energies of the nuclei.
-The analysis will map all of the peak centers onto the same position.
-This done by using West Scaling. 
+Additional information about DINS theory and applications can be found in the recent review:
+C. Andreani et al., Advances in Physics, 66 (2017) 1-73
+
+Additional information on the geometry and operations of the VESUVIO spectrometer can be found in
+J. Mayers and G. Reiter, Measurement Science and Technology, 23 (2012) 045902
+G. Romanelli et al., Measurement Science and Technology, 28 (2017), 095501
 
 
 Warning
@@ -30,31 +32,51 @@ If you encounter any problems please contact the Mantid team and the Vesuvio sci
 Usage:
 ------
 
-**Example: Simple mean of two workspaces**
+**Example: Analysis of polyethylene**
 
 .. testcode::
 
-   # Create two  2-spectrum workspaces with Y values 1->8 & 3->10
-   dataX = [0,1,2,3,4,
-            0,1,2,3,4]
-   dataY = [1,2,3,4,
-            5,6,7,8]
-   ws_1 = CreateWorkspace(dataX, dataY, NSpec=2)
-   dataY = [3,4,5,6,
-            7,8,9,10]
-   ws_2 = CreateWorkspace(dataX, dataY, NSpec=2)
+   # create table of elements
+   table = CreateEmptyTableWorkspace() 
+   table.addColumn(type="str", name="Symbol")
+   table.addColumn(type="double", name="Mass (a.u.)")
+   table.addColumn(type="double", name="Intensity lower limit")
+   table.addColumn(type="double", name="Intensity value")
+   table.addColumn(type="double", name="Intensity upper limit")
+   table.addColumn(type="double", name="Width lower limit")
+   table.addColumn(type="double", name="Width value")
+   table.addColumn(type="double", name="Width upper limit")
+   table.addColumn(type="double", name="Centre lower limit")
+   table.addColumn(type="double", name="Centre value")
+   table.addColumn(type="double", name="Centre upper limit")
+   table.addRow(['H', 1.0079,  0.,1.,9.9e9,  3.,  4.5,  6.,  -1.5, 0., 0.5])
+   table.addRow(['C', 12.0,    0.,1.,9.9e9,  10., 15.5, 30., -1.5, 0., 0.5])
 
-   result = Mean("ws_1, ws_2") # note the comma-separate strings
-   print("Mean of y values in first spectrum: {}".format(result.readY(0)))
-   print("Mean of y values in second spectrum: {}".format(result.readY(1)))
+   VesuvioAnalysis(IPFile = "ip2018.par", ComptonProfile = table, AnalysisMode = "LoadReduceAnalyse",
+                   NumberOfIterations = 2, OutputName = "polyethylene", Runs = "38898-38906", TOFRangeVector = [110.,1.5,460.],
+                   Spectra = [135,182], MonteCarloEvents = 1e3, ConstraintsProfileNumbers = [0,1],
+                   ConstraintsProfileScatteringCrossSection = "2.*82.03/5.51", SpectraToBeMasked = [173,174,181],
+                   SubtractResonancesFunction = 'name=Voigt,LorentzAmp=1.,LorentzPos=284.131,LorentzFWHM=2,GaussianFWHM=3;',
+                   YSpaceFitFunctionTies = "(c6=0., c4=0.)")
+                
+   fit_results = mtd["polyethylene_H_JoY_sym_Parameters"]
 
+   print("variable", "value")
+   for row in range(fit_results.rowCount()):
+       print(fit_results.column(0)[row],"{:.3f}".format(fit_results.column(1)[row]))
+   
 Output:
 
 .. testoutput::
 
-   Mean of y values in first spectrum: [ 2.  3.  4.  5.]
-   Mean of y values in second spectrum: [ 6.  7.  8.  9.]
-
+   variable value
+   f1.sigma1 4.917
+   f1.c4 0.000
+   f1.c6 0.000
+   f1.A 0.080
+   f1.B0 0.000
+   Cost function value 0.203
+   
 .. categories::
 
 .. sourcelink::
