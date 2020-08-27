@@ -26,8 +26,9 @@ It is recommended to set up the following as a minimum:
            #name =
            #email =
    [core]
-           # Set an editor you like
-           editor = vi
+           # Uncomment and set an editor you like. If you're not sure, try Nano on Linux or Notepad++ on Windows
+           #editor = nano
+           #editor = "'C:/Program Files (x86)/Notepad++/notepad++.exe' -multiInst -notabbar -nosession -noPlugin"
            # Specify your own global list of files/patterns that git should ignore
            excludesfile = ~/.gitignore
            # Fix up line endings between windows/linux - uncomment one
