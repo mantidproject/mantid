@@ -130,11 +130,11 @@ void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
       }
     } else {
       // Edge case do not add range
-      if (i - 1 != currentLastRun && i + 1 != autoRun) {
-        newInput.append("-");
-        newInput.append(QString::number(i - 1));
+      if (i - 1 == currentLastRun && i + 1 == autoRun) {
         fnf = true;
       } else {
+        newInput.append("-");
+        newInput.append(QString::number(i - 1));
         fnf = true;
       }
     }
