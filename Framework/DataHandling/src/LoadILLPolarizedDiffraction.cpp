@@ -335,7 +335,8 @@ void LoadILLPolarizedDiffraction::loadInstrument(
 }
 
 /**
- * Loads twotheta for each detector pixel from the file
+ * Loads 2theta for each detector pixel from either the nexus file or the
+ * Instrument Parameter File
  * @param workspace : workspace with loaded instrument
  * @param entry : entry from which the pixel 2theta positions will be read
  * @param bankId : bank ID for which 2theta positions will be read
@@ -355,10 +356,10 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
     float *twoThetaDataEnd = twoThetaDataStart + D7_NUMBER_PIXELS_BANK;
     twoTheta.assign(twoThetaDataStart, twoThetaDataEnd);
   } else {
-    IAlgorithm_sptr loadInst = createChildAlgorithm("LoadParameterFile");
-    loadInst->setPropertyValue("Filename", getPropertyValue("YIGFilename"));
-    loadInst->setProperty("Workspace", workspace);
-    loadInst->execute();
+    IAlgorithm_sptr loadIpf = createChildAlgorithm("LoadParameterFile");
+    loadIpf->setPropertyValue("Filename", getPropertyValue("YIGFilename"));
+    loadIpf->setProperty("Workspace", workspace);
+    loadIpf->execute();
 
     Instrument_const_sptr instrument = workspace->getInstrument();
     IComponent_const_sptr currentBank = instrument->getComponentByName(
@@ -374,6 +375,29 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
     }
   }
   return twoTheta;
+}
+
+/**
+ * Loads offsets and slopes for each detector bank from the workspace entry
+ * @param workspace : workspace with loaded instrument
+ * @param entry : entry containing bank parameters
+ * @param bankId : bank ID of the relevant bank
+ * @return : vector of the bank slope and offset
+ */
+std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(
+    const API::MatrixWorkspace_sptr workspace, const int bankId) {
+  std::vector<double> bankParameters;
+
+  Instrument_const_sptr instrument = workspace->getInstrument();
+  IComponent_const_sptr currentBank = instrument->getComponentByName(
+      std::string("bank" + std::to_string(bankId)));
+
+  auto slope = currentBank->getParameterAsString(std::string("gradient"));
+  bankParameters.push_back(stod(slope));
+  auto offset = currentBank->getParameterAsString(std::string("offset"));
+  bankParameters.push_back(stod(offset));
+
+  return bankParameters;
 }
 
 /**
@@ -403,6 +427,10 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
     } else {
       std::vector<double> twoThetaPixels =
           loadTwoThetaDetectors(workspace, entry, bank_no + 2);
+      std::vector<double> bankParameters{1, 0}; // slope, offset
+      if (getPropertyValue("PositionCalibration") == "YIGFile") {
+        bankParameters = loadBankParameters(workspace, bank_no + 2);
+      }
       for (auto pixel_no = 0;
            pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK); ++pixel_no) {
         auto const pixelIndex =
@@ -411,7 +439,9 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
         V3D position = pixel->getPos();
         double radius, theta, phi;
         position.getSpherical(radius, theta, phi);
-        position.spherical(radius, twoThetaBank[0] - twoThetaPixels[pixel_no],
+        position.spherical(radius,
+                           bankParameters[0] * twoThetaBank[0] -
+                               bankParameters[1] - twoThetaPixels[pixel_no],
                            phi);
         componentInfo.setPosition(pixelIndex, position);
       }

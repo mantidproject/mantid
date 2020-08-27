@@ -49,6 +49,8 @@ private:
   void loadInstrument(API::MatrixWorkspace_sptr);
   std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr,
                                             const NeXus::NXEntry &, const int);
+  std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr,
+                                         const int);
   void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr);
   std::vector<double> prepareAxes(const NeXus::NXEntry &);
 
