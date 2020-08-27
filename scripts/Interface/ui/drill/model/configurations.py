@@ -60,7 +60,6 @@ class RundexSettings(object):
                 "MaskFiles",
                 "ReferenceFiles",
                 "OutputWorkspace",
-                "WedgeWorkspace",
                 "SampleThickness",
                 "CustomOptions"
                 ],

@@ -287,9 +287,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('WaterCrossSection', 'Options')
 
         self.copyProperties('SANSILLIntegration',
-                            ['OutputType', 'CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'OutputBinning',
-                             'NPixelDivision', 'NumberOfWedges', 'WedgeWorkspace', 'WedgeAngle', 'WedgeOffset',
-                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ', 'IQxQyLogBinning', 'PanelOutputWorkspaces'])
+                            ['OutputType', 'CalculateResolution',
+                             'DefaultQBinning', 'BinningFactor',
+                             'OutputBinning', 'NPixelDivision',
+                             'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
+                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ',
+                             'IQxQyLogBinning', 'PanelOutputWorkspaces'])
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
