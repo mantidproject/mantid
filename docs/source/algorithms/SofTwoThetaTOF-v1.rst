@@ -30,7 +30,8 @@ Usage
 
 **Example - Applying SofTwoThetaTOF and plotting the result**
 
-.. code-block:: python
+.. plot::
+   :include-source:
 
    from mantid.simpleapi import *
    import directtools as dt
@@ -41,10 +42,8 @@ Usage
    fig, axes = dt.subplots()
    axes.pcolor(SofTT)
    axes.set_xlim(0.)
-   fig.show()
-
+   #fig.show()
 
 .. categories::
 
 .. sourcelink::
-

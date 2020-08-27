@@ -635,11 +635,9 @@ double LoadILLReflectometry::reflectometryPeak() {
   if (!isDefault("ForegroundPeakCentre")) {
     return getProperty("ForegroundPeakCentre");
   }
-  int startIndex;
-  int endIndex;
   const auto autoIndices = fitIntegrationWSIndexRange(*m_localWorkspace);
-  startIndex = autoIndices.first;
-  endIndex = autoIndices.second;
+  auto startIndex = autoIndices.first;
+  auto endIndex = autoIndices.second;
   if (!isDefault("FitStartWorkspaceIndex")) {
     startIndex = getProperty("FitStartWorkspaceIndex");
   }

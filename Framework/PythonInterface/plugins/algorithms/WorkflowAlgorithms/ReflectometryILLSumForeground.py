@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
@@ -13,8 +11,9 @@ from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValid
                            StringListValidator)
 from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, RebinToWorkspace,
                               ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
-import numpy
 import ReflectometryILL_common as common
+import ILL_utilities as utils
+import numpy
 
 
 class Prop:
@@ -324,7 +323,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         fractional and integer foreground centre along the detector plane.
         It also applies local rotation so that the detector continues to face the sample.
         Note that this translation has nothing to do with the difference of foreground centres in direct and reflected beams,
-        which is hanled already in pre-process algorithm.
+        which is handled already in pre-process algorithm.
         Here it's only about the difference of the fractional and integer foreground centre of the reflected beam
         with already calibrated angle no matter the option.
         Note also, that this could probably be avoided, if the loader placed

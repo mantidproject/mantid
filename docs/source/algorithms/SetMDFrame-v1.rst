@@ -30,7 +30,7 @@ Usage
 
 **Example - Sample usage of SetMDFrame**
 
-.. code-block:: python
+.. testcode:: SetMDFrameExample
 
     # Prepare the sample workspace
     mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10',
