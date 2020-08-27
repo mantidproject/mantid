@@ -436,28 +436,27 @@ class ILLYIGPositionCalibration(PythonAlgorithm):
         if parameter_table.column(1)[0] == 0:
             raise RuntimeError('Bank2 slope is equal to 0.')
         bank2_slope = 1.0 / float(parameter_table.column(1)[0])
-        bank2_offset = float(parameter_table.column(1)[3])
+        bank2_offset = self._RAD_2_DEG * float(parameter_table.column(1)[3])
         if parameter_table.column(1)[3*self._D7NumberPixelsBank] == 0:
             raise RuntimeError('Bank3 slope is equal to 0.')
         bank3_slope = 1.0 / float(parameter_table.column(1)[4*self._D7NumberPixelsBank])
-        bank3_offset = float(parameter_table.column(1)[4*self._D7NumberPixelsBank+3])
+        bank3_offset = self._RAD_2_DEG * float(parameter_table.column(1)[4*self._D7NumberPixelsBank+3])
         if parameter_table.column(1)[6*self._D7NumberPixelsBank] == 0:
             raise RuntimeError('Bank4 slope is equal to 0.')
         bank4_slope = 1.0 / float(parameter_table.column(1)[8*self._D7NumberPixelsBank])
-        bank4_offset = float(parameter_table.column(1)[8*self._D7NumberPixelsBank+3])
+        bank4_offset = self._RAD_2_DEG * float(parameter_table.column(1)[8*self._D7NumberPixelsBank+3])
         bank_slopes = [bank2_slope, bank3_slope, bank4_slope]
         bank_offsets = [bank2_offset, bank3_offset, bank4_offset]
         user_offsets = self.getPropertyValue("BankOffsets").split(',')
+        bank_offsets = [offset1+float(offset2) for offset1, offset2 in zip(bank_offsets, user_offsets)]
         pixel_offsets = []
         pixel_no = 0
         for row_no in range(parameter_table.rowCount()):
             row_data = parameter_table.row(row_no)
             if '.offset' in row_data['Name']:
-                pixel_offset = +self._RAD_2_DEG * row_data['Value'] \
-                             + self._RAD_2_DEG * bank_offsets[math.floor(pixel_no / self._D7NumberPixelsBank)] \
+                pixel_offset = self._RAD_2_DEG * row_data['Value'] \
                              + (0.5*self._D7NumberPixelsBank) \
-                             - bank_slopes[math.floor(pixel_no / self._D7NumberPixelsBank)] * (pixel_no % self._D7NumberPixelsBank) \
-                             - float(user_offsets[math.floor(pixel_no / self._D7NumberPixelsBank)])
+                             - bank_slopes[math.floor(pixel_no / self._D7NumberPixelsBank)] * (pixel_no % self._D7NumberPixelsBank)
                 if pixel_no % 2 == 0:
                     pixel_offset -= self._RAD_2_DEG * 0.011 / (2.0 * (1.5177 - 0.01252)) # repeats calculation from the D7 IDF
                 pixel_offsets.append(pixel_offset)
