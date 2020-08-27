@@ -96,6 +96,7 @@ Improvements
 - Sliceviewer no longer lists the reversed colourmaps along with the regular, instead they are accessed with a reverse checkbox.
 - Sliceviewer colourmap uses the default colourmap from the settings.
 - Code completions are now loaded when the code editor is first changed.
+- The ExtractFFTSpectrum algorithm has extra properties (Shift, AutoShift, and AcceptXRoundingErrors) to reflect those of the underlying FFT.
 - Legends in 1D plots are now editable in-situ.
 
 Bugfixes
@@ -140,6 +141,8 @@ Bugfixes
   flagging the old ``launch_workbench.exe`` as a threat and quarantining it.
 - Fixed an issue where workbench would not open if PID assigned by project recovery was owned by another programme.
 - Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
+- When running `ExtractFFTSpectrum` with only a real input, there is no longer a blank output on the end of the workspace.
+- `ExtractFFTSpectrum` gives the correct units. 
 - Warn users when they attempt to use Generate Recovery Script with no workspaces present.
 - Fixed a bug with colorfill plot script generation for distribution workspaces.
 
