@@ -13,7 +13,8 @@ Powder Diffraction
 ------------------
 New features
 ^^^^^^^^^^^^
-- New ``D7`` instrument definition for ILL 
+- New ``D7`` instrument definition for ILL
+- New :ref:`SaveGSSCW <algm-SaveGSSCW>` is implemented for constant wavelength diffractometers.
 
 Improvements
 ^^^^^^^^^^^^

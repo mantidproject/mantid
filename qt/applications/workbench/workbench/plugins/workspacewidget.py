@@ -274,3 +274,6 @@ class WorkspaceWidget(PluginWidget):
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()
+
+    def empty_of_workspaces(self):
+        return len(self._ads.getObjectNames()) == 0

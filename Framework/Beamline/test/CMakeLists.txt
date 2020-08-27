@@ -7,7 +7,6 @@ if(CXXTEST_FOUND)
   target_include_directories(BeamlineTest SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
   target_link_libraries(BeamlineTest
                         PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         Beamline
 			Kernel
                         ${Boost_LIBRARIES}

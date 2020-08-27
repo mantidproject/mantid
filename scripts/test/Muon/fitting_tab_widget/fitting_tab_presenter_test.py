@@ -117,6 +117,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.function_browser.getDatasetNames(), ['Input Workspace Name'])
 
     def test_fit_clicked_passes_in_correct_arguments_to_model(self):
+        self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.presenter.model.get_function_name.return_value = 'GausOsc'
         self.presenter.get_fit_input_workspaces = mock.MagicMock(
             return_value=['Input Workspace Name_1', 'Input Workspace Name 2'])
@@ -698,6 +699,15 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.handle_function_structure_changed()
 
         self.assertEqual(self.presenter._fit_function, [None])
+
+    def test_that_handle_fit_clicked_shows_warning_and_returns_before_processing_if_no_data_selected(self):
+        self.presenter.selected_data = []
+        self.presenter.perform_fit = mock.MagicMock()
+
+        self.presenter.handle_fit_clicked()
+
+        self.view.warning_popup.assert_called_once_with('No data selected to fit')
+        self.presenter.perform_fit.assert_not_called()
 
 
 if __name__ == '__main__':

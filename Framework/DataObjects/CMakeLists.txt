@@ -240,7 +240,6 @@ set_property(TARGET DataObjects PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(DataObjects
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${JSONCPP_LIBRARIES}
                       ${NEXUS_LIBRARIES})
