@@ -288,13 +288,12 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
         m_fileNames.emplace_back(file.str());
       }
     }
-  }
-  else {
+  } else {
     // Check all files in same directory
     const auto pathF = FileFinder::Instance().getFullPath(m_fileNames[0]);
     Poco::File fileBase(pathF);
     std::size_t found = fileBase.path().find_last_of("/\\");
-    const auto firstDir = fileBase.path().substr(0,found + 1);
+    const auto firstDir = fileBase.path().substr(0, found + 1);
     for (const auto &file : m_fileNames) {
       const auto pathT = FileFinder::Instance().getFullPath(file);
       Poco::File filePathT(pathT);
@@ -305,7 +304,6 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
         throw std::runtime_error("All Files are not in the same directory.");
       }
     }
-   
   }
 
   // Extract run numbers for all runs and map to filenames

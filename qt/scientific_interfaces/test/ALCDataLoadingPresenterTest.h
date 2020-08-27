@@ -259,8 +259,9 @@ public:
   void test_load_error() {
     // Set last run to one of the different instrument - should cause error
     // within algorithms exec
-    std::vector<std::string> bad{"MUSR000015189.nxs", "EMU00006473.nxs"};
-    ON_CALL(*m_view, getRuns()).WillByDefault(Return(bad));
+    std::vector<std::string> diffInstrument{
+        "MUSR00015189.nxs", "MUSR00015191.nxs", "EMU00006473.nxs"};
+    ON_CALL(*m_view, getRuns()).WillByDefault(Return(diffInstrument));
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     m_view->requestLoading();
@@ -275,8 +276,8 @@ public:
   }
 
   void test_load_nonExistentFile() {
-    std::vector<std::string> bad{"non-existent-file"};
-    ON_CALL(*m_view,getRuns()).WillByDefault(Return(bad));
+    std::vector<std::string> nonExistent{"non-existent-file"};
+    ON_CALL(*m_view, getRuns()).WillByDefault(Return(nonExistent));
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     m_view->requestLoading();
@@ -353,9 +354,9 @@ public:
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1364.520, 1E-3),
                                             WorkspaceX(0, 1, 1380.000, 1E-3),
                                             WorkspaceX(0, 2, 1398.090, 1E-3),
-                                            WorkspaceY(0, 0, 0.12492, 1E-5),
-                                            WorkspaceY(0, 1, 0.10353, 1E-5),
-                                            WorkspaceY(0, 2, 0.14734, 1E-5)),
+                                            WorkspaceY(0, 0, 0.12838, 1E-5),
+                                            WorkspaceY(0, 1, 0.10900, 1E-5),
+                                            WorkspaceY(0, 2, 0.15004, 1E-5)),
                                       0));
 
     m_view->requestLoading();

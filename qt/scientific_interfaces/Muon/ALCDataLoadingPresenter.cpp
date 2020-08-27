@@ -60,20 +60,26 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   load(files);
 }
 
-
+/**
+ * Changes which files are loaded based on autoRun. Will only make changes if
+ * the current last run number is less than autoRun Removes any files which
+ * don't exist between the first run and autoRun
+ * @param autoRun :: [input] The latest run number found in the same directory
+ * as the first run supplied
+ */
 void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
 
   const int currentLastRun = m_view->extractRunNumber(m_view->lastRun());
-  //auto currentInput = m_ui.runs->getText().toStdString();
+  // auto currentInput = m_ui.runs->getText().toStdString();
   auto currentInput = m_view->getCurrentRunsText();
 
-  // Only make changes if found run > user last run
-  if (autoRun < currentLastRun)
-    return;
-
   // Save old input
-  //m_oldInput = currentInput;
+  // m_oldInput = currentInput;
   m_view->setRunsOldInput(currentInput);
+
+  // Only make changes if found run > user last run
+  if (autoRun <= currentLastRun)
+    return;
 
   // Check if range at end
   std::size_t findRange = currentInput.find_last_of("-");
@@ -91,6 +97,10 @@ void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
   // Will hold the base path for all runs, used to check which run numbers
   // exist
   auto basePath = m_view->firstRun();
+  if (basePath.empty()) {
+    m_view->displayError("First run invalid");
+    return;
+  }
 
   // Strip the extension
   size_t findExt = basePath.find_last_of(".");
@@ -120,7 +130,7 @@ void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
       }
     } else {
       // Edge case do not add range
-      if (i-1 != currentLastRun && i+1 != autoRun) {
+      if (i - 1 != currentLastRun && i + 1 != autoRun) {
         newInput.append("-");
         newInput.append(QString::number(i - 1));
         fnf = true;
@@ -138,10 +148,9 @@ void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
   newInput.append(QString::number(autoRun));
 
   // Update it
-  //m_ui.runs->setFileTextWithSearch(newInput);
+  // m_ui.runs->setFileTextWithSearch(newInput);
   m_view->setRunsTextWithSearch(newInput);
 }
-
 
 /**
  * Called when the auto checkbox is checked
@@ -169,8 +178,13 @@ void ALCDataLoadingPresenter::updateAutoRun() {
   updateRunsTextFromAuto(lastRun);
 }
 
+/**
+ * Called when Auto checkbox is unchecked
+ * Sets runs file finder to input as it was before auto was checked
+ */
 void ALCDataLoadingPresenter::resetAutoRun() {
-  m_view->setRunsTextWithSearch(QString::fromStdString(m_view->getRunsOldInput()));
+  m_view->setRunsTextWithSearch(
+      QString::fromStdString(m_view->getRunsOldInput()));
 }
 
 /**
@@ -271,14 +285,6 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     } else {
       assert(m_loadedData->getNumberHistograms() == 4);
     }
-
-    const auto xvalOne = m_loadedData->readX(0)[0];
-    const auto xvalTwo = m_loadedData->readX(0)[1];
-    const auto xvalThree = m_loadedData->readX(0)[2];
-
-    const auto yvalOne = m_loadedData->readY(0)[0];
-    const auto yvalTwo = m_loadedData->readY(0)[1];
-    const auto yvalThree = m_loadedData->readY(0)[2];
 
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)

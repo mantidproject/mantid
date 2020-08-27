@@ -62,7 +62,6 @@ std::string ALCDataLoadingView::firstRun() const {
 
 /**
  * If the last run is valid, return the filename.
- * If user entered "Auto", return this.
  * Otherwise, return an empty string.
  */
 std::string ALCDataLoadingView::lastRun() const {
@@ -74,6 +73,9 @@ std::string ALCDataLoadingView::lastRun() const {
   return "";
 }
 
+/**
+ * If runs expression is valid, returns vector of file names
+ */
 std::vector<std::string> ALCDataLoadingView::getRuns() const {
   std::vector<std::string> returnFiles;
   if (m_ui.runs->isValid()) {
@@ -269,7 +271,6 @@ void ALCDataLoadingView::enableAll() {
   m_ui.load->setEnabled(true);
 }
 
-
 /**
  * Called when the check state of the "Auto" checkbox changes.
  * Set text before setting read-only to validate the right text.
@@ -285,30 +286,19 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
     // Update auto run
     emit runAutoChecked();
 
-    // Check for failure
-    //if (m_currentAutoRun == -1) {
-    //  return; // Error displayed from presenter
-    //}
-
-    // Update runs
-    //updateRunsTextFromAuto();
-
   } else {
     // Remove read only
     m_ui.runs->setReadOnly(false);
 
     // Reset text as before auto checked
     emit runAutoUnchecked();
-
-    // Reset text as before auto checked
-    //m_ui.runs->setFileTextWithSearch(QString::fromStdString(m_oldInput));
   }
 }
 
 /**
  * Remove the run number from a full file path
  * @param file :: [input] full path which contains a run number
- * @return An integer representation of the run number 
+ * @return An integer representation of the run number
  */
 int ALCDataLoadingView::extractRunNumber(const std::string &file) {
   if (file.empty())
@@ -321,8 +311,8 @@ int ALCDataLoadingView::extractRunNumber(const std::string &file) {
 
   // Remove all non-digits
   returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(),
-                               [](auto c) { return !std::isdigit(c); }),
-                returnVal.end());
+                                 [](auto c) { return !std::isdigit(c); }),
+                  returnVal.end());
 
   // Return run number as int (removes leading 0's)
   return std::stoi(returnVal);
@@ -338,7 +328,7 @@ void ALCDataLoadingView::setRunsTextWithSearch(const QString &text) {
 
 std::string ALCDataLoadingView::getRunsOldInput() const { return m_oldInput; }
 
-void ALCDataLoadingView::setRunsOldInput(const std::string& oldInput) {
+void ALCDataLoadingView::setRunsOldInput(const std::string &oldInput) {
   m_oldInput = oldInput;
 }
 
