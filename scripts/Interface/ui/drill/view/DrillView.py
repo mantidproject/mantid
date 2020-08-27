@@ -479,7 +479,7 @@ class DrillView(QMainWindow):
         Popup the help window.
         """
         InterfaceManager().showHelpPage(
-                "qthelp://org.mantidproject/doc/interfaces/drill.html")
+                "qthelp://org.mantidproject/doc/interfaces/DrILL.html")
 
     def automatic_filling(self):
         """
