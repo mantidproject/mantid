@@ -133,7 +133,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         peaks_positions = self._fit_bragg_peaks(intensityWS, yig_peaks_positions)
         progress.report()
         ReplaceSpecialValues(InputWorkspace='fit_results', OutputWorkspace='fit_results',
-                             NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
+                             NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, checkErrorAxis=True)
         # fit the wavelegnth, bank gradients and individual
         detector_parameters = self._fit_detector_positions(peaks_positions)
         progress.report()
