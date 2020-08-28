@@ -356,6 +356,7 @@ void InstrumentWidget::resetSurface() {
  * Select the tab to be displayed
  */
 void InstrumentWidget::selectTab(int tab) {
+  getSurface()->setCurrentTab(tab);
   mControlsTab->setCurrentIndex(tab);
 }
 
@@ -576,7 +577,13 @@ void InstrumentWidget::setupColorMap() { emit colorMapChanged(); }
 /**
  * Connected to QTabWidget::currentChanged signal
  */
-void InstrumentWidget::tabChanged(int /*unused*/) { updateInfoText(); }
+void InstrumentWidget::tabChanged(int /*unused*/) {
+  updateInfoText();
+  auto surface = getSurface();
+  if (surface) {
+    surface->setCurrentTab(getCurrentTab());
+  }
+}
 
 /**
  * Change color map button slot. This provides the file dialog box to select

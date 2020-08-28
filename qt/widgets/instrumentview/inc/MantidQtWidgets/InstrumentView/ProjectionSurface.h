@@ -147,6 +147,8 @@ public:
   /// Save settings for the projection surface to a project file
   virtual std::string saveToProject() const;
 
+  void setCurrentTab(int currentTab) { m_currentTab = currentTab; }
+
   //-----------------------------------
   //    Mask methods
   //-----------------------------------
@@ -267,6 +269,7 @@ signals:
   // detector selection
   void singleComponentTouched(size_t /*_t1*/);
   void singleComponentPicked(size_t /*_t1*/);
+  void singleComponentPickedForMasking(size_t /*_t1*/);
 
   // shape manipulation
   void signalToStartCreatingShape2D(const QString &type,
@@ -387,6 +390,7 @@ private:
   /// Set when the picking image must be redrawn regardless of the interaction
   /// mode
   mutable bool m_redrawPicking;
+  int m_currentTab;
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;

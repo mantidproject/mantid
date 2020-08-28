@@ -375,7 +375,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
  */
 void InstrumentWidgetMaskTab::initSurface() {
   connect(m_instrWidget->getSurface().get(),
-          SIGNAL(singleComponentPicked(size_t)), this,
+          SIGNAL(singleComponentPickedForMasking(size_t)), this,
           SLOT(singlePixelPicked(size_t)));
   connect(m_instrWidget->getSurface().get(), SIGNAL(shapeCreated()), this,
           SLOT(shapeCreated()));
