@@ -135,7 +135,8 @@ class RecentlyClosedScriptsMenuTest(TestCase):
         warning.assert_called_once()
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["C:/script1.py", "C:/script2.py"])
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=[(1, "C:/script1.py"),
+                                                                               (2, "C:/script2.py")])
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
     def test_remove_script_from_settings_removes_given_path(self, has, get, set):
         menu = RecentlyClosedScriptsMenu(None)
@@ -144,9 +145,11 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         has.assert_called_once_with(RECENT_SCRIPTS_KEY)
         get.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        set.assert_called_once_with(RECENT_SCRIPTS_KEY, ["C:/script2.py"])
+        set.assert_called_once_with(RECENT_SCRIPTS_KEY, [(0, "C:/script2.py")])
 
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["C:/script1.py", "C:/script2.py", "C:/script1.py",])
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=[(1, "C:/script1.py"),
+                                                                               (2, "C:/script2.py"),
+                                                                               (3, "C:/script1.py")])
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
     def test_load_scripts_from_settings_removes_duplicates(self, has, get):
         menu = RecentlyClosedScriptsMenu(None)
@@ -164,8 +167,9 @@ class RecentlyClosedScriptsMenuTest(TestCase):
         menu = RecentlyClosedScriptsMenu(None)
         self.assertEqual([], menu.load_scripts_from_settings())
 
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["C:/script1.py", "C:/script2.py",
-                                                                               "C:/script3.py"])
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=[(1, "C:/script1.py"),
+                                                                               (2, "C:/script2.py"),
+                                                                               (3, "C:/script3.py")])
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
     def test_load_scripts_loads_scripts_from_settings(self, has, get):
         menu = RecentlyClosedScriptsMenu(None)
@@ -180,7 +184,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
         self.assertTrue("C:/script3.py" in load)
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["C:/script1.py", "C:/script2.py"])
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=[(0, "C:/script1.py"), (1, "C:/script2.py")])
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
     def test_add_script_to_settings_adds_a_script_to_settings(self, has, get, set):
         menu = RecentlyClosedScriptsMenu(None)
@@ -189,10 +193,10 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         has.assert_called_once_with(RECENT_SCRIPTS_KEY)
         get.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        set.assert_called_once_with(RECENT_SCRIPTS_KEY, ["C:/script3.py", "C:/script1.py", "C:/script2.py"])
+        set.assert_called_once_with(RECENT_SCRIPTS_KEY, [(0, "C:/script3.py"), (1, "C:/script1.py"), (2, "C:/script2.py")])
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["C:/script1.py", "C:/script2.py"])
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=[(1, "C:/script1.py"), (2, "C:/script2.py")])
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
     def test_add_script_doesnt_add_duplicates(self, has, get, set):
         menu = RecentlyClosedScriptsMenu(None)
@@ -228,8 +232,8 @@ class RecentlyClosedScriptsMenuTest(TestCase):
         set.assert_not_called()
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["1", "2", "3", "4", "5", "6", "7", "8",
-                                                                               "9", "10"])
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=[(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5"), (6, "6"), (7, "7"), (8, "8"),
+                                                                               (9, "9"), (10, "10")])
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
     def test_add_script_doesnt_add_more_than_max_number_of_scripts(self, has, get, set):
         menu = RecentlyClosedScriptsMenu(None)
@@ -239,11 +243,12 @@ class RecentlyClosedScriptsMenuTest(TestCase):
         has.assert_called_once_with(RECENT_SCRIPTS_KEY)
         get.assert_called_once_with(RECENT_SCRIPTS_KEY)
         self.assertEqual(RECENT_SCRIPT_MAX_NUMBER, len(set.call_args[0][1]))
-        set.assert_called_once_with(RECENT_SCRIPTS_KEY, ['11', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+        set.assert_called_once_with(RECENT_SCRIPTS_KEY, [(0, '11'), (1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'),
+                                                         (6, '6'), (7, '7'), (8, '8'), (9, '9')])
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["1", "2", "3", "4", "5", "6", "7", "8",
-                                                                               "9", "10"])
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=[(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5"), (6, "6"), (7, "7"), (8, "8"),
+                                                                               (9, "9"), (10, "10")])
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
     def test_add_script_adds_new_scripts_to_the_first_index_and_removes_excess_scripts_from_the_last_index(self, has, get, set):
         menu = RecentlyClosedScriptsMenu(None)
@@ -252,4 +257,5 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         has.assert_called_once_with(RECENT_SCRIPTS_KEY)
         get.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        set.assert_called_once_with(RECENT_SCRIPTS_KEY, ['11', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+        set.assert_called_once_with(RECENT_SCRIPTS_KEY, [(0, '11'), (1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'),
+                                                         (6, '6'), (7, '7'), (8, '8'), (9, '9')])

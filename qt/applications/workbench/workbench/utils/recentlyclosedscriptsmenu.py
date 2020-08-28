@@ -62,32 +62,24 @@ class RecentlyClosedScriptsMenu(QMenu):
                                   "problems?",
                                   QMessageBox.Ok)
 
-    @staticmethod
-    def remove_script_from_settings(path):
-        if CONF.has(RECENT_SCRIPTS_KEY):
-            scripts = CONF.get(RECENT_SCRIPTS_KEY)
-            if path in scripts:
-                scripts.remove(path)
-                CONF.set(RECENT_SCRIPTS_KEY, scripts)
+    def remove_script_from_settings(self, path):
+        scripts = self._get_scripts_from_settings()
+        if path in scripts:
+            scripts.remove(path)
+            self._store_scripts_to_settings(scripts)
 
-    @staticmethod
-    def load_scripts_from_settings():
-        scripts = []
-        if CONF.has(RECENT_SCRIPTS_KEY):
-            scripts = CONF.get(RECENT_SCRIPTS_KEY)
+    def load_scripts_from_settings(self):
+        scripts = self._get_scripts_from_settings()
 
         # Ensure there are no duplicates, general sanitization.
         scripts = list(set(scripts))
 
         return scripts
 
-    @staticmethod
-    def add_script_to_settings(path):
+    def add_script_to_settings(self, path):
         if path is None or path == '':
             return
-        scripts = []
-        if CONF.has(RECENT_SCRIPTS_KEY):
-            scripts = CONF.get(RECENT_SCRIPTS_KEY)
+        scripts = self._get_scripts_from_settings()
 
         if path not in scripts:
             scripts.insert(0, path)
@@ -95,4 +87,28 @@ class RecentlyClosedScriptsMenu(QMenu):
             if len(scripts) > RECENT_SCRIPT_MAX_NUMBER:
                 scripts.pop()
 
-            CONF.set(RECENT_SCRIPTS_KEY, scripts)
+            self._store_scripts_to_settings(scripts)
+
+    @staticmethod
+    def _get_scripts_from_settings():
+        scripts = []
+        if CONF.has(RECENT_SCRIPTS_KEY):
+            scripts = CONF.get(RECENT_SCRIPTS_KEY)
+
+        def sort_key(sub_list):
+            return sub_list[0]
+
+        scripts.sort(key=sort_key)
+        # strip scripts of it's extra data and overwrite the list
+        for index, script in enumerate(scripts):
+            scripts[index] = script[1]
+
+        return scripts
+
+    @staticmethod
+    def _store_scripts_to_settings(scripts):
+        # Add an index to a tuple in the script
+        for index, script in enumerate(scripts):
+            scripts[index] = (index, script)
+
+        CONF.set(RECENT_SCRIPTS_KEY, scripts)
