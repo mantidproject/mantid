@@ -23,6 +23,8 @@ class LinePlotsTest(unittest.TestCase):
         self.axx, self.axy = MagicMock(), MagicMock()
         self.image_axes.figure.add_subplot.side_effect = [self.axx, self.axy]
         self.mock_colorbar = MagicMock(cmin_value=1.0, cmax_value=50.)
+        self.mock_colorbar.get_colorbar_scale = MagicMock()
+        self.mock_colorbar.get_colorbar_scale.return_value = [1.0, {}]
 
     @patch('mantidqt.widgets.sliceviewer.lineplots.GridSpec')
     def test_construction_adds_line_plots_to_axes(self, mock_gridspec):
@@ -35,8 +37,10 @@ class LinePlotsTest(unittest.TestCase):
         self.assertEqual(1, mock_gridspec.call_count)
         # use spaces at 0, 1 & 3 in grid
         gs.__getitem__.assert_has_calls((call(0), call(1), call(3)), any_order=True)
-        self.assertTrue('sharex' in fig.add_subplot.call_args_list[0].kwargs)
-        self.assertTrue('sharey' in fig.add_subplot.call_args_list[1].kwargs)
+        self.assertTrue('sharey' in fig.add_subplot.call_args_list[0][1] or
+                        'sharey' in fig.add_subplot.call_args_list[1][1])
+        self.assertTrue('sharex' in fig.add_subplot.call_args_list[0][1] or
+                        'sharex' in fig.add_subplot.call_args_list[1][1])
 
     def test_delete_plot_lines_handles_empty_plots(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
@@ -71,6 +75,28 @@ class LinePlotsTest(unittest.TestCase):
         plotter.plot_y_line(x, y)
         self.axy.plot.assert_called_once_with(y, x, scaley=False)
         self.axy.set_ylabel.assert_called_once_with(self.image_axes.get_ylabel())
+
+    def test_plot_lines_are_set_to_width_of_below_default(self):
+        plotter = LinePlots(self.image_axes, self.mock_colorbar)
+        self.axx.set_xlabel.reset_mock()
+        x, y = np.arange(10.), np.arange(10.) * 2
+
+        plotter.plot_x_line(x, y)
+        self.axx.plot.assert_called_once_with(x, y, scalex=False)
+        self.assert_that_a_call_has_been_made_to_this_object_containing_linewidth_and_half(self.axx.plot)
+
+        self.axy.set_ylabel.reset_mock()
+        self.axy.set_xlim.reset_mock()
+        plotter.plot_y_line(x, y)
+        self.axy.plot.assert_called_once_with(y, x, scaley=False)
+        self.assert_that_a_call_has_been_made_to_this_object_containing_linewidth_and_half(self.axy.plot)
+
+    def assert_that_a_call_has_been_made_to_this_object_containing_linewidth_and_half(self, obj):
+        one_of_the_calls_is_linewidth = False
+        for mock_call in obj.mock_calls:
+            if mock_call[0] == "().__getitem__().set_linewidth" or mock_call[1] == 0.5:
+                one_of_the_calls_is_linewidth = True
+        self.assertTrue(one_of_the_calls_is_linewidth)
 
     def test_plot_with_line_present_sets_data(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
