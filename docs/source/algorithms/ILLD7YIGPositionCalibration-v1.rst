@@ -32,7 +32,7 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
-**Example - ILLD7YIGCalibration - calibration at the intermediate wavelength**
+**Example - ILLD7YIGPositionCalibration - calibration at the intermediate wavelength**
 
 .. testcode:: ILLD7YIGCalibrationIntermediateExample
 
