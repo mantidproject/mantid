@@ -52,7 +52,7 @@ Output:
 
 .. testoutput:: ILLD7YIGCalibrationIntermediateExample
 
-   The output calibrated wavelength is: 4.86
+   The calibrated wavelength is: 4.86
    The bank2 gradient is: 0.992
    The bank3 gradient is: 1.004
    The bank4 gradient is: 0.997
