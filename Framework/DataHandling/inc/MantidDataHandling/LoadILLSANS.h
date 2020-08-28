@@ -7,6 +7,8 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/IPreview.h"
+#include "MantidAPI/PreviewManager.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
