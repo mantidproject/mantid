@@ -97,6 +97,7 @@ Improvements
 - Sliceviewer colourmap uses the default colourmap from the settings.
 - Code completions are now loaded when the code editor is first changed.
 - Legends in 1D plots are now editable in-situ.
+- Sliceviewer cut line plots' line widths reduced
 
 Bugfixes
 ########
