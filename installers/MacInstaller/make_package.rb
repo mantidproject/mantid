@@ -27,7 +27,7 @@ BUNDLED_PY_MODULES_COMMON = [
   'setuptools*.*-info',
   'wheel',
   'wheel*.*-info'
-]
+].freeze
 # Brew Python packages to be copied to bundle
 BUNDLED_PY_MODULES_MANTIDPLOT = [
   'PyQt4/__init__.py',
@@ -40,7 +40,7 @@ BUNDLED_PY_MODULES_MANTIDPLOT = [
   'PyQt4/QtXml.so',
   'PyQt4/sip.so',
   'PyQt4/uic'
-]
+].freeze
 BUNDLED_PY_MODULES_WORKBENCH = [
   'PyQt5/__init__.py',
   'PyQt5/Qt.so',
@@ -54,7 +54,7 @@ BUNDLED_PY_MODULES_WORKBENCH = [
   'PyQt5/QtXml.so',
   'PyQt5/sip.so',
   'PyQt5/uic',
-]
+].freeze
 REQUIREMENTS_FILE = Pathname.new(__dir__) + 'requirements.txt'
 REQUIREMENTS_WORKBENCH_FILE = Pathname.new(__dir__) + 'requirements-workbench.txt'
 SITECUSTOMIZE_FILE = Pathname.new(__dir__) + 'sitecustomize.py'
@@ -581,21 +581,6 @@ python_version_major = python_version_full[0]
 python_version_minor = python_version_full[1]
 so_suffix = ''
 
-# === legacy: can be removed one all builders moved to homebrew HEAD. The lists at the top can then be frozen again ===
-# Allow building with old brew python 3.7 package when brew was fixed for 2/3 compatability
-# plus new HEAD state.
-# We use the presence of sip.so in the top-level site-packages to determine if we are in the legacy mode or HEAD.
-# sip.so is bundled inside PyQt with homebrew at HEAD
-_py_home = host_python_exe.realpath.parent.parent
-_src_site_packages = Pathname.new("#{_py_home}/lib/python#{python_version_major}.#{python_version_minor}/site-packages")
-if Pathname.new("#{_src_site_packages}/sip.so").exist?
-  so_suffix = 'm'
-  BUNDLED_PY_MODULES_COMMON << 'sip.so'
-  BUNDLED_PY_MODULES_MANTIDPLOT.delete('PyQt4/sip.so')
-  BUNDLED_PY_MODULES_WORKBENCH.delete('PyQt5/sip.so')
-end
-# ==== end legacy =======
-
 bundled_packages = BUNDLED_PY_MODULES_COMMON.map { |s| s % "cpython-%d%d%s-darwin" % [python_version_major, python_version_minor, so_suffix] }
 requirements_files = [REQUIREMENTS_FILE]
 # check we have a known bundle
@@ -604,6 +589,7 @@ if bundle_path.to_s.end_with?('MantidWorkbench.app')
   requirements_files << REQUIREMENTS_WORKBENCH_FILE
   bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
+  executables << "#{contents_macos}/MantidWorkbench"
 elsif bundle_path.to_s.end_with?('MantidPlot.app')
   bundled_packages += BUNDLED_PY_MODULES_MANTIDPLOT
   bundled_qt_plugins = QT_PLUGINS_COMMON

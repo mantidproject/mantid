@@ -100,7 +100,7 @@ public:
     MatrixWorkspace_sptr outWorkspace =
         algorithm->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWorkspace->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outWorkspace->blocksize(), 6);
+    TS_ASSERT_EQUALS(outWorkspace->blocksize(), 5);
   }
 
   void test_sample_output_values_are_correct() {

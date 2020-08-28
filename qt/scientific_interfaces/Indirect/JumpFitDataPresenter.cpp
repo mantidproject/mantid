@@ -95,6 +95,10 @@ void JumpFitDataPresenter::updateActiveDataIndex() {
   m_dataIndex = m_jumpModel->numberOfWorkspaces();
 }
 
+void JumpFitDataPresenter::updateActiveDataIndex(int index) {
+  m_dataIndex = index;
+}
+
 void JumpFitDataPresenter::updateAvailableParameters() {
   updateAvailableParameters(m_cbParameterType->currentText());
 }
@@ -169,6 +173,7 @@ void JumpFitDataPresenter::dialogParameterTypeUpdated(
 
 void JumpFitDataPresenter::updateParameterOptions(
     JumpFitAddWorkspaceDialog *dialog) {
+  setDataIndexToCurrentWorkspace(dialog);
   if (m_activeParameterType == "Width")
     dialog->setParameterNames(m_jumpModel->getWidths(m_dataIndex));
   else if (m_activeParameterType == "EISF")
@@ -179,6 +184,7 @@ void JumpFitDataPresenter::updateParameterOptions(
 
 void JumpFitDataPresenter::updateParameterTypes(
     JumpFitAddWorkspaceDialog *dialog) {
+  setDataIndexToCurrentWorkspace(dialog);
   dialog->setParameterTypes(getParameterTypes(m_dataIndex));
 }
 
@@ -202,6 +208,9 @@ void JumpFitDataPresenter::addWorkspace(IndirectFittingModel *model,
 void JumpFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto jumpDialog =
           dynamic_cast<JumpFitAddWorkspaceDialog const *>(dialog)) {
+    setDataIndexToCurrentWorkspace(jumpDialog);
+    // here we can say that we are in multiple mode so we can append the spectra
+    // to the current one and then setspectra
     setModelSpectrum(jumpDialog->parameterNameIndex());
     updateActiveDataIndex();
   }
@@ -224,9 +233,26 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
   if (index < 0)
     throw std::runtime_error("No valid parameter was selected.");
   else if (m_activeParameterType == "Width")
-    m_jumpModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex);
+    m_jumpModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex,
+                                false);
   else
-    m_jumpModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex);
+    m_jumpModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex,
+                               false);
+}
+
+void JumpFitDataPresenter::setDataIndexToCurrentWorkspace(
+    IAddWorkspaceDialog const *dialog) {
+  //  update active data index with correct index based on the workspace name
+  //  and the vector in m_fitDataModel which is in the base class
+  //  indirectFittingModel get table workspace index
+  const auto wsName = dialog->workspaceName().append("_HWHM");
+  // This a vector of workspace names currently loaded
+  auto wsVector = m_jumpModel->m_fitDataModel->getWorkspaceNames();
+  // this is an iterator pointing to the current wsName in wsVector
+  auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
+  // this is the index of the workspace.
+  int index = int(std::distance(wsVector.begin(), wsIt));
+  updateActiveDataIndex(index);
 }
 
 void JumpFitDataPresenter::closeDialog() {

@@ -646,9 +646,6 @@ class MainWindow(QMainWindow):
 
     def readSettings(self, settings):
         qapp = QApplication.instance()
-        qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
-        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('high_dpi_scaling'))
 
         # get the saved window geometry
         window_size = settings.get('MainWindow/size')

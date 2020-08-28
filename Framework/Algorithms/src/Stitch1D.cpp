@@ -495,8 +495,7 @@ void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
       std::isnan(m_scaleFactor)) {
     std::stringstream messageBuffer;
     messageBuffer << "Stitch1D calculated scale factor is: " << m_scaleFactor
-                  << ". Check that in both input workspaces the integrated "
-                     "overlap region is non-zero.";
+                  << ". Check the overlap region is non-zero.";
     g_log.warning(messageBuffer.str());
   }
 }

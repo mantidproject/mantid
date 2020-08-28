@@ -30,6 +30,8 @@ Improvements
 
 - The plot selection dialog now correctly shows the full range of valid spectra to plot, not just the min to max range.
 - We have added a Copy to Clipboard button to the plot window.
+- Any changes in the settings menu (currently only changing the default font) that require a restart will be detailed in
+  a pop up notification when leaving the settings window.
 - Tile plots are now reloaded correctly by project recovery.
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
@@ -101,7 +103,9 @@ Improvements
 - Workbench will now spot if it is about to create the settings window off the available screen, and will move it so it is all visible. This is important as it is a modal dialog and could freeze the application in an unrecoverable way before.
 - Sliceviewer no longer lists the reversed colourmaps along with the regular, instead they are accessed with a reverse checkbox.
 - Sliceviewer colourmap uses the default colourmap from the settings.
+- Sliceviewer scale remains set when reopened
 - Code completions are now loaded when the code editor is first changed.
+- The ExtractFFTSpectrum algorithm has extra properties (Shift, AutoShift, and AcceptXRoundingErrors) to reflect those of the underlying FFT.
 - Legends in 1D plots are now editable in-situ.
 
 Bugfixes
@@ -144,8 +148,12 @@ Bugfixes
 - Fix crash when subscribing algorithms from a separate thread
 - The workbench launch scripts have been replaced by an executable on macOS & Windows. On Windows this will stop virus scanners
   flagging the old ``launch_workbench.exe`` as a threat and quarantining it.
+- Fixed an issue where workbench would not open if PID assigned by project recovery was owned by another programme.
 - Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
+- When running `ExtractFFTSpectrum` with only a real input, there is no longer a blank output on the end of the workspace.
+- `ExtractFFTSpectrum` gives the correct units. 
 - Warn users when they attempt to use Generate Recovery Script with no workspaces present.
+- The y axis labels will now appear in the correct order if imshow is called from a script with origin=upper.
 - Fixed a bug with colorfill plot script generation for distribution workspaces.
 
 :ref:`Release 5.1.0 <v5.1.0>`

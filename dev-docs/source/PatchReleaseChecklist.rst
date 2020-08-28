@@ -14,13 +14,12 @@ Request
 #######
 
 *  Anyone may request a patch release, but that request must be intially
-   approved by Project manager (Nick) or one of the team leaders (Pete
-   or Mattieu).
+   approved by one of the local PMs.
 
 Authorisation
 #############
 
-*  The Project Manager and Team leaders must meet to authorise the patch
+*  The Project Management Team must meet to authorise the patch
    release.
 *  During the meeting other high value, low impact changes may be
    considered for inclusion for the release. Any that are to be included
@@ -141,11 +140,10 @@ Once the testing has passed:
   :ref:`release checklist <ReleaseChecklist>`.
 * Send an email, including the text of the release notes, to the
   following lists
-* ``mantid-announce@mantidproject.org``
-* ``mantid-developers@mantidproject.org``
 * ``nobugs@nobugsconference.org``
 * ``news@neutronsources.org``
 * ``neutron@neutronsources.org``
+* Also post the contents of the message on Announcements on Slack
 * Add topic to the news page on the `forum <http://forum.mantidproject.org/>`__
 * Close the release milestone in github
 * Remove the patch candidate tag from pull requests (if not already done)
