@@ -988,6 +988,76 @@ using LU decomposition
 }
 
 template <typename T>
+void Matrix<T>::invertTridiagonal()
+/**
+Check it's a square tridiagonal matrix with all diagonal elements equal and if
+yes invert the matrix using analytic formula. If not then use standard Invert
+*/
+{
+  bool regular = true;
+  if ((numRows() > 1) && (numCols() > 1)) {
+    if (numRows() == numCols()) {
+      std::vector<T> diagonal = {m_rawData[0][0], m_rawData[1][0]};
+      for (size_t i = 1; i < numRows() && regular; i++) {
+        for (size_t j = 1; i < numCols() && regular; i++) {
+          size_t diff = std::abs(static_cast<int>(i - j));
+          if (diff < 2) {
+            if (std::abs(diagonal[diff] - m_rawData[i][j]) >
+                std::numeric_limits<double>::epsilon()) {
+              regular = false;
+            }
+          } else if (m_rawData[i][j] != 0) {
+            throw std::runtime_error("Matrix is not tridiagonal");
+          }
+        }
+      }
+    } else {
+      regular = false;
+    }
+  }
+  if (regular) {
+    // use analytic expression as described in G Y Hu and R F O’Connell (1996)
+    T scalefactor = numRows() > 1 ? m_rawData[1][0] : 1;
+    *this /= scalefactor;
+    T D = m_rawData[0][0];
+    T lambda = static_cast<T>(acosh(D / 2));
+    auto k = static_cast<long long int>(numRows());
+    for (auto i = 0; i < static_cast<int>(numRows()); i++) {
+      for (auto j = 0; j < static_cast<int>(numCols()); j++) {
+        if (D >= 2) {
+          m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
+        } else {
+          m_rawData[i][j] = -1;
+        }
+        if (std::abs(D) > 2) {
+          m_rawData[i][j] *= static_cast<T>(
+              cosh((k + 1 - std::abs(i - j)) * lambda) -
+              cosh((k + 1 - i - j - 2) * lambda)); // extra -2 because i and j
+                                                   // are 1-based in the paper
+          m_rawData[i][j] /=
+              static_cast<T>(2 * sinh(lambda) * sinh((k + 1) * lambda));
+        } else if (std::abs(D) == 2) {
+          m_rawData[i][j] *= static_cast<T>(
+              (2 * k + 2 - std::abs(i - j) - i - j - 2) *
+              (static_cast<long long int>(i) + j + 2 - std::abs(i - j)));
+          m_rawData[i][j] /= static_cast<T>((4 * (k + 1)));
+        } else {
+          m_rawData[i][j] *= static_cast<T>(
+              cos((k + 1 - std::abs(i - j)) * lambda) -
+              cos((k + 1 - i - j - 2) * lambda)); // extra -2 because i and j
+                                                  // are 1-based in the paper
+          m_rawData[i][j] /=
+              static_cast<T>(2 * sin(lambda) * sin((k + 1) * lambda));
+        }
+      }
+    }
+    *this /= scalefactor;
+  } else {
+    Invert();
+  }
+}
+
+template <typename T>
 T Matrix<T>::determinant() const
 /**
 Calculate the derminant of the matrix
