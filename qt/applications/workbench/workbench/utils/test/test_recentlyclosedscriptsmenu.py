@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 from qtpy.QtWidgets import QAction
 from qtpy.QtCore import QObject
 from mantidqt.utils.qt.testing import start_qapplication
-from utils.recentlyclosedscriptsmenu import RECENT_SCRIPTS_KEY, RecentlyClosedScriptsMenu
+from workbench.utils.recentlyclosedscriptsmenu import RECENT_SCRIPTS_KEY, RecentlyClosedScriptsMenu
 
 test_CONF_settings = {RECENT_SCRIPTS_KEY: ["C:/script1.py", "C:/script2.py",
                                            "C:/thisisaverylongfolder/thisisalongerfilename.py"]}
@@ -100,7 +100,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
         menu = RecentlyClosedScriptsMenu(None)
         path = "12345678912345678912345678912345678912845176451762534716412786459176549671549673"
 
-        self.assertEqual("...45678912845176451762534716412786459176549671549673", menu.size_path_correctly(path))
+        self.assertEqual("...534716412786459176549671549673", menu.size_path_correctly(path))
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF", new_callable=MockCONF)
     def test_size_path_doesnt_shorten_short_enough_string(self, _):
@@ -237,7 +237,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         has.assert_called_once_with(RECENT_SCRIPTS_KEY)
         get.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        self.assertEqual(10, len(set.call_args.args[1]))
+        self.assertEqual(10, len(set.call_args[0][1]))
         set.assert_called_once_with(RECENT_SCRIPTS_KEY, ['11', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")

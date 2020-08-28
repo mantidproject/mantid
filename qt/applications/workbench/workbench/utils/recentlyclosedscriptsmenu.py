@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QMenu, QMessageBox
 from os.path import join, exists
 from mantid import ConfigService
 from mantidqt.utils.qt import create_action
-from config import CONF
+from workbench.config import CONF
 
 RECENT_SCRIPT_MAX_NUMBER = 10
 CACHE_FILE_NAME = "recent_script_file"
@@ -47,7 +47,7 @@ class RecentlyClosedScriptsMenu(QMenu):
 
     @staticmethod
     def size_path_correctly(path):
-        return path if len(path) < 33 else "..." + path[30:]
+        return path if len(path) < 33 else "..." + path[-30:]
 
     def open_script(self, path):
         # Check if it exists, if it doesn't pop up small window saying sorry this doesn't exist, then remove it from
@@ -92,7 +92,7 @@ class RecentlyClosedScriptsMenu(QMenu):
         if path not in scripts:
             scripts.insert(0, path)
 
-        if len(scripts) > RECENT_SCRIPT_MAX_NUMBER:
-            scripts.pop()
+            if len(scripts) > RECENT_SCRIPT_MAX_NUMBER:
+                scripts.pop()
 
-        CONF.set(RECENT_SCRIPTS_KEY, scripts)
+            CONF.set(RECENT_SCRIPTS_KEY, scripts)
