@@ -81,7 +81,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
                              doc='File path of run(s).')
 
-        options = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample', 'Calibration']
+        options = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
 
         self.declareProperty(name='ProcessAs',
                              defaultValue='Sample',
@@ -104,10 +104,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         quartz = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Quartz')
 
         vanadium = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Vanadium')
-
-        calibration = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Calibration')
-
-        not_calibration = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsNotEqualTo, 'Calibration')
 
         reduction = EnabledWhenProperty(quartz, EnabledWhenProperty(vanadium, sample, LogicOperator.Or), LogicOperator.Or)
 
@@ -206,16 +202,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                                           extensions=['.xml']),
                              doc='The path to the calibrated Instrument Parameter File.')
 
-        self.setPropertySettings('InstrumentParameterFile', not_calibration)
+        self.setPropertySettings('InstrumentParameterFile', scan)
 
-        wavelengthValidator = FloatBoundedValidator(3.0, 5.9)
-        self.declareProperty(name="ApproximateWavelength",
-                             defaultValue=3.1,
-                             validator=wavelengthValidator,
-                             direction=Direction.Input,
-                             doc="Initial estimate for the neutrons' wavelength.")
-
-        self.setPropertySettings('ApproximateWavelength', calibration)
 
     def _figureMeasurementMethod(self, ws):
         nEntriesPerNumor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
@@ -543,7 +531,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
-        processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample', 'Calibration']
+        processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
@@ -551,11 +539,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         calibration_setting = 'YIGFile'
         if self.getProperty('InstrumentParameterFile').isDefault:
             calibration_setting = 'None'
-
-        if process in ['Calibration']:
-            ILLD7Calibration(Filenames=self.getPropertyValue('Run').replace('+',','),
-                             ApproximateWavelength=self.getProperty('ApproximateWavelength').value)
-            return
 
         Load(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLPolarizedDiffraction',
              PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentParameterFile'),
