@@ -37,6 +37,9 @@ from .zoom import ScrollZoomMixin
 # Constants
 DBLMAX = sys.float_info.max
 
+SCALENORM = "SliceViewer/scale_norm"
+POWERSCALE = "SliceViewer/scale_norm_power"
+
 
 class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
     pass
@@ -45,7 +48,7 @@ class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -55,6 +58,7 @@ class SliceViewerDataView(QWidget):
         self.can_normalise = can_normalise
         self.nonortho_transform = None
         self.ws_type = dims_info[0]['type']
+        self.conf = conf
 
         self._line_plots = None
         self._image_info_tracker = None
@@ -105,9 +109,11 @@ class SliceViewerDataView(QWidget):
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
-        self.colorbar = ColorbarWidget(self)
+        norm_scale = self.get_default_scale_norm()
+        self.colorbar = ColorbarWidget(self, norm_scale)
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
+        self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
         # make width larger to fit image readout table
         if self.ws_type == 'MDE':
             self.colorbar.setMaximumWidth(155)
@@ -488,11 +494,36 @@ class SliceViewerDataView(QWidget):
         else:
             self.norm_opts.setCurrentIndex(0)
 
+    def get_default_scale_norm(self):
+        scale = 'Linear'
+        if self.conf is None:
+            return scale
+
+        if self.conf.has(SCALENORM):
+            scale = self.conf.get(SCALENORM)
+
+        if scale == 'Power' and self.conf.has(POWERSCALE):
+            exponent = self.conf.get(POWERSCALE)
+            scale = (scale, exponent)
+
+        return scale
+
+    def scale_norm_changed(self):
+        if self.conf is None:
+            return
+
+        scale = self.colorbar.norm.currentText()
+        self.conf.set(SCALENORM, scale)
+
+        if scale == 'Power':
+            exponent = self.colorbar.powerscale_value
+            self.conf.set(POWERSCALE, exponent)
+
 
 class SliceViewerView(QWidget):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -501,7 +532,7 @@ class SliceViewerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._splitter = QSplitter(self)
-        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self)
+        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self, conf)
         self._splitter.addWidget(self._data_view)
         #  peaks viewer off by default
         self._peaks_view = None

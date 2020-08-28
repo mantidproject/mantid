@@ -38,6 +38,7 @@ New Features
 - Added a Plot difference checkbox to the Muon Analysis GUI, which allows user to choose whether the fit difference curve is shown.
 - Added support for specifying which periods should be used to calculate a group.
 - Added suport for loading and saving group period data from xml files.
+- Added a Help option to the right-click menu in the function browser which brings up a relevant documentation page describing the function.
 
 Improvements
 -------------
