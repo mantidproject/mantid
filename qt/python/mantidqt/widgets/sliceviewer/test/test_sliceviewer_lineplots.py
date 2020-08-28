@@ -37,10 +37,8 @@ class LinePlotsTest(unittest.TestCase):
         self.assertEqual(1, mock_gridspec.call_count)
         # use spaces at 0, 1 & 3 in grid
         gs.__getitem__.assert_has_calls((call(0), call(1), call(3)), any_order=True)
-        self.assertTrue('sharey' in fig.add_subplot.call_args_list[0][1] or
-                        'sharey' in fig.add_subplot.call_args_list[1][1])
-        self.assertTrue('sharex' in fig.add_subplot.call_args_list[0][1] or
-                        'sharex' in fig.add_subplot.call_args_list[1][1])
+        self.assertTrue('sharey' in fig.add_subplot.call_args_list[0][1] or 'sharey' in fig.add_subplot.call_args_list[1][1])
+        self.assertTrue('sharex' in fig.add_subplot.call_args_list[0][1] or 'sharex' in fig.add_subplot.call_args_list[1][1])
 
     def test_delete_plot_lines_handles_empty_plots(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
