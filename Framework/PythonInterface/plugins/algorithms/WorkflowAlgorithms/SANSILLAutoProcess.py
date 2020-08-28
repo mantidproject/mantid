@@ -158,16 +158,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         return result
 
     def setUp(self):
-        self.sample = self.getPropertyValue('SampleRuns') \
-            .replace(' ', '').split(',')
-        self.absorber = self.getPropertyValue('AbsorberRuns') \
-            .replace(' ', '').split(',')
-        self.beam = self.getPropertyValue('BeamRuns') \
-            .replace(' ', '').split(',')
-        self.flux = self.getPropertyValue('FluxRuns') \
-            .replace(' ', '').split(',')
-        self.container = self.getPropertyValue('ContainerRuns') \
-            .replace(' ', '').split(',')
+        self.sample = self.getPropertyValue('SampleRuns').split(',')
+        self.absorber = self.getPropertyValue('AbsorberRuns').split(',')
+        self.beam = self.getPropertyValue('BeamRuns').split(',')
+        self.flux = self.getPropertyValue('FluxRuns').split(',')
+        self.container = self.getPropertyValue('ContainerRuns').split(',')
         self.stransmission = self.getPropertyValue('SampleTransmissionRuns')
         self.ctransmission = self.getPropertyValue('ContainerTransmissionRuns')
         self.btransmission = self.getPropertyValue('TransmissionBeamRuns')
