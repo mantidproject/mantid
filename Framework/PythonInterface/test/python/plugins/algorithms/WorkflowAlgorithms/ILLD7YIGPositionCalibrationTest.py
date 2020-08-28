@@ -46,7 +46,7 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
         approximate_wavelength = '4.8' # Angstrom
         ILLD7YIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_intermediateWavelength.xml',
-                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets="-4,-4,0",
+                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
                                   DetectorFitOutput='test_intermediateWavelength')
         self._check_fit_output('test_intermediateWavelength')
         self._check_load_data_with_calibration('test_intermediateWavelength.xml')
@@ -70,11 +70,11 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
         wavelength = float(mtd[fitTableName].column(1)[1])
         self.assertAlmostEqual(wavelength, 1.0,  delta=5e-2) # +/- 5 %
         bank2_slope = 1.0 / float(mtd[fitTableName].column(1)[0])
-        self.assertAlmostEqual(bank2_slope, 1.0, delta=1e-2) # +/- 1 %
+        self.assertAlmostEqual(bank2_slope, 1.0, delta=2e-2) # +/- 1 %
         bank3_slope = 1.0 / float(mtd[fitTableName].column(1)[4*self._pixels_per_bank])
-        self.assertAlmostEqual(bank3_slope, 1.0, delta=1e-2) # +/- 1 %
+        self.assertAlmostEqual(bank3_slope, 1.0, delta=2e-2) # +/- 1 %
         bank4_slope = 1.0 / float(mtd[fitTableName].column(1)[8*self._pixels_per_bank])
-        self.assertAlmostEqual(bank4_slope, 1.0, delta=1e-2) # +/- 1 %
+        self.assertAlmostEqual(bank4_slope, 1.0, delta=2e-2) # +/- 1 %
 
         for row_no in range(mtd[fitTableName].rowCount()):
             row_data = mtd[fitTableName].row(row_no)
