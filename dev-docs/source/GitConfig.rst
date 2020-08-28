@@ -12,7 +12,7 @@ Summary
 
 This page describes some configuration that will help with your usage of Git - some of which is strongly recommended. This should all be added to the ``.gitconfig`` file in your user home directory, i.e. ``~/`` on Linux or ``%USERPROFILE%`` on Windows. This will then be global across all of your repositories - please sanity check these suggestions if you use git for other repositories.
 
-Note that some of the values are commented out because they must be updated with your own details or are OS specific.
+Note that some of the values are commented out because they must be updated with your own details or are OS specific. Some commands use third party tools which may need to be installed.
 
 Recommended Config
 ------------------
@@ -70,14 +70,14 @@ You may find the following diff/merge tools helpful:
    # Uncomment lines where appropriate for specific OS
    [diff]
            # Set up a graphical tool for viewing diffs. I like meld because it looks good and
-           # does a good job with directory diffs (but you'll need to install it on Windows)
+           # does a good job with directory diffs
            tool = meld
    [difftool]
            # Disable the prompt when opening the difftool
            prompt = false
    [merge]
            # Specify a graphical tool for resolving merge conflicts. I like diffmerge because you
-           # can toggle between the merged file and common ancestor (but you'll need to install it)
+           # can toggle between the merged file and common ancestor
            tool = diffmerge
    [difftool "meld"]
            external = meld
