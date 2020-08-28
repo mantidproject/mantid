@@ -8,6 +8,10 @@ from sans.user_file.toml_parsers.toml_parser import TomlParser
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
+class UserFileLoadException(Exception):
+    pass
+
+
 class FileLoading:
     @staticmethod
     def load_user_file(file_path, file_information):
@@ -17,8 +21,24 @@ class FileLoading:
         instrument: The instrument name
         """
         if file_path.casefold().endswith("TOML".casefold()):
-            parser = TomlParser()
-            return parser.parse_toml_file(file_path, file_information=file_information)
+            return FileLoading._parse_toml(file_path, file_information)
         else:
+            return FileLoading._parse_legacy(file_path, file_information)
+
+    @staticmethod
+    def _parse_toml(file_path, file_information):
+        parser = TomlParser()
+        try:
+            return parser.parse_toml_file(file_path, file_information=file_information)
+        except KeyError as e:
+            raise UserFileLoadException(f"The following key is missing: {e}")
+        except ValueError as e:
+            raise UserFileLoadException(e)
+
+    @staticmethod
+    def _parse_legacy(file_path, file_information):
+        try:
             converter = UserFileReaderAdapter(user_file_name=file_path, file_information=file_information)
             return converter.get_all_states(file_information=file_information)
+        except (RuntimeError, ValueError) as e:
+            raise UserFileLoadException(e)

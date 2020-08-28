@@ -1,4 +1,5 @@
-set(TEST_PY_FILES FileLoadingTest.py RowEntriesTest.py
+set(TEST_PY_FILES file_loading_test.py
+                  RowEntriesTest.py
                   settings_adjustment_model_test.py
 )
 

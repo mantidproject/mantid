@@ -119,7 +119,7 @@ class _TomlV1ParserImpl(object):
         try:
             instrument = self._get_val_impl(["instrument", "name"], dict_to_parse=self._input)
         except KeyError:
-            raise RuntimeError("instrument.name is missing")
+            raise KeyError("instrument.name is missing")
         return SANSInstrument(instrument)
 
     def _create_state_objs(self, data_info):

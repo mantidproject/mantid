@@ -34,7 +34,7 @@ from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
-from sans.gui_logic.models.file_loading import FileLoading
+from sans.gui_logic.models.file_loading import FileLoading, UserFileLoadException
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
@@ -380,7 +380,7 @@ class RunTabPresenter(PresenterCommon):
             # Always set the instrument to NoInstrument unless otherwise specified as our fallback
             user_file_items = FileLoading.load_user_file(file_path=user_file_path,
                                                          file_information=self._file_information)
-        except (RuntimeError, ValueError) as e:
+        except UserFileLoadException as e:
             # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
             self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
             return
