@@ -134,8 +134,8 @@ class RundexSettings(object):
                 },
             REFL_POL : {
                 "PolarizationEfficiencyFile": "",
-                "DirectFlatBackground": "Background Constant Fit",
-                "ReflFlatBackground": "Background Constant Fit",
+                "DirectFlatBackground": "Background Average",
+                "ReflFlatBackground": "Background Average",
                 "SubalgorithmLogging": "Logging OFF",
                 "Cleanup": "Cleanup ON",
                 "WaterWorkspace": "",
@@ -167,8 +167,8 @@ class RundexSettings(object):
                 "ReflFitWavelengthUpperBound": "-1"
                 },
             REFL_NPOL : {
-                "DirectFlatBackground": "Background Constant Fit",
-                "ReflFlatBackground": "Background Constant Fit",
+                "DirectFlatBackground": "Background Average",
+                "ReflFlatBackground": "Background Average",
                 "SubalgorithmLogging": "Logging OFF",
                 "Cleanup": "Cleanup ON",
                 "WaterWorkspace": "",
