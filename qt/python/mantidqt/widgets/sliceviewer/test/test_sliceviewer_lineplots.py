@@ -74,17 +74,18 @@ class LinePlotsTest(unittest.TestCase):
         self.axy.plot.assert_called_once_with(y, x, scaley=False)
         self.axy.set_ylabel.assert_called_once_with(self.image_axes.get_ylabel())
 
-    def test_plot_lines_are_set_to_width_of_below_default(self):
+    def test_plot_axx_lines_are_set_to_width_of_below_default(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
-        self.axx.set_xlabel.reset_mock()
         x, y = np.arange(10.), np.arange(10.) * 2
 
         plotter.plot_x_line(x, y)
         self.axx.plot.assert_called_once_with(x, y, scalex=False)
         self.assert_that_a_call_has_been_made_to_this_object_containing_linewidth_and_half(self.axx.plot)
 
-        self.axy.set_ylabel.reset_mock()
-        self.axy.set_xlim.reset_mock()
+    def test_plot_axy_lines_are_set_to_width_of_below_default(self):
+        plotter = LinePlots(self.image_axes, self.mock_colorbar)
+        x, y = np.arange(10.), np.arange(10.) * 2
+
         plotter.plot_y_line(x, y)
         self.axy.plot.assert_called_once_with(y, x, scaley=False)
         self.assert_that_a_call_has_been_made_to_this_object_containing_linewidth_and_half(self.axy.plot)
