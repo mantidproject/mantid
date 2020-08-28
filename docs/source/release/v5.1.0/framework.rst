@@ -16,12 +16,12 @@ New Algorithms
 --------------
 
 - New algorithm :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` will calculate all 4 terms in self attenuation corrections following the Paalman and Pings formalism. Simple shapes are supported: FlatPlate, Cylinder, Annulus. Both elastic and inelastic as well as direct and indirect geometries are supported.
+- New algorithm :ref:`ILLD7YIGPositionCalibration <algm-ILLD7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
 
 
 Algorithms
 ----------
 
-- :ref:`ILLD7YIGCalibration <algm-ILLD7YIGCalibration>` new algorithm to perform wavelength and detector position calibration for the ILL D7 instrument.
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can also check the Error axis for unwanted values if the appropriate checkbox is ticked.
 - :ref:`SetSample <algm-SetSample>` is extended to support for composite shapes, such as FlatPlateHolder and HollowCylinderHolder. Also the input validation is made more stringent.
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
