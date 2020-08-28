@@ -648,16 +648,19 @@ void LoadNexusLogs::execLoader() {
 
   if (m_logsWithInvalidValues.size() > 0) {
     if (m_logsWithInvalidValues.size() == 1) {
-      g_log.warning() << "Sample Log \"" << m_logsWithInvalidValues[0]
-                      << "\" contains invalid values, click \"Show Sample Logs\" "
-                         "for details.\n";
+      g_log.warning()
+        << "Sample Log \"" << m_logsWithInvalidValues[0]
+        << "\" contains invalid values, click \"Show Sample Logs\" "
+           "for details.\n";
+
     }
-    auto other_string = (m_logsWithInvalidValues.size() < 2) ? " other" : " others";
-    g_log.warning() << "Sample Log \"" << m_logsWithInvalidValues[0]
-                    << "\" and " << m_logsWithInvalidValues.size() - 1
-                    << other_string
-                    << " contains invalid values, click \"Show Sample Logs\" for "
-                       "details.\n";
+    auto other_string = (m_logsWithInvalidValues.size() < 2) ? " other " : " others";
+    g_log.warning()
+      << "Sample Log \"" << m_logsWithInvalidValues[0]
+      << "\" and " << m_logsWithInvalidValues.size() - 1
+      << other_string
+      << " contain invalid values, click \"Show Sample Logs\" for "
+          "details.\n";
 
   }
 }
