@@ -247,7 +247,7 @@ public:
     TS_ASSERT_DELTA(d, 2 * M_PI / 3, 1e-8)
   }
 
-  void test_interpolateFromDetectorGrid() {
+  void test_interpolateFromDetectorGrid_OnSparseDetector() {
     using namespace WorkspaceCreationHelper;
     auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 7);
     const size_t sparseRows = 3;
@@ -284,18 +284,38 @@ public:
       TS_ASSERT_DELTA(h.y()[i], val, 1e-7)
       TS_ASSERT_EQUALS(h.e()[i], 0.0)
     }
-    lat = grid.latitudeAt(1);
-    lon = (grid.longitudeAt(3) + grid.longitudeAt(2)) / 2.0;
-    indices = sparseWS->grid().nearestNeighbourIndices(lat, lon);
+  }
+
+  void test_interpolateFromDetectorGrid_InBetweenSparseDetectors() {
+    using namespace WorkspaceCreationHelper;
+    auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 7);
+    const size_t sparseRows = 3;
+    const size_t sparseCols = 6;
+    const size_t wavelengths = 3;
+    auto sparseWS = std::make_unique<SparseWorkspaceWrapper>(
+        *ws, wavelengths, sparseRows, sparseCols);
+    for (size_t i = 0; i < sparseWS->getNumberHistograms(); ++i) {
+      auto &ys = sparseWS->mutableY(i);
+      auto &es = sparseWS->mutableE(i);
+      for (size_t j = 0; j < ys.size(); ++j) {
+        ys[j] = static_cast<double>(i);
+        es[j] = std::sqrt(ys[j]);
+      }
+    }
+    auto &grid = sparseWS->grid();
+    double lat = grid.latitudeAt(1);
+    double lon = (grid.longitudeAt(3) + grid.longitudeAt(2)) / 2.0;
+    auto indices = sparseWS->grid().nearestNeighbourIndices(lat, lon);
     double distance1 = sparseWS->greatCircleDistance(
         lat, lon, grid.latitudeAt(1), grid.longitudeAt(2));
     double distance2 = sparseWS->greatCircleDistance(
         lat, lon, grid.latitudeAt(2), grid.longitudeAt(2));
     double sumWeights = 2 / pow(distance1, 2) + 2 / pow(distance2, 2);
-    val = (static_cast<double>(indices[0] + indices[2]) / pow(distance1, 2) +
-           static_cast<double>(indices[1] + indices[3]) / pow(distance2, 2)) /
-          sumWeights;
-    h = sparseWS->interpolateFromDetectorGrid(lat, lon);
+    double val =
+        (static_cast<double>(indices[0] + indices[2]) / pow(distance1, 2) +
+         static_cast<double>(indices[1] + indices[3]) / pow(distance2, 2)) /
+        sumWeights;
+    auto h = sparseWS->interpolateFromDetectorGrid(lat, lon);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
     for (size_t i = 0; i < h.size(); ++i) {
       TS_ASSERT_DELTA(h.y()[i], val, 1e-7)
@@ -304,7 +324,7 @@ public:
   }
 
   // test the interpolation and the error propagation
-  void test_bilinearInterpolateFromDetectorGrid() {
+  void test_bilinearInterpolateFromDetectorGrid_OnSparseDetector() {
     using namespace WorkspaceCreationHelper;
     auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 7);
     const size_t sparseRows = 3;
@@ -329,8 +349,27 @@ public:
       TS_ASSERT_EQUALS(h.y()[i], 0.0)
       TS_ASSERT_EQUALS(h.e()[i], 0.0)
     }
-    lat = (grid.latitudeAt(2) + grid.latitudeAt(1)) / 2.0;
-    lon = (grid.longitudeAt(3) + grid.longitudeAt(2)) / 2.0;
+  }
+
+  void test_bilinearInterpolateFromDetectorGrid_InBetweenSparseDetectors() {
+    using namespace WorkspaceCreationHelper;
+    auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 7);
+    const size_t sparseRows = 3;
+    const size_t sparseCols = 6;
+    const size_t wavelengths = 3;
+    auto sparseWS = std::make_unique<SparseWorkspaceWrapper>(
+        *ws, wavelengths, sparseRows, sparseCols);
+    for (size_t i = 0; i < sparseWS->getNumberHistograms(); ++i) {
+      auto &ys = sparseWS->mutableY(i);
+      auto &es = sparseWS->mutableE(i);
+      for (size_t j = 0; j < ys.size(); ++j) {
+        ys[j] = static_cast<double>(i);
+        es[j] = std::sqrt(ys[j]);
+      }
+    }
+    auto &grid = sparseWS->grid();
+    double lat = (grid.latitudeAt(2) + grid.latitudeAt(1)) / 2.0;
+    double lon = (grid.longitudeAt(3) + grid.longitudeAt(2)) / 2.0;
     size_t nearestLatIndex, nearestLonIndex;
     std::tie(nearestLatIndex, nearestLonIndex) =
         sparseWS->grid().getNearestVertex(lat, lon);
@@ -355,7 +394,7 @@ public:
                       sparseWS->grid().getDetectorIndex(nearestLatIndex + 1,
                                                         nearestLonIndex + 1)) /
                  4.0;
-    h = sparseWS->bilinearInterpolateFromDetectorGrid(lat, lon);
+    auto h = sparseWS->bilinearInterpolateFromDetectorGrid(lat, lon);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
     for (size_t i = 0; i < h.size(); ++i) {
       TS_ASSERT_DELTA(h.y()[i], val, 1e-7)
@@ -364,7 +403,8 @@ public:
   }
 
   // test the interpolation error
-  void test_bilinearInterpolateFromDetectorGrid_interp_errors() {
+  void
+  test_bilinearInterpolateFromDetectorGrid_interpErrors_OnSparseDetector() {
     using namespace WorkspaceCreationHelper;
     auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 7);
     const size_t sparseRows = 3;
@@ -390,13 +430,36 @@ public:
       TS_ASSERT_EQUALS(h.y()[i], 0.0)
       TS_ASSERT_EQUALS(h.e()[i], 0.0)
     }
+  }
+
+  void
+  test_bilinearInterpolateFromDetectorGrid_interpErrors_InBetweenSparseDetectors() {
+    using namespace WorkspaceCreationHelper;
+    auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 7);
+    const size_t sparseRows = 3;
+    const size_t sparseCols = 6;
+    const size_t wavelengths = 3;
+    auto sparseWS = std::make_unique<SparseWorkspaceWrapper>(
+        *ws, wavelengths, sparseRows, sparseCols);
+    for (size_t row = 0; row < sparseRows; row++) {
+      for (size_t col = 0; col < sparseCols; col++) {
+        auto &ys = sparseWS->mutableY(row + col * sparseRows);
+        for (size_t j = 0; j < ys.size(); ++j) {
+          ys[j] = pow(col, 2);
+        }
+      }
+    }
+
+    auto &grid = sparseWS->grid();
     const int longIndex = 2, latIndex = 1;
-    lat = (grid.latitudeAt(latIndex + 1) + grid.latitudeAt(latIndex)) / 2.0;
-    lon = (grid.longitudeAt(longIndex) + grid.longitudeAt(longIndex + 1)) / 2.0;
+    double lat =
+        (grid.latitudeAt(latIndex + 1) + grid.latitudeAt(latIndex)) / 2.0;
+    double lon =
+        (grid.longitudeAt(longIndex) + grid.longitudeAt(longIndex + 1)) / 2.0;
     double val = (pow(longIndex, 2) + pow(longIndex + 1, 2)) / 2.0;
     // 2nd derivative in long is 2.0, 2nd derivative in lat is zero
     double err = 0.5 * 0.5 * 0.5 * 2.0;
-    h = sparseWS->bilinearInterpolateFromDetectorGrid(lat, lon);
+    auto h = sparseWS->bilinearInterpolateFromDetectorGrid(lat, lon);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
     for (size_t i = 0; i < h.size(); ++i) {
       TS_ASSERT_DELTA(h.y()[i], val, 1e-7)

@@ -122,7 +122,7 @@ The interpolation is a two step process: first a spatial interpolation is done f
 Spatial interpolation
 ^^^^^^^^^^^^^^^^^^^^^
 
-The sample to detector distance does not matter for absorption, so it suffices to consider directions only. The detector grid of the sparse instrument consists of detectors at constant latitude and longitude intervals. For a detector :math:`D` of the full input instrument at latitude :math:`\phi` and longitude :math:`\lambda`, we pick the four detectors :math:`D_ij` (:math:`i = 1, 2` :math:`j = 1, 2`) at the corners of the grid cell which includes (:math:`\phi`, :math:`\lambda`).
+The sample to detector distance does not matter for absorption, so it suffices to consider directions only. The detector grid of the sparse instrument consists of detectors at constant latitude and longitude intervals. For a detector :math:`D` of the full input instrument at latitude :math:`\phi` and longitude :math:`\lambda`, we pick the four detectors :math:`D_{ij}` (:math:`i = 1, 2` :math:`j = 1, 2`) at the corners of the grid cell which includes (:math:`\phi`, :math:`\lambda`).
 
 If :math:`D` coincides with any :math:`D_{ij}`, the :math:`y` values of the histogram linked to :math:`D` are directly taken from :math:`D_{ij}`. Otherwise, :math:`y` is interpolated using a bilinear interpolation method. The data is interpolated in the longitude direction first:
 

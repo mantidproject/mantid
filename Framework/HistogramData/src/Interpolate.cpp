@@ -114,6 +114,9 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
                                 const bool calculateErrors = false,
                                 const bool independentErrors = true) {
   auto xs = input.dataX();
+  // Error propagation follows method described in Gardner paper
+  // "Uncertainties in Interpolated Spectral Data", Journal of Research of the
+  // National Institute of Standards and Technology, 2003
   // create tridiagonal "h" matrix
   Mantid::Kernel::Matrix<double> h(xs.size() - 2, xs.size() - 2);
   for (size_t i = 0; i < xs.size() - 2; i++) {
@@ -150,11 +153,14 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
   // calculate some covariances to support error propagation
   auto &enew = output.mutableE();
   auto &eold = input.dataE();
+  // u_ypp_ypp - covariance of y'' vs y''
   std::vector<double> u_ypp_ypp(xs.size());
+  // u_ypp_y - covariance of y'' vs y
   std::vector<double> u_ypp_y(xs.size());
 
   for (size_t i = 0; i < xs.size(); i++) {
     for (size_t k = 0; k < xs.size(); k++) {
+      // dyppidyk - derivative of y'' at bin i with respect to y at bin k
       double dyppidyk = 0;
       if ((i != 0) && (i != xs.size() - 1)) {
         if (k > 1) {
