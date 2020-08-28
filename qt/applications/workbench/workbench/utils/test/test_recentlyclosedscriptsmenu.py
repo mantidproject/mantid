@@ -13,7 +13,8 @@ from unittest.mock import MagicMock, patch
 from qtpy.QtWidgets import QAction
 from qtpy.QtCore import QObject
 from mantidqt.utils.qt.testing import start_qapplication
-from workbench.utils.recentlyclosedscriptsmenu import RECENT_SCRIPTS_KEY, RecentlyClosedScriptsMenu
+from workbench.utils.recentlyclosedscriptsmenu import RECENT_SCRIPTS_KEY, RecentlyClosedScriptsMenu, \
+    RECENT_SCRIPT_MAX_NUMBER
 
 test_CONF_settings = {RECENT_SCRIPTS_KEY: ["C:/script1.py", "C:/script2.py",
                                            "C:/thisisaverylongfolder/thisisalongerfilename.py"]}
@@ -200,7 +201,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         has.assert_called_once_with(RECENT_SCRIPTS_KEY)
         get.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        set.assert_called_once_with(RECENT_SCRIPTS_KEY, ["C:/script1.py", "C:/script2.py"])
+        set.assert_not_called()
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=None)
@@ -237,33 +238,18 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         has.assert_called_once_with(RECENT_SCRIPTS_KEY)
         get.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        self.assertEqual(10, len(set.call_args[0][1]))
+        self.assertEqual(RECENT_SCRIPT_MAX_NUMBER, len(set.call_args[0][1]))
         set.assert_called_once_with(RECENT_SCRIPTS_KEY, ['11', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["1", "2", "3", "4", "5", "6", "7", "8",
                                                                                "9", "10"])
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
-    def test_add_script_adds_new_scripts_to_the_first_index(self, has, get, set):
+    def test_add_script_adds_new_scripts_to_the_first_index_and_removes_excess_scripts_from_the_last_index(self, has, get, set):
         menu = RecentlyClosedScriptsMenu(None)
 
         menu.add_script_to_settings("11")
 
         has.assert_called_once_with(RECENT_SCRIPTS_KEY)
         get.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        self.assertEqual("11", set.call_args.args[1][0])
-        set.assert_called_once_with(RECENT_SCRIPTS_KEY, ['11', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
-
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", return_value=["1", "2", "3", "4", "5", "6", "7", "8",
-                                                                               "9", "10"])
-    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.has", return_value=True)
-    def test_add_script_adds_removes_excess_scripts_from_the_last_index(self, has, get, set):
-        menu = RecentlyClosedScriptsMenu(None)
-
-        menu.add_script_to_settings("11")
-
-        has.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        get.assert_called_once_with(RECENT_SCRIPTS_KEY)
-        self.assertEqual("9", set.call_args.args[1][-1])
         set.assert_called_once_with(RECENT_SCRIPTS_KEY, ['11', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
