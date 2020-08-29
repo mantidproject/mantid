@@ -19,6 +19,9 @@ def _create_XML_subElement_for_groups(root_node, groups):
         id_string = run_string_utils.run_list_to_string(group.detectors)
         ids = ET.SubElement(child, 'ids', val=id_string)
         child.extend(ids)
+        period_string = run_string_utils.run_list_to_string(group.periods)
+        periods = ET.SubElement(child, 'periods', val=period_string)
+        child.extend(periods)
         group_nodes += [child]
     return group_nodes
 
@@ -92,13 +95,14 @@ def load_grouping_from_XML(filename):
     except (AttributeError, KeyError):
         default = ''
 
-    group_names, group_ids = _get_groups_from_XML(root)
+    group_names, group_ids, periods = _get_groups_from_XML(root)
     pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
     groups, pairs = [], []
 
     for i, group_name in enumerate(group_names):
+        period = periods[i] if periods and i<len(periods) else [1]
         groups += [MuonGroup(group_name=group_name,
-                             detector_ids=group_ids[i])]
+                             detector_ids=group_ids[i], periods=period)]
     for i, pair_name in enumerate(pair_names):
         pairs += [MuonPair(pair_name=pair_name,
                            forward_group_name=pair_groups[i][0],
@@ -108,12 +112,17 @@ def load_grouping_from_XML(filename):
 
 
 def _get_groups_from_XML(root):
-    names, ids = [], []
+    names, ids, periods = [], [], []
     for child in root:
         if child.tag == "group":
             names += [child.attrib['name']]
             ids += [run_string_utils.run_string_to_list(child.find('ids').attrib['val'])]
-    return names, ids
+            try:
+                periods += [run_string_utils.run_string_to_list(child.find('periods').attrib['val'])]
+            except AttributeError:
+                # Using an old style xml file where grouping information is not stored
+                pass
+    return names, ids, periods
 
 
 def _get_pairs_from_XML(root):
