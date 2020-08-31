@@ -8,12 +8,12 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IPreview.h"
-#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/SingletonHolder.h"
 
 #include <map>
 #include <vector>
+#include <type_traits>
 
 namespace Mantid {
 namespace API {
@@ -33,23 +33,17 @@ public:
                       const std::string &preview) {
     return *m_previews[technique][preview];
   }
-
-  template <class T> void subscribe() {
-    std::unique_ptr<Kernel::AbstractInstantiator<IPreview>> newI =
-        std::make_unique<Kernel::Instantiator<T, IPreview>>();
-    this->subscribe(std::move(newI));
+  template <class T>
+  void subscribe() {
+      static_assert(std::is_base_of<IPreview, T>::value);
+      T preview;
+      const auto technique = preview.technique();
+      const auto name = preview.name();
+      m_previews[technique][name] = std::make_unique<T>();
   }
 
 private:
-  template <class T> void
-  subscribe(std::unique_ptr<Kernel::AbstractInstantiator<T>> instantiator) {
-    const auto preview = instantiator->createInstance();
-    const auto technique = preview->technique();
-    const auto name = preview->name();
-    m_previews[technique][name] = preview;
-  }
-
-  std::map<std::string, std::map<std::string, IPreview_sptr>> m_previews;
+  std::map<std::string, std::map<std::string, IPreview_uptr>> m_previews;
 };
 
 using PreviewManager = Mantid::Kernel::SingletonHolder<PreviewManagerImpl>;

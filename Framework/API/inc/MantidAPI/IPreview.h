@@ -27,9 +27,6 @@ public:
 private:
   virtual MatrixWorkspace_sptr preview(MatrixWorkspace_sptr ws) const { return ws; }
 };
-
 using IPreview_uptr = std::unique_ptr<IPreview>;
-using IPreview_sptr = std::shared_ptr<IPreview>;
-
 } // namespace API
 } // namespace Mantid
