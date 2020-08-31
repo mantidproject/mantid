@@ -40,16 +40,16 @@ public:
     this->subscribe(std::move(newI));
   }
 
+private:
   template <class T> void
   subscribe(std::unique_ptr<Kernel::AbstractInstantiator<T>> instantiator) {
-    const auto preview = instantiator->createUnwrappedInstance();
+    const auto preview = instantiator->createInstance();
     const auto technique = preview->technique();
     const auto name = preview->name();
     m_previews[technique][name] = preview;
   }
 
-private:
-  std::map<std::string, std::map<std::string, IPreview*>> m_previews;
+  std::map<std::string, std::map<std::string, IPreview_sptr>> m_previews;
 };
 
 using PreviewManager = Mantid::Kernel::SingletonHolder<PreviewManagerImpl>;

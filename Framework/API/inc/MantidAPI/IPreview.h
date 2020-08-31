@@ -29,6 +29,7 @@ private:
 };
 
 using IPreview_uptr = std::unique_ptr<IPreview>;
+using IPreview_sptr = std::shared_ptr<IPreview>;
 
 } // namespace API
 } // namespace Mantid
