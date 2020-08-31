@@ -11,6 +11,17 @@ These are the steps involved in performing a full Mantid release. To
 request or perform a patch release look at the
 :ref:`patch release checklist <PatchReleaseChecklist>`.
 
+Roles
+#####
+
+The roles are defined in terms of person responsible.
+This does not mean that the person needs to do the jobs himself/herself, but that they are responsible for ensuring that the work gets done.
+
+* Technical Release Manager [TRM] - Person responsible for technical tasks such as renaming branchs, creating tags, configuring build servers.
+* Release Editor [RE] - Person responsible for editing the release notes and giving them a common language, layout, and collecting images.
+* Release Manager [RM] - Person in charge of the go/no go decision of the release. The main task is to reiterate the timeline and be collection point for information between all of the Local Project Managers.
+* Local Project Manager(s) [lPM]- People in charge of communicating with local development teams, facility managment, and other people at their sponsoring facility.
+
 Timeline
 ########
 
@@ -203,14 +214,14 @@ Once the unscripted testing has passed:
 * After all of the packages have been smoke tested run the
   `release_deploy <https://builds.mantidproject.org/view/Release%20Pipeline/job/release_deploy/>`__
   job to put the packages, with the exception of Windows, on Sourceforge.
-  
+
   * Have someone at ISIS signs the Windows binary and upload this
     manually to Sourceforge
-  
+
   * Set the default package for each OS to the new version using the information icon
     next to the file list on Sourceforge
 
-* Upload packages to the GitHub release (essentially for a backup). 
+* Upload packages to the GitHub release (essentially for a backup).
 * Publish the GitHub release. This will create the tag required to generate the DOI.
 * Update the `download <http://download.mantidproject.org>`__ page,
   following the instructions
