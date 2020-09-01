@@ -181,7 +181,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 in_ws = self._input_ws + '_' + panel
                 out_ws = panels_out_ws + '_' + panel
                 CropToComponent(InputWorkspace=self._input_ws, OutputWorkspace=in_ws, ComponentNames=panel)
-                self._integrate(in_ws, out_ws)
+                self._integrate(in_ws, out_ws, True)
                 DeleteWorkspace(in_ws)
                 ReplaceSpecialValues(InputWorkspace=out_ws, OutputWorkspace=out_ws, NaNValue=0, NaNError=0)
                 self._crop_zero_bins(out_ws)
@@ -190,14 +190,17 @@ class SANSILLIntegration(PythonAlgorithm):
             self.setProperty('PanelOutputWorkspaces', mtd[panels_out_ws])
 
     def _crop_zero_bins(self, ws):
+        if self.getPropertyValue('OutputType') == "I(Phi,Q)":
+            return
         y = mtd[ws].readY(0)
         x = mtd[ws].readX(0)
         nonzero = np.nonzero(y)[0]
-        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=x[nonzero[0]], XMax=x[nonzero[-1]+1])
+        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=x[nonzero[0]],
+                      XMax=x[nonzero[-1] + 1])
 
-    def _integrate(self, in_ws, out_ws):
+    def _integrate(self, in_ws, out_ws, panel=False):
         if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
-            self._integrate_iq(in_ws, out_ws)
+            self._integrate_iq(in_ws, out_ws, panel)
         elif self._output_type == 'I(Qx,Qy)':
             self._integrate_iqxy(in_ws, out_ws)
 
@@ -350,7 +353,7 @@ class SANSILLIntegration(PythonAlgorithm):
         log_binning = self.getProperty('IQxQyLogBinning').value
         Qxy(InputWorkspace=ws_in, OutputWorkspace=ws_out, MaxQxy=max_qxy, DeltaQ=delta_q, IQxQyLogBinning=log_binning)
 
-    def _integrate_iq(self, ws_in, ws_out):
+    def _integrate_iq(self, ws_in, ws_out, panel=False):
         """
         Produces I(Q) or I(Phi,Q) using Q1DWeighted
         """
@@ -376,14 +379,19 @@ class SANSILLIntegration(PythonAlgorithm):
         pixel_division = self.getProperty('NPixelDivision').value
         gravity = wavelength == 0.
         if self._output_type == 'I(Q)':
+            if panel:
+                # do not process wedges for panels
+                n_wedges = 0
             wedge_ws = self.getPropertyValue('WedgeWorkspace')
             wedge_angle = self.getProperty('WedgeAngle').value
             wedge_offset = self.getProperty('WedgeOffset').value
             asymm_wedges = self.getProperty('AsymmetricWedges').value
             Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=ws_out,
-                        NumberOfWedges=n_wedges, OutputBinning=q_binning, AccountForGravity=gravity,
-                        WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
-                        AsymmetricWedges=asymm_wedges, NPixelDivision=pixel_division)
+                        NumberOfWedges=n_wedges, OutputBinning=q_binning,
+                        AccountForGravity=gravity, WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
+                        AsymmetricWedges=asymm_wedges,
+                        NPixelDivision=pixel_division)
             if self._resolution == 'MildnerCarpenter':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
@@ -402,9 +410,11 @@ class SANSILLIntegration(PythonAlgorithm):
             azimuth_axis.setUnit("Degrees")
             for i in range(n_wedges):
                 azimuth_axis.setValue(i, i * wedge_angle)
-            Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=iq_ws, NumberOfWedges=n_wedges,
-                        NPixelDivision=pixel_division, OutputBinning=q_binning, WedgeWorkspace=wedge_ws,
-                        WedgeAngle=wedge_angle, AsymmetricWedges=True, AccountForGravity=gravity)
+            Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=iq_ws,
+                        NumberOfWedges=n_wedges, NPixelDivision=pixel_division,
+                        OutputBinning=q_binning, WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle, AsymmetricWedges=True,
+                        AccountForGravity=gravity)
             DeleteWorkspace(iq_ws)
             ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=ws_out)
             mtd[ws_out].replaceAxis(1, azimuth_axis)
