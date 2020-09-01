@@ -173,6 +173,7 @@ void MonteCarloAbsorption::exec() {
   const int seed = getProperty("SeedValue");
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"));
+  interpolateOpt.setIndependentErrors(resimulateTracks);
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
   auto simulatePointsIn =
@@ -425,10 +426,6 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
 
     prog.report(reportMsg);
 
-    if (!useSparseInstrument) {
-      outputWS->setHistogram(i, simulationWS.histogram(i));
-    }
-
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -491,7 +488,7 @@ void MonteCarloAbsorption::interpolateFromSparse(
     double lat, lon;
     std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
     const auto spatiallyInterpHisto =
-        sparseWS.interpolateFromDetectorGrid(lat, lon);
+        sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
