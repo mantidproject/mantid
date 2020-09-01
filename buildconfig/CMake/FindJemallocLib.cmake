@@ -10,7 +10,7 @@ set ( JEMALLOC_LIBRARIES ${JEMALLOC_LIB} )
 # handle the QUIETLY and REQUIRED arguments and set JEMALLOC_FOUND to TRUE if
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( Jemalloc DEFAULT_MSG JEMALLOC_LIBRARIES )
+find_package_handle_standard_args( JemallocLib DEFAULT_MSG JEMALLOC_LIBRARIES )
 
 mark_as_advanced ( JEMALLOC_LIB
                    JEMALLOC_LIBRARIES JEMALLOC_FOUND )

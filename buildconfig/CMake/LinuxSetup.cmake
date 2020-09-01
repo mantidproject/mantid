@@ -11,7 +11,7 @@ option(USE_JEMALLOC "If true, use LD_PRELOAD=libjemalloc.so in startup scripts"
 )
 # If not wanted, just carry on without it
 if(USE_JEMALLOC)
-  find_package(Jemalloc)
+  find_package(JemallocLib REQUIRED)
   if(JEMALLOC_FOUND)
     set(JEMALLOC_LIBRARY ${JEMALLOC_LIBRARIES})
   endif(JEMALLOC_FOUND)
