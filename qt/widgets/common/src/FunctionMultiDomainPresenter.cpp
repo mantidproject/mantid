@@ -49,6 +49,8 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
           SLOT(viewRequestedCopyToClipboard()));
   connect(m_view, SIGNAL(globalsChanged(const QStringList &)), this,
           SLOT(viewChangedGlobals(const QStringList &)));
+  connect(m_view, SIGNAL(functionHelpRequest()), this,
+          SLOT(viewRequestedFunctionHelp()));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun) {
@@ -307,6 +309,12 @@ void FunctionMultiDomainPresenter::viewChangedGlobals(
   emit functionStructureChanged();
 }
 
+void FunctionMultiDomainPresenter::viewRequestedFunctionHelp() {
+  auto func = m_view->getSelectedFunction();
+  if (func)
+    m_view->showFunctionHelp(QString::fromStdString(func->name()));
+}
+
 QString FunctionMultiDomainPresenter::getFunctionString() const {
   return m_model->getFunctionString();
 }
@@ -320,7 +328,6 @@ void FunctionMultiDomainPresenter::clear() {
   m_view->clear();
   emit functionStructureChanged();
 }
-
 void FunctionMultiDomainPresenter::setColumnSizes(int s0, int s1, int s2) {
   auto treeView = dynamic_cast<FunctionTreeView *>(m_view);
   if (treeView)

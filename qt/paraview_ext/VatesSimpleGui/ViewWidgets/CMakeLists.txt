@@ -104,8 +104,7 @@ mtd_add_qt_library(
   DEFS IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
   INCLUDE_DIRS inc
   SYSTEM_INCLUDE_DIRS ${PARAVIEW_INCLUDE_DIRS}
-  LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
-            pqApplicationComponents
+  LINK_LIBS pqApplicationComponents
             pqComponents
             ${vtkjsoncpp_LIBRARIES}
             vtkPVServerManagerRendering

@@ -64,6 +64,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="plot_diff_checkbox">
+       <property name="text">
+        <string>Plot difference</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="external_plot_button">
        <property name="text">
         <string>External Plot</string>

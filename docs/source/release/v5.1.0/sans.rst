@@ -12,6 +12,11 @@ SANS Changes
 Algorithms and instruments
 --------------------------
 
+New
+###
+
+ - :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>` algorithm added, used to treat data from ILL's D16 on omega scan mode.
+
 Bug Fixed
 #########
 

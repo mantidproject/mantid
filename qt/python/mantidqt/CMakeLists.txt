@@ -16,10 +16,10 @@ set(
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/Row.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/RowLocation.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeView.h
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h)
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/InstrumentSelector.h)
 
 list(APPEND common_link_libs
-            ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             PythonInterfaceCore)
@@ -43,7 +43,7 @@ if(ENABLE_MANTIDPLOT)
                        Qt4::Qscintilla
                        API
                      INSTALL_DIR
-                       ${LIB_DIR}/mantidqt
+                       ${SITE_PACKAGES}/mantidqt
                      LINUX_INSTALL_RPATH
                        "\$ORIGIN/.."
                      OSX_INSTALL_RPATH
@@ -71,11 +71,11 @@ if(ENABLE_WORKBENCH)
                        Qt5::Qscintilla
                        API
                      INSTALL_DIR
-                       ${WORKBENCH_LIB_DIR}/mantidqt
+                       ${WORKBENCH_SITE_PACKAGES}/mantidqt
                      LINUX_INSTALL_RPATH
                        "\$ORIGIN/.."
                      OSX_INSTALL_RPATH
-                       "@loader_path/.."
+		       "@loader_path/.."
                      FOLDER Qt5)
 endif()
 

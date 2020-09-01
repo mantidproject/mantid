@@ -9,10 +9,11 @@
 Description
 -----------
 
-The algorithm searches over all of the values in a workspace and if it
-finds a value set to NaN (not a number), infinity, larger or smaller than the
-'big'/'small' threshold given then that value and the associated error is
-replaced by the user provided values.
+The algorithm searches over all of the values, in Y and Error (provided
+the checkbox 'CheckErrorAxis' is ticked) axes, in a workspace and if it
+finds a value set to NaN (not a number), infinity, larger or smaller
+than the 'big'/'small' threshold given then that value and the associated
+error is replaced by the user provided values.
 
 If no value is provided for either NaNValue, InfinityValue, BigValueThreshold 
 or SmallValueThreshold then the algorithm will exit with an error, as in this

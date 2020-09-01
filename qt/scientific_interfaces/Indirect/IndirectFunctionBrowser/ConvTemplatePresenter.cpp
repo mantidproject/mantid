@@ -8,12 +8,26 @@
 #include "ConvTemplateBrowser.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include <QInputDialog>
+#include <QtConcurrentRun>
 #include <cmath>
 #include <float.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+namespace {
+class ScopedDisable {
+  FunctionTemplateBrowser *m_browser;
+
+public:
+  // Disables the function browser and re-enables when leaving scope
+  ScopedDisable(FunctionTemplateBrowser *browser) : m_browser(browser) {
+    m_browser->setDisabled(true);
+  }
+  ~ScopedDisable() { m_browser->setDisabled(false); }
+};
+} // namespace
 
 using namespace MantidWidgets;
 
@@ -29,9 +43,15 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view)
           SLOT(viewChangedParameterValue(const QString &, double)));
 }
 
+// This function creates a Qt thread to run the model updates
+// This was found to be necessary to allow the processing of the GUI thread to
+// continue which is necessary to stop the int manager from self-incrementing
+// itself due to an internal timer occurring within the class
 void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   if (subTypeIndex == SubTypeIndex::Fit) {
     m_model.setFitType(static_cast<FitType>(typeIndex));
+  } else if (subTypeIndex == SubTypeIndex::Lorentzian) {
+    m_model.setLorentzianType(static_cast<LorentzianType>(typeIndex));
   } else {
     m_model.setBackground(static_cast<BackgroundType>(typeIndex));
   }
@@ -95,9 +115,14 @@ void ConvTemplatePresenter::setFunction(const QString &funStr) {
   m_view->updateTemperatureCorrectionAndDelta(m_model.hasTempCorrection(),
                                               m_model.hasDeltaFunction());
 
+  m_view->setSubType(SubTypeIndex::Lorentzian,
+                     static_cast<int>(m_model.getLorentzianType()));
   m_view->setSubType(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
   m_view->setSubType(SubTypeIndex::Background,
                      static_cast<int>(m_model.getBackgroundType()));
+
+  m_view->setInt(SubTypeIndex::Lorentzian,
+                 static_cast<int>(m_model.getLorentzianType()));
   m_view->setEnum(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
   m_view->setEnum(SubTypeIndex::Background,
                   static_cast<int>(m_model.getBackgroundType()));

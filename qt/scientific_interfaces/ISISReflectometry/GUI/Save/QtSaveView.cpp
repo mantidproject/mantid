@@ -76,7 +76,7 @@ void QtSaveView::connectSaveSettingsWidgets() {
   connectSettingsChange(*m_ui.filterEdit);
   connectSettingsChange(*m_ui.regexCheckBox);
   connectSettingsChange(*m_ui.saveReductionResultsCheckBox);
-  connectSettingsChange(*m_ui.titleCheckBox);
+  connectSettingsChange(*m_ui.headerCheckBox);
   connectSettingsChange(*m_ui.qResolutionCheckBox);
   connectSettingsChange(*m_ui.commaRadioButton);
   connectSettingsChange(*m_ui.spaceRadioButton);
@@ -122,14 +122,56 @@ void QtSaveView::enableAutosaveControls() {
   m_ui.autosaveGroup->setEnabled(true);
 }
 
-void QtSaveView::enableFileFormatAndLocationControls() {
+void QtSaveView::enableFileFormatControls() {
   m_ui.fileFormatGroup->setEnabled(true);
+}
+
+void QtSaveView::disableFileFormatControls() {
+  m_ui.fileFormatGroup->setEnabled(false);
+}
+
+void QtSaveView::enableLocationControls() {
   m_ui.fileLocationGroup->setEnabled(true);
 }
 
-void QtSaveView::disableFileFormatAndLocationControls() {
-  m_ui.fileFormatGroup->setEnabled(false);
+void QtSaveView::disableLocationControls() {
   m_ui.fileLocationGroup->setEnabled(false);
+}
+
+void QtSaveView::enableLogList() {
+  m_ui.listOfLoggedParameters->setEnabled(true);
+}
+
+void QtSaveView::disableLogList() {
+  m_ui.listOfLoggedParameters->setEnabled(false);
+}
+
+void QtSaveView::enableHeaderCheckBox() {
+  m_ui.headerCheckBox->setEnabled(true);
+}
+
+void QtSaveView::disableHeaderCheckBox() {
+  m_ui.headerCheckBox->setEnabled(false);
+}
+
+void QtSaveView::enableQResolutionCheckBox() {
+  m_ui.qResolutionCheckBox->setEnabled(true);
+}
+
+void QtSaveView::disableQResolutionCheckBox() {
+  m_ui.qResolutionCheckBox->setEnabled(false);
+}
+
+void QtSaveView::enableSeparatorButtonGroup() {
+  m_ui.commaRadioButton->setEnabled(true);
+  m_ui.spaceRadioButton->setEnabled(true);
+  m_ui.tabRadioButton->setEnabled(true);
+}
+
+void QtSaveView::disableSeparatorButtonGroup() {
+  m_ui.commaRadioButton->setEnabled(false);
+  m_ui.spaceRadioButton->setEnabled(false);
+  m_ui.tabRadioButton->setEnabled(false);
 }
 
 /** Returns the save path
@@ -205,11 +247,11 @@ int QtSaveView::getFileFormatIndex() const {
   return m_ui.fileFormatComboBox->currentIndex();
 }
 
-/** Returns the title check value
- * @return :: The title check
+/** Returns the header check value
+ * @return :: The header check
  */
-bool QtSaveView::getTitleCheck() const {
-  return m_ui.titleCheckBox->isChecked();
+bool QtSaveView::getHeaderCheck() const {
+  return m_ui.headerCheckBox->isChecked();
 }
 
 /** Returns the Q resolution check value

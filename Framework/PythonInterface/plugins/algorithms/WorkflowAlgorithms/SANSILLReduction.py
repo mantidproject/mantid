@@ -4,8 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, WorkspaceGroup
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
+    WorkspaceGroup, FileAction
+from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, \
+    StringListValidator
 from mantid.simpleapi import *
 from math import fabs
 import numpy as np
@@ -34,6 +36,10 @@ class SANSILLReduction(PythonAlgorithm):
         process = self.getPropertyValue('ProcessAs')
         if process == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
             issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
+        if bool(self.getPropertyValue('InputWorkspace')) == bool(self.getPropertyValue("Run")):
+            issues['Run'] = "Please provide either Run (for standard SANS) or InputWorkspace (for parameter scans)."
+            issues['InputWorkspace'] = \
+                "Please provide either Run (for standard SANS) or InputWorkspace (for parameter scans)."
         return issues
 
     @staticmethod
@@ -83,7 +89,8 @@ class SANSILLReduction(PythonAlgorithm):
 
     def PyInit(self):
 
-        self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('Run', action=FileAction.OptionalLoad,
+                                                  extensions=['nxs'], allow_empty=True),
                              doc='File path of run(s).')
 
         options = ['Absorber', 'Beam', 'Transmission', 'Container', 'Sample']
@@ -219,6 +226,10 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.declareProperty('ThetaDependent', True,
                              doc='Whether or not to use 2theta dependent transmission correction')
+
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='Input workspace containing already loaded raw data, used for parameter scans.')
 
     def _normalise(self, ws):
         """
@@ -508,6 +519,9 @@ class SANSILLReduction(PythonAlgorithm):
         if process != 'Transmission':
             if self._instrument == 'D33':
                 CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
+            elif self._instrument == 'D16' and mtd[ws].getAxis(0).getUnit().caption() != "Wavelength":
+                # D16 omega scan case : we have an histogram indexed by omega, not wavelength
+                pass
             else:
                 CalculateDynamicRange(Workspace=ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
@@ -531,14 +545,18 @@ class SANSILLReduction(PythonAlgorithm):
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
-        # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
-        # instead we load and list, and merge once with merge runs
-        LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
-        if isinstance(mtd[ws], WorkspaceGroup):
-            tmp = '__tmp'+ws
-            MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp)
-            DeleteWorkspaces(ws)
-            RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
+        if self.getPropertyValue('Run'):
+            LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+', ','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
+            if isinstance(mtd[ws], WorkspaceGroup):
+                # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
+                # instead we load and list, and merge once with merge runs
+                tmp = '__tmp'+ws
+                MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp)
+                DeleteWorkspaces(ws)
+                RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
+        else:
+            in_ws = self.getPropertyValue('InputWorkspace')
+            CloneWorkspace(InputWorkspace=in_ws, OutputWorkspace=ws)
         self._instrument = mtd[ws].getInstrument().getName()
         self._normalise(ws)
         run = mtd[ws].getRun()

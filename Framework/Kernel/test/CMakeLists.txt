@@ -14,7 +14,6 @@ if(CXXTEST_FOUND)
                              ../../TestHelpers/inc)
   target_link_libraries(KernelTest
                         PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         Types
                         Kernel
                         ${NEXUS_LIBRARIES}

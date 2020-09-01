@@ -10,8 +10,8 @@ import sys
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common import message_box
 
-group_table_columns = {0: 'group_name', 1: 'to_analyse', 2: 'detector_ids', 3: 'number_of_detectors'}
-inverse_group_table_columns = {'group_name': 0, 'to_analyse': 1,  'detector_ids': 2,  'number_of_detectors': 3}
+group_table_columns = {0: 'group_name', 2: 'to_analyse', 3: 'detector_ids', 4: 'number_of_detectors', 1: 'periods'}
+inverse_group_table_columns = {'group_name': 0, 'to_analyse': 2,  'detector_ids': 3,  'number_of_detectors': 4, 'periods': 1}
 
 
 class GroupingTableView(QtWidgets.QWidget):
@@ -19,9 +19,8 @@ class GroupingTableView(QtWidgets.QWidget):
     dataChanged = Signal()
     addPairRequested = Signal(str, str)
 
-    @staticmethod
-    def warning_popup(message):
-        message_box.warning(str(message))
+    def warning_popup(self, message):
+        message_box.warning(str(message), parent=self)
 
     def __init__(self, parent=None):
         super(GroupingTableView, self).__init__(parent)
@@ -114,13 +113,14 @@ class GroupingTableView(QtWidgets.QWidget):
         self.setLayout(self.vertical_layout)
 
     def set_up_table(self):
-        self.grouping_table.setColumnCount(4)
-        self.grouping_table.setHorizontalHeaderLabels(["Group Name", "Analyse (plot/fit)", "Detector IDs", "N Detectors"])
+        self.grouping_table.setColumnCount(5)
+        self.grouping_table.setHorizontalHeaderLabels(["Group Name", "Periods", "Analyse (plot/fit)", "Detector IDs", "N Detectors"])
         header = self.grouping_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
         vertical_headers = self.grouping_table.verticalHeader()
         vertical_headers.setSectionsMovable(False)
         vertical_headers.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
@@ -129,14 +129,15 @@ class GroupingTableView(QtWidgets.QWidget):
         self.grouping_table.horizontalHeaderItem(0).setToolTip("The name of the group :"
                                                                "\n    - The name must be unique across all groups/pairs"
                                                                "\n    - The name can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(1).setToolTip("Whether to include this group in the analysis.")
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("Periods to use when calculating this group.")
+        self.grouping_table.horizontalHeaderItem(2).setToolTip("Whether to include this group in the analysis.")
 
-        self.grouping_table.horizontalHeaderItem(2).setToolTip("The sorted list of detectors :"
+        self.grouping_table.horizontalHeaderItem(3).setToolTip("The sorted list of detectors :"
                                                                "\n  - The list can only contain integers."
                                                                "\n  - , is used to separate detectors or ranges."
                                                                "\n  - \"-\" denotes a range, i,e \"1-5\" is the same as"
                                                                " \"1,2,3,4,5\" ")
-        self.grouping_table.horizontalHeaderItem(3).setToolTip("The number of detectors in the group.")
+        self.grouping_table.horizontalHeaderItem(4).setToolTip("The number of detectors in the group.")
 
     def num_rows(self):
         return self.grouping_table.rowCount()
@@ -156,33 +157,41 @@ class GroupingTableView(QtWidgets.QWidget):
         row_position = self.grouping_table.rowCount()
         self.grouping_table.insertRow(row_position)
         for i, entry in enumerate(row_entries):
-            item = QtWidgets.QTableWidgetItem(entry)
             if group_table_columns[i] == 'group_name':
-                # column 0 : group name
                 group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
                 group_name_widget.setText(entry)
                 self.grouping_table.setItem(row_position, i, group_name_widget)
                 self.grouping_table.item(row_position, i).setToolTip(entry)
+                group_name_widget.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+
+            if group_table_columns[i] == 'periods':
+                period_widget = QtWidgets.QTableWidgetItem(entry)
+                self.grouping_table.setItem(row_position, i, period_widget)
+                self.grouping_table.item(row_position, i).setToolTip(entry)
+                period_widget.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+
             if group_table_columns[i] == 'to_analyse':
-                # columns 1 : whether to analyse this group
+                to_analyse_widget = QtWidgets.QTableWidgetItem(entry)
+                to_analyse_widget.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
                 if entry:
-                    item.setCheckState(QtCore.Qt.Checked)
+                    to_analyse_widget.setCheckState(QtCore.Qt.Checked)
                 else:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+                    to_analyse_widget.setCheckState(QtCore.Qt.Unchecked)
+                self.grouping_table.setItem(row_position, i, to_analyse_widget)
+
             if group_table_columns[i] == 'detector_ids':
-                # column 2 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem()
                 detector_widget.setText(entry)
                 self.grouping_table.setItem(row_position, i, detector_widget)
                 self.grouping_table.item(row_position, i).setToolTip(entry)
                 detector_widget.set_validator(self._validate_detector_ID_entry)
-                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEnabled)
+                detector_widget.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+                self.grouping_table.setItem(row_position, i, detector_widget)
 
             if group_table_columns[i] == 'number_of_detectors':
-                # column 3 : number of detector
-                item.setFlags(QtCore.Qt.ItemIsEnabled)
-                item.setFlags(QtCore.Qt.ItemIsSelectable)
-            self.grouping_table.setItem(row_position, i, item)
+                num_detectors_widget = QtWidgets.QTableWidgetItem(entry)
+                num_detectors_widget.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                self.grouping_table.setItem(row_position, i, num_detectors_widget)
 
     def _get_selected_row_indices(self):
         return list(set(index.row() for index in self.grouping_table.selectedIndexes()))
@@ -384,23 +393,10 @@ class GroupingTableView(QtWidgets.QWidget):
         self.remove_group_button.setEnabled(False)
 
     def _disable_all_table_items(self):
-        for row in range(self.num_rows()):
-            for col in range(self.num_cols()):
-                item = self.grouping_table.item(row, col)
-                item.setFlags(QtCore.Qt.ItemIsSelectable)
+        self.grouping_table.setEnabled(False)
 
     def _enable_all_table_items(self):
-        for row in range(self.num_rows()):
-            for col in range(self.num_cols()):
-                item = self.grouping_table.item(row, col)
-                if group_table_columns[col] == 'detector_ids':
-                    item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
-
-                elif group_table_columns[col] == 'to_analyse':
-                    item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-                else:
-                    # Group name and number of detectors should remain un-editable
-                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+        self.grouping_table.setEnabled(True)
 
     def get_group_range(self):
         return str(self.group_range_min.text()), str(self.group_range_max.text())

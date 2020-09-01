@@ -15,10 +15,12 @@
 set ( BIN_DIR bin )
 set ( ETC_DIR etc )
 set ( LIB_DIR lib )
+set ( SITE_PACKAGES ${LIB_DIR} )
 set ( PLUGINS_DIR plugins )
 
 set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
 set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
 set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
 
 # Separate directory of plugins to be discovered by the ParaView framework
@@ -153,7 +155,7 @@ if [ -n \"\${NXSESSIONID}\" ]; then  # running in nx
   VGLRUN=\"vglrun\"
 elif [ -n \"\${TLSESSIONDATA}\" ]; then  # running in thin-linc
   command -v vglrun >/dev/null 2>&1 || { echo >&2 \"MantidPlot requires VirtualGL but it's not installed.  Aborting.\"; exit 1; }
-  if [ command -v vgl-wrapper.sh ]; then
+  if [ \$(command -v vgl-wrapper.sh) ]; then
     VGLRUN=\"vgl-wrapper.sh\"
   else
     VGLRUN=\"vglrun\"
@@ -213,7 +215,7 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     GDB=\"gdb --args\"
 fi" )
 
-set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
+set ( ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?" )
 
 ##### Local dev version
 set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
@@ -224,7 +226,6 @@ else ()
 endif ()
 
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin" )
-set ( SCRIPTSDIR ${CMAKE_HOME_DIRECTORY}/scripts)
 
 # used by mantidplot and mantidworkbench
 if (ENABLE_MANTIDPLOT)
@@ -266,7 +267,6 @@ endif ()
 
 # used by mantidplot and mantidworkbench
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
-set ( SCRIPTSDIR "\${INSTALLDIR}/scripts")
 
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot_exe )
@@ -276,7 +276,7 @@ if (ENABLE_MANTIDPLOT)
             DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
 endif ()
 if (ENABLE_WORKBENCH)
-  set ( MANTIDWORKBENCH_EXEC workbench-script ) # what the actual thing is called
+  set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY )
   install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install
