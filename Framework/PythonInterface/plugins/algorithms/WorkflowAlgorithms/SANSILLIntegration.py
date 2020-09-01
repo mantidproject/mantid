@@ -181,24 +181,14 @@ class SANSILLIntegration(PythonAlgorithm):
                 in_ws = self._input_ws + '_' + panel
                 out_ws = panels_out_ws + '_' + panel
                 CropToComponent(InputWorkspace=self._input_ws, OutputWorkspace=in_ws, ComponentNames=panel)
-                self._integrate(in_ws, out_ws, True)
+                self._integrate(in_ws, out_ws, panel)
                 DeleteWorkspace(in_ws)
                 ReplaceSpecialValues(InputWorkspace=out_ws, OutputWorkspace=out_ws, NaNValue=0, NaNError=0)
-                self._crop_zero_bins(out_ws)
                 panel_outputs.append(out_ws)
             GroupWorkspaces(InputWorkspaces=panel_outputs, OutputWorkspace=panels_out_ws)
             self.setProperty('PanelOutputWorkspaces', mtd[panels_out_ws])
 
-    def _crop_zero_bins(self, ws):
-        if self.getPropertyValue('OutputType') == "I(Phi,Q)":
-            return
-        y = mtd[ws].readY(0)
-        x = mtd[ws].readX(0)
-        nonzero = np.nonzero(y)[0]
-        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=x[nonzero[0]],
-                      XMax=x[nonzero[-1] + 1])
-
-    def _integrate(self, in_ws, out_ws, panel=False):
+    def _integrate(self, in_ws, out_ws, panel=None):
         if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
             self._integrate_iq(in_ws, out_ws, panel)
         elif self._output_type == 'I(Qx,Qy)':
@@ -353,15 +343,20 @@ class SANSILLIntegration(PythonAlgorithm):
         log_binning = self.getProperty('IQxQyLogBinning').value
         Qxy(InputWorkspace=ws_in, OutputWorkspace=ws_out, MaxQxy=max_qxy, DeltaQ=delta_q, IQxQyLogBinning=log_binning)
 
-    def _integrate_iq(self, ws_in, ws_out, panel=False):
+    def _integrate_iq(self, ws_in, ws_out, panel=None):
         """
         Produces I(Q) or I(Phi,Q) using Q1DWeighted
         """
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
         run = mtd[ws_in].getRun()
-        q_min = run.getLogData('qmin').value
-        q_max = run.getLogData('qmax').value
+        q_min_name = 'qmin'
+        q_max_name = 'qmax'
+        if panel:
+            q_min_name += ('_' + panel)
+            q_max_name += ('_' + panel)
+        q_min = run.getLogData(q_min_name).value
+        q_max = run.getLogData(q_max_name).value
         self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
         pixel_height = run.getLogData('pixel_height').value
         pixel_width = run.getLogData('pixel_width').value

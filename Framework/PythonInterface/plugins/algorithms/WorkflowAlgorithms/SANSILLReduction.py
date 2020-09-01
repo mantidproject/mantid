@@ -518,7 +518,13 @@ class SANSILLReduction(PythonAlgorithm):
     def _finalize(self, ws, process):
         if process != 'Transmission':
             if self._instrument == 'D33':
-                CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
+                CalculateDynamicRange(Workspace=ws,
+                                      ComponentNames=['back_detector',
+                                                      'front_detector',
+                                                      'front_detector_right',
+                                                      'front_detector_left',
+                                                      'front_detector_top',
+                                                      'front_detector_bottom'])
             elif self._instrument == 'D16' and mtd[ws].getAxis(0).getUnit().caption() != "Wavelength":
                 # D16 omega scan case : we have an histogram indexed by omega, not wavelength
                 pass
