@@ -403,7 +403,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEquals(self.model.selected_groups, ['group_1'])
 
     def test_update_view_from_model_correctly_adds_warnings_for_invalid_periods(self):
-        self.presenter.validate_periods_list = mock.MagicMock(return_value=RowValid.invalid_for_all_runs)
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.invalid_for_all_runs)
         self.presenter._view.add_entry_to_table = mock.MagicMock()
         self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
 
@@ -413,7 +413,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
                                                                         (255, 0, 0), 'Warning: group periods invalid for all runs')
 
     def test_update_view_from_model_correctly_adds_warnings_for_semi_invalid_periods(self):
-        self.presenter.validate_periods_list = mock.MagicMock(return_value=RowValid.valid_for_some_runs)
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.valid_for_some_runs)
         self.presenter._view.add_entry_to_table = mock.MagicMock()
         self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
 
@@ -423,7 +423,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
                                                                         (255, 255, 0), 'Warning: group periods invalid for some runs')
 
     def test_update_view_from_model_correctly_adds_warnings_for_valid(self):
-        self.presenter.validate_periods_list = mock.MagicMock(return_value=RowValid.valid_for_all_runs)
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.valid_for_all_runs)
         self.presenter._view.add_entry_to_table = mock.MagicMock()
         self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
 

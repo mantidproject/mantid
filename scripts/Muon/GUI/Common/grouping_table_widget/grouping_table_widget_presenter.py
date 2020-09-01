@@ -5,19 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-from enum import Enum
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import inverse_group_table_columns
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
+
 
 maximum_number_of_groups = 20
-
-
-class RowValid(Enum):
-    invalid_for_all_runs = 0
-    valid_for_all_runs = 2
-    valid_for_some_runs = 1
 
 
 # Row colours specified in RGB. i.e. (255, 0, 0) is red and (255, 255, 0) is yellow.
@@ -100,22 +95,7 @@ class GroupingTablePresenter(object):
             # An IndexError thrown here implies that the input string is not a valid
             # number list.
             return RowValid.invalid_for_all_runs
-        return self.validate_periods_list(period_list)
-
-    def validate_periods_list(self, periods):
-        invalid_runs = []
-        current_runs = self._model._context.current_runs
-
-        for run in current_runs:
-            if any([period < 1 or self._model._context.num_periods(run) < period for period in periods]):
-                invalid_runs.append(run)
-
-        if not invalid_runs:
-            return RowValid.valid_for_all_runs
-        elif len(invalid_runs) == len(current_runs):
-            return RowValid.invalid_for_all_runs
-        else:
-            return RowValid.valid_for_some_runs
+        return self._model.validate_periods_list(period_list)
 
     def disable_editing(self):
         self._view.disable_editing()
@@ -224,7 +204,7 @@ class GroupingTablePresenter(object):
 
         for group in self._model.groups:
             to_analyse = True if group.name in self._model.selected_groups else False
-            display_period_warning = self.validate_periods_list(group.periods)
+            display_period_warning = self._model.validate_periods_list(group.periods)
             color = row_colors[display_period_warning]
             tool_tip = row_tooltips[display_period_warning]
             self.add_group_to_view(group, to_analyse, color, tool_tip)
