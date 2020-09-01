@@ -120,7 +120,9 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
         mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_sliceinfo.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
