@@ -74,29 +74,36 @@ Techniques for Calculating Corrections
 
 Methods for calculating the absorption corrections (and also the multiple scattering)  generally fall into these categories:
 
-1) Analytical solutions, based on the Boltzmann transport equation. Numerical integration is required for most shapes.
+1) Analytical solutions. For some simple situations it is possible to do an exact, analytical integration to produce a formula for the absorption correction based on parameters of the sample 
 
-* Generally provides quicker solutions.
+* Very fast.
+* Results are often stored in look up tables.
+* Use often involves interpolating between tabulated results.
+* Implemented in Mantid
+
+2) Numerical integration
+
+* Generally provides quicker solutions than Monte Carlo methods.
 * Some assumptions are included: sample geometries and the scattering processes.
 * Less flexible than the Monte Carlo integration or ray-tracing for tackling different problems.
 * Implemented in Mantid
 
-2) Monte Carlo integration
+3) Monte Carlo integration
  
 * Generally a more computationally demanding calculation and slower to solution. Monte Carlo is used for the numerical integration technique.
 * Relaxation of most assumptions needed by analytical solutions.
 * More flexible than the analytical techniques for shapes, beam profiles, and mixed number of scattering processes.
 * Implemented in Mantid
 
-3) Monte Carlo ray tracing 
+4) Monte Carlo ray tracing 
 
 * Most general solution in that it is a virtual neutron experiment with all neutron histories kept. Slowest to solution.
 * Relatively no assumptions needed. Can simulate mixed numbers of scattering, complex scattering processes (ie scattering sample to sample environment back to sample then to detector), moderator and guides included.
 * Most flexible but mainly a tool for designing new instruments than for calculating sample corrections.
 * Typically calculated in another program specific to ray tracing and then imported into Mantid. 
 
-The analytical method generally provides a quicker solution, but at the expense of having to make assumptions about sample geometries and scattering processes that make them less flexible than the Monte Carlo techniques (integration and ray-tracing).
-However, in many cases analytical solutions are satisfactory and allow much more efficient analysis of results. 
+The analytical and numerical integration methods generally provide a quicker solution, but at the expense of having to make assumptions about sample geometries and scattering processes that make them less flexible than the Monte Carlo techniques (integration and ray-tracing).
+However, in many cases analytical and numerical integration solutions are satisfactory and allow much more efficient analysis of results. 
 
 .. _Absorption Corrections:
 
@@ -201,10 +208,10 @@ As discussed above, the final term in this expression is generally neglected.
 General Notes
 ##############
 
-Analytical Methods
+Integration Methods
 ^^^^^^^^^^^^^^^^^^
 
-The analytically approach has been further extended in a number of ways:
+The numerical and Monte Carlo integration approaches can be further extended in a number of ways:
 
 1. The beam profile (and similarly the detector visibility of the sample) can also be included to accommodate partial illumination of the sample by the beam by means of a convolution function for the shape of the profile. [10]_ The beam profile and detector profile can be defined as a function of the volume element :math:`dV` as :math:`P(dV)` and :math:`D(dV)`, respectively. These can then be included into Eq. :eq:`absorption_factor` as:
 
@@ -238,6 +245,8 @@ Indicates the technique used for calculating the absorption correction:
 +------------+-------------------------+ 
 |  Legend for Technique                | 
 +============+=========================+ 
+|  A         | Analytical              | 
++------------+-------------------------+ 
 |  NI        | Numerical Integration   | 
 +------------+-------------------------+ 
 |  MC        | Monte Carlo Integration | 
@@ -276,24 +285,24 @@ Absorption Correction Algorithms in Mantid Table
 | :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`                             | E,D,I       | NI         | Any Shape                       | Wavelength         | A,PI                || Approximates sample shape using cuboid mesh of given element size                    |
 |                                                                                     |             |            |                                 |                    |                     || Base class: AbsorptionCorrection                                                     |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`AnnularRingAbsorption <algm-AnnularRingAbsorption>`                           | E,D,I       | MC         | Annular / Hollow Cylinder       | Wavelength         | A,PI                |                                                                                       |
+| :ref:`AnnularRingAbsorption <algm-AnnularRingAbsorption>`                           | E,D,I       | MC         | Annular / Hollow Cylinder       | Wavelength         | A,PI                | Wrapper for MonteCarloAbsorption for hollow cylindrical sample                        |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`AnvredCorrection <algm-AnvredCorrection>`                                     | E           | NI         | Sphere                          | Wavelength or TOF  | A,FI,W              ||  Absorption for spheres with additional corrections in ANVRED program from ISAW:     |
+| :ref:`AnvredCorrection <algm-AnvredCorrection>`                                     | E           | A          | Sphere                          | Wavelength or TOF  | A,FI,W              ||  Absorption for spheres with additional corrections in ANVRED program from ISAW:     |
 |                                                                                     |             |            |                                 |                    |                     ||  - weight factors for pixels of instrument                                           |
 |                                                                                     |             |            |                                 |                    |                     ||  - correct for the slant path through the scintillator glass and scale factors       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`               | E,D,I       | NI         | Cylinder or Flat Plate / Slab   | Wavelength         | W                   || Simply applies the correction workspaces from other Paalman-Pings-style algorithms   |
+| :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`               | E,D,I       |            | Cylinder or Flat Plate / Slab   | Wavelength         | W                   || Simply applies the correction workspaces from other Paalman-Pings-style algorithms   |
 |                                                                                     |             |            |                                 |                    |                     || Can also apply shift and scale factors to container workspaces                       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` | E           | NI         | Cylinder                        | Wavelength         | A,MS,FI             ||  Only applicable to Vanadium                                                         |
+| :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` | E           | A          | Cylinder                        | Wavelength         | A,MS,FI             ||  Only applicable to Vanadium                                                         |
 |                                                                                     |             |            |                                 |                    |                     ||  In-plane only                                                                       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>`           | E,D,I       | MC         || Cylinder or                    | Wavelength         | A\+,PI              || Uses multiple calls to SimpleShapeMonteCarloAbsorption to calculate                  |
 |                                                                                     |             |            || Flat Plate / Slab or           |                    |                     || sample and container correction workspaces                                           |
-|                                                                                     |             |            || Annular / Hollow Cylinder      |                    |                     ||                                                                                      |
+|                                                                                     |             |            || Annular / Hollow Cylinder      |                    |                     || (Deprecated)                                                                         |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`                   | E           | NI         | Cylinder                        | Wavelength         | A,MS,FI,W           ||  Only applicable to Vanadium                                                         |
-|                                                                                     |             |            |                                 |                    |                     ||  In-plane only                                                                       |
+| :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`                   | E           | A          | Cylinder                        | Wavelength         | A,MS,FI,W           ||  Calls CalculateCarpenterSampleCorrection                                            |
+|                                                                                     |             |            |                                 |                    |                     ||                                                                                      |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`CuboidGaugeVolumeAbsorption <algm-CuboidGaugeVolumeAbsorption>`               | E,D,I       | NI         | Cuboid section                  | Wavelength         | A,PI                | Base class: AbsorptionCorrection via wrapping                                         |
 |                                                                                     |             |            | in Any Shape sample             |                    |                     | via wrapping :ref:`FlatPlateAbsorption <algm-FlatPlateAbsorption>`                    |
@@ -329,6 +338,10 @@ Absorption Correction Algorithms in Mantid Table
 | :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`                             | E,D,I       | MC         | Any Shape                       | Wavelength         | A\+*,PI             || "Workhorse" of the MC-based algorithms                                               |
 |                                                                                     |             |            |                                 |                    |                     || \*Outputs a single correction workspace with both sample and container corrections   |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
+| :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`     | E,D,I       | MC         || Cylinder or                    || Wavelength        | A\++,PI             || Calculates Paalman Pings partial absorption factors using MonteCarloAbsorption       |
+|                                                                                     |             |            || Flat Plate / Slab or           || Energy Transfer   |                     ||                                                                                      |
+|                                                                                     |             |            || Annular / Hollow Cylinder      || Momentum Transfer |                     ||                                                                                      |
++-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`PearlMCAbsorption <algm-PearlMCAbsorption>`                                   | E           | MC         | Any Shape                       | N/A                | L                   || Simply reads in pre-computed :math:`\mu` values for PEARL instrument from an         |
 |                                                                                     |             |            |                                 |                    |                     || external Monte Carlo program. Uses :ref:`LoadAscii <algm-LoadAscii>`                 |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
@@ -336,7 +349,7 @@ Absorption Correction Algorithms in Mantid Table
 |                                                                                     |             |            || Flat Plate / Slab or           |                    |                     ||                                                                                      |
 |                                                                                     |             |            || Annular / Hollow Cylinder      |                    |                     ||                                                                                      |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`SphericalAbsorption <algm-SphericalAbsorption>`                               | E           | NI         | Sphere                          | Wavelength         | A,FI,W              |  Wrapper around :ref:`AvredCorrection <algm-AnvredCorrection>`                        |
+| :ref:`SphericalAbsorption <algm-SphericalAbsorption>`                               | E           | NI         | Sphere                          | Wavelength         | A,FI,W              |  Wrapper around :ref:`AnvredCorrection <algm-AnvredCorrection>`                       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 
 
