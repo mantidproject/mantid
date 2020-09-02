@@ -141,8 +141,8 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
 
   // ypp means y prime prime
   std::vector<double> ypp(xs.size() - 2);
-  // would be quicker to solve linear equation rather than invert h but
-  // also need h-1 elements later on
+  // would be quicker to solve linear equation rather than invert h but also
+  // need h-1 elements later on
   h.invertTridiagonal();
   ypp = h * d;
 
@@ -211,8 +211,8 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
     ynew[i] = A * y1 + B * y2 + C * ypp1 + D * ypp2;
 
     // propagate the source points errors through to the interpolated point
-    // Interpolation error is hard to calculate and is probably v
-    // small so assume it's zero
+    // Interpolation error is hard to calculate and is probably v small so
+    // assume it's zero
     if (calculateErrors) {
       if (independentErrors) {
         auto var = A * A * e1 * e1 + 2 * A * C * u_y1pp_y1 + B * B * e2 * e2 +
@@ -222,8 +222,8 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
       } else {
         // if the errors are correlated just do linear interpolation on them
         // to get something approximately equal to the two calculated errors
-        // Not sure there's much point doing a spline interpolation
-        // on the errors
+        // Not sure there's much point doing a spline interpolation on the
+        // errors
         enew[i] = (points[i] - x1) * e2 + (x2 - points[i]) * e1;
       }
     } else {
