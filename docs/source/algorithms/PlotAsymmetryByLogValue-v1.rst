@@ -70,23 +70,25 @@ Output:
 
 .. testcode:: ExSimpleRange
 
-	ws_list = ['MUSR00015195','MUSR00015189','MUSR00015191']
+   ws_list = ['MUSR00015195','MUSR00015189','MUSR00015192']
 
-	ws = PlotAsymmetryByLogValue(WorkspaceNames = ws_list,
-								LogValue = 'sample_magn_field',
-								TimeMin = 0.55,
-								TimeMax = 12.0);
+   ws = PlotAsymmetryByLogValue(WorkspaceNames = ws_list,
+                                LogValue = 'sample_magn_field',
+                                TimeMin = 0.55,
+                                TimeMax = 12.0);
 
-	print("Y values (asymmetry): {}".format(ws.readY(0)))
-	print("X values (sample magn. field): {}".format(ws.readX(0)))
+   print("Y values (asymmetry): [ {:.7f}  {:.7f}  {:.7f} ]".format(
+       ws.readY(0)[0],ws.readY(0)[1],ws.readY(0)[2]))
+   print("X values (sample magn. field): [ {:.1f}  {:.1f}  {:.1f} ]".format(
+       ws.readX(0)[0],ws.readX(0)[1],ws.readX(0)[2]))
 	
 Output:
 
 .. testoutput:: ExSimpleRange
   :options: +NORMALIZE_WHITESPACE
   
-   Y values (asymmetry): [ 0.14500665   0.11987909    0.06521432]
-   X values (sample magn. field): [ 1350.  1370.  1410.]
+   Y values (asymmetry): [ 0.1450066  0.0929052  0.0652143 ]
+   X values (sample magn. field): [ 1350.0  1380.0  1410.0 ]
 
 **Example - Using both Red and Green periods:**
 
