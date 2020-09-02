@@ -34,4 +34,10 @@ Bug Fixes
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work correctly for annular sample in a container.
 - FQ and Msd tabs now label output workspaces with the fitting function.
 
+New
+###
+
+- :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` has been added as a beta method for analysing Vesuvio data.
+
+
 :ref:`Release 5.1.0 <v5.1.0>`
