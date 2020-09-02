@@ -7,11 +7,15 @@
 from qtpy import QtWidgets, QtGui, QtCore
 from qtpy.QtCore import Signal
 import sys
-from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common import message_box
 
 group_table_columns = {0: 'group_name', 2: 'to_analyse', 3: 'detector_ids', 4: 'number_of_detectors', 1: 'periods'}
 inverse_group_table_columns = {'group_name': 0, 'to_analyse': 2,  'detector_ids': 3,  'number_of_detectors': 4, 'periods': 1}
+table_column_flags = {'group_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+                      'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
+                      'detector_ids': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
+                      'number_of_detectors': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+                      'periods': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable}
 
 
 class GroupingTableView(QtWidgets.QWidget):
@@ -152,46 +156,24 @@ class GroupingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / removing table entries
     # ------------------------------------------------------------------------------------------------------------------
-    def add_entry_to_table(self, row_entries):
+    def add_entry_to_table(self, row_entries, color = (255, 255, 255), tooltip=''):
         assert len(row_entries) == self.grouping_table.columnCount()
         row_position = self.grouping_table.rowCount()
         self.grouping_table.insertRow(row_position)
+        q_color = QtGui.QColor(*color, alpha=127)
+        q_brush = QtGui.QBrush(q_color)
         for i, entry in enumerate(row_entries):
-            if group_table_columns[i] == 'group_name':
-                group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
-                group_name_widget.setText(entry)
-                self.grouping_table.setItem(row_position, i, group_name_widget)
-                self.grouping_table.item(row_position, i).setToolTip(entry)
-                group_name_widget.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-
-            if group_table_columns[i] == 'periods':
-                period_widget = QtWidgets.QTableWidgetItem(entry)
-                self.grouping_table.setItem(row_position, i, period_widget)
-                self.grouping_table.item(row_position, i).setToolTip(entry)
-                period_widget.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+            table_item = QtWidgets.QTableWidgetItem(entry)
+            table_item.setBackground(q_brush)
+            table_item.setToolTip(tooltip)
+            self.grouping_table.setItem(row_position, i, table_item)
+            table_item.setFlags(table_column_flags[group_table_columns[i]])
 
             if group_table_columns[i] == 'to_analyse':
-                to_analyse_widget = QtWidgets.QTableWidgetItem(entry)
-                to_analyse_widget.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
                 if entry:
-                    to_analyse_widget.setCheckState(QtCore.Qt.Checked)
+                    table_item.setCheckState(QtCore.Qt.Checked)
                 else:
-                    to_analyse_widget.setCheckState(QtCore.Qt.Unchecked)
-                self.grouping_table.setItem(row_position, i, to_analyse_widget)
-
-            if group_table_columns[i] == 'detector_ids':
-                detector_widget = table_utils.ValidatedTableItem()
-                detector_widget.setText(entry)
-                self.grouping_table.setItem(row_position, i, detector_widget)
-                self.grouping_table.item(row_position, i).setToolTip(entry)
-                detector_widget.set_validator(self._validate_detector_ID_entry)
-                detector_widget.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
-                self.grouping_table.setItem(row_position, i, detector_widget)
-
-            if group_table_columns[i] == 'number_of_detectors':
-                num_detectors_widget = QtWidgets.QTableWidgetItem(entry)
-                num_detectors_widget.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-                self.grouping_table.setItem(row_position, i, num_detectors_widget)
+                    table_item.setCheckState(QtCore.Qt.Unchecked)
 
     def _get_selected_row_indices(self):
         return list(set(index.row() for index in self.grouping_table.selectedIndexes()))
