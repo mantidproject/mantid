@@ -26,12 +26,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 
 import numpy as np
-import mantid
 import mantid.simpleapi as sapi
-from scipy import signal
-from scipy.optimize import curve_fit
 from scipy import optimize
-from scipy.ndimage import convolve1d
 
 #
 #   INITIALISING FUNCTIONS AND USEFUL FUNCTIONS
@@ -88,7 +84,8 @@ def fun_pseudo_voigt(x, sigma, gamma): #input std gaussian hwhm lorentziana
     eta = 1.36603 *fl/f - 0.47719 * (fl/f)**2 + 0.11116 *(fl/f)**3
     sigma_v, gamma_v = f/(2.*np.sqrt(2.*np.log(2.))), f /2.
     pseudo_voigt = eta * fun_lorentzian(x, gamma_v) + (1.-eta) * fun_gaussian(x, sigma_v)
-    norm=np.sum(pseudo_voigt)*(x[1]-x[0])
+    #norm=np.sum(pseudo_voigt)*(x[1]-x[0])
+    _=np.sum(pseudo_voigt)*(x[1]-x[0])
     return pseudo_voigt#/np.abs(norm)
 
 
@@ -307,8 +304,8 @@ def calculate_resolution(spectrum, data_x, mass, IPFile):
     dEE = (1. + (E0 / Ef)**1.5 * ( L1 / L0 ) )**2 * dE1**2 + (2. * E0 * v0 / L0 )**2 * dTOF**2
     dEE+= ( 2. * E0**1.5 / Ef**0.5 / L0 )**2 * dL1**2 + ( 2. * E0 / L0 )**2 * dL0**2
     dQQ =  (1. - (E0 / Ef )**1.5 *L1 / L0 - np.cos(angle/180.*np.pi) * ( ( E0 / Ef )**0.5 - L1 / L0 * E0 / Ef ))**2 * dE1**2
-    dQQ+= ( ( 2. * E0 * v0 / L0 )**2 * dTOF**2 + (2. * E0**1.5 / L0 / Ef**0.5 )**2 *dL1**2 +
-            ( 2. * E0 / L0 )**2 * dL0**2 ) * np.abs( Ef / E0 * np.cos(angle/180.*np.pi) -1.)
+    DQQ_2 =  np.abs( Ef / E0 * np.cos(angle/180.*np.pi) -1.)
+    dQQ+= ( ( 2. * E0 * v0 / L0 )**2 * dTOF**2 + (2. * E0**1.5 / L0 / Ef**0.5 )**2 *dL1**2+ ( 2. * E0 / L0 )**2 * dL0**2 )*DQQ_2
     dQQ+= ( 2. * np.sqrt( E0 * Ef )* np.sin(angle/180.*np.pi) )**2 * dTheta**2
     # conversion from meV^2 to A^-2
     dEE*= ( mass / hbar**2 /delta_Q )**2
@@ -456,7 +453,8 @@ def correct_for_multiple_scattering(ws_name,first_spectrum,last_spectrum, sample
         for j in range(ws.getNumberHistograms()):
             for k in range(ws.blocksize()):
                 ws.dataE(j)[
-                         k] =0. # set the errors from the MonteCarlo simulation to zero - no propagation of such uncertainties - Use high number of events for final corrections!!!
+                         k] =0. # set the errors from the MonteCarlo simulation to zero - no propagation of such uncertainties
+                #- Use high number of events for final corrections!!!
         sapi.Divide(LHSWorkspace = workspace, RHSWorkspace = simulation_normalisation, OutputWorkspace = workspace)
         sapi.Multiply(LHSWorkspace = workspace, RHSWorkspace = data_normalisation, OutputWorkspace = workspace)
         sapi.RenameWorkspace(InputWorkspace = workspace, OutputWorkspace = str(ws_name)+workspace)
@@ -475,18 +473,18 @@ def calculate_mantid_resolutions(ws_name, mass):
         sapi.VesuvioResolution(Workspace=ws,WorkspaceIndex=index,Mass=mass,OutputWorkspaceYSpace="tmp")
         tmp=sapi.Rebin("tmp",rebin_parameters)
         if index == 0:
-            sapi.RenameWorkspace("tmp","resolution")
+            sapi.RenameWorkspace(tmp,"resolution")
         else:
-            sapi.AppendSpectra("resolution", "tmp", OutputWorkspace= "resolution")
+            sapi.AppendSpectra("resolution", tmp, OutputWorkspace= "resolution")
     sapi.SumSpectra(InputWorkspace="resolution",OutputWorkspace="resolution")
     normalise_workspace("resolution")
-    safe_delete_ws("tmp")
+    safe_delete_ws(tmp)
 
 
 def normalise_workspace(ws_name):
     tmp_norm = sapi.Integration(ws_name)
     sapi.Divide(LHSWorkspace=ws_name,RHSWorkspace="tmp_norm",OutputWorkspace=ws_name)
-    safe_delete_ws("tmp_norm")
+    safe_delete_ws(tmp_norm)
 
 
 def final_fit(fit_ws_name, constraints,y_range, correct_for_offsets, masses, g_log) :
@@ -510,8 +508,9 @@ def final_fit(fit_ws_name, constraints,y_range, correct_for_offsets, masses, g_l
     g_log.notice( "mean kinetic energy: ",sigma_to_energy*ws.cell(0,1)**2," +/- ", 2.*sigma_to_energy*ws.cell(0,2)*ws.cell(0,1), " meV ")
     if correct_for_offsets :
         sapi.Scale(InputWorkspace=fit_ws_name,Factor=-ws.cell(4,1),Operation="Add",OutputWorkspace=fit_ws_name+'_cor')
-        sapi.Scale(InputWorkspace=fit_ws_name+'_cor',Factor=(2.*np.pi)**(-0.5)/ws.cell(0,1)/
-                   ws.cell(3,1),Operation="Multiply",OutputWorkspace=fit_ws_name+'_cor')
+        sapi.Scale(InputWorkspace=fit_ws_name+'_cor',
+                   Factor=(2.*np.pi)**(-0.5)/ws.cell(0,1)/ws.cell(3,1),Operation="Multiply",
+                   OutputWorkspace=fit_ws_name+'_cor')
 
 
 class element:
@@ -535,13 +534,17 @@ def prepare_fit_arguments(elements, constraints) :
     masses[0]=elements[0].mass
     par = (elements[0].intensity, elements[0].width, elements[0].centre)
     bounds = ( (elements[0].intensity_low, elements[0].intensity_high), (elements[0].width_low,
-                                                                         elements[0].width_high), (elements[0].centre_low, elements[0].centre_high) )
+                                                                         elements[0].width_high),
+               (elements[0].centre_low,
+                elements[0].centre_high) )
     for m in range(len(elements) -1 ):
         m += 1
         masses[m] = elements[m].mass
         par += ( elements[m].intensity, elements[m].width, elements[m].centre )
         bounds += ( (elements[m].intensity_low, elements[m].intensity_high), (elements[m].width_low,
-                                                                              elements[m].width_high), (elements[m].centre_low, elements[m].centre_high) )
+                                                                              elements[m].width_high),
+                    (elements[m].centre_low,
+                     elements[m].centre_high) )
     for k in range(len(constraints) ):
         # from element position in elements to intensity position in par
         lhs_int, rhs_int = 3*constraints[k].lhs_element_position, 3*constraints[k].rhs_element_position

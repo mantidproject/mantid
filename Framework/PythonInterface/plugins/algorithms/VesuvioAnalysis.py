@@ -26,7 +26,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.api import PropertyMode
 from mantid.simpleapi import *
 from mantid.kernel import  StringListValidator, IntListValidator, FloatBoundedValidator, Direction
 from Inelastic.vesuvio.analysisHelpers import *
@@ -74,7 +73,8 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(
             "AnalysisMode",
             "LoadReduceAnalyse",
-            doc="In the first case, all the algorithm is run. In the second case, the data are not re-loaded, and only the TOF and y-scaling bits are run. In the third case, only the y-scaling final analysis is run.",
+            doc="In the first case, all the algorithm is run. In the second case, the data are not re-loaded, and only"
+            " the TOF and y-scaling bits are run. In the third case, only the y-scaling final analysis is run.",
             validator=StringListValidator(
                 [
                     "LoadReduceAnalyse",
@@ -98,7 +98,8 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(
             "TransmissionGuess",
             0.9174,
-            doc="A number from 0 to 1 to represent the experimental transmission value of the sample for epithermal neutrons. This value is used for the multiple scattering corrections. If 1, the multiple scattering correction is not run.",
+            doc="A number from 0 to 1 to represent the experimental transmission value of the sample for epithermal"
+            " neutrons. This value is used for the multiple scattering corrections. If 1, the multiple scattering correction is not run.",
             validator=FloatBoundedValidator(
                 0,
                 1) )
@@ -112,11 +113,16 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(
             "ConstraintsProfileScatteringCrossSection",
             "2.*82.03/5.551",
-            doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering cross section. Simple arithmetic can be included but the result may be rounded.")
+            doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering"
+            "cross section. Simple arithmetic can be included but the result may be rounded.")
         self.declareProperty("ConstraintsProfileState", "eq", validator=StringListValidator(["eq","ineq"]))
         self.declareProperty(IntArrayProperty("SpectraToBeMasked", []))#173,174,181
         self.declareProperty("SubtractResonancesFunction", "", doc="Function for resonance subtraction. Empty means no subtraction.")
-        self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles but the first element specified in the elements string. Then such spectra are converted to the Y space of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermte function up to the sixth order.")
+        self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles"
+                             " about the first element specified in the elements string. Then such spectra are converted to the Y space"
+                             " of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and"
+                             " symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermte function up to the sixth"
+                             "order.")
 
     def validateInputs(self):
         tableCols = [
@@ -273,7 +279,8 @@ class VesuvioAnalysis(PythonAlgorithm):
                               OutputWorkspace=ws_name+"_cor_residuals")
                         ws = CloneWorkspace(ws_name+"_cor_residuals")
                         for index in range( ws.getNumberHistograms() ):
-                            Fit(Function=resonance_function, InputWorkspace=ws_name+"_cor_residuals", WorkspaceIndex=index, MaxIterations=10000,
+                            Fit(Function=resonance_function, InputWorkspace=ws_name+"_cor_residuals", WorkspaceIndex=index,
+                                MaxIterations=10000,
                                 Output=ws_name+"_cor_residuals", OutputCompositeMembers=True, StartX=110., EndX=460.)
                             fit_ws=mtd[ws_name+"_cor_residuals_Workspace"]
                             for bin in range( ws.blocksize() ) :
@@ -287,14 +294,15 @@ class VesuvioAnalysis(PythonAlgorithm):
                 else:
                     if fit_hydrogen_in_Y_space:
                         hydrogen_ws = subtract_other_masses(ws_name+"_cor", widths, intensities, centres, spectra, masses,IPFile,g_log)
-                        RenameWorkspace("hydrogen_ws", ws_name+'_H')
+                        RenameWorkspace(hydrogen_ws, ws_name+'_H')
                         SumSpectra(InputWorkspace=ws_name+'_H', OutputWorkspace=ws_name+'_H_sum')
                         calculate_mantid_resolutions(ws_name, masses[0])
 
             # Fit of the summed and symmetrised hydrogen neutron Compton profile in its Y space using MANTID.
             if fit_hydrogen_in_Y_space:
                 #calculate_mantid_resolutions(ws_name, masses[0])
-                max_Y = convert_to_y_space_and_symmetrise(ws_name+"_H",masses[0])
+                #max_Y
+                _ = convert_to_y_space_and_symmetrise(ws_name+"_H",masses[0])
                 # IT WOULD BE GOOD TO HAVE THE TIES DEFINED IN THE USER SECTION!!!
                 constraints = "   sigma1=3.0,c4=0.0, c6=0.0,A=0.08, B0=0.00, ties = {}".format(y_fit_ties)
                 correct_for_offsets = True
