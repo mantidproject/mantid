@@ -147,7 +147,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
-        mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+        mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_tableworkspace_item.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py

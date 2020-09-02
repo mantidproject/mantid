@@ -10,7 +10,7 @@
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 
 # local imports
-from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView, QTableWidget
+from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 
 
 class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
@@ -22,7 +22,11 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         TableWorkspaceDisplayView.__init__(self, *args, **kwargs)
 
     def keyPressEvent(self, event):
-        QTableWidget.keyPressEvent(self, event)
+        """
+        Override base to call handler as part of event
+        """
+        # bypass immediate base class to get standard table arrow key behaviour
+        QTableView.keyPressEvent(self, event)
         self._key_handler._row_selected()
 
 
@@ -112,7 +116,7 @@ class PeaksViewerView(QWidget):
         self._table_view = _PeaksWorkspaceTableView(parent=self, key_handler=self)
         self._table_view.setSelectionBehavior(_PeaksWorkspaceTableView.SelectRows)
         self._table_view.setSelectionMode(_PeaksWorkspaceTableView.SingleSelection)
-        self._table_view.itemClicked.connect(self._on_row_clicked)
+        self._table_view.clicked.connect(self._on_row_clicked)
 
         group_box_layout = QVBoxLayout()
         group_box_layout.addWidget(self._table_view)
@@ -139,7 +143,7 @@ class PeaksViewerView(QWidget):
 
     def _selected_index(self):
         # construction ensures we can only have 0 or 1 items selected
-        selected = self.table_view.selectedItems()
+        selected = self.table_view.selectedIndexes()
         if not selected:
             return None
 

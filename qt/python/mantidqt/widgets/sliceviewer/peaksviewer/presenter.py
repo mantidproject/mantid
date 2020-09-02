@@ -19,7 +19,6 @@ class PeaksViewerPresenter(object):
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
-
     class Event(Enum):
         PeaksListChanged = 1
         OverlayPeaks = 2
@@ -65,7 +64,7 @@ class PeaksViewerPresenter(object):
         elif event == PresenterEvent.PeakSelected:
             self._peak_selected()
         elif event == PresenterEvent.PeaksListChanged:
-            self._peaks_table_presenter.refresh()
+            self._peaks_list_changed()
         elif event == PresenterEvent.ClearPeaks:
             self._clear_peaks()
         else:
@@ -99,6 +98,13 @@ class PeaksViewerPresenter(object):
         #   - find and set limits required to "zoom" to the selected peak
         self._view.set_slicepoint(self.model.slicepoint(selected_index, self._view.sliceinfo))
         self._view.set_axes_limits(*self.model.viewlimits(selected_index), auto_transform=False)
+
+    def _peaks_list_changed(self):
+        """
+        Respond to a change in the peaks list in the model
+        """
+        self._peaks_table_presenter.refresh()
+        self.view.table_view.enable_sorting()
 
     # private api
     @staticmethod
@@ -142,8 +148,8 @@ class PeaksViewerCollectionPresenter(object):
         :param name: The name of a PeaksWorkspace.
         :returns: The child presenter
         """
-        presenter = PeaksViewerPresenter(
-            self._create_peaksviewer_model(name), self._view.append_peaksviewer())
+        presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
+                                         self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
         return presenter
 
