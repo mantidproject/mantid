@@ -47,7 +47,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         mock_worker.assert_called_with("mocked model method",
                                        ("/a/file/to/load.txt, /another/one.nxs", "TOF"),
                                        error_cb=self.presenter._on_worker_error,
-                                       finished_cb=self.presenter._emit_enable_button_signal,
+                                       finished_cb=self.presenter._emit_enable_load_button_signal,
                                        success_cb=self.presenter._on_worker_success)
 
     @patch(dir_path + ".data_presenter.create_error_message")
@@ -318,6 +318,24 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter._handle_table_cell_changed(1, 3)
         self.model.do_background_subtraction.assert_not_called()
         self.model.undo_background_subtraction.assert_called_once_with("name2")
+
+    def test_inspect_bg_btn_disabled_default(self):
+        mocked_table_item = mock.MagicMock()
+        mocked_table_item.checkState.return_value = True
+        self.view.get_table_item.return_value = mocked_table_item
+        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
+        self.presenter.row_numbers["name1"] = 0
+        self.presenter.row_numbers["name2"] = 1
+        self.model.get_loaded_workspaces.return_value = {"name1": self.ws1, "name2": self.ws2}
+        self.assertFalse(self.view.button_plotBG.isEnabled())
+
+    def test_inspect_bg_btn_changes_enabled(self):
+        self._setup_bgsub_test()
+        self.assertTrue(self.view.button_plotBG.isEnabled())
+        # undo background subtraction
+        self.view.get_item_checked.return_value = False
+        self.presenter._handle_table_cell_changed(1, 3)
+        self.assertFalse(self.view.button_plotBG.isEnabled())
 
     def _setup_bgsub_test(self):
         mocked_table_item = mock.MagicMock()

@@ -47,6 +47,7 @@ Improvements
 - The currently loaded calibration is now shown at the bottom of the GUI.
 - The location of the saved output files from the GUI is now shown in the messages log.
 - The save directory is now displayed in the status bar of the GUI.
+- The Inspect Background button of the Fitting tab is now only enabled when the selected run has had a background subtraction.
 
 Bugfixes
 ^^^^^^^^

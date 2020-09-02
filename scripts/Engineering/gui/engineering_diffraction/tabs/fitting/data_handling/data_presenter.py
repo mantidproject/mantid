@@ -21,12 +21,14 @@ class FittingDataPresenter(object):
 
         # Connect view signals to local methods
         self.view.set_on_load_clicked(self.on_load_clicked)
-        self.view.set_enable_button_connection(self._enable_load_button)
+        self.view.set_enable_load_button_connection(self._enable_load_button)
+        self.view.set_enable_inspect_bg_button_connection(self._enable_inspect_bg_button)
         self.view.set_on_remove_selected_clicked(self._remove_selected_tracked_workspaces)
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
         self.view.set_on_xunit_changed(self._log_xunit_change)
+        self.view.set_table_selection_changed(self._handle_selection_changed)
 
         # Observable Setup
         self.plot_added_notifier = GenericObservable()
@@ -81,13 +83,13 @@ class FittingDataPresenter(object):
         """
         self.worker = AsyncTask(self.model.load_files, (filenames, xunit),
                                 error_cb=self._on_worker_error,
-                                finished_cb=self._emit_enable_button_signal,
+                                finished_cb=self._emit_enable_load_button_signal,
                                 success_cb=self._on_worker_success)
         self.worker.start()
 
     def _on_worker_error(self, _):
         logger.error("Error occurred when loading files.")
-        self._emit_enable_button_signal()
+        self._emit_enable_load_button_signal()
 
     def _on_worker_success(self, _):
         if self.view.get_add_to_plot():
@@ -167,11 +169,22 @@ class FittingDataPresenter(object):
                     bg_params = self.view.read_bg_params_from_table(row)
                     self.model.do_background_subtraction(ws_name, bg_params)
 
+    def _handle_selection_changed(self):
+        rows = self.view.get_selected_rows()
+        enabled = False
+        for row in rows:
+            if self.view.get_item_checked(row, 3):
+                enabled = True
+        self._enable_inspect_bg_button(enabled)
+
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
 
-    def _emit_enable_button_signal(self):
+    def _emit_enable_load_button_signal(self):
         self.view.sig_enable_load_button.emit(True)
+
+    def _enable_inspect_bg_button(self, enabled):
+        self.view.set_inspect_bg_button_enabled(enabled)
 
     def _get_filenames(self):
         return self.view.get_filenames_to_load()
