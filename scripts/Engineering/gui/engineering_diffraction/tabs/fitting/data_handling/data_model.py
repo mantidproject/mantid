@@ -22,7 +22,6 @@ class FittingDataModel(object):
         self._background_workspaces = {}
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
-        print()
 
     def load_files(self, filenames_string, xunit):
         self._last_added = []

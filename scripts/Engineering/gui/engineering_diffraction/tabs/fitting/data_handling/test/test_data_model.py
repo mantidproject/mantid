@@ -117,7 +117,6 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(file_path + ".Load")
     def test_loading_multiple_files_too_many_spectra(self, mock_load, mock_logger):
         self.mock_ws.getNumberHistograms.return_value = 2
-        print(self.mock_ws.getNumberHistograms())
         mock_load.return_value = self.mock_ws
 
         self.model.load_files("/dir/file1.txt, /dir/file2.nxs", "TOF")
