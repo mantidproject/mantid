@@ -12,6 +12,7 @@ from os.path import join, exists
 from mantid import ConfigService
 from mantidqt.utils.qt import create_action
 from workbench.config import CONF
+from mantid.kernel import logger
 
 RECENT_SCRIPT_MAX_NUMBER = 10
 CACHE_FILE_NAME = "recent_script_file"
@@ -92,8 +93,10 @@ class RecentlyClosedScriptsMenu(QMenu):
     @staticmethod
     def _get_scripts_from_settings():
         scripts = []
-        if CONF.has(RECENT_SCRIPTS_KEY):
+        try:
             scripts = CONF.get(RECENT_SCRIPTS_KEY)
+        except KeyError:
+            logger.warning("Key not found in QSettings")
 
         def sort_key(sub_list):
             return sub_list[0]
