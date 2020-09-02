@@ -87,7 +87,7 @@ void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
   QString newInput;
 
   // Remove ending range if at end of input
-  if (findRange != -1 && (findComma == -1 || findRange > findComma)) {
+  if (findRange >= 0 && (findComma < 0 || findRange > findComma)) {
     currentInput.erase(findRange, currentInput.length() - 1);
   }
 
@@ -189,7 +189,7 @@ void ALCDataLoadingPresenter::resetAutoRun() {
 
 /**
  * Load new data and update the view accordingly
- * @param lastFile :: [input] Last file in range (user-specified or auto)
+ * @param files :: [input] range of files (user-specified or auto generated)
  */
 void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
 
