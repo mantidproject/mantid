@@ -30,6 +30,7 @@ public:
   virtual void clear() = 0;
   virtual void setFunction(IFunction_sptr fun) = 0;
   virtual bool hasFunction() const = 0;
+  virtual IFunction_sptr getSelectedFunction() = 0;
   virtual void setParameter(const QString &paramName, double value) = 0;
   virtual void setParameterError(const QString &paramName, double error) = 0;
   virtual double getParameter(const QString &paramName) const = 0;
@@ -41,6 +42,7 @@ public:
   virtual void setParameterConstraint(const QString &paramName,
                                       const QString &constraint) = 0;
   virtual void setGlobalParameters(const QStringList &) = 0;
+  virtual void showFunctionHelp(const QString &) const = 0;
 
 signals:
   /// User replaces the whole function (eg, by pasting it from clipboard)
@@ -64,6 +66,8 @@ signals:
   void parameterConstraintRemoved(const QString &paramName);
   /// User requested copy function to clipboard
   void copyToClipboardRequest();
+  /// User requested function help
+  void functionHelpRequest();
   /// User changed the list of global parameters.
   void globalsChanged(const QStringList &);
 };

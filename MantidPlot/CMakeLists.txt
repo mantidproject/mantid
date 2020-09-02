@@ -687,8 +687,7 @@ qt4_add_resources(RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc)
 qt4_add_resources(RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc)
 qt4_add_resources(RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc)
 qt4_add_resources(
-  RES_FILES ${PROJECT_SOURCE_DIR}/scripts/ErrorReporter/errorreporter.qrc
-)
+  RES_FILES ${PROJECT_SOURCE_DIR}/qt/python/mantidqt/dialogs/errorreports/errorreports.qrc)
 
 #
 # Add the dependencies
@@ -836,7 +835,6 @@ target_compile_options(
 target_link_libraries(
   MantidPlot
   LINK_PRIVATE
-  ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
   PythonInterfaceCore
   MantidQtWidgetsCommonQt4

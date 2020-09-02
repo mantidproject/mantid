@@ -134,11 +134,16 @@ class PlottingCanvasModel(object):
     def _get_workspace_plot_axis(self, workspace_name: str):
         if not self._is_tiled:
             return 0
-        for key, axis in self._axes_workspace_map.items():
-            if key in workspace_name:
-                return axis
-        else:
-            return 0
+
+        group_pair_name, run_as_string = self._context.group_pair_context.get_group_pair_name_and_run_from_workspace_name(workspace_name)
+
+        if group_pair_name in self._axes_workspace_map:
+            return self._axes_workspace_map[group_pair_name]
+
+        if run_as_string in self._axes_workspace_map:
+            return self._axes_workspace_map[run_as_string]
+
+        return 0
 
     @staticmethod
     def _get_rebin_label(workspace_name):

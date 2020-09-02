@@ -26,7 +26,6 @@ from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
 from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
 from .lineplots import LinePlots
-from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar, ToolItemText
 from .peaksviewer.workspaceselection import \
     (PeaksWorkspaceSelectorModel, PeaksWorkspaceSelectorPresenter,
@@ -38,6 +37,9 @@ from .zoom import ScrollZoomMixin
 # Constants
 DBLMAX = sys.float_info.max
 
+SCALENORM = "SliceViewer/scale_norm"
+POWERSCALE = "SliceViewer/scale_norm_power"
+
 
 class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
     pass
@@ -46,7 +48,7 @@ class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -54,8 +56,9 @@ class SliceViewerDataView(QWidget):
         self.image = None
         self.line_plots_active = False
         self.can_normalise = can_normalise
-        self.nonortho_tr = None
+        self.nonortho_transform = None
         self.ws_type = dims_info[0]['type']
+        self.conf = conf
 
         self._line_plots = None
         self._image_info_tracker = None
@@ -106,9 +109,11 @@ class SliceViewerDataView(QWidget):
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
-        self.colorbar = ColorbarWidget(self)
+        norm_scale = self.get_default_scale_norm()
+        self.colorbar = ColorbarWidget(self, norm_scale)
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
+        self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
         # make width larger to fit image readout table
         if self.ws_type == 'MDE':
             self.colorbar.setMaximumWidth(155)
@@ -120,7 +125,6 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.linePlotsClicked.connect(self.on_line_plots_toggle)
         self.mpl_toolbar.regionSelectionClicked.connect(self.on_region_selection_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
-        self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
@@ -150,14 +154,14 @@ class SliceViewerDataView(QWidget):
 
     @property
     def nonorthogonal_mode(self):
-        return self.nonortho_tr is not None
+        return self.nonortho_transform is not None
 
     def create_axes_orthogonal(self, redraw_on_zoom=False):
         """Create a standard set of orthogonal axes
         :param redraw_on_zoom: If True then when scroll zooming the canvas is redrawn immediately
         """
         self.clear_figure()
-        self.nonortho_tr = None
+        self.nonortho_transform = None
         self.ax = self.fig.add_subplot(111, projection='mantid')
         self.enable_zoom_on_mouse_scroll(redraw_on_zoom)
         if self.grid_on:
@@ -172,12 +176,12 @@ class SliceViewerDataView(QWidget):
     def create_axes_nonorthogonal(self, transform):
         self.clear_figure()
         self.set_nonorthogonal_transform(transform)
-        self.ax = CurveLinearSubPlot(
-            self.fig,
-            1,
-            1,
-            1,
-            grid_helper=GridHelperCurveLinear((self.nonortho_tr, transform.inv_tr)))
+        self.ax = CurveLinearSubPlot(self.fig,
+                                     1,
+                                     1,
+                                     1,
+                                     grid_helper=GridHelperCurveLinear(
+                                         (transform.tr, transform.inv_tr)))
         # don't redraw on zoom as the data is rebinned and has to be redrawn again anyway
         self.enable_zoom_on_mouse_scroll(redraw=False)
         self.set_grid_on()
@@ -262,13 +266,12 @@ class SliceViewerDataView(QWidget):
 
     def plot_MDH_nonorthogonal(self, ws, **kwargs):
         self.clear_image()
-        self.image = pcolormesh_nonorthogonal(
-            self.ax,
-            ws,
-            self.nonortho_tr,
-            transpose=self.dimensions.transpose,
-            norm=self.colorbar.get_norm(),
-            **kwargs)
+        self.image = pcolormesh_nonorthogonal(self.ax,
+                                              ws,
+                                              self.nonortho_transform.tr,
+                                              transpose=self.dimensions.transpose,
+                                              norm=self.colorbar.get_norm(),
+                                              **kwargs)
         self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         # swapping dimensions in nonorthogonal mode currently resets back to the
@@ -294,8 +297,7 @@ class SliceViewerDataView(QWidget):
                 old_extent = e3, e4, e1, e2
 
         self.clear_image()
-        self.image = imshow_sampling(
-            self.ax,
+        self.image = self.ax.imshow(
             ws,
             origin='lower',
             aspect='auto',
@@ -314,7 +316,7 @@ class SliceViewerDataView(QWidget):
             if self.line_plots_active:
                 self._line_plots.plotter.delete_line_plot_lines()
             self.image_info_widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
-            self.image.remove()
+            self.ax.remove_artists_if(lambda art: art == self.image)
             self.image = None
 
     def clear_figure(self):
@@ -350,7 +352,7 @@ class SliceViewerDataView(QWidget):
         This just updates the plot data without creating a new plot. The extents
         can change if the data has been rebinned.
         """
-        if self.nonortho_tr:
+        if self.nonortho_transform:
             self.image.set_array(data.T.ravel())
         else:
             self.image.set_data(data.T)
@@ -418,7 +420,7 @@ class SliceViewerDataView(QWidget):
 
     def get_axes_limits(self):
         """
-        Return the limits of the image axes or None if no image yet exists
+        Return the limits on the image axes in the orthogonal frame
         """
         if self.image is None:
             return None
@@ -427,7 +429,9 @@ class SliceViewerDataView(QWidget):
 
     def set_axes_limits(self, xlim, ylim):
         """
-        Set the view limits on the image axes to the given extents
+        Set the view limits on the image axes to the given extents. Assume the
+        limits are in the orthogonal frame.
+
         :param xlim: 2-tuple of (xmin, xmax)
         :param ylim: 2-tuple of (ymin, ymax)
         """
@@ -448,7 +452,7 @@ class SliceViewerDataView(QWidget):
         :param transform: An object with a tr method to transform from nonorthognal
                           coordinates to display coordinates
         """
-        self.nonortho_tr = transform.tr
+        self.nonortho_transform = transform
 
     def show_temporary_status_message(self, msg, timeout_ms):
         """
@@ -484,18 +488,42 @@ class SliceViewerDataView(QWidget):
     def set_normalization(self, ws, **kwargs):
         normalize_by_bin_width, _ = get_normalize_by_bin_width(ws, self.ax, **kwargs)
         is_normalized = normalize_by_bin_width or ws.isDistribution()
+        self.presenter.normalization = is_normalized
         if is_normalized:
-            self.presenter.normalization = mantid.api.MDNormalization.VolumeNormalization
             self.norm_opts.setCurrentIndex(1)
         else:
-            self.presenter.normalization = mantid.api.MDNormalization.NoNormalization
             self.norm_opts.setCurrentIndex(0)
+
+    def get_default_scale_norm(self):
+        scale = 'Linear'
+        if self.conf is None:
+            return scale
+
+        if self.conf.has(SCALENORM):
+            scale = self.conf.get(SCALENORM)
+
+        if scale == 'Power' and self.conf.has(POWERSCALE):
+            exponent = self.conf.get(POWERSCALE)
+            scale = (scale, exponent)
+
+        return scale
+
+    def scale_norm_changed(self):
+        if self.conf is None:
+            return
+
+        scale = self.colorbar.norm.currentText()
+        self.conf.set(SCALENORM, scale)
+
+        if scale == 'Power':
+            exponent = self.colorbar.powerscale_value
+            self.conf.set(POWERSCALE, exponent)
 
 
 class SliceViewerView(QWidget):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -504,7 +532,7 @@ class SliceViewerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._splitter = QSplitter(self)
-        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self)
+        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self, conf)
         self._splitter.addWidget(self._data_view)
         #  peaks viewer off by default
         self._peaks_view = None
@@ -529,8 +557,7 @@ class SliceViewerView(QWidget):
     def peaks_view(self):
         """Lazily instantiates PeaksViewer and returns it"""
         if self._peaks_view is None:
-            self._peaks_view = PeaksViewerCollectionView(
-                MplPainter(self.data_view.ax), self.presenter)
+            self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view), self.presenter)
             self._splitter.addWidget(self._peaks_view)
 
         return self._peaks_view
@@ -539,12 +566,6 @@ class SliceViewerView(QWidget):
         """Peaks overlay button has been toggled
         """
         self.presenter.overlay_peaks_workspaces()
-
-    def draw_peak(self, peak_info):
-        """
-        :param peak_info: A PeakRepresentation object
-        """
-        return peak_info.draw(self.ax)
 
     def query_peaks_to_overlay(self, current_overlayed_names):
         """Display a dialog to the user to ask which peaks to overlay

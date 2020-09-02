@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
    home_instrument_widget_test.py
    plot_widget/plot_widget_presenter_test.py
    plot_widget/plot_widget_model_test.py
+   plotting_canvas/plot_color_queue_test.py
    plotting_canvas/plotting_canvas_presenter_test.py
    plotting_canvas/plotting_canvas_model_test.py
    external_plotting_model_test.py
@@ -40,6 +41,8 @@ set ( TEST_PY_FILES
    phase_table_widget/phase_table_context_test.py
    frequency_domain_context_test.py
    grouping_tab/grouping_table_presenter_test.py
+   grouping_tab/grouping_tab_model_test.py
+   grouping_tab/calculate_pair_and_group_test.py
    grouping_tab/pairing_table_presenter_test.py
    grouping_tab/grouping_tab_presenter_test.py
    grouping_tab/pairing_table_group_selector_test.py

@@ -782,6 +782,7 @@ Save ASCII Tab
 
 The **Save ASCII** tab allows for processed workspaces to be saved in specific
 ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
+See :ref:`algm-SaveReflectometryAscii` for a description of the formats.
 
 .. figure:: /images/ISISReflectometryInterface/save_tab.png
   :class: screenshot
@@ -834,7 +835,7 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 |                               | available as save algorithms from mantid itself.     |
 +-------------------------------+------------------------------------------------------+
 | Custom Format Options         | When saving in 'Custom' this section allows you      |
-|                               | to specify if you want a Title and/or Q Resolution   |
+|                               | to specify if you want a Header and/or Q Resolution  |
 |                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |
