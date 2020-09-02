@@ -1020,7 +1020,6 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     T scalefactor = numRows() > 1 ? m_rawData[1][0] : 1;
     *this /= scalefactor;
     T D = m_rawData[0][0];
-    T lambda = static_cast<T>(acosh(D / 2));
     auto k = static_cast<long long int>(numRows());
     for (auto i = 0; i < static_cast<int>(numRows()); i++) {
       for (auto j = 0; j < static_cast<int>(numCols()); j++) {
@@ -1030,6 +1029,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           m_rawData[i][j] = -1;
         }
         if (std::abs(D) > 2) {
+          T lambda = static_cast<T>(acosh(D / 2));
           m_rawData[i][j] *= static_cast<T>(
               cosh((k + 1 - std::abs(i - j)) * lambda) -
               cosh((k + 1 - i - j - 2) * lambda)); // extra -2 because i and j
@@ -1042,6 +1042,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
               (static_cast<long long int>(i) + j + 2 - std::abs(i - j)));
           m_rawData[i][j] /= static_cast<T>((4 * (k + 1)));
         } else {
+          T lambda = static_cast<T>(acos(D / 2));
           m_rawData[i][j] *= static_cast<T>(
               cos((k + 1 - std::abs(i - j)) * lambda) -
               cos((k + 1 - i - j - 2) * lambda)); // extra -2 because i and j
