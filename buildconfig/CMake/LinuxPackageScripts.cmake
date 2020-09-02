@@ -163,8 +163,8 @@ elif [ -n \"\${TLSESSIONDATA}\" ]; then  # running in thin-linc
 fi" )
 
 # The scripts need jemalloc to be resolved to the runtime library as the plain
-# .so symlink is only present when a -dev/-devel package is present
-if ( JEMALLOC_FOUND )
+# .so symlink is only present when a -dev/-devel package is presentz
+if ( JEMALLOCLIB_FOUND )
   get_filename_component ( JEMALLOC_RUNTIME_LIB ${JEMALLOC_LIBRARIES} REALPATH )
   # We only want to use the major version number
   string( REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" JEMALLOC_RUNTIME_LIB ${JEMALLOC_RUNTIME_LIB} )
