@@ -39,6 +39,8 @@ New features
 ^^^^^^^^^^^^
 - New algorithm for estimating background of powder spectra :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` using iterative smoothing.
 - Mantid fitting capability added to fitting tab of Engineering Diffraction UI (with simpler fitpropertybrowser providing only relevant options).
+- Mantid fitting capability added to fitting tab of Engineering Diffraction UI.
+- Added support for a Circular Beam Profile for use with Monte Carlo Absorption
 
 Improvements
 ^^^^^^^^^^^^
