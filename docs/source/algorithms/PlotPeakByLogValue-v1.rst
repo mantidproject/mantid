@@ -34,11 +34,16 @@ Input property
 
 Internally PlotPeakByLogValue uses :ref:`algm-Fit` algorithm to perform
 fitting and the following properties have the same meaning as in
-:ref:`algm-Fit`: Function, StartX, EndX, Minimizer, CostFunction. Property
+:ref:`algm-Fit`: StartX, EndX, Minimizer, CostFunction. Property
 FitType defines the way of setting initial values. If it is set to
 "Sequential" every next fit starts with parameters returned by the
 previous fit. If set to "Individual" each fit starts with the same
 initial values defined in the Function property.
+
+The Function property can be a single domain function in which case this 
+function is used to fit each of the inputs, or it can be a multi-domain function.
+In the latter case the number of domains must equal the number of inputs and 
+each input is fitted to the equivalent function from the multi-domain function.
 
 LogValue property specifies a log value to be included into the output.
 If this property is empty the values of axis 1 will be used instead.
@@ -150,6 +155,29 @@ Output:
 Output:
 
 .. testoutput:: ExPlotPeakByLogValueSeqWithOutputStatus
+
+    Fit status = ['success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success']
+    Fit chi2 = [  5.09648779e-08   6.89426130e-09   9.33124574e-10   1.26539259e-10
+       1.73025195e-11   2.45555803e-12   4.06465408e-13   1.04496124e-13
+       4.79987355e-14   3.01813222e-14]
+
+.. testcode:: MultiDomainFunctionExample
+    ws = CreateSampleWorkspace()
+    function = mantid.api.FunctionFactory.createInitializedMultiDomainFunction("name=Gaussian,Height=10.0041,PeakCentre=10098.6,Sigma=48.8581;name=FlatBackground,A0=0.3", 200)
+
+    #create string of workspaces to fit (ws,i0; ws,i1, ws,i2 ...)
+    workspaces = [ws.name() + ',i%d' % i for i in range(ws.getNumberHistograms())]
+    workspaces = ';'.join(workspaces)
+
+    peaks, status, chi2 = PlotPeakByLogValue(workspaces, function, Spectrum=1, OutputFitStatus=True)
+
+    # Print status of first 10 fits
+    print("Fit status = {}".format(status[0:10]))
+    print("Fit chi2 = {}".format(chi2[0:10]))
+
+Output:
+
+.. testoutput:: MultiDomainFunctionExample
 
     Fit status = ['success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success']
     Fit chi2 = [  5.09648779e-08   6.89426130e-09   9.33124574e-10   1.26539259e-10
