@@ -34,5 +34,6 @@ Fixed
 #####
 
 - A bug has been fixed where processing old data could fail if it involves -add files produced from 2013 or earlier.
+- Batch file selector now only shows CSV files and will handle loading in non-CSV data (such as mask files) gracefully.
 
 :ref:`Release 5.1.0 <v5.1.0>`

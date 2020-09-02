@@ -106,8 +106,7 @@ void sanityCheck(const Histogram &input, const Histogram &output,
  * Perform cubic spline interpolation in place
  * @param input A histogram containing the input x, y, e values
  * @param points A container of points at which to interpolate
- * @param output A histogram containing the original and interpolated
- * values
+ * @param output A histogram containing the original and interpolated values
  */
 void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
                                 const Mantid::HistogramData::Points &points,
@@ -115,6 +114,9 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
                                 const bool calculateErrors = false,
                                 const bool independentErrors = true) {
   auto xs = input.dataX();
+  // Error propagation follows method described in Gardner paper
+  // "Uncertainties in Interpolated Spectral Data", Journal of Research of the
+  // National Institute of Standards and Technology, 2003
   // create tridiagonal "h" matrix
   Mantid::Kernel::Matrix<double> h(xs.size() - 2, xs.size() - 2);
   for (size_t i = 0; i < xs.size() - 2; i++) {
@@ -144,19 +146,21 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
   h.invertTridiagonal();
   ypp = h * d;
 
-  // add in the zero second derivatives at extreme pts to give natural
-  // splines
+  // add in the zero second derivatives at extreme pts to give natural splines
   std::vector<double> ypp_full(xs.size(), 0);
   std::copy(ypp.begin(), ypp.end(), ypp_full.begin() + 1);
 
   // calculate some covariances to support error propagation
   auto &enew = output.mutableE();
   auto &eold = input.dataE();
+  // u_ypp_ypp - covariance of y'' vs y''
   std::vector<double> u_ypp_ypp(xs.size());
+  // u_ypp_y - covariance of y'' vs y
   std::vector<double> u_ypp_y(xs.size());
 
   for (size_t i = 0; i < xs.size(); i++) {
     for (size_t k = 0; k < xs.size(); k++) {
+      // dyppidyk - derivative of y'' at bin i with respect to y at bin k
       double dyppidyk = 0;
       if ((i != 0) && (i != xs.size() - 1)) {
         if (k > 1) {
@@ -177,8 +181,8 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
     }
   }
 
-  // plug the calculated second derivatives into the formula for each
-  // cubic polynomial y = A*y_i + B*y_i+1 + C*ypp_i + D*ypp_i+1
+  // plug the calculated second derivatives into the formula for each cubic
+  // polynomial y = A*y_i + B*y_i+1 + C*ypp_i + D*ypp_i+1
   auto &ynew = output.mutableY();
   for (size_t i = 0; i < points.size(); i++) {
     auto it = std::upper_bound(xs.begin(), xs.end(), points[i]);
@@ -206,8 +210,8 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
 
     ynew[i] = A * y1 + B * y2 + C * ypp1 + D * ypp2;
 
-    // propagate the source points errors through to the interpolated
-    // point Interpolation error is hard to calculate and is probably v
+    // propagate the source points errors through to the interpolated point
+    // Interpolation error is hard to calculate and is probably v
     // small so assume it's zero
     if (calculateErrors) {
       if (independentErrors) {
@@ -216,9 +220,9 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
                    D * D * u_y2pp_y2pp;
         enew[i] = sqrt(var);
       } else {
-        // if the errors are correlated just do linear interpolation on
-        // them to get something approximately equal to the two calculated
-        // errors Not sure there's much point doing a spline interpolation
+        // if the errors are correlated just do linear interpolation on them
+        // to get something approximately equal to the two calculated errors
+        // Not sure there's much point doing a spline interpolation
         // on the errors
         enew[i] = (points[i] - x1) * e2 + (x2 - points[i]) * e1;
       }
@@ -234,11 +238,10 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
  * Perform cubic spline interpolation in place
  * @param input A histogram containing the input x, y, e values
  * @param points A container of points at which to interpolate
- * @param output A histogram containing the original and interpolated
- * values
+ * @param output A histogram containing the original and interpolated values
  * @param calculateErrors Boolean to control whether errors are calculated
- * @param independentErrors Boolean to control whether errors on original
- * points are considered to be correlated or independent
+ * @param independentErrors Boolean to control whether errors on original points
+ * are considered to be correlated or independent
  */
 void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
                                const Mantid::HistogramData::Points &points,
@@ -369,8 +372,8 @@ size_t minSizeForCSplineInterpolation() { return 3; }
 size_t minSizeForLinearInterpolation() { return 2; }
 
 /**
- * Linearly interpolate through the y values of a histogram assuming that
- * the calculated "nodes" are stepSize apart.
+ * Linearly interpolate through the y values of a histogram assuming that the
+ * calculated "nodes" are stepSize apart.
  * @param input Input histogram defining x values and containing calculated
  * Y values at stepSize intervals. It is assumed that the first/last points
  * are always calculated points.

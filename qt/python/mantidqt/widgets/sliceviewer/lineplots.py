@@ -92,6 +92,7 @@ class LinePlots:
         except (AttributeError, IndexError):
             self._axx.clear()
             self._xfig = self._axx.plot(x, y, scalex=False)[0]
+            self._xfig.set_linewidth(0.5)
             self.update_line_plot_labels()
 
     def plot_y_line(self, x: np.array, y: np.array):
@@ -105,6 +106,7 @@ class LinePlots:
         except (AttributeError, IndexError):
             self._axy.clear()
             self._yfig = self._axy.plot(y, x, scaley=False)[0]
+            self._yfig.set_linewidth(0.5)
             self.update_line_plot_labels()
 
     def redraw(self):

@@ -61,24 +61,18 @@ void SortPeaksWorkspace::exec() {
   PeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
   PeaksWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  try {
-    // Try to get the column. This will throw if the column does not exist.
-    inputWS->getColumn(columnToSortBy);
+  // Try to get the column. This will throw if the column does not exist.
+  inputWS->getColumn(columnToSortBy);
 
-    if (inputWS != outputWS) {
-      outputWS = inputWS->clone();
-    }
-
-    // Perform the sorting.
-    std::vector<std::pair<std::string, bool>> sortCriteria;
-    sortCriteria.emplace_back(
-        std::pair<std::string, bool>(columnToSortBy, sortAscending));
-    outputWS->sort(sortCriteria);
-    setProperty("OutputWorkspace", outputWS);
-  } catch (std::invalid_argument &) {
-    this->g_log.error("Specified ColumnToSortBy does not exist");
-    throw;
+  if (inputWS != outputWS) {
+    outputWS = inputWS->clone();
   }
+
+  // Perform the sorting.
+  std::vector<PeaksWorkspace::ColumnAndDirection> sortCriteria;
+  sortCriteria.emplace_back(std::make_pair(columnToSortBy, sortAscending));
+  outputWS->sort(sortCriteria);
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Crystal

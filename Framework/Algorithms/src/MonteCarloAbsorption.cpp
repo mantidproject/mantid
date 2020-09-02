@@ -10,6 +10,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/InterpolationOption.h"
+#include "MantidAlgorithms/SampleCorrections/CircularBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
@@ -173,6 +174,7 @@ void MonteCarloAbsorption::exec() {
   const int seed = getProperty("SeedValue");
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"));
+  interpolateOpt.setIndependentErrors(resimulateTracks);
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
   auto simulatePointsIn =
@@ -425,10 +427,6 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
 
     prog.report(reportMsg);
 
-    if (!useSparseInstrument) {
-      outputWS->setHistogram(i, simulationWS.histogram(i));
-    }
-
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -452,9 +450,9 @@ MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
 }
 
 /**
- * Create the beam profile. Currently only supports Rectangular. The dimensions
- * are either specified by those provided by `SetBeam` algorithm or default
- * to the width and height of the samples bounding box
+ * Create the beam profile. Currently only supports Rectangular or Circular. The
+ * dimensions are either specified by those provided by `SetBeam` algorithm or
+ * default to the width and height of the samples bounding box
  * @param instrument A reference to the instrument object
  * @param sample A reference to the sample object
  * @return A new IBeamProfile object
@@ -464,18 +462,29 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
                                         const Sample &sample) const {
   const auto frame = instrument.getReferenceFrame();
   const auto source = instrument.getSource();
+  double beamWidth(-1.0), beamHeight(-1.0), beamRadius(-1.0);
 
-  auto beamWidthParam = source->getNumberParameter("beam-width");
-  auto beamHeightParam = source->getNumberParameter("beam-height");
-  double beamWidth(-1.0), beamHeight(-1.0);
-  if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
-    beamWidth = beamWidthParam[0];
-    beamHeight = beamHeightParam[0];
-  } else {
-    const auto bbox = sample.getShape().getBoundingBox().width();
-    beamWidth = bbox[frame->pointingHorizontal()];
-    beamHeight = bbox[frame->pointingUp()];
-  }
+  std::string beamShapeParam = source->getParameterAsString("beam-shape");
+  if (beamShapeParam == "Slit") {
+    auto beamWidthParam = source->getNumberParameter("beam-width");
+    auto beamHeightParam = source->getNumberParameter("beam-height");
+    if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
+      beamWidth = beamWidthParam[0];
+      beamHeight = beamHeightParam[0];
+      return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(),
+                                                      beamWidth, beamHeight);
+    }
+  } else if (beamShapeParam == "Circle") {
+    auto beamRadiusParam = source->getNumberParameter("beam-radius");
+    if (beamRadiusParam.size() == 1) {
+      beamRadius = beamRadiusParam[0];
+      return std::make_unique<CircularBeamProfile>(*frame, source->getPos(),
+                                                   beamRadius);
+    }
+  } // revert to sample dimensions if no return by this point
+  const auto bbox = sample.getShape().getBoundingBox().width();
+  beamWidth = bbox[frame->pointingHorizontal()];
+  beamHeight = bbox[frame->pointingUp()];
   return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(),
                                                   beamWidth, beamHeight);
 }
@@ -491,7 +500,7 @@ void MonteCarloAbsorption::interpolateFromSparse(
     double lat, lon;
     std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
     const auto spatiallyInterpHisto =
-        sparseWS.interpolateFromDetectorGrid(lat, lon);
+        sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
