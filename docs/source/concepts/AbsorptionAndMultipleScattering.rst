@@ -209,7 +209,7 @@ General Notes
 ##############
 
 Integration Methods
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 The numerical and Monte Carlo integration approaches can be further extended in a number of ways:
 
