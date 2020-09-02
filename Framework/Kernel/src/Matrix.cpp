@@ -538,9 +538,10 @@ Always returns 0 if the Matrix have different sizes
     for (size_t i = 0; i < m_numRows; i++)
       for (size_t j = 0; j < m_numColumns; j++) {
         const T diff = (m_rawData[i][j] - A.m_rawData[i][j]);
-        if (fabs(diff) > maxDiff)
+        // < and > return false if either argument is a NaN
+        if (!(fabs(diff) < maxDiff))
           maxDiff = fabs(diff);
-        if (fabs(m_rawData[i][j]) > maxS)
+        if (!(fabs(m_rawData[i][j]) < maxS))
           maxS = fabs(m_rawData[i][j]);
       }
     if (maxDiff < Tolerance)
@@ -1023,13 +1024,19 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     auto k = static_cast<long long int>(numRows());
     for (auto i = 0; i < static_cast<int>(numRows()); i++) {
       for (auto j = 0; j < static_cast<int>(numCols()); j++) {
+        T lambda;
         if (D >= 2) {
           m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
+          lambda = static_cast<T>(acosh(D / 2));
+        } else if ((D > -2) && (D < 2)) {
+          m_rawData[i][j] = 1; // use +1 here instead of the -1 in the paper
+          lambda = static_cast<T>(
+              acos(-D / 2)); // extra minus sign here compared to paper
         } else {
           m_rawData[i][j] = -1;
+          lambda = static_cast<T>(acosh(-D / 2));
         }
         if (std::abs(D) > 2) {
-          T lambda = static_cast<T>(acosh(D / 2));
           m_rawData[i][j] *= static_cast<T>(
               cosh((k + 1 - std::abs(i - j)) * lambda) -
               cosh((k + 1 - i - j - 2) * lambda)); // extra -2 because i and j
@@ -1042,7 +1049,6 @@ yes invert the matrix using analytic formula. If not then use standard Invert
               (static_cast<long long int>(i) + j + 2 - std::abs(i - j)));
           m_rawData[i][j] /= static_cast<T>((4 * (k + 1)));
         } else {
-          T lambda = static_cast<T>(acos(D / 2));
           m_rawData[i][j] *= static_cast<T>(
               cos((k + 1 - std::abs(i - j)) * lambda) -
               cos((k + 1 - i - j - 2) * lambda)); // extra -2 because i and j
