@@ -16,6 +16,12 @@ New
 - Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
 - A default font for plots can now be set in the workbench settings.
 - Added a Recently Closed Scripts sub-menu to the File menu in workbench, it shows all scripts that have recently been closed in descending order.
+- Spreadsheet based data processing interface is created for ILL data reduction. 
+  SANS and reflectometry are currently supported. See :ref:`DrILL documentation <DrILL-ref>`
+  for more information.
+
+.. figure:: ../../images/drill.png
+   :align: right
 
 Improvements
 ############
@@ -102,6 +108,7 @@ Improvements
 - Code completions are now loaded when the code editor is first changed.
 - The ExtractFFTSpectrum algorithm has extra properties (Shift, AutoShift, and AcceptXRoundingErrors) to reflect those of the underlying FFT.
 - Legends in 1D plots are now editable in-situ.
+- Sliceviewer cut line plots' line widths reduced
 
 Bugfixes
 ########

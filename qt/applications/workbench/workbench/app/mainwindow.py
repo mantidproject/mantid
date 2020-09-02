@@ -224,14 +224,12 @@ class MainWindow(QMainWindow):
         action_open = create_action(self,
                                     "Open Script",
                                     on_triggered=self.open_file,
-                                    shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut="Ctrl+O")
         action_load_project = create_action(self, "Open Project", on_triggered=self.load_project)
         action_save_script = create_action(self,
                                            "Save Script",
                                            on_triggered=self.save_script,
-                                           shortcut="Ctrl+S",
-                                           shortcut_context=Qt.ApplicationShortcut)
+                                           shortcut="Ctrl+S")
         action_save_script_as = create_action(self,
                                               "Save Script as...",
                                               on_triggered=self.save_script_as)
@@ -252,8 +250,7 @@ class MainWindow(QMainWindow):
         action_quit = create_action(self,
                                     "&Quit",
                                     on_triggered=self.close,
-                                    shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut="Ctrl+Q")
 
         menu_recently_closed_scripts = RecentlyClosedScriptsMenu(self)
         self.editor.editors.sig_tab_closed.connect(menu_recently_closed_scripts.add_script_to_settings)

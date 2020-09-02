@@ -4,22 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-import ILL_utilities as utils
-from mantid.api import (AlgorithmFactory,
-                        DataProcessorAlgorithm,
-                        FileAction,
-                        MatrixWorkspaceProperty,
-                        MultipleFileProperty,
-                        PropertyMode,
-                        WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, IntArrayLengthValidator, IntArrayBoundedValidator,
-                           IntArrayProperty, IntBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
-                              Divide, ExtractMonitors, FindReflectometryLines, LoadAndMerge, Minus, mtd,
-                              NormaliseToMonitor, RebinToWorkspace, Scale, SpecularReflectionPositionCorrect, Transpose)
-import numpy
+                           IntArrayProperty, IntBoundedValidator, StringListValidator, EnabledWhenProperty, PropertyCriterion)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty,
+                        PropertyMode, WorkspaceUnitValidator)
+from mantid.simpleapi import *
 import ReflectometryILL_common as common
+import ILL_utilities as utils
+import numpy as np
 
 
 class Prop:
@@ -34,19 +26,19 @@ class Prop:
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     HIGH_BKG_OFFSET = 'HighAngleBkgOffset'
     HIGH_BKG_WIDTH = 'HighAngleBkgWidth'
-    INPUT_WS = 'InputWorkspace'
     LINE_POSITION = 'LinePosition'
     LOW_BKG_OFFSET = 'LowAngleBkgOffset'
     LOW_BKG_WIDTH = 'LowAngleBkgWidth'
     OUTPUT_WS = 'OutputWorkspace'
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
-    TWO_THETA = 'TwoTheta'
+    THETA = 'BraggAngle'
     SUBALG_LOGGING = 'SubalgorithmLogging'
     WATER_REFERENCE = 'WaterWorkspace'
 
 
 class BkgMethod:
+    AVERAGE = 'Background Average'
     CONSTANT = 'Background Constant Fit'
     LINEAR = 'Background Linear Fit'
     OFF = 'Background OFF'
@@ -116,13 +108,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws, monWS = self._extractMonitors(ws)
 
-        ws, linePosition = self._peakFitting(ws)
+        self._addSampleLogInfo(ws)
 
-        self._addSampleLogInfo(ws, linePosition)
-
-        ws = self._moveDetector(ws, linePosition)
-
-        ws = self._calibrateDetectorAngleByDirectBeam(ws, linePosition)
+        if self.getPropertyValue('AngleOption')=='DetectorAngle' and self.getPropertyValue('Measurement')=='ReflectedBeam':
+            # we still have to do this after having loaded and found the foreground centre of the reflected beam
+            ws = self._calibrateDetectorAngleByDirectBeam(ws)
 
         ws = self._waterCalibration(ws)
 
@@ -146,30 +136,33 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
         maxTwoNonnegativeInts.add(nonnegativeIntArray)
         self.declareProperty(MultipleFileProperty(Prop.RUN,
-                                                  action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
                              doc='A list of input run numbers/files.')
-        self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
-                                                     defaultValue='',
-                                                     direction=Direction.Input,
-                                                     validator=WorkspaceUnitValidator('TOF'),
-                                                     optional=PropertyMode.Optional),
-                             doc='An input workspace (units TOF) if no Run is specified.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
                                                      defaultValue='',
                                                      direction=Direction.Output),
                              doc='The preprocessed output workspace (unit wavelength), single histogram.')
-        self.declareProperty(Prop.TWO_THETA,
+        self.declareProperty('Measurement', 'DirectBeam',
+                             StringListValidator(['DirectBeam', 'ReflectedBeam']),
+                             'Whether to process as direct or reflected beam.')
+        self.declareProperty('AngleOption', 'SampleAngle',
+                             StringListValidator(['SampleAngle', 'DetectorAngle', 'UserAngle']))
+        self.setPropertySettings('AngleOption',
+                                 EnabledWhenProperty('Measurement', PropertyCriterion.IsEqualTo, 'ReflectedBeam'))
+        self.declareProperty(Prop.THETA,
                              defaultValue=-1.,
-                             doc='A user-defined scattering angle 2 theta (unit degrees).')
-        self.declareProperty(name=Prop.LINE_POSITION,
-                             defaultValue=-1.,
-                             doc='A fractional workspace index corresponding to the beam centre between 0 and 255.')
-        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_LINE_WORKSPACE,
-                                                     defaultValue='',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='A pre-processed direct beam workspace.')
+                             doc='The bragg angle for reflected beam [Degree], used if angle option is UserAngle.')
+        self.setPropertySettings(Prop.THETA,
+                                 EnabledWhenProperty('AngleOption', PropertyCriterion.IsEqualTo, 'UserAngle'))
+        self.declareProperty('DirectBeamDetectorAngle', -1.,
+                             'The detector angle value [Degree] for the corresponding direct beam, '
+                             'used if angle option is DetectorAngle')
+        self.declareProperty('DirectBeamForegroundCentre', -1.,
+                             'Fractional pixel index for the direct beam, used if angle option is DetectorAngle.')
+        self.setPropertySettings('DirectBeamDetectorAngle',
+                                 EnabledWhenProperty('AngleOption', PropertyCriterion.IsEqualTo, 'DetectorAngle'))
+        self.setPropertySettings('DirectBeamForegroundCentre',
+                                 EnabledWhenProperty('AngleOption', PropertyCriterion.IsEqualTo, 'DetectorAngle'))
         self.declareProperty(Prop.SUBALG_LOGGING,
                              defaultValue=SubalgLogging.OFF,
                              validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
@@ -198,8 +191,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                               validator=maxTwoNonnegativeInts),
                              doc='Number of foreground pixels at lower and higher angles from the centre pixel.')
         self.declareProperty(Prop.BKG_METHOD,
-                             defaultValue=BkgMethod.CONSTANT,
-                             validator=StringListValidator([BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]),
+                             defaultValue=BkgMethod.AVERAGE,
+                             validator=StringListValidator([BkgMethod.AVERAGE, BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]),
                              doc='Flat background calculation method for background subtraction.')
         self.declareProperty(Prop.LOW_BKG_OFFSET,
                              defaultValue=7,
@@ -231,30 +224,30 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              doc='Last workspace index used for peak fitting.')
         self.declareProperty(Prop.XMIN,
                              defaultValue=-1.,
-                             doc='Minimum x value (unit Angstrom) used for peak fitting.')
+                             doc='Minimum wavelength [Angstrom] used for peak fitting.')
         self.declareProperty(Prop.XMAX,
                              defaultValue=-1.,
-                             doc='Maximum x value (unit Angstrom) used for peak fitting.')
+                             doc='Maximum wavelength [Angstrom] used for peak fitting.')
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
-        if self.getProperty(Prop.INPUT_WS).isDefault and len(self.getProperty(Prop.RUN).value) == 0:
-            issues[Prop.RUN] = 'Provide at least an input file or alternatively an input workspace.'
+        if self.getPropertyValue('Measurement') == 'ReflectedBeam':
+            angle_option = self.getPropertyValue('AngleOption')
+            if angle_option == 'UserAngle' and self.getProperty('BraggAngle').isDefault:
+                issues['BraggAngle'] = 'Bragg angle is mandatory if the angle option is UserAngle'
+            elif angle_option == 'DetectorAngle':
+                if self.getProperty('DirectBeamDetectorAngle').isDefault:
+                    issues['DirectBeamDetectorAngle'] = 'Direct beam detector angle is mandatory' \
+                                                        ' if the angle option is DetectorAngle'
+                if self.getProperty('DirectBeamForegroundCentre').isDefault:
+                    issues['DirectBeamForegroundCentre'] = 'Direct beam foreground centre is mandatory' \
+                                                           ' if the angle option is DetectorAngle'
+
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
                 issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background /' \
                                           ' widths are zero.'
-        # We cannot use a FloatBoundedValidator here since we need to check for the default empty double
-        if not self.getProperty(Prop.LINE_POSITION).isDefault:
-            beamCentre = self.getProperty(Prop.LINE_POSITION).value
-            if beamCentre < 0. or beamCentre > 255.:
-                issues[Prop.LINE_POSITION] = 'Value should be between 0.0 and 255.0'
-        # Check whether user provides TwoTheta or sample log entry exist
-        if not self.getProperty(Prop.INPUT_WS).isDefault:
-            ws = self.getProperty(Prop.INPUT_WS).value
-            if not ws.run().hasProperty(common.SampleLogs.TWO_THETA) and self.getProperty(Prop.TWO_THETA).isDefault:
-                issues[Prop.TWO_THETA] = 'Must provide TwoTheta or in sample logs ' + common.SampleLogs.TWO_THETA
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             xmin = self.getProperty(Prop.XMIN).value
@@ -352,135 +345,65 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             halfWidths = [halfWidths[0], halfWidths[0]]
         return halfWidths
 
+    def _theta_from_detector_angles(self):
+        """Returns the bragg angle as half of detector angle difference"""
+        first_run = self.getProperty(Prop.RUN).value[0]
+        db_detector_angle = self.getProperty('DirectBeamDetectorAngle').value
+        return (common.detector_angle(first_run) - db_detector_angle) / 2.
+
     def _inputWS(self):
         """Return a raw input workspace."""
         inputFiles = self.getPropertyValue(Prop.RUN)
         inputFiles = inputFiles.replace(',', '+')
-        if inputFiles:
-            mergedWSName = self._names.withSuffix('merged')
-            loadOption = {
-                'XUnit': 'TimeOfFlight',
-                'BeamCentre': 127.5,
-                'BraggAngle': 0.0
-            }
-            # MergeRunsOptions are defined by the parameter files and will not be modified here!
-            ws = LoadAndMerge(
-                Filename=inputFiles,
-                LoaderName='LoadILLReflectometry',
-                LoaderVersion=-1,
-                LoaderOptions=loadOption,
-                OutputWorkspace=mergedWSName,
-                EnableLogging=self._subalgLogging
-            )
-        else:
-            ws = self.getProperty(Prop.INPUT_WS).value
-            if not ws.run().hasProperty(common.SampleLogs.TWO_THETA):
-                # Write two theta to sample logs
-                ws.run().addProperty(common.SampleLogs.TWO_THETA,
-                                     float(self.getProperty(Prop.TWO_THETA).value), 'degree', True)
-            self._cleanup.protect(ws)
+        mergedWSName = self._names.withSuffix('merged')
+        measurement_type = self.getPropertyValue('Measurement')
+        load_options = {
+            'Measurement': measurement_type,
+            'XUnit': 'TimeOfFlight',
+            'FitStartWorkspaceIndex': self.getProperty(Prop.START_WS_INDEX).value,
+            'FitEndWorkspaceIndex': self.getProperty(Prop.END_WS_INDEX).value,
+            'FitRangeLower': self.getProperty(Prop.XMIN).value,
+            'FitRangeUpper': self.getProperty(Prop.XMAX).value
+        }
+        if measurement_type == 'ReflectedBeam':
+            bragg_angle = None
+            angle_option = self.getPropertyValue('AngleOption')
+            first_run = self.getProperty(Prop.RUN).value[0]
+            if angle_option == 'SampleAngle':
+                bragg_angle = common.sample_angle(first_run)
+            elif angle_option == 'DetectorAngle':
+                bragg_angle = self._theta_from_detector_angles()
+                # in this clause we still need to correct for the difference of foreground
+                # centres between direct and reflected beams
+                # but we need first to load the reflected beam to be able to do this
+            elif angle_option == 'UserAngle':
+                bragg_angle = self.getProperty('BraggAngle').value
+            load_options['BraggAngle'] = bragg_angle
+
+        # MergeRunsOptions are defined by the parameter files and will not be modified here!
+        ws = LoadAndMerge(
+            Filename=inputFiles,
+            LoaderName='LoadILLReflectometry',
+            LoaderOptions=load_options,
+            OutputWorkspace=mergedWSName,
+            EnableLogging=self._subalgLogging
+        )
         return ws
 
-    def _peakFitting(self, ws):
-        """Add peak and foreground information to the sample logs."""
-        # Convert to wavelength
-        l1 = ws.spectrumInfo().l1()
-        hists = ws.getNumberHistograms()
-        mindex = int(hists / 2)
-        l2 = ws.spectrumInfo().l2(mindex)
-        if not self.getProperty(Prop.LINE_POSITION).isDefault:
-            linePosition = self.getProperty(Prop.LINE_POSITION).value
-        else:
-            # Fit peak position
-            peakWSName = self._names.withSuffix('peak')
-            xmin = Property.EMPTY_DBL
-            if not self.getProperty(Prop.XMIN).isDefault:
-                xmin = self.getProperty(Prop.XMIN).value
-                xmin = common.inTOF(xmin, l1, l2)
-            xmax = Property.EMPTY_DBL
-            if not self.getProperty(Prop.XMAX).isDefault:
-                xmax = self.getProperty(Prop.XMAX).value
-                xmax = common.inTOF(xmax, l1, l2)
-            peak = FindReflectometryLines(
-                InputWorkspace=ws,
-                OutputWorkspace=peakWSName,
-                RangeLower=xmin,
-                RangeUpper=xmax,
-                StartWorkspaceIndex=self.getProperty(Prop.START_WS_INDEX).value,
-                EndWorkspaceIndex=self.getProperty(Prop.END_WS_INDEX).value,
-                EnableLogging=self._subalgLogging
-            )
-            linePosition = peak.LineCentre
-            self._cleanup.cleanup(peak.OutputWorkspace)
-        # Add the fractional workspace index of the beam position to the sample logs of ws.
-        ws.run().addProperty(common.SampleLogs.LINE_POSITION, float(linePosition), True)
-        return ws, linePosition
-
-    def _addSampleLogInfo(self, ws, linePosition):
+    def _addSampleLogInfo(self, ws):
         """Add foreground indices (start, center, end), names start with reduction."""
         run = ws.run()
         hws = self._foregroundWidths()
-        beamPosIndex = int(numpy.rint(linePosition))
+        foregroundCentre = run.getProperty(common.SampleLogs.LINE_POSITION).value
         sign = self._workspaceIndexDirection(ws)
-        startIndex = beamPosIndex - sign * hws[0]
-        endIndex = beamPosIndex + sign * hws[1]
+        startIndex = foregroundCentre - sign * hws[0]
+        endIndex = foregroundCentre + sign * hws[1]
         if startIndex > endIndex:
             endIndex, startIndex = startIndex, endIndex
+        # note that those 3 are integers, but he line position is fractional
         run.addProperty(common.SampleLogs.FOREGROUND_START, int(startIndex), True)
-        run.addProperty(common.SampleLogs.FOREGROUND_CENTRE, int(beamPosIndex), True)
+        run.addProperty(common.SampleLogs.FOREGROUND_CENTRE, int(foregroundCentre), True)
         run.addProperty(common.SampleLogs.FOREGROUND_END, int(endIndex), True)
-
-    def _moveDetector(self, ws, linePosition):
-        """Perform detector position correction for direct and reflected beams."""
-        detectorMovedWSName = self._names.withSuffix('detectors_moved')
-        run = ws.run()
-        twoTheta = run.getProperty(common.SampleLogs.TWO_THETA).value
-        args = {
-            'InputWorkspace': ws,
-            'OutputWorkspace': detectorMovedWSName,
-            'TwoTheta': twoTheta,
-            'DetectorComponentName': 'detector',
-            'PixelSize': common.pixelSize(self._instrumentName),
-            'DetectorCorrectionType': 'RotateAroundSample',
-            'DetectorFacesSample': True,
-            'EnableLogging': self._subalgLogging
-        }
-        if not self.getProperty(Prop.TWO_THETA).isDefault:
-            # We should use the user angle
-            twoTheta = self.getProperty(Prop.TWO_THETA).value
-            args['TwoTheta'] = twoTheta
-            # We need to subtract an offsetAngle from user given TwoTheta
-            args['LinePosition'] = linePosition
-        else:
-            twoTheta = twoTheta + common.deflectionAngle(run)
-            args['TwoTheta'] = twoTheta
-        detectorMovedWS = SpecularReflectionPositionCorrect(**args)
-        # Write twoTheta to the sample logs
-        run.addProperty(common.SampleLogs.REDUCTION_TWO_THETA, float(twoTheta), 'Degree', True)
-        self._cleanup.cleanup(ws)
-        return detectorMovedWS
-
-    def _calibrateDetectorAngleByDirectBeam(self, ws, linePosition):
-        """Perform detector position correction for reflected beams."""
-        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault or not self.getProperty(Prop.TWO_THETA).isDefault:
-            return ws
-        calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
-        directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
-        directLine = directLineWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
-        calibratedWS = SpecularReflectionPositionCorrect(
-            InputWorkspace=ws,
-            OutputWorkspace=calibratedWSName,
-            DetectorComponentName='detector',
-            DirectLineWorkspace=directLineWS,
-            DirectLinePosition=directLine,
-            LinePosition=linePosition,
-            PixelSize=common.pixelSize(self._instrumentName),
-            DetectorCorrectionType='RotateAroundSample',
-            DetectorFacesSample=True,
-            EnableLogging=self._subalgLogging
-        )
-        self._cleanup.cleanup(ws)
-        return calibratedWS
 
     def _normaliseToFlux(self, detWS, monWS):
         """Normalise ws to monitor counts or counting time."""
@@ -543,6 +466,24 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return normalisedWS
 
+    def _calculate_average_background(self, transposedWS, transposedBkgWSName, ranges):
+        """Calculates mean background in the specified detector region"""
+        nspec = transposedWS.getNumberHistograms()
+        blocksize = transposedWS.blocksize()
+        y = transposedWS.extractY()
+        x = transposedWS.extractX()
+        transposedBkgWS = CloneWorkspace(InputWorkspace=transposedWS, OutputWorkspace=transposedBkgWSName)
+        condition = (x >= ranges[0]) & (x <= ranges[1])
+        if len(ranges) == 4:
+            condition = (((x >= ranges[0]) & (x <= ranges[1])) | ((x >= ranges[2]) & (x <= ranges[3])))
+        bkg_region = np.extract(condition, y)
+        bkg_region = bkg_region.reshape((nspec, int(bkg_region.size/nspec)))
+        bkg = np.mean(bkg_region, axis=1)
+        for channel in range(nspec):
+            transposedBkgWS.setE(channel, np.zeros(blocksize))
+            transposedBkgWS.setY(channel, bkg[channel] * np.ones(blocksize))
+        return transposedBkgWS
+
     def _subtractFlatBkg(self, ws):
         """Return a workspace where a flat background has been subtracted from ws."""
         method = self.getProperty(Prop.BKG_METHOD).value
@@ -562,16 +503,21 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         )
         self._cleanup.cleanup(clonedWS)
         ranges = self._flatBkgRanges(ws)
-        polynomialDegree = 0 if self.getProperty(Prop.BKG_METHOD).value == BkgMethod.CONSTANT else 1
+        self.log().information('Calculating background in the range ' + str(ranges))
         transposedBkgWSName = self._names.withSuffix('transposed_flat_background')
-        transposedBkgWS = CalculatePolynomialBackground(
-            InputWorkspace=transposedWS,
-            OutputWorkspace=transposedBkgWSName,
-            Degree=polynomialDegree,
-            XRanges=ranges,
-            CostFunction='Unweighted least squares',
-            EnableLogging=self._subalgLogging
-        )
+        if method == BkgMethod.CONSTANT or method == BkgMethod.LINEAR:
+            # fit with polynomial
+            polynomialDegree = 0 if method == BkgMethod.CONSTANT else 1
+            transposedBkgWS = CalculatePolynomialBackground(
+                InputWorkspace=transposedWS,
+                OutputWorkspace=transposedBkgWSName,
+                Degree=polynomialDegree,
+                XRanges=ranges,
+                CostFunction='Unweighted least squares',
+                EnableLogging=self._subalgLogging
+            )
+        elif method == BkgMethod.AVERAGE:
+            transposedBkgWS = self._calculate_average_background(transposedWS, transposedBkgWSName, ranges)
         self._cleanup.cleanup(transposedWS)
         bkgWSName = self._names.withSuffix('flat_background')
         bkgWS = Transpose(
@@ -622,6 +568,24 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         )
         self._cleanup.cleanup(waterWS)
         self._cleanup.cleanup(rebinnedWaterWS)
+        self._cleanup.cleanup(ws)
+        return calibratedWS
+
+    def _calibrateDetectorAngleByDirectBeam(self, ws):
+        """Perform detector position correction for reflected beams."""
+        direct_line = self.getProperty('DirectBeamForegroundCentre').value
+        calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
+        calibratedWS = SpecularReflectionPositionCorrect(
+            InputWorkspace=ws,
+            OutputWorkspace=calibratedWSName,
+            DetectorComponentName='detector',
+            LinePosition=direct_line, # yes, this is the direct line position!
+            TwoTheta=2*self._theta_from_detector_angles(),
+            PixelSize=common.pixelSize(self._instrumentName),
+            DetectorCorrectionType='RotateAroundSample',
+            DetectorFacesSample=True,
+            EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(ws)
         return calibratedWS
 
