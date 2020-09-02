@@ -87,7 +87,8 @@ void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
   QString newInput;
 
   // Remove ending range if at end of input
-  if (findRange >= 0 && (findComma < 0 || findRange > findComma)) {
+  if (findRange != std::string::npos &&
+      (findComma == std::string::npos || findRange > findComma)) {
     currentInput.erase(findRange, currentInput.length() - 1);
   }
 
