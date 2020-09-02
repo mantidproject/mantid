@@ -63,7 +63,7 @@ is not needed as a result of the symmetrisation.
 
 class VesuvioAnalysis(PythonAlgorithm):
     def category(self):
-        return "Indirect"
+        return "Inelastic\\Indirect\\Vesuvio"
 
     def seeAlso(self):
         return ["VesuvioCalculateGammaBackground", "ConvertToYSpace","VesuvioThickness",
