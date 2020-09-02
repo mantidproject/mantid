@@ -46,9 +46,13 @@ class BatchCsvParser(object):
 
         parsed_rows = []
 
-        with open(batch_file_name, 'r') as csvfile:
-            batch_reader = reader(csvfile, delimiter=",")
-            read_rows = list(batch_reader)
+        try:
+            with open(batch_file_name, 'r') as csvfile:
+                batch_reader = reader(csvfile, delimiter=",")
+                read_rows = list(batch_reader)
+        except (csv.Error, UnicodeDecodeError) as e:
+            # Wrap so caller does not need to know about csv.Error
+            raise SyntaxError(f"Bad CSV detected:\n{str(e)}")
 
         for row_number, row in enumerate(read_rows):
             # Check if the row is empty or is a comment
