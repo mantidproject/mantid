@@ -101,7 +101,7 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_fitTree(nullptr), m_currentHandler(nullptr),
       m_defaultFunction("Gaussian"), m_defaultPeak("Gaussian"),
       m_defaultBackground("LinearBackground"), m_peakToolOn(false),
-      m_auto_back(false),
+      m_hideWsListWidget(false), m_auto_back(false),
       m_autoBgName(QString::fromStdString(
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),
@@ -569,7 +569,7 @@ void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
   }
 
   auto noOfItems = m_wsListWidget->count();
-  if (noOfItems != 0) {
+  if (noOfItems != 0 && !m_hideWsListWidget) {
     auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) +
                   2 * m_wsListWidget->frameWidth();
     m_wsListWidget->setMaximumHeight(height);
@@ -3185,18 +3185,20 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   auto *settings =
       m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
 
-  settings->property()->removeSubProperty(m_evaluationType);
-  m_evaluationType->setEnabled(false);
-  // if it is a MatrixWorkspace insert WorkspaceIndex
-  auto mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-  if (mws) {
-    addWorkspaceIndexToBrowser();
-    auto isHistogram = mws->isHistogramData();
-    m_evaluationType->setEnabled(isHistogram);
-    if (isHistogram) {
-      settings->property()->addSubProperty(m_evaluationType);
+  if (settings->property()->subProperties().contains(m_evaluationType)) {
+    settings->property()->removeSubProperty(m_evaluationType);
+    m_evaluationType->setEnabled(false);
+    // if it is a MatrixWorkspace insert WorkspaceIndex
+    auto mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+    if (mws) {
+      addWorkspaceIndexToBrowser();
+      auto isHistogram = mws->isHistogramData();
+      m_evaluationType->setEnabled(isHistogram);
+      if (isHistogram) {
+        settings->property()->addSubProperty(m_evaluationType);
+      }
+      return;
     }
-    return;
   }
 
   // if it is a TableWorkspace insert the column properties
@@ -3277,6 +3279,36 @@ void FitPropertyBrowser::addWorkspaceIndexToBrowser() {
 void FitPropertyBrowser::fit() {
   int maxIterations = m_intManager->value(m_maxIterations);
   doFit(maxIterations);
+}
+
+/**
+ * Function to toggle the visibility of the settings browser
+ */
+void FitPropertyBrowser::toggleSettingsBrowserVisible() {
+  if (m_browser->isItemVisible(m_settingsGroup)) {
+    m_browser->setItemVisible(m_settingsGroup, false);
+  } else {
+    m_browser->setItemVisible(m_settingsGroup, true);
+  }
+}
+
+/**
+ * Function to toggle the visibility of a settings group property
+ * exposed to python
+ */
+void FitPropertyBrowser::removePropertiesFromSettingsBrowser(
+    const QStringList &propsToRemove) {
+  // get settings properties
+  QList<QtProperty *> props = m_settingsGroup->property()->subProperties();
+  for (auto &prop : props) {
+    if (propsToRemove.contains(prop->propertyName())) {
+      m_settingsGroup->property()->removeSubProperty(prop);
+    }
+  }
+}
+
+void FitPropertyBrowser::toggleWsListVisible() {
+  m_hideWsListWidget = !m_hideWsListWidget;
 }
 
 /**=================================================================================================

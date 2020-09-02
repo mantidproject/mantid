@@ -45,7 +45,13 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.toolbar = FittingPlotToolbar(self.figure.canvas, self, False)
         self.vLayout_plot.addWidget(self.toolbar)
         self.vLayout_plot.addWidget(self.figure.canvas)
-        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas, ToolbarStateManager(self.toolbar)) # self.fitprop_toolbar
+        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas,
+                                                     ToolbarStateManager(self.toolbar))
+        hide_props = ['StartX', 'EndX', 'Minimizer', 'Cost function', 'Max Iterations', 'Output',
+                      'Ignore invalid data', 'Peak Radius', 'Plot Composite Members',
+                      'Convolve Composite Members', 'Show Parameter Errors', 'Evaluate Function As']
+        self.fit_browser.removePropertiesFromSettingsBrowser(hide_props)
+        self.fit_browser.toggleWsListVisible()
         self.fit_browser.closing.connect(self.toolbar.handle_fit_browser_close)
         self.vLayout_fitprop.addWidget(self.fit_browser)
         self.fit_browser.hide()

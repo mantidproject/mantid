@@ -40,7 +40,6 @@ include_directories(inc)
 
 target_link_libraries(Nexus
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${NEXUS_C_LIBRARIES}
                       ${NEXUS_LIBRARIES})

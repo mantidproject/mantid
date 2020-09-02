@@ -6,7 +6,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(RemoteJobManagersTest ${TEST_FILES})
   target_link_libraries(RemoteJobManagersTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         API
                         Types
                         Kernel

@@ -48,18 +48,12 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view)
 // continue which is necessary to stop the int manager from self-incrementing
 // itself due to an internal timer occurring within the class
 void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
-  auto fun = [this, subTypeIndex, typeIndex]() {
-    if (subTypeIndex == SubTypeIndex::Fit) {
-      m_model.setFitType(static_cast<FitType>(typeIndex));
-    } else if (subTypeIndex == SubTypeIndex::Lorentzian) {
-      m_model.setLorentzianType(static_cast<LorentzianType>(typeIndex));
-    } else {
-      m_model.setBackground(static_cast<BackgroundType>(typeIndex));
-    }
-  };
-  auto future = QtConcurrent::run(fun);
-  while (future.isRunning()) {
-    qApp->processEvents();
+  if (subTypeIndex == SubTypeIndex::Fit) {
+    m_model.setFitType(static_cast<FitType>(typeIndex));
+  } else if (subTypeIndex == SubTypeIndex::Lorentzian) {
+    m_model.setLorentzianType(static_cast<LorentzianType>(typeIndex));
+  } else {
+    m_model.setBackground(static_cast<BackgroundType>(typeIndex));
   }
   m_view->setSubType(subTypeIndex, typeIndex);
   setErrorsEnabled(false);

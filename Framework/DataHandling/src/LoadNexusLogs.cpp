@@ -344,7 +344,6 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(
     }
   }
   if (invalidDataFound) {
-    log.warning() << "Some \"" << prop.name() << "\" log data is invalid!\n";
     const auto tspName =
         API::LogManager::getInvalidValuesFilterLogName(prop.name());
     auto tsp = std::make_unique<TimeSeriesProperty<bool>>(tspName);
@@ -646,6 +645,22 @@ void LoadNexusLogs::execLoader() {
 
   // Close the file
   file.close();
+
+  if (m_logsWithInvalidValues.size() > 0) {
+    if (m_logsWithInvalidValues.size() == 1) {
+      g_log.warning()
+          << "Sample Log \"" << m_logsWithInvalidValues[0]
+          << "\" contains invalid values, click \"Show Sample Logs\" "
+             "for details.\n";
+    }
+    auto other_string =
+        (m_logsWithInvalidValues.size() < 2) ? " other " : " others";
+    g_log.warning()
+        << "Sample Log \"" << m_logsWithInvalidValues[0] << "\" and "
+        << m_logsWithInvalidValues.size() - 1 << other_string
+        << " contain invalid values, click \"Show Sample Logs\" for "
+           "details.\n";
+  }
 }
 
 /** Try to load the "Veto_pulse" field in DASLogs
@@ -853,6 +868,7 @@ void LoadNexusLogs::loadNXLog(
         appendEndTimeLog(validityLogValue.get(), workspace->run());
         workspace->mutableRun().addProperty(std::move(validityLogValue),
                                             overwritelogs);
+        m_logsWithInvalidValues.emplace_back(entry_name);
       }
       appendEndTimeLog(logValue.get(), workspace->run());
       workspace->mutableRun().addProperty(std::move(logValue), overwritelogs);
@@ -917,6 +933,7 @@ void LoadNexusLogs::loadSELog(
       if (validityLogValue) {
         appendEndTimeLog(validityLogValue.get(), workspace->run());
         workspace->mutableRun().addProperty(std::move(validityLogValue));
+        m_logsWithInvalidValues.emplace_back(propName);
       }
       appendEndTimeLog(logValue.get(), workspace->run());
 

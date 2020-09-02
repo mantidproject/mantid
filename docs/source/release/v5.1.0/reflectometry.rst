@@ -15,11 +15,12 @@ Algorithms
 New
 ----
 
-- Added new :ref:`algm-LRReductionWithReference` to use a measured standard with a model reflectivity curve calculated by the `refl1d` package to produce a normalization curve for a sample reduction. Requires `refl1d` to be installed seperately. 
+- Added new :ref:`algm-LRReductionWithReference` to use a measured standard with a model reflectivity curve calculated by the `refl1d` package to produce a normalization curve for a sample reduction. Requires `refl1d` to be installed seperately.
 
 Improvements
 ------------
 
+- The ensemble of ILL reflectometry reduction is improved to produce results more consistent with the legacy software for D17 instrument.
 - Sample waviness term is removed from resolution calculation in incoherent mode in :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 - Flag to enable / disable apply scaling factor from `ScalingFactorFile`, called `ApplyScalingFactor`, added to :ref:`algm-LiquidsReflectometryReduction`.
 - Modified :ref:`algm-LRAutoReduction` to allow the option to autoreduce data with a reference measurement for normalization (instead of only direct beam) using the new :ref:`algm-LRReductionWithReference` algorithm of this release
@@ -30,6 +31,11 @@ Bug fixes
 - :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` has been fixed to update the sample logs of chopper gap and chopper position with correct units regardless the wrong setting in nexus files.
 - The history for :ref:`algm-ReflectometryReductionOne` has been fixed so that the conversion to Q is now always included in the history.
 
+Removed
+-------
+
+- The following deprecated algorithms have been removed: ``SaveANSTOAscii``, ``SaveILLCosmosAscii``, ``SaveReflCustomAscii``, and ``SaveReflThreeColumnAscii``. They have been replaced by :ref:`algm-SaveReflectometryAscii`.
+  
 ISIS Reflectometry Interface
 ############################
 

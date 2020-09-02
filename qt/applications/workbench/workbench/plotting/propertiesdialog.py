@@ -92,6 +92,43 @@ class LabelEditor(PropertiesEditorBase):
         self.ui.errors.show()
 
 
+class LegendEditorModel(object):
+
+    def __init__(self, label_text):
+        self.label_text = label_text
+
+
+class LegendEditor(PropertiesEditorBase):
+    """Provides a dialog box to edit a legend label"""
+
+    def __init__(self, canvas, target, target_curve):
+        """
+        :param target: A reference to the label being edited
+        :param target_curve: A reference to the curve whose legend is being edited
+       """
+        super().__init__('labeleditor.ui', canvas)
+        self.ui.errors.hide()
+
+        self.target = target
+        self.target_curve = target_curve
+        self._memento = LegendEditorModel(target.get_text())
+        self.ui.editor.setText(self._memento.label_text)
+
+    def changes_accepted(self):
+        self.ui.errors.hide()
+        self.target.set_text(self.ui.editor.text())
+        self.target_curve.set_label(self.ui.editor.text())
+
+    def error_occurred(self, exc):
+        """
+        Display errors to user and reset state
+        :param exc: The exception that occurred
+        """
+        self.target.set_text(self._memento.label_text)
+        self.ui.errors.setText(str(exc).strip())
+        self.ui.errors.show()
+
+
 class AxisEditorModel(object):
     min = None
     max = None
@@ -225,12 +262,12 @@ class ColorbarAxisEditor(AxisEditor):
 
         self.ui.gridBox.hide()
 
-        self.images=[]
+        self.images = []
 
         images = get_images_from_figure(canvas.figure)
         # If there are an equal number of plots and colorbars so apply changes to plot with the selected colorbar
         # Otherwise apply changes to all the plots in the figure
-        if len(images) != len(self.canvas.figure.axes)/2:
+        if len(images) != len(self.canvas.figure.axes) / 2:
             self.images = images
         else:
             # apply changes to selected axes
