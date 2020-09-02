@@ -42,7 +42,7 @@ class FittingDataModel(object):
                         if ws_name not in self._background_workspaces:
                             self._background_workspaces[ws_name] = None
                         self._last_added.append(ws_name)
-                        self.add_log_to_table(ws)
+                        self.add_log_to_table(ws_name, ws)
                     else:
                         logger.warning(
                             f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
@@ -70,7 +70,8 @@ class FittingDataModel(object):
                 ws.addColumn(type="float", name="stdev")
                 self._log_workspaces.add(log)
 
-    def add_log_to_table(self, ws):
+    def add_log_to_table(self, ws_name, ws):
+        # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
         if not self._log_workspaces:
             self.create_log_table()
         # add run info
@@ -81,7 +82,7 @@ class FittingDataModel(object):
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
         for ilog in range(1, len(self._log_workspaces)):
             try:
-                avg, stdev = AverageLogData(ws, LogName=self._log_workspaces[ilog].name(), FixZero=False)
+                avg, stdev = AverageLogData(ws_name, LogName=self._log_workspaces[ilog].name(), FixZero=False)
                 self._log_workspaces[ilog].addRow([avg, stdev])
             except RuntimeError:
                 self._log_workspaces[ilog].addRow(full(2, nan))
@@ -94,9 +95,15 @@ class FittingDataModel(object):
         self.update_log_group_name()
 
     def clear_logs(self):
-        ws_name = self._log_workspaces.name()
-        self._log_workspaces = None
-        DeleteWorkspace(ws_name)
+        if self._log_workspaces:
+            ws_name = self._log_workspaces.name()
+            self._log_workspaces = None
+            DeleteWorkspace(ws_name)
+
+    def repopulate_logs(self):
+        self.clear_logs()
+        for ws_name, ws in self._loaded_workspaces.items():
+            self.add_log_to_table(ws_name, ws)
 
     def update_log_group_name(self):
         run_info = ADS.retrieve('run_info')
@@ -108,8 +115,21 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
+    def update_workspace_name(self, old_name, new_name):
+        if new_name not in self._loaded_workspaces:
+            self._loaded_workspaces[new_name] = self._loaded_workspaces.pop(old_name)
+            if old_name in self._background_workspaces:
+                self._background_workspaces[new_name] = self._background_workspaces.pop(old_name)
+            if old_name in self._bg_params:
+                self._bg_params[new_name] = self._bg_params.pop(old_name)
+        else:
+            logger.warning(f"There already exists a workspace with name {new_name}.")
+
     def get_loaded_workspaces(self):
         return self._loaded_workspaces
+
+    def get_log_workspaces_name(self):
+        return [ws.name() for ws in self._log_workspaces] if self._log_workspaces else ''
 
     def get_background_workspaces(self):
         return self._background_workspaces
