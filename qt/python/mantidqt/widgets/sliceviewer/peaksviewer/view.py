@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 
 # 3rd party imports
+from qtpy.QtCore import QSortFilterProxyModel
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 
 # local imports
@@ -20,6 +21,8 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
     def __init__(self, *args, **kwargs):
         self._key_handler = kwargs.pop('key_handler')
         TableWorkspaceDisplayView.__init__(self, *args, **kwargs)
+        self.source_model = self.model()
+        self.proxy_model = None
 
     def keyPressEvent(self, event):
         """
@@ -28,6 +31,15 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         # bypass immediate base class to get standard table arrow key behaviour
         QTableView.keyPressEvent(self, event)
         self._key_handler._row_selected()
+
+    def enable_sorting(self):
+        """
+        Turn on column sorting
+        """
+        self.setSortingEnabled(True)
+        self.proxy_model = QSortFilterProxyModel()
+        self.proxy_model.setSourceModel(self.source_model)
+        self.setModel(self.proxy_model)
 
 
 class PeaksViewerView(QWidget):
@@ -147,7 +159,7 @@ class PeaksViewerView(QWidget):
         if not selected:
             return None
 
-        return self.table_view.row(selected[0])
+        return self.table_view.proxy_model.mapToSource(selected[0]).row()
 
 
 class PeaksViewerCollectionView(QWidget):
