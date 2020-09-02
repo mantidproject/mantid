@@ -36,8 +36,6 @@ public:
   defineActiveRegion(const Geometry::BoundingBox &sampleBox) const override;
 
 private:
-  // const double m_azimuthDeg;
-
   const unsigned short m_upIdx;
   const unsigned short m_beamIdx;
   const unsigned short m_horIdx;

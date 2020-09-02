@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import PaalmanPingsMonteCarloAbsorption, Load, mtd, SaveNexus
+from mantid.simpleapi import PaalmanPingsMonteCarloAbsorption, Load, mtd
 
 
 class FlatPlateTest(systemtesting.MantidSystemTest):
@@ -44,7 +44,6 @@ class FlatPlateTest(systemtesting.MantidSystemTest):
             ContainerDensity=6.0,
             CorrectionsWorkspace='flat_plate_corr'
         )
-        SaveNexus(InputWorkspace='flat_plate_corr', Filename='C:\\NewTestData\\CLAYTONirs_PP_MC_flat_plate.nxs')
 
 
 class CylinderTest(systemtesting.MantidSystemTest):
@@ -81,7 +80,6 @@ class CylinderTest(systemtesting.MantidSystemTest):
             ContainerDensity=6.0,
             CorrectionsWorkspace='cylinder_corr'
         )
-        SaveNexus(InputWorkspace='cylinder_corr', Filename='C:\\NewTestData\\CLAYTONirs_PP_MC_cylinder.nxs')
 
 
 class AnnulusTest(systemtesting.MantidSystemTest):
@@ -121,4 +119,3 @@ class AnnulusTest(systemtesting.MantidSystemTest):
             CorrectionsWorkspace='annulus_corr',
             EventsPerPoint=5000
         )
-        SaveNexus(InputWorkspace='annulus_corr', Filename='C:\\NewTestData\\CLAYTONirs_PP_MC_annulus.nxs')
