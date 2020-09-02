@@ -9,6 +9,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include <QComboBox>
+#include <QCompleter>
 #include <QLabel>
 
 using namespace Mantid::Kernel;
@@ -40,6 +41,10 @@ OptionsPropertyWidget::OptionsPropertyWidget(Mantid::Kernel::Property *prop,
   // output box and used the saved combo box
   m_combo = new QComboBox(this);
   m_combo->setToolTip(m_doc);
+  if (std::string(prop->type()).find("Workspace") != std::string::npos) {
+    m_combo->setEditable(true);
+    m_combo->completer()->setCompletionMode(QCompleter::PopupCompletion);
+  }
   m_widgets.push_back(m_combo);
 
   std::vector<std::string> items = prop->allowedValues();
