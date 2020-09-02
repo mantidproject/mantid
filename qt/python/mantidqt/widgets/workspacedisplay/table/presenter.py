@@ -72,7 +72,14 @@ class TableWorkspaceDataPresenter(object):
             column_data = self.model.get_column(col)
             editable = self.model.is_editable_column(col)
             for row in range(num_rows):
-                data_model.setItem(row, col, create_table_item(column_data[row], editable))
+                data_model.setItem(row, col, self.create_item(column_data[row], editable))
+
+    def create_item(self, data, editable):
+        """Create a QStandardItemModel for the data
+        :param data: The typed data to store
+        :param editable: True if it should be editable in the view
+        """
+        return create_table_item(data, editable)
 
 
 class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, DataCopier):

@@ -11,8 +11,25 @@ from enum import Enum
 
 # local imports
 from mantidqt.widgets.workspacedisplay.table.presenter \
-    import TableWorkspaceDataPresenter
+    import TableWorkspaceDataPresenter, create_table_item
 from .model import create_peaksviewermodel
+
+
+class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
+    """Override create_item method to format table columns more
+    appropriately
+    """
+    FLOAT_FORMAT_STR = '{:.5f}'
+
+    def create_item(self, data, _):
+        """Create a table item to display the data. The data is always readonly
+        here.
+        """
+        if type(data) == float:
+            data = self.FLOAT_FORMAT_STR.format(data)
+        else:
+            data = str(data)
+        return create_table_item(data, editable=False)
 
 
 class PeaksViewerPresenter(object):
@@ -37,7 +54,7 @@ class PeaksViewerPresenter(object):
         self._model = model
         self._raise_error_if_workspace_incompatible(model.peaks_workspace)
         self._peaks_table_presenter = \
-            TableWorkspaceDataPresenter(model, view.table_view)
+            PeaksWorkspaceDataPresenter(model, view.table_view)
 
         self._view = view
         view.subscribe(self)
