@@ -10,6 +10,7 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/LatticeDomain.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 #include "MantidCurveFitting/LatticeFunction.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

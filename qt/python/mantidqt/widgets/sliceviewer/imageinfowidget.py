@@ -8,6 +8,7 @@
 # std imports
 from typing import Union
 import sys
+import numpy as np
 
 from mantidqt.utils.qt import import_qt
 from matplotlib.collections import QuadMesh
@@ -59,7 +60,7 @@ class ImageInfoTracker(CursorTracker):
         cinfo = cursor_info(self._image, xdata, ydata)
         if cinfo is not None:
             arr, _, (i, j) = cinfo
-            if (0 <= i < arr.shape[0]) and (0 <= j < arr.shape[1]):
+            if (0 <= i < arr.shape[0]) and (0 <= j < arr.shape[1]) and not np.ma.is_masked(arr[i, j]):
                 if self._transpose_xy:
                     ydata, xdata = xdata, ydata
                 self._widget.cursorAt(xdata, ydata, arr[i, j])

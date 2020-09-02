@@ -58,11 +58,6 @@ private:
   Kernel::V3D declareSamplePosition(const API::MatrixWorkspace &ws);
   double twoThetaFromProperties(const API::MatrixWorkspace &inWS,
                                 const double l2);
-  double twoThetaFromDirectLine(const std::string &detectorName,
-                                const detid_t detectorID,
-                                const Kernel::V3D &samplePosition,
-                                const double l2, const Kernel::V3D &alongDir,
-                                const double beamOffset);
 };
 
 } // namespace Reflectometry

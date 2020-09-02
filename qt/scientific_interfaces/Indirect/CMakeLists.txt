@@ -279,7 +279,6 @@ mtd_add_qt_library(
         INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
         SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
         LINK_LIBS
-        ${TCMALLOC_LIBRARIES_LINKTIME}
         ${CORE_MANTIDLIBS}
         ${POCO_LIBRARIES}
         ${Boost_LIBRARIES}
@@ -574,7 +573,6 @@ mtd_add_qt_library(
         PrecompiledHeader.h
         INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
         LINK_LIBS
-        ${TCMALLOC_LIBRARIES_LINKTIME}
         ${CORE_MANTIDLIBS}
         PythonInterfaceCore
         ${POCO_LIBRARIES}

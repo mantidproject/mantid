@@ -30,8 +30,9 @@ DetectorGridDefinition::DetectorGridDefinition(const double minLatitude,
     : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude),
       m_latitudePoints(latitudePoints), m_minLongitude(minLongitude),
       m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
-  if (latitudePoints == 0 || longitudePoints == 0 ||
-      minLatitude > maxLatitude || minLongitude > maxLongitude) {
+  // prevent pointless edge case to simplify interpolation code
+  if (latitudePoints < 2 || longitudePoints < 2 || minLatitude > maxLatitude ||
+      minLongitude > maxLongitude) {
     throw std::runtime_error("Invalid detector grid definition.");
   }
   // The angular ranges might be zero in some cases preventing
@@ -92,6 +93,42 @@ DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
   std::get<2>(is) = std::get<0>(is) + m_latitudePoints;
   std::get<3>(is) = std::get<2>(is) + 1;
   return is;
+}
+
+/** Return the indices of the detector described by a row and col
+ *  @param row Zero-based integer describing a row of detector grid
+ *  @param col Zero-based integer describing a column of detector grid
+ *  @return Indices of the detector
+ */
+size_t DetectorGridDefinition::getDetectorIndex(size_t row, size_t col) {
+  if ((col >= m_longitudePoints) || (row >= m_latitudePoints)) {
+    throw std::runtime_error("DetectorGridDefinition::getDetectorIndex: "
+                             "detector requested for out of bounds row or col");
+  }
+  return col * m_latitudePoints + row;
+}
+
+/** Return the indices to the detector that is immediate neighbour
+ *  of the supplied lat/long and has lat/long <= supplied values
+ *  @param latitude Latitude of a point.
+ *  @param longitude Longitude of a point.
+ *  @return Indices to nearest detector
+ */
+std::pair<size_t, size_t>
+DetectorGridDefinition::getNearestVertex(const double latitude,
+                                         const double longitude) const {
+  auto topLeftRow =
+      static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
+  // Check for points at the edges or outside the grid.
+  if (topLeftRow == m_latitudePoints - 1) {
+    --topLeftRow;
+  }
+  auto topLeftCol =
+      static_cast<size_t>((longitude - m_minLongitude) / m_longitudeStep);
+  if (topLeftCol == m_longitudePoints - 1) {
+    --topLeftCol;
+  }
+  return std::pair<size_t, size_t>{topLeftRow, topLeftCol};
 }
 
 /** Return the number of columns in the grid.

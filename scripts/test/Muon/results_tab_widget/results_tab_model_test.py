@@ -362,6 +362,21 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertRaises(RuntimeError, model.create_results_table,
                           selected_logs, selected_results)
 
+    def test_that_when_new_fit_is_performed_function_name_is_set_to_lastest_fit_name(self):
+        parameters = OrderedDict([('Height', (100, 0.1)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters, [])
+
+        parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func2 = create_test_fits(('ws2', ), 'func2', parameters, [])
+        model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
+
+        model.on_new_fit_performed()
+
+        self.assertEqual(model.selected_fit_function(), 'func2')
+
+
     # ---------------------- Private helper functions -------------------------
 
     def _assert_table_matches_expected(self, expected_cols, expected_content,

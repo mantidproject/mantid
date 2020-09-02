@@ -1,6 +1,5 @@
 set(SRC_FILES
     src/AppendGeometryToSNSNexus.cpp
-    src/AsciiPointBase.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
     src/CompressEvents.cpp
@@ -89,9 +88,10 @@ set(SRC_FILES
     src/LoadMuonNexus1.cpp
     src/LoadMuonNexus2.cpp
     src/LoadMuonNexusV2.cpp
-    src/LoadMuonNexusV2Helper.cpp
+    src/LoadMuonNexusV2NexusHelper.cpp
     src/LoadMuonStrategy.cpp
     src/SinglePeriodLoadMuonStrategy.cpp
+    src/MultiPeriodLoadMuonStrategy.cpp
     src/LoadNXSPE.cpp
     src/LoadNXcanSAS.cpp
     src/LoadNexus.cpp
@@ -157,7 +157,6 @@ set(SRC_FILES
     src/SampleEnvironmentFactory.cpp
     src/SampleEnvironmentSpec.cpp
     src/SampleEnvironmentSpecParser.cpp
-    src/SaveANSTOAscii.cpp
     src/SaveAscii.cpp
     src/SaveAscii2.cpp
     src/SaveBankScatteringAngles.cpp
@@ -176,7 +175,6 @@ set(SRC_FILES
     src/SaveGDA.cpp
     src/SaveGSASInstrumentFile.cpp
     src/SaveGSS.cpp
-    src/SaveILLCosmosAscii.cpp
     src/SaveISISNexus.cpp
     src/SaveIsawDetCal.cpp
     src/SaveMask.cpp
@@ -194,8 +192,6 @@ set(SRC_FILES
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
     src/SaveRKH.cpp
-    src/SaveReflCustomAscii.cpp
-    src/SaveReflThreeColumnAscii.cpp
     src/SaveReflectometryAscii.cpp
     src/SaveRMCProfile.cpp
     src/SaveSESANS.cpp
@@ -216,7 +212,6 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidDataHandling/AppendGeometryToSNSNexus.h
-    inc/MantidDataHandling/AsciiPointBase.h
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/CheckMantidVersion.h
     inc/MantidDataHandling/CompressEvents.h
@@ -306,9 +301,10 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMuonNexus1.h
     inc/MantidDataHandling/LoadMuonNexus2.h
     inc/MantidDataHandling/LoadMuonNexusV2.h
-    inc/MantidDataHandling/LoadMuonNexusV2Helper.h
+    inc/MantidDataHandling/LoadMuonNexusV2NexusHelper.h
     inc/MantidDataHandling/LoadMuonStrategy.h
     inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
+    inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
     inc/MantidDataHandling/LoadNXSPE.h
     inc/MantidDataHandling/LoadNXcanSAS.h
     inc/MantidDataHandling/LoadNexus.h
@@ -371,7 +367,6 @@ set(INC_FILES
     inc/MantidDataHandling/SampleEnvironmentFactory.h
     inc/MantidDataHandling/SampleEnvironmentSpec.h
     inc/MantidDataHandling/SampleEnvironmentSpecParser.h
-    inc/MantidDataHandling/SaveANSTOAscii.h
     inc/MantidDataHandling/SaveAscii.h
     inc/MantidDataHandling/SaveAscii2.h
     inc/MantidDataHandling/SaveBankScatteringAngles.h
@@ -390,7 +385,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveGDA.h
     inc/MantidDataHandling/SaveGSASInstrumentFile.h
     inc/MantidDataHandling/SaveGSS.h
-    inc/MantidDataHandling/SaveILLCosmosAscii.h
     inc/MantidDataHandling/SaveISISNexus.h
     inc/MantidDataHandling/SaveIsawDetCal.h
     inc/MantidDataHandling/SaveMask.h
@@ -408,8 +402,6 @@ set(INC_FILES
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
     inc/MantidDataHandling/SaveRKH.h
-    inc/MantidDataHandling/SaveReflCustomAscii.h
-    inc/MantidDataHandling/SaveReflThreeColumnAscii.h
     inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveSESANS.h
@@ -570,7 +562,6 @@ set(TEST_FILES
     SampleEnvironmentSpecFileFinderTest.h
     SampleEnvironmentSpecParserTest.h
     SampleEnvironmentSpecTest.h
-    SaveANSTOAsciiTest.h
     SaveAscii2Test.h
     SaveAsciiTest.h
     SaveBankScatteringAnglesTest.h
@@ -588,7 +579,6 @@ set(TEST_FILES
     SaveGDATest.h
     SaveGSASInstrumentFileTest.h
     SaveGSSTest.h
-    SaveILLCosmosAsciiTest.h
     SaveIsawDetCalTest.h
     SaveMaskTest.h
     SaveNISTDATTest.h
@@ -605,8 +595,6 @@ set(TEST_FILES
     SavePHXTest.h
     SaveParameterFileTest.h
     SaveRKHTest.h
-    SaveReflCustomAsciiTest.h
-    SaveReflThreeColumnAsciiTest.h
     SaveReflectometryAsciiTest.h
     SaveRMCProfileTest.h
     SaveSESANSTest.h
@@ -685,7 +673,6 @@ target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Bo
 
 target_link_libraries(DataHandling
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       Nexus
                       HistogramData

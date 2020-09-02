@@ -7,6 +7,7 @@
 from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group, construct_empty_pair
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.muon_group import MuonRun
 
 
 class GroupingTabModel(object):
@@ -29,10 +30,10 @@ class GroupingTabModel(object):
         it doesn't already exist (e.g. if group added to table but no update yet triggered).
         """
         try:
-            workspace = self._groups_and_pairs[group_name].workspace[str(run)].workspace
+            workspace = self._groups_and_pairs[group_name].workspace[MuonRun(run)].workspace
         except AttributeError:
-            workspace = self._context.calculate_group(group_name, str(run), rebin=False)
-            self._groups_and_pairs[group_name].update_counts_workspace(workspace, str(run))
+            workspace = self._context.calculate_group(group_name, run, rebin=False)
+            self._groups_and_pairs[group_name].update_counts_workspace(workspace, MuonRun(run))
         return workspace
 
     @property
@@ -139,8 +140,10 @@ class GroupingTabModel(object):
         return pair
 
     def reset_groups_and_pairs_to_default(self):
+        maximum_number_of_periods = max([self._context.num_periods(run) for run in self._context.current_runs])
+
         self._groups_and_pairs.reset_group_and_pairs_to_default(self._data.current_workspace, self._data.instrument,
-                                                                self._data.main_field_direction)
+                                                                self._data.main_field_direction, maximum_number_of_periods)
 
     def reset_selected_groups_and_pairs(self):
         self._groups_and_pairs.reset_selected_groups_and_pairs()

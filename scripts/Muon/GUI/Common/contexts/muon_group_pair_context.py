@@ -212,11 +212,26 @@ class MuonGroupPairContext(object):
         else:
             raise ValueError('Groups and pairs must have unique names')
 
-    def show(self, name, run):
-        self[name].show(str(run))
+    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
+        default_groups, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
+        if num_periods == 1:
+            self._groups = default_groups
+            self._pairs = default_pairs
+            self._selected = default_selected
+        else:
+            periods = range(num_periods + 1)[1:]
+            self._groups = []
+            self._pairs = []
+            for period in periods:
+                for group in default_groups:
+                    self._groups.append(MuonGroup(group.name + str(period), group.detectors, [period]))
 
-    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
-        self._groups, self._pairs, self._selected = get_default_grouping(workspace, instrument, main_field_direction)
+            for period in periods:
+                for pair in default_pairs:
+                    self._pairs.append(MuonPair(pair.name + str(period), pair.forward_group + str(period),
+                                       pair.backward_group + str(period), pair.alpha))
+
+            self._selected = self.pair_names[0]
 
     def _check_name_unique(self, name):
         for item in self._groups + self.pairs:
@@ -298,3 +313,11 @@ class MuonGroupPairContext(object):
             unnormalised_workspace = group.find_unormalised(workspace)
             if unnormalised_workspace:
                 return unnormalised_workspace
+
+    def get_group_pair_name_and_run_from_workspace_name(self, workspace_name):
+        for group_pair in self.groups + self.pairs:
+            run = group_pair.get_run_for_workspace(workspace_name)
+            if(run):
+                return group_pair.name, str(run)
+
+        return None, None
