@@ -4,14 +4,17 @@
 Crystal Field Examples
 ======================
 
-Mantid supports the calculation and fitting of inelastic neutron scattering (INS) measurements of transitions between crystal field (or crystalline electric field) energy levels. The scientific background is summarised in the concept page whilst the syntax of the Python commands used is described in the interface page
+Mantid supports the calculation and fitting of inelastic neutron scattering (INS) measurements of transitions between crystal field (or crystalline electric field) energy levels. The scientific background is summarised in the `concept page <https://docs.mantidproject.org/nightly/concepts/index.html>`_ whilst the syntax of the Python commands used is described in the `interface page <https://docs.mantidproject.org/nightly/interfaces/index.html>`_
 
-This page contains specific worked examples. The data files are in this file. Please download and unzip this into a folder which is on your Mantid path (set using the "Manage User Directories" menu item).
+This page contains specific worked examples. The data files can be found `here <https://github.com/mducle/cf_examples/raw/master/cf_examples_data.zip>`_. Please download and unzip this into a folder which is on your Mantid path (set using the "Manage User Directories" menu item).
 
 .. contents:: Table of contents
     :local:
 	
-.. testcode:: Fitting INS spectrum
+Fitting INS spectrum
+====================
+	
+.. code-block:: python
 
    from CrystalField import CrystalField, CrystalFieldFit
 
@@ -38,9 +41,14 @@ This page contains specific worked examples. The data files are in this file. Pl
    table = mtd['fit_Parameters']
    print ('Cost function value = '+str(table.row(table.rowCount()-1)['Value']))
    
-ADD IMAGE HERE
+  
+|FittingINSSpectrum.png|
 
-.. testcode::Fitting with resolution function
+
+Fitting with resolution function
+================================
+
+.. code-block:: python
 
    from CrystalField import CrystalField, CrystalFieldFit, Background, Function, ResolutionModel
    from PyChop import PyChop2
@@ -69,10 +77,13 @@ ADD IMAGE HERE
    cf.ResolutionModel = [resmod, resmod]
 
    # Runs the fit
-   fit = CrystalFieldFit(Model=cf, InputWorkspace=[data_ws3, data_ws4],MaxIterations=2000, Output='Fit_159K')
+   fit = CrystalFieldFit(Model=cf, InputWorkspace=[data_ws1, data_ws2],MaxIterations=2000, Output='Fit_159K')
    fit.fit()
-
-..testcode::Fitting magnetic susceptibility
+ 
+Fitting magnetic susceptibility
+===============================
+   
+.. code-block:: python
 
    from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
    import matplotlib.pyplot as plt
@@ -112,10 +123,17 @@ ADD IMAGE HERE
    plt.ylabel('Inverse Susceptibility (mol/emu)')
    plt.show()
    
-ADD IMAGE HERE
+   
+|FittingMagneticSusceptibility.png|
+   
 
-..testcode::Fitting INS spectrum and susceptibility simultaneously
+.. Avoid Fitting INS spectrum and susceptibility simultaneously
+.. Avoid ======================================================
+
 Fitting multiple INS spectra
+============================
+
+.. code-block:: python
 
    from CrystalField import CrystalField, CrystalFieldFit
 
@@ -153,5 +171,30 @@ Fitting multiple INS spectra
    table = mtd['fit_Parameters']
    print ('Cost function value = '+str(table.row(table.rowCount()-1)['Value']))
 
-ADD IMAGES HERE
-ADD DATA TABLE HERE FROM PRINT AT END
+
+|FittingMultipleINSSpectra_0.png| |FittingMultipleINSSpectra_1.png| |FittingMultipleINSSpectra_2.png|
+
+
+.. code-block:: python
+
+   B20 = 0.101723272944 meV
+   B40 = 0.012725904646 meV
+   B44 = 0.0890276949598 meV
+   Cost function value = 1.79652249577
+
+.. Avoid Fitting systems with multiple inequivalent sites
+.. Avoid ================================================
+
+
+.. |FittingINSSpectrum.png| image:: /images/FittingINSSpectrum.png
+
+.. |FittingMagneticSusceptibility.png| image:: /images/FittingMagneticSusceptibility.png   
+
+.. |FittingMultipleINSSpectra_0.png| image:: /images/FittingMultipleINSSpectra_0.png
+   :width: 33%
+  
+.. |FittingMultipleINSSpectra_1.png| image:: /images/FittingMultipleINSSpectra_1.png
+   :width: 33%
+
+.. |FittingMultipleINSSpectra_2.png| image:: /images/FittingMultipleINSSpectra_2.png
+   :width: 33%   
