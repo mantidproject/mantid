@@ -224,6 +224,17 @@ class TestFittingDataModel(unittest.TestCase):
         mock_delws.assert_called_with(name)
         self.assertEqual(None, self.model._log_workspaces)
 
+    def test_update_workspace_name(self):
+        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
+        self.model._background_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
+        self.model._bg_params = {"name1": [True, 80, 1000, False]}
+
+        self.model.update_workspace_name("name1", "new_name")
+
+        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._loaded_workspaces)
+        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._background_workspaces)
+        self.assertEqual({"new_name": [True, 80, 1000, False]}, self.model._bg_params)
+
 
 if __name__ == '__main__':
     unittest.main()
