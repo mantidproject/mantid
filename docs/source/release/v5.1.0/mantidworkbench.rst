@@ -158,5 +158,6 @@ Bugfixes
 - The y axis labels will now appear in the correct order if imshow is called from a script with origin=upper.
 - Fixed a bug with colorfill plot script generation for distribution workspaces.
 - Use Jemalloc for memory allocation on Linux so memory can be released to the system.
+- Fixed a bug where instrument view would not update on wheel zoom.
 
 :ref:`Release 5.1.0 <v5.1.0>`
