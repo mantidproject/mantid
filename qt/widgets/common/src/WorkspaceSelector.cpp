@@ -18,6 +18,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include <QCompleter>
 #include <QDebug>
 #include <QDropEvent>
 #include <QMimeData>
@@ -40,7 +41,8 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_init(init), m_workspaceTypes(), m_showHidden(false), m_showGroups(true),
       m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
       m_algName(), m_algPropName(), m_algorithm() {
-  setEditable(false);
+  setEditable(true);
+  this->completer()->setCompletionMode(QCompleter::PopupCompletion);
   if (init) {
     Mantid::API::AnalysisDataServiceImpl &ads =
         Mantid::API::AnalysisDataService::Instance();
