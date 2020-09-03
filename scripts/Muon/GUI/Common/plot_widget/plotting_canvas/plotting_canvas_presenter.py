@@ -67,6 +67,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
                                  not in self._view.plotted_workspace_information]
         self._view.add_workspaces_to_plot(workspace_info_to_add)
         self._set_axes_limits_and_titles(autoscale)
+        self._handle_autoscale_y_axes()
 
     def remove_workspace_names_from_plot(self, workspace_names: List[str]):
         """Removes the input workspace names from the plot"""
@@ -82,6 +83,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def remove_workspace_from_plot(self, workspace):
         """Removes all references to the input workspace from the plot"""
         self._view.remove_workspace_from_plot(workspace)
+        self._handle_autoscale_y_axes()
         self._view.redraw_figure()
 
     def replace_workspace_in_plot(self, workspace):

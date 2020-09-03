@@ -200,8 +200,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def _autoscale_changed(self, _= None):
         if self.quickEdit.check_autoscale_state():
             self.quickEdit.disable_yaxis_changer()
-            names = self.quickEdit.get_selection()
-            self.plots.set_y_autoscale(names, True)
+            self.plots.set_y_autoscale()
         else:
             self.quickEdit.enable_yaxis_changer()
 

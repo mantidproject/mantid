@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
-
+import numpy as np
+import matplotlib.pyplot as plt
 from copy import deepcopy
 
 from matplotlib.figure import Figure
@@ -153,10 +154,29 @@ class subplot(QtWidgets.QWidget):
     def disconnect_rm_line_signal(self):
         self.signal_rm_line.disconnect()
 
-    def set_y_autoscale(self, subplot_names, state):
-        for subplotName in subplot_names:
-            self._context.subplots[subplotName].change_auto(state)
-            self.canvas.draw()
+    def set_y_autoscale(self):
+        for axis in self.figure.axes:
+            ymin,ymax = self._get_y_axis_autoscale_limts(axis)
+            axis.set_ylim(ymin, ymax)
+        self.canvas.draw()
+
+    def _get_y_axis_autoscale_limts(self,axis):
+        bottom = 1e9
+        top = -1e9
+        ylim = np.inf, -np.inf
+        xmin, xmax = axis.get_xlim()
+        for line in axis.lines:
+            x, y = line.get_data()
+            start, stop = np.searchsorted(x, tuple([xmin, xmax]))
+            y_within_range = y[max(start - 1, 0):(stop + 1)]
+            ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
+            bottom_i = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
+            top_i = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
+            if bottom_i < bottom:
+                bottom = bottom_i
+            if top_i > top:
+                top = top_i
+        return bottom, top
 
     def _rm(self):
         names = list(self._context.subplots.keys())
