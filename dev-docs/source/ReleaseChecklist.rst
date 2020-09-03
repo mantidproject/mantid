@@ -17,10 +17,11 @@ Roles
 The roles are defined in terms of person responsible.
 This does not mean that the person needs to do the jobs himself/herself, but that they are responsible for ensuring that the work gets done.
 
-* Technical Release Manager [TRM] - Person responsible for technical tasks such as renaming branchs, creating tags, configuring build servers.
-* Release Editor [RE] - Person responsible for editing the release notes and giving them a common language, layout, and collecting images.
-* Release Manager [RM] - Person in charge of the go/no go decision of the release. The main task is to reiterate the timeline and be collection point for information between all of the Local Project Managers.
-* Local Project Manager(s) [lPM]- People in charge of communicating with local development teams, facility managment, and other people at their sponsoring facility.
+* Technical Release Manager - Person responsible for technical tasks such as renaming branchs, creating tags, configuring build servers.
+* Release Editor - Person responsible for editing the release notes and giving them a common language, layout, and collecting images.
+* Release Manager - Person in charge of the go/no go decision of the release. The main task is to reiterate the timeline and be collection point for information between all of the Local Project Managers.
+* Local Project Manager(s) - People in charge of communicating with local development teams, facility managment, and other people at their sponsoring facility.
+* Quality Assurance Manager - Person responsible for making sure that manual testing has been performed.
 
 Timeline
 ########
