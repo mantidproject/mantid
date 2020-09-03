@@ -224,14 +224,12 @@ class MainWindow(QMainWindow):
         action_open = create_action(self,
                                     "Open Script",
                                     on_triggered=self.open_file,
-                                    shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut="Ctrl+O")
         action_load_project = create_action(self, "Open Project", on_triggered=self.load_project)
         action_save_script = create_action(self,
                                            "Save Script",
                                            on_triggered=self.save_script,
-                                           shortcut="Ctrl+S",
-                                           shortcut_context=Qt.ApplicationShortcut)
+                                           shortcut="Ctrl+S")
         action_save_script_as = create_action(self,
                                               "Save Script as...",
                                               on_triggered=self.save_script_as)
@@ -252,8 +250,7 @@ class MainWindow(QMainWindow):
         action_quit = create_action(self,
                                     "&Quit",
                                     on_triggered=self.close,
-                                    shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut="Ctrl+Q")
         self.file_menu_actions = [
             action_open, action_load_project, None, action_save_script, action_save_script_as,
             action_generate_ws_script, None, action_save_project, action_save_project_as, None,
@@ -649,9 +646,6 @@ class MainWindow(QMainWindow):
 
     def readSettings(self, settings):
         qapp = QApplication.instance()
-        qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
-        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('high_dpi_scaling'))
 
         # get the saved window geometry
         window_size = settings.get('MainWindow/size')

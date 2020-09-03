@@ -97,7 +97,7 @@ class PairingTablePresenterTest(unittest.TestCase):
     def test_that_add_pair_button_adds_pair_to_end_of_table(self):
         self.add_two_pairs_to_table()
 
-        self.presenter.add_pair(MuonPair(pair_name="new"))
+        self.presenter.add_pair(MuonPair(pair_name="new", forward_group_name='my_group_0', backward_group_name='my_group_1'))
 
         self.assertEqual(self.view.get_table_item_text(self.view.num_rows() - 1, 0), "new")
 

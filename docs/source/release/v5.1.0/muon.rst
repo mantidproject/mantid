@@ -36,6 +36,9 @@ New Features
 - Added support for specifying which groups should be used to calculate a group.
 - Added two buttons to the Muon analysis and Frequency domain analysis plot toolbar to allow users to show major and minor gridlines.
 - Added a Plot difference checkbox to the Muon Analysis GUI, which allows user to choose whether the fit difference curve is shown.
+- Added support for specifying which periods should be used to calculate a group.
+- Added support for loading and saving group period data from xml files.
+- Added a Help option to the right-click menu in the function browser which brings up a relevant documentation page describing the function.
 
 Improvements
 -------------
@@ -58,6 +61,7 @@ Improvements
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Added in default group and pair selection when loading grouping files from xml.
 - Updated CHRONUS TF asymmetry mode default grouping. Now uses eight groups by default.
+- Added warnings when the selected runs do not have the relevant periods to calculate the groups or pairs.
 
 Bug fixes
 ---------
