@@ -170,7 +170,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_free_draw, 0, 7);
   toolBox->addWidget(m_pixel, 1, 0);
   toolBox->addWidget(m_tube, 1, 1);
-  toolBox->setColumnStretch(1, 1);
+  toolBox->setColumnStretch(8, 1);
   toolBox->setSpacing(2);
 
   connect(m_move, SIGNAL(clicked()), this, SLOT(setActivity()));
