@@ -53,7 +53,7 @@ NXInt LoadMuonNexusV2NexusHelper::loadGoodFramesDataFromNexus(
       NXInt goodFrames = m_entry.openNXInt(NeXusEntry::GOODFRAMES);
       goodFrames.load();
       return goodFrames;
-    } catch (std::runtime_error) {
+    } catch (std::runtime_error &) {
       throw std::runtime_error(
           "Could not load good frames data from nexus file, check Nexus file");
     }
@@ -64,7 +64,7 @@ NXInt LoadMuonNexusV2NexusHelper::loadGoodFramesDataFromNexus(
       NXInt goodFrames = periodClass.openNXInt(NeXusEntry::GOODFRAMES);
       goodFrames.load();
       return goodFrames;
-    } catch (std::runtime_error) {
+    } catch (std::runtime_error &) {
       throw std::runtime_error(
           "Could not load good frames data from nexus file, check Nexus file");
     }
@@ -106,7 +106,7 @@ std::string LoadMuonNexusV2NexusHelper::loadMainFieldDirectionFromNexus() {
     if (orientation[0] == 't') {
       mainFieldDirection = "Transverse";
     }
-  } catch (std::runtime_error) {
+  } catch (std::runtime_error &) {
     // no data - assume main field was longitudinal and continue.
   }
   return mainFieldDirection;
@@ -164,7 +164,7 @@ double LoadMuonNexusV2NexusHelper::loadFirstGoodDataFromNexus() {
     double bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
     double bin_size = resolution / 1000000.0;
     return bin * bin_size;
-  } catch (std::runtime_error) {
+  } catch (std::runtime_error &) {
     throw std::runtime_error("Error loading FirstGoodData, check Nexus file");
   }
 }
@@ -175,7 +175,7 @@ double LoadMuonNexusV2NexusHelper::loadTimeZeroFromNexusFile() {
     double timeZero =
         static_cast<double>(detectorEntry.getFloat(NeXusEntry::TIMEZERO));
     return timeZero;
-  } catch (std::runtime_error) {
+  } catch (std::runtime_error &) {
     throw std::runtime_error("Could not load time zero, check Nexus file");
   }
 }
@@ -206,7 +206,7 @@ LoadMuonNexusV2NexusHelper::loadSampleInformationFromNexus() {
     sampleInformation.magneticField =
         runSample.getFloat(NeXusEntry::MAGNETICFIELD);
     sampleInformation.temperature = runSample.getFloat(NeXusEntry::TEMPERATURE);
-  } catch (std::runtime_error) {
+  } catch (std::runtime_error &) {
     throw std::runtime_error("Could not load sample information (temperature "
                              "and magnetic field) from nexus entry");
   }

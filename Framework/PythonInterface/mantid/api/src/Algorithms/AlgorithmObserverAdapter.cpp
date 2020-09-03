@@ -18,15 +18,12 @@ void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg,
                                               const double estimatedTime,
                                               const int progressPrecision) {
   UNUSED_ARG(alg)
-  UNUSED_ARG(p)
-  UNUSED_ARG(msg)
-  UNUSED_ARG(estimatedTime)
-  UNUSED_ARG(progressPrecision)
-  // This method is explicitly not implemented.
-  // There are so many progress calls that passing these across the C++/Python
-  // boundary is too expensive and can slow down Mantid by up to an order of
-  // magnitude
-  return;
+  try {
+    return callMethod<void>(getSelf(), "progressHandle", p, msg, estimatedTime,
+                            progressPrecision);
+  } catch (UndefinedAttributeError &) {
+    return;
+  }
 }
 
 void AlgorithmObserverAdapter::startingHandle(API::IAlgorithm_sptr alg) {

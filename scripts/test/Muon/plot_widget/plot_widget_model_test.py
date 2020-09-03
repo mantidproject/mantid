@@ -103,6 +103,18 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.assertEqual(workspaces, expected_workspaces)
         self.assertEqual(expected_indices, indices)
 
+    def test_get_fit_workspaces_to_plot_returns_correctly_when_plot_diff_is_False(self):
+        fit = FitInformation(mock.MagicMock(), 'GaussOsc',
+                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
+                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+        expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted']
+        expected_indices = [1]
+
+        workspaces, indices = self.model.get_fit_workspace_and_indices(fit,False)
+
+        self.assertEqual(workspaces, expected_workspaces)
+        self.assertEqual(expected_indices, indices)
+
     def test_get_workspace_list_and_indices_to_plot_returns_correctly(self):
         self.model.get_time_workspaces_to_plot = mock.Mock(return_value=["62260;fwd"])
         expected_workspaces = ['62260;fwd']

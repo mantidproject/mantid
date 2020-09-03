@@ -136,7 +136,7 @@ target_include_directories(PythonKernelModule PUBLIC inc)
 # Add the required dependencies
 target_link_libraries(
   PythonKernelModule
-  PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  PRIVATE
           PythonInterfaceCore
           Types
           Kernel

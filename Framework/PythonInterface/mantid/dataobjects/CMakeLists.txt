@@ -48,7 +48,6 @@ set_python_properties(PythonDataObjectsModule _dataobjects)
 target_link_libraries(
   PythonDataObjectsModule
   LINK_PRIVATE
-  ${TCMALLOC_LIBRARIES_LINKTIME}
   PythonInterfaceCore
   PythonAPIModule
   PythonGeometryModule

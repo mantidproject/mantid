@@ -39,7 +39,6 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsRefDetectorView
                    SYSTEM_INCLUDE_DIRS
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${Boost_LIBRARIES}
                      ${POCO_LIBRARIES}
@@ -53,7 +52,6 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsRefDetectorView
                      @loader_path/../MacOS
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
-
 # DEMO/GUI TESTING APPLICATIONS
 mtd_add_qt_executable(TARGET_NAME RefDetectorViewDemo
                       QT_VERSION 4
@@ -61,7 +59,6 @@ mtd_add_qt_executable(TARGET_NAME RefDetectorViewDemo
                       SYSTEM_INCLUDE_DIRS
                         ${Boost_INCLUDE_DIRS}
                       LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${Boost_LIBRARIES}
                         ${POCO_LIBRARIES}
                       QT4_LINK_LIBS
