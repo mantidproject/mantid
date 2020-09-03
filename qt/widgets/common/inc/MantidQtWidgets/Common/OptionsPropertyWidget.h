@@ -43,7 +43,7 @@ protected:
   QComboBox *m_combo;
 
 public slots:
-   void editingFinished();
+  void editingFinished();
 };
 
 } // namespace API

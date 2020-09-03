@@ -11,10 +11,10 @@
 #include <QComboBox>
 #include <QCompleter>
 #include <QLabel>
+#include <QLineEdit>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
 namespace API {
