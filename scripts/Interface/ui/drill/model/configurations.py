@@ -15,15 +15,18 @@ class RundexSettings(object):
     D33 =    "D33"
     D17 =    "D17"
     FIGARO = "FIGARO"
+    D2B =    "D2B"
 
-    # techniques
-    SANS = "SANS"
-    REFL = "Reflectometry"
+    # techniques (see instrument/Facilities.xml)
+    SANS =   "SANS"
+    REFL =   "Reflectometry"
+    POWDER = "Powder diffraction"
 
     # acquisition modes
-    SANS_ACQ =   "SANS"
-    REFL_POL =   "Polarized"
-    REFL_NPOL =  "Unpolarized"
+    SANS_ACQ =     "SANS"
+    REFL_POL =     "Polarized"
+    REFL_NPOL =    "Unpolarized"
+    POWDER_DSCAN = "Detector scan"
 
     # correspondance between instrument and technique
     TECHNIQUE = {
@@ -32,7 +35,8 @@ class RundexSettings(object):
             D22:    SANS,
             D33:    SANS,
             D17:    REFL,
-            FIGARO: REFL
+            FIGARO: REFL,
+            D2B:    POWDER,
             }
 
     # correspondance between instrument and acquisition mode
@@ -42,7 +46,8 @@ class RundexSettings(object):
             D22:    [SANS_ACQ],
             D33:    [SANS_ACQ],
             D17:    [REFL_POL, REFL_NPOL],
-            FIGARO: [REFL_NPOL]
+            FIGARO: [REFL_NPOL],
+            D2B:    [POWDER_DSCAN],
             }
 
     # parameters for each acquisition mode
@@ -90,22 +95,29 @@ class RundexSettings(object):
                 "UseManualScaleFactors",
                 "ManualScaleFactors",
                 "CustomOptions"
-                ]
+                ],
+            POWDER_DSCAN: [
+                "Run",
+                "OutputWorkspace",
+                "CustomOptions"
+                ],
             }
 
     # algo name for each acquisition mode
     ALGORITHM = {
-            SANS_ACQ:   "SANSILLAutoProcess",
-            REFL_POL:   "ReflectometryILLAutoProcess",
-            REFL_NPOL:  "ReflectometryILLAutoProcess"
+            SANS_ACQ:     "SANSILLAutoProcess",
+            REFL_POL:     "ReflectometryILLAutoProcess",
+            REFL_NPOL:    "ReflectometryILLAutoProcess",
+            POWDER_DSCAN: "PowderILLDetectorScan",
             }
 
     # ideal number of threads for each acquisition mode (optional).
     # If not provided, Qt will decide
     THREADS_NUMBER = {
-            SANS_ACQ:  1,
-            REFL_POL:  1,
-            REFL_NPOL: 1
+            SANS_ACQ:     1,
+            REFL_POL:     1,
+            REFL_NPOL:    1,
+            POWDER_DSCAN: 1,
             }
 
     # settings for each acquisition mode
@@ -198,7 +210,22 @@ class RundexSettings(object):
                 "ReflFitEndWorkspaceIndex": "255",
                 "ReflFitWavelengthLowerBound": "-1",
                 "ReflFitWavelengthUpperBound": "-1"
-                }
+                },
+            POWDER_DSCAN: {
+                "NormaliseTo": "Monitor",
+                "CalibrationFile": "",
+                "UseCalibratedData": True,
+                "Output2DTubes": False,
+                "Output2D": False,
+                "Output1D": True,
+                "CropNegativeScatteringAngles": True,
+                "HeightRange": "",
+                "InitialMask": "20",
+                "FinalMask": 30,
+                "ComponentsToMask": "",
+                "ComponentsToReduce": "",
+                "AlignTubes": True
+                },
             }
 
     # optionnal flags
