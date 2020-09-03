@@ -107,6 +107,7 @@ Improvements
 - Code completions are now loaded when the code editor is first changed.
 - The ExtractFFTSpectrum algorithm has extra properties (Shift, AutoShift, and AcceptXRoundingErrors) to reflect those of the underlying FFT.
 - Legends in 1D plots are now editable in-situ.
+- Added an option in `figure options` to change the canvas color for an axis.
 - Sliceviewer cut line plots' line widths reduced
 
 Bugfixes
