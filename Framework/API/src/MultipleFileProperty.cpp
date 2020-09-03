@@ -423,7 +423,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
             throw std::runtime_error(
                 "Unable to find file matching the string \"" +
                 unresolvedFileName +
-                "\", even after appending suggested file extensions.");
+                "\", please check the data search directories.");
           } else {
             // if the fullyResolvedFile is empty, it means it failed to find the
             // file so keep the unresolvedFileName as a hint to be displayed

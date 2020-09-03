@@ -53,8 +53,9 @@ public:
     // make beam v narrow so simulated paths all pass through sphere centre
     auto &paramMap = peaksWS->instrumentParameters();
     auto parametrizedSource = parametrizedInstrument->getSource();
-    paramMap.add("double", parametrizedSource.get(), "beam-width", 0.000001);
-    paramMap.add("double", parametrizedSource.get(), "beam-height", 0.000001);
+    paramMap.addString(parametrizedSource.get(), "beam-shape", "Slit");
+    paramMap.addDouble(parametrizedSource.get(), "beam-width", 0.000001);
+    paramMap.addDouble(parametrizedSource.get(), "beam-height", 0.000001);
 
     Mantid::Algorithms::AddAbsorptionWeightedPathLengths alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

@@ -447,7 +447,7 @@ class RunTabPresenter(PresenterCommon):
             self._table_model.clear_table_entries()
 
             self._add_multiple_rows_to_table_model(rows=parsed_rows)
-        except RuntimeError as e:
+        except (RuntimeError, ValueError, SyntaxError) as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 

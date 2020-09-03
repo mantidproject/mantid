@@ -14,7 +14,7 @@ from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymme
                               CopyLogs, EvaluateFunction)
 from mantid.api import AnalysisDataService
 from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
-
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 import mantid
 import math
 
@@ -677,11 +677,12 @@ class FittingTabModel(object):
         workspace_names = []
         for run in runs:
             for group_or_pair in groups_and_pairs:
+                period_string = run_list_to_string(self.context.group_pair_context[group_or_pair].periods)
                 if group_or_pair in self.context.group_pair_context.selected_pairs:
-                    workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run,
+                    workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run, period_string,
                                                                 not self.fitting_options["fit_to_raw"])]
                 else:
-                    workspace_names += [get_group_asymmetry_name(self.context, group_or_pair, run,
+                    workspace_names += [get_group_asymmetry_name(self.context, group_or_pair, run, period_string,
                                                                  not self.fitting_options["fit_to_raw"])]
 
         return workspace_names

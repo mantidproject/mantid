@@ -5,7 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from Muon.GUI.Common.utilities.xml_utils import load_grouping_from_XML
+from unittest import mock
+from Muon.GUI.Common.utilities.xml_utils import load_grouping_from_XML, save_grouping_to_XML
+from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_pair import MuonPair
 from mantid import ConfigService
 import os
 
@@ -28,6 +31,20 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.assertEquals(description, filename)
         self.assertEquals(default, '')
+
+    @mock.patch('Muon.GUI.Common.utilities.xml_utils.ET.parse')
+    def test_that_save_and_load_grouping_xml_correctly_stores_and_reads_period_data(self, mock_file_parse):
+        groups = [MuonGroup('fwd', [1,2,3], [1,3]), MuonGroup('bwd', [4,5,6], [2,4])]
+        pairs = [MuonPair('long', 'fwd', 'bwd')]
+
+        xml_tree = save_grouping_to_XML(groups, pairs, 'filename.xml', save=False, description='Bespoke grouping')
+        mock_file_parse.return_value = xml_tree
+
+        loaded_groups, loaded_pairs, loaded_description, loaded_default = load_grouping_from_XML('filename.xml')
+
+        self.assertEqual(loaded_groups[0].periods, groups[0].periods)
+        self.assertEqual(loaded_groups[1].periods, groups[1].periods)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -10,6 +10,7 @@ import numpy as np
 
 from mantid.plots.datafunctions import get_matrix_2d_ragged, get_normalize_by_bin_width
 
+
 class SamplingImage(mimage.AxesImage):
     def __init__(self,
                  ax,
@@ -46,6 +47,7 @@ class SamplingImage(mimage.AxesImage):
         self._resample_required = True
         self._full_extent = extent
         self._xbins, self._ybins = 100, 100
+        self.origin = origin
 
     def connect_events(self):
         axes = self.axes
@@ -80,7 +82,7 @@ class SamplingImage(mimage.AxesImage):
 
     def _resize(self, canvas):
         xbins, ybins = self._calculate_bins_from_extent()
-        if  xbins > self._xbins or ybins > self._ybins:
+        if xbins > self._xbins or ybins > self._ybins:
             self._resample_required = True
 
     def _calculate_bins_from_extent(self):
@@ -100,6 +102,15 @@ class SamplingImage(mimage.AxesImage):
 
             x, y, data = get_matrix_2d_ragged(self.ws, self.normalization, histogram2D=True, transpose=self.transpose,
                                               extent=extent, xbins=xbins, ybins=ybins, spec_info=self.spectrum_info)
+
+            # Data is an MxN matrix.
+            # If origin = upper extent is set as [xmin, xmax, ymax, ymin].
+            # Data[M,0] is the data at [xmin, ymin], which should be drawn at the top left corner,
+            # whereas Data[0,0] is the data at [xmin, ymax], which should be drawn at the bottom left corner.
+            # Origin upper starts drawing the data from top-left, which means we need to horizontally flip the matrix
+            if self.origin == "upper":
+                data = np.flip(data, 0)
+
             self.set_data(data)
             self._xbins = xbins
             self._ybins = ybins
@@ -156,11 +167,13 @@ def imshow_sampling(axes,
 
     if not extent:
         x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
-                          workspace.getDimension(1).getMinimum() , workspace.getDimension(1).getMaximum())
+                          workspace.getDimension(1).getMinimum(), workspace.getDimension(1).getMaximum())
         if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
             width = workspace.getDimension(1).getBinWidth()
-            y0 -= width/2
-            y1 += width/2
+            y0 -= width / 2
+            y1 += width / 2
+        if origin == "upper":
+            y0, y1 = y1, y0
         extent = (x0, x1, y0, y1)
 
         if transpose:
