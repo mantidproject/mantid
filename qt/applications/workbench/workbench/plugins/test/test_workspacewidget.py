@@ -33,17 +33,19 @@ MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
 @start_qapplication
 class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.ws_widget = WorkspaceWidget(QMainWindow())
+    def setUp(self):
+        self.ws_widget = WorkspaceWidget(QMainWindow())
         mat_ws = CreateSampleWorkspace()
         table_ws = CreateEmptyTableWorkspace()
         group_ws = GroupWorkspaces([mat_ws, table_ws])
         single_val_ws = CreateSingleValuedWorkspace(5, 6)
-        cls.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws]
-        cls.ws_names = ['MatWS', 'TableWS', 'GroupWS', 'SingleValWS']
-        for ws_name, ws in zip(cls.ws_names, cls.w_spaces):
-            cls.ws_widget._ads.add(ws_name, ws)
+        self.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws]
+        self.ws_names = ['MatWS', 'TableWS', 'GroupWS', 'SingleValWS']
+        for ws_name, ws in zip(self.ws_names, self.w_spaces):
+            self.ws_widget._ads.add(ws_name, ws)
+
+    def tearDown(self):
+        self.ws_widget._ads.clear()
 
     def test_algorithm_history_window_opens_with_workspace(self):
         with mock.patch(ALGORITHM_HISTORY_WINDOW + '.show', lambda x: None):
@@ -105,6 +107,12 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         with mock.patch(MATRIXWORKSPACE_DISPLAY + '.show_view', lambda x: None):
             self.ws_widget._action_double_click_workspace(self.ws_names[3])
         self.assert_widget_type_exists(MATRIXWORKSPACE_DISPLAY_TYPE)
+
+    def test_empty_workspaces(self):
+        self.ws_widget._ads.clear()
+        self.assertEqual(self.ws_widget.empty_of_workspaces(), True)
+        CreateSampleWorkspace(OutputWorkspace="ws")
+        self.assertEqual(self.ws_widget.empty_of_workspaces(), False)
 
 
 if __name__ == '__main__':

@@ -68,7 +68,7 @@ class StateScaleBuilder(object):
         self.state.shape = val
 
     def set_shape_from_file(self, val):
-        self.state.shape_from_file(val)
+        self.state.shape_from_file = SampleShape(val)
 
 
 # ---------------------------------------

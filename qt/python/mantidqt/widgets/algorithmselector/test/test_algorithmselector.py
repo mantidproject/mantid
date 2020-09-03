@@ -64,12 +64,12 @@ class ModelTest(unittest.TestCase):
         counter = Counter(names)
         self.assertEqual(counter['Rebin'], 1)
         self.assertEqual(counter['DoStuff'], 1)
-        self.assertEqual(mock_get_algorithm_descriptors.mock_calls, [call(False), call(True)])
+        self.assertEqual(mock_get_algorithm_descriptors.mock_calls, [call(False, True), call(True, True)])
 
     def test_include_hidden_algorithms(self):
         model = AlgorithmSelectorModel(None, include_hidden=True)
         model.get_algorithm_data()
-        self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
+        self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True, True))
 
 
 createDialogFromName_func_name = ('mantidqt.interfacemanager.InterfaceManager.'

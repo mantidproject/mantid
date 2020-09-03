@@ -176,6 +176,26 @@ class MuonGroupTest(unittest.TestCase):
 
         self.assertEqual(rebinned_workspace_name, None)
 
+    def test_that_default_period_for_group_set_correctly(self):
+        group = MuonGroup(group_name="group1")
+
+        self.assertEqual(group.periods, [1])
+
+    def test_get_counts_workspace_for_run_returns_workspace_name_if_it_exists(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        counts_workspace_name = group.get_counts_workspace_for_run([22222], False)
+        rebinned_counts_workspace_name = group.get_counts_workspace_for_run([22222], True)
+
+        self.assertEqual(counts_workspace_name, 'counts_name_22222')
+        self.assertEqual(rebinned_counts_workspace_name, 'counts_name_22222_rebin')
+
+    def test_get_counts_workspace_for_run_throws_a_key_error_if_workspace_not_found(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        with self.assertRaises(KeyError):
+            group.get_counts_workspace_for_run([222223], True)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

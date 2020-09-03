@@ -40,9 +40,6 @@ class MockStateReduction(StateReductionMode):
     def get_merge_strategy(self):
         pass
 
-    def get_detector_name_for_reduction_mode(self, reduction_mode):
-        pass
-
     def get_all_reduction_modes(self):
         pass
 
@@ -127,33 +124,6 @@ class StateTest(unittest.TestCase):
         # Good values
         state = self._get_state(good_state)
         self.assertIsNone(state.validate())
-
-    def test_that_raises_when_move_has_not_been_set(self):
-        self.check_bad_and_good_values({"move": None}, {"move": MockStateMove()})
-
-    def test_that_raises_when_reduction_has_not_been_set(self):
-        self.check_bad_and_good_values({"reduction": None}, {"reduction": MockStateReduction()})
-
-    def test_that_raises_when_slice_has_not_been_set(self):
-        self.check_bad_and_good_values({"slice": None}, {"slice": MockStateSliceEvent()})
-
-    def test_that_raises_when_mask_has_not_been_set(self):
-        self.check_bad_and_good_values({"mask": None}, {"mask": MockStateMask()})
-
-    def test_that_raises_when_wavelength_has_not_been_set(self):
-        self.check_bad_and_good_values({"wavelength": None}, {"wavelength": MockStateWavelength()})
-
-    def test_that_raises_when_save_has_not_been_set(self):
-        self.check_bad_and_good_values({"save": None}, {"save": MockStateSave()})
-
-    def test_that_raises_when_scale_has_not_been_set(self):
-        self.check_bad_and_good_values({"scale": None}, {"scale": MockStateScale()})
-
-    def test_that_raises_when_adjustment_has_not_been_set(self):
-        self.check_bad_and_good_values({"adjustment": None}, {"adjustment": MockStateAdjustment()})
-
-    def test_that_raises_when_convert_to_q_has_not_been_set(self):
-        self.check_bad_and_good_values({"convert_to_q": None}, {"convert_to_q": MockStateConvertToQ()})
 
 
 if __name__ == '__main__':

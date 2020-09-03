@@ -30,7 +30,7 @@ Algorithms
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Bug fixed where setting ResimulateTracksForDifferentWavelengths parameter to True was being ignored
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections are not calculated anymore for masked spectra
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections can be calculated for a workspace without a sample eg container only
-- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now calculates the error on the absorption correction factors
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now calculates the error on the absorption correction factors based on the spread of the attenuation factors across the simulated paths and the number of simulated paths. The error from any spatial interpolation and any wavelength interpolation performed is also included.
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has received a number of updates:
 
   - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
@@ -80,6 +80,11 @@ Data Objects
 
 - Added MatrixWorkspace::findY to find the histogram and bin with a given value
 - Matrix Workspaces now ignore non-finite values when integrating values for the instrument view.  Please note this is different from the :ref:`Integration <algm-Integration>` algorithm.
+
+HistogramData
+-------------
+
+- The linear and spline interpolation functionality that acts on histograms has been updated to add the ability to calculate errors. This has involved swapping out the gsl implementations of linear and spline interpolation and replacing with a native Mantid implementation. The new functionality is off by default and has been explicitly enabled for the MonteCarloAbsorption algorithm. The histogram interpolation functionality is currently used by these algorithms: :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` , :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`, LoadILLPolarizationFactors, Join ISISPolarizationEfficiences.
 
 Python
 ------

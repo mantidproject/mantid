@@ -202,6 +202,9 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
+  /// TODO: Add unittests for setDataIndexToCurrentWorkspace when mainanence
+  /// makes tests simpler.
+
   ///----------------------------------------------------------------------
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------

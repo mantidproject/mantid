@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
 from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
+from sans.state.AllStates import AllStates
 
 
 class BeamCentreModel(object):
@@ -23,8 +24,6 @@ class BeamCentreModel(object):
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''
         self._hab_pos_1 = ''
-        self.scale_1 = 1000
-        self.scale_2 = 1000
         self.COM = False
         self.verbose = False
         self.q_min = 0.01
@@ -51,16 +50,7 @@ class BeamCentreModel(object):
             self._r_min = 60
             self._r_max = 280
 
-        self.set_scaling(instrument=instrument)
-
-    def set_scaling(self, instrument):
-        self.scale_1 = 1000
-        self.scale_2 = 1000
-
-        if instrument == SANSInstrument.LARMOR:
-            self.scale_1 = 1.0
-
-    def find_beam_centre(self, state):
+    def find_beam_centre(self, state: AllStates):
         """
         This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
 

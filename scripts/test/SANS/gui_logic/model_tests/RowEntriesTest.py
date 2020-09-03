@@ -23,7 +23,7 @@ class RowEntriesTest(unittest.TestCase):
                              "Row state did not reset for attr: {0}".format(observed_attr))
 
     def test_non_user_keys_keep_state(self):
-        observed_attrs = ["err_msg", "state"]
+        observed_attrs = ["tool_tip", "state"]
 
         for attr in observed_attrs:
             obj = RowEntries()

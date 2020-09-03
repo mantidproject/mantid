@@ -165,6 +165,6 @@ def create_state(state_model_with_view_update, file, period, facility):
     table_row = RowEntries(sample_scatter=file, sample_scatter_period=period)
     gui_state_director = GuiStateDirector(state_model_with_view_update, facility)
 
-    state = gui_state_director.create_state(table_row)
+    state = gui_state_director.create_state(table_row).all_states
 
     return state

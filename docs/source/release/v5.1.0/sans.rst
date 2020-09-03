@@ -30,9 +30,17 @@ Bug Fixed
 ISIS SANS Interface
 -------------------
 
+New
+###
+
+- TOML File V0 support; The format is pinned to version 0 to allow people to
+  get a feel for the new format. The legacy parser still exists and has not
+  been modified.
+
 Fixed
 #####
 
 - A bug has been fixed where processing old data could fail if it involves -add files produced from 2013 or earlier.
+- Batch file selector now only shows CSV files and will handle loading in non-CSV data (such as mask files) gracefully.
 
 :ref:`Release 5.1.0 <v5.1.0>`

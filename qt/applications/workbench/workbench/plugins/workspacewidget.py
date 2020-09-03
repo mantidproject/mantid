@@ -23,6 +23,7 @@ from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDi
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+from workbench.config import CONF
 from workbench.plugins.base import PluginWidget
 
 
@@ -178,7 +179,7 @@ class WorkspaceWidget(PluginWidget):
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                presenter = SliceViewer(ws=ws, parent=self)
+                presenter = SliceViewer(ws=ws, parent=self, conf=CONF)
                 presenter.view.show()
             except Exception as exception:
                 logger.warning("Could not open slice viewer for workspace '{}'."
@@ -274,3 +275,6 @@ class WorkspaceWidget(PluginWidget):
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()
+
+    def empty_of_workspaces(self):
+        return len(self._ads.getObjectNames()) == 0

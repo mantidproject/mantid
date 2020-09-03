@@ -113,7 +113,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             workspace_name = workspace_plot_info.workspace_name
             try:
                 workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except RuntimeError:
+            except (RuntimeError, KeyError):
                 continue
             self._plot_information_list.append(workspace_plot_info)
             errors = workspace_plot_info.errors

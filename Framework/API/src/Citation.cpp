@@ -7,6 +7,7 @@
 #include "MantidAPI/Citation.h"
 
 #include <nexus/NeXusFile.hpp>
+#include <stdexcept>
 
 #include <stdexcept>
 

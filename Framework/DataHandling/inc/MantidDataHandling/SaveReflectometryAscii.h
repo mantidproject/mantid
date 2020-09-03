@@ -52,12 +52,8 @@ private:
   void checkFile(const std::string &filename);
   /// Write the data
   void data();
-  /// Print a double value to file
-  void outputval(double val);
-  /// Write a string value
-  bool writeString(bool write, const std::string &s);
-  /// Print a string value to file
-  void outputval(const std::string &val);
+  /// Print a value to file
+  template <typename T> void outputval(const T &val, bool firstColumn = false);
   /// Retrieve sample log value
   std::string sampleLogValue(const std::string &logName);
   /// Retrieve sample log unit
@@ -69,6 +65,8 @@ private:
   void header();
   /// Determine the separator
   void separator();
+  /// Whether the Q resolution should be included in the output
+  bool includeQResolution() const;
   /// Separator
   char m_sep{'\t'};
   /// Filename

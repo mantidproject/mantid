@@ -14797,6 +14797,10 @@
   content: "\FA87";
 }
 
+.mdi-fast-forward:before {
+	content: "\F211";
+}
+
 .mdi-blank:before {
   content: "\F68C";
   visibility: hidden;
