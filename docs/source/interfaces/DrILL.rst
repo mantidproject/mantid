@@ -16,6 +16,8 @@ currently supported instruments:
     * D22: SANS
     * D33: SANS
     * FIGARO: Reflectometry
+    * D2B: Powder diffraction
+    * D20: Powder diffraction
 
 The interface is accessible through the Workbench menu bar: *Interfaces* ->
 *ILL* -> *DrILL*.
@@ -65,6 +67,8 @@ To get further information on the currently supported algorithms:
 
     * SANS: :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`
     * Reflectometry: :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>`
+    * Powder diffraction: :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` and
+      :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>`
 
 
 Global settings
