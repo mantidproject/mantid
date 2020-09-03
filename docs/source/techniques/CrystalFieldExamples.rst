@@ -52,7 +52,7 @@ Fitting with resolution function
 
    from CrystalField import CrystalField, CrystalFieldFit, Background, Function, ResolutionModel
    from PyChop import PyChop2
-
+   
    # load the data
    data_ws1 = Load('MER38435_10p22meV.txt')
    data_ws2 = Load('MER38436_10p22meV.txt')
@@ -61,7 +61,7 @@ Fitting with resolution function
    merlin = PyChop2('MERLIN', 'G', 250.)
    merlin.setEi(10.)
    resmod = ResolutionModel(merlin.getResolution, xstart=-10, xend=9.0, accuracy=0.01)
-
+   
    Kelvin_to_meV = 1./11.6
 
    # Parameters from https://doi.org/10.1016/0921-4526(91)90575-Y
@@ -70,15 +70,35 @@ Fitting with resolution function
       lit_par[parameter] *= Kelvin_to_meV
 
    # Set up the crystal field model.
-   cf = CrystalField('Ho', 'D2', Temperature=[55,159], FWHM=0.3, **lit_par)
+   cf = CrystalField('Ho', 'D2', Temperature=[25, 50], FWHM=0.3, **lit_par)
    cf.PeakShape = 'Lorentzian'
    cf.IntensityScaling = [0.2, 0.2]   # Scale factor if data is not in absolute units (mbarn/sr/f.u./meV), will be fitted.
-   cf.background = Background(peak=Function('Gaussian', Height=700, Sigma=0.4/2.3))
    cf.ResolutionModel = [resmod, resmod]
+   cf.background = Background(peak=Function('Gaussian', Height=1200, Sigma=0.4/2.3))
+   cf.background[1].peak.ties(Height=1400, PeakCentre=0, Sigma=0.4/2.3)
 
    # Runs the fit
-   fit = CrystalFieldFit(Model=cf, InputWorkspace=[data_ws1, data_ws2],MaxIterations=2000, Output='Fit_159K')
+   fit = CrystalFieldFit(Model=cf, InputWorkspace=[data_ws1, data_ws2], MaxIterations=100, Output='Fit')
    fit.fit()
+
+   # Plots the fit
+   res_ws = [mtd['Fit_Workspace_0'], mtd['Fit_Workspace_1']]
+   titles = ['20K', '50K']
+   titley = [2000, 1300]
+   fig, axs = plt.subplots(figsize=(9, 6), nrows=2, ncols=1, sharex=True, subplot_kw={'projection':'mantid'})
+   for ii in range(2):
+       axs[ii].errorbar(res_ws[ii], 'rs', wkspIndex=0, label='Data')
+       axs[ii].plot(res_ws[ii], 'b-', wkspIndex=1, label='Fit')
+       axs[ii].legend()
+       axs[ii].set_ylabel('Intensity (arb. units)')
+       axs[ii].tick_params(axis='both', direction='in')
+       axs[ii].annotate(titles[ii], (-5, titley[ii]))
+   axs[0].set_xlabel('')
+   fig.tight_layout()
+   fig.show()
+   
+|FittingWithResolutionFunction.png|
+
  
 Fitting magnetic susceptibility
 ===============================
@@ -187,6 +207,8 @@ Fitting multiple INS spectra
 
 
 .. |FittingINSSpectrum.png| image:: /images/FittingINSSpectrum.png
+
+.. |FittingWithResolutionFunction.png| image:: /images/FittingWithResolutionFunction.png
 
 .. |FittingMagneticSusceptibility.png| image:: /images/FittingMagneticSusceptibility.png   
 
