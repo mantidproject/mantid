@@ -16,6 +16,7 @@ class RundexSettings(object):
     D17 =    "D17"
     FIGARO = "FIGARO"
     D2B =    "D2B"
+    D20 =    "D20"
 
     # techniques (see instrument/Facilities.xml)
     SANS =   "SANS"
@@ -27,6 +28,7 @@ class RundexSettings(object):
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
+    POWDER_PSCAN = "Parameter scan"
 
     # correspondance between instrument and technique
     TECHNIQUE = {
@@ -37,6 +39,7 @@ class RundexSettings(object):
             D17:    REFL,
             FIGARO: REFL,
             D2B:    POWDER,
+            D20:    POWDER,
             }
 
     # correspondance between instrument and acquisition mode
@@ -48,6 +51,7 @@ class RundexSettings(object):
             D17:    [REFL_POL, REFL_NPOL],
             FIGARO: [REFL_NPOL],
             D2B:    [POWDER_DSCAN],
+            D20:    [POWDER_DSCAN, POWDER_PSCAN],
             }
 
     # parameters for each acquisition mode
@@ -101,6 +105,11 @@ class RundexSettings(object):
                 "OutputWorkspace",
                 "CustomOptions"
                 ],
+            POWDER_PSCAN: [
+                "Run",
+                "OutputWorkspace",
+                "CustomOptions"
+                ],
             }
 
     # algo name for each acquisition mode
@@ -109,6 +118,7 @@ class RundexSettings(object):
             REFL_POL:     "ReflectometryILLAutoProcess",
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
+            POWDER_PSCAN: "PowderILLParameterScan",
             }
 
     # ideal number of threads for each acquisition mode (optional).
@@ -118,6 +128,7 @@ class RundexSettings(object):
             REFL_POL:     1,
             REFL_NPOL:    1,
             POWDER_DSCAN: 1,
+            POWDER_PSCAN: 1,
             }
 
     # settings for each acquisition mode
@@ -226,6 +237,18 @@ class RundexSettings(object):
                 "ComponentsToReduce": "",
                 "AlignTubes": True
                 },
+            POWDER_PSCAN: {
+                "CalibrationFile": "",
+                "ROCCorrectionFile": "",
+                "NormaliseTo": "None",
+                "ROI": "0,153.6",
+                "Observable": "sample.temperature",
+                "SortObservableAxis": False,
+                "ScanAxisBinWidth": "0",
+                "CropNegative2Theta": True,
+                "ZeroCountingCells": "Interpolate",
+                "Unit": "ScatteringAngle"
+                }
             }
 
     # optionnal flags
