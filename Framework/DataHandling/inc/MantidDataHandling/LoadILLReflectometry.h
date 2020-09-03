@@ -30,6 +30,7 @@ public:
   const std::vector<std::string> seeAlso() const override {
     return {"LoadNexus"};
   }
+  std::map<std::string, std::string> validateInputs() override;
   /// Algorithm's category for search and find. @see Algorithm::category
   const std::string category() const override {
     return "DataHandling\\Nexus;ILL\\Reflectometry";
@@ -91,9 +92,9 @@ private:
   std::string m_chopper2Name;
   double m_detectorAngle{0.0};
   double m_detectorDistance{0.0};
-  const static double PIXEL_CENTER;
   double m_pixelWidth{0.0};
   double m_sampleZOffset{0.0};
+  double m_sourceDistance{0.0};
   Mantid::DataHandling::LoadHelper m_loader;
 };
 

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
@@ -129,10 +130,11 @@ class PlotWidgetModel(object):
         if tiled_by == TILED_BY_GROUP_TYPE:
             keys = self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
         else:
-            keys = [str(item) for sublist in self.context.data_context.current_runs for item in sublist]
+            keys = [run_list_to_string(item) for item in self.context.data_context.current_runs]
         return keys
 
-    def get_plot_types(self):
+    @staticmethod
+    def get_plot_types():
         plot_types = [ASYMMETRY_PLOT_TYPE, COUNTS_PLOT_TYPE]
         return plot_types
 
@@ -146,7 +148,7 @@ class PlotWidgetModel(object):
         return indices
 
     @staticmethod
-    def get_fit_workspace_and_indices(fit):
+    def get_fit_workspace_and_indices(fit, with_diff=True):
         if fit is None:
             return [], []
         workspaces = []
@@ -156,10 +158,10 @@ class PlotWidgetModel(object):
             if TF_ASYMMETRY_PREFIX in workspace_name:
                 first_fit_index = 3
             second_fit_index = 2  # Diff
-
             workspaces.append(workspace_name)
             indices.append(first_fit_index)
-            workspaces.append(workspace_name)
-            indices.append(second_fit_index)
+            if with_diff:
+                workspaces.append(workspace_name)
+                indices.append(second_fit_index)
 
         return workspaces, indices

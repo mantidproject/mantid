@@ -17,7 +17,8 @@ import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import (  # noqa: F401
+    FigureCanvasQTAgg, draw_if_interactive as draw_if_interactive_impl, show as show_impl)
 from matplotlib.collections import LineCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
@@ -27,9 +28,9 @@ from qtpy import QT_VERSION
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
-from mantid.plots import datafunctions, MantidAxes
+from mantid.plots import datafunctions, MantidAxes, axesfunctions
 from mantidqt.io import open_a_file_dialog
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
@@ -44,7 +45,6 @@ from workbench.plotting.plothelppages import PlotHelpPages
 
 def _catch_exceptions(func):
     """Catch all exceptions in method and print a traceback to stderr"""
-
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -100,7 +100,8 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 to_redraw = ax.remove_workspace_artists(workspace)
             else:
                 to_redraw = False
-            if type(ax) is not Axes:  # Solution for filtering out colorbar axes. Works most of the time.
+            # Solution for filtering out colorbar axes. Works most of the time.
+            if type(ax) is not Axes:
                 empty_axes.append(MantidAxes.is_empty(ax))
             redraw = redraw | to_redraw
 
@@ -160,21 +161,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
-
     def __init__(self, canvas, num):
+        assert QAppThreadCall.is_qapp_thread(
+        ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
-        # Patch show/destroy to be thread aware
-        self._destroy_orig = self.destroy
-        self.destroy = QAppThreadCall(self._destroy_orig)
-        self._show_orig = self.show
-        self.show = QAppThreadCall(self._show_orig)
-        self._window_activated_orig = self._window_activated
-        self._window_activated = QAppThreadCall(self._window_activated_orig)
-        self.set_window_title_orig = self.set_window_title
-        self.set_window_title = QAppThreadCall(self.set_window_title_orig)
-        self.fig_visibility_changed_orig = self.fig_visibility_changed
-        self.fig_visibility_changed = QAppThreadCall(self.fig_visibility_changed_orig)
 
         parent, flags = get_window_config()
         self.window = FigureWindow(canvas, parent=parent, window_flags=flags)
@@ -224,7 +215,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_waterfall_fill_area_triggered.connect(
                 self.launch_waterfall_fill_area_options)
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
-            self.toolbar.sig_change_line_collection_colour_triggered.connect(self.change_line_collection_colour)
+            self.toolbar.sig_change_line_collection_colour_triggered.connect(
+                self.change_line_collection_colour)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -361,7 +353,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 # The grid toggle function for 3D plots doesn't let you choose between major and minor lines.
                 ax.grid(on)
             else:
-                which = 'both' if hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
+                which = 'both' if hasattr(
+                    ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
                 ax.grid(on, which=which)
         canvas.draw_idle()
 
@@ -439,6 +432,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                             ax.collections[0]._vec = copy.deepcopy(ax.original_data)
                         else:
                             ax.view_init()
+                    elif ax.images:
+                        axesfunctions.update_colorplot_datalimits(ax, ax.images)
+                        continue
 
                     ax.autoscale()
 
@@ -496,7 +492,13 @@ def new_figure_manager(num, *args, **kwargs):
 
 
 def new_figure_manager_given_figure(num, figure):
-    """Create a new figure manager instance for the given figure."""
-    canvas = FigureCanvasQTAgg(figure)
-    manager = FigureManagerWorkbench(canvas, num)
-    return manager
+    """Create a new manager from a num & figure """
+    def _new_figure_manager_given_figure_impl(num, figure):
+        """Create a new figure manager instance for the given figure.
+        Forces all public and non-dunder method calls onto the QApplication thread.
+        """
+        canvas = FigureCanvasQTAgg(figure)
+        return force_method_calls_to_qapp_thread(FigureManagerWorkbench(canvas, num))
+
+    # figure manager & canvas must be created on the QApplication thread
+    return QAppThreadCall(_new_figure_manager_given_figure_impl)(num, figure)

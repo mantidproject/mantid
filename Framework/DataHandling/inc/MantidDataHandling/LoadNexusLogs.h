@@ -8,6 +8,7 @@
 
 #include "MantidAPI/NexusFileLoader.h"
 #include <nexus/NeXusFile.hpp>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -107,6 +108,8 @@ private:
   /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for
   /// SNAP
   std::string freqStart;
+
+  mutable std::vector<std::string> m_logsWithInvalidValues;
 };
 
 } // namespace DataHandling

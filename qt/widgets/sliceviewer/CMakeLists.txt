@@ -126,7 +126,6 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsSliceViewer
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      DataObjects
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
@@ -169,7 +168,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsSliceViewerTest
                    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
                    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                  LINK_LIBS
-                   ${TCMALLOC_LIBRARIES_LINKTIME}
                    ${CORE_MANTIDLIBS}
                    Crystal
                    DataObjects

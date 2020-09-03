@@ -22,7 +22,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries(MDAlgorithmsTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         DataHandling
                         CurveFitting

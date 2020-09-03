@@ -34,7 +34,6 @@ set_target_properties(VatesAlgorithms
 
 target_link_libraries(VatesAlgorithms
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTID_SUBPROJECT_LIBS}
                       VatesAPI
                       vtkCommonCore
@@ -80,7 +79,6 @@ set(TESTHELPER_SRCS
 cxxtest_add_test(VatesAlgorithmsTest ${TEST_FILES})
 target_link_libraries(VatesAlgorithmsTest
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTID_SUBPROJECT_LIBS}
                       Indexing
                       VatesAPI

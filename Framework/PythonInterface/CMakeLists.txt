@@ -85,6 +85,12 @@ endfunction()
 # ##############################################################################
 # mantid package
 # ##############################################################################
+# Common install RPATH setting for all extension modules
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(EXT_INSTALL_RPATH ${DL_ORIGIN_TAG}/../../../MacOS)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(EXT_INSTALL_RPATH ${DL_ORIGIN_TAG}/../../../${LIB_DIR})
+endif()
 
 # All targets can see these includes
 include_directories(core/inc)
@@ -97,9 +103,9 @@ include(PythonPackageTargetFunctions)
 
 # Adds `mantid` as a target in the `MantidFramework/Python` folder
 if(APPLE)
-  set(_install_lib_dirs "${LIB_DIR};${WORKBENCH_LIB_DIR}")
+  set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
 else()
-  set(_install_lib_dirs "${WORKBENCH_LIB_DIR}")
+  set(_install_lib_dirs "${SITE_PACKAGES}")
 endif()
 add_python_package(
   PythonInterface EGGLINKNAME mantid INSTALL_LIB_DIRS ${_install_lib_dirs}

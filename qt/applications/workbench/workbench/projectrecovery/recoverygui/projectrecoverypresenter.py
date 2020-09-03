@@ -60,6 +60,8 @@ class ProjectRecoveryPresenter(object):
 
         # Reset whether model believes recovery has been started.
         rows = self.model.rows
+        if len(rows) == 0:
+            return True
         self.model = ProjectRecoveryModel(self.project_recovery, self)
         self._set_checkpoint_tried_values_from_rows(rows)
 

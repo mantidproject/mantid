@@ -58,7 +58,7 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::TW_CENTRE, "Centre"},
     {ParamID::DELTA_HEIGHT, "Height"},
     {ParamID::DELTA_CENTER, "Centre"},
-    {ParamID::TEMPERATURE, "Temp"},
+    {ParamID::TEMPERATURE, "Temperature"},
     {ParamID::SE_HEIGHT, "Height"},
     {ParamID::SE_TAU, "Tau"},
     {ParamID::SE_BETA, "Beta"},
@@ -152,11 +152,10 @@ std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
 template <>
 std::map<TempCorrectionType, TemplateSubTypeDescriptor>
     TemplateSubTypeImpl<TempCorrectionType>::g_typeMap{
-        {TempCorrectionType::None,
-         {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {TempCorrectionType::None, {"None", "", {ParamID::NONE}}},
         {TempCorrectionType::Exponential,
          {"Temp Correction",
-          "UserFunction",
+          "ConvTempCorrection",
           {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
     };
 
