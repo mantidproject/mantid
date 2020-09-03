@@ -12,7 +12,6 @@ We also deal with importing the mantidplot module outside of MantidPlot here.
 """
 from contextlib import contextmanager
 import numpy.core.setup_common as numpy_cfg
-import os
 import platform
 import sys
 from mantid import logger
@@ -51,12 +50,11 @@ def _os_env():
 
 def _lib_suffix():
     if platform.system() == "Windows":
-        suffix = "win"
-    elif platform.system() == "Linux":
-        suffix = "lnx"
+        suffix = f"_win{platform.architecture()[0][0:2]}"
     else:
-        return ""
-    return "_" + suffix + platform.architecture()[0][0:2]
+        suffix = ""
+
+    return suffix
 
 
 def _numpy_abi_ver():
@@ -81,7 +79,7 @@ def is_supported_f2py_platform():
     @returns True if we are currently on a platform that supports the F2Py
     libraries, else False.
     """
-    if (_os_env().startswith("Windows")
+    if ((_os_env().startswith("Windows") or _os_env().startswith("Linux"))
             and _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI
             and "python_d" not in sys.executable):
         return True
@@ -98,7 +96,7 @@ def import_f2py(lib_base_name):
     modules, which hopefully makes the other Indirect scripts a lot less messy.
 
     @param lib_base_name :: is the prefix of the library name.  For example,
-    the QLres_lnx64.so and QLres_win32.pyd libraries share the same base name
+    the QLres.so and QLres_win64.pyd libraries share the same base name
     of "QLres".
 
     @returns the imported module.
@@ -112,17 +110,9 @@ def import_f2py(lib_base_name):
         yield
         sys.path.pop(0)
 
-    lib_name = lib_base_name + _lib_suffix()
     # In Python 3 f2py produces a filename properly tagged with the ABI compatability
-    # information and Python can import this without issue but it will take an untagged
-    # filename in preference so we cannot keep the Python2/Python3 ones in the same
-    # directory. We manipulate the sys.path temporarily to get the correct library.
-    version = sys.version_info
-    if version.major >= 3:
-        return __import__(lib_name)
-    else:
-        with in_syspath(os.path.join(os.path.dirname(__file__), 'cp27')):
-            return __import__(lib_name)
+    lib_name = lib_base_name + _lib_suffix()
+    return __import__(lib_name)
 
 
 def run_f2py_compatibility_test():

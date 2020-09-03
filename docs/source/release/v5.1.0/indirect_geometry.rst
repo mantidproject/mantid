@@ -37,6 +37,7 @@ Improvements
 - Added default parameter estimations to the F(q) tab.
 - The ConvFit tab within the IDA GUI will now output convolved members by default.
 - Added a Help option to the right-click menu in the function browser (in full function view) which brings up a relevant documentation page describing the function.
+- Added Bayes and Corrections f2py-compiled modules for Linux
 
 Bug Fixes
 #########

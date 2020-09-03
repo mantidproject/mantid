@@ -204,14 +204,19 @@ foreach(_bundle ${BUNDLES})
             EXCLUDE
             PATTERN ".gitignore"
             EXCLUDE
-            PATTERN "*_win*.pyd"
+            PATTERN "*.pyd"
             EXCLUDE
-            PATTERN "*_lnx64.so"
+            PATTERN "*.so"
             EXCLUDE
             PATTERN "CMakeLists.txt"
             EXCLUDE
             PATTERN "test"
             EXCLUDE)
+    if(CMAKE_SYSTEM_NAME MATCHES Linux)
+      install(DIRECTORY ../scripts/
+              DESTINATION ${_bundle}scripts
+              FILES_MATCHING PATTERN "*.so")
+    endif()
   endif()
 endforeach()
 
