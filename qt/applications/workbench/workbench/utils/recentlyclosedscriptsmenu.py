@@ -12,7 +12,6 @@ from os.path import join, exists
 from mantid import ConfigService
 from mantidqt.utils.qt import create_action
 from workbench.config import CONF
-from mantid.kernel import logger
 
 RECENT_SCRIPT_MAX_NUMBER = 10
 CACHE_FILE_NAME = "recent_script_file"
