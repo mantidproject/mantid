@@ -33,7 +33,7 @@ class RecentlyClosedScriptsMenu(QMenu):
 
     def populate_menu(self):
         # Check cache is present or don't do anything.
-        scripts = self.load_scripts_from_settings()
+        scripts = self._get_scripts_from_settings()
 
         if len(scripts) > 0:
             for script_path in scripts:
@@ -69,14 +69,6 @@ class RecentlyClosedScriptsMenu(QMenu):
             scripts.remove(path)
             self._store_scripts_to_settings(scripts)
 
-    def load_scripts_from_settings(self):
-        scripts = self._get_scripts_from_settings()
-
-        # Ensure there are no duplicates, general sanitization.
-        scripts = list(set(scripts))
-
-        return scripts
-
     def add_script_to_settings(self, path):
         if path is None or path == '':
             return
@@ -96,7 +88,8 @@ class RecentlyClosedScriptsMenu(QMenu):
         try:
             scripts = CONF.get(RECENT_SCRIPTS_KEY)
         except KeyError:
-            logger.warning("Key not found in QSettings")
+            # Happens quite often and should fail silently.
+            pass
 
         def sort_key(sub_list):
             return sub_list[0]
