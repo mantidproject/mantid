@@ -252,7 +252,7 @@ class PixelLinePlot(CursorTracker, KeyHandler):
     set of line plots.
     """
 
-    STATUS_MESSAGE = "Press key to send cuts to workspaces: c=both cuts, x=X, y=Y."
+    STATUS_MESSAGE = "Keys: arrow keys control mouse pointer, workspace cuts: c=both cuts, x=X, y=Y."
     SELECTION_KEYS = ('c', 'x', 'y', 'up', 'down', 'left', 'right')
     PIXEL_TRANSFORM_CLS = {
         'up': MoveMouseCursorUp,
