@@ -3,7 +3,7 @@ Priority: optional
 Standards-Version: 3.9.2
 
 Package: mantid-developer
-Version: 2.0
+Version: 2.1
 Maintainer: Mantid Project <mantid-tech@mantidproject.org>
 Priority: optional
 Architecture: all
@@ -16,7 +16,7 @@ Depends: git,
   graphviz,
   libtbb-dev,
   libgoogle-perftools-dev,
-  libjemalloc-dev
+  libjemalloc-dev,
   libboost-all-dev,
   libpoco-dev(>=1.4.6),
   libnexus0-dev,
