@@ -286,15 +286,10 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   acquisitionMode.load();
   m_acquisitionMode = acquisitionMode[0];
   if (m_acquisitionMode == TOF_MODE_ON) {
-    auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
-        UnitFactory::Instance().create("Label"));
-    lblUnit->setLabel("Time", Units::Symbol::Microsecond);
-    workspace->getAxis(0)->unit() = lblUnit;
+    workspace->getAxis(0)->unit() = UnitFactory::Instance().create("Time");
   } else {
-    auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
-        UnitFactory::Instance().create("Label"));
-    lblUnit->setLabel("Wavelength", Units::Symbol::Angstrom);
-    workspace->getAxis(0)->unit() = lblUnit;
+    workspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("Wavelength");
   }
   // Set y axis unit
 

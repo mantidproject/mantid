@@ -558,7 +558,7 @@ public:
       TS_ASSERT(workspaceEntry->isHistogramData())
       TS_ASSERT(!workspaceEntry->isDistribution())
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
-      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
+      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(),
                        "Wavelength")
       TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(0), 12.66, 0.01)
       TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(1), 13.45, 0.01)
@@ -622,12 +622,11 @@ public:
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
       if (measurementMode == "monochromatic") {
         TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 1)
-        TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
+        TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(),
                          "Wavelength")
       } else if (measurementMode == "TOF") {
         {
-          TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
-                           "Time")
+          TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(), "Time")
           TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512)
         }
       }
