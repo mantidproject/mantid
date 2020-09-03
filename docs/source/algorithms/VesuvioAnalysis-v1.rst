@@ -70,7 +70,7 @@ Output:
 .. testoutput::
 
    variable value
-   f1.sigma1 4.917
+   f1.sigma1 4.931
    f1.c4 0.000
    f1.c6 0.000
    f1.A 0.080
