@@ -121,7 +121,6 @@ class StateMoveWorkspaceZOOMTest(unittest.TestCase):
 # ----------------------------------------------------------------------------------------------------------------------
 class StateMoveBuilderTest(unittest.TestCase):
     def test_that_state_for_loq_can_be_built(self):
-        # Arrange
         facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
         data_builder = get_data_builder(facility, file_information)

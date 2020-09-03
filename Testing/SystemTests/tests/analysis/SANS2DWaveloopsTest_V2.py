@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 import systemtesting
-import mantid  # noqa
 from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, Gravity, Set1D, AssignSample,
                                                          TransmissionSample, AssignCan, TransmissionCan,
                                                          CompWavRanges, UseCompatibilityMode)

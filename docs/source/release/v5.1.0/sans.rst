@@ -30,6 +30,13 @@ Bug Fixed
 ISIS SANS Interface
 -------------------
 
+New
+###
+
+- TOML File V0 support; The format is pinned to version 0 to allow people to
+  get a feel for the new format. The legacy parser still exists and has not
+  been modified.
+
 Fixed
 #####
 
