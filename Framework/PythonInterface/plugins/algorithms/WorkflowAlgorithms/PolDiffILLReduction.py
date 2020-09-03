@@ -8,8 +8,8 @@
 from mantid.api import FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
     PropertyMode, Progress, PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty, \
     FileAction, AlgorithmFactory
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
-    LogicOperator, PropertyCriterion, StringListValidator
+from mantid.kernel import Direction, EnabledWhenProperty, LogicOperator, PropertyCriterion, \
+    StringListValidator
 
 from mantid.simpleapi import *
 
@@ -23,7 +23,11 @@ class PolDiffILLReduction(PythonAlgorithm):
     _method = 'Uniaxial'
     _instrument = None
     _DEG_2_RAD =  np.pi / 180.0
+
+    _sampleMass = None
     _formulaUnits = None
+    _gyromagnetiRatio = None
+    _r0 = None
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -204,7 +208,6 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('InstrumentParameterFile', scan)
 
-
     def _figureMeasurementMethod(self, ws):
         nEntriesPerNumor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
         if nEntriesPerNumor == 10:
@@ -232,7 +235,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 list_pol = []
                 for numor in numors:
                     list_pol.append('{0}_{1}'.format(numor, direction))
-                SumOverlappingTubes(','.join(list_pol), OutputWorkspace='{0}_{1}'.format(ws[2:], direction), OutputType='1D', ScatteringAngleBinning=0.5, Normalise=True, HeightAxis='-0.1,0.1')
+                SumOverlappingTubes(','.join(list_pol), OutputWorkspace='{0}_{1}'.format(ws[2:], direction),
+                                    OutputType='1D', ScatteringAngleBinning=0.5, Normalise=True, HeightAxis='-0.1,0.1')
                 names_list.append('{0}_{1}'.format(ws[2:], direction))
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
         return ws
@@ -435,10 +439,10 @@ class PolDiffILLReduction(PythonAlgorithm):
                         # Incoherent
                         dataY[spectrum][2] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - dataY[spectrum][0]
                     else:
-                        sigma_xmy_sf = mtd[ws].getItem(entry_no+6).readY(spectrum)
-                        sigma_xmy_nsf = mtd[ws].getItem(entry_no+7).readY(spectrum)
-                        sigma_xpy_sf = mtd[ws].getItem(entry_no+8).readY(spectrum)
-                        sigma_xpy_nsf = mtd[ws].getItem(entry_no+9).readY(spectrum)
+                        # sigma_xmy_sf = mtd[ws].getItem(entry_no+6).readY(spectrum)
+                        # sigma_xmy_nsf = mtd[ws].getItem(entry_no+7).readY(spectrum)
+                        # sigma_xpy_sf = mtd[ws].getItem(entry_no+8).readY(spectrum)
+                        # sigma_xpy_nsf = mtd[ws].getItem(entry_no+9).readY(spectrum)
 
                         raise RuntimeError('10-point method has not been implemented yet')
 
@@ -461,14 +465,15 @@ class PolDiffILLReduction(PythonAlgorithm):
             ws_vanadium = self.getPropertyValue('VanadiumWorkspaceInput')
             if normaliseToAbsoluteUnits:
                 normFactor = self._formulaUnits
-            for entry_no, entry in enumerate(mtd[ws_vanadium]):
-                if not normaliseToAbsoluteUnits:
-                    normFactor = math.max(entry.readY())
-                ws_name = '{0}_{1}'.format(tmp_name, entry_no)
-                tmp_names.append(ws_name)
-                Divide(LHSWorkspace=ws_vanadium,
-                       RHSWorkspace=CreateSingleValuedWorkspace(normFactor),
-                       OutputWorkspace=ws_name)
+            else:
+                for entry_no, entry in enumerate(mtd[ws_vanadium]):
+                    if not normaliseToAbsoluteUnits:
+                        normFactor = math.max(entry.readY())
+            ws_name = '{0}_{1}'.format(tmp_name, entry_no)
+            tmp_names.append(ws_name)
+            Divide(LHSWorkspace=ws_vanadium,
+                   RHSWorkspace=CreateSingleValuedWorkspace(normFactor),
+                   OutputWorkspace=ws_name)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
                 if self._mode == 'TOF':
@@ -478,10 +483,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 for entry_no, entry in enumerate(mtd[ws]):
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
                     tmp_names.append(ws_name)
-                    gamma = -1 #placeholder
-                    r0 = -1 #placeholder
                     raise RunTimeError("Paramagnetic calibration has not been implemented yet, missing: gamma, r0 definitions")
-                    const = (2.0/3.0) * math.pow(gamma*r0, 2) # find definitions and values for gamma (lorentz?) and r0 (classical radius?)
+                    const = (2.0/3.0) * math.pow(self._gyromagneticRatio*self._r0, 2)
                     Divide(LHSWorkspace=const * entry * (entry+1),
                            RHSWorkspace=paramagnetic,
                            OutputWorkspace=ws_name)
@@ -490,7 +493,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     raise RuntimeError('Incoherent calibration is not valid in the TOF mode.')
                 raise RunTimeError("Incoherent calibration has not been implemented yet, missing: NSI-cross section input")
                 if normaliseToAbsoluteUnits:
-                    normFactor = -1.0 #placeholder
+                    normFactor = -1.0 #placeholder, magnetic component??
                 for entry_no, entry in enumerate(mtd[components_ws]):
                     if not normaliseToAbsoluteUnits:
                         normFactor = math.max(entry.readY())
