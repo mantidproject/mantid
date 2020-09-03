@@ -63,6 +63,7 @@ Improvements
 - The ALC interface in workbench will now show errors by default. The error bars can also be turned on/off using the right-click plot menu.
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Added in default group and pair selection when loading grouping files from xml.
+- Updated CHRONUS TF asymmetry mode default grouping. Now uses eight groups by default.
 - Added warnings when the selected runs do not have the relevant periods to calculate the groups or pairs.
 
 Bug fixes
