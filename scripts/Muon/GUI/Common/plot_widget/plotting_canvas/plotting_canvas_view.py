@@ -218,7 +218,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                     ymin = ymin_i
                 if ymax_i > ymax:
                     ymax = ymax_i
-            print(2)
 
         else:
 
@@ -235,7 +234,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             ymax = -1e9
             ymin,ymax = self._get_y_axis_autoscale_limts(axis)
             axis = self.fig.axes[axis_number]
-            print(1)
 
         else:
             ymax, ymin = ymax + 0.1*(ymax-ymin) , ymin - 0.1*(ymax-ymin)
