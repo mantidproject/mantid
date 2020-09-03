@@ -14,10 +14,10 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
 namespace API {
-
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
@@ -43,7 +43,10 @@ OptionsPropertyWidget::OptionsPropertyWidget(Mantid::Kernel::Property *prop,
   m_combo->setToolTip(m_doc);
   if (std::string(prop->type()).find("Workspace") != std::string::npos) {
     m_combo->setEditable(true);
+    m_combo->setInsertPolicy(QComboBox::NoInsert);
     m_combo->completer()->setCompletionMode(QCompleter::PopupCompletion);
+    connect(m_combo->lineEdit(), SIGNAL(editingFinished()),
+            SLOT(editingFinished()));
   }
   m_widgets.push_back(m_combo);
 
@@ -80,5 +83,18 @@ void OptionsPropertyWidget::setValueImpl(const QString &value) {
   if (index >= 0)
     m_combo->setCurrentIndex(index);
 }
+
+void OptionsPropertyWidget::editingFinished() {
+  auto value = m_combo->currentText();
+  const QString temp =
+      value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
+  int index = m_combo->findText(temp);
+  if (index >= 0)
+    m_combo->setCurrentIndex(index);
+  else {
+    updateIconVisibility();
+  }
+}
+
 } // namespace API
 } // namespace MantidQt
