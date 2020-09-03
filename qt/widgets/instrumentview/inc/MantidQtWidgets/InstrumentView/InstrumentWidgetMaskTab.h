@@ -97,7 +97,9 @@ protected slots:
   void clearShapes();
   void applyMask();
   void applyMaskToView();
-  void storeDetectorMask(bool isROI = false);
+  void
+  storeDetectorMask(bool isROI = false,
+                    const std::vector<size_t> &dets = std::vector<size_t>());
   void storeBinMask();
   void storeMask();
   void clearMask();

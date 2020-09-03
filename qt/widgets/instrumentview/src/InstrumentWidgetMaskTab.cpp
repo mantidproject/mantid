@@ -536,81 +536,18 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
   }
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  std::vector<size_t> detectorId{pickID};
+  std::vector<size_t> detectorsId{pickID};
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
-  auto wsMask = actor.getMaskWorkspace();
 
-  // two cases : either we are on roi mode, or on masking mode
-  if (m_masking_on->isChecked()) {
-    // then either we are on single pixel picking mode, on on tube picking mode
-    if (m_pixel->isChecked()) {
-      actor.addMaskBinsData(detectorId);
-
-      Mantid::detid_t detId = actor.getDetID(pickID);
-
-      // try to mask the detector, ignore any failure
-      try {
-        wsMask->setMasked(detId);
-      } catch (...) {
-      }
-    } else if (m_tube->isChecked()) {
+  if (m_masking_on->isChecked() || m_roi_on->isChecked()) {
+    if (m_tube->isChecked()) {
       if (!componentInfo.hasParent(pickID)) {
         return;
       }
       auto parent = componentInfo.parent(pickID);
-      auto detectors = componentInfo.detectorsInSubtree(parent);
-      actor.addMaskBinsData(detectors);
-
-      for (auto det : detectors) {
-        Mantid::detid_t detId = actor.getDetID(det);
-        try {
-          wsMask->setMasked(detId);
-        } catch (...) {
-        }
-      }
+      detectorsId = componentInfo.detectorsInSubtree(parent);
     }
-  } else if (m_roi_on->isChecked()) {
-
-    // first, find the oldest ancestor
-    auto ancestorID = pickID;
-    while (componentInfo.hasParent(ancestorID)) {
-      ancestorID = componentInfo.parent(ancestorID);
-    }
-
-    auto detectorsToMask = componentInfo.detectorsInSubtree(ancestorID);
-
-    if (m_pixel->isChecked()) {
-      // remove the picked pixel from the list of detectors to mask
-      std::vector<size_t>::iterator newEnd;
-
-      newEnd =
-          std::remove(detectorsToMask.begin(), detectorsToMask.end(), pickID);
-      detectorsToMask.erase(newEnd, detectorsToMask.end());
-    } else if (m_tube->isChecked()) {
-      if (!componentInfo.hasParent(pickID)) {
-        return;
-      }
-      auto parent = componentInfo.parent(pickID);
-      auto detectorsToKeep = componentInfo.detectorsInSubtree(parent);
-
-      // remove all the detectors from the picked tube from the list of
-      // detectors to mask
-      std::vector<size_t>::iterator newEnd = detectorsToMask.end();
-      for (auto toKeep : detectorsToKeep) {
-        newEnd = std::remove(detectorsToMask.begin(), newEnd, toKeep);
-      }
-      detectorsToMask.erase(newEnd, detectorsToMask.end());
-    }
-    // then mask selected detectors
-    actor.addMaskBinsData(detectorsToMask);
-
-    for (auto det : detectorsToMask) {
-      Mantid::detid_t detId = actor.getDetID(det);
-      try {
-        wsMask->setMasked(detId);
-      } catch (...) {
-      }
-    }
+    storeDetectorMask(m_roi_on->isChecked(), detectorsId);
   } else if (m_grouping_on->isChecked()) {
     if (m_pixel->isChecked()) {
       Mantid::detid_t detId = actor.getDetID(pickID);
@@ -628,6 +565,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
         m_detectorsToGroup.append(det);
     }
   }
+
   // update detector colours
   m_instrWidget->getInstrumentActor().updateColors();
   m_instrWidget->updateInstrumentDetectors();
@@ -828,6 +766,7 @@ void InstrumentWidgetMaskTab::applyMaskToView() {
  */
 void InstrumentWidgetMaskTab::clearMask() {
   clearShapes();
+
   m_instrWidget->getInstrumentActor().clearMasks();
   m_instrWidget->updateInstrumentView();
   enableApplyButtons();
@@ -1279,7 +1218,8 @@ InstrumentWidgetMaskTab::addDoubleProperty(const QString &name) const {
 /**
  * Store the mask defined by the shape tools to the helper m_maskWorkspace.
  */
-void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
+void InstrumentWidgetMaskTab::storeDetectorMask(
+    bool isROI, const std::vector<size_t> &onClickDets) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_pointer->setChecked(true);
   setActivity();
@@ -1290,6 +1230,7 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
   std::vector<size_t> dets;
   // get detectors covered by the shapes
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
+  dets.insert(dets.end(), onClickDets.begin(), onClickDets.end());
   if (!dets.empty()) {
     auto wsMask = actor.getMaskWorkspace();
     // have to cast up to the MaskWorkspace to get access to clone()
