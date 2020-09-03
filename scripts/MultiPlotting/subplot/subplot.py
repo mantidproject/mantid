@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
 import numpy as np
-import matplotlib.pyplot as plt
 from copy import deepcopy
 
 from matplotlib.figure import Figure

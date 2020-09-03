@@ -208,7 +208,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def autoscale_y_axes(self,ymax = None,ymin = None):
 
-        if ymax == None or ymin ==None:
+        if ((ymax == None) or (ymin == None )):
             ymin = 1e9
             ymax = -1e9
             for axis in self.fig.axes:
@@ -226,7 +226,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         axis = self.fig.axes[axis_number]
         if axis_number >= len(self.fig.axes):
             return
-        if (ymax == None) or (ymin == None):
+        if ((ymax == None ) or (ymin == None)):
             ymin = 1e9
             ymax = -1e9
             ymin,ymax = self._get_y_axis_autoscale_limts(axis)
