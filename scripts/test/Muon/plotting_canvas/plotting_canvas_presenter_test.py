@@ -189,24 +189,18 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
     'Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter.PlottingCanvasPresenter.'
     'autoscale_selected_y_axis')
     def test_handle_autoscale_correctly_handles_one_subplot(self,mock_autoscale_selected_y_axis):
-        self.presenter._options_presenter.check_autoscale_state = mock.Mock()
-        self.presenter._options_presenter.check_autoscale_state.return_value = True
-        self.presenter._options_presenter.get_selection= mock.Mock()
-        self.presenter._options_presenter.get_selection.return_value = [1]
-        self.presenter._view.get_axis_limits = mock.Mock()
-        self.presenter._view.get_axis_limits.return_value = 0,1,0,1
+        self.presenter._options_presenter.check_autoscale_state = mock.Mock(return_value = True)
+        self.presenter._options_presenter.get_selection= mock.Mock(return_value = [1])
+        self.presenter._view.get_axis_limits = mock.Mock(return_value = [0,1,0,1])
         self.presenter._handle_autoscale_y_axes()
         mock_autoscale_selected_y_axis.assert_called_once_with(0)
 
     @mock.patch(
     'Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter.PlottingCanvasPresenter.autoscale_y_axes')
     def test_handle_autoscale_correctly_handles_multiple_subplot(self,mock_autoscale_y_axes):
-        self.presenter._options_presenter.check_autoscale_state = mock.Mock()
-        self.presenter._options_presenter.check_autoscale_state.return_value = True
-        self.presenter._options_presenter.get_selection = mock.Mock()
-        self.presenter._options_presenter.get_selection.return_value = [1,2,3]
-        self.presenter._view.get_axis_limits = mock.Mock()
-        self.presenter._view.get_axis_limits.return_value = 0, 1, 0, 1
+        self.presenter._options_presenter.check_autoscale_state = mock.Mock(return_value = True)
+        self.presenter._options_presenter.get_selection = mock.Mock(return_value = [1,2,3])
+        self.presenter._view.get_axis_limits = mock.Mock(return_value = [0, 1, 0, 1] )
         self.presenter._handle_autoscale_y_axes()
         mock_autoscale_y_axes.assert_called_once_with()
 
@@ -214,39 +208,43 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
     'Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter.PlottingCanvasPresenter.get_workspace_info')
     @mock.patch(
     'Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter.PlottingCanvasPresenter.get_plot_axes')
-    def test_autoscale_y_axes_calculates_correct_yerr(self,mock_get_plot_axes,mock_get_workspace_info):
-        self.presenter._options_presenter.get_errors = mock.Mock()
-        self.presenter._options_presenter.get_errors.return_value = True
+    def test_autoscale_y_axes_calculates_correct_ymax_and_ymin(self,mock_get_plot_axes,mock_get_workspace_info):
+        self.presenter._options_presenter.get_errors = mock.Mock(return_value=True)
         mock_get_workspace_info.return_value = [WorkspacePlotInformation(workspace_name="test",index = 0,
                                                                         axis = 0, normalised = True,
                                                                         errors = True, label = 'Test Workspace')]
 
-        mock_get_plot_axes.return_value =[MockAxis(0,10)]
-        x_data = range(0,51)
-        y_data = [x**2 for x in x_data]
-        e_data = range(0,51)
+        mock_get_plot_axes.return_value =[MockAxis(2,8)]
+        x_data = range(0, 11)
+        y_data = [x ** 2 for x in x_data]
+        e_data = [1, 3, 1, 10, 8, 2, 9, 9, -7, 4, 1]
+        # ymax = max(y_data+e_data) which is equal to 7**2 + 9 = 58 which occurs at x = 7
+        # ymin = min(y_data - e_data) which is equal to 3**2 - 10 = -1 which occurs at x = 3
         test = CreateWorkspace(x_data,y_data,e_data)
         self.presenter.autoscale_y_axes()
-        self.presenter._view.autoscale_y_axes.assert_called_once_with(10.0)
+        # self.presenter._view.autoscale_y_axes should be called with the ymax and ymin for test to pass
+        self.presenter._view.autoscale_y_axes.assert_called_once_with(58,-1)
 
     @mock.patch(
     'Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter.PlottingCanvasPresenter.get_workspace_info')
     @mock.patch(
     'Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter.PlottingCanvasPresenter.get_plot_axes')
-    def test_autoscale_selected_y_axis_calculates_correct_yerr(self,mock_get_plot_axes,mock_get_workspace_info):
-        self.presenter._options_presenter.get_errors = mock.Mock()
-        self.presenter._options_presenter.get_errors.return_value = True
+    def test_autoscale_selected_y_axis_calculates_correct_ymax_and_ymin(self,mock_get_plot_axes,mock_get_workspace_info):
+        self.presenter._options_presenter.get_errors = mock.Mock(return_value=True)
         mock_get_workspace_info.return_value = [WorkspacePlotInformation(workspace_name="test", index=0,
                                                                          axis=0, normalised=True,
                                                                          errors=True, label='Test Workspace')]
 
-        mock_get_plot_axes.return_value = [MockAxis(0, 10)]
-        x_data = range(0, 51)
+        mock_get_plot_axes.return_value = [MockAxis(2, 8)]
+        x_data = range(0, 11)
         y_data = [x ** 2 for x in x_data]
-        e_data = range(0, 51)
+        e_data = [1, 3, 1, 10, 8, 2, 9, 9, -7, 4, 1]
+        #ymax = max(y_data+e_data) which is equal to 7**2 + 9 = 58 which occurs at x = 7
+        #ymin = min(y_data - e_data) which is equal to 3**2 - 10 = -1 which occurs at x = 3
         test = CreateWorkspace(x_data, y_data, e_data)
         self.presenter.autoscale_selected_y_axis(0)
-        self.presenter._view.autoscale_selected_y_axis.assert_called_once_with(0,10.0)
+        # self.presenter._view.autoscale_y_axes should be called with the axis number ymax and ymin for test to pass
+        self.presenter._view.autoscale_selected_y_axis.assert_called_once_with(0,58,-1)
 
 
 class MockAxis():

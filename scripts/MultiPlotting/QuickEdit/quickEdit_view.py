@@ -42,6 +42,7 @@ class QuickEditView(QtWidgets.QWidget):
         button_layout.addWidget(self.y_axis_changer.view)
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
+        self.autoscale.setToolTip("While pan or zoom are enabled autoscale is disabled")
 
     """ plot selection """
 

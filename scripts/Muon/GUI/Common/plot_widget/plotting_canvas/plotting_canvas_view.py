@@ -55,7 +55,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         layout.addWidget(self.toolBar)
         layout.addWidget(self.fig.canvas)
         self.setLayout(layout)
-
         self._plot_information_list = []  # type : List[PlotInformation}
 
     @property
@@ -207,31 +206,40 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def set_axes_limits(self, xlim, ylim):
         plt.setp(self.fig.axes, xlim=xlim, ylim=ylim)
 
-    def autoscale_y_axes(self,yerr=0):
-        ymin = 1e9
-        ymax = -1e9
+    def autoscale_y_axes(self,ymax = None,ymin = None):
 
-        for axis in self.fig.axes:
-            ymin_i, ymax_i = self._get_y_axis_autoscale_limts(axis)
-            if ymin_i < ymin:
-                ymin = ymin_i
-            if ymax_i > ymax:
-                ymax = ymax_i
+        if ymax == None or ymin ==None:
+            ymin = 1e9
+            ymax = -1e9
 
-        ymax,ymin = ymax + yerr , ymin - yerr
+            for axis in self.fig.axes:
+                ymin_i, ymax_i = self._get_y_axis_autoscale_limts(axis)
+                if ymin_i < ymin:
+                    ymin = ymin_i
+                if ymax_i > ymax:
+                    ymax = ymax_i
+            print(2)
+
+        else:
+
+            ymax, ymin = ymax + 0.1 * abs(ymax - ymin), ymin - 0.1 * abs(ymax - ymin)
 
         plt.setp(self.fig.axes, ylim=[ymin, ymax])
 
-    def autoscale_selected_y_axis(self, axis_number,yerr = 0):
-        ymin = 1e9
-        ymax = -1e9
+    def autoscale_selected_y_axis(self, axis_number,ymin = None,ymax = None):
+        axis = self.fig.axes[axis_number]
         if axis_number >= len(self.fig.axes):
             return
-        axis = self.fig.axes[axis_number]
-        ymin,ymax = self._get_y_axis_autoscale_limts(axis)
-        axis = self.fig.axes[axis_number]
+        if ymax == None or ymin == None:
+            ymin = 1e9
+            ymax = -1e9
+            ymin,ymax = self._get_y_axis_autoscale_limts(axis)
+            axis = self.fig.axes[axis_number]
+            print(1)
 
-        ymax, ymin = ymax + yerr, ymin - yerr
+        else:
+            ymax, ymin = ymax + 0.1*(ymax-ymin) , ymin - 0.1*(ymax-ymin)
+
         axis.set_ylim(ymin,ymax)
 
     def set_title(self, axis_number, title):

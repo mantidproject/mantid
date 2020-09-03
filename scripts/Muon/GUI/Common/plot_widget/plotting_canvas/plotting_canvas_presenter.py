@@ -137,37 +137,53 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         return self._view.plotted_workspace_information
 
     def autoscale_y_axes(self):
-        yerr = 0
-        if self._options_presenter.get_errors():
-            for workspace_info in self.get_workspace_info():
-                workspace = AnalysisDataService.Instance().retrieve(workspace_info.workspace_name)
-                axis_number = workspace_info.axis
-                axis = self.get_plot_axes()[axis_number]
-                x_data = workspace.readX(workspace_info.index)
-                limits = axis.get_xlim()
-                index = np.where((x_data >= limits[0])&(x_data <= limits[1]))
-                max_error = workspace.readE(workspace_info.index)[index].max()
-                if max_error > yerr:
-                    yerr = max_error
-        self._view.autoscale_y_axes(yerr)
+        ymin = 1e9
+        ymax = -1e9
+
+        for workspace_info in self.get_workspace_info():
+            workspace = AnalysisDataService.Instance().retrieve(workspace_info.workspace_name)
+            axis_number = workspace_info.axis
+            axis = self.get_plot_axes()[axis_number]
+            x_data = workspace.readX(workspace_info.index)
+            limits = axis.get_xlim()
+            index = np.where((x_data >= limits[0])&(x_data <= limits[1]))
+            errors = 0
+            if self._options_presenter.get_errors():
+                errors = workspace.readE(workspace_info.index)
+            y_data = workspace.readY(workspace_info.index)
+            max_y = (y_data+errors)[index].max()
+            min_y = (y_data- errors)[index].min()
+            if max_y > ymax:
+                ymax = max_y
+            if min_y < ymin:
+                ymin = min_y
+
+        self._view.autoscale_y_axes(ymax,ymin)
         self._view.redraw_figure()
 
     def autoscale_selected_y_axis(self, axis_number):
-        yerr = 0
-        if self._options_presenter.get_errors():
-            for workspace_info in self.get_workspace_info():
-                if workspace_info.axis != axis_number:
-                    continue
-                workspace = AnalysisDataService.Instance().retrieve(workspace_info.workspace_name)
-                axis_number = workspace_info.axis
-                axis = self.get_plot_axes()[axis_number]
-                x_data = workspace.readX(workspace_info.index)
-                limits = axis.get_xlim()
-                index = np.where((x_data >= limits[0]) & (x_data <= limits[1]))
-                max_error = workspace.readE(workspace_info.index)[index].max()
-                if max_error > yerr:
-                    yerr = max_error
-        self._view.autoscale_selected_y_axis(axis_number,yerr)
+        ymin = 1e9
+        ymax = -1e9
+        for workspace_info in self.get_workspace_info():
+            if workspace_info.axis != axis_number:
+                continue
+            workspace = AnalysisDataService.Instance().retrieve(workspace_info.workspace_name)
+            axis_number = workspace_info.axis
+            axis = self.get_plot_axes()[axis_number]
+            x_data = workspace.readX(workspace_info.index)
+            limits = axis.get_xlim()
+            index = np.where((x_data >= limits[0]) & (x_data <= limits[1]))
+            errors = 0
+            if self._options_presenter.get_errors():
+                errors = workspace.readE(workspace_info.index)
+            y_data = workspace.readY(workspace_info.index)
+            max_y = (y_data + errors)[index].max()
+            min_y = (y_data - errors)[index].min()
+            if max_y > ymax:
+                ymax = max_y
+            if min_y < ymin:
+                ymin = min_y
+        self._view.autoscale_selected_y_axis(axis_number,ymax,ymin)
         self._view.redraw_figure()
 
     def set_axis_limits(self, ax_num, xlims, ylims):
