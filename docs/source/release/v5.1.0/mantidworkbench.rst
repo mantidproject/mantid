@@ -16,8 +16,8 @@ New
 - Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
 - A default font for plots can now be set in the workbench settings.
 - Spreadsheet based data processing interface is created for ILL data reduction. 
-  SANS and reflectometry are currently supported. See :ref:`DrILL documentation <DrILL-ref>`
-  for more information.
+  SANS, reflectometry and powder diffraction (D2B and D20) are currently supported. See
+  :ref:`DrILL documentation <DrILL-ref>` for more information.
 
 .. figure:: ../../images/drill.png
    :align: right
