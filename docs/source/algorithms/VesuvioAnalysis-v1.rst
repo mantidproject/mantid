@@ -75,7 +75,7 @@ Output:
    f1.c6 0.000
    f1.A 0.080
    f1.B0 0.000
-   Cost function value 0.203
+   Cost function value 0.200
    
 .. categories::
 
