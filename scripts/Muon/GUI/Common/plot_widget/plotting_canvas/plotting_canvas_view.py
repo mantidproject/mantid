@@ -289,7 +289,5 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def add_enable_autoscale_subscriber(self,observer):
         self.toolBar.enable_autoscale_notifier.add_subscriber(observer)
 
-
     def add_disable_autoscale_subscriber(self,observer):
         self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)
-
