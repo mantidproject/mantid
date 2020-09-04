@@ -55,7 +55,7 @@ class TableModel(object):
     def get_all_rows(self):
         return self._table_entries
 
-    def get_row(self, index):
+    def get_row(self, index) -> RowEntries:
         return self._table_entries[index]
 
     def get_row_index(self, row):

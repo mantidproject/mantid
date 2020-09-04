@@ -59,13 +59,15 @@ public:
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
+  std::map<std::string, std::string> validateInputs() override;
+  int extractRunNumberFromRunName(std::string runName);
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
   // Load run, apply dead time corrections and detector grouping
-  API::Workspace_sptr doLoad(size_t runNumber);
+  API::Workspace_sptr doLoad(const std::string &fileName);
   // Analyse loaded run
   void doAnalysis(const API::Workspace_sptr &loadedWs, size_t index);
   // Parse run names
@@ -99,7 +101,7 @@ private:
   /// Populate the hidden ws storing current results
   void saveResultsToADS(API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
-  void checkProperties(size_t &is, size_t &ie);
+  void checkProperties(size_t &firstRunNumber, size_t &lastRunNumber);
 
   /// Properties needed to load a run
   /// Stores base name shared by all runs
@@ -116,6 +118,10 @@ private:
   std::vector<int> m_forward_list;
   /// Store backward spectra
   std::vector<int> m_backward_list;
+  /// Store workspaces
+  std::vector<std::string> m_fileNames;
+  /// The map holding extracted run numbers from filenames
+  std::map<std::string, int> m_rmap;
 
   /// Properties needed to analyse a run
   /// Type of calculation: integral or differential

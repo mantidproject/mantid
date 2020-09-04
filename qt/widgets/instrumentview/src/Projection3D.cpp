@@ -373,7 +373,7 @@ void Projection3D::zoom(int x, int y) {
  */
 void Projection3D::wheelZoom(int x, int y, int d) {
   m_viewport.wheelZoom(x, y, d);
-  updateView(false);
+  updateView(true);
   emit finishedMove();
 }
 

@@ -27,7 +27,7 @@ class StateConvertToQ(metaclass=JsonSerializable):
     def __init__(self):
         super(StateConvertToQ, self).__init__()
         self.reduction_dimensionality = ReductionDimensionality.ONE_DIM
-        self.use_gravity = False  # : Bool
+        self.use_gravity = True  # : Bool
         self.gravity_extra_length = 0.0  # : Float (Positive)
         self.radius_cutoff = 0.0  # : Float (Positive)
         self.wavelength_cutoff = 0.0  # : Float (Positive)
@@ -40,7 +40,7 @@ class StateConvertToQ(metaclass=JsonSerializable):
         # 2D settings
         self.q_xy_max = None  # : Float (Positive)
         self.q_xy_step = None  # : Float (Positive)
-        self.q_xy_step_type = RangeStepType.LIN
+        self.q_xy_step_type: RangeStepType = None
 
         # -----------------------
         # Q Resolution specific
@@ -51,7 +51,9 @@ class StateConvertToQ(metaclass=JsonSerializable):
         self.moderator_file = None  # : Str()
 
         # Circular aperture settings
+        # Source aperture diameter
         self.q_resolution_a1 = None  # : Float (Positive)
+        # Sample aperture diameter
         self.q_resolution_a2 = None  # : Float (Positive)
 
         # Rectangular aperture settings
