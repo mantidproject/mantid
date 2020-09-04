@@ -113,6 +113,8 @@ public:
 
   /// Load function
   void loadFunction(const QString &funcString);
+  /// save function
+  void saveFunction(const QString &fnName);
   /// Create a new function
   PropertyHandler *addFunction(const std::string &fnName);
 
@@ -585,8 +587,6 @@ protected:
 private:
   ///
   QPushButton *createFitMenuButton(QWidget *w);
-  /// save function
-  void saveFunction(const QString &fnName);
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr /*ws*/) const;
   /// Find QtBrowserItem for a property prop among the chidren of
