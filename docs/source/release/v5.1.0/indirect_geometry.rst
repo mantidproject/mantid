@@ -53,4 +53,11 @@ Bug Fixes
 - Indirect Data Analysis F(Q) fit multiple workspaces can now load more than one spectra from each workspace.
 - Fixed a bug in the Indirect->Bayes->Quasi Interface, which caused the same parameter to be plotted twice.
 
+New
+###
+
+- :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` has been added as a beta method for analysing Vesuvio data.
+
+
+
 :ref:`Release 5.1.0 <v5.1.0>`
