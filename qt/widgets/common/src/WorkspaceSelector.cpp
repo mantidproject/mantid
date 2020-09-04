@@ -21,6 +21,7 @@
 #include <QCompleter>
 #include <QDebug>
 #include <QDropEvent>
+#include <QLineEdit>
 #include <QMimeData>
 #include <QUrl>
 using namespace MantidQt::MantidWidgets;
@@ -42,7 +43,6 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
       m_algName(), m_algPropName(), m_algorithm() {
   setEditable(true);
-  this->completer()->setCompletionMode(QCompleter::PopupCompletion);
   if (init) {
     Mantid::API::AnalysisDataServiceImpl &ads =
         Mantid::API::AnalysisDataService::Instance();
@@ -55,6 +55,8 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
     refresh();
   }
   this->setAcceptDrops(true);
+  this->completer()->setCompletionMode(QCompleter::PopupCompletion);
+  this->setInsertPolicy(QComboBox::NoInsert);
 }
 
 /**
