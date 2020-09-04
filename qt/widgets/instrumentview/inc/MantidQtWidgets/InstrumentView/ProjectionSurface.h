@@ -147,7 +147,7 @@ public:
   /// Save settings for the projection surface to a project file
   virtual std::string saveToProject() const;
 
-  void setCurrentTab(int currentTab) { m_currentTab = currentTab; }
+  void setCurrentTab(QString currentTab) { m_currentTab = currentTab; }
 
   //-----------------------------------
   //    Mask methods
@@ -390,7 +390,7 @@ private:
   /// Set when the picking image must be redrawn regardless of the interaction
   /// mode
   mutable bool m_redrawPicking;
-  int m_currentTab;
+  QString m_currentTab;
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;

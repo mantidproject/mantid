@@ -529,7 +529,7 @@ void InstrumentWidgetMaskTab::setActivity() {
  * Can be used either to mask the picked pixel or its parent.
  */
 void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
-  auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.componentInfo();
   if (!componentInfo.isDetector(pickID)) {
     return;
@@ -548,6 +548,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       detectorsId = componentInfo.detectorsInSubtree(parent);
     }
     storeDetectorMask(m_roi_on->isChecked(), detectorsId);
+
   } else if (m_grouping_on->isChecked()) {
     if (m_pixel->isChecked()) {
       Mantid::detid_t detId = actor.getDetID(pickID);
@@ -558,8 +559,9 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       if (!componentInfo.hasParent(pickID)) {
         return;
       }
-      auto parent = componentInfo.parent(pickID);
-      auto dets = actor.getDetIDs(componentInfo.detectorsInSubtree(parent));
+      const auto parent = componentInfo.parent(pickID);
+      const auto dets =
+          actor.getDetIDs(componentInfo.detectorsInSubtree(parent));
       m_detectorsToGroup.clear();
       for (auto det : dets)
         m_detectorsToGroup.append(det);
@@ -766,7 +768,6 @@ void InstrumentWidgetMaskTab::applyMaskToView() {
  */
 void InstrumentWidgetMaskTab::clearMask() {
   clearShapes();
-
   m_instrWidget->getInstrumentActor().clearMasks();
   m_instrWidget->updateInstrumentView();
   enableApplyButtons();
@@ -1221,15 +1222,17 @@ InstrumentWidgetMaskTab::addDoubleProperty(const QString &name) const {
 void InstrumentWidgetMaskTab::storeDetectorMask(
     bool isROI, const std::vector<size_t> &onClickDets) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  m_pointer->setChecked(true);
-  setActivity();
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
   Mantid::API::IMaskWorkspace_sptr wsFresh;
 
   const auto &actor = m_instrWidget->getInstrumentActor();
   std::vector<size_t> dets;
-  // get detectors covered by the shapes
-  m_instrWidget->getSurface()->getMaskedDetectors(dets);
+  if (onClickDets.size() == 0) {
+    // get detectors covered by the shapes
+    m_instrWidget->getSurface()->getMaskedDetectors(dets);
+    m_pointer->setChecked(true);
+    setActivity();
+  }
   dets.insert(dets.end(), onClickDets.begin(), onClickDets.end());
   if (!dets.empty()) {
     auto wsMask = actor.getMaskWorkspace();
@@ -1273,8 +1276,10 @@ void InstrumentWidgetMaskTab::storeDetectorMask(
       m_instrWidget->updateInstrumentDetectors();
     }
   }
-  // remove masking shapes
-  clearShapes();
+  if (onClickDets.size() == 0) {
+    // remove masking shapes
+    clearShapes();
+  }
   QApplication::restoreOverrideCursor();
 }
 

@@ -178,9 +178,6 @@ void XIntegrationScrollBar::updateMinMax() {
 XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
     : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0),
       m_totalMaximum(1), m_minimum(0), m_maximum(1) {
-  // if the integration control panel is hidden, most of the fields should not
-  // be declared
-
   auto *layout = new QHBoxLayout();
   m_minText = new QLineEdit(this);
   m_minText->setMaximumWidth(100);

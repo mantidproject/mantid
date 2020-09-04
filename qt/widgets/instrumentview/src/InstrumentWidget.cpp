@@ -159,14 +159,14 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   try {
     size_t blockSize = m_instrumentActor->getWorkspace()->blocksize();
 
-    m_shouldIntegrate =
+    m_isIntegrable =
         (blockSize > 1 ||
          m_instrumentActor->getWorkspace()->id() == "EventWorkspace");
   } catch (...) {
-    m_shouldIntegrate = true;
+    m_isIntegrable = true;
   }
 
-  if (m_shouldIntegrate) {
+  if (m_isIntegrable) {
     m_xIntegration = new XIntegrationControl(this);
     mainLayout->addWidget(m_xIntegration);
     connect(m_xIntegration, SIGNAL(changed(double, double)), this,
@@ -306,7 +306,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
         new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
 
-  if (m_shouldIntegrate) {
+  if (m_isIntegrable) {
     m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
                                   m_instrumentActor->maxBinValue());
     m_xIntegration->setUnits(QString::fromStdString(
@@ -356,7 +356,7 @@ void InstrumentWidget::resetSurface() {
  * Select the tab to be displayed
  */
 void InstrumentWidget::selectTab(int tab) {
-  getSurface()->setCurrentTab(tab);
+  getSurface()->setCurrentTab(mControlsTab->tabText(tab));
   mControlsTab->setCurrentIndex(tab);
 }
 
@@ -581,7 +581,7 @@ void InstrumentWidget::tabChanged(int /*unused*/) {
   updateInfoText();
   auto surface = getSurface();
   if (surface) {
-    surface->setCurrentTab(getCurrentTab());
+    surface->setCurrentTab(mControlsTab->tabText(getCurrentTab()));
   }
 }
 
@@ -894,7 +894,7 @@ void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
  * python.
  */
 void InstrumentWidget::setBinRange(double xmin, double xmax) {
-  if (m_shouldIntegrate) {
+  if (m_isIntegrable) {
     m_xIntegration->setRange(xmin, xmax);
   }
 }
@@ -1266,7 +1266,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
   m_maskTab->loadSettings(settings);
 
-  if (m_shouldIntegrate) {
+  if (m_isIntegrable) {
     connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
             SLOT(changedIntegrationRange(double, double)));
   }
