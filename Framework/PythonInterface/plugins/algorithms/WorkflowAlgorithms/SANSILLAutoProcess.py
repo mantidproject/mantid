@@ -328,6 +328,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             else:
                 self.log().information('Skipping empty token run.')
 
+        for output in outputs:
+            ConvertToPointData(InputWorkspace=output,
+                               OutputWorkspace=output)
         if len(outputs) > 1:
             try:
                 stitched = self.output + "_stitched"
