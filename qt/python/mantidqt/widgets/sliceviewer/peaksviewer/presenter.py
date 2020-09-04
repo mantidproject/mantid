@@ -11,15 +11,31 @@ from enum import Enum
 
 # local imports
 from mantidqt.widgets.workspacedisplay.table.presenter \
-    import TableWorkspaceDataPresenter
+    import TableWorkspaceDataPresenter, create_table_item
 from .model import create_peaksviewermodel
+
+
+class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
+    """Override create_item method to format table columns more
+    appropriately
+    """
+    FLOAT_FORMAT_STR = '{:.5f}'
+
+    def create_item(self, data, _):
+        """Create a table item to display the data. The data is always readonly
+        here.
+        """
+        if type(data) == float:
+            data = self.FLOAT_FORMAT_STR.format(data)
+        else:
+            data = str(data)
+        return create_table_item(data, editable=False)
 
 
 class PeaksViewerPresenter(object):
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
-
     class Event(Enum):
         PeaksListChanged = 1
         OverlayPeaks = 2
@@ -38,7 +54,7 @@ class PeaksViewerPresenter(object):
         self._model = model
         self._raise_error_if_workspace_incompatible(model.peaks_workspace)
         self._peaks_table_presenter = \
-            TableWorkspaceDataPresenter(model, view.table_view)
+            PeaksWorkspaceDataPresenter(model, view.table_view)
 
         self._view = view
         view.subscribe(self)
@@ -65,7 +81,7 @@ class PeaksViewerPresenter(object):
         elif event == PresenterEvent.PeakSelected:
             self._peak_selected()
         elif event == PresenterEvent.PeaksListChanged:
-            self._peaks_table_presenter.refresh()
+            self._peaks_list_changed()
         elif event == PresenterEvent.ClearPeaks:
             self._clear_peaks()
         else:
@@ -99,6 +115,13 @@ class PeaksViewerPresenter(object):
         #   - find and set limits required to "zoom" to the selected peak
         self._view.set_slicepoint(self.model.slicepoint(selected_index, self._view.sliceinfo))
         self._view.set_axes_limits(*self.model.viewlimits(selected_index), auto_transform=False)
+
+    def _peaks_list_changed(self):
+        """
+        Respond to a change in the peaks list in the model
+        """
+        self._peaks_table_presenter.refresh()
+        self.view.table_view.enable_sorting()
 
     # private api
     @staticmethod
@@ -142,8 +165,8 @@ class PeaksViewerCollectionPresenter(object):
         :param name: The name of a PeaksWorkspace.
         :returns: The child presenter
         """
-        presenter = PeaksViewerPresenter(
-            self._create_peaksviewer_model(name), self._view.append_peaksviewer())
+        presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
+                                         self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
         return presenter
 

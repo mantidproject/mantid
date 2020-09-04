@@ -12,17 +12,17 @@ import unittest
 from qtpy.QtCore import Qt
 
 from mantid.kernel import V3D
-from mantidqt.widgets.workspacedisplay.table.workbench_table_widget_item import WorkbenchTableWidgetItem
+from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import create_table_item
 
 
-class WorkbenchTableWidgetItemTest(unittest.TestCase):
+class TableWorkspaceItemTest(unittest.TestCase):
     def test_initialise_editable_int(self):
         """
         Test that the widget is correctly initialised and the type is correctly kept in the .data call
         """
         mock_data = 12
-        w = WorkbenchTableWidgetItem(mock_data, editable=True)
-        self.assertEqual(mock_data, w.display_data)
+        w = create_table_item(mock_data, editable=True)
+        self.assertEqual(mock_data, w.orig_data)
         self.assertEqual(mock_data, w.data(Qt.DisplayRole))
 
     def test_initialise_editable_bool(self):
@@ -30,8 +30,8 @@ class WorkbenchTableWidgetItemTest(unittest.TestCase):
         Test that the widget is correctly initialised and the type is correctly kept in the .data call
         """
         mock_data = True
-        w = WorkbenchTableWidgetItem(mock_data, editable=True)
-        self.assertEqual(mock_data, w.display_data)
+        w = create_table_item(mock_data, editable=True)
+        self.assertEqual(mock_data, w.orig_data)
         self.assertEqual(mock_data, w.data(Qt.DisplayRole))
 
     def test_initialise_readonly(self):
@@ -40,51 +40,55 @@ class WorkbenchTableWidgetItemTest(unittest.TestCase):
         :return:
         """
         mock_data = 123
-        w = WorkbenchTableWidgetItem(mock_data, editable=False)
+        w = create_table_item(mock_data, editable=False)
         self.assertEqual(str(mock_data), w.data(Qt.DisplayRole))
 
         mock_data = 1.3333333
-        w = WorkbenchTableWidgetItem(mock_data, editable=False)
+        w = create_table_item(mock_data, editable=False)
         self.assertEqual(str(mock_data), w.data(Qt.DisplayRole))
 
         mock_data = V3D(1, 2, 3)
-        w = WorkbenchTableWidgetItem(mock_data, editable=False)
+        w = create_table_item(mock_data, editable=False)
         self.assertEqual(str(mock_data), w.data(Qt.DisplayRole))
 
         mock_data = True
-        w = WorkbenchTableWidgetItem(mock_data, editable=False)
+        w = create_table_item(mock_data, editable=False)
         self.assertEqual(str(mock_data), w.data(Qt.DisplayRole))
 
         mock_data = "apples"
-        w = WorkbenchTableWidgetItem(mock_data, editable=False)
+        w = create_table_item(mock_data, editable=False)
         self.assertEqual(str(mock_data), w.data(Qt.DisplayRole))
 
     def test_initialise_editable_with_v3d(self):
         mock_data = V3D(1, 2, 3)
-        w = WorkbenchTableWidgetItem(mock_data, True)
+        w = create_table_item(mock_data, True)
         self.assertEqual(str(mock_data), w.data(Qt.DisplayRole))
         # the original data of the V3D is stored as a string too
-        self.assertEqual(str(mock_data), w.display_data)
+        self.assertEqual(str(mock_data), w.orig_data)
 
     def test_initialise_editable_with_float(self):
         mock_data = 42.00
-        w = WorkbenchTableWidgetItem(mock_data, True)
+        w = create_table_item(mock_data, True)
         self.assertEqual(mock_data, w.data(Qt.DisplayRole))
-        self.assertEqual(mock_data, w.display_data)
+        self.assertEqual(mock_data, w.orig_data)
 
-    def test_reset(self):
-        w = WorkbenchTableWidgetItem(500, editable=False)
+    def test_reset_sets_item_data_back_to_original_for_editable_item(self):
+        mock_data = 42
+        w = create_table_item(mock_data, True)
 
-        w.display_data = 4444
+        w.setData(3, Qt.DisplayRole)
         w.reset()
 
-        self.assertEqual(4444, w.data(Qt.DisplayRole))
+        self.assertEqual(mock_data, w.data(Qt.DisplayRole))
 
-    def test_update(self):
-        w = WorkbenchTableWidgetItem(500, editable=False)
-        w.setData(Qt.DisplayRole, 4444)
-        w.update()
-        self.assertEqual(4444, w.display_data)
+    def test_sync_updates_orignal_data_from_model_for_editable_item(self):
+        w = create_table_item(400, editable=True)
+        new_data = 5
+        w.setData(new_data, Qt.DisplayRole)
+
+        w.sync()
+
+        self.assertEqual(new_data, w.orig_data)
 
 
 if __name__ == '__main__':
