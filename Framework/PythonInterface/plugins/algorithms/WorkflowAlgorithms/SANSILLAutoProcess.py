@@ -8,6 +8,7 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Multiple
     WorkspaceGroupProperty, FileAction
 from mantid.kernel import Direction, FloatBoundedValidator
 from mantid.simpleapi import *
+import numpy as np
 from os import path
 
 EMPTY_TOKEN = '000000'
@@ -342,13 +343,40 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                    "stitching manually: " + str(re))
 
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
+
         # group wedge workspaces
         if self.getPropertyValue('OutputType') != "I(Phi,Q)":
             for w in range(self.getProperty('NumberOfWedges').value):
                 wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
                             for d in range(self.dimensionality)]
+                # convert to point data and remove nan and 0 from edges
+                for ws in wedge_ws:
+                    ConvertToPointData(InputWorkspace=ws,
+                                       OutputWorkspace=ws)
+                    ReplaceSpecialValues(InputWorkspace=ws,
+                                         OutputWorkspace=ws,
+                                         NaNValue=0)
+                    y = mtd[ws].readY(0)
+                    x = mtd[ws].readX(0)
+                    nonzero = np.nonzero(y)
+
+                    CropWorkspace(InputWorkspace=ws,
+                                  XMin=x[nonzero][0] - 1,
+                                  XMax=x[nonzero][-1],
+                                  OutputWorkspace=ws)
+
+                # and stitch if possible
+                try:
+                    stitched = self.output + "_wedge_" + str(w + 1) + "_stitched"
+                    Stitch1DMany(InputWorkspaces=wedge_ws,
+                                 OutputWorkspace=stitched)
+                    wedge_ws.append(stitched)
+                except:
+                    self.log().warning("Unable to stitch automatically, consider "
+                                       "stitching manually: " + str(re))
                 GroupWorkspaces(InputWorkspaces=wedge_ws,
                                 OutputWorkspace=self.output + "_wedge_" + str(w + 1))
+
 
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
