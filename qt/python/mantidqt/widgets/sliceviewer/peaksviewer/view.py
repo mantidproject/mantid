@@ -129,6 +129,7 @@ class PeaksViewerView(QWidget):
         self._table_view.setSelectionBehavior(_PeaksWorkspaceTableView.SelectRows)
         self._table_view.setSelectionMode(_PeaksWorkspaceTableView.SingleSelection)
         self._table_view.clicked.connect(self._on_row_clicked)
+        self._table_view.verticalHeader().sectionClicked.connect(self._row_selected)
 
         group_box_layout = QVBoxLayout()
         group_box_layout.addWidget(self._table_view)
