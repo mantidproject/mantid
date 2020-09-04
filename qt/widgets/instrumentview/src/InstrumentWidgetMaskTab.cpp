@@ -81,6 +81,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
       m_doubleManager(nullptr), m_browser(nullptr), m_left(nullptr),
       m_top(nullptr), m_right(nullptr), m_bottom(nullptr) {
 
+  m_detectorsToGroup = QList<Mantid::detid_t>();
   // main layout
   QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -455,6 +456,7 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
 void InstrumentWidgetMaskTab::setActivity() {
   const QColor borderColor = getShapeBorderColor();
   const QColor fillColor = getShapeFillColor();
+  // m_detectorsToGroup.clear();
   QString whatIsBeingSelected = m_maskBins && getMode() == Mode::Mask
                                     ? "Selecting bins"
                                     : "Selecting detectors";
@@ -522,6 +524,7 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_activeTool->setText("Tool: Tube/bank mask. " + whatIsBeingSelected);
   }
   m_instrWidget->updateInfoText();
+  // enableApplyButtons();
 }
 
 /**
@@ -554,7 +557,6 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       Mantid::detid_t detId = actor.getDetID(pickID);
       m_detectorsToGroup.clear();
       m_detectorsToGroup.append(detId);
-
     } else if (m_tube->isChecked()) {
       if (!componentInfo.hasParent(pickID)) {
         return;
@@ -768,6 +770,7 @@ void InstrumentWidgetMaskTab::applyMaskToView() {
  */
 void InstrumentWidgetMaskTab::clearMask() {
   clearShapes();
+  m_detectorsToGroup.clear();
   m_instrWidget->getInstrumentActor().clearMasks();
   m_instrWidget->updateInstrumentView();
   enableApplyButtons();
@@ -1146,7 +1149,7 @@ void InstrumentWidgetMaskTab::enableApplyButtons() {
   bool hasBinMask = instrActor.hasBinMask();
   bool hasDetectorMask = hasMaskShapes || hasMaskWorkspace;
   bool hasMask = hasDetectorMask || hasBinMask;
-
+  bool canGroup = (m_detectorsToGroup.size() != 0) && (mode == Mode::Group);
   bool enableBinMasking = hasMaskShapes && m_maskBins && mode == Mode::Mask;
 
   if (m_maskBins && mode == Mode::Mask) {
@@ -1164,8 +1167,9 @@ void InstrumentWidgetMaskTab::enableApplyButtons() {
     m_applyToView->setEnabled(false);
   }
   m_saveShapesToTable->setEnabled(hasMaskShapes);
-  m_saveButton->setEnabled(hasDetectorMask && (!enableBinMasking));
-  m_clearAll->setEnabled(hasMask);
+  m_saveButton->setEnabled((hasDetectorMask || canGroup) &&
+                           (!enableBinMasking));
+  m_clearAll->setEnabled(hasMask || canGroup);
   setActivity();
 }
 
