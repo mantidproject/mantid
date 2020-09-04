@@ -319,6 +319,18 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.do_background_subtraction.assert_not_called()
         self.model.undo_background_subtraction.assert_called_once_with("name2")
 
+    def test_inspect_bg_button_enables_and_disables(self):
+        self.view.get_item_checked.return_value = False
+        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
+        self.presenter.row_numbers["name1"] = 0
+        self.presenter.row_numbers["name2"] = 1
+        self.view.get_selected_rows.return_value = self.presenter.row_numbers
+        self.presenter._handle_selection_changed()
+        self.view.set_inspect_bg_button_enabled.assert_called_with(False)
+        self.view.get_item_checked.return_value = True
+        self.presenter._handle_selection_changed()
+        self.view.set_inspect_bg_button_enabled.assert_called_with(True)
+
     def _setup_bgsub_test(self):
         mocked_table_item = mock.MagicMock()
         mocked_table_item.checkState.return_value = True
