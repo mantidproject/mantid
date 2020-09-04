@@ -58,10 +58,5 @@ New
 - :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` has been added as a beta method for analysing Vesuvio data.
 
 
-New
-###
-
-- :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` has been added as a beta method for analysing Vesuvio data.
-
 
 :ref:`Release 5.1.0 <v5.1.0>`
