@@ -233,6 +233,50 @@ void PlotAsymmetryByLogValue::exec() {
   saveResultsToADS(outWS, nplots + 1);
 }
 
+/**  Finds path to a file and removes file name to return it's directory
+ *   @param fileName : [input] name of file 
+ *   @return string containing directory path
+ */
+std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(
+    const std::string &fileName) const {
+  const auto path = FileFinder::Instance().getFullPath(fileName);
+  Poco::File fileBase(path);
+  std::size_t found = fileBase.path().find_last_of("/\\");
+
+  if (found == std::string::npos)
+    return ""; // Empty string if file name could not be found so directory could not be determined
+
+  return fileBase.path().substr(0, found + 1);
+}
+
+/**  Loops files between first and last values and adds to vector of file names
+ */
+void PlotAsymmetryByLogValue::populateFileNamesFromFirstLast(std::string firstRun, std::string lastRun) {
+  // Parse run names and get the number of runs
+  parseRunNames(firstRun, lastRun, m_filenameBase, m_filenameExt,
+                m_filenameZeros);
+  const auto firstRunNumber = std::stoul(firstRun); // starting run number
+  const auto lastRunNumber = std::stoul(lastRun);   // last run number
+  if (lastRunNumber < firstRunNumber) {
+    throw std::runtime_error(
+        "First run number is greater than last run number");
+  }
+
+  for (size_t i = firstRunNumber; i <= lastRunNumber; i++) {
+    // Get complete run name
+    std::ostringstream file, fileRunNumber;
+    fileRunNumber << std::setw(m_filenameZeros) << std::setfill('0') << i;
+    file << m_filenameBase << fileRunNumber.str() << m_filenameExt;
+
+    // Check if file exists
+    if (!Poco::File(file.str()).exists()) {
+      m_log.warning() << "File " << file.str() << " not found\n";
+    } else {
+      m_fileNames.emplace_back(file.str());
+    }
+  }
+}
+
 /**  Checks input properties and compares them to previous values
  *   @param firstRunNumber :: [output] Number of the first run
  *   @param lastRunNumber :: [output] Number of the last run
@@ -259,49 +303,21 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
   m_dtcType = getPropertyValue("DeadTimeCorrType");
   m_dtcFile = getPropertyValue("DeadTimeCorrFile");
   // Get runs
-  std::string firstFN = getProperty("FirstRun");
-  std::string lastFN = getProperty("LastRun");
   m_fileNames = getProperty("WorkspaceNames");
 
   // If file names empty, first and last provided so need to populate vector
   if (m_fileNames.empty()) {
-    // Parse run names and get the number of runs
-    parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
-                  m_filenameZeros);
-    firstRunNumber = std::stoul(firstFN); // starting run number
-    lastRunNumber = std::stoul(lastFN);   // last run number
-    if (lastRunNumber < firstRunNumber) {
-      throw std::runtime_error(
-          "First run number is greater than last run number");
-    }
-
-    for (size_t i = firstRunNumber; i <= lastRunNumber; i++) {
-      // Get complete run name
-      std::ostringstream file, fileRunNumber;
-      fileRunNumber << std::setw(m_filenameZeros) << std::setfill('0') << i;
-      file << m_filenameBase << fileRunNumber.str() << m_filenameExt;
-
-      // Check if file exists
-      if (!Poco::File(file.str()).exists()) {
-        m_log.warning() << "File " << file.str() << " not found\n";
-      } else {
-        m_fileNames.emplace_back(file.str());
-      }
-    }
+    populateFileNamesFromFirstLast(getProperty("FirstRun"),
+                                   getProperty("LastRun"));
   } else {
-    // Check all files in same directory
-    const auto pathF = FileFinder::Instance().getFullPath(m_fileNames[0]);
-    Poco::File fileBase(pathF);
-    std::size_t found = fileBase.path().find_last_of("/\\");
-    const auto firstDir = fileBase.path().substr(0, found + 1);
+    // Get directory of first file  
+    const auto firstDir = getDirectoryFromFileName(m_fileNames[0]);
+
+    // Check all directories match
     for (const auto &file : m_fileNames) {
-      const auto pathT = FileFinder::Instance().getFullPath(file);
-      Poco::File filePathT(pathT);
-      std::size_t found_t = filePathT.path().find_last_of("/\\");
-      const auto dir = filePathT.path().substr(0, found_t + 1);
-      if (dir != firstDir) {
+      if (firstDir != getDirectoryFromFileName(file)) {
         // Error
-        throw std::runtime_error("All Files are not in the same directory.");
+        throw std::runtime_error("All Files are not in the same directory (" + firstDir + ").");
       }
     }
   }

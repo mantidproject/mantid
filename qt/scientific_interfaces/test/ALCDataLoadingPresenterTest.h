@@ -57,8 +57,6 @@ public:
   MOCK_METHOD0(updateRunsTextFromAuto, void());
   MOCK_CONST_METHOD0(getCurrentRunsText, std::string());
   MOCK_METHOD1(setRunsTextWithSearch, void(const QString &));
-  MOCK_CONST_METHOD0(getRunsOldInput, std::string());
-  MOCK_METHOD1(setRunsOldInput, void(const std::string &));
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
@@ -74,7 +72,7 @@ public:
   MOCK_METHOD1(checkBoxAutoChanged, void(int));
   MOCK_METHOD1(setCurrentAutoFile, void(const std::string &));
   MOCK_METHOD0(handleFirstFileChanged, void());
-  MOCK_METHOD1(extractRunNumber, int(const std::string &));
+  MOCK_METHOD1(setRunsReadOnly, void(bool));
 
   void requestLoading() { emit loadRequested(); }
   void selectRuns() { emit runsSelected(); }

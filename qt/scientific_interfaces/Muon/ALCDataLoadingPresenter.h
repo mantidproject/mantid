@@ -68,6 +68,9 @@ private:
   /// Check custom grouping is sensible
   bool checkCustomGrouping();
 
+  /// Extract run number as in from file name string
+  int ALCDataLoadingPresenter::extractRunNumber(const std::string &file);
+
   /// Check the group is valid
   std::string isCustomGroupingValid(const std::string &group, bool &isValid);
 
@@ -85,6 +88,9 @@ private:
 
   // Loading algorithm
   Mantid::API::IAlgorithm_sptr m_LoadingAlg;
+
+  /// Input entered before auto checked
+  std::string m_oldInput;
 };
 
 } // namespace CustomInterfaces

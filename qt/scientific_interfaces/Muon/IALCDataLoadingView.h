@@ -82,11 +82,8 @@ public:
   /// Sets text of runs with a search for files
   virtual void setRunsTextWithSearch(const QString &text) = 0;
 
-  /// @return string which was saved when auto checked
-  virtual std::string getRunsOldInput() const = 0;
-
-  /// Sets old input when auto checked
-  virtual void setRunsOldInput(const std::string &oldInput) = 0;
+  /// Sets readonly for runs filefinder widget
+  virtual void setRunsReadOnly(bool readOnly) = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -131,9 +128,6 @@ public slots:
 
   /// Toggles "auto" mode for last file
   virtual void checkBoxAutoChanged(int state) = 0;
-
-  /// Extract run number from a file
-  virtual int extractRunNumber(const std::string &file) = 0;
 
 signals:
   /// Request to load data

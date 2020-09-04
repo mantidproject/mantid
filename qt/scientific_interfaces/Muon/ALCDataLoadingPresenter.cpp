@@ -31,7 +31,7 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_numDetectors(0), m_loadingData(false) {}
+    : m_view(view), m_numDetectors(0), m_loadingData(false), m_oldInput("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -61,6 +61,29 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
 }
 
 /**
+ * Remove the run number from a full file path
+ * @param file :: [input] full path which contains a run number
+ * @return An integer representation of the run number
+ */
+int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
+  if (file.empty())
+    return -1;
+
+  auto returnVal = file;
+  // Strip beginning of path to just the run (e.g. MUSR00015189.nxs)
+  std::size_t found = returnVal.find_last_of("/\\");
+  returnVal = returnVal.substr(found + 1);
+
+  // Remove all non-digits
+  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(),
+                                 [](auto c) { return !std::isdigit(c); }),
+                  returnVal.end());
+
+  // Return run number as int (removes leading 0's)
+  return std::stoi(returnVal);
+}
+
+/**
  * Changes which files are loaded based on autoRun. Will only make changes if
  * the current last run number is less than autoRun Removes any files which
  * don't exist between the first run and autoRun
@@ -69,13 +92,12 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
  */
 void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
 
-  const int currentLastRun = m_view->extractRunNumber(m_view->lastRun());
+  const int currentLastRun = extractRunNumber(m_view->lastRun());
   // auto currentInput = m_ui.runs->getText().toStdString();
   auto currentInput = m_view->getCurrentRunsText();
 
   // Save old input
-  // m_oldInput = currentInput;
-  m_view->setRunsOldInput(currentInput);
+  m_oldInput = currentInput;
 
   // Only make changes if found run > user last run
   if (autoRun <= currentLastRun)
@@ -160,6 +182,9 @@ void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
  */
 void ALCDataLoadingPresenter::updateAutoRun() {
 
+  // Set read only
+  m_view->setRunsReadOnly(true);
+
   // Find most recent file from first
   ALCLatestFileFinder finder(m_view->firstRun());
   const auto last = finder.getMostRecentFile();
@@ -172,7 +197,7 @@ void ALCDataLoadingPresenter::updateAutoRun() {
   }
 
   // Update the auto run in the view
-  const int lastRun = m_view->extractRunNumber(last);
+  const int lastRun = extractRunNumber(last);
   m_view->setCurrentAutoRun(lastRun);
 
   // Update text
@@ -184,8 +209,11 @@ void ALCDataLoadingPresenter::updateAutoRun() {
  * Sets runs file finder to input as it was before auto was checked
  */
 void ALCDataLoadingPresenter::resetAutoRun() {
+  // Remove read only
+  m_view->setRunsReadOnly(false);
+
   m_view->setRunsTextWithSearch(
-      QString::fromStdString(m_view->getRunsOldInput()));
+      QString::fromStdString(m_oldInput));
 }
 
 /**
@@ -432,5 +460,6 @@ bool ALCDataLoadingPresenter::isLoading() const { return m_loadingData; }
  * Cancels current loading algorithm
  */
 void ALCDataLoadingPresenter::cancelLoading() const { m_LoadingAlg->cancel(); }
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

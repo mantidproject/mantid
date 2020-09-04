@@ -66,12 +66,8 @@ public:
   void checkBoxAutoChanged(int state) override;
   std::string getCurrentRunsText() const override;
   void setRunsTextWithSearch(const QString &text) override;
-  std::string getRunsOldInput() const override;
-  void setRunsOldInput(const std::string &oldInput) override;
-
   void setCurrentAutoRun(const int run) override { m_currentAutoRun = run; }
-
-  int extractRunNumber(const std::string &file) override;
+  void setRunsReadOnly(bool readOnly) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
@@ -89,9 +85,6 @@ private:
 
   /// The currently found last run when auto checked, -1 if not found
   int m_currentAutoRun;
-
-  /// The input saved when auto checkbox checked
-  std::string m_oldInput;
 };
 
 } // namespace CustomInterfaces

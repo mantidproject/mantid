@@ -280,42 +280,19 @@ void ALCDataLoadingView::checkBoxAutoChanged(int state) {
 
   // Try to auto fill in rest of runs
   if (state == Qt::Checked) {
-    // Set read only
-    m_ui.runs->setReadOnly(true);
 
     // Update auto run
     emit runAutoChecked();
 
   } else {
-    // Remove read only
-    m_ui.runs->setReadOnly(false);
 
     // Reset text as before auto checked
     emit runAutoUnchecked();
   }
 }
 
-/**
- * Remove the run number from a full file path
- * @param file :: [input] full path which contains a run number
- * @return An integer representation of the run number
- */
-int ALCDataLoadingView::extractRunNumber(const std::string &file) {
-  if (file.empty())
-    return -1;
-
-  auto returnVal = file;
-  // Strip beginning of path to just the run (e.g. MUSR00015189.nxs)
-  std::size_t found = returnVal.find_last_of("/\\");
-  returnVal = returnVal.substr(found + 1);
-
-  // Remove all non-digits
-  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(),
-                                 [](auto c) { return !std::isdigit(c); }),
-                  returnVal.end());
-
-  // Return run number as int (removes leading 0's)
-  return std::stoi(returnVal);
+void ALCDataLoadingView::setRunsReadOnly(bool readOnly) {
+  m_ui.runs->setReadOnly(readOnly);
 }
 
 std::string ALCDataLoadingView::getCurrentRunsText() const {
@@ -324,12 +301,6 @@ std::string ALCDataLoadingView::getCurrentRunsText() const {
 
 void ALCDataLoadingView::setRunsTextWithSearch(const QString &text) {
   m_ui.runs->setFileTextWithSearch(text);
-}
-
-std::string ALCDataLoadingView::getRunsOldInput() const { return m_oldInput; }
-
-void ALCDataLoadingView::setRunsOldInput(const std::string &oldInput) {
-  m_oldInput = oldInput;
 }
 
 } // namespace CustomInterfaces
