@@ -26,6 +26,8 @@ New
 Improvements
 ############
 
+- Combo boxes for workspace selection through `OptionsPropertyWidget` and `WorkspaceSelector` are now editable and support popup autocompletion based on the beginning of a string.
+
 .. figure:: ../../images/Plot1DSelectionDialog5-1.png
    :align: right
 
