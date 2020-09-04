@@ -84,6 +84,8 @@ void OptionsPropertyWidget::setValueImpl(const QString &value) {
     m_combo->setCurrentIndex(index);
 }
 
+//----------------------------------------------------------------------------------------------
+/** Performs validation of the inputs when editing is finished */
 void OptionsPropertyWidget::editingFinished() {
   auto value = m_combo->currentText();
   const QString temp =
