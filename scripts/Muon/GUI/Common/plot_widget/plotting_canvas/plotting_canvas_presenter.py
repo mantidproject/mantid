@@ -39,13 +39,13 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def _setup_autoscale_observer(self):
         self.uncheck_autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
-        self._view.toolBar.uncheck_autoscale_notifier.add_subscriber(self.uncheck_autoscale_observer)
+        self._view.add_uncheck_autoscale_subscriber(self.uncheck_autoscale_observer)
 
         self.enable_autoscale_observer = GenericObserver(self._options_presenter.enable_autoscale)
-        self._view.toolBar.enable_autoscale_notifier.add_subscriber(self.enable_autoscale_observer)
+        self._view.add_enable_autoscale_subscriber(self.enable_autoscale_observer)
 
         self.disable_autoscale_observer = GenericObserver(self._options_presenter.disable_autoscale)
-        self._view.toolBar.disable_autoscale_notifier.add_subscriber(self.disable_autoscale_observer)
+        self._view.add_disable_autoscale_subscriber(self.disable_autoscale_observer)
 
     # Interface implementation
     def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
