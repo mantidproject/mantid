@@ -46,6 +46,8 @@ class SamplingImage(mimage.AxesImage):
         self._resize_cid, self._xlim_cid, self._ylim_cid = None, None, None
         self._resample_required = True
         self._full_extent = extent
+        self.orig_shape = (workspace.getDimension(0).getNBins(),
+                           workspace.getDimension(1).getNBins())
         self._xbins, self._ybins = 100, 100
         self.origin = origin
 
@@ -100,8 +102,14 @@ class SamplingImage(mimage.AxesImage):
             if xbins is None or ybins is None:
                 xbins, ybins = self._calculate_bins_from_extent()
 
-            x, y, data = get_matrix_2d_ragged(self.ws, self.normalization, histogram2D=True, transpose=self.transpose,
-                                              extent=extent, xbins=xbins, ybins=ybins, spec_info=self.spectrum_info)
+            x, y, data = get_matrix_2d_ragged(self.ws,
+                                              self.normalization,
+                                              histogram2D=True,
+                                              transpose=self.transpose,
+                                              extent=extent,
+                                              xbins=xbins,
+                                              ybins=ybins,
+                                              spec_info=self.spectrum_info)
 
             # Data is an MxN matrix.
             # If origin = upper extent is set as [xmin, xmax, ymax, ymin].
@@ -166,8 +174,10 @@ def imshow_sampling(axes,
     kwargs.pop('distribution', None)
 
     if not extent:
-        x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
-                          workspace.getDimension(1).getMinimum(), workspace.getDimension(1).getMaximum())
+        x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(),
+                          workspace.getDimension(0).getMaximum(),
+                          workspace.getDimension(1).getMinimum(),
+                          workspace.getDimension(1).getMaximum())
         if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
             width = workspace.getDimension(1).getBinWidth()
             y0 -= width / 2

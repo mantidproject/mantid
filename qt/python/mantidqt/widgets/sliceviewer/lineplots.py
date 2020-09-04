@@ -21,7 +21,8 @@ import numpy as np
 
 # local imports
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from .cursortracker import CursorTracker
+from .cursor import (CursorTracker, MoveMouseCursorUp, MoveMouseCursorDown, MoveMouseCursorLeft,
+                     MoveMouseCursorRight)
 
 # Limits for X/Y axes
 Limits = Tuple[Tuple[float, float], Tuple[float, float]]
@@ -203,7 +204,6 @@ class KeyHandler:
       - STATUS_MESSAGE: str - A string defining the information message to display
       - SELECTION_KEYS: tuple(str) - A tuple of strings defining keys to accept
     """
-
     def __init__(self, plotter: LinePlots, exporter: Any):
         """
         :param plotter: A reference to the object holding the line plot axes.
@@ -242,7 +242,8 @@ class KeyHandler:
         try:
             self.handle_key(key)
         except Exception:
-            pass
+            import traceback
+            traceback.print_exc()
 
 
 class PixelLinePlot(CursorTracker, KeyHandler):
@@ -251,8 +252,14 @@ class PixelLinePlot(CursorTracker, KeyHandler):
     set of line plots.
     """
 
-    STATUS_MESSAGE = "Press key to send cuts to workspaces: c=both cuts, x=X, y=Y."
-    SELECTION_KEYS = ('c', 'x', 'y')
+    STATUS_MESSAGE = "Keys: arrow keys control mouse pointer, workspace cuts: c=both cuts, x=X, y=Y."
+    SELECTION_KEYS = ('c', 'x', 'y', 'up', 'down', 'left', 'right')
+    PIXEL_TRANSFORM_CLS = {
+        'up': MoveMouseCursorUp,
+        'down': MoveMouseCursorDown,
+        'left': MoveMouseCursorLeft,
+        'right': MoveMouseCursorRight,
+    }
 
     def __init__(self, plotter: LinePlots, exporter: Any):
         """
@@ -274,11 +281,11 @@ class PixelLinePlot(CursorTracker, KeyHandler):
         plotter = self.plotter
         cinfo = cursor_info(plotter.image, xdata, ydata)
         if cinfo is not None:
+            self._cursor_pos = (xdata, ydata)
             arr, (xmin, xmax, ymin, ymax), (i, j) = cinfo
             plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
             plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
             plotter.sync_plot_limits_with_colorbar()
-            self._cursor_pos = (xdata, ydata)
             plotter.redraw()
 
     def on_cursor_outside_axes(self):
@@ -288,16 +295,21 @@ class PixelLinePlot(CursorTracker, KeyHandler):
         self._plotter.delete_line_plot_lines()
         self._cursor_pos = None
 
-    # RegionExtractionTool interface
+    # KeyHandler interface
     def handle_key(self, key):
         """
-        Called by RegionExtractionTool if a key was accepted to perform a region
+        Called by KeyHandler if a key was accepted to perform a region
         extraction
         """
         if self._cursor_pos is None:
             return None
 
-        self.exporter.export_pixel_cut(self._cursor_pos, key)
+        pixel_transforms = self.PIXEL_TRANSFORM_CLS
+        if key in pixel_transforms:
+            to_next_pixel = pixel_transforms[key](self.plotter.image)
+            to_next_pixel.move_from(self._cursor_pos)
+        else:
+            self.exporter.export_pixel_cut(self._cursor_pos, key)
 
 
 class RectangleSelectionLinePlot(KeyHandler):
