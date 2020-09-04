@@ -114,7 +114,7 @@ void PropertyWithValue<TYPE>::saveProperty(::NeXus::File * /*file*/) {
   // isn't a big deal.
   throw std::invalid_argument(
       "PropertyWithValue::saveProperty - Cannot save '" + this->name() +
-      "', property type not implemented.");
+      "', property type " + typeid(TYPE).name() + " not implemented.");
 }
 
 /** Get the value of the property as a string

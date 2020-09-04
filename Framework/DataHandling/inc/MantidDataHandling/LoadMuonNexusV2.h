@@ -7,6 +7,7 @@
 #pragma once
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataHandling/LoadMuonNexusV2NexusHelper.h"
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexus/NexusClasses.h"
@@ -34,7 +35,7 @@ OutputWorkspace_PeriodNo)
 
 @author Stephen Smith, ISIS
 */
-// Forward declare Muon Load Strategy
+
 class DLLExport LoadMuonNexusV2 : public API::NexusFileLoader {
 public:
   // Default constructor
@@ -62,11 +63,11 @@ private:
   /// Overwrites Algorithm method
   void execLoader() override;
   // Determines whether entry contains multi period data
-  void isEntryMultiPeriod(const NeXus::NXEntry &entry);
+  void isEntryMultiPeriod();
   // Run child algorithm LoadISISNexus2
   API::Workspace_sptr runLoadISISNexus();
   // Load Muon specific properties
-  void loadMuonProperties(const NeXus::NXEntry &entry);
+  void loadMuonProperties(size_t numSpectra);
   /// The name and path of the input file
   std::string m_filename;
   /// The number of the input entry
@@ -75,9 +76,14 @@ private:
   bool m_isFileMultiPeriod;
   // Are multi periods loaded
   bool m_multiPeriodsLoaded;
+  // Choose loader strategy
+  void chooseLoaderStrategy(const API::Workspace_sptr &workspace);
   // The loading strategy used
   std::unique_ptr<LoadMuonStrategy> m_loadMuonStrategy;
-}; // namespace DataHandling
-
+  // Nexus loading helper class
+  std::unique_ptr<LoadMuonNexusV2NexusHelper> m_nexusLoader;
+  // Change the time axis unit as LoadISISNexus has the wrong one
+  void applyTimeAxisUnitCorrection(API::Workspace &workspace);
+};
 } // namespace DataHandling
 } // namespace Mantid

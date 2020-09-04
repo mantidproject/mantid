@@ -16,7 +16,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(CrystalTest ${TEST_FILES})
   target_link_libraries(CrystalTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Crystal
                         DataHandling

@@ -6,7 +6,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(TypesTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries(TypesTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         Types
                         ${Boost_LIBRARIES}
                         gmock

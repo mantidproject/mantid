@@ -42,6 +42,9 @@ namespace {
 std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
 std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
 
+static constexpr double degToRad = M_PI / 180.;
+static constexpr double radToDeg = 180. / M_PI;
+
 /** Get the twoTheta angle for the centre of the detector associated with the
  * given spectrum
  *
@@ -198,6 +201,12 @@ ReflectometryReductionOne2::validateInputs() {
 
   const auto transmission = validateTransmissionProperties();
   results.insert(transmission.begin(), transmission.end());
+
+  const std::string summationType = getProperty("SummationType");
+  const std::string reductionType = getProperty("ReductionType");
+  if (summationType == "SumInQ" && reductionType == "DivergentBeam" &&
+      (*getProperty("ThetaIn")).isDefault())
+    results["ThetaIn"] = "ThetaIn must be specified for the DivergentBeam case";
 
   return results;
 }
@@ -638,6 +647,36 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
   return corrAlg->getProperty("OutputWorkspace");
 }
 
+/** Returns true if we should use the output workspace's detector position
+ * for the theta angle to use in the conversion to Q */
+bool ReflectometryReductionOne2::useDetectorAngleForQConversion(
+    const MatrixWorkspace_sptr &ws) const {
+  // If summing in Q, the output workspace is constructed such that the angle
+  // of the detector is correct for the conversion to Q
+  if (summingInQ())
+    return true;
+
+  // Otherwise we are summing in lambda. If ThetaIn was not specified then no
+  // correction was requested so assume the detector angle is correct
+  if ((*getProperty("ThetaIn")).isDefault())
+    return true;
+
+  // If there is only one detector (i.e. no summation was required) then we use
+  // the detector angle. This is because the correction is assumed to only be
+  // required when the region of interest is not centred on a pixel other than
+  // the specular pixel, but if we only have one pixel we assume it is the
+  // centre pixel. I'm not sure if we may want to change this in future to
+  // enable overriding it anyway.
+  // Note that when summing in lambda it is not allowed to pass ThetaIn with
+  // multiple groups, so we can assume we only have one group (i.e. one output
+  // spectrum) here.
+  bool const singleDetector = ws->getDetector(0)->nDets() <= 1;
+  if (singleDetector)
+    return true;
+
+  return false;
+}
+
 /** Convert a workspace to Q
  *
  * @param inputWS : The input workspace (in wavelength) to convert to Q
@@ -645,41 +684,46 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
  */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
-  bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
-  bool const shouldCorrectAngle =
-      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
-  if (shouldCorrectAngle && moreThanOneDetector) {
-    if (inputWS->getNumberHistograms() > 1) {
-      throw std::invalid_argument(
-          "Expected a single group in "
-          "ProcessingInstructions to be able to "
-          "perform angle correction, found " +
-          std::to_string(inputWS->getNumberHistograms()));
-    }
-    MatrixWorkspace_sptr IvsQ = inputWS->clone();
-    auto &XOut0 = IvsQ->mutableX(0);
-    const auto &XIn0 = inputWS->x(0);
-    double const theta = getProperty("ThetaIn");
-    double const factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
-    std::transform(XIn0.rbegin(), XIn0.rend(), XOut0.begin(),
-                   [factor](double x) { return factor / x; });
-    auto &Y0 = IvsQ->mutableY(0);
-    auto &E0 = IvsQ->mutableE(0);
-    std::reverse(Y0.begin(), Y0.end());
-    std::reverse(E0.begin(), E0.end());
-    IvsQ->getAxis(0)->unit() =
-        UnitFactory::Instance().create("MomentumTransfer");
-    return IvsQ;
-  } else {
+  MatrixWorkspace_sptr IvsQ;
+  if (useDetectorAngleForQConversion(inputWS)) {
+    // We can just use ConvertUnits, because the detectors are at the correct
+    // position
     auto convertUnits = this->createChildAlgorithm("ConvertUnits");
     convertUnits->initialize();
     convertUnits->setProperty("InputWorkspace", inputWS);
     convertUnits->setProperty("Target", "MomentumTransfer");
     convertUnits->setProperty("AlignBins", false);
     convertUnits->execute();
-    MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
-    return IvsQ;
+    IvsQ = convertUnits->getProperty("OutputWorkspace");
+  } else {
+    // Use RefRoi with the given ThetaIn. This is currently only possible for a
+    // single region of interest (i.e. a single histogram in the summed
+    // workspace) because different regions of interest would be centred around
+    // different angles.
+    if (inputWS->getNumberHistograms() > 1) {
+      throw std::invalid_argument(
+          "Angle correction using ThetaIn can only be done for a single group "
+          "in ProcessingInstructions, but the number of groups specified was " +
+          std::to_string(inputWS->getNumberHistograms()));
+    }
+    double const theta = getProperty("ThetaIn");
+    auto refRoi = this->createChildAlgorithm("RefRoi");
+    refRoi->initialize();
+    refRoi->setProperty("InputWorkspace", inputWS);
+    refRoi->setProperty("NXPixel", 1);
+    refRoi->setProperty("NYPixel", 1);
+    refRoi->setProperty("ConvertToQ", true);
+    refRoi->setProperty("SumPixels", false);
+    refRoi->setProperty("ScatteringAngle", theta);
+    refRoi->execute();
+    IvsQ = refRoi->getProperty("OutputWorkspace");
+    // RefRoi outputs as distribution data but ConvertUnits outputs as
+    // counts. For now make this consistent with the original behaviour using
+    // ConvertUnits but we may wish to change this in future.
+    IvsQ->setYUnitLabel("Counts");
+    IvsQ->setDistribution(false);
   }
+  return IvsQ;
 }
 
 /**
@@ -688,7 +732,7 @@ ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
  *
  * @return : true if the reduction should sum in Q; false otherwise
  */
-bool ReflectometryReductionOne2::summingInQ() {
+bool ReflectometryReductionOne2::summingInQ() const {
   bool result = false;
   const std::string summationType = getProperty("SummationType");
 
@@ -771,7 +815,7 @@ void ReflectometryReductionOne2::findTheta0() {
   g_log.debug("theta0: " + std::to_string(theta0()) + " degrees\n");
 
   // Convert to radians
-  m_theta0 *= M_PI / 180.0;
+  m_theta0 *= degToRad;
 }
 
 /**
@@ -841,7 +885,7 @@ void ReflectometryReductionOne2::findWavelengthMinMax(
       m_wavelengthMax = projectedMax;
       first = false;
     } else {
-      m_wavelengthMin = std::min(m_wavelengthMax, projectedMin);
+      m_wavelengthMin = std::min(m_wavelengthMin, projectedMin);
       m_wavelengthMax = std::max(m_wavelengthMax, projectedMax);
     }
   }
@@ -970,7 +1014,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
       detectorWS, numGroups, numBins, numBins - 1);
 
-  // Loop through each detector group in the input
+  // Loop through each detector group in the input and collate the related list
+  // of spectrum numbers for the output
+  std::vector<SpectrumNumber> spectrumNumbers;
   for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
     // Get the detectors in this group
     auto &detectors = detectorGroups()[groupIdx];
@@ -984,12 +1030,12 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
     outSpec.clearDetectorIDs();
     outSpec.addDetectorID(twoThetaRDetID);
     // Set the spectrum number from the twoThetaR detector
-    SpectrumNumber specNum =
-        detectorWS->indexInfo().spectrumNumber(twoThetaRIdx);
-    auto indexInf = outputWS->indexInfo();
-    indexInf.setSpectrumNumbers(specNum, specNum);
-    outputWS->setIndexInfo(indexInf);
+    spectrumNumbers.emplace_back(
+        detectorWS->indexInfo().spectrumNumber(twoThetaRIdx));
   }
+  auto indexInf = outputWS->indexInfo();
+  indexInf.setSpectrumNumbers(std::move(spectrumNumbers));
+  outputWS->setIndexInfo(indexInf);
 
   return outputWS;
 }
@@ -1198,9 +1244,9 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
   // We cannot project pixels below the horizon angle
   if (twoTheta <= theta0()) {
     throw std::runtime_error(
-        "Cannot process twoTheta=" + std::to_string(twoTheta * 180.0 / M_PI) +
+        "Cannot process twoTheta=" + std::to_string(twoTheta * radToDeg) +
         " as it is below the horizon angle=" +
-        std::to_string(theta0() * 180.0 / M_PI));
+        std::to_string(theta0() * radToDeg));
   }
 
   // Get the angle from twoThetaR to this detector
@@ -1227,7 +1273,7 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
   } catch (std::exception &ex) {
     throw std::runtime_error(
         "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +
-        "," + std::to_string(twoTheta * 180.0 / M_PI) + ") onto twoThetaR = " +
+        "," + std::to_string(twoTheta * radToDeg) + ") onto twoThetaR = " +
         std::to_string(twoThetaRVal) + ": " + ex.what());
   }
 }

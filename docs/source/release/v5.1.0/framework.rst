@@ -21,6 +21,7 @@ New Algorithms
 Algorithms
 ----------
 
+- :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can also check the Error axis for unwanted values if the appropriate checkbox is ticked.
 - :ref:`SetSample <algm-SetSample>` is extended to support for composite shapes, such as FlatPlateHolder and HollowCylinderHolder. Also the input validation is made more stringent.
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
@@ -29,7 +30,7 @@ Algorithms
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Bug fixed where setting ResimulateTracksForDifferentWavelengths parameter to True was being ignored
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections are not calculated anymore for masked spectra
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections can be calculated for a workspace without a sample eg container only
-- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now calculates the error on the absorption correction factors
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now calculates the error on the absorption correction factors based on the spread of the attenuation factors across the simulated paths and the number of simulated paths. The error from any spatial interpolation and any wavelength interpolation performed is also included.
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has received a number of updates:
 
   - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
@@ -47,7 +48,9 @@ Algorithms
   and :ref:`MaskInstrument <algm-MaskInstrument>` is now deprecated and you should use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
 - Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and\or translated
 - Algorithms now lazily load their documentation and function signatures, improving import times from the `simpleapi`.
-
+- Added alias for GeneratePythonScript as ExportHistory
+- Deprecated the RecordPythonScript algorithm
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now increments the random seed for each detector.
 
 Data Handling
 -------------
@@ -78,6 +81,11 @@ Data Objects
 - Added MatrixWorkspace::findY to find the histogram and bin with a given value
 - Matrix Workspaces now ignore non-finite values when integrating values for the instrument view.  Please note this is different from the :ref:`Integration <algm-Integration>` algorithm.
 
+HistogramData
+-------------
+
+- The linear and spline interpolation functionality that acts on histograms has been updated to add the ability to calculate errors. This has involved swapping out the gsl implementations of linear and spline interpolation and replacing with a native Mantid implementation. The new functionality is off by default and has been explicitly enabled for the MonteCarloAbsorption algorithm. The histogram interpolation functionality is currently used by these algorithms: :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` , :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`, LoadILLPolarizationFactors, Join ISISPolarizationEfficiences.
+
 Python
 ------
 - A list of spectrum numbers can be got by calling getSpectrumNumbers on a
@@ -85,10 +93,16 @@ Python
 - Documentation for manipulating :ref:`workspaces <02_scripting_workspaces>` and :ref:`plots <02_scripting_plots>` within a script have been produced.
 - Property.units now attempts to encode with windows-1252 if utf-8 fails.
 - Property.unitsAsBytes has been added to retrieve the raw bytes from the units string.
+- Various file finding methods have been moved to ``mantid.api.InstrumentFileFinder``. For compatibility
+  these still exist in ``ExperimentInfo`` but the helpers should be used instead in the future.
+- A new method for finding IPF files has been added to the ``InstrumentFileFinder``
+  ``getParameterPath``, which will accept an instrument name and return the full path to the associated
+  IPF file.
 
 Improvements
 ------------
 - Updated the convolution function in the fitting framework to allow the convolution of two composite functions.
+- Added an unroll all checkbox in Algorithm History Window which allows all algorithms to be unrolled at once when copying the script
 
 Bugfixes
 --------

@@ -83,6 +83,7 @@ private:
   bool m_performSmallCheck; ///< Flag to indicate if the 'small number' check is
   /// to
   /// be performed
+  bool m_checkErrors;
 };
 
 } // namespace Algorithms

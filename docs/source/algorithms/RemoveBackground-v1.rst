@@ -35,7 +35,7 @@ Proof of concept background removal algorithm::
   import os
   
   
-  maps_dir = '/home/user/InstrumentFiles/let/'
+  maps_dir = '/home/user/InstrumentFileFinder/let/'
   data_dir ='/home/user/results'   
   ref_data_dir = '/home/user/SystemTests/AnalysisTests/ReferenceResults' 
   config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
@@ -130,7 +130,7 @@ are identical::
   import os
   
   
-  maps_dir = '/home/user/InstrumentFiles/let/'
+  maps_dir = '/home/user/InstrumentFileFinder/let/'
   data_dir ='/home/user/results'   
   ref_data_dir = '/home/user/SystemTests/AnalysisTests/ReferenceResults' 
   config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
