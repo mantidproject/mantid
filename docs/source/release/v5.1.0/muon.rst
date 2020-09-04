@@ -65,6 +65,7 @@ Improvements
 - Added in default group and pair selection when loading grouping files from xml.
 - Updated CHRONUS TF asymmetry mode default grouping. Now uses eight groups by default.
 - Added warnings when the selected runs do not have the relevant periods to calculate the groups or pairs.
+- Autoscale has been replaced with a checkbox. It does not work with pan/zoom on.
 
 Bug fixes
 ---------
