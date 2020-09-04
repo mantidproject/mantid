@@ -7,7 +7,7 @@
 from Engineering.gui.engineering_diffraction.tabs.common import create_error_message
 from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 
 
 class FittingDataPresenter(object):
@@ -34,6 +34,14 @@ class FittingDataPresenter(object):
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
+        # Obeservers
+        self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
+
+    def fit_completed(self, results_dict):
+        # result_dict = eval(fit_result.replace('true', 'True').replace('false', 'False'))
+        ws_name = results_dict["properties"]["InputWorkspace"]
+        self.model.update_fit(self.row_numbers[ws_name], results_dict)
+
 
     def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))

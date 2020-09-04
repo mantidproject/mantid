@@ -22,6 +22,7 @@ class FittingDataModel(object):
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
         self._background_workspaces = {}
+        self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
 
@@ -140,6 +141,9 @@ class FittingDataModel(object):
                 RenameWorkspace(InputWorkspace=self._log_workspaces.name(), OutputWorkspace=name)
         else:
             self.clear_logs()
+
+    def update_fit(self, row_number, results_dict):
+        print('FIT RESULT\t', row_number, results_dict['properties']['Function'])
 
     def update_workspace_name(self, old_name, new_name):
         if new_name not in self._loaded_workspaces:

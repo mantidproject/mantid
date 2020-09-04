@@ -7,6 +7,7 @@
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
+from Engineering.gui.engineering_diffraction.tabs.common import FitObserver
 
 PLOT_KWARGS = {"linestyle": "", "marker": "x", "markersize": "3"}
 
