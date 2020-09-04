@@ -234,7 +234,7 @@ void PlotAsymmetryByLogValue::exec() {
 }
 
 /**  Finds path to a file and removes file name to return it's directory
- *   @param fileName : [input] name of file 
+ *   @param fileName : [input] name of file
  *   @return string containing directory path
  */
 std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(
@@ -244,14 +244,16 @@ std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(
   std::size_t found = fileBase.path().find_last_of("/\\");
 
   if (found == std::string::npos)
-    return ""; // Empty string if file name could not be found so directory could not be determined
+    return ""; // Empty string if file name could not be found so directory
+               // could not be determined
 
   return fileBase.path().substr(0, found + 1);
 }
 
 /**  Loops files between first and last values and adds to vector of file names
  */
-void PlotAsymmetryByLogValue::populateFileNamesFromFirstLast(std::string firstRun, std::string lastRun) {
+void PlotAsymmetryByLogValue::populateFileNamesFromFirstLast(
+    std::string firstRun, std::string lastRun) {
   // Parse run names and get the number of runs
   parseRunNames(firstRun, lastRun, m_filenameBase, m_filenameExt,
                 m_filenameZeros);
@@ -310,14 +312,15 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
     populateFileNamesFromFirstLast(getProperty("FirstRun"),
                                    getProperty("LastRun"));
   } else {
-    // Get directory of first file  
+    // Get directory of first file
     const auto firstDir = getDirectoryFromFileName(m_fileNames[0]);
 
     // Check all directories match
     for (const auto &file : m_fileNames) {
       if (firstDir != getDirectoryFromFileName(file)) {
         // Error
-        throw std::runtime_error("All Files are not in the same directory (" + firstDir + ").");
+        throw std::runtime_error("All Files are not in the same directory (" +
+                                 firstDir + ").");
       }
     }
   }

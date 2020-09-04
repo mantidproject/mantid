@@ -212,8 +212,7 @@ void ALCDataLoadingPresenter::resetAutoRun() {
   // Remove read only
   m_view->setRunsReadOnly(false);
 
-  m_view->setRunsTextWithSearch(
-      QString::fromStdString(m_oldInput));
+  m_view->setRunsTextWithSearch(QString::fromStdString(m_oldInput));
 }
 
 /**
