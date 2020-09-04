@@ -26,6 +26,10 @@ class StateSave(metaclass=JsonSerializable):
         self.user_specified_output_name_suffix = None  # : Str()
         self.use_reduction_mode_as_suffix = None  # : Bool
 
+        # Settings for the main user file and batch file
+        self.user_file = None # : Str
+        self.batch_file = None # : Str
+
     def validate(self):
         pass
 

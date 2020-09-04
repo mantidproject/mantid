@@ -373,7 +373,6 @@ class RunTabPresenter(PresenterCommon):
             self._on_user_file_load_failure(path_error, error_msg + " when finding file.")
             return
 
-        self._table_model.user_file = user_file_path
         # Clear out the current view
         self._view.reset_all_fields_to_default()
         try:
@@ -388,6 +387,7 @@ class RunTabPresenter(PresenterCommon):
         try:
             # 4. Populate the model and update sub-presenters
             self._model = StateGuiModel(user_file_items)
+            self._model.user_file = user_file_path
             self._settings_adjustment_presenter.set_model(
                 SettingsAdjustmentModel(user_file_items=user_file_items))
             # 5. Update the views.
@@ -438,8 +438,6 @@ class RunTabPresenter(PresenterCommon):
                     "The batch file path {} does not exist. Make sure a valid batch file path"
                     " has been specified.".format(batch_file_path))
 
-            self._table_model.batch_file = batch_file_path
-
             # 2. Read the batch file
             parsed_rows = self._csv_parser.parse_batch_file(batch_file_path)
 
@@ -447,6 +445,10 @@ class RunTabPresenter(PresenterCommon):
             self._table_model.clear_table_entries()
 
             self._add_multiple_rows_to_table_model(rows=parsed_rows)
+
+            # 4. Set the batch file path in the model
+            self._model.batch_file = batch_file_path
+
         except (RuntimeError, ValueError, SyntaxError) as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))

@@ -79,6 +79,24 @@ class StateGuiModel(ModelCommon):
     def save_types(self, value):
         self._user_file_items.save.file_format = value
 
+    @property
+    def user_file(self):
+        val = self._user_file_items.save.user_file
+        return val if val else ""
+
+    @user_file.setter
+    def user_file(self, value):
+        self._user_file_items.save.user_file = value
+
+    @property
+    def batch_file(self):
+        val = self._user_file_items.save.batch_file
+        return val if val else ""
+
+    @batch_file.setter
+    def batch_file(self, value):
+        self._user_file_items.save.batch_file = value
+
     # ==================================================================================================================
     # ==================================================================================================================
     # BeamCentre TAB
