@@ -103,8 +103,7 @@ private:
   /// Check input properties
   void checkProperties(size_t &firstRunNumber, size_t &lastRunNumber);
   /// Get path to the direcotry from a file name
-  std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(
-      const std::string &fileName) const;
+  std::string getDirectoryFromFileName(const std::string &fileName) const;
   /// Uses FirstRun and LastRun to populate filenames vector
   void populateFileNamesFromFirstLast(std::string firstRun,
                                       std::string lastRun);

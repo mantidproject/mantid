@@ -69,7 +69,7 @@ private:
   bool checkCustomGrouping();
 
   /// Extract run number as in from file name string
-  int ALCDataLoadingPresenter::extractRunNumber(const std::string &file);
+  int extractRunNumber(const std::string &file);
 
   /// Check the group is valid
   std::string isCustomGroupingValid(const std::string &group, bool &isValid);
