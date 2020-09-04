@@ -161,6 +161,7 @@ public:
   void swapCols(const size_t, const size_t); ///< Swap cols (second V index)
 
   T Invert();                                      ///< LU inversion routine
+  void invertTridiagonal();
   void averSymmetric();                            ///< make Matrix symmetric
   int Diagonalise(Matrix<T> &, Matrix<T> &) const; ///< (only Symmetric matrix)
   void sortEigen(Matrix<T> &);                     ///< Sort eigenvectors
