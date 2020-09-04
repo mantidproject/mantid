@@ -162,6 +162,7 @@ Output:
        4.79987355e-14   3.01813222e-14]
 
 .. testcode:: MultiDomainFunctionExample
+
     ws = CreateSampleWorkspace()
     function = mantid.api.FunctionFactory.createInitializedMultiDomainFunction("name=Gaussian,Height=10.0041,PeakCentre=10098.6,Sigma=48.8581;name=FlatBackground,A0=0.3", 200)
 
