@@ -516,6 +516,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
     setButtonsEnabled(true);
     m_saveAlgRunning = false;
   } else {
+    m_saveAlgRunning = false;
     setSaveResultEnabled(false);
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
