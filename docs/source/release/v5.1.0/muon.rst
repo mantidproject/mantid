@@ -42,6 +42,7 @@ New Features
 - Added support for specifying which periods should be used to calculate a group.
 - Added support for loading and saving group period data from xml files.
 - Added a Help option to the right-click menu in the function browser which brings up a relevant documentation page describing the function.
+- The ALC interface has been updated and now only has a single runs box. Additionally the functionality of 'Auto' has been slightly altered. See :ref:`Muon ALC <MuonALC-ref>`
 
 Improvements
 -------------
