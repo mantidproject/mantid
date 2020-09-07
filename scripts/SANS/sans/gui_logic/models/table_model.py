@@ -29,8 +29,6 @@ class TableModel(object):
 
     def __init__(self):
         super(TableModel, self).__init__()
-        self.batch_file = ""
-        self.user_file = ""
         self._subscriber_list = []
 
         self._table_entries = []
@@ -55,7 +53,7 @@ class TableModel(object):
     def get_all_rows(self):
         return self._table_entries
 
-    def get_row(self, index):
+    def get_row(self, index) -> RowEntries:
         return self._table_entries[index]
 
     def get_row_index(self, row):

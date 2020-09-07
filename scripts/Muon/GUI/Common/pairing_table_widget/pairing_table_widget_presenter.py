@@ -9,6 +9,9 @@ import re
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex, valid_alpha_regex
 from mantidqt.utils.observer_pattern import Observable, GenericObservable
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import row_colors, row_tooltips
+
 
 pair_columns = ['pair_name', 'to_analyse', 'group_1', 'group_2', 'alpha']
 
@@ -19,7 +22,7 @@ class PairingTablePresenter(object):
         self._view = view
         self._model = model
 
-        self._view.on_add_pair_button_clicked(self.handle_add_pair_button_clicked)
+        self._view.on_add_pair_button_clicked(self.handle_add_pair_button_checked_state)
         self._view.on_remove_pair_button_clicked(self.handle_remove_pair_button_clicked)
 
         self._view.on_user_changes_pair_name(self.validate_pair_name)
@@ -108,7 +111,19 @@ class PairingTablePresenter(object):
         self._view.clear()
         for pair in self._model.pairs:
             to_analyse = True if pair.name in self._model.selected_pairs else False
-            self.add_pair_to_view(pair, to_analyse)
+            forward_group_periods = self._model._context.group_pair_context[pair.forward_group].periods
+            backward_group_periods = self._model._context.group_pair_context[pair.backward_group].periods
+            forward_period_warning = self._model.validate_periods_list(forward_group_periods)
+            backward_period_warning = self._model.validate_periods_list(backward_group_periods)
+            if forward_period_warning==RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
+                display_period_warning = RowValid.invalid_for_all_runs
+            elif forward_period_warning==RowValid.valid_for_some_runs or backward_period_warning == RowValid.valid_for_some_runs:
+                display_period_warning = RowValid.valid_for_some_runs
+            else:
+                display_period_warning = RowValid.valid_for_all_runs
+            color = row_colors[display_period_warning]
+            tool_tip = row_tooltips[display_period_warning]
+            self.add_pair_to_view(pair, to_analyse, color, tool_tip)
 
         self._view.enable_updates()
 
@@ -141,19 +156,27 @@ class PairingTablePresenter(object):
         if self._view.num_rows() > 19:
             self._view.warning_popup("Cannot add more than 20 pairs.")
             return
-        self.add_pair_to_view(pair)
         self.add_pair_to_model(pair)
+        self.update_view_from_model()
 
     def add_pair_to_model(self, pair):
         self._model.add_pair(pair)
 
-    def add_pair_to_view(self, pair, to_analyse=False):
+    def add_pair_to_view(self, pair, to_analyse=False, color=row_colors[RowValid.valid_for_all_runs],
+                         tool_tip=row_tooltips[RowValid.valid_for_all_runs]):
         self._view.disable_updates()
         self.update_group_selections()
         assert isinstance(pair, MuonPair)
         entry = [str(pair.name), to_analyse, str(pair.forward_group), str(pair.backward_group), str(pair.alpha)]
-        self._view.add_entry_to_table(entry)
+        self._view.add_entry_to_table(entry, color, tool_tip)
         self._view.enable_updates()
+
+    """
+    This is required to strip out the boolean value the clicked method
+    of QButton emits by default.
+    """
+    def handle_add_pair_button_checked_state(self):
+        self.handle_add_pair_button_clicked()
 
     def handle_add_pair_button_clicked(self, group_1='', group_2=''):
         if len(self._model.group_names) == 0 or len(self._model.group_names) == 1:

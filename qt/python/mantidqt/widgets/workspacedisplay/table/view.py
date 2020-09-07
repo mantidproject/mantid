@@ -10,16 +10,15 @@ from functools import partial
 
 from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, Signal, Slot
-from qtpy.QtGui import QKeySequence
+from qtpy.QtGui import QKeySequence, QStandardItemModel
 from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox,
-                            QStyledItemDelegate, QTableWidget)
+                            QStyledItemDelegate, QTableView)
 
 import mantidqt.icons
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 
 
 class PreciseDoubleFactory(QItemEditorFactory):
-
     def __init__(self):
         QItemEditorFactory.__init__(self)
 
@@ -33,11 +32,13 @@ class PreciseDoubleFactory(QItemEditorFactory):
         return widget
 
 
-class TableWorkspaceDisplayView(QTableWidget):
+class TableWorkspaceDisplayView(QTableView):
     repaint_signal = Signal()
 
     def __init__(self, presenter=None, parent=None):
-        super(TableWorkspaceDisplayView, self).__init__(parent)
+        super().__init__(parent)
+        self.data_model = QStandardItemModel(self)
+        self.setModel(self.data_model)
 
         self.presenter = presenter
         self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
@@ -54,6 +55,12 @@ class TableWorkspaceDisplayView(QTableWidget):
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
 
+    def columnCount(self):
+        return self.data_model.columnCount()
+
+    def rowCount(self):
+        return self.data_model.rowCount()
+
     def subscribe(self, presenter):
         """
         :param presenter: A reference to the controlling presenter
@@ -61,7 +68,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.presenter = presenter
 
     def resizeEvent(self, event):
-        QTableWidget.resizeEvent(self, event)
+        super().resizeEvent(event)
         header = self.horizontalHeader()
         # resizes the column headers to fit the contents,
         # currently this overwrites any manual changes to the widths of the columns
@@ -84,7 +91,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         if event.matches(QKeySequence.Copy):
             self.presenter.action_keypress_copy()
             return
-        elif event.key() == Qt.Key_F2 or event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+        elif event.key() in (Qt.Key_F2, Qt.Key_Return, Qt.Key_Enter):
             self.edit(self.currentIndex())
             return
 
@@ -128,16 +135,19 @@ class TableWorkspaceDisplayView(QTableWidget):
         plot_line.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR))
 
         plot_line_with_yerr = QAction("Line with Y Errors", plot)
-        plot_line_with_yerr.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR_WITH_ERR))
+        plot_line_with_yerr.triggered.connect(
+            partial(self.presenter.action_plot, PlotType.LINEAR_WITH_ERR))
 
         plot_scatter = QAction("Scatter", plot)
         plot_scatter.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER))
 
         plot_scatter_with_yerr = QAction("Scatter with Y Errors", plot)
-        plot_scatter_with_yerr.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER_WITH_ERR))
+        plot_scatter_with_yerr.triggered.connect(
+            partial(self.presenter.action_plot, PlotType.SCATTER_WITH_ERR))
 
         plot_line_and_points = QAction("Line + Symbol", plot)
-        plot_line_and_points.triggered.connect(partial(self.presenter.action_plot, PlotType.LINE_AND_SYMBOL))
+        plot_line_and_points.triggered.connect(
+            partial(self.presenter.action_plot, PlotType.LINE_AND_SYMBOL))
 
         plot.addAction(plot_line)
         plot.addAction(plot_line_with_yerr)

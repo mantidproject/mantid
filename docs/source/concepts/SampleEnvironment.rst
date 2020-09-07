@@ -61,7 +61,7 @@ The CSG geometry of both the sample and container are defined using the same syn
 used in the instrument definition files to define detector shapes. See
 :ref:`here <HowToDefineGeometricShape>` for detail on defining shapes in XML.
 
-Multiple containers container be specified in the definition. The correct container for a run
+Multiple containers can be specified in the definition. The correct container for a run
 must be chosen by the user at the time the environment is attached to a
 workspace with the ``Environment`` option on the
 :ref:`SetSample <algm-SetSample>` algorithm.
@@ -90,11 +90,16 @@ specifying an .stl file as follows.
 Mantid will try the following approaches to find the path to the stl file (in order):
 
 - If a full path is supplied in the filename attribute then it will be used
-- Mantid will then check in the same directory as the environment definition file
+- Mantid will then check in the same directory as the environment definition files
 - Mantid will then check in the data search directories
 
 The stl file format doesn't natively support a scale so this should be specified
 in the scale attribute of the stilfile tag. Possible values are mm, cm or m.
+
+Mantid does not provide tools to view meshes loaded from .stl files. There are however various free software tools available that can view .stl files:
+
+- FreeCAD (Windows, Linux, Mac). https://www.freecadweb.org/ This viewer also provides coordinate readout of the cursor position
+- Microsoft 3D Viewer (Windows only)
 
 Materials
 #########

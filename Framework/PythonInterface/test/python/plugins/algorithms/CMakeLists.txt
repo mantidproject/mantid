@@ -108,6 +108,7 @@ set(TEST_PY_FILES
     VelocityCrossCorrelationsTest.py
     VelocityAutoCorrelationsTest.py
     SelectNexusFilesByMetadataTest.py
+    VesuvioAnalysisTest.py
     VesuvioPeakPredictionTest.py
     VesuvioPreFitTest.py
     VesuvioResolutionTest.py

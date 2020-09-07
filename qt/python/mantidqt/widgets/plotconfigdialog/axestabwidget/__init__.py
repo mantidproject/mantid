@@ -32,6 +32,7 @@ class AxProperties(dict):
         props['ylim'] = ax.get_ylim()
         props['ylabel'] = ax.get_ylabel()
         props['yscale'] = ax.get_yscale().title()
+        props['canvas_color'] = ax.get_facecolor()
 
         if isinstance(ax, Axes3D):
             props['zlim'] = ax.get_zlim()
@@ -49,6 +50,7 @@ class AxProperties(dict):
         props['title'] = view.get_title()
         props['minor_ticks'] = view.get_show_minor_ticks()
         props['minor_gridlines'] = view.get_show_minor_gridlines()
+        props['canvas_color'] = view.get_canvas_color()
 
         ax = view.get_axis()
         props[f'{ax}lim'] = (view.get_lower_limit(), view.get_upper_limit())

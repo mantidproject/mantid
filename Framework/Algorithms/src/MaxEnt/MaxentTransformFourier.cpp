@@ -11,6 +11,8 @@
 #include <memory>
 #include <stdexcept>
 
+#include <stdexcept>
+
 namespace Mantid {
 namespace Algorithms {
 

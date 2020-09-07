@@ -51,5 +51,14 @@ Bug Fixes
   would yield a parsing error.
 - Fixed errors with the temperature correction in the ConvFit tab of the Indirect Data Analysis interface. These issues occurred when the function was evaluated at Q=0, where it is undefined.
 - Indirect Data Analysis F(Q) fit multiple workspaces can now load more than one spectra from each workspace.
+- Fixed a crash in the corrections interface which occurred when the user attempted to save the results in the Monte Carlo tab.
+- Fixed a bug in the Indirect->Bayes->Quasi Interface, which caused the same parameter to be plotted twice.
+
+New
+###
+
+- :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` has been added as a beta method for analysing Vesuvio data.
+
+
 
 :ref:`Release 5.1.0 <v5.1.0>`
