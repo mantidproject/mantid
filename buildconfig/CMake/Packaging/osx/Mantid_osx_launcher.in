@@ -6,6 +6,6 @@ PYTHONHOME=$INSTALLDIR/../Frameworks/Python.framework/Versions/@Python_VERSION_M
 cd $INSTALLDIR
 env PYTHONHOME=${PYTHONHOME} ./MantidPlot
 if [ $? -ne 0 ]; then
-  env PYTHONHOME=${PYTHONHOME} $PYTHONHOME/bin/python ../scripts/ErrorReporter/error_dialog_app.py \
-    --exitcode=$? --directory=$INSTALLDIR --qtdir=$INSTALLDIR/../PlugIns --application=mantidplot
+  env PYTHONHOME=${PYTHONHOME} $PYTHONHOME/bin/python ./mantidqt/dialogs/errorreports/main.py \
+    --exitcode=$? --qtdir=$INSTALLDIR/../PlugIns --application=mantidplot
 fi
