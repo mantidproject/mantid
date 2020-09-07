@@ -423,7 +423,7 @@ QString InstrumentWidget::getSaveFileName(const QString &title,
  * Update the info text displayed at the bottom of the window.
  */
 void InstrumentWidget::updateInfoText(const QString &text) {
-  if (text.length() == 0) {
+  if (text.isEmpty()) {
     setInfoText(getSurfaceInfoText());
   } else {
     setInfoText(text);
