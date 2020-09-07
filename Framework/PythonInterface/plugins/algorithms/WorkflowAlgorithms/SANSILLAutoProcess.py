@@ -194,6 +194,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.n_wedges = self.getProperty('NumberOfWedges').value
         self.maxqxy = self.getPropertyValue('MaxQxy').split(',')
         self.deltaq = self.getPropertyValue('DeltaQ').split(',')
+        self.output_type = self.getPropertyValue('OutputType')
 
     def PyInit(self):
 
@@ -350,7 +351,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
         # group wedge workspaces
-        if self.getPropertyValue('OutputType') == "I(Q)":
+        if self.output_type == "I(Q)":
             for w in range(self.n_wedges):
                 wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
                             for d in range(self.dimensionality)]
@@ -564,7 +565,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 )
 
         panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
-        if self.n_wedges and self.getPropertyValue('OutputType') == "I(Q)":
+        if self.n_wedges and self.output_type == "I(Q)":
             output_wedges = self.output + "_wedge_d" + str(i + 1)
         else:
             output_wedges = ""
@@ -575,7 +576,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         SANSILLIntegration(
                 InputWorkspace=sample_name,
                 OutputWorkspace=output,
-                OutputType=self.getPropertyValue('OutputType'),
+                OutputType=self.output_type,
                 CalculateResolution=
                 self.getPropertyValue('CalculateResolution'),
                 DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
@@ -598,7 +599,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 )
 
         # wedges ungrouping and renaming
-        if self.n_wedges and self.getPropertyValue('OutputType') == "I(Q)":
+        if self.n_wedges and self.output_type == "I(Q)":
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(self.n_wedges)]
             wedges_new_names = [self.output + "_wedge_" + str(w + 1)
