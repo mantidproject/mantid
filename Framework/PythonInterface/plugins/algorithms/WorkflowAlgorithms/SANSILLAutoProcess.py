@@ -179,6 +179,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.dimensionality = len(self.sample)
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
         self.cleanup = self.getProperty('ClearCorrected2DWorkspace').value
+        self.n_wedges = self.getProperty('NumberOfWedges').value
 
     def PyInit(self):
 
@@ -331,7 +332,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
         # group wedge workspaces
         if self.getPropertyValue('OutputType') == "I(Q)":
-            for w in range(self.getProperty('NumberOfWedges').value):
+            for w in range(self.n_wedges):
                 wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
                             for d in range(self.dimensionality)]
                 GroupWorkspaces(InputWorkspaces=wedge_ws,
@@ -544,8 +545,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 )
 
         panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
-        n_wedges = self.getProperty('NumberOfWedges').value
-        if n_wedges and self.getPropertyValue('OutputType') == "I(Q)":
+        if self.n_wedges and self.getPropertyValue('OutputType') == "I(Q)":
             output_wedges = self.output + "_wedge_d" + str(i + 1)
         else:
             output_wedges = ""
@@ -563,7 +563,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 BinningFactor=self.getProperty('BinningFactor').value,
                 OutputBinning=self.getPropertyValue('OutputBinning'),
                 NPixelDivision=self.getProperty('NPixelDivision').value,
-                NumberOfWedges=self.getProperty('NumberOfWedges').value,
+                NumberOfWedges=self.n_wedges,
                 WedgeAngle=self.getProperty('WedgeAngle').value,
                 WedgeOffset=self.getProperty('WedgeOffset').value,
                 WedgeWorkspace=output_wedges,
@@ -572,12 +572,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 )
 
         # wedges ungrouping and renaming
-        if n_wedges and self.getPropertyValue('OutputType') == "I(Q)":
+        if self.n_wedges and self.getPropertyValue('OutputType') == "I(Q)":
             wedges_old_names = [output_wedges + "_" + str(w + 1)
-                                for w in range(n_wedges)]
+                                for w in range(self.n_wedges)]
             wedges_new_names = [self.output + "_wedge_" + str(w + 1)
                                 + "_" + str(i + 1)
-                                for w in range(n_wedges)]
+                                for w in range(self.n_wedges)]
             UnGroupWorkspace(InputWorkspace=output_wedges)
             RenameWorkspaces(InputWorkspaces=wedges_old_names,
                              WorkspaceNames=wedges_new_names)
