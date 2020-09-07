@@ -377,7 +377,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 GroupWorkspaces(InputWorkspaces=wedge_ws,
                                 OutputWorkspace=self.output + "_wedge_" + str(w + 1))
 
-
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
