@@ -5,21 +5,22 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 
-from sans.common.enums import SANSFacility
+from sans.common.enums import SANSFacility, SANSInstrument
 from sans.gui_logic.models.diagnostics_page_model import create_state
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.test_helper.user_file_test_helper import sample_user_file, create_user_file
-from sans.user_file.user_file_reader import UserFileReader
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 class DiagnosticsPageModelTest(unittest.TestCase):
     def test_that_create_state_creates_correct_state(self):
         user_file_path = create_user_file(sample_user_file)
-        user_file_reader = UserFileReader(user_file_path)
-        user_file_items = user_file_reader.read_user_file()
+        user_file_reader = UserFileReaderAdapter(user_file_name=user_file_path, file_information=None)
+        user_file_items = user_file_reader.get_all_states(file_information=None)
 
-        state_from_view =  StateGuiModel(user_file_items)
+        state_from_view = StateGuiModel(user_file_items)
 
         state = create_state(state_from_view, "SANS2D00022024", '', SANSFacility.ISIS)
 

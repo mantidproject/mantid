@@ -32,6 +32,9 @@ New Features
 - Addition of a LoadMuonNexusV2 algorithm to load the new Muon V2 files, see :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>`.
 - Updated rounding for time zero and first good data to be 3 decimal places.
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
+- Add parameter 'WorkspaceNames' to :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` which accepts a range of runs to be processed.
+  Parameters 'FirstRun' and 'LastRun' are no longer mandatory. Either WorkspaceNames, or FirstRun and LastRun must be supplied for a valid input.
+  Preference is given to WorkspaceNames if FirstRun, LastRun, and WorkspaceNames is supplied. An example of a valid range is '62260-3, 62267, 62270-4'.
 - Added multi-period support to the LoadMuonNexusV2 algorithm.
 - Added support for specifying which groups should be used to calculate a group.
 - Added two buttons to the Muon analysis and Frequency domain analysis plot toolbar to allow users to show major and minor gridlines.
@@ -39,6 +42,7 @@ New Features
 - Added support for specifying which periods should be used to calculate a group.
 - Added support for loading and saving group period data from xml files.
 - Added a Help option to the right-click menu in the function browser which brings up a relevant documentation page describing the function.
+- The ALC interface has been updated and now only has a single runs box. Additionally the functionality of 'Auto' has been slightly altered. See :ref:`Muon ALC <MuonALC-ref>`
 
 Improvements
 -------------
@@ -60,7 +64,9 @@ Improvements
 - The ALC interface in workbench will now show errors by default. The error bars can also be turned on/off using the right-click plot menu.
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Added in default group and pair selection when loading grouping files from xml.
+- Updated CHRONUS TF asymmetry mode default grouping. Now uses eight groups by default.
 - Added warnings when the selected runs do not have the relevant periods to calculate the groups or pairs.
+- Autoscale has been replaced with a checkbox. It does not work with pan/zoom on.
 
 Bug fixes
 ---------

@@ -73,7 +73,7 @@ Unscripted and Final Testing
 
 *  Ensure the
    `master build and system
-   test <http://builds.mantidproject.org/view/Master%20Builds/>`__
+   test <https://builds.mantidproject.org/view/Master%20Pipeline/>`__
    jobs have passed for all build environments for this release.
 *  Complete any PR testing remaining from Friday
 *  Perform unscripted testing following the instructions described
@@ -90,10 +90,10 @@ Create the Release Branch (once most PR's are merged)
 
 *  Ensure the
    `master build and system
-   test <http://builds.mantidproject.org/view/Master%20Builds/>`__
+   test <https://builds.mantidproject.org/view/Master%20Pipeline/>`__
    jobs have passed for all build environments for this release.
 *  Run
-   `open-release-testing <http://builds.mantidproject.org/view/All/job/open-release-testing/>`__
+   `open-release-testing <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
    to create the release branch and prepare build jobs
 *  Check state of all open pull requests for this milestone and decide which should be kept for the release,
    liase with PM on this. Move any pull requests not targeted for release out of the milestone
@@ -103,7 +103,7 @@ Create the Release Branch (once most PR's are merged)
 
   .. code
 
-  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: http://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
+  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
 
 *  Create a skeleton set of release notes on master for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``.
 
@@ -186,7 +186,7 @@ Once the unscripted testing has passed:
 * Check the release notes and remove the "Under Construction" paragraph
   on the main index page.
 * Disable release deploy jobs by executing
-  `close-release-testing <http://builds.mantidproject.org/view/All/job/close-release-testing>`__
+  `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
   job.
 * On the ``release-next`` branch, update major & minor versions
   accordingly in ``buildconfig/CMake/VersionNumber.cmake``. Also
@@ -194,7 +194,7 @@ Once the unscripted testing has passed:
 * Merge ``release-next`` branch back to ``master``
 * Comment out patch number on ``master`` branch
 * Hit build on `release kit
-  builds <http://builds.mantidproject.org/view/Release%20Pipeline/>`__
+  builds <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
   and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 * Draft a `new
   release <https://github.com/mantidproject/mantid/releases>`__ on
@@ -212,13 +212,13 @@ Once the unscripted testing has passed:
 
 * Upload packages to the GitHub release (essentially for a backup). 
 * Publish the GitHub release. This will create the tag required to generate the DOI.
-* Update the `download <http://download.mantidproject.org>`__ page,
+* Update the `download <https://download.mantidproject.org>`__ page,
   following the instructions
   `here <https://github.com/mantidproject/download.mantidproject.org>`__. Once the new
   file in the `releases` directory is pushed Jenkins will publish the new page.
 * Publish the draft release on GitHub (this will create the tag too).
 * Kick off the build for ``mantidXY`` on RHEL7 for SNS:
-  http://builds.mantidproject.org/job/release_clean-rhel7/ with suffix
+  https://builds.mantidproject.org/job/release_clean-rhel7/ with suffix
   ``XY``
 * **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for mantid to be updated on IDAaaS and cabin PCs. If out of cycle do this immediately.
 

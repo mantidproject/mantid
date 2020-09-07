@@ -77,12 +77,12 @@ class BatchProcessRunner(QObject):
             for state in states.values():
                 try:
                     out_scale_factors, out_shift_factors = \
-                        self.batch_processor([state], use_optimizations, output_mode, plot_results, output_graph, save_can)
+                        self.batch_processor([state.all_states], use_optimizations, output_mode, plot_results, output_graph, save_can)
                 except Exception as e:
                     self._handle_err(index, e)
                     continue
 
-                if state.reduction.reduction_mode == ReductionMode.MERGED:
+                if state.all_states.reduction.reduction_mode == ReductionMode.MERGED:
                     out_shift_factors = out_shift_factors[0]
                     out_scale_factors = out_scale_factors[0]
                 else:
@@ -103,7 +103,7 @@ class BatchProcessRunner(QObject):
 
             for state in states.values():
                 try:
-                    load_workspaces_from_states(state)
+                    load_workspaces_from_states(state.all_states)
                     self.row_processed_signal.emit(index, [], [])
                 except Exception as e:
                     self._handle_err(index, e)

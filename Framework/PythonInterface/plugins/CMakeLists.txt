@@ -136,6 +136,7 @@ set(PYTHON_PLUGINS
   algorithms/LRDirectBeamSort.py
   algorithms/BASISPowderDiffraction.py
   algorithms/LoadEmptyVesuvio.py
+  algorithms/VesuvioAnalysis.py
   algorithms/VelocityCrossCorrelations.py
   algorithms/MergeCalFiles.py
   algorithms/AngularAutoCorrelationsSingleAxis.py

@@ -96,7 +96,7 @@ The errors that the Monte Carlo simulation calculates for different wavelength p
 
 If ResimulateTracksForDifferentWavelengths=True then the errors on the simulated points will be independent and the errors can be combined using standard formulae for combining errors on independent variables.
 
-The error propagation through the spline interpolation is complex because each cubic polynomial is usually expressed as a function of the known y values and a derivative of those y values at the same points (some texts use the first derivative others the second). The error in y and the derivative of y are correlated at a particular x value and the derivatives at different x values are also correlated. So some extra covariances are required in addition to the error (variance) of each y value [#GAR]_.
+The error propagation through the spline interpolation is complex because each cubic polynomial is usually expressed as a function of the known y values and a derivative of those y values at the same points (some texts use the first derivative others the second). The error in y and the derivative of y are correlated at a particular x value and the derivatives at different x values are also correlated. So some extra covariances are required in addition to the error (variance) of each y value. The method followed [#GAR]_ involves inverting a symmetric tridiagonal matrix and an analytic calculation for the inversion has been implemented to minimize the run time [#HUO]_
 
 Sparse instrument
 #################
@@ -262,6 +262,11 @@ References
           `https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf <https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf>`_
 .. [#SEV] Severens, Ivo, technische universiteit eindhoven, (2003),
           `https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf <https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf>`_
+.. [#HUO] Hu, G. Y., O'Connell, R.F. , *Journal of Physics A*, **29** 1511 (1996),
+          `doi: 10.1088/0305-4470/29/7/020 <http://dx.doi.org/10.1088/0305-4470/29/7/020>`_
+          Note: the following edits have been applied to the formulae in the paper for the case -2 < D < 2:
+          a) D = -2 cos :math:`\lambda` has been implemented instead of D = 2 cos :math:`\lambda`
+          b) equation (10) has been modified for the -2 < D < 2 case so that the leading minus sign on the right hand side is removed
 
 |
 

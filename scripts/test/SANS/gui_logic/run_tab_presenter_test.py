@@ -5,22 +5,21 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 
 from mantid.kernel import PropertyManagerDataService
 from mantid.kernel import config
-from unittest import mock
 from sans.command_interface.batch_csv_parser import BatchCsvParser
+from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, RowState)
 from sans.common.enums import SANSInstrument
-from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ReductionMode,
-                               RangeStepType, FitType, RowState)
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from sans.state.AllStates import AllStates
 from sans.test_helper.common import (remove_file)
-from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.test_helper.mock_objects import (create_mock_view)
-from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
+from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
 
 BATCH_FILE_TEST_CONTENT_1 = [RowEntries(sample_scatter=1, sample_transmission=2,
                                         sample_direct=3, output_name='test_file',
@@ -75,6 +74,8 @@ class RunTabPresenterTest(unittest.TestCase):
         self._mock_csv_parser = mock.Mock(spec=BatchCsvParser)
         self._mock_view = mock.Mock()
 
+        self._mock_model.instrument = SANSInstrument.SANS2D
+
         # TODO, this top level presenter should not be creating sub presenters, instead we should use
         # TODO  an observer pattern and common interface to exchange messages. However for the moment
         # TODO  we will skip patching each
@@ -83,6 +84,8 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # The beam centre presenter will run QThreads which leads to flaky tests, so mock out
         self.presenter._beam_centre_presenter = mock.Mock()
+        self.presenter._masking_table_presenter = mock.Mock()
+        self.presenter._workspace_diagnostic_presenter = mock.Mock()
 
         self.presenter._csv_parser = self._mock_csv_parser
         # Allows us to use mock objs as the method tries to directly use int/floats
@@ -102,67 +105,26 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.presenter.set_view(view)
 
-        # Act
-        try:
+        # Mock out methods which should be called
+        self.presenter._beam_centre_presenter = mock.Mock()
+        self.presenter._masking_table_presenter = mock.Mock()
+        self.presenter.update_view_from_model = mock.Mock()
+        self.presenter._workspace_diagnostic_presenter = mock.Mock()
+
+        with mock.patch("sans.gui_logic.presenter.run_tab_presenter.FileLoading") as mocked_loader:
+            mocked_loader.load_user_file.return_value = AllStates()
             self.presenter.on_user_file_load()
-        except RuntimeError:
-            # Assert that RuntimeError from no instrument is caught
-            self.fail("on_user_file_load raises a RuntimeError which should be caught")
+            mocked_loader.load_user_file.assert_called_once_with(file_path=user_file_path, file_information=mock.ANY)
+
+        self.presenter._beam_centre_presenter.update_centre_positions.assert_called()
+        self.presenter._beam_centre_presenter.on_update_rows.assert_called()
+        self.presenter._masking_table_presenter.on_update_rows.assert_called()
+        self.presenter._workspace_diagnostic_presenter.on_user_file_loadassert_called()
+
+        self.presenter.update_view_from_model.assert_called()
 
         # Assert
         # Note that the event slices are not set in the user file
-        self.assertFalse(view.event_slices)
-        self.assertEqual(view.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
-        self.assertEqual(view.save_types[0], SaveType.NX_CAN_SAS)
-        self.assertTrue(view.zero_error_free)
-        self.assertTrue(view.use_optimizations)
-        self.assertEqual(view.reduction_mode, ReductionMode.LAB)
-        self.assertEqual(view.merge_scale, 1.)
-        self.assertEqual(view.merge_shift, 0.)
-        self.assertFalse(view.merge_scale_fit)
-        self.assertFalse(view.merge_shift_fit)
-        self.assertEqual(view.event_binning, "7000.0,500.0,60000.0")
-        self.assertEqual(view.wavelength_step_type, RangeStepType.LIN)
-        self.assertEqual(view.wavelength_min, 1.5)
-        self.assertEqual(view.wavelength_max, 12.5)
-        self.assertEqual(view.wavelength_step, 0.125)
-        self.assertEqual(view.absolute_scale, 0.074)
-        self.assertEqual(view.z_offset, 53.)
-        self.assertEqual(view.normalization_incident_monitor, 1)
-        self.assertTrue(view.normalization_interpolate)
-        self.assertEqual(view.transmission_incident_monitor, 1)
-        self.assertTrue(view.transmission_interpolate)
-        self.assertEqual(view.transmission_roi_files, "test2.xml")
-        self.assertEqual(view.transmission_mask_files, "test4.xml")
-        self.assertEqual(view.transmission_radius, 7.)
-        self.assertEqual(view.transmission_monitor, 4)
-        self.assertEqual(view.transmission_mn_4_shift, -70)
-        self.assertTrue(view.transmission_sample_use_fit)
-        self.assertEqual(view.transmission_sample_fit_type, FitType.LOGARITHMIC)
-        self.assertEqual(view.transmission_sample_polynomial_order, 2)
-        self.assertEqual(view.transmission_sample_wavelength_min, 1.5)
-        self.assertEqual(view.transmission_sample_wavelength_max, 12.5)
-        self.assertTrue(view.transmission_sample_use_wavelength)
-        self.assertFalse(view.pixel_adjustment_det_1)
-        self.assertFalse(view.pixel_adjustment_det_2)
-        self.assertFalse(view.wavelength_adjustment_det_1)
-        self.assertFalse(view.wavelength_adjustment_det_2)
-        self.assertEqual(view.q_1d_min_or_rebin_string, "0.001,0.001,0.0126,-0.08,0.2")
-        self.assertEqual(view.q_xy_max, 0.05)
-        self.assertEqual(view.q_xy_step, 0.001)
-        self.assertEqual(view.q_xy_step_type, RangeStepType.LIN)
-        self.assertTrue(view.gravity_on_off)
-        self.assertTrue(view.use_q_resolution)
-        self.assertEqual(view.q_resolution_sample_a, 14.)
-        self.assertEqual(view.q_resolution_source_a, 13.)
-        self.assertEqual(view.q_resolution_delta_r, 11.)
-        self.assertEqual(view.q_resolution_collimation_length, 12.)
-        self.assertEqual(view.q_resolution_moderator_file, "moderator_rkh_file.txt")
-        self.assertTrue(view.phi_limit_use_mirror)
-        self.assertEqual(view.radius_limit_min, 12.)
-        self.assertEqual(view.radius_limit_min, 12.)
-        self.assertEqual(view.radius_limit_max, 15.)
-        self.assertTrue(view.compatibility_mode)
 
         # clean up
         remove_file(user_file_path)
@@ -200,33 +162,31 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(states), 2)
-        for _, state in states.items():
-            state.validate()
 
         # Check state 0
         state0 = states[BATCH_FILE_TEST_CONTENT_2[0]]
-        self.assertEqual(state0.data.sample_scatter, "SANS2D00022024")
-        self.assertEqual(state0.data.sample_transmission, "SANS2D00022048")
-        self.assertEqual(state0.data.sample_direct, "SANS2D00022048")
-        self.assertEqual(state0.data.can_scatter, None)
-        self.assertEqual(state0.data.can_transmission, None)
-        self.assertEqual(state0.data.can_direct, None)
+        self.assertEqual(state0.all_states.data.sample_scatter, "SANS2D00022024")
+        self.assertEqual(state0.all_states.data.sample_transmission, "SANS2D00022048")
+        self.assertEqual(state0.all_states.data.sample_direct, "SANS2D00022048")
+        self.assertEqual(state0.all_states.data.can_scatter, None)
+        self.assertEqual(state0.all_states.data.can_transmission, None)
+        self.assertEqual(state0.all_states.data.can_direct, None)
 
         # Check state 1
         state1 = states[BATCH_FILE_TEST_CONTENT_2[1]]
-        self.assertEqual(state1.data.sample_scatter, "SANS2D00022024")
-        self.assertEqual(state1.data.sample_transmission, None)
-        self.assertEqual(state1.data.sample_direct, None)
-        self.assertEqual(state1.data.can_scatter, None)
-        self.assertEqual(state1.data.can_transmission, None)
-        self.assertEqual(state1.data.can_direct, None)
+        self.assertEqual(state1.all_states.data.sample_scatter, "SANS2D00022024")
+        self.assertEqual(state1.all_states.data.sample_transmission, None)
+        self.assertEqual(state1.all_states.data.sample_direct, None)
+        self.assertEqual(state1.all_states.data.can_scatter, None)
+        self.assertEqual(state1.all_states.data.can_transmission, None)
+        self.assertEqual(state1.all_states.data.can_direct, None)
 
         # Check some entries
-        self.assertEqual(state0.slice.start_time, None)
-        self.assertEqual(state0.slice.end_time, None)
+        self.assertEqual(state0.all_states.slice.start_time, None)
+        self.assertEqual(state0.all_states.slice.end_time, None)
 
-        self.assertEqual(state0.reduction.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
-        self.assertEqual(state0.move.detectors['LAB'].sample_centre_pos1, 0.15544999999999998)
+        self.assertEqual(state0.all_states.reduction.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
+        self.assertEqual(state0.all_states.move.detectors['LAB'].sample_centre_pos1, 0.15544999999999998)
 
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
@@ -234,13 +194,13 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_that_can_get_state_for_index_if_index_exists(self):
         state_key = mock.NonCallableMock()
         self._mock_table.get_row.return_value = state_key
-        expected_states, expected_errs = {state_key: "state"}, None
+        expected_states, expected_errs = {state_key: mock.NonCallableMock(spec=StateGuiModel)}, None
         self.presenter.get_states = mock.Mock(return_value=(expected_states, expected_errs))
         self.presenter.sans_logger = mock.Mock()
 
         state = self.presenter.get_state_for_row(0)
 
-        self.assertEqual(expected_states[state_key], state)
+        self.assertEqual(expected_states[state_key].all_states, state)
 
     def test_on_data_changed_calls_update_rows(self):
         batch_file_path, user_file_path, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
@@ -813,11 +773,6 @@ class RunTabPresenterTest(unittest.TestCase):
             remove_file(user_file_path)
         if batch_file_path:
             remove_file(batch_file_path)
-
-    @staticmethod
-    def get_file_information_mock():
-        return SANSFileInformationMock(instrument=SANSInstrument.SANS2D)
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -15,6 +15,7 @@ New
 - The axis tick markers in a plot can be switched between Log and decimal formats independently of the axes scale.
 - Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
 - A default font for plots can now be set in the workbench settings.
+- Added a Recently Closed Scripts sub-menu to the File menu in workbench, it shows all scripts that have recently been closed in descending order.
 - Spreadsheet based data processing interface is created for ILL data reduction. 
   SANS and reflectometry are currently supported. See :ref:`DrILL documentation <DrILL-ref>`
   for more information.
@@ -24,6 +25,8 @@ New
 
 Improvements
 ############
+
+- Combo boxes for workspace selection through `OptionsPropertyWidget` and `WorkspaceSelector` are now editable and support popup autocompletion based on the beginning of a string.
 
 .. figure:: ../../images/Plot1DSelectionDialog5-1.png
    :align: right
@@ -109,6 +112,8 @@ Improvements
 - Legends in 1D plots are now editable in-situ.
 - Added an option in `figure options` to change the canvas color for an axis.
 - Sliceviewer cut line plots' line widths reduced
+- When line plots are active on the sliceviewer the arrow keys can now be used to move the cursor a pixel at a time.
+
 
 Bugfixes
 ########
@@ -153,10 +158,11 @@ Bugfixes
 - Fixed an issue where workbench would not open if PID assigned by project recovery was owned by another programme.
 - Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
 - When running `ExtractFFTSpectrum` with only a real input, there is no longer a blank output on the end of the workspace.
-- `ExtractFFTSpectrum` gives the correct units. 
+- `ExtractFFTSpectrum` gives the correct units.
 - Warn users when they attempt to use Generate Recovery Script with no workspaces present.
 - The y axis labels will now appear in the correct order if imshow is called from a script with origin=upper.
 - Fixed a bug with colorfill plot script generation for distribution workspaces.
 - Use Jemalloc for memory allocation on Linux so memory can be released to the system.
+- Fixed a bug where instrument view would not update on wheel zoom.
 
 :ref:`Release 5.1.0 <v5.1.0>`

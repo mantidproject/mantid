@@ -41,8 +41,6 @@ class StateData(metaclass=JsonSerializable):
         self.can_direct = None  # : Str()
         self.can_direct_period = StateData.ALL_PERIODS  # : Int (Positive)
 
-        self.calibration = None  # : Str()
-
         self.sample_scatter_run_number = None  # : Int (Positive)
         self.sample_scatter_is_multi_period = None  # : Bool
         self.idf_file_path = None  # : Str()
@@ -119,9 +117,6 @@ class StateDataBuilder(object):
         self._file_information = file_information
 
     def build(self):
-        # Make sure that the product is in a valid state, ie not incomplete
-        self.state.validate()
-
         # There are some elements which need to be read from the file information object.
         #  This is currently:
         # 1. instrument
