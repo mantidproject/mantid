@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
     WorkspaceGroupProperty, FileAction
-from mantid.kernel import Direction, FloatBoundedValidator
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty
 from mantid.simpleapi import *
 from os import path
 
@@ -117,6 +117,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     def validateInputs(self):
         result = dict()
         message = 'Wrong number of {0} runs: {1}. Provide one or as many as sample runs: {2}.'
+        message_value = 'Wrong number of {0} values: {1}. Provide one or as ' \
+                        'many as sample runs: {2}.'
         tr_message = 'Wrong number of {0} runs: {1}. Provide one or multiple runs summed with +.'
         sample_dim = self.getPropertyValue('SampleRuns').count(',')
         abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
@@ -130,6 +132,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         mask_dim = self.getPropertyValue('MaskFiles').count(',')
         sens_dim = self.getPropertyValue('SensitivityMaps').count(',')
         ref_dim = self.getPropertyValue('ReferenceFiles').count(',')
+        maxqxy_dim = self.getPropertyValue('MaxQxy').count(',')
+        deltaq_dim = self.getPropertyValue('DeltaQ').count(',')
         if self.getPropertyValue('SampleRuns') == '':
             result['SampleRuns'] = 'Please provide at least one sample run.'
         if abs_dim != sample_dim and abs_dim != 0:
@@ -154,6 +158,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             result['SensitivityMaps'] = message.format('Sensitivity', sens_dim, sample_dim)
         if flux_dim != flux_dim and flux_dim != 0:
             result['FluxRuns'] = message.format('Flux')
+        if maxqxy_dim != sample_dim and maxqxy_dim != 0:
+            result['MaxQxy'] = message_value.format('MaxQxy',
+                                                    maxqxy_dim,
+                                                    sample_dim)
+        if deltaq_dim != sample_dim and deltaq_dim != 0:
+            result['DeltaQ'] = message_value.format('DeltaQ',
+                                                    deltaq_dim,
+                                                    sample_dim)
 
         return result
 
@@ -180,6 +192,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
         self.cleanup = self.getProperty('ClearCorrected2DWorkspace').value
         self.n_wedges = self.getProperty('NumberOfWedges').value
+        self.maxqxy = self.getPropertyValue('MaxQxy').split(',')
+        self.deltaq = self.getPropertyValue('DeltaQ').split(',')
 
     def PyInit(self):
 
@@ -287,13 +301,18 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('BeamRadius', 'Options')
         self.setPropertyGroup('WaterCrossSection', 'Options')
 
+        self.declareProperty(FloatArrayProperty('MaxQxy', values=[0]),
+                             doc='Maximum of absolute Qx and Qy.')
+        self.declareProperty(FloatArrayProperty('DeltaQ', values=[0]),
+                             doc='The dimension of a Qx-Qy cell.')
+
         self.copyProperties('SANSILLIntegration',
                             ['OutputType', 'CalculateResolution',
                              'DefaultQBinning', 'BinningFactor',
                              'OutputBinning', 'NPixelDivision',
                              'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
-                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ',
-                             'IQxQyLogBinning', 'PanelOutputWorkspaces'])
+                             'AsymmetricWedges', 'IQxQyLogBinning',
+                             'PanelOutputWorkspaces'])
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
@@ -569,8 +588,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 WedgeWorkspace=output_wedges,
                 AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
                 PanelOutputWorkspaces=panel_ws_group,
-                MaxQxy=self.getProperty('MaxQxy').value,
-                DeltaQ=self.getProperty('DeltaQ').value,
+                MaxQxy=(self.maxqxy[i]
+                        if len(self.maxqxy) == self.dimensionality
+                        else self.maxqxy[0]),
+                DeltaQ=(self.deltaq[i]
+                        if len(self.deltaq) == self.dimensionality
+                        else self.deltaq[0]),
                 IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value
                 )
 
