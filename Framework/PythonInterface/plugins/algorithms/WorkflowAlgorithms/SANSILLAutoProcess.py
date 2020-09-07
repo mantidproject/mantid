@@ -330,7 +330,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
         # group wedge workspaces
-        if self.getPropertyValue('OutputType') != "I(Phi,Q)":
+        if self.getPropertyValue('OutputType') == "I(Q)":
             for w in range(self.getProperty('NumberOfWedges').value):
                 wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
                             for d in range(self.dimensionality)]
@@ -545,7 +545,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
         n_wedges = self.getProperty('NumberOfWedges').value
-        if n_wedges and self.getPropertyValue('OutputType') != "I(Phi,Q)":
+        if n_wedges and self.getPropertyValue('OutputType') == "I(Q)":
             output_wedges = self.output + "_wedge_d" + str(i + 1)
         else:
             output_wedges = ""
@@ -571,8 +571,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 PanelOutputWorkspaces=panel_ws_group
                 )
 
-        # wedges ungrouping and renaming (except whent output is I(Phi,Q))
-        if n_wedges and self.getPropertyValue('OutputType') != "I(Phi,Q)":
+        # wedges ungrouping and renaming
+        if n_wedges and self.getPropertyValue('OutputType') == "I(Q)":
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(n_wedges)]
             wedges_new_names = [self.output + "_wedge_" + str(w + 1)
