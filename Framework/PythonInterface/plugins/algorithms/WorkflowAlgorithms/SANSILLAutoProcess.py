@@ -568,7 +568,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 WedgeOffset=self.getProperty('WedgeOffset').value,
                 WedgeWorkspace=output_wedges,
                 AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
-                PanelOutputWorkspaces=panel_ws_group
+                PanelOutputWorkspaces=panel_ws_group,
+                MaxQxy=self.getProperty('MaxQxy').value,
+                DeltaQ=self.getProperty('DeltaQ').value,
+                IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value
                 )
 
         # wedges ungrouping and renaming
