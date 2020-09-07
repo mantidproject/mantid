@@ -520,7 +520,6 @@ class SANSILLReduction(PythonAlgorithm):
             if self._instrument == 'D33':
                 CalculateDynamicRange(Workspace=ws,
                                       ComponentNames=['back_detector',
-                                                      'front_detector',
                                                       'front_detector_right',
                                                       'front_detector_left',
                                                       'front_detector_top',
