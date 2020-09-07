@@ -11,7 +11,6 @@ set_pvplugin_properties(MantidParaViewSinglePeakMarkerSourceSMPlugin QT_VERSION
 
 target_link_libraries(MantidParaViewSinglePeakMarkerSourceSMPlugin
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${CORE_MANTIDLIBS}
                       VatesAPI)
 

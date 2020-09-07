@@ -5,16 +5,19 @@ label = "\n"
 subgraph params {
  $param_style
   inputWorkspace     [label="OutputWorkspaceWavelength", group=g1]
+  thetaIn            [label="ThetaIn"]
   outputWorkspace    [label="OutputWorkspace"]
 }
 
 subgraph decisions {
  $decision_style
+ checkCorrectAngle  [label="Sum in wavelength and ThetaIn provided?"]
 }
 
 subgraph algorithms {
  $algorithm_style
   convertUnits  [label="ConvertUnits\n(AlignBins=False)", group=g1]
+  refRoi        [label="RefRoi"]
 }
 
 subgraph processes {
@@ -25,8 +28,15 @@ subgraph values {
  $value_style
 }
 
-inputWorkspace     -> convertUnits
-convertUnits       ->  outputWorkspace
+inputWorkspace     -> checkCorrectAngle
+
+checkCorrectAngle  -> convertUnits [label="No"]
+checkCorrectAngle  -> refRoi [label="Yes"]
+
+convertUnits       -> outputWorkspace
+
+thetaIn            -> refRoi
+refRoi             -> outputWorkspace
 
 }
 

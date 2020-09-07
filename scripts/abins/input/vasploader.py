@@ -180,6 +180,7 @@ class VASPLoader(AbInitioLoader):
                 raise IndexError("Number of eigenvectors in OUTCAR does not match "
                                  "the number element symbols determined from 'ions per type' line. "
                                  "Something must have gone wrong while reading these.")
+
             for i, (position, symbol, mass) in enumerate(zip(positions, symbols, masses)):
                 ion_data = {"symbol": symbol,
                             "coord": np.array(position),

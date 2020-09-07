@@ -15,7 +15,6 @@ if(CXXTEST_FOUND)
                              PRIVATE ${HDF5_INCLUDE_DIRS})
   target_link_libraries(NexusGeometryTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         NexusGeometry
                         Geometry

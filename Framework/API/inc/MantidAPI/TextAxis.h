@@ -60,8 +60,6 @@ public:
   double getMax() const override;
 
 private:
-  /// Private, undefined copy assignment operator
-  const TextAxis &operator=(const TextAxis &);
   /// A vector holding the axis values for the axis.
   std::vector<std::string> m_values;
 };

@@ -708,6 +708,6 @@ private:
                 0.06281112, 0.06287284, 0.06251089, 0.06240202, 0.06257857}));
     space2D->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    return std::move(space2D);
+    return space2D;
   }
 };

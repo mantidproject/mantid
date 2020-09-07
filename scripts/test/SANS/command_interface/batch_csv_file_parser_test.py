@@ -38,6 +38,11 @@ class BatchCsvParserTest(unittest.TestCase):
             parser.parse_batch_file(batch_file_path)
         BatchCsvParserTest._remove_csv(batch_file_path)
 
+    def test_handles_unknown_data(self):
+        parser = BatchCsvParser()
+        with self.assertRaises(SyntaxError):
+            parser.parse_batch_file('LOQ74044.nxs')
+
     def test_raises_if_the_batch_file_uses_key_as_val(self):
         content = "# MANTID_BATCH_FILE add more text here\n" \
                    "sample_sans,sample_trans,74024,sample_direct_beam,74014,can_sans,74019,can_trans,74020," \
@@ -225,7 +230,7 @@ class BatchCsvParserTest(unittest.TestCase):
         with mock.patch(patchable, mocked_handle):
             parser.save_batch_file(rows=[], file_path=expected_file_path)
 
-        mocked_handle.assert_called_with(expected_file_path, "w")
+        mocked_handle.assert_called_with(expected_file_path, "w", newline="")
 
     def test_parses_row_to_csv_correctly(self):
         test_row = RowEntries()

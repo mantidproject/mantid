@@ -86,6 +86,7 @@ set(TEST_PY_FILES
     SANSWideAngleCorrectionTest.py
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
+    SaveGSSCWTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
@@ -107,6 +108,7 @@ set(TEST_PY_FILES
     VelocityCrossCorrelationsTest.py
     VelocityAutoCorrelationsTest.py
     SelectNexusFilesByMetadataTest.py
+    VesuvioAnalysisTest.py
     VesuvioPeakPredictionTest.py
     VesuvioPreFitTest.py
     VesuvioResolutionTest.py

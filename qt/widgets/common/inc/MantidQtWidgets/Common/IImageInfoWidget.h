@@ -8,8 +8,8 @@
 
 #include "DllOption.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/Common/ImageInfoModel.h"
 #include <QTableWidget>
-#include <cfloat>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -19,8 +19,9 @@ class EXPORT_OPT_MANTIDQT_COMMON IImageInfoWidget : public QTableWidget {
 public:
   IImageInfoWidget(QWidget *parent = nullptr) : QTableWidget(0, 0, parent) {}
 
-  virtual void updateTable(const double x = DBL_MAX, const double y = DBL_MAX,
-                           const double z = DBL_MAX) = 0;
+  virtual void cursorAt(const double x, const double y,
+                        const double signal) = 0;
+  virtual void showInfo(const ImageInfoModel::ImageInfo &info) = 0;
   virtual void setWorkspace(const Mantid::API::Workspace_sptr &ws) = 0;
 };
 

@@ -25,8 +25,6 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     in INS analysis.
     """
     def __init__(self, input_ab_initio_filename=None):
-        self._num_k = None
-        self._num_atoms = None
         self._sample_form = None
         self._ab_initio_program = None
         self._clerk = abins.IO(input_filename=input_ab_initio_filename,
@@ -45,8 +43,6 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
 
           2) Method should read from an ab initio file information about frequencies, atomic displacements,
           k-point vectors, weights of k-points and ions.
-
-             As a side-effect, self._num_k and self._num_atom should be set
 
           3) Method should reconstruct data for symmetry equivalent k-points
              (protected method _recover_symmetry_points).
@@ -131,8 +127,6 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors",
                                                   "atomic_displacements", "unit_cell", "atoms"])
         datasets = data["datasets"]
-        self._num_k = datasets["k_vectors"].shape[0]
-        self._num_atoms = len(datasets["atoms"])
 
         loaded_data = {"frequencies": datasets["frequencies"],
                        "weights": datasets["weights"],
@@ -151,26 +145,19 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         :returns: Returns an object of type AbinsData
         """
 
-        k_points = abins.KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
+        k_points = abins.KpointsData(#      1D [k] (one entry corresponds to weight of one k-point)
+                                     weights=data["weights"],
+                                     # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
+                                     k_vectors=data["k_vectors"],
+                                     # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                                     frequencies=data["frequencies"],
+                                     # 4D array [k][atom_n][freq][3] (one entry corresponds to
+                                     # one coordinate for atom atom_n, frequency  freq and k-point k )
+                                     atomic_displacements=data["atomic_displacements"],
+                                     unit_cell=data["unit_cell"])
 
-        # 1D [k] (one entry corresponds to weight of one k-point)
-        k_points.set({"weights": data["weights"],
-                      # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                      "k_vectors": data["k_vectors"],
-                      # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                      "frequencies": data["frequencies"],
-                      # 4D array [k][atom_n][freq][3] (one entry corresponds to
-                      # one coordinate for atom atom_n, frequency  freq and k-point k )
-                      "atomic_displacements": data["atomic_displacements"],
-                      "unit_cell": data["unit_cell"]
-                      })
-
-        atoms = abins.AtomsData(num_atoms=self._num_atoms)
-        atoms.set(data["atoms"])
-
-        result_data = abins.AbinsData()
-        result_data.set(k_points_data=k_points, atoms_data=atoms)
-        return result_data
+        atoms = abins.AtomsData(data["atoms"])
+        return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
 
     def save_ab_initio_data(self, data=None):
         """

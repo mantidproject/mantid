@@ -19,7 +19,7 @@ from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.workbench_table_widget_item import WorkbenchTableWidgetItem
+from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import QStandardItem, create_table_item
 
 
 class TableWorkspaceDataPresenter(object):
@@ -50,28 +50,36 @@ class TableWorkspaceDataPresenter(object):
         # deep copy the original headers so that they are not changed by the appending of the label
         column_headers = self.model.original_column_headers()
         num_headers = len(column_headers)
-        self.view.setColumnCount(num_headers)
+        data_model = self.view.model()
+        data_model.setColumnCount(num_headers)
 
         extra_labels = self.model.build_current_labels()
         if len(extra_labels) > 0:
             for index, label in extra_labels:
                 column_headers[index] += str(label)
 
-        self.view.setHorizontalHeaderLabels(column_headers)
+        data_model.setHorizontalHeaderLabels(column_headers)
 
     def load_data(self, table):
         num_rows = self.model.get_number_of_rows()
-        table.setRowCount(num_rows)
+        data_model = table.model()
+        data_model.setRowCount(num_rows)
 
         num_cols = self.model.get_number_of_columns()
-        table.setColumnCount(num_cols)
+        data_model.setColumnCount(num_cols)
 
         for col in range(num_cols):
             column_data = self.model.get_column(col)
             editable = self.model.is_editable_column(col)
             for row in range(num_rows):
-                item = WorkbenchTableWidgetItem(column_data[row], editable=editable)
-                table.setItem(row, col, item)
+                data_model.setItem(row, col, self.create_item(column_data[row], editable))
+
+    def create_item(self, data, editable):
+        """Create a QStandardItemModel for the data
+        :param data: The typed data to store
+        :param editable: True if it should be editable in the view
+        """
+        return create_table_item(data, editable)
 
 
 class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, DataCopier):
@@ -92,8 +100,17 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = 'Column {}'
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None, container=None,
-                 window_width=600, window_height=400):
+    def __init__(self,
+                 ws,
+                 plot=None,
+                 parent=None,
+                 model=None,
+                 view=None,
+                 name=None,
+                 ads_observer=None,
+                 container=None,
+                 window_width=600,
+                 window_height=400):
         """
         Creates a display for the provided workspace.
 
@@ -112,7 +129,9 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         TableWorkspaceDataPresenter.__init__(self, model, view)
 
         self.name = name if name else self.model.get_name()
-        self.container = container if container else StatusBarView(parent, self.view, self.name,
+        self.container = container if container else StatusBarView(parent,
+                                                                   self.view,
+                                                                   self.name,
                                                                    window_width=window_width,
                                                                    window_height=window_height,
                                                                    presenter=self)
@@ -128,7 +147,7 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         self.refresh()
 
         # connect to cellChanged signal after the data has been loaded
-        self.view.itemChanged.connect(self.handleItemChanged)
+        self.view.model().itemChanged.connect(self.handleItemChanged)
 
     def show_view(self):
         self.container.show()
@@ -153,19 +172,21 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
 
             self.view.emit_repaint()
 
-    def handleItemChanged(self, item):
+    def handleItemChanged(self, item: QStandardItem):
         """
-        :type item: WorkbenchTableWidgetItem
+        :type item: A reference to the item that has been edited
         """
         try:
-            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), item.is_v3d)
-            item.update()
+            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
+                                     item.is_v3d)
         except ValueError:
+            item.reset()
             self.view.show_warning(self.ITEM_CHANGED_INVALID_DATA_MESSAGE)
         except Exception as x:
-            self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
-        finally:
             item.reset()
+            self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
+        else:
+            item.sync()
 
     def action_copy_cells(self):
         self.copy_cells(self.view)
@@ -221,7 +242,9 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
             return
 
         stats = self.model.get_statistics(selected_columns)
-        TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
+        TableWorkspaceDisplay(stats,
+                              parent=self.parent,
+                              name="Column Statistics of {}".format(self.name))
 
     def action_hide_selected(self):
         try:
@@ -276,7 +299,7 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         # reset it's type to None
         for col in removed_items:
             if col != selected_column:
-                self.model.set_column_type(int(col),0)
+                self.model.set_column_type(int(col), 0)
         self.model.set_column_type(selected_column, 5, related_y_column)
         self.update_column_headers()
 
@@ -350,8 +373,9 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
                     pass
             if len(yerr) != len(selected_columns):
                 column_headers = self.model.original_column_headers()
-                self.view.show_warning(self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(
-                    ",".join([column_headers[col] for col in selected_columns])))
+                self.view.show_warning(
+                    self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(",".join(
+                        [column_headers[col] for col in selected_columns])))
                 return
         x = self.model.get_column(selected_x)
 

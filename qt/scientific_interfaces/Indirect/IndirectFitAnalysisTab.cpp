@@ -268,7 +268,8 @@ size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
 }
 
 void IndirectFitAnalysisTab::setModelFitFunction() {
-  m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
+  auto func = m_fitPropertyBrowser->getFittingFunction();
+  m_fittingModel->setFitFunction(func);
 }
 
 void IndirectFitAnalysisTab::setModelStartX(double startX) {
@@ -329,14 +330,16 @@ void IndirectFitAnalysisTab::tableExcludeChanged(const std::string & /*unused*/,
 
 void IndirectFitAnalysisTab::startXChanged(double startX) {
   m_plotPresenter->setStartX(startX);
-  m_plotPresenter->updateGuess();
   m_fittingModel->setStartX(startX, m_plotPresenter->getSelectedDataIndex());
+  updateParameterEstimationData();
+  m_plotPresenter->updateGuess();
 }
 
 void IndirectFitAnalysisTab::endXChanged(double endX) {
   m_plotPresenter->setEndX(endX);
-  m_plotPresenter->updateGuess();
   m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex());
+  updateParameterEstimationData();
+  m_plotPresenter->updateGuess();
 }
 
 /**
@@ -346,6 +349,9 @@ void IndirectFitAnalysisTab::endXChanged(double endX) {
  */
 void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
   m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+  // if convolve members is on, output members should also be on
+  if (convolveMembers)
+    m_fitPropertyBrowser->setOutputCompositeMembers(true);
 }
 
 void IndirectFitAnalysisTab::updateFitOutput(bool error) {
@@ -653,6 +659,12 @@ void IndirectFitAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
       m_dataPresenter->getDataForParameterEstimation(
           getEstimationDataSelector()));
+  const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
+                                                     getSelectedSpectrum());
+  // If we haven't fit the data yet we may update the guess
+  if (!isFit) {
+    m_fitPropertyBrowser->estimateFunctionParameters();
+  }
 }
 
 /**

@@ -22,9 +22,9 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # Qt
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
-from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
+from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
-                            QSplashScreen)  # noqa
+                            QSplashScreen, QMessageBox)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.interfacemanager import InterfaceManager  # noqa
 from mantidqt.widgets import manageuserdirectories  # noqa
@@ -33,13 +33,13 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
-from mantidqt.usersubwindow import UserSubWindow  # noqa
 
 from workbench.config import CONF  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
+from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
 
@@ -224,14 +224,12 @@ class MainWindow(QMainWindow):
         action_open = create_action(self,
                                     "Open Script",
                                     on_triggered=self.open_file,
-                                    shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut="Ctrl+O")
         action_load_project = create_action(self, "Open Project", on_triggered=self.load_project)
         action_save_script = create_action(self,
                                            "Save Script",
                                            on_triggered=self.save_script,
-                                           shortcut="Ctrl+S",
-                                           shortcut_context=Qt.ApplicationShortcut)
+                                           shortcut="Ctrl+S")
         action_save_script_as = create_action(self,
                                               "Save Script as...",
                                               on_triggered=self.save_script_as)
@@ -252,13 +250,16 @@ class MainWindow(QMainWindow):
         action_quit = create_action(self,
                                     "&Quit",
                                     on_triggered=self.close,
-                                    shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut="Ctrl+Q")
+
+        menu_recently_closed_scripts = RecentlyClosedScriptsMenu(self)
+        self.editor.editors.sig_tab_closed.connect(menu_recently_closed_scripts.add_script_to_settings)
+
         self.file_menu_actions = [
             action_open, action_load_project, None, action_save_script, action_save_script_as,
-            action_generate_ws_script, None, action_save_project, action_save_project_as, None,
-            action_settings, None, action_manage_directories, None, action_script_repository, None,
-            action_quit
+            menu_recently_closed_scripts, action_generate_ws_script, None, action_save_project,
+            action_save_project_as, None, action_settings, None, action_manage_directories, None,
+            action_script_repository, None, action_quit
         ]
 
         # view menu
@@ -577,9 +578,15 @@ class MainWindow(QMainWindow):
         self.editor.save_current_file_as()
 
     def generate_script_from_workspaces(self):
-        task = BlockingAsyncTaskWithCallback(target=self._generate_script_from_workspaces,
-                                             blocking_cb=QApplication.processEvents)
-        task.start()
+        if not self.workspacewidget.empty_of_workspaces():
+            task = BlockingAsyncTaskWithCallback(target=self._generate_script_from_workspaces,
+                                                 blocking_cb=QApplication.processEvents)
+            task.start()
+        else:
+            # Tell users they need a workspace to do that
+            QMessageBox().warning(None, "No Workspaces!",
+                                  "In order to generate a recovery script there needs to be some workspaces.",
+                                  QMessageBox.Ok)
 
     def _generate_script_from_workspaces(self):
         script = "from mantid.simpleapi import *\n\n" + get_all_workspace_history_from_ads()
@@ -643,9 +650,6 @@ class MainWindow(QMainWindow):
 
     def readSettings(self, settings):
         qapp = QApplication.instance()
-        qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
-        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('high_dpi_scaling'))
 
         # get the saved window geometry
         window_size = settings.get('MainWindow/size')

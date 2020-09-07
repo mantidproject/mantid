@@ -11,7 +11,6 @@ set_pvplugin_properties(MantidParaViewMDEWSourceSMPlugin QT_VERSION 4)
 include_directories(SYSTEM ${QWT5_INCLUDE_DIR})
 target_link_libraries(MantidParaViewMDEWSourceSMPlugin
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${CORE_MANTIDLIBS}
                       DataObjects
                       VatesAPI

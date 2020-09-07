@@ -1,79 +1,74 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import abins
-from abins.generaldata import GeneralData
+from typing import Any, Dict
+
+from abins.kpointsdata import KpointsData
+from abins.atomsdata import AtomsData
 
 
-class AbinsData(GeneralData):
+class AbinsData:
     """
     Class for storing input DFT data.
-    """
-    def __init__(self, ):
 
-        super().__init__()
-        self._atoms_data = None
-        self._kpoints_data = None
-        self._data = None
+    :param k_points_data: object of type KpointsData
+    :param atoms_data: object of type AtomsData
+
+    """
+    def __init__(self, *,
+                 k_points_data: KpointsData,
+                 atoms_data: AtomsData) -> None:
+        if not isinstance(k_points_data, KpointsData):
+            raise TypeError("Invalid type of k-points data.: {}".format(type(k_points_data)))
+        self._k_points_data = k_points_data
+
+        if not isinstance(atoms_data, AtomsData):
+            raise TypeError("Invalid type of atoms data.")
+        self._atoms_data = atoms_data
+        self._check_consistent_dimensions()
 
     @staticmethod
-    def from_calculation_data(filename, ab_initio_program):
+    def from_calculation_data(filename: str,
+                              ab_initio_program: str) -> 'AbinsData':
         """
         Get AbinsData from ab initio calculation output file.
 
         :param filename: Path to vibration/phonon data file
-        :type filename: str
         :param ab_initio_program: Program which generated data file; this should be a key in AbinsData.ab_initio_loaders
-        :type ab_initio_program: str
         """
-        import abins.input  # Defer import to avoid loops when abins.__init__ imports AbinsData
+        from abins.input import all_loaders  # Defer import to avoid loops when abins.__init__ imports AbinsData
 
-        # This should live closer to the Loaders but for now it is the only place the dict is used.
-        ab_initio_loaders = {"CASTEP": abins.input.CASTEPLoader, "CRYSTAL": abins.input.CRYSTALLoader,
-                             "DMOL3": abins.input.DMOL3Loader, "GAUSSIAN": abins.input.GAUSSIANLoader,
-                             "VASP": abins.input.VASPLoader}
-
-        if ab_initio_program.upper() not in ab_initio_loaders:
+        if ab_initio_program.upper() not in all_loaders:
             raise ValueError("No loader available for {}: unknown program. "
                              "supported loaders: {}".format(ab_initio_program.upper(),
-                                                            ' '.join(ab_initio_loaders.keys())))
-        loader = ab_initio_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
-        return loader.get_formatted_data()
+                                                            ' '.join(all_loaders.keys())))
+        loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
+        data = loader.get_formatted_data()
+        return data
 
-    def set(self, k_points_data=None, atoms_data=None):
-        """
+    def get_kpoints_data(self) -> KpointsData:
+        """Get vibration data mapped over k-points"""
+        return self._k_points_data
 
-        :param k_points_data: object of type KpointsData
-        :param atoms_data: object of type AtomsData
-        """
-
-        if isinstance(k_points_data, abins.KpointsData):
-            self._kpoints_data = k_points_data
-        else:
-            raise ValueError("Invalid type of k-points data.")
-
-        if isinstance(atoms_data, abins.AtomsData):
-            self._atoms_data = atoms_data
-        else:
-            raise ValueError("Invalid type of atoms data.")
-
-        self._data = {"k_points_data": k_points_data.extract(), "atoms_data": atoms_data.extract()}
-
-    def get_kpoints_data(self):
-        return self._kpoints_data
-
-    def get_atoms_data(self):
+    def get_atoms_data(self) -> AtomsData:
+        """Get atomic structure data"""
         return self._atoms_data
 
-    def extract(self):
-        for k in self._data["k_points_data"]["atomic_displacements"]:
-            if self._data["k_points_data"]["atomic_displacements"][k].shape[0] != len(self._data["atoms_data"]):
-                raise ValueError("Abins data is inconsistent.")
+    def _check_consistent_dimensions(self) -> None:
+        """Raise an error if atoms_data and k_points_data have different numbers of atoms"""
+        data = self.extract()
+        for k in data["k_points_data"]["atomic_displacements"]:
+            if data["k_points_data"]["atomic_displacements"][k].shape[0] != len(data["atoms_data"]):
+                raise ValueError("KpointsData and AtomsData are not consistent: number of atoms in structure "
+                                 "does not match displacement data.")
 
-        return self._data
+    def extract(self) -> Dict[str, Any]:
+        """Get a dict with k-points data and atoms data"""
+        return {"k_points_data": self.get_kpoints_data().extract(),
+                "atoms_data": self.get_atoms_data().extract()}
 
-    def __str__(self):
-        return "DFT data"
+    def __str__(self) -> str:
+        return "Abins data"

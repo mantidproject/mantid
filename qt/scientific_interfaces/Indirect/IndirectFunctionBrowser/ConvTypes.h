@@ -25,8 +25,6 @@ using namespace Mantid::API;
 
 enum class FitType {
   None,
-  OneLorentzian,
-  TwoLorentzians,
   TeixeiraWater,
   StretchedExpFT,
   ElasticDiffSphere,
@@ -35,9 +33,20 @@ enum class FitType {
   InelasticDiffRotDiscreteCircle,
 };
 
+enum class LorentzianType {
+  None,
+  OneLorentzian,
+  TwoLorentzians,
+};
+
 extern std::map<FitType, bool> FitTypeQDepends;
 extern std::unordered_map<FitType, std::string> FitTypeEnumToString;
 extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
+
+extern std::unordered_map<LorentzianType, std::string>
+    LorentzianTypeEnumToString;
+extern std::unordered_map<std::string, LorentzianType>
+    LorentzianTypeStringToEnum;
 
 enum class BackgroundType { None, Flat, Linear };
 
@@ -100,8 +109,9 @@ inline void applyToParamIDRange(ParamID from, ParamID to,
 }
 
 enum SubTypeIndex {
-  Fit = 0,
-  Background = 1,
+  Lorentzian = 0,
+  Fit = 1,
+  Background = 2,
 };
 
 struct TemplateSubType {
@@ -188,6 +198,10 @@ struct FitSubType : public TemplateSubTypeImpl<FitType> {
   QString name() const override { return "Fit Type"; }
 };
 
+struct LorentzianSubType : public TemplateSubTypeImpl<LorentzianType> {
+  QString name() const override { return "Lorentzians"; }
+};
+
 struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
   QString name() const override { return "Background"; }
 };
@@ -197,11 +211,15 @@ struct DeltaSubType : public TemplateSubTypeImpl<bool> {
 };
 
 struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
-  QString name() const override { return "TempCorrection"; }
+  QString name() const override { return "ConvTempCorrection"; }
 };
 
 void applyToFitType(FitType fitType,
                     const std::function<void(ParamID)> &paramFun);
+
+void applyToLorentzianType(LorentzianType lorenzianType,
+                           const std::function<void(ParamID)> &paramFun);
+
 void applyToBackground(BackgroundType bgType,
                        const std::function<void(ParamID)> &paramFun);
 void applyToDelta(bool deltaType, const std::function<void(ParamID)> &paramFun);

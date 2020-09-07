@@ -23,11 +23,13 @@ class IFuncMinimizer;
 
 namespace CurveFitting {
 namespace Algorithms {
-MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr getDoublePulseFunction(
-    std::shared_ptr<const API::ParamFunction> const &function, double offset,
-    double firstPulseWeight, double secondPulseWeight);
+MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr
+getDoublePulseFunction(std::shared_ptr<const API::IFunction> const &function,
+                       double offset, double firstPulseWeight,
+                       double secondPulseWeight);
 
-MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr getDoublePulseFunction(
+MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr
+getDoublePulseMultiDomainFunction(
     std::shared_ptr<const API::MultiDomainFunction> const &function,
     double offset, double firstPulseWeight, double secondPulseWeight);
 

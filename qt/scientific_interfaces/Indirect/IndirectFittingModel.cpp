@@ -732,7 +732,8 @@ IndirectFittingModel::getDataForParameterEstimation(
     for (const auto &spectrum : m_fitDataModel->getSpectra(i)) {
       auto const &x = ws->readX(spectrum.value);
       auto const &y = ws->readY(spectrum.value);
-      dataCollection.emplace_back(selector(x, y));
+      auto range = getFittingRange(i, spectrum);
+      dataCollection.emplace_back(selector(x, y, range));
     }
   }
   return dataCollection;

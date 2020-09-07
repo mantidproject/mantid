@@ -37,7 +37,7 @@ class D17Cycle192IncoherentSanTest(systemtesting.MantidSystemTest):
         name = 'VoS11'
         directBeams = '541838,541839'
         reflectedBeams = '541882,541883'
-        foregroundWidth = [3, 15]
+        foregroundWidth = [3, 3]
         angleOffset = [2, 5]
         angleWidth = 5
         ReflectometryILLAutoProcess(
@@ -94,7 +94,7 @@ class D17Cycle192CoherentDanTest(systemtesting.MantidSystemTest):
         name = 'SiO2'
         directBeams = '541838,541839'
         reflectedBeams = '541853,541854'
-        foregroundWidth = [3, 15]
+        foregroundWidth = [3, 3]
         angleOffset = [2, 5]
         angleWidth = 5
         ReflectometryILLAutoProcess(

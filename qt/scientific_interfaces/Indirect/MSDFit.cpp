@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MSDFit.h"
+#include "IDAFunctionParameterEstimation.h"
+
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -26,6 +28,11 @@ std::vector<std::string> MSDFIT_HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
      "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
      "PeakRadius", "PlotParameter"});
+
+const std::string MSDGAUSSFUNC{"MsdGauss"};
+const std::string MSDPETERSFUNC{"MsdPeters"};
+const std::string MSDYIFUNC{"MsdYi"};
+
 } // namespace
 
 namespace MantidQt {
@@ -33,7 +40,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 auto msdFunctionStrings = std::map<std::string, std::string>(
-    {{"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
+    {{"None", ""},
+     {"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
      {"Peters",
       "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0, "
       "Msd>0, Beta>0)"},
@@ -52,7 +60,10 @@ MSDFit::MSDFit(QWidget *parent)
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  auto templateBrowser = new SingleFunctionTemplateBrowser(msdFunctionStrings);
+  auto parameterEstimation = createParameterEstimation();
+  auto templateBrowser = new SingleFunctionTemplateBrowser(
+      msdFunctionStrings,
+      std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
       templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
@@ -78,10 +89,33 @@ void MSDFit::setRunIsRunning(bool running) {
 void MSDFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 EstimationDataSelector MSDFit::getEstimationDataSelector() const {
-  return [](const std::vector<double> &,
-            const std::vector<double> &) -> DataForParameterEstimation {
-    return DataForParameterEstimation{};
-  };
+
+  return
+      [](const std::vector<double> &x, const std::vector<double> &y,
+         const std::pair<double, double> range) -> DataForParameterEstimation {
+        // Find data thats within range
+        double xmin = range.first;
+        double xmax = range.second;
+        if (xmin > xmax) {
+          return DataForParameterEstimation{};
+        }
+
+        const auto startItr = std::find_if(
+            x.cbegin(), x.cend(),
+            [xmin](const double &val) -> bool { return val >= (xmin - 1e-5); });
+        auto endItr = std::find_if(
+            x.cbegin(), x.cend(),
+            [xmax](const double &val) -> bool { return val > xmax; });
+
+        size_t first = std::distance(x.cbegin(), startItr);
+        size_t end = std::distance(x.cbegin(), endItr);
+        size_t m = first + (end - first) / 2;
+
+        if (std::distance(startItr, endItr - 1) < 2)
+          return DataForParameterEstimation{};
+
+        return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
+      };
 }
 
 void MSDFit::fitFunctionChanged() {
@@ -109,6 +143,33 @@ std::string MSDFit::fitTypeString() const {
     return "Yi";
 
   return "UserDefined";
+}
+// Create parameter estimation functions
+// These function rely on the data returned from getEstimationDataSelector,
+// which should be appropriately configured.
+IDAFunctionParameterEstimation MSDFit::createParameterEstimation() const {
+  auto estimateMsd = [](::Mantid::API::IFunction_sptr &function,
+                        const DataForParameterEstimation &estimationData) {
+    auto y = estimationData.y;
+    auto x = estimationData.x;
+    if (x.size() != 2 || y.size() != 2) {
+      return;
+    }
+    double Msd = 6 * log(y[0] / y[1]) / (x[1] * x[1]);
+    // If MSD less than zero, reject the estimate and set to default value of
+    // 0.05, which leads to a (roughly) flat line
+    Msd = Msd > 0 ? Msd : 0.05;
+    function->setParameter("Msd", Msd);
+    function->setParameter("Height", y[0]);
+  };
+  IDAFunctionParameterEstimation parameterEstimation;
+
+  parameterEstimation.addParameterEstimationFunction(MSDGAUSSFUNC, estimateMsd);
+  parameterEstimation.addParameterEstimationFunction(MSDPETERSFUNC,
+                                                     estimateMsd);
+  parameterEstimation.addParameterEstimationFunction(MSDYIFUNC, estimateMsd);
+
+  return parameterEstimation;
 }
 
 } // namespace IDA

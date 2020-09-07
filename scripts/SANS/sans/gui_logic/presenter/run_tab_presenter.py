@@ -15,8 +15,12 @@ import os
 import time
 import traceback
 from contextlib import contextmanager
+from typing import Optional
 
 from qtpy import PYQT4
+from ui.sans_isis import SANSSaveOtherWindow
+from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
+from ui.sans_isis.work_handler import WorkHandler
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
@@ -30,6 +34,7 @@ from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
+from sans.gui_logic.models.file_loading import FileLoading, UserFileLoadException
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
@@ -41,10 +46,7 @@ from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 from sans.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjustmentPresenter
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.sans_batch import SANSCentreFinder
-from sans.user_file.user_file_reader import UserFileReader
-from ui.sans_isis import SANSSaveOtherWindow
-from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from ui.sans_isis.work_handler import WorkHandler
+from sans.state.AllStates import AllStates
 
 IN_MANTIDPLOT = False
 if PYQT4:
@@ -187,7 +189,7 @@ class RunTabPresenter(PresenterCommon):
         self.progress = 0
 
         # Models that are being used by the presenter
-        self._model = model if model else StateGuiModel(user_file_items={})
+        self._model = model if model else StateGuiModel(user_file_items=AllStates())
         self._table_model = table_model if table_model else TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
@@ -357,60 +359,58 @@ class RunTabPresenter(PresenterCommon):
         Loads the user file. Populates the models and the view.
         """
         error_msg = "Loading of the user file failed"
-        try:
-            # 1. Get the user file path from the view
-            user_file_path = self._view.get_user_file_path()
+        # 1. Get the user file path from the view
+        user_file_path = self._view.get_user_file_path()
 
-            if not user_file_path:
-                return
-            # 2. Get the full file path
-            user_file_path = FileFinder.getFullPath(user_file_path)
-            if not os.path.exists(user_file_path):
-                raise RuntimeError(
-                    "The user path {} does not exist. Make sure a valid user file path"
-                    " has been specified.".format(user_file_path))
-        except RuntimeError as path_error:
-            # This exception block runs if user file does not exist
+        if not user_file_path:
+            return
+
+        # 2. Get the full file path
+        user_file_path = FileFinder.getFullPath(user_file_path)
+        if not os.path.exists(user_file_path):
+            path_error = "The user path {} does not exist. Make sure a valid user file path"
+            " has been specified.".format(user_file_path)
             self._on_user_file_load_failure(path_error, error_msg + " when finding file.")
-        else:
-            try:
-                self._table_model.user_file = user_file_path
-                # Clear out the current view
-                self._view.reset_all_fields_to_default()
+            return
 
-                # 3. Read and parse the user file
-                user_file_reader = UserFileReader(user_file_path)
-                user_file_items = user_file_reader.read_user_file()
-            except (RuntimeError, ValueError) as e:
-                # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
-                self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
-            else:
-                try:
-                    # 4. Populate the model and update sub-presenters
-                    self._model = StateGuiModel(user_file_items)
-                    self._settings_adjustment_presenter.set_model(
-                        SettingsAdjustmentModel(user_file_items=user_file_items))
-                    # 5. Update the views.
-                    self.update_view_from_model()
-                    self._beam_centre_presenter.update_centre_positions(self._model)
+        # Clear out the current view
+        self._view.reset_all_fields_to_default()
+        try:
+            # Always set the instrument to NoInstrument unless otherwise specified as our fallback
+            user_file_items = FileLoading.load_user_file(file_path=user_file_path,
+                                                         file_information=self._file_information)
+        except UserFileLoadException as e:
+            # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
+            self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
+            return
 
-                    self._beam_centre_presenter.on_update_rows()
-                    self._masking_table_presenter.on_update_rows()
-                    self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
+        try:
+            # 4. Populate the model and update sub-presenters
+            self._model = StateGuiModel(user_file_items)
+            self._model.user_file = user_file_path
+            self._settings_adjustment_presenter.set_model(
+                SettingsAdjustmentModel(user_file_items=user_file_items))
+            # 5. Update the views.
+            self.update_view_from_model()
+            self._beam_centre_presenter.update_centre_positions(self._model)
 
-                    # 6. Warning if user file did not contain a recognised instrument
-                    if self._view.instrument == SANSInstrument.NO_INSTRUMENT:
-                        raise RuntimeError("User file did not contain a SANS Instrument.")
+            self._beam_centre_presenter.on_update_rows()
+            self._masking_table_presenter.on_update_rows()
+            self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
-                except RuntimeError as instrument_e:
-                    # This exception block runs if the user file does not contain an parsable instrument
-                    self._on_user_file_load_failure(instrument_e, error_msg + " when reading instrument.")
-                except Exception as other_error:
-                    # If we don't catch all exceptions, SANS can fail to open if last loaded
-                    # user file contains an error that would not otherwise be caught
-                    traceback.print_exc()
-                    self._on_user_file_load_failure(other_error, "Unknown error in loading user file.",
-                                                    use_error_name=True)
+            # 6. Warning if user file did not contain a recognised instrument
+            if self._view.instrument == SANSInstrument.NO_INSTRUMENT:
+                raise RuntimeError("User file did not contain a SANS Instrument.")
+
+        except RuntimeError as instrument_e:
+            # This exception block runs if the user file does not contain an parsable instrument
+            self._on_user_file_load_failure(instrument_e, error_msg + " when reading instrument.")
+        except Exception as other_error:
+            # If we don't catch all exceptions, SANS can fail to open if last loaded
+            # user file contains an error that would not otherwise be caught
+            traceback.print_exc()
+            self._on_user_file_load_failure(other_error, "Unknown error in loading user file.",
+                                            use_error_name=True)
 
     def _on_user_file_load_failure(self, e, message, use_error_name=False):
         self._setup_instrument_specific_settings(SANSInstrument.NO_INSTRUMENT)
@@ -438,8 +438,6 @@ class RunTabPresenter(PresenterCommon):
                     "The batch file path {} does not exist. Make sure a valid batch file path"
                     " has been specified.".format(batch_file_path))
 
-            self._table_model.batch_file = batch_file_path
-
             # 2. Read the batch file
             parsed_rows = self._csv_parser.parse_batch_file(batch_file_path)
 
@@ -447,7 +445,11 @@ class RunTabPresenter(PresenterCommon):
             self._table_model.clear_table_entries()
 
             self._add_multiple_rows_to_table_model(rows=parsed_rows)
-        except RuntimeError as e:
+
+            # 4. Set the batch file path in the model
+            self._model.batch_file = batch_file_path
+
+        except (RuntimeError, ValueError, SyntaxError) as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
@@ -456,6 +458,22 @@ class RunTabPresenter(PresenterCommon):
 
     def on_update_rows(self):
         self.update_view_from_table_model()
+        self._get_current_file_information()
+
+    def _get_current_file_information(self):
+        # We shouldn't have to do this hack, but it solves the problem of trying to load in
+        # file information before we need it when the user adds details to a row entry
+        file_info = None
+        for row in self._table_model.get_non_empty_rows():
+            try:
+                file_info = row.file_information
+            except (ValueError, RuntimeError):
+                pass
+
+        if self._file_information != file_info:
+            # Reload everything now our file information has updated
+            self._file_information = file_info
+            self.on_user_file_load()
 
     def update_view_from_table_model(self):
         self._view.clear_table()
@@ -920,8 +938,7 @@ class RunTabPresenter(PresenterCommon):
             states, errors = create_states(state_model_with_view_update,
                                            facility=self._facility,
                                            row_entries=row_entries,
-                                           file_lookup=file_lookup,
-                                           user_file=self._view.get_user_file_path())
+                                           file_lookup=file_lookup)
 
         if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")
@@ -933,7 +950,7 @@ class RunTabPresenter(PresenterCommon):
     def get_row(self, row_index):
         return self._table_model.get_row(index=row_index)
 
-    def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False):
+    def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False)->Optional[AllStates]:
         """
         Creates the state for a particular row.
         :param row_index: the row index
@@ -952,7 +969,7 @@ class RunTabPresenter(PresenterCommon):
                     "There does not seem to be data for a row {}.".format(row_index))
             return None
 
-        return states[row_entry]
+        return states[row_entry].all_states
 
     def update_view_from_model(self):
         self._set_on_view("instrument")

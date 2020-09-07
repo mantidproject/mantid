@@ -389,7 +389,7 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   outputWS->getSpectrum(0).clearDetectorIDs();
   outputWS->getSpectrum(0).setSpectrumNo(1);
 
-  return std::move(outputWS);
+  return outputWS;
 }
 
 /** Calculate the normalization term for each output bin

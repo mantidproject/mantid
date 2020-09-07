@@ -10,6 +10,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 
 #include <Poco/File.h>

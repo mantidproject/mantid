@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingView.h"
 
+#include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
+#include <Poco/File.h>
 
 #include <QMessageBox>
 
@@ -15,8 +17,6 @@ using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/// This is the string "Auto", used for last file
-const std::string ALCDataLoadingView::g_autoString = "Auto";
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget) : m_widget(widget) {}
 
@@ -28,12 +28,9 @@ void ALCDataLoadingView::initialize() {
   m_ui.logValueSelector->setVisible(true);
   m_ui.logValueSelector->setEnabled(true);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
-  connect(m_ui.firstRun, SIGNAL(fileFindingFinished()),
-          SIGNAL(firstRunSelected()));
-  connect(m_ui.firstRun, SIGNAL(filesFoundChanged()), this,
-          SLOT(handleFirstFileChanged()));
+  connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsSelected()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.lastRunAuto, SIGNAL(stateChanged(int)), this,
+  connect(m_ui.runAuto, SIGNAL(stateChanged(int)), this,
           SLOT(checkBoxAutoChanged(int)));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
@@ -41,7 +38,7 @@ void ALCDataLoadingView::initialize() {
   // Error bars on the plot
   QStringList plotsWithErrors{"Data"};
   m_ui.dataPlot->setLinesWithErrors(plotsWithErrors);
-
+  m_ui.dataPlot->showLegend(false);
   // The following lines disable the groups' titles when the
   // group is disabled
   QPalette palette;
@@ -56,8 +53,8 @@ void ALCDataLoadingView::initialize() {
 }
 
 std::string ALCDataLoadingView::firstRun() const {
-  if (m_ui.firstRun->isValid()) {
-    return m_ui.firstRun->getFirstFilename().toStdString();
+  if (m_ui.runs->isValid()) {
+    return m_ui.runs->getFirstFilename().toStdString();
   } else {
     return "";
   }
@@ -65,21 +62,28 @@ std::string ALCDataLoadingView::firstRun() const {
 
 /**
  * If the last run is valid, return the filename.
- * If user entered "Auto", return this.
  * Otherwise, return an empty string.
  */
 std::string ALCDataLoadingView::lastRun() const {
-  std::string toReturn("");
-
-  if (m_ui.lastRun->isValid()) {
-    toReturn = m_ui.lastRun->getFirstFilename().toStdString();
-    QString userInput = m_ui.lastRun->getText();
-    if (0 ==
-        userInput.compare(QString(autoString().c_str()), Qt::CaseInsensitive)) {
-      toReturn = autoString();
-    }
+  if (m_ui.runs->isValid()) {
+    const auto files = m_ui.runs->getFilenames();
+    if (!files.empty())
+      return files.back().toStdString();
   }
-  return toReturn;
+  return "";
+}
+
+/**
+ * If runs expression is valid, returns vector of file names
+ */
+std::vector<std::string> ALCDataLoadingView::getRuns() const {
+  std::vector<std::string> returnFiles;
+  if (m_ui.runs->isValid()) {
+    const auto fileNames = m_ui.runs->getFilenames();
+    for (const auto &file : fileNames)
+      returnFiles.emplace_back(file.toStdString());
+  }
+  return returnFiles;
 }
 
 std::string ALCDataLoadingView::log() const {
@@ -273,29 +277,30 @@ void ALCDataLoadingView::enableAll() {
  * @param state :: [input] Check state - member of Qt::CheckState enum
  */
 void ALCDataLoadingView::checkBoxAutoChanged(int state) {
-  // Tell the presenter about the change
-  emit lastRunAutoCheckedChanged(state);
+
+  // Try to auto fill in rest of runs
   if (state == Qt::Checked) {
-    // Auto mode on
-    m_ui.lastRun->setText(autoString().c_str());
-    m_ui.lastRun->setReadOnly(true);
+
+    // Update auto run
+    emit runAutoChecked();
+
   } else {
-    // Replace "auto" with the currently loaded file
-    // The search is necessary to clear the validator
-    m_ui.lastRun->setFileTextWithSearch(m_currentAutoFile.c_str());
-    m_ui.lastRun->setReadOnly(false);
+
+    // Reset text as before auto checked
+    emit runAutoUnchecked();
   }
 }
 
-/**
- * Called when the "first run" file has changed.
- * Sets the "last run" box to look in the same directory.
- */
-void ALCDataLoadingView::handleFirstFileChanged() {
-  QString directory = m_ui.firstRun->getLastDirectory();
-  if (!directory.isEmpty()) {
-    m_ui.lastRun->setLastDirectory(directory);
-  }
+void ALCDataLoadingView::setRunsReadOnly(bool readOnly) {
+  m_ui.runs->setReadOnly(readOnly);
+}
+
+std::string ALCDataLoadingView::getCurrentRunsText() const {
+  return m_ui.runs->getText().toStdString();
+}
+
+void ALCDataLoadingView::setRunsTextWithSearch(const QString &text) {
+  m_ui.runs->setFileTextWithSearch(text);
 }
 
 } // namespace CustomInterfaces

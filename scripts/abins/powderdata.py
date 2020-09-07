@@ -1,56 +1,100 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from abins import GeneralData
-from abins.constants import ALL_KEYWORDS_POWDER_DATA, GAMMA_POINT
+import numpy as np
+from typing import Dict, Optional
+
+PowderDict = Dict[str, Dict[int, np.ndarray]]
 
 
-class PowderData(GeneralData):
+class PowderData:
     """
-    Class for storing powder data.
+    Data container for tensors used in analytic powder-averaging model
+
+    :param a_tensors: dict of total displacement tensors, indexed by integer
+        k-point identities
+    :param b_tensors: dict of mode-by-mode tensors, indexed by integer k-point
+        identities
+    :param frequencies: frequencies corresponding to data in b_tensors; usually
+        this has already been pruned to remove imaginary modes.
+
+    :param num_atoms: Expected number of atoms in tensor data. If provided,
+        this value is used for sanity-checking
+
     """
-    def __init__(self, num_atoms=None):
-        super(PowderData, self).__init__()
+    def __init__(self, *,
+                 a_tensors: Dict[int, np.ndarray],
+                 b_tensors: Dict[int, np.ndarray],
+                 frequencies: Dict[int, np.ndarray],
+                 num_atoms: Optional[int] = None):
 
-        if isinstance(num_atoms, int) and num_atoms > 0:
-            self._num_atoms = num_atoms
-        else:
-            raise ValueError("Invalid value of atoms.")
+        self._data = {"a_tensors": a_tensors,
+                      "b_tensors": b_tensors,
+                      "frequencies": frequencies}  # type: PowderDict
 
-        self._data = None
+        self._num_atoms = num_atoms
 
-    def set(self, items=None):
+        self._check_data()
 
-        self._check_items(items=items)
-        self._data = items
+    def get_a_tensors(self) -> Dict[int, np.ndarray]:
+        return self._data["a_tensors"]
 
-    def extract(self):
-        self._check_items(items=self._data)
-        return self._data
+    def get_b_tensors(self) -> Dict[int, np.ndarray]:
+        return self._data["b_tensors"]
 
-    def _check_items(self, items=None):
+    def get_frequencies(self) -> np.ndarray:
+        return self._data["frequencies"]
 
-        if not isinstance(items, dict):
-            raise ValueError("Invalid value. Dictionary with the following entries : %s" %
-                             ALL_KEYWORDS_POWDER_DATA + " was expected.")
+    def extract(self) -> PowderDict:
+        """Get tensor data as dict"""
+        return {key: {str(k): array for k, array in data.items()}
+                for key, data in self._data.items()}
 
-        if sorted(items.keys()) != sorted(ALL_KEYWORDS_POWDER_DATA):
-            raise ValueError("Invalid structure of the dictionary.")
+    @classmethod
+    def from_extracted(cls, dct: PowderDict,
+                       num_atoms: Optional[int] = None):
+        """Reconstruct a PowderData object from the extracted dictionary representation"""
+        a_tensors = {int(k_index): data for k_index, data in dct['a_tensors'].items()}
+        b_tensors = {int(k_index): data for k_index, data in dct['b_tensors'].items()}
+        frequencies = {int(k_index): data for k_index, data in dct['frequencies'].items()}
+        return cls(a_tensors=a_tensors, b_tensors=b_tensors,
+                   frequencies=frequencies, num_atoms=num_atoms)
 
-        if not isinstance(items["a_tensors"], dict):
-            raise ValueError("New value of a_tensor should be a dictionary.")
+    def _check_data(self) -> None:
+        for key in "a_tensors", "b_tensors", "frequencies":
+            if not isinstance(self._data[key], dict):
+                raise TypeError(f"Value of {key} should be a dictionary.")
 
-        if not isinstance(items["b_tensors"], dict):
-            raise ValueError("New value of Debye-Waller factors should be a dictionary.")
+            for k, data in self._data[key].items():
+                if not isinstance(data, np.ndarray):
+                    raise TypeError(f"Items in {key} dict should be numpy arrays")
 
-        if items["a_tensors"][GAMMA_POINT].shape[0] != self._num_atoms:
-            raise ValueError("Invalid dimension of a_tensors.")
+        if self._num_atoms is not None:
+            self._num_atoms = int(self._num_atoms)
 
-        if items["b_tensors"][GAMMA_POINT].shape[0] != self._num_atoms:
-            raise ValueError("Invalid dimension of b_tensors.")
+            if self._num_atoms <= 0:
+                raise ValueError("Invalid value of num_atoms.")
 
-    def __str__(self):
-        return "Powder data"
+            for _, tensor in self.get_a_tensors().items():
+                if tensor.shape[0] != self._num_atoms:
+                    raise ValueError("Invalid dimension of a_tensors.")
+
+            for _, tensor in self.get_b_tensors().items():
+                if tensor.shape[0] != self._num_atoms:
+                    raise ValueError("Invalid dimension of b_tensors.")
+
+        if self.get_frequencies().keys() != self.get_a_tensors().keys():
+            raise ValueError("Frequency data does not cover same number of kpts as a_tensors")
+
+        if self.get_frequencies().keys() != self.get_b_tensors().keys():
+            raise ValueError("Frequency data does not cover same number of kpts as b_tensors")
+
+        for k, frequency_set in self.get_frequencies().items():
+            if frequency_set.size != self.get_b_tensors()[k].shape[1]:
+                raise ValueError(f"Number of frequencies does not match shape of b_tensors at k-point {k}")
+
+    def __str__(self) -> str:
+        return "Tensor data for analytic powder averaging"

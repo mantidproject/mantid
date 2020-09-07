@@ -6,6 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import Observable
 
+from enum import Enum
+
+PlotModeStrings = ['Plot Data', 'Plot Fits']
+
+
+class PlotMode(Enum):
+    Data = 0
+    Fitting = 1
+
+    def __str__(self):
+        return PlotModeStrings[self.value]
+
 
 class GuiVariablesNotifier(Observable):
     def __init__(self, outer):
@@ -51,14 +63,6 @@ class MuonGuiContext(dict):
 
     def add_non_calc_subscriber(self, observer):
         self.gui_variable_non_calulation_notifier.add_subscriber(observer)
-
-    def period_string(self, run=None):
-        summed_periods = self["SummedPeriods"] if 'SummedPeriods' in self else [1]
-        subtracted_periods = self["SubtractedPeriods"] if 'SubtractedPeriods' in self else []
-        if subtracted_periods:
-            return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
-        else:
-            return '+'.join([str(period) for period in summed_periods])
 
     def remove_workspace_by_name(self, workspace_name):
         try:

@@ -18,6 +18,16 @@ class PlottingWidgetViewMeta(type(QtWidgets.QWidget), ABCMeta):
 class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
 
     @abstractmethod
+    def show_plot_diff(self):
+        """Shows Plot Difference Checkbox"""
+        pass
+
+    @abstractmethod
+    def hide_plot_diff(self):
+        """Hides Plot Difference checkbox"""
+        pass
+
+    @abstractmethod
     def setup_plot_type_options(self, options: List[str]):
         """
         Setup the options which are displayed in the plot type combo box
@@ -50,10 +60,25 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         pass
 
     @abstractmethod
+    def get_plot_mode(self):
+        """
+        Returns the current plot mode
+        :return: A string containing the plot mode
+        """
+        pass
+
+    @abstractmethod
     def is_tiled_plot(self) -> bool:
         """
         Checks if tiled plot is currently requested
         :return: A boolean which is true if it is a tiled plot
+        """
+        pass
+
+    @abstractmethod
+    def is_plot_diff(self):
+        """
+        Checks if tiled plot is currently requested
         """
         pass
 
@@ -74,6 +99,13 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         pass
 
     @abstractmethod
+    def set_is_tiled_plot(self, is_tiled : bool):
+        """
+        Sets whether a tiled plot should made
+        """
+        pass
+
+    @abstractmethod
     def on_rebin_options_changed(self, slot):
         """
         Connect the plot_rebin checkbox to the input slot
@@ -90,10 +122,25 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         pass
 
     @abstractmethod
+    def on_plot_mode_changed(self, slot):
+        """
+        Connect the plot_mode combo box to the input slot
+        :param slot: call back function for the signal
+        """
+        pass
+
+    @abstractmethod
     def on_tiled_by_type_changed(self, slot):
         """
         Connect the tiled_by combo box to the input slot
         :param slot: call back function for the signal
+        """
+        pass
+
+    @abstractmethod
+    def on_plot_diff_checkbox_changed(self,slot):
+        """
+        Connect the plot difference checkbox to the input slot
         """
         pass
 
@@ -124,5 +171,54 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
     def set_plot_type(self, plot_type: str):
         """
         Sets the plot type to the input string
+        """
+        pass
+
+    @abstractmethod
+    def set_plot_mode(self, plot_mode: str):
+        """
+        Sets the plot mode to the input string
+        """
+        pass
+
+    @abstractmethod
+    def enable_plot_type_combo(self):
+        """
+        Enable plot type selection
+        """
+        pass
+
+    @abstractmethod
+    def disable_plot_type_combo(self):
+        """
+        Disable plot type collection
+        """
+        pass
+
+    @abstractmethod
+    def enable_tile_plotting_options(self):
+        """
+        Enable tile plotting
+        """
+        pass
+
+    @abstractmethod
+    def disable_tile_plotting_options(self):
+        """
+        Disable tile plotting
+        """
+        pass
+
+    @abstractmethod
+    def disable_plot_raw_option(self):
+        """
+        Disable plot raw option
+        """
+        pass
+
+    @abstractmethod
+    def enable_plot_raw_option(self):
+        """
+        Enable plot raw option
         """
         pass

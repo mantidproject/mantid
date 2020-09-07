@@ -43,7 +43,6 @@ set(SRC_FILES
     src/ClearCache.cpp
     src/ClearInstrumentParameters.cpp
     src/ClearMaskFlag.cpp
-    src/ClearMaskedSpectra.cpp
     src/CloneWorkspace.cpp
     src/Comment.cpp
     src/CommutativeBinaryOperation.cpp
@@ -264,6 +263,7 @@ set(SRC_FILES
     src/RunCombinationHelpers/RunCombinationHelper.cpp
     src/RunCombinationHelpers/SampleLogsBehaviour.cpp
     src/SANSCollimationLengthEstimator.cpp
+    src/SampleCorrections/CircularBeamProfile.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
     src/SampleCorrections/MCInteractionStatistics.cpp
@@ -271,7 +271,7 @@ set(SRC_FILES
     src/SampleCorrections/MayersSampleCorrection.cpp
     src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
     src/SampleCorrections/RectangularBeamProfile.cpp
-    src/SampleCorrections/SparseInstrument.cpp
+    src/SampleCorrections/SparseWorkspace.cpp
     src/SassenaFFT.cpp
     src/Scale.cpp
     src/ScaleX.cpp
@@ -370,7 +370,6 @@ set(INC_FILES
     inc/MantidAlgorithms/ClearCache.h
     inc/MantidAlgorithms/ClearInstrumentParameters.h
     inc/MantidAlgorithms/ClearMaskFlag.h
-    inc/MantidAlgorithms/ClearMaskedSpectra.h
     inc/MantidAlgorithms/CloneWorkspace.h
     inc/MantidAlgorithms/Comment.h
     inc/MantidAlgorithms/CommutativeBinaryOperation.h
@@ -595,15 +594,18 @@ set(INC_FILES
     inc/MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h
     inc/MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h
     inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
+    inc/MantidAlgorithms/SampleCorrections/CircularBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
+    inc/MantidAlgorithms/SampleCorrections/IMCAbsorptionStrategy.h
+    inc/MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h
     inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
     inc/MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h
     inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
     inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
-    inc/MantidAlgorithms/SampleCorrections/SparseInstrument.h
+    inc/MantidAlgorithms/SampleCorrections/SparseWorkspace.h
     inc/MantidAlgorithms/SassenaFFT.h
     inc/MantidAlgorithms/Scale.h
     inc/MantidAlgorithms/ScaleX.h
@@ -711,10 +713,10 @@ set(TEST_FILES
     ChangeTimeZeroTest.h
     CheckWorkspacesMatchTest.h
     ChopDataTest.h
+    CircularBeamProfileTest.h
     ClearCacheTest.h
     ClearInstrumentParametersTest.h
     ClearMaskFlagTest.h
-    ClearMaskedSpectraTest.h
     CloneWorkspaceTest.h
     CommentTest.h
     CommutativeBinaryOperationTest.h
@@ -947,7 +949,7 @@ set(TEST_FILES
     SolidAngleTest.h
     SortEventsTest.h
     SortXAxisTest.h
-    SparseInstrumentTest.h
+    SparseWorkspaceTest.h
     SpatialGroupingTest.h
     SphericalAbsorptionTest.h
     Stitch1DManyTest.h
@@ -1021,7 +1023,6 @@ include_directories(inc)
 target_include_directories(Algorithms SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(Algorithms
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES})
 

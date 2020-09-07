@@ -61,18 +61,6 @@ struct AlgorithmHistoryComparator {
 /// Default Constructor
 WorkspaceHistory::WorkspaceHistory() : m_environment() {}
 
-/// Destructor
-WorkspaceHistory::~WorkspaceHistory() = default;
-
-/**
-  Standard Copy Constructor
-  @param A :: WorkspaceHistory Item to copy
- */
-WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory &A)
-    : m_environment(A.m_environment) {
-  m_algorithms = A.m_algorithms;
-}
-
 /// Returns a const reference to the algorithmHistory
 const Mantid::API::AlgorithmHistories &
 WorkspaceHistory::getAlgorithmHistories() const {

@@ -113,6 +113,9 @@ void export_MDGeometry() {
            "vector for the specified "
            "dimension")
 
+      .def("clearOriginalWorkspaces", &MDGeometry::clearOriginalWorkspaces,
+           (arg("self")), "Clear any attached original workspaces")
+
       .def("hasOriginalWorkspace", &MDGeometry::hasOriginalWorkspace,
            (arg("self"), arg("index")),
            "Returns True if there is a source workspace at the given index")

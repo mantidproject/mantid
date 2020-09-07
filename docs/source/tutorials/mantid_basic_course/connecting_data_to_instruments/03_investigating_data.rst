@@ -19,6 +19,7 @@ The Toolbar
 - |PickTabRectButton.png| - Draw a rectangle.
 - |PickTabElRingButton.png| - Draw an elliptical ring.
 - |PickTabRectRingButton.png| - Draw a rectangular ring.
+- |PickTabSectorButton.png| - Draw a circular sector.
 - |PickTabArbitraryShape.png| - Draw an arbitrary shape.
 - |PickTabPickPixelButton.png| - Select a single detector.
 - |PickTabPickTubeButton.png| - Select a tube/bank.
@@ -146,6 +147,7 @@ the shapes and plots this vs time of flight.
 .. |PickTabRectButton.png| image:: /images/PickTabRectButton.png
 .. |PickTabElRingButton.png| image:: /images/PickTabElRingButton.png
 .. |PickTabRectRingButton.png| image:: /images/PickTabRectRingButton.png
+.. |PickTabSectorButton.png| image:: /images/PickTabSectorButton.png
 .. |PickTabPickPixelButton.png| image:: /images/PickTabPickPixelButton.png
 .. |PickTabPickTubeButton.png| image:: /images/PickTabPickTubeButton.png
 .. |PickTabAddPeakButton.png| image:: /images/PickTabAddPeakButton.png

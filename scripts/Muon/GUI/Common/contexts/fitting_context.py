@@ -304,6 +304,7 @@ class FittingContext(object):
         self._number_of_fits_cache = 0
         self._plot_guess = False
         self._guess = None
+        self._fit_raw = True
         self._fit_type = "Single"
 
     def __len__(self):
@@ -464,6 +465,14 @@ class FittingContext(object):
     @plot_guess.setter
     def plot_guess(self, value):
         self._plot_guess = value
+
+    @property
+    def fit_raw(self):
+        return self._fit_raw
+
+    @fit_raw.setter
+    def fit_raw(self, value):
+        self._fit_raw = value
 
     @property
     def guess_ws(self):

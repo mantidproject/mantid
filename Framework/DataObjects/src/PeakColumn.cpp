@@ -23,10 +23,42 @@ Kernel::Logger g_log("PeakColumn");
 
 /// Number of items to keep around in the cell cache (see void_pointer())
 size_t NCELL_ITEM_CACHED = 100;
-/// Type lookup: key=name,value=type. Moved here from static inside typeFromName
-/// to avoid the need for locks with the initialisation problem across multiple
-/// threads
-std::map<std::string, std::string> TYPE_INDEX;
+
+/**
+ * Private implementation to wrap a map such that it can be
+ * initialized in a thread-safe manner with a local static
+ */
+class ColumnNameToType {
+public:
+  ColumnNameToType() {
+    // Assume double if not in this map
+    m_type_index.emplace("DetID", "int");
+    m_type_index.emplace("RunNumber", "int");
+    m_type_index.emplace("h", "double");
+    m_type_index.emplace("k", "double");
+    m_type_index.emplace("l", "double");
+    m_type_index.emplace("Wavelength", "double");
+    m_type_index.emplace("Energy", "double");
+    m_type_index.emplace("TOF", "double");
+    m_type_index.emplace("DSpacing", "double");
+    m_type_index.emplace("Intens", "double");
+    m_type_index.emplace("SigInt", "double");
+    m_type_index.emplace("Intens/SigInt", "double");
+    m_type_index.emplace("BinCount", "double");
+    m_type_index.emplace("BankName", "str");
+    m_type_index.emplace("Row", "double");
+    m_type_index.emplace("Col", "double");
+    m_type_index.emplace("QLab", "V3D");
+    m_type_index.emplace("QSample", "V3D");
+    m_type_index.emplace("PeakNumber", "int");
+    m_type_index.emplace("TBar", "double");
+  }
+
+  inline const auto &data() const { return m_type_index; }
+
+private:
+  std::unordered_map<std::string, std::string> m_type_index;
+};
 
 /**
  * Returns a string type identifier from the given name
@@ -34,40 +66,9 @@ std::map<std::string, std::string> TYPE_INDEX;
  * @returns A string identifier for the column type
  */
 const std::string typeFromName(const std::string &name) {
-  // We should enter the critical section if the map has not been fully filled.
-  // Be sure to keep the value tested against in sync with the number of inserts
-  // below
-  if (TYPE_INDEX.size() != 19) {
-    PARALLEL_CRITICAL(fill_column_index_map) {
-      if (TYPE_INDEX.empty()) // check again inside the critical block
-      {
-        // Assume double if not in this map
-        TYPE_INDEX.emplace("DetID", "int");
-        TYPE_INDEX.emplace("RunNumber", "int");
-        TYPE_INDEX.emplace("h", "double");
-        TYPE_INDEX.emplace("k", "double");
-        TYPE_INDEX.emplace("l", "double");
-        TYPE_INDEX.emplace("Wavelength", "double");
-        TYPE_INDEX.emplace("Energy", "double");
-        TYPE_INDEX.emplace("TOF", "double");
-        TYPE_INDEX.emplace("DSpacing", "double");
-        TYPE_INDEX.emplace("Intens", "double");
-        TYPE_INDEX.emplace("SigInt", "double");
-        TYPE_INDEX.emplace("BinCount", "double");
-        TYPE_INDEX.emplace("BankName", "str");
-        TYPE_INDEX.emplace("Row", "double");
-        TYPE_INDEX.emplace("Col", "double");
-        TYPE_INDEX.emplace("QLab", "V3D");
-        TYPE_INDEX.emplace("QSample", "V3D");
-        TYPE_INDEX.emplace("PeakNumber", "int");
-        TYPE_INDEX.emplace("TBar", "double");
-        // If adding an entry, be sure to increment the size comparison in the
-        // first line
-      }
-    }
-  }
-  auto iter = TYPE_INDEX.find(name);
-  if (iter != TYPE_INDEX.end()) {
+  static ColumnNameToType typeIndex;
+  auto iter = typeIndex.data().find(name);
+  if (iter != typeIndex.data().end()) {
     return iter->second;
   } else {
     throw std::runtime_error(

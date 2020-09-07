@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include <map>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {

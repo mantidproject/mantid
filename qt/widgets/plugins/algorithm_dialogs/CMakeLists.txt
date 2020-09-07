@@ -69,7 +69,6 @@ mtd_add_qt_library(
   SYSTEM_INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
   LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -93,7 +92,6 @@ mtd_add_qt_library(
   PRECOMPILED
     inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
   LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}

@@ -327,9 +327,22 @@ QString IndirectFitPropertyBrowser::selectedFitType() const {
 /**
  * Sets whether fit members should be convolved with the resolution after a fit.
  *
- * @param convolveMembers If true, members are to be convolved.
+ * @param convolveEnabled: If true, members are to be convolved.
  */
-void IndirectFitPropertyBrowser::setConvolveMembers(bool) {}
+void IndirectFitPropertyBrowser::setConvolveMembers(bool convolveEnabled) {
+  m_fitOptionsBrowser->setProperty("ConvolveMembers",
+                                   QString(convolveEnabled ? "1" : "0"));
+}
+
+/**
+ * Sets whether to output fit members
+ *
+ * @param outputEnabled: If true, fit members are outputted
+ */
+void IndirectFitPropertyBrowser::setOutputCompositeMembers(bool outputEnabled) {
+  m_fitOptionsBrowser->setProperty("OutputCompositeMembers",
+                                   QString(outputEnabled ? "1" : "0"));
+}
 
 /**
  * Clears the functions in this indirect fit property browser.
@@ -354,6 +367,10 @@ void IndirectFitPropertyBrowser::setErrorsEnabled(bool enabled) {
 void IndirectFitPropertyBrowser::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_templateBrowser->updateParameterEstimationData(std::move(data));
+}
+
+void IndirectFitPropertyBrowser::estimateFunctionParameters() {
+  m_templateBrowser->estimateFunctionParameters();
 }
 
 void IndirectFitPropertyBrowser::setBackgroundA0(double value) {

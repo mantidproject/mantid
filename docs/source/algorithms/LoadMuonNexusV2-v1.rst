@@ -54,6 +54,11 @@ In the table below details of the information loaded is shown, for more informat
 | Time Zero                        | ``instrument/detector_1/time_zero``        | TimeZero property                      |
 |                                  | if found                                   |                                        |
 +----------------------------------+--------------------------------------------+----------------------------------------+
+| Time Zero Vector                 | ``instrument/detector_1/time_zero`` can be | TimeZeroList property                  |
+|                                  | a single value or an array. This contains  |                                        |
+|                                  | either the the values from the array or the|                                        |
+|                                  | single value expanded into a vector        |                                        |
++----------------------------------+--------------------------------------------+----------------------------------------+
 | First good time                  | ``instrument/detector_1/first_good_bin``   | FirstGoodData property                 |
 |                                  | and ``instrument/detector_1/resolution``   |                                        |
 +----------------------------------+--------------------------------------------+----------------------------------------+
@@ -136,6 +141,53 @@ Output:
    9 0.007483229972
    10 -0.010110599920
 
+**Example -Time zero loading:**
+
+.. testcode:: ExTimeZeroLoading
+
+   # Load some spectra
+   ws, main_field_direction, time_zero, first_good_data, time_zero_list, dead_time_table, detector_grouping_table = \
+      LoadMuonNexusV2(Filename="EMU00102347.nxs_v2",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
+  
+   print('Single time zero value is {:.2g}'.format(time_zero))
+   print("TimeZeroList values are:")
+   for timeZero in time_zero_list:
+      print(round(timeZero, 2))
+
+Output:
+
+.. testoutput:: ExTimeZeroLoading
+
+   Single time zero value is 0.16
+   TimeZeroList values are:
+   0.16
+   0.16
+   0.16
+   0.16
+   0.16
+   0.16
+
+**Example - Test loading a multi period file:**
+
+.. testcode:: LoadMuonNexusV2MultiPeriod
+
+   # Load a multi period file
+   load_muon_alg = LoadMuonNexusV2(Filename="EMU00103767.nxs_v2")
+   # The workspace is the first return value from the Loader.
+   wsGroup = load_muon_alg[0]
+   print("Workspace Group has  {}  workspaces".format(wsGroup.getNumberOfEntries()))
+   for i in range(wsGroup.getNumberOfEntries()):
+       print("Workspace has  {}  spectra".format(wsGroup.getItem(i).getNumberHistograms()))
+
+Output:
+
+.. testoutput:: LoadMuonNexusV2MultiPeriod
+
+   Workspace Group has  4  workspaces
+   Workspace has  96  spectra
+   Workspace has  96  spectra
+   Workspace has  96  spectra
+   Workspace has  96  spectra
 
 .. categories::
 

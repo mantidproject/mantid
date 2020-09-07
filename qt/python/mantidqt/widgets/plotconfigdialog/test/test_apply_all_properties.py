@@ -40,7 +40,8 @@ new_ax_view_props = {
     'ylabel': 'New Y Label',
     'yscale': 'log',
     'minor_ticks': True,
-    'minor_gridlines': True}
+    'minor_gridlines': True,
+    'canvas_color': '#ffff00'}
 
 new_curve_view_props = {
     'label': 'New label',

@@ -20,6 +20,9 @@ The new unit and duplicates will not be aggregated. Any spectrum for which a det
 not found (i.e. if the instrument definition is incomplete) will not
 appear in the output workspace.
 
+InPlane2Theta and SignedInPlane2Theta return the 2theta value of the projection of the pixel on the horizontal scattering plane.
+
+
 Usage
 -----
 

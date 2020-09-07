@@ -149,7 +149,6 @@ class MaskingTablePresenter(object):
         # Get the state information for the selected row.
         # Disable the button
         self._view.set_display_mask_button_to_processing()
-
         try:
             row_index = self._view.get_current_row()
             state = self.get_state(row_index)

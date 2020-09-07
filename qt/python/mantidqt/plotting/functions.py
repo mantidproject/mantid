@@ -164,6 +164,9 @@ def pcolormesh_from_names(names, fig=None, ax=None):
 
 def use_imshow(ws):
     y = ws.getAxis(1).extractValues()
+    if ws.getAxis(1).isText():
+        nhist = ws.getNumberHistograms()
+        y = np.arange(nhist)
     difference = np.diff(y)
     try:
         commonLogBins = hasattr(ws, 'isCommonLogBins') and ws.isCommonLogBins()
@@ -212,10 +215,9 @@ def pcolormesh(workspaces, fig=None):
             # nothing here
             ax.axis('off')
 
-    # Colour bar limits are wrong if workspace is ragged. Set them manually.
     # If there are multiple plots limits are the min and max of all the plots
-    colorbar_min = min(np.nanmin(pt.get_array()) for pt in plots)
-    colorbar_max = max(np.nanmax(pt.get_array()) for pt in plots)
+    colorbar_min = min(pt.norm.vmin for pt in plots)
+    colorbar_max = max(pt.norm.vmax for pt in plots)
     for pt in plots:
         pt.set_clim(colorbar_min, colorbar_max)
 

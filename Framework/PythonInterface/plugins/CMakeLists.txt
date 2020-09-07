@@ -2,7 +2,7 @@
 # to remove the need for searching for all of the algorithms and fit functions 
 # on startup.
 
-# List of python alforithms and fit functions
+# List of python algorithms and fit functions
 set(PYTHON_PLUGINS
   algorithms/HFIRSANS2Wavelength.py
   algorithms/DSFinterp.py
@@ -122,6 +122,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/TotScatCalculateSelfScattering.py
   algorithms/WorkflowAlgorithms/IndirectILLEnergyTransfer.py
   algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
+  algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
   algorithms/ViewBOA.py
   algorithms/ReflectometrySliceEventWorkspace.py
   algorithms/SNAPReduce.py
@@ -135,6 +136,7 @@ set(PYTHON_PLUGINS
   algorithms/LRDirectBeamSort.py
   algorithms/BASISPowderDiffraction.py
   algorithms/LoadEmptyVesuvio.py
+  algorithms/VesuvioAnalysis.py
   algorithms/VelocityCrossCorrelations.py
   algorithms/MergeCalFiles.py
   algorithms/AngularAutoCorrelationsSingleAxis.py
@@ -178,6 +180,7 @@ set(PYTHON_PLUGINS
   algorithms/LoadAndMerge.py
   algorithms/USANSSimulation.py
   algorithms/SaveNexusPD.py
+  algorithms/SaveGSSCW.py
   algorithms/ApplyDetectorScanEffCorr.py
   algorithms/MaskAngle.py
   algorithms/fractional_indexing.py
@@ -229,6 +232,7 @@ set(PYTHON_PLUGINS
   algorithms/OptimizeCrystalPlacementByRun.py
   algorithms/ComputeIncoherentDOS.py
   algorithms/EnggFocus.py
+  algorithms/EnggEstimateFocussedBackground.py
   algorithms/LRReductionWithReference.py
   algorithms/NMoldyn4Interpolation.py
   algorithms/ExaminePowderDiffProfile.py
@@ -371,3 +375,4 @@ install(
     DESTINATION ${PLUGINS_DIR}/python
     RENAME "python-plugin-manifest.txt"
 )
+

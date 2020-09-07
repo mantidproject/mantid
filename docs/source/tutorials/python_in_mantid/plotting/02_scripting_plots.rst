@@ -54,7 +54,7 @@ Adjust the `scale to logarithmic <https://matplotlib.org/3.1.1/api/_as_gen/matpl
 
 .. code-block:: python
 
-    axes.yscale('log')
+    axes.set_yscale('log')
     axes.set_xlim(0.0, 80.)
     # x and y can be swapped to alter the other axis
 
@@ -62,7 +62,7 @@ Add a title:
 
 .. code-block:: python
 
-    axes.title("My Wonderful Plot", fontsize=20, verticalalignment='bottom')
+    axes.set_title("My Wonderful Plot", fontsize=20, verticalalignment='bottom')
 
 Add axis labels:
 

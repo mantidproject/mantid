@@ -25,7 +25,7 @@ set_property(
 )
 target_link_libraries(
   PythonWorkspaceCreationHelper
-  PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  PRIVATE
           PythonInterfaceCore
           PythonAPIModule
           DataObjects

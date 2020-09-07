@@ -22,6 +22,13 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setupUi(self)
+        self.setMinimumSize(600,600)
+
+    def show_plot_diff(self):
+        self.plot_diff_checkbox.setVisible(True)
+
+    def hide_plot_diff(self):
+        self.plot_diff_checkbox.setVisible(False)
 
     def setup_plot_type_options(self, options):
         """
@@ -57,11 +64,29 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         """
         return self.plot_type_combo.currentText()
 
+    def get_plot_mode(self):
+        """
+        Returns the current plot mode
+        """
+        return self.fit_or_data_combo_box.currentText()
+
     def is_tiled_plot(self):
         """
         Checks if tiled plot is currently requested
         """
         return self.tiled_plot_checkbox.isChecked()
+
+    def is_plot_diff(self):
+        """
+        Checks if plot difference is currently requested
+        """
+        return self.plot_diff_checkbox.isChecked()
+
+    def set_is_tiled_plot(self, is_tiled):
+        """
+        Sets whether a tiled plot should made
+        """
+        self.tiled_plot_checkbox.setChecked(is_tiled)
 
     def is_raw_plot(self):
         """
@@ -81,11 +106,23 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         """
         self.plot_type_combo.currentIndexChanged.connect(slot)
 
+    def on_plot_mode_changed(self, slot):
+        """
+        Connect the plot mode combo box
+        """
+        self.fit_or_data_combo_box.currentIndexChanged.connect(slot)
+
     def on_plot_tiled_checkbox_changed(self, slot):
         """
         Connect the tiled_plot checkbox to the input slot
         """
         self.tiled_plot_checkbox.stateChanged.connect(slot)
+
+    def on_plot_diff_checkbox_changed(self,slot):
+        """
+        Connect the plot difference checkbox to the input slot
+        """
+        self.plot_diff_checkbox.stateChanged.connect(slot)
 
     def on_tiled_by_type_changed(self, slot):
         """
@@ -120,3 +157,52 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         if index >= 0:  # find text returns -1 if string plot_type doesn't exist
             self.plot_type_combo.setCurrentIndex(index)
         self.plot_type_combo.blockSignals(False)
+
+    def set_plot_mode(self, plot_mode: str):
+        """
+        Sets the plot mode to the input string
+        """
+        self.fit_or_data_combo_box.blockSignals(True)
+        index = self.fit_or_data_combo_box.findText(plot_mode)
+        if index >= 0:  # find text returns -1 if string plot_type doesn't exist
+            self.fit_or_data_combo_box.setCurrentIndex(index)
+        self.fit_or_data_combo_box.blockSignals(False)
+
+    def enable_plot_type_combo(self):
+        """
+        Enable plot type collection
+        """
+        self.plot_type_combo.setEnabled(True)
+
+    def disable_plot_type_combo(self):
+        """
+        Disable plot type collection
+        """
+        self.plot_type_combo.setEnabled(False)
+
+    def enable_tile_plotting_options(self):
+        """
+        Enable tile plotting
+        """
+        self.tiled_plot_checkbox.setEnabled(True)
+        self.tiled_by_combo.setEnabled(True)
+        self.plot_raw_checkbox.setEnabled(True)
+
+    def disable_tile_plotting_options(self):
+        """
+        Disable tile plotting
+        """
+        self.tiled_plot_checkbox.setEnabled(False)
+        self.tiled_by_combo.setEnabled(False)
+
+    def disable_plot_raw_option(self):
+        """
+        Disable plot raw option
+        """
+        self.plot_raw_checkbox.setEnabled(False)
+
+    def enable_plot_raw_option(self):
+        """
+        Enable plot raw option
+        """
+        self.plot_raw_checkbox.setEnabled(True)

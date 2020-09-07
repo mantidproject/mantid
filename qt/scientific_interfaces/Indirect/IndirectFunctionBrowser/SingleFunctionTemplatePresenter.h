@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "IFQFitObserver.h"
 #include "ParameterEstimation.h"
 #include "SingleFunctionTemplateModel.h"
@@ -35,10 +36,12 @@ class MANTIDQT_INDIRECT_DLL SingleFunctionTemplatePresenter : public QObject {
 public:
   explicit SingleFunctionTemplatePresenter(
       SingleFunctionTemplateBrowser *view,
-      const std::map<std::string, std::string> &functionInitialisationStrings);
+      const std::map<std::string, std::string> &functionInitialisationStrings,
+      std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
   void updateAvailableFunctions(
       const std::map<std::string, std::string> &functionInitialisationStrings);
   void setFitType(const QString &name);
+
   void init();
 
   void setNumberOfDatasets(int);
@@ -58,6 +61,7 @@ public:
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
 
 signals:
   void functionStructureChanged();

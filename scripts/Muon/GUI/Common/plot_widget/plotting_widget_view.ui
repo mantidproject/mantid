@@ -23,6 +23,20 @@
       <number>0</number>
      </property>
      <item>
+      <widget class="QComboBox" name="fit_or_data_combo_box">
+       <item>
+        <property name="text">
+         <string>Plot Data</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Plot Fits</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="plot_type_combo"/>
      </item>
      <item>
@@ -46,6 +60,13 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="plot_diff_checkbox">
+       <property name="text">
+        <string>Plot difference</string>
        </property>
       </widget>
      </item>

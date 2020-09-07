@@ -17,9 +17,9 @@ namespace MantidWidgets {
 
 /**
  * Constructor
+ * @param parent A QWidget to act as the parent widget
  */
-ImageInfoWidget::ImageInfoWidget(const std::string &workspace_type,
-                                 QWidget *parent)
+ImageInfoWidget::ImageInfoWidget(QWidget *parent)
     : IImageInfoWidget(parent),
       m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
@@ -28,39 +28,46 @@ ImageInfoWidget::ImageInfoWidget(const std::string &workspace_type,
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
   horizontalHeader()->hide();
   verticalHeader()->hide();
-
-  m_presenter->createImageInfoModel(workspace_type);
-  updateTable();
 }
 
-void ImageInfoWidget::updateTable(const double x, const double y,
-                                  const double z) {
-  auto info = m_presenter->getInfoList(x, y, z);
+/**
+ * @param x X position if the cursor
+ * @param y Y position if the cursor
+ * @param signal Signal value at cursor position
+ */
+void ImageInfoWidget::cursorAt(const double x, const double y,
+                               const double signal) {
+  m_presenter->cursorAt(x, y, signal);
+}
 
+/**
+ * Display the information provided within the table cells
+ * @param info A reference to a collection of header/value pairs
+ */
+void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
   if (info.empty())
     return;
 
-  setColumnCount(static_cast<int>(info.size() / 2));
-  setRowCount(2);
-
-  auto row = 0;
-  auto column = 0;
-  for (const auto &item : info) {
-    auto cell = new QTableWidgetItem(item);
-    setItem(row, column, cell);
-    cell->setFlags(Qt::ItemIsSelectable);
-    row++;
-    if (row == 2) {
-      row = 0;
-      column++;
-    }
+  const auto itemCount(info.size());
+  setColumnCount(itemCount);
+  for (int i = 0; i < itemCount; ++i) {
+    auto header = new QTableWidgetItem(info.name(i));
+    header->setFlags(Qt::ItemIsSelectable);
+    setItem(0, i, header);
+    auto value = new QTableWidgetItem(info.value(i));
+    value->setFlags(Qt::ItemIsSelectable);
+    setItem(1, i, value);
   }
   horizontalHeader()->setMinimumSectionSize(50);
   resizeColumnsToContents();
 }
+
+/**
+ * Set the workspace to probe for information
+ * @param ws A pointer to a Workspace object
+ */
 void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) {
   m_presenter->setWorkspace(ws);
-  updateTable();
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -9,6 +9,7 @@
 #
 # std imports
 import os.path as osp
+from os import linesep
 
 # 3rd party imports
 from qtpy.QtCore import Qt, Slot, Signal
@@ -29,6 +30,7 @@ class MultiPythonFileInterpreter(QWidget):
     sig_code_exec_start = Signal(str)
     sig_file_name_changed = Signal(str, str)
     sig_current_tab_changed = Signal(str)
+    sig_tab_closed = Signal(str)
 
     def __init__(self, font=None, default_content=None, parent=None):
         """
@@ -146,6 +148,12 @@ class MultiPythonFileInterpreter(QWidget):
         tab_idx = self._tabs.addTab(interpreter, tab_title)
         self._tabs.setTabToolTip(tab_idx, tab_tooltip)
         self._tabs.setCurrentIndex(tab_idx)
+
+        # set the cursor to the last line and give the new editor focus
+        interpreter.editor.setFocus()
+        if content is not None:
+            line_count = content.count(linesep)
+            interpreter.editor.setCursorPosition(line_count,0)
         return tab_idx
 
     def abort_current(self):
@@ -191,6 +199,7 @@ class MultiPythonFileInterpreter(QWidget):
                 self.zoom_level = self.current_editor().editor.getZoom()
 
             widget = self.editor_at(idx)
+            filename = self.editor_at(idx).filename
             # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
             widget.close()
@@ -199,6 +208,11 @@ class MultiPythonFileInterpreter(QWidget):
 
         if (not allow_zero_tabs) and self.editor_count == 0:
             self.append_new_editor()
+
+        if filename is not None:
+            self.sig_tab_closed.emit(filename)
+        else:
+            self.sig_tab_closed.emit("")
 
         return True
 

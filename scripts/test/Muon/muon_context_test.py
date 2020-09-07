@@ -8,15 +8,17 @@ import unittest
 
 from Muon.GUI.Common.calculate_pair_and_group import run_pre_processing
 from mantidqt.utils.qt.testing import start_qapplication
+from unittest import mock
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService
-from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import CreateWorkspace
 from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_pair import MuonPair
 
 
 @start_qapplication
@@ -42,7 +44,7 @@ class MuonContextTest(unittest.TestCase):
         self.data_context.current_runs = [[self.run_number]]
         self.data_context.update_current_data()
         self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0].workspace,
-                                                                 'EMU', '')
+                                                                 'EMU', '', 1)
 
     def tearDown(self):
         ConfigService['MantidOptions.InvisibleWorkspaces'] = 'False'
@@ -88,19 +90,36 @@ class MuonContextTest(unittest.TestCase):
     def test_calculate_group_calculates_group_for_given_run(self):
         # Generate the pre_process_data workspace
         run_pre_processing(self.context, [self.run_number], rebin=False)
-        counts_workspace, asymmetry_workspace, group_asymmetry_unormalised = self.context.calculate_group('fwd',
+        counts_workspace, asymmetry_workspace, group_asymmetry_unormalised = self.context.calculate_group(MuonGroup('fwd'),
                                                                                                           run=[19489])
 
         self.assertEqual(counts_workspace, 'EMU19489; Group; fwd; Counts; MA')
         self.assertEqual(asymmetry_workspace, 'EMU19489; Group; fwd; Asymmetry; MA')
         self.assertEqual(group_asymmetry_unormalised, '__EMU19489; Group; fwd; Asymmetry; MA_unnorm')
 
-    def test_calculate_pair_calculates_pair_for_given_run(self):
+    def test_calculate_group_with_no_relevant_periods_returns_none(self):
         # Generate the pre_process_data workspace
         run_pre_processing(self.context, [self.run_number], rebin=False)
-        pair_asymmetry = self.context.calculate_pair('long', run=[19489])
+        counts_workspace, asymmetry_workspace, group_asymmetry_unormalised = self.context.calculate_group(MuonGroup('fwd', periods=(3,4)),
+                                                                                                          run=[19489])
+
+        self.assertEqual(counts_workspace, None)
+        self.assertEqual(asymmetry_workspace, None)
+        self.assertEqual(group_asymmetry_unormalised, None)
+
+    def test_calculate_pair_calculates_pair_for_given_run(self):
+        self.context.show_all_groups()
+        long = MuonPair('long', 'fwd', 'bwd')
+        pair_asymmetry = self.context.calculate_pair(long, [19489], False)
 
         self.assertEqual(pair_asymmetry, 'EMU19489; Pair Asym; long; MA')
+
+    def test_calculate_pair_returns_nothing_if_relevant_groups_do_not_exist(self):
+        self.context.show_all_groups()
+        long = MuonPair('long', 'fwd', 'bwd')
+        pair_asymmetry = self.context.calculate_pair(long, [19489], True)
+
+        self.assertEqual(pair_asymmetry, None)
 
     def test_show_all_groups_calculates_and_shows_all_groups(self):
         self.context.show_all_groups()
@@ -128,6 +147,7 @@ class MuonContextTest(unittest.TestCase):
                                   'EMU19489; Group; fwd; Counts; MA', 'EMU19489; Group; fwd; Counts; Rebin; MA'])
 
     def test_show_all_pairs_calculates_and_shows_all_pairs(self):
+        self.context.show_all_groups()
         self.context.show_all_pairs()
 
         self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA'])
@@ -136,6 +156,7 @@ class MuonContextTest(unittest.TestCase):
         self.gui_context['RebinType'] = 'Fixed'
         self.gui_context['RebinFixed'] = 2
 
+        self.context.show_all_groups()
         self.context.show_all_pairs()
 
         self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA',
@@ -232,6 +253,40 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
                                   'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
+
+    def test_calculate_all_pairs(self):
+        self.context._calculate_pairs = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=False)
+
+        self.context.calculate_all_pairs()
+        self.context._calculate_pairs.assert_called_with(rebin=False)
+        self.assertEqual(self.context._calculate_pairs.call_count,1)
+
+    def test_calculate_all_groups(self):
+        self.context._calculate_groups = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=False)
+
+        self.context.calculate_all_groups()
+        self.context._calculate_groups.assert_called_with(rebin=False)
+        self.assertEqual(self.context._calculate_groups.call_count,1)
+
+    def test_calculate_all_pairs_rebin(self):
+        self.context._calculate_pairs = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=True)
+
+        self.context.calculate_all_pairs()
+        self.context._calculate_pairs.assert_any_call(rebin=False)
+        self.context._calculate_pairs.assert_called_with(rebin=True)
+        self.assertEqual(self.context._calculate_pairs.call_count,2)
+
+    def test_calculate_all_groups_rebin(self):
+        self.context._calculate_groups = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=True)
+
+        self.context.calculate_all_groups()
+        self.context._calculate_groups.assert_any_call(rebin=False)
+        self.context._calculate_groups.assert_called_with(rebin=True)
+        self.assertEqual(self.context._calculate_groups.call_count,2)
 
 
 if __name__ == '__main__':

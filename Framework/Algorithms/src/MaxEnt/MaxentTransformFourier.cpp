@@ -9,6 +9,9 @@
 
 #include <gsl/gsl_fft_complex.h>
 #include <memory>
+#include <stdexcept>
+
+#include <stdexcept>
 
 namespace Mantid {
 namespace Algorithms {
