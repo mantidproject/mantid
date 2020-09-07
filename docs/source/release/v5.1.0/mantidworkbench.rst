@@ -167,5 +167,6 @@ Bugfixes
 - Fixed a bug with colorfill plot script generation for distribution workspaces.
 - Use Jemalloc for memory allocation on Linux so memory can be released to the system.
 - Fixed a bug where instrument view would not update on wheel zoom.
+- Fixed a bug which caused workbench to crash midway through closing normally when logging level was set to debug.
 
 :ref:`Release 5.1.0 <v5.1.0>`
