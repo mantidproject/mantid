@@ -153,10 +153,25 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   mainLayout->addWidget(controlPanelLayout);
 
-  m_xIntegration = new XIntegrationControl(this);
-  mainLayout->addWidget(m_xIntegration);
-  connect(m_xIntegration, SIGNAL(changed(double, double)), this,
-          SLOT(setIntegrationRange(double, double)));
+  m_instrumentActor.reset(
+      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+
+  try {
+    size_t blockSize = m_instrumentActor->getWorkspace()->blocksize();
+
+    m_isIntegrable =
+        (blockSize > 1 ||
+         m_instrumentActor->getWorkspace()->id() == "EventWorkspace");
+  } catch (...) {
+    m_isIntegrable = true;
+  }
+
+  if (m_isIntegrable) {
+    m_xIntegration = new XIntegrationControl(this);
+    mainLayout->addWidget(m_xIntegration);
+    connect(m_xIntegration, SIGNAL(changed(double, double)), this,
+            SLOT(setIntegrationRange(double, double)));
+  }
 
   // Set the mouse/keyboard operation info and help button
   auto *infoLayout = new QHBoxLayout();
@@ -169,16 +184,12 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   infoLayout->setStretchFactor(mInteractionInfo, 1);
   infoLayout->setStretchFactor(m_help, 0);
   mainLayout->addLayout(infoLayout);
-
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
 
   // Background colour
   setBackgroundColor(
       settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
-
-  m_instrumentActor.reset(
-      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
 
   // Create the b=tabs
   createTabs(settings);
@@ -294,10 +305,13 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
     m_instrumentActor.reset(
         new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
-  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
-                                m_instrumentActor->maxBinValue());
-  m_xIntegration->setUnits(QString::fromStdString(
-      m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+
+  if (m_isIntegrable) {
+    m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
+                                  m_instrumentActor->maxBinValue());
+    m_xIntegration->setUnits(QString::fromStdString(
+        m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+  }
   auto surface = getSurface();
   if (resetGeometry || !surface) {
     if (setDefaultView) {
@@ -342,6 +356,7 @@ void InstrumentWidget::resetSurface() {
  * Select the tab to be displayed
  */
 void InstrumentWidget::selectTab(int tab) {
+  getSurface()->setCurrentTab(mControlsTab->tabText(tab));
   mControlsTab->setCurrentIndex(tab);
 }
 
@@ -407,7 +422,13 @@ QString InstrumentWidget::getSaveFileName(const QString &title,
 /**
  * Update the info text displayed at the bottom of the window.
  */
-void InstrumentWidget::updateInfoText() { setInfoText(getSurfaceInfoText()); }
+void InstrumentWidget::updateInfoText(const QString &text) {
+  if (text.isEmpty()) {
+    setInfoText(getSurfaceInfoText());
+  } else {
+    setInfoText(text);
+  }
+}
 
 void InstrumentWidget::setSurfaceType(int type) {
   // we cannot do 3D without OpenGL
@@ -562,7 +583,13 @@ void InstrumentWidget::setupColorMap() { emit colorMapChanged(); }
 /**
  * Connected to QTabWidget::currentChanged signal
  */
-void InstrumentWidget::tabChanged(int /*unused*/) { updateInfoText(); }
+void InstrumentWidget::tabChanged(int /*unused*/) {
+  updateInfoText();
+  auto surface = getSurface();
+  if (surface) {
+    surface->setCurrentTab(mControlsTab->tabText(getCurrentTab()));
+  }
+}
 
 /**
  * Change color map button slot. This provides the file dialog box to select
@@ -873,7 +900,9 @@ void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
  * python.
  */
 void InstrumentWidget::setBinRange(double xmin, double xmax) {
-  m_xIntegration->setRange(xmin, xmax);
+  if (m_isIntegrable) {
+    m_xIntegration->setRange(xmin, xmax);
+  }
 }
 
 /**
@@ -1241,10 +1270,12 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_maskTab = new InstrumentWidgetMaskTab(this);
   connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
-  connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
-          SLOT(changedIntegrationRange(double, double)));
   m_maskTab->loadSettings(settings);
 
+  if (m_isIntegrable) {
+    connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
+            SLOT(changedIntegrationRange(double, double)));
+  }
   // Instrument tree controls
   m_treeTab = new InstrumentWidgetTreeTab(this);
   m_treeTab->loadSettings(settings);
@@ -1487,8 +1518,12 @@ std::string InstrumentWidget::saveToProject() const {
   tsv.writeLine("SurfaceType") << getSurfaceType();
   tsv.writeSection("surface", getSurface()->saveToProject());
   tsv.writeLine("CurrentTab") << getCurrentTab();
-  tsv.writeLine("EnergyTransfer")
-      << m_xIntegration->getMinimum() << m_xIntegration->getMaximum();
+  if (this->isIntegrable()) {
+    tsv.writeLine("EnergyTransfer")
+        << m_xIntegration->getMinimum() << m_xIntegration->getMaximum() << true;
+  } else {
+    tsv.writeLine("EnergyTransfer") << -1 << -1 << false;
+  }
 
   // serialise widget subsections
   tsv.writeSection("actor", m_instrumentActor->saveToProject());
@@ -1552,8 +1587,11 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
 
   if (tsv.selectLine("EnergyTransfer")) {
     double min, max;
-    tsv >> min >> max;
-    setBinRange(min, max);
+    bool isIntegrable;
+    tsv >> min >> max >> isIntegrable;
+    if (isIntegrable) {
+      setBinRange(min, max);
+    }
   }
 
   if (tsv.selectSection("Surface")) {

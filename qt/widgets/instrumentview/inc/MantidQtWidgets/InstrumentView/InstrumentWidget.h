@@ -160,6 +160,7 @@ public:
   void addTab(const std::string &tabName);
   void hideHelp();
   InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
+  bool isIntegrable() const { return m_isIntegrable; }
 
 signals:
   void enableLighting(bool /*_t1*/);
@@ -228,7 +229,7 @@ public slots:
   /// Enable OpenGL. Slot called from render tab only - doesn't update the
   /// checkbox.
   void enableGL(bool on);
-  void updateInfoText();
+  void updateInfoText(const QString &text = QString());
 
 private slots:
   void helpClicked();
@@ -312,6 +313,9 @@ protected:
   bool m_instrumentDisplayContextMenuOn;
   /// dict of selected tabs
   std::vector<std::pair<std::string, bool>> m_stateOfTabs;
+
+  /// Is the workspace monochromatic ?
+  bool m_isIntegrable;
 
 private:
   /// ADS notification handlers

@@ -849,7 +849,11 @@ void ProjectionSurface::selectMultipleMasks(const QRect &rect) {
  */
 void ProjectionSurface::pickComponentAt(int x, int y) {
   size_t pickID = getPickID(x, y);
-  emit singleComponentPicked(pickID);
+  if (m_currentTab == "Draw") {
+    emit singleComponentPickedForMasking(pickID);
+  } else {
+    emit singleComponentPicked(pickID);
+  }
 }
 
 void ProjectionSurface::touchComponentAt(int x, int y) {

@@ -178,7 +178,6 @@ void XIntegrationScrollBar::updateMinMax() {
 XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
     : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0),
       m_totalMaximum(1), m_minimum(0), m_maximum(1) {
-  m_scrollBar = new XIntegrationScrollBar(this);
   auto *layout = new QHBoxLayout();
   m_minText = new QLineEdit(this);
   m_minText->setMaximumWidth(100);
@@ -189,6 +188,7 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
   m_units = new QLabel("TOF", this);
   m_setWholeRange = new QPushButton("Reset");
   m_setWholeRange->setToolTip("Reset integration range to maximum");
+  m_scrollBar = new XIntegrationScrollBar(this);
 
   layout->addWidget(m_units, 0);
   layout->addWidget(m_minText, 0);
@@ -196,6 +196,7 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
   layout->addWidget(m_maxText, 0);
   layout->addWidget(m_setWholeRange, 0);
   setLayout(layout);
+
   connect(m_scrollBar, SIGNAL(changed(double, double)), this,
           SLOT(sliderChanged(double, double)));
   connect(m_scrollBar, SIGNAL(running(double, double)), this,
@@ -251,6 +252,7 @@ void XIntegrationControl::setRange(double minimum, double maximum) {
   double w = m_totalMaximum - m_totalMinimum;
   m_scrollBar->set((m_minimum - m_totalMinimum) / w,
                    (m_maximum - m_totalMinimum) / w);
+
   updateTextBoxes();
   emit changed(m_minimum, m_maximum);
 }

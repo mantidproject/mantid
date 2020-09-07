@@ -113,6 +113,9 @@ Improvements
 - Added an option in `figure options` to change the canvas color for an axis.
 - Sliceviewer cut line plots' line widths reduced
 - When line plots are active on the sliceviewer the arrow keys can now be used to move the cursor a pixel at a time.
+- When showing monochromatic workspaces, the instrument widget will not show the integration bar, nor the pick widget the detector spectra graph.
+- In the instrument widget's rendering tab, added a Reset view button to restore to default projection.
+- In the instrument widget's draw tab, added the option to mask, draw ROI and group single pixel and tube.
 
 
 Bugfixes
