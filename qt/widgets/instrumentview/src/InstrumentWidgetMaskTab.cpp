@@ -81,7 +81,6 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
       m_doubleManager(nullptr), m_browser(nullptr), m_left(nullptr),
       m_top(nullptr), m_right(nullptr), m_bottom(nullptr) {
 
-  m_detectorsToGroup = QList<Mantid::detid_t>();
   // main layout
   QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -226,7 +225,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
 
   // Algorithm buttons
 
-  m_applyToData = new QPushButton("Apply to Data");
+  m_applyToData = new QPushButton("Apply to Data (Cannot be reverted)");
   m_applyToData->setToolTip("Apply current detector and bin masks to the data "
                             "workspace. Cannot be reverted.");
   connect(m_applyToData, SIGNAL(clicked()), this, SLOT(applyMask()));
@@ -456,7 +455,6 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
 void InstrumentWidgetMaskTab::setActivity() {
   const QColor borderColor = getShapeBorderColor();
   const QColor fillColor = getShapeFillColor();
-  // m_detectorsToGroup.clear();
   QString whatIsBeingSelected = m_maskBins && getMode() == Mode::Mask
                                     ? "Selecting bins"
                                     : "Selecting detectors";
@@ -524,7 +522,6 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_activeTool->setText("Tool: Tube/bank mask. " + whatIsBeingSelected);
   }
   m_instrWidget->updateInfoText();
-  // enableApplyButtons();
 }
 
 /**
@@ -538,6 +535,8 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
     return;
   }
 
+  size_t parent;
+
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   std::vector<size_t> detectorsId{pickID};
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
@@ -547,7 +546,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       if (!componentInfo.hasParent(pickID)) {
         return;
       }
-      auto parent = componentInfo.parent(pickID);
+      parent = componentInfo.parent(pickID);
       detectorsId = componentInfo.detectorsInSubtree(parent);
     }
     storeDetectorMask(m_roi_on->isChecked(), detectorsId);
@@ -561,7 +560,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       if (!componentInfo.hasParent(pickID)) {
         return;
       }
-      const auto parent = componentInfo.parent(pickID);
+      parent = componentInfo.parent(pickID);
       const auto dets =
           actor.getDetIDs(componentInfo.detectorsInSubtree(parent));
       m_detectorsToGroup.clear();
@@ -575,6 +574,19 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
   m_instrWidget->updateInstrumentDetectors();
   QApplication::restoreOverrideCursor();
   enableApplyButtons();
+
+  if (m_grouping_on->isChecked()) {
+    if (m_pixel->isChecked()) {
+      m_instrWidget->updateInfoText(
+          QString("Pixel %0 picked for grouping").arg(pickID));
+
+    } else if (m_tube->isChecked()) {
+      std::string message = "Parent " +
+                            componentInfo.componentID(parent)->getName() +
+                            " picked for grouping";
+      m_instrWidget->updateInfoText(QString::fromStdString(message));
+    }
+  }
 }
 
 /**

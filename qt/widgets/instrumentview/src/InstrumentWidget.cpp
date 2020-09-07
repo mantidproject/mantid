@@ -422,7 +422,13 @@ QString InstrumentWidget::getSaveFileName(const QString &title,
 /**
  * Update the info text displayed at the bottom of the window.
  */
-void InstrumentWidget::updateInfoText() { setInfoText(getSurfaceInfoText()); }
+void InstrumentWidget::updateInfoText(const QString &text) {
+  if (text.length() == 0) {
+    setInfoText(getSurfaceInfoText());
+  } else {
+    setInfoText(text);
+  }
+}
 
 void InstrumentWidget::setSurfaceType(int type) {
   // we cannot do 3D without OpenGL
