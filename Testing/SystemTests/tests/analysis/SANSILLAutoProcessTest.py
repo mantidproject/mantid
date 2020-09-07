@@ -5,8 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, \
-                             SaveNexusProcessed, LoadNexusProcessed, \
-                             DeleteWorkspace, config, mtd
+                             SaveNexusProcessed, LoadNexusProcessed, config, mtd
 import systemtesting
 from tempfile import gettempdir
 import os
