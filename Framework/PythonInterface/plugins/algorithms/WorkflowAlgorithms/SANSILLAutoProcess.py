@@ -332,7 +332,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         for output in outputs:
             ConvertToPointData(InputWorkspace=output,
                                OutputWorkspace=output)
-        if len(outputs) > 1:
+        if len(outputs) > 1 and self.getPropertyValue('OutputType') == 'I(Q)':
             try:
                 stitched = self.output + "_stitched"
                 Stitch1DMany(InputWorkspaces=outputs,
