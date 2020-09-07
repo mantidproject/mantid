@@ -16,6 +16,7 @@ New
 ###
 
  - :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>` algorithm added, used to treat data from ILL's D16 on omega scan mode.
+ - SaveCanSAS1D and SaveNXCanSAS now include the batch file name in their metadata if one was used to produce the output.
 
 Bug Fixed
 #########
@@ -29,6 +30,13 @@ Bug Fixed
 
 ISIS SANS Interface
 -------------------
+
+New
+###
+
+- TOML File V0 support; The format is pinned to version 0 to allow people to
+  get a feel for the new format. The legacy parser still exists and has not
+  been modified.
 
 Fixed
 #####

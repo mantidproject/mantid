@@ -114,7 +114,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             workspace_name = workspace_plot_info.workspace_name
             try:
                 workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except RuntimeError:
+            except (RuntimeError, KeyError):
                 continue
             self._plot_information_list.append(workspace_plot_info)
             errors = workspace_plot_info.errors
@@ -282,3 +282,12 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def resizeEvent(self, event):
         self.fig.tight_layout()
+
+    def add_uncheck_autoscale_subscriber(self, observer):
+        self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)
+
+    def add_enable_autoscale_subscriber(self,observer):
+        self.toolBar.enable_autoscale_notifier.add_subscriber(observer)
+
+    def add_disable_autoscale_subscriber(self,observer):
+        self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)

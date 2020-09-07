@@ -13,7 +13,6 @@ import systemtesting
 import mantid
 from mantid.api import AlgorithmManager
 from sans.state.Serializer import Serializer
-from sans.state.StateBuilder import StateBuilder
 
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.common.enums import (DetectorType, DataType, SANSFacility)
@@ -26,6 +25,9 @@ from sans.common.file_information import SANSFileInformationFactory
 # -----------------------------------------------
 # Tests for the SANSReductionCore algorithm
 # -----------------------------------------------
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+
+
 class SANSReductionCoreTest(unittest.TestCase):
     def _load_workspace(self, state):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
@@ -147,17 +149,17 @@ class SANSReductionCoreTest(unittest.TestCase):
         data_builder.set_sample_scatter("SANS2D00034484")
         data_builder.set_sample_transmission("SANS2D00034505")
         data_builder.set_sample_direct("SANS2D00034461")
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_state,
-                                                       user_filename=user_file)
-        state = user_file_director.get_all_states()
+        user_file_director = UserFileReaderAdapter(file_information=file_information,
+                                                   user_file_name=user_file)
+        state = user_file_director.get_all_states(file_information=file_information)
 
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.compatibility.use_compatibility_mode = True
+        state.data = data_state
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
@@ -187,7 +189,6 @@ class SANSReductionCoreTest(unittest.TestCase):
         data_builder.set_sample_scatter("SANS2D00034484")
         data_builder.set_sample_transmission("SANS2D00034505")
         data_builder.set_sample_direct("SANS2D00034461")
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_state = data_builder.build()
 
         ################################################################################################################
@@ -195,12 +196,13 @@ class SANSReductionCoreTest(unittest.TestCase):
         ################################################################################################################
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_state,
-                                                       user_filename=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information,
+                                                   user_file_name=user_file)
+        state = user_file_director.get_all_states(file_information=file_information)
 
-        state = user_file_director.get_all_states()
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.compatibility.use_compatibility_mode = True
+        state.data = data_state
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
@@ -214,11 +216,11 @@ class SANSReductionCoreTest(unittest.TestCase):
         # Non-compatibility mode
         ################################################################################################################
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_state,
-                                                       user_filename=user_file)
-        state = user_file_director.get_all_states()
+        user_file_director = UserFileReaderAdapter(file_information=file_information,
+                                                   user_file_name=user_file)
+        state = user_file_director.get_all_states(file_information=file_information)
         state.compatibility.use_compatibility_mode = False
+        state.data = data_state
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)

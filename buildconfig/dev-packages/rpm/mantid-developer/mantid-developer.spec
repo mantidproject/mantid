@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        2.0
+Version:        2.1
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -26,6 +26,7 @@ Requires: graphviz
 Requires: gsl-devel
 Requires: hdf5-devel
 Requires: hdf-devel
+Requires: jemalloc-devel
 Requires: jsoncpp-devel >= 0.7.0
 Requires: librdkafka-devel
 Requires: muParser-devel

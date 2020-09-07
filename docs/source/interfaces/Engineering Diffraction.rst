@@ -34,7 +34,8 @@ Instrument
 Settings
     Provides a range of options that apply across the entire interface, currently
     providing the option to change the default output directory and force the
-    recalculation of the vanadium correction files.
+    recalculation of the vanadium correction files. The user can also select the
+    log values from a list which are loaded with data in the fitting tab.
 
 Close
     Close the interface.
@@ -165,13 +166,15 @@ Fitting
 This tab will allow for single peak fitting of focused run files.
 
 Focused run files can be loaded from the file system into mantid from the interface and converted to units TOF or d-sapcing. The interface will keep track of all the
-workspaces that it has created from these files. 
+workspaces that it has created from these files. When a focussed run is loaded, the proton charge weighted average (and standard deviation) of the log values set in the 
+settings options are calculated and stroed in a grouped workspace accessible in the main mantid window.
 
 Loaded workspaces can be plotted in the interface and the mantid fitting capability can be accessed from the 'Fit' button on the plot toolbar.
 This allows for the user to select peaks of any supported type (e.g. :ref:`Pseudo-Voigt <func-PseudoVoigt>` and
 :ref:`BackToBackExponential <func-BackToBackExponential>`) by right-clicking on the plot. The inital parameters can be varied interactively by dragging sliders (vertical lines on the plot).
 
-The output from the fit is currently stored in a table workspace - in future the plan is to store the fit, metadata and run in a hdf5 file which can also be loaded to provide a guess for the fit to another run.
+The output from the fit is currently stored in a table workspace. In future the plan is to store the fit and metadata (in the form of the grouped table worksapces 
+containing the average log vlaues) in a nexus format which can also be loaded to provide a guess for the fit to another run.
 
 Parameters
 ^^^^^^^^^^

@@ -60,6 +60,22 @@ QGroupBox:title {
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="fitting">
+     <property name="title">
+      <string>Fitting</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QListWidget" name="log_list">
+		<property name="verticalScrollBarPolicy">
+		  <enum>Qt::ScrollBarAlwaysOn</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
