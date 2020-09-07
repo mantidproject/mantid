@@ -63,6 +63,55 @@ public:
     TS_ASSERT(C == expectedInverse);
   }
 
+  /**
+  Test that a tridiagonal matrix can be inverted
+  */
+  void testInvertTridiagonal() {
+    // 1x1
+    Matrix<double> B(1, 1);
+    B[0][0] = 2.;
+    B.invertTridiagonal();
+    TS_ASSERT_DELTA(B[0][0], 0.5, 1e-5);
+
+    // 2x2 constant along diagonals D>2
+    std::vector<double> data{4, 1, 1, 4},
+        expected{4.0 / 15.0, -1.0 / 15.0, -1.0 / 15.0, 4.0 / 15.0};
+    DblMatrix C(data);
+    C.invertTridiagonal();
+    DblMatrix expectedInverse(expected);
+    TS_ASSERT(C == expectedInverse);
+
+    // 2x2 constant along diagonals D=2
+    std::vector<double> data2{2, 1, 1, 2},
+        expected2{2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 2.0 / 3.0};
+    DblMatrix C2(data2);
+    C2.invertTridiagonal();
+    DblMatrix expectedInverse2(expected2);
+    TS_ASSERT(C2 == expectedInverse2);
+
+    // 2x2 constant along diagonals -2<D<2
+    std::vector<double> data3{1, 2, 2, 1},
+        expected3{-1.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, -1.0 / 3.0};
+    DblMatrix C3(data3);
+    C3.invertTridiagonal();
+    DblMatrix expectedInverse3(expected3);
+
+    // 2x2 constant along diagonals D<-2
+    std::vector<double> data4{-4, 1, 1, -4},
+        expected4{-4.0 / 15.0, -1.0 / 15.0, -1.0 / 15.0, -4.0 / 15.0};
+    DblMatrix C4(data4);
+    C4.invertTridiagonal();
+    DblMatrix expectedInverse4(expected4);
+    TS_ASSERT(C4 == expectedInverse4);
+
+    // 2x2 not constant along diagonals
+    std::vector<double> data5{1, 2, 3, 4}, expected5{-2, 1, 1.5, -0.5};
+    DblMatrix C5(data5);
+    C5.invertTridiagonal();
+    DblMatrix expectedInverse5(expected5);
+    TS_ASSERT(C5 == expectedInverse5);
+  }
+
   void testIdent() {
     Matrix<double> A(3, 3);
 
