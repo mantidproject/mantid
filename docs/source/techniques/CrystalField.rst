@@ -1,8 +1,8 @@
-.. _Crystal field:
+.. Crystal Field:
 
-======================
-Crystal Field Examples
-======================
+=============
+Crystal Field
+=============
 
 Mantid supports the calculation and fitting of inelastic neutron scattering (INS) measurements of transitions between crystal field (or crystalline electric field) energy levels. The scientific background is summarised in the :ref:`concept page <Crystal structure and reflections>` whilst the syntax of the Python commands used is described in the :ref:`interface page <Crystal Field Python Interface>`
 
