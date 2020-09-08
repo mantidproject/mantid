@@ -378,64 +378,65 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         return ws
 
-    def _apply_self_attenuation_correction(self, ws):
-        correction_type = self.getPropertyValue("SelfAttenuationTreatment")
+    def _read_sample_geometry(self):
+        raw_list = (self.getPropertyValue('SampleGeometryDictionary')).split(';')
+        self._sampleGeometry = { item.split('=')[0] : item.split('=')[1] for item in raw_list }
+        geometry_type = self.getPropertyValue('SampleGeometry')
+        print (self._sampleGeometry)
+        required_keys = ['mass', 'density', 'n_atoms', 'beam_height', 'beam_width', 'container_density']
 
-        """transmission is going to be calculated here"""
-        transmission = np.zeros(mtd[ws].getItem(0).getNumberHistograms())
-        transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
-        if 'analytical' in correction_type:
-            thickness = 1 # placeholder
-            linear_attenuation = math.log(1.0 / mtd[transmission_ws].readY(0)[0]) / thickness
-            angular_range_ws = 'angular_range'
-            ConvertSpectrumAxis(ws, 'signed_theta', OrderAxis=False, OutputWorkspace=angular_range_ws)
-            ConvertAxisByFormula(angular_range_ws, 'Y', '-y', OutputWorkspace=angular_range_ws)
-            Transpose(InputWorkspace=angular_range_ws, OutputWorkspace=angular_range_ws)
-            angular_range = mtd[angular_range_ws].getItem(0).readX(0)
-            for index, theta in enumerate(angular_range):
-                if 'slab' in correction_type:
-                    # assuming neutrons momentum is normal to the sample surface
-                    sec_theta = 1.0 / math.cos(self._DEG_2_RAD*theta)
-                    if sec_theta == 1:
-                        transmission[index] = 0
-                    else:
-                        transmission[index] = ( math.exp(-thickness*linear_attenuation)
-                                                - math.exp(-thickness*linear_attenuation*sec_theta) ) \
-                                        / (linear_attenuation * thickness * (sec_theta - 1) )
-        else:
+        if geometry_type == 'FlatPlate':
+            required_keys += ['height', 'width', 'thickness', 'container_front_thickness', 'container_back_thickness']
+        if geometry_type == 'Cylinder':
+            required_keys += ['height', 'radius', 'container_radius']
+        if geometry_type == 'Annulus':
+            required_keys += ['height', 'inner_radius', 'outer_radius', 'container_inner_radius', 'container_outer_radius']
+
+        for key in required_keys:
+            if key not in self._sampleGeometry:
+                raise RuntimeError('{} needs to be defined in the dictionary'.format(key))
+
+    def _apply_self_attenuation_correction(self, sample_ws, container_ws):
+        geometry_type = self.getPropertyValue('SampleGeometry')
+
+        kwargs = {}
+        kwargs['BeamHeight'] = self._sampleGeometry['beam_height']
+        kwargs['BeamWidth'] = self._sampleGeometry['beam_width']
+        kwargs['SampleDensity'] = self._sampleGeometry['density']
+        kwargs['SampleHeight'] = self._sampleGeometry['height']
+        kwargs['SampleChemicalFormula'] = self.getPropertyValue('ChemicalFormula')
+        kwargs['ContainerChemicalFormula'] = self._sampleGeometry['container_formula']
+        kwargs['ContainerDensity'] = self.getPropertyValue('container_density')
+
+        if geometry_type == 'FlatPlate':
+            kwargs['SampleWidth'] = self._sampleGeometry['width']
+            kwargs['SampleThickness'] = self._sampleGeometry['thickness']
+            kwargs['ContainerFrontThickness'] = self._sampleGeometry['container_front_thickness']
+            kwargs['ContainerBackThickness'] = self._sampleGeometry['container_back_thickness']
+        elif geometry_type == 'Cylinder':
+            kwargs['SampleRadius'] = self._sampleGeometry['radius']
+            kwargs['ContainerRadius'] = self._sampleGeometry['container_radius']
+        elif geometry_type == 'Annulus':
+            kwargs['SampleInnerRadius'] = self._sampleGeometry['inner_radius']
+            kwargs['SampleOuterRadius']  = self._sampleGeometry['outer_radius']
+            kwargs['ContainerInnerRadius'] = self._sampleGeometry['container_inner_radius']
+            kwargs['ContainerOuterRadius'] = self._sampleGeometry['container_outer_radius']
+        elif geometry_type == 'Custom':
             pass
-#         print ("Transmission:", transmission)
-        return ws
-        """somehow get the necessary cross-sections and apply them to data"""
-        alpha = delta * (cs_SF / (cs_a + cs_s ) )
-        beta = delta * (cs_NSF / (cs_a + cs_s ) )
-        for entry_no in range(0, mtd[ws].getNumberOfEntries(), 2):
-            intensity_0 = mtd[ws].getItem(entry_no).name()
-            intensity_1 = mtd[ws].getItem(entry_no+1).name()
-            tmp_names = [intensity_0 + '_tmp']
-            tmp_names.append(intensity_1 + '_tmp')
 
-            Plus(LHSWorkspace=(1-beta)*intensity_0,
-                 RHSWorkspace=-alpha*intensity_1,
-                 OutputWorkspace=tmp_names[0])
-            Divide(LHSWorkspace=tmp_names[0],
-                   RHSWorkspace=transmission,
-                   OutputWorkspace=tmp_names[0])
-
-            Plus(LHSWorkspace=-alpha*intensity_0,
-                 RHSWorkspace=(1-beta)*intensity_1,
-                 OutputWorkspace=tmp_names[1])
-            Divide(LHSWorkspace=tmp_names[1],
-                   RHSWorkspace=transmission,
-                   OutputWorkspace=tmp_names[1])
-
-            RenameWorkspace(tmp_names[0], intensity_0)
-            RenameWorkspace(tmp_names[1], intensity_1)
+        PaalmanPingsMonteCarloAbsorption(
+                SampleWorkspace=sample_ws,
+                Shape=geometry_type,
+                **kwargs,
+                CorrectionsWorkspace='{}_corr'.format(geometry_type)
+        )
+        ApplyPaalmanPingsCorrection(SampleWorkspace=sample_ws,
+                                    CorrectionsWorkspace='{}_corr'.format(geometry_type),
+                                    CanWorkspace=container_ws)
 
         return ws
 
     def _component_separation(self, ws):
-
         tmp_names = []
         nMeasurements = 0
         if self._method == '10-p':
@@ -612,13 +613,13 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if pol_eff_ws:
                     self._apply_polarization_corrections(ws, pol_eff_ws)
                     progress.report()
-                self._apply_self_attenuation_correction(ws)
+                self._read_sample_geometry()
+                self._apply_self_attenuation_correction(ws, container_ws)
                 progress.report()
                 self._component_separation(ws)
                 progress.report()
                 if process == 'Vanadium':
-                    n_atoms = 6e23 # placeholder
-                    self._output_vanadium(ws, n_atoms)
+                    self._output_vanadium(ws, self._sampleGeometry['n_atoms'])
                 else:
                     self._detector_efficiency_correction(ws)
                     progress.report()
