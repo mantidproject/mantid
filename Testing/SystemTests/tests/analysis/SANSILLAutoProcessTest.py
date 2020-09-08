@@ -127,6 +127,46 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             )
 
 
+class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11 with output type as I(Qx, Qy).
+    """
+
+    def __init__(self):
+        super(D11_AutoProcess_IQxQy_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['iqxy', 'D11_AutoProcess_IQxQy_Reference.nxs']
+
+    def runTest(self):
+        SANSILLAutoProcess(
+            SampleRuns='3187,3177,3167',
+            BeamRuns='2866,2867+2868,2878',
+            ContainerRuns='2888+2971,2884+2960,2880+2949',
+            MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
+            SensitivityMaps='sens-lamp.nxs',
+            SampleTransmissionRuns='3172',
+            ContainerTransmissionRuns='2870+2954',
+            TransmissionBeamRuns='2867+2868',
+            SampleThickness=0.2,
+            CalculateResolution='MildnerCarpenter',
+            OutputWorkspace='iqxy',
+            OutputType='I(Qx,Qy)'
+        )
+
+
 class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     """
     Tests auto process with D33 monochromatic data
