@@ -90,6 +90,8 @@ class SaveDirectoryObserver(ConfigPropertyObserver):
 
 
 class RunTabPresenter(PresenterCommon):
+    DEFAULT_DECIMAL_PLACES_MM = 1
+
     class ConcreteRunTabListener(SANSDataProcessorGui.RunTabListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ConcreteRunTabListener, self).__init__()
@@ -1003,7 +1005,7 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("wavelength_step")
 
         self._set_on_view("absolute_scale")
-        self._set_on_view("z_offset")
+        self._set_on_view("z_offset", self.DEFAULT_DECIMAL_PLACES_MM)
 
         # Q tab
         self._set_on_view_q_rebin_string()
@@ -1016,27 +1018,27 @@ class RunTabPresenter(PresenterCommon):
 
         self._set_on_view("use_q_resolution")
         self._set_on_view_q_resolution_aperture()
-        self._set_on_view("q_resolution_delta_r")
+        self._set_on_view("q_resolution_delta_r", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("q_resolution_collimation_length")
         self._set_on_view("q_resolution_moderator_file")
 
-        self._set_on_view("r_cut")
+        self._set_on_view("r_cut", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("w_cut")
 
         # Mask
         self._set_on_view("phi_limit_min")
         self._set_on_view("phi_limit_max")
         self._set_on_view("phi_limit_use_mirror")
-        self._set_on_view("radius_limit_min")
-        self._set_on_view("radius_limit_max")
+        self._set_on_view("radius_limit_min", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("radius_limit_max", self.DEFAULT_DECIMAL_PLACES_MM)
 
     def _set_on_view_q_resolution_aperture(self):
-        self._set_on_view("q_resolution_source_a")
-        self._set_on_view("q_resolution_sample_a")
-        self._set_on_view("q_resolution_source_h")
-        self._set_on_view("q_resolution_sample_h")
-        self._set_on_view("q_resolution_source_w")
-        self._set_on_view("q_resolution_sample_w")
+        self._set_on_view("q_resolution_source_a", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_a", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_source_h", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_h", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_source_w", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_w", self.DEFAULT_DECIMAL_PLACES_MM)
 
         # If we have h1, h2, w1, and w2 selected then we want to select the rectangular aperture.
         is_rectangular = self._model.q_resolution_source_h and self._model.q_resolution_sample_h and \
