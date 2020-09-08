@@ -302,9 +302,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('BeamRadius', 'Options')
         self.setPropertyGroup('WaterCrossSection', 'Options')
 
-        self.declareProperty(FloatArrayProperty('MaxQxy', values=[0]),
+        self.declareProperty(FloatArrayProperty('MaxQxy', values=[-1]),
                              doc='Maximum of absolute Qx and Qy.')
-        self.declareProperty(FloatArrayProperty('DeltaQ', values=[0]),
+        self.declareProperty(FloatArrayProperty('DeltaQ', values=[-1]),
                              doc='The dimension of a Qx-Qy cell.')
 
         self.copyProperties('SANSILLIntegration',
