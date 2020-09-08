@@ -17,6 +17,7 @@
 
 #include <QAction>
 #include <QActionGroup>
+#include <QCoreApplication>
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QMenu>
@@ -25,7 +26,6 @@
 #include <QScrollBar>
 #include <QSettings>
 #include <QSignalMapper>
-#include <QCoreApplication>
 
 #include <Poco/Logger.h>
 #include <Poco/Message.h>
@@ -509,9 +509,9 @@ QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
  */
 bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
   if (((msg.scriptPath().isEmpty() && showFrameworkOutput()) ||
-      (!msg.scriptPath().isEmpty() && showAllScriptOutput()) ||
-      (showActiveScriptOutput() && (msg.scriptPath() == activeScript()))) 
-      && !QCoreApplication::closingDown())
+       (!msg.scriptPath().isEmpty() && showAllScriptOutput()) ||
+       (showActiveScriptOutput() && (msg.scriptPath() == activeScript()))) &&
+      !QCoreApplication::closingDown())
     return true;
   return false;
 }
