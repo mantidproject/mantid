@@ -11,39 +11,37 @@ import numpy as np
 import math
 
 
-class SNAPBackgroundPeakClipping(PythonAlgorithm):
+class ClipPeaks(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(
-            WorkspaceProperty("Input Workspace", "", Direction.Input, PropertyMode.Optional),
+            WorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),
             "The workspace containing the normalization data.")
 
         self.declareProperty(
-            "LLS Correction", True,
-            "Read live data - requires a saved run in the current IPTS with the same Instrumnet configuration"
+            "LLSCorrection", True,
+            "Read live data - requires a saved run in the current IPTS with the same Instrument configuration"
         )
 
         self.declareProperty(
-            "Increasing Window", False,
-            "Read live data - requires a saved run in the current IPTS with the same Instrumnet configuration"
+            "IncreasingWindow", False,
+            "Read live data - requires a saved run in the current IPTS with the same Instrument configuration"
         )
 
         self.declareProperty(
-            "Smoothing Range", 10,
-            "Read live data - requires a saved run in the current IPTS with the same Instrumnet configuration"
+            "SmoothingRange", 10,
+            "Read live data - requires a saved run in the current IPTS with the same Instrument configuration"
         )
 
         self.declareProperty(
-            "Peak Clipping Window Size", 10,
-            "Read live data - requires a saved run in the current IPTS with the same Instrumnet configuration"
+            "PeakClippingWindowSize", 10,
+            "Read live data - requires a saved run in the current IPTS with the same Instrument configuration"
         )
 
-        self.declareProperty(WorkspaceProperty("Output Workspace", "", Direction.Output),
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              "The workspace containing the normalization data.")
 
     def category(self):
-        return "Diffraction\\Reduction"
-
-############################
+        return "Diffraction\\Corrections"
 
     def smooth(self, data, order):
         # This smooths data based on linear weigthed average around
@@ -116,21 +114,18 @@ class SNAPBackgroundPeakClipping(PythonAlgorithm):
 
         return output
 
-
-##############################
-
     def PyExec(self):
         # Retrieve all relevant notice
 
-        WS = self.getProperty("Input Workspace").value
+        WS = self.getProperty("InputWorkspace").value
 
-        window = self.getProperty("Peak Clipping Window Size").value
+        window = self.getProperty("PeakClippingWindowSize").value
 
-        smooth_range = self.getProperty("Smoothing Range").value
+        smooth_range = self.getProperty("SmoothingRange").value
 
-        LLS_set = self.getProperty("LLS Correction").value
+        LLS_set = self.getProperty("LLSCorrection").value
 
-        decreasing = self.getProperty("Increasing Window").value
+        decreasing = self.getProperty("IncreasingWindow").value
 
         n_histo = WS.getNumberHistograms()
 
@@ -152,6 +147,6 @@ class SNAPBackgroundPeakClipping(PythonAlgorithm):
                                smooth_window=smooth_range))
             peak_clip_WS.setE(h, e[h])
 
-        self.setProperty("Output Workspace", peak_clip_WS)
+        self.setProperty("OutputWorkspace", peak_clip_WS)
 
-AlgorithmFactory.subscribe(SNAPBackgroundPeakClipping)
+AlgorithmFactory.subscribe(ClipPeaks)
