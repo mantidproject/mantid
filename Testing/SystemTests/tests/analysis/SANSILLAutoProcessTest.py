@@ -211,10 +211,10 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns=can_tr,
             TransmissionBeamRuns=tr_beam,
             OutputWorkspace='iq',
-            PanelOutputWorkspaces='panels'
+            OutputPanels=True
         )
 
-        GroupWorkspaces(InputWorkspaces=['iq', 'panels'], OutputWorkspace='out')
+        GroupWorkspaces(InputWorkspaces=['iq', 'iq_panels'], OutputWorkspace='out')
 
 
 class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
@@ -260,12 +260,12 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns=can_tr,
             TransmissionBeamRuns=tr_beam,
             OutputWorkspace='iphiq',
-            PanelOutputWorkspaces='panels',
+            OutputPanels=True,
             NumberOfWedges=4,
             OutputType='I(Phi,Q)'
         )
 
-        GroupWorkspaces(InputWorkspaces=['iphiq', 'panels'],
+        GroupWorkspaces(InputWorkspaces=['iphiq', 'iphiq_panels'],
                         OutputWorkspace='out')
 
 

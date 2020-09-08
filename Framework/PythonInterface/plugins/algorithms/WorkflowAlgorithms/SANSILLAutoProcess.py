@@ -184,6 +184,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.mask = self.getPropertyValue('MaskFiles').split(',')
         self.reference = self.getPropertyValue('ReferenceFiles').split(',')
         self.output = self.getPropertyValue('OutputWorkspace')
+        self.output_panels = self.output + "_panels"
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
         self.theta_dependent = self.getProperty('ThetaDependent').value
@@ -307,13 +308,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty('DeltaQ', values=[-1]),
                              doc='The dimension of a Qx-Qy cell.')
 
+        self.declareProperty('OutputPanels', False,
+                             doc='Whether or not process the individual '
+                             'detector panels.')
+
         self.copyProperties('SANSILLIntegration',
                             ['OutputType', 'CalculateResolution',
                              'DefaultQBinning', 'BinningFactor',
                              'OutputBinning', 'NPixelDivision',
                              'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
-                             'AsymmetricWedges', 'IQxQyLogBinning',
-                             'PanelOutputWorkspaces'])
+                             'AsymmetricWedges', 'IQxQyLogBinning'])
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
@@ -324,7 +328,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.setUp()
         outputs = []
-        panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
         panel_output_groups = []
 
         container_transmission, sample_transmission = \
@@ -340,12 +343,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     beam, flux = self.processBeam(d, absorber)
                 container = self.processContainer(d, beam, absorber,
                                                   container_transmission)
-                self.processSample(d, flux, sample_transmission, beam, absorber,
-                                   container)
-                outputs.append(self.output+ '_' + str(d + 1))
-                panel_ws_group = panel_outputs + '_' + str(d + 1)
-                if mtd.doesExist(panel_ws_group) and panel_outputs:
-                    panel_output_groups.append(panel_ws_group)
+                sample, panels = self.processSample(d, flux,
+                                                    sample_transmission, beam,
+                                                    absorber, container)
+                outputs.append(sample)
+                if panels:
+                    panel_output_groups.append(panels)
             else:
                 self.log().information('Skipping empty token run.')
 
@@ -362,9 +365,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if self.output_sens:
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
-        if panel_outputs and len(panel_output_groups) != 0:
-            GroupWorkspaces(InputWorkspaces=panel_output_groups, OutputWorkspace=panel_outputs)
-            self.setProperty('PanelOutputWorkspaces', mtd[panel_outputs])
+        # group panels
+        if panel_output_groups:
+            GroupWorkspaces(InputWorkspaces=panel_output_groups,
+                            OutputWorkspace=self.output_panels)
 
     def processTransmissions(self):
         [process_transmission_absorber, transmission_absorber_name] = \
@@ -564,14 +568,15 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('WaterCrossSection').value
                 )
 
-        panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
+        if self.getProperty('OutputPanels').value:
+            panel_ws_group = self.output_panels + '_' + str(i + 1)
+        else:
+            panel_ws_group = ""
+
         if self.n_wedges and self.output_type == "I(Q)":
             output_wedges = self.output + "_wedge_d" + str(i + 1)
         else:
             output_wedges = ""
-        panel_ws_group = (panel_outputs + '_' + str(i + 1)
-                          if panel_outputs
-                          else '')
 
         SANSILLIntegration(
                 InputWorkspace=sample_name,
@@ -611,6 +616,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         if self.cleanup:
             DeleteWorkspace(sample_name)
+
+        if not mtd.doesExist(panel_ws_group):
+            panel_ws_group = ""
+
+        return output, panel_ws_group
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)
