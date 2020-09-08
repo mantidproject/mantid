@@ -144,7 +144,7 @@ Improvements
 Bugfixes
 ########
 ''',
-    'mantidworkbench.rst':'''==================
+    'mantidworkbench.rst':'''========================
 Mantid Workbench Changes
 ========================
 
