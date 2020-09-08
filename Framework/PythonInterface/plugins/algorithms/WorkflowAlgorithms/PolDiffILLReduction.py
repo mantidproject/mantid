@@ -63,19 +63,26 @@ class PolDiffILLReduction(PythonAlgorithm):
             issues['ContainerInputWorkspace'] = 'Container input workspace is mandatory for vanadium data reduction.'
             issues['AbsorberInputWorkspace'] = 'Absorber input workspace is mandatory for vanadium data reduction.'
 
-        if process == 'Sample' and ( self.getProperty('TransmissionInputWorkspace').isDefault
-                                     or self.getProperty('QuartzInputWorkspace').isDefault
-                                     or self.getProperty('ContainerInputWorkspace').isDefault
-                                     or self.getProperty('AbsorberInputWorkspace').isDefault ) :
-            issues['TransmissionInputWorkspace'] = 'Sample transmission is mandatory for sample data reduction.'
-            issues['QuartzInputWorkspace'] = 'Vanadium input workspace is mandatory for sample data reduction.'
-            issues['ContainerInputWorkspace'] = 'Container input workspace is mandatory for sample data reduction.'
-            issues['AbsorberInputWorkspace'] = 'Absorber input workspace is mandatory for sample data reduction.'
+        if process == 'Sample' or process == 'Vanadium':
+            if self.getProperty('SampleGeometry') != 'None' and self.getProperty('ChemicalFormula').isDefault:
+                issues['ChemicalFormula'] = 'Chemical formula of the sample is required for self-attenuation correction.'
+            if self.getProperty('SampleGeometryDictionary').isDefault:
+                issues['SampleGeometryDictionary'] = 'Sample parameters need to be defined.'
 
-        if (process == 'Sample' and self.getProperty('DetectorEfficiencyCalibration') == 'Vanadium'
-                and self.getProperty('VanadiumInputWorkspace').isDefault):
-            issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for sample data reduction when \
-                detector efficiency calibration is based "Vanadium".'
+        if process == 'Sample':
+            if ( self.getProperty('TransmissionInputWorkspace').isDefault
+                 or self.getProperty('QuartzInputWorkspace').isDefault
+                 or self.getProperty('ContainerInputWorkspace').isDefault
+                 or self.getProperty('AbsorberInputWorkspace').isDefault ) :
+                issues['TransmissionInputWorkspace'] = 'Sample transmission is mandatory for sample data reduction.'
+                issues['QuartzInputWorkspace'] = 'Vanadium input workspace is mandatory for sample data reduction.'
+                issues['ContainerInputWorkspace'] = 'Container input workspace is mandatory for sample data reduction.'
+                issues['AbsorberInputWorkspace'] = 'Absorber input workspace is mandatory for sample data reduction.'
+
+            if (self.getProperty('DetectorEfficiencyCalibration') == 'Vanadium'
+                    and self.getProperty('VanadiumInputWorkspace').isDefault):
+                issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for sample data reduction when \
+                    detector efficiency calibration is based "Vanadium".'
 
         return issues
 
@@ -176,21 +183,44 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('SubtractBackground', reduction)
 
-        self.declareProperty('NormalizeToAbsoluteUnits', True,
+        self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
 
-        self.setPropertySettings('NormalizeToAbsoluteUnits', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+        self.setPropertySettings('AbsoluteUnitsNormalisation', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to clear the cache of intermediate workspaces.')
 
-        self.declareProperty(name="SelfAttenuationTreatment",
-                             defaultValue="analytical:slab",
-                             validator=StringListValidator(["analytical:slab", "analytical:sphere", "analytical:cylinder", "custom"]),
+        # self-attenuation group:
+        self.declareProperty(name="SampleGeometry",
+                             defaultValue="FlatPlate",
+                             validator=StringListValidator(["FlatPlate", "Cylinder", "Annulus", "Custom", "None"]),
                              direction=Direction.Input,
-                             doc="Type of self-attenuation correction to be applied.")
+                             doc="Sample geometry for self-attenuation correction to be applied.")
 
-        self.setPropertySettings('SelfAttenuationTreatment', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+        self.setPropertySettings('SampleGeometry', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+
+        self.declareProperty(name="SampleGeometryDictionary",
+                             defaultValue="",
+                             direction=Direction.Input,
+                             doc="Dictionary for the geometry used for self-attenuation correction.")
+
+        self.setPropertySettings('SampleGeometryDictionary',
+                                 EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsNotEqualTo, 'Custom'))
+
+        self.declareProperty(FileProperty(name="SampleGeometryFile",
+                             defaultValue="",
+                             action=FileAction.OptionalLoad),
+                             doc="The path to the custom geometry for self-attenuation correction to be applied.")
+
+        self.setPropertySettings('SampleGeometryFile', EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsEqualTo, 'Custom'))
+
+        self.declareProperty(name="ChemicalFormula",
+                             defaultValue="",
+                             direction=Direction.Input,
+                             doc="Chemical formula of the sample")
+
+        self.setPropertySettings('ChemicalFormula', EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsNotEqualTo, 'None'))
 
         self.declareProperty(name="DetectorEfficiencyCalibration",
                              defaultValue="Incoherent",
@@ -457,7 +487,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _detector_efficiency(self, ws):
         calibrationType = self.getPropertyValue('DetectorEfficiencyCalibration')
-        normaliseToAbsoluteUnits = self.getProperty('NormalizeToAbsoluteUnits')
+        normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation')
         tmp_name = 'det_eff'
         tmp_names = []
         if calibrationType == 'Vanadium':
