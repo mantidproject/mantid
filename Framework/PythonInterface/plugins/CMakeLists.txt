@@ -293,7 +293,7 @@ set(PYTHON_PLUGINS
   algorithms/CompareSampleLogs.py
   algorithms/MuonMaxent.py
   algorithms/SaveP2D.py
-  algorithms/SNAPBackgroundPeakClipping.py
+  algorithms/ClipPeaks.py
   functions/AFMZF.py
   functions/PCRmagnetZFKT.py
   functions/StretchedExpFTHelper.py
