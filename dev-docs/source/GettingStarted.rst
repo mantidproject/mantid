@@ -92,15 +92,22 @@ if you wish to setup eclipse for use developing mantid, then instructions can be
 
 Ubuntu 20.04
 ~~~~~~~~~~~~
+- Mantid uses `qtpy` to talk to Python bindings of Qt.  It is recommended to have the _
+  environment var `QT_API=pyqt5` exported to the shell before building with CMake.
+- The header and lib shipped with Anaconda (if installed) could interfere with Mantid building _
+  process. It is highly recommended to remove Anaconda Python from your env prior to building _
+  using `conda deactivate`.
 - Mantid is not yet officially supported on Ubuntu 20.04 as Qt4 has been removed but Workbench can be built by installing:
 
 .. code-block:: sh
 
-   apt-get install -y git \
+   apt-get install -y \
+     git \
      g++ \
      clang-format-6.0 \
      cmake \
      dvipng \
+     doxygen \
      libtbb-dev \
      libgoogle-perftools-dev \
      libboost-all-dev \
@@ -108,6 +115,7 @@ Ubuntu 20.04
      libnexus-dev \
      libhdf5-dev \
      libhdf4-dev \
+     libjemalloc-dev \
      libgsl-dev \
      liboce-visualization-dev \
      libmuparser-dev \
