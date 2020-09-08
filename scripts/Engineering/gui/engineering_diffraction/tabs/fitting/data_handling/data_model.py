@@ -22,7 +22,7 @@ class FittingDataModel(object):
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
         self._background_workspaces = {}
-        self._fit_workspaces = None
+        self._fit_results = {} # {WorkspaceName: Setup}
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
 
@@ -142,8 +142,30 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
+    # def create_fit_table(self):
+    #     # table to store model/setup
+    #     setup = CreateEmptyTableWorkspace()
+    #     setup.addColumn(type="str", name="Setup")
+    #     setup.addColumn(type="int", name="StartX")
+    #     setup.addColumn(type="int", name="EndX")
+    #     # table to store parameters
+    #     self._fit_workspaces = GroupWorkspaces([setup], OutputWorkspace='fit')
+    #
+    # def add_fit_to_table(self, results_dict = None):
+    #     # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
+    #     if not self._fit_workspaces:
+    #         self.create_fit_table()
+
+
     def update_fit(self, row_number, results_dict):
-        print('FIT RESULT\t', row_number, results_dict['properties']['Function'])
+        ws_name = results_dict['properties']['InputWorkspace']
+        # # at this point we know the fit workspaces output so can collect error setc.
+        # self._fit_results[ws_name] = results_dict['properties']
+        # self._repopulate_fit_table()
+
+    # def _repopulate_fit_table(self):
+    #     # could also override fitpropertybrowswer.addFitResultWorkspacesToTableWidget
+    #     # loop over ws_names in group and use ufit results dict
 
     def update_workspace_name(self, old_name, new_name):
         if new_name not in self._loaded_workspaces:
