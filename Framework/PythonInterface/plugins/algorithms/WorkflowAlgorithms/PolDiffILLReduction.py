@@ -24,10 +24,9 @@ class PolDiffILLReduction(PythonAlgorithm):
     _instrument = None
     _DEG_2_RAD =  np.pi / 180.0
 
-    _sampleMass = None
-    _formulaUnits = None
-    _gyromagnetiRatio = None
-    _r0 = None
+    _sampleGeometry = None
+    _gyromagnetiRatio = 1.832472e8 # [s^-1 T^-1], from NIST
+    _r0 =  2.817940e-15 # [m], classical e radius,  from NIST
 
     def category(self):
         return 'ILL\\Diffraction'
