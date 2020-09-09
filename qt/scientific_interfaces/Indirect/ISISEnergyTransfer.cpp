@@ -369,8 +369,6 @@ bool ISISEnergyTransfer::validate() {
     int detectorMax = m_uiForm.spPlotTimeSpecMax->value();
 
     const QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
-    const auto pos = rawFile.lastIndexOf(".");
-    const auto extension = rawFile.right(rawFile.length() - pos);
     const QFileInfo rawFileInfo(rawFile);
     const std::string name = rawFileInfo.baseName().toStdString();
 
