@@ -316,7 +316,10 @@ class SliceViewerDataView(QWidget):
             if self.line_plots_active:
                 self._line_plots.plotter.delete_line_plot_lines()
             self.image_info_widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
-            self.ax.remove_artists_if(lambda art: art == self.image)
+            if hasattr(self.ax, "remove_artists_if"):
+                self.ax.remove_artists_if(lambda art: art == self.image)
+            else:
+                self.image.remove()
             self.image = None
 
     def clear_figure(self):
