@@ -127,8 +127,8 @@ class RundexSettings(object):
                 "WedgeAngle": "30",
                 "WedgeOffset": "0",
                 "AsymmetricWedges": False,
-                "MaxQxy": "0",
-                "DeltaQ": "0",
+                "MaxQxy": "-1",
+                "DeltaQ": "-1",
                 "IQxQyLogBinning": False,
                 "OutputPanels": False
                 },
