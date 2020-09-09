@@ -153,6 +153,12 @@ class PythonFileInterpreter(QWidget):
         # Only load the simpleapi completions if the code editor starts being modified.
         self.sig_editor_modified.connect(self.code_completer.add_simpleapi_to_completions_if_required)
 
+    def connect_editor_to_sig_process(self):
+        self.editor.progressMade.connect(self.sig_progress)
+
+    def disconnect_editor_from_sig_process(self):
+        self.editor.progressMade.disconnect(self.sig_progress)
+
     def closeEvent(self, event):
         self.deleteLater()
         if self.find_replace_dialog:

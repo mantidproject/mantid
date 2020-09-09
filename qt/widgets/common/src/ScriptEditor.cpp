@@ -418,6 +418,7 @@ void ScriptEditor::updateProgressMarker(int lineno, bool error) {
 
   ensureLineVisible(lineno);
   markerAdd(m_currentExecLine - 1, m_progressArrowKey);
+  progressMade(lineno);
 }
 
 /// Mark the progress arrow as an error

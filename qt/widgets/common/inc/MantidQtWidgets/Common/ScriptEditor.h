@@ -148,6 +148,8 @@ signals:
   void textZoomedOut();
   /// Notify that the filename has been modified
   void fileNameChanged(const QString &fileName);
+  /// Progress has been made in script execution
+  void progressMade(const int progress);
 
 protected:
   /// Write to the given device
