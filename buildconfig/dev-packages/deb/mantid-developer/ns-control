@@ -63,7 +63,7 @@ Depends: git,
   python3-psutil,
   python3-requests,
   python3-toml,
-  python3-pycifrw,
+  python3-pycifrw(>=4.2.1),
   python3-yaml,
   texlive,
   texlive-latex-extra
