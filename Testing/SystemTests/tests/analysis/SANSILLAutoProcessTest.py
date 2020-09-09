@@ -118,6 +118,9 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             OutputWorkspace='iq'
             )
 
+        # here, 4 symmetric wedges with an offset of 0 will produce 2 times the
+        # same outputs. NumberOfWedges=2 would have made more sense.
+
         GroupWorkspaces(
             InputWorkspaces=['iq_1', 'iq_2', 'iq_3',
                              'iq_wedge_1_1', 'iq_wedge_1_2', 'iq_wedge_1_3',
