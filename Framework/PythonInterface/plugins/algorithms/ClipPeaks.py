@@ -118,6 +118,10 @@ class ClipPeaks(PythonAlgorithm):
 
         output = temp * (start_data[index] / temp[index])
 
+        # Return 0 if nan
+        if np.any(np.isnan(output)):
+            return temp * 0.0
+
         return output
 
     def PyExec(self):
