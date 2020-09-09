@@ -4,11 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import *
+from mantid.api import PythonAlgorithm, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import *
-from mantid.api import *
+from mantid.kernel import Direction
+
 import numpy as np
-import math
 
 
 class ClipPeaks(PythonAlgorithm):
@@ -19,22 +19,22 @@ class ClipPeaks(PythonAlgorithm):
 
         self.declareProperty(
             "LLSCorrection", True,
-            "Read live data - requires a saved run in the current IPTS with the same Instrument configuration"
+            "Whether to apply a log-log-sqrt transformation to make data more sensitive to weaker peaks."
         )
 
         self.declareProperty(
             "IncreasingWindow", False,
-            "Read live data - requires a saved run in the current IPTS with the same Instrument configuration"
+            "Use an increasing moving window when clipping."
         )
 
         self.declareProperty(
             "SmoothingRange", 10,
-            "Read live data - requires a saved run in the current IPTS with the same Instrument configuration"
+            "The size of the window used for smoothing data. No smoothing if set to 0."
         )
 
         self.declareProperty(
-            "PeakClippingWindowSize", 10,
-            "Read live data - requires a saved run in the current IPTS with the same Instrument configuration"
+            "WindowSize", 10,
+            "The size of the peak clipping window to be used."
         )
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
@@ -44,10 +44,12 @@ class ClipPeaks(PythonAlgorithm):
         return "Diffraction\\Corrections"
 
     def smooth(self, data, order):
-        # This smooths data based on linear weigthed average around
-        # point i for example for an order of 7 the i point is
-        # weighted 4, i=/- 1 weighted 3, i+/-2 weighted 2 and i+/-3
-        # weighted 1 this input is only the y values
+        """
+        This smooths data based on linear weighted average around
+        point i for example for an order of 7 the i point is
+        weighted 4, i=/- 1 weighted 3, i+/-2 weighted 2 and i+/-3
+        weighted 1 this input is only the y values
+        """
         sm = np.zeros(len(data))
         factor = order / 2 + 1
 
@@ -61,20 +63,24 @@ class ClipPeaks(PythonAlgorithm):
 
         return sm
 
-    def LLS_transformation(self, input):
-        # this transforms data to be more sensitive to weak peaks. The
-        # function is reversed by the Inv_LLS function below
+    def log_log_sqrt_transformation(self, input):
+        """
+        this transforms data to be more sensitive to weak peaks. The
+        function is reversed by the Inv_LLS function below
+        """
         out = np.log(np.log((input + 1)**0.5 + 1) + 1)
 
         return out
 
-    def Inv_LLS_transformation(self, input):
-        # See Function LLS function above
+    def Inv_log_log_sqrt_transformation(self, input):
+        """
+        See Function LLS function above
+        """
         out = (np.exp(np.exp(input) - 1) - 1)**2 - 1
 
         return out
 
-    def peak_clip(self, data, win=30, decrese=True, LLS=True, smooth_window=0):
+    def peak_clip(self, data, win=30, decrease=True, LLS=True, smooth_window=0):
         start_data = np.copy(data)
 
         window = win
@@ -84,11 +90,11 @@ class ClipPeaks(PythonAlgorithm):
             data = self.smooth(data, smooth_window)
 
         if LLS:
-            data = self.LLS_transformation(data)
+            data = self.log_log_sqrt_transformation(data)
 
         temp = data.copy()
 
-        if decrese:
+        if decrease:
             scan = list(range(window + 1, 0, -1))
         else:
             scan = list(range(1, window + 1))
@@ -104,7 +110,7 @@ class ClipPeaks(PythonAlgorithm):
                     temp[i] = np.min(average[:int(len(average) / 2)])
 
         if LLS:
-            temp = self.Inv_LLS_transformation(temp)
+            temp = self.Inv_log_log_sqrt_transformation(temp)
 
         self.log().information(str(min(start_data - temp)))
 
@@ -119,7 +125,7 @@ class ClipPeaks(PythonAlgorithm):
 
         WS = self.getProperty("InputWorkspace").value
 
-        window = self.getProperty("PeakClippingWindowSize").value
+        window = self.getProperty("WindowSize").value
 
         smooth_range = self.getProperty("SmoothingRange").value
 
@@ -142,7 +148,7 @@ class ClipPeaks(PythonAlgorithm):
                 h,
                 self.peak_clip(y[h],
                                win=window,
-                               decrese=decreasing,
+                               decrease=decreasing,
                                LLS=LLS_set,
                                smooth_window=smooth_range))
             peak_clip_WS.setE(h, e[h])
