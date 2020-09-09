@@ -129,7 +129,8 @@ class RundexSettings(object):
                 "AsymmetricWedges": False,
                 "MaxQxy": "0",
                 "DeltaQ": "0",
-                "IQxQyLogBinning": False
+                "IQxQyLogBinning": False,
+                "OutputPanels": False
                 },
             REFL_POL : {
                 "PolarizationEfficiencyFile": "",
