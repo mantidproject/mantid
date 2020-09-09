@@ -69,9 +69,9 @@ class RunTabPresenterTest(unittest.TestCase):
 
         config["default.facility"] = "ISIS"
 
-        self._mock_model = mock.Mock(spec=StateGuiModel)
-        self._mock_table = mock.Mock(spec=TableModel)
-        self._mock_csv_parser = mock.Mock(spec=BatchCsvParser)
+        self._mock_model = mock.create_autospec(StateGuiModel, spec_set=True)
+        self._mock_table = mock.create_autospec(TableModel, spec_set=True)
+        self._mock_csv_parser = mock.create_autospec(BatchCsvParser, spec_set=True)
         self._mock_view = mock.Mock()
 
         self._mock_model.instrument = SANSInstrument.SANS2D
@@ -525,18 +525,27 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.on_process_selected_clicked()
         self.presenter._process_rows.assert_called_with([populated_row])
 
+    def test_that_csv_file_is_saved_when_export_table_button_is_clicked(self):
+        self.presenter._export_table = mock.MagicMock()
+        self._mock_table.get_non_empty_rows.return_value = BATCH_FILE_TEST_CONTENT_1
+        self._mock_model.batch_file = ""
+        self.presenter.display_save_file_box = mock.Mock(return_value="mocked_file_path")
+        self.presenter.on_export_table_clicked()
+        self.assertEqual(self._mock_csv_parser.save_batch_file.call_count, 1,
+                         "_save_batch_file should have been called but was not")
+
     def test_that_table_not_exported_if_table_is_empty(self):
         self.presenter._export_table = mock.MagicMock()
         self._mock_table.get_non_empty_rows.return_value = []
 
         self.presenter.on_export_table_clicked()
-        self.assertEqual(self.presenter._export_table.call_count, 0,
-                         "_export table should not have been called."
+        self.assertEqual(self._mock_csv_parser.save_batch_file.call_count, 0,
+                         "_save_batch_file should not have been called."
                          " It was called {} times.".format(self.presenter._export_table.call_count))
 
     def test_buttons_enabled_after_export_table_fails(self):
         self._mock_table.get_non_empty_rows.return_value = [RowEntries()]
-        self._mock_table.batch_file = ""
+        self._mock_model.batch_file = ""
 
         self.presenter.display_save_file_box = mock.Mock(return_value="mocked_file_path")
 
@@ -551,6 +560,18 @@ class RunTabPresenterTest(unittest.TestCase):
             self.presenter.on_export_table_clicked()
 
         self.assertEqual(self.presenter._view.enable_buttons.call_count, 1)
+
+    def test_that_default_name_is_used_when_export_table(self):
+        self.presenter._export_table = mock.MagicMock()
+        self._mock_table.get_non_empty_rows.return_value = BATCH_FILE_TEST_CONTENT_1
+        self._mock_model.batch_file = 'test_filename'
+        self.presenter.display_save_file_box = mock.Mock(return_value="mocked_file_path")
+        self.presenter.on_export_table_clicked()
+        self.assertEqual(self.presenter.display_save_file_box.call_count, 1,
+                         "display_save_file_box should have been called but was not")
+        expected_args = ['Save table as', 'test_filename', '*.csv']
+        args = [arg for arg in self.presenter.display_save_file_box.call_args[0]]
+        self.assertEqual(args, expected_args)
 
     def test_that_canSAS_is_disabled_if_2D_reduction(self):
         """This test checks that if you are running a 2D reduction and have canSAS output mode checked,
