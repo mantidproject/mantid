@@ -382,7 +382,7 @@ def get_bin_indices(workspace):
     if is_range:
         return range(range_start + 1, range_end)
     else:
-        indices = np.where(np.isin(range(total_range), monitors_indices, invert=True))
+        indices = np.where(np.isin(range(total_range), monitors_indices, invert=True))[0]
         return indices
 
 
