@@ -59,7 +59,7 @@ class ProjectRecoveryWidgetView(QDialog):
         self.ui.tableWidget.setItem(0, 0, QTableWidgetItem(row[0]))
         self.ui.tableWidget.setItem(0, 1, QTableWidgetItem(row[1]))
 
-    def closeEvent(self, QCloseEvent):
+    def closeEvent(self, _):
         if self.editor is not None:
             self.editor.disconnect_editor_from_sig_process()
 

@@ -30,6 +30,9 @@ class RecoveryFailureView(QDialog):
         # Set the table data
         self._add_data_to_table()
 
+        # keep copy of reference to the code editor
+        self.editor = None
+
     def _add_data_to_table(self):
         # This table's size was generated for 5 which is the default but will take the value given by the presenter
         number_of_rows = self.presenter.get_number_of_checkpoints()
@@ -45,8 +48,9 @@ class RecoveryFailureView(QDialog):
         self.ui.progressBar.setMaximum(new_value)
 
     def connect_progress_bar(self):
-        self.presenter.project_recovery.loader.multi_file_interpreter.current_editor().sig_progress.connect(
-            self.update_progress_bar)
+        self.editor = self.presenter.project_recovery.loader.multi_file_interpreter.current_editor()
+        self.editor.sig_progress.connect(self.update_progress_bar)
+        self.editor.connect_editor_to_sig_process()
 
     def emit_abort_script(self):
         self.abort_project_recovery_script.connect(
@@ -56,6 +60,10 @@ class RecoveryFailureView(QDialog):
 
     def change_start_mantid_button(self, string):
         self.ui.pushButton_3.setText(string)
+
+    def closeEvent(self, _):
+        if self.editor is not None:
+            self.editor.disconnect_editor_from_sig_process()
 
     ######################################################
     #  Slots
