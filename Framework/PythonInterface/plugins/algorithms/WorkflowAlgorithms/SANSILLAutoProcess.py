@@ -390,14 +390,17 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                   OutputWorkspace=ws)
 
                 # and stitch if possible
-                try:
-                    stitched = self.output + "_wedge_" + str(w + 1) + "_stitched"
-                    Stitch1DMany(InputWorkspaces=wedge_ws,
-                                 OutputWorkspace=stitched)
-                    wedge_ws.append(stitched)
-                except:
-                    self.log().warning("Unable to stitch automatically, consider "
-                                       "stitching manually: " + str(re))
+                if len(wedge_ws) > 1:
+                    try:
+                        stitched = self.output + "_wedge_" + str(w + 1) \
+                                   + "_stitched"
+                        Stitch1DMany(InputWorkspaces=wedge_ws,
+                                     OutputWorkspace=stitched)
+                        wedge_ws.append(stitched)
+                    except:
+                        self.log().warning("Unable to stitch automatically, "
+                                           "consider stitching manually: "
+                                           + str(re))
                 GroupWorkspaces(InputWorkspaces=wedge_ws,
                                 OutputWorkspace=self.output + "_wedge_" + str(w + 1))
 
