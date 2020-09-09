@@ -17,6 +17,16 @@ New
 
  - :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>` algorithm added, used to treat data from ILL's D16 on omega scan mode.
 
+Improvements
+############
+
+ - :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`: for I(Q) processing and several
+   distances, an automatically stitched result is also produced.
+ - Wedges processing is functionnal in :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`.
+ - For ILL D33 instrument, the detector panels can be processed individualy (OutputPanels option, see
+   the :ref:`SANSILLAutoProcess documentation <algm-SANSILLAutoProcess>`). This options is also
+   available in the :ref:`DrILL interface <DrILL-ref>`.
+
 Bug Fixed
 #########
 
