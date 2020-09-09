@@ -17,6 +17,7 @@
 
 #include <QAction>
 #include <QActionGroup>
+#include <QCoreApplication>
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QMenu>
@@ -507,9 +508,10 @@ QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
  * @param msg A Message object
  */
 bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
-  if ((msg.scriptPath().isEmpty() && showFrameworkOutput()) ||
-      (!msg.scriptPath().isEmpty() && showAllScriptOutput()) ||
-      (showActiveScriptOutput() && (msg.scriptPath() == activeScript())))
+  if (((msg.scriptPath().isEmpty() && showFrameworkOutput()) ||
+       (!msg.scriptPath().isEmpty() && showAllScriptOutput()) ||
+       (showActiveScriptOutput() && (msg.scriptPath() == activeScript()))) &&
+      !QCoreApplication::closingDown())
     return true;
   return false;
 }
