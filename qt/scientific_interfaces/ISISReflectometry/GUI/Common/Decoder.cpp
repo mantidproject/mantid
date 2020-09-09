@@ -155,8 +155,13 @@ void Decoder::decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex,
                                         int columnsNum,
                                         const QList<QVariant> &list) {
   MantidQt::API::SignalBlocker blocker(tab);
-  for (auto columnIndex = 0; columnIndex < columnsNum; ++columnIndex) {
-    auto tableWidgetItem = new QTableWidgetItem(list[columnIndex].toString());
+  // Loop all columns in the table
+  for (auto columnIndex = 0; columnIndex < tab->columnCount(); ++columnIndex) {
+    // Old files may not include all of the columns so add an empty cell if it
+    // doesn't exist in the file
+    auto const columnValue =
+        columnIndex < columnsNum ? list[columnIndex].toString() : QString();
+    auto tableWidgetItem = new QTableWidgetItem(columnValue);
     tab->setItem(rowIndex, columnIndex, tableWidgetItem);
   }
 }
