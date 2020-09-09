@@ -141,6 +141,7 @@ Ubuntu 20.04
      python3-scipy \
      python3-sphinx \
      python3-sphinx-bootstrap-theme \
+     python3-pycifrw \
      python3-dateutil \
      python3-matplotlib \
      python3-qtconsole \
