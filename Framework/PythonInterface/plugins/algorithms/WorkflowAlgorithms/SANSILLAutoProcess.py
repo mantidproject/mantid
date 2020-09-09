@@ -8,6 +8,7 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Multiple
     WorkspaceGroupProperty, FileAction
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty
 from mantid.simpleapi import *
+import numpy as np
 from os import path
 
 EMPTY_TOKEN = '000000'
@@ -352,12 +353,51 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             else:
                 self.log().information('Skipping empty token run.')
 
+        for output in outputs:
+            ConvertToPointData(InputWorkspace=output,
+                               OutputWorkspace=output)
+        if len(outputs) > 1 and self.getPropertyValue('OutputType') == 'I(Q)':
+            try:
+                stitched = self.output + "_stitched"
+                Stitch1DMany(InputWorkspaces=outputs,
+                             OutputWorkspace=stitched)
+                outputs.append(stitched)
+            except RuntimeError as re:
+                self.log().warning("Unable to stitch automatically, consider "
+                                   "stitching manually: " + str(re))
+
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
+
         # group wedge workspaces
         if self.output_type == "I(Q)":
             for w in range(self.n_wedges):
                 wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
                             for d in range(self.dimensionality)]
+                # convert to point data and remove nan and 0 from edges
+                for ws in wedge_ws:
+                    ConvertToPointData(InputWorkspace=ws,
+                                       OutputWorkspace=ws)
+                    ReplaceSpecialValues(InputWorkspace=ws,
+                                         OutputWorkspace=ws,
+                                         NaNValue=0)
+                    y = mtd[ws].readY(0)
+                    x = mtd[ws].readX(0)
+                    nonzero = np.nonzero(y)
+
+                    CropWorkspace(InputWorkspace=ws,
+                                  XMin=x[nonzero][0] - 1,
+                                  XMax=x[nonzero][-1],
+                                  OutputWorkspace=ws)
+
+                # and stitch if possible
+                try:
+                    stitched = self.output + "_wedge_" + str(w + 1) + "_stitched"
+                    Stitch1DMany(InputWorkspaces=wedge_ws,
+                                 OutputWorkspace=stitched)
+                    wedge_ws.append(stitched)
+                except:
+                    self.log().warning("Unable to stitch automatically, consider "
+                                       "stitching manually: " + str(re))
                 GroupWorkspaces(InputWorkspaces=wedge_ws,
                                 OutputWorkspace=self.output + "_wedge_" + str(w + 1))
 
