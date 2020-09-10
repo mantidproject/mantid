@@ -49,7 +49,7 @@ class RecoveryFailureView(QDialog):
 
     def connect_progress_bar(self):
         self.editor = self.presenter.project_recovery.loader.multi_file_interpreter.current_editor()
-        self.editor.connect_editor_to_sig_process_and_connect_this_to_sig_process(self.update_progress_bar)
+        self.editor.connect_to_progress_reports(self.update_progress_bar)
 
     def emit_abort_script(self):
         self.abort_project_recovery_script.connect(
@@ -62,7 +62,7 @@ class RecoveryFailureView(QDialog):
 
     def closeEvent(self, _):
         if self.editor is not None:
-            self.editor.disconnect_editor_from_sig_process()
+            self.editor.disconnect_to_progress_reports()
 
     ######################################################
     #  Slots
