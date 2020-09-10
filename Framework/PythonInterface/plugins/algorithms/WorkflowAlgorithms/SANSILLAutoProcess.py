@@ -402,7 +402,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                         Stitch1DMany(InputWorkspaces=wedge_ws,
                                      OutputWorkspace=stitched)
                         wedge_ws.append(stitched)
-                    except:
+                    except RuntimeError as re:
                         self.log().warning("Unable to stitch automatically, "
                                            "consider stitching manually: "
                                            + str(re))
