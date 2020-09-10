@@ -403,8 +403,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         raw_list = (self.getPropertyValue('SampleGeometryDictionary')).split(';')
         self._sampleGeometry = { item.split('=')[0] : item.split('=')[1] for item in raw_list }
         geometry_type = self.getPropertyValue('SampleGeometry')
-        print (self._sampleGeometry)
-        required_keys = ['mass', 'density', 'n_atoms', 'beam_height', 'beam_width', 'container_density']
+        required_keys = ['mass', 'density', 'number_density', 'beam_height', 'beam_width', 'formula_units', 'container_density']
 
         if geometry_type == 'FlatPlate':
             required_keys += ['height', 'width', 'thickness', 'container_front_thickness', 'container_back_thickness']
@@ -417,6 +416,10 @@ class PolDiffILLReduction(PythonAlgorithm):
             if key not in self._sampleGeometry:
                 raise RuntimeError('{} needs to be defined in the dictionary'.format(key))
 
+        self._sampleGeometry['n_atoms'] = float(self._sampleGeometry['number_density']) \
+            * float(self._sampleGeometry['mass']) \
+            / float(self._sampleGeometry['density'])
+
     def _apply_self_attenuation_correction(self, sample_ws, container_ws):
         geometry_type = self.getPropertyValue('SampleGeometry')
 
@@ -424,38 +427,52 @@ class PolDiffILLReduction(PythonAlgorithm):
         kwargs['BeamHeight'] = self._sampleGeometry['beam_height']
         kwargs['BeamWidth'] = self._sampleGeometry['beam_width']
         kwargs['SampleDensity'] = self._sampleGeometry['density']
-        kwargs['SampleHeight'] = self._sampleGeometry['height']
+        kwargs['Height'] = self._sampleGeometry['height']
         kwargs['SampleChemicalFormula'] = self.getPropertyValue('ChemicalFormula')
-        kwargs['ContainerChemicalFormula'] = self._sampleGeometry['container_formula']
-        kwargs['ContainerDensity'] = self.getPropertyValue('container_density')
-
+        if 'container_formula' in self._sampleGeometry:
+            kwargs['ContainerChemicalFormula'] = self._sampleGeometry['container_formula']
+            kwargs['ContainerDensity'] = self._sampleGeometry['container_density']
         if geometry_type == 'FlatPlate':
             kwargs['SampleWidth'] = self._sampleGeometry['width']
             kwargs['SampleThickness'] = self._sampleGeometry['thickness']
-            kwargs['ContainerFrontThickness'] = self._sampleGeometry['container_front_thickness']
-            kwargs['ContainerBackThickness'] = self._sampleGeometry['container_back_thickness']
+            if 'container_formula' in self._sampleGeometry:
+                kwargs['ContainerFrontThickness'] = self._sampleGeometry['container_front_thickness']
+                kwargs['ContainerBackThickness'] = self._sampleGeometry['container_back_thickness']
         elif geometry_type == 'Cylinder':
             kwargs['SampleRadius'] = self._sampleGeometry['radius']
-            kwargs['ContainerRadius'] = self._sampleGeometry['container_radius']
+            if 'container_formula' in self._sampleGeometry:
+                kwargs['ContainerRadius'] = self._sampleGeometry['container_radius']
         elif geometry_type == 'Annulus':
             kwargs['SampleInnerRadius'] = self._sampleGeometry['inner_radius']
             kwargs['SampleOuterRadius']  = self._sampleGeometry['outer_radius']
-            kwargs['ContainerInnerRadius'] = self._sampleGeometry['container_inner_radius']
-            kwargs['ContainerOuterRadius'] = self._sampleGeometry['container_outer_radius']
-        elif geometry_type == 'Custom':
+            if 'container_formula' in self._sampleGeometry:
+                kwargs['ContainerInnerRadius'] = self._sampleGeometry['container_inner_radius']
+                kwargs['ContainerOuterRadius'] = self._sampleGeometry['container_outer_radius']
+
+        if geometry_type == 'Custom':
             pass
+        else:
+            for entry_no, entry in enumerate(mtd[sample_ws]):
+                correction_ws = '{}_corr'.format(geometry_type)
+                if ( (self._method == 'Uniaxial' and entry_no % 2 == 0)
+                     or (self._method == 'XYZ' and entry_no % 6 == 0)
+                     or (self._method == '10-p' and entry_no % 10 == 0) ):
+                    PaalmanPingsMonteCarloAbsorption(SampleWorkspace=entry,
+                                                     Shape=geometry_type,
+                                                     CorrectionsWorkspace=correction_ws,
+                                                     ContainerWorkspace=mtd[container_ws].getItem(entry_no),
+                                                     **kwargs)
+                    for correction in mtd[correction_ws]:
+                        correction.setYUnit('')
 
-        PaalmanPingsMonteCarloAbsorption(
-                SampleWorkspace=sample_ws,
-                Shape=geometry_type,
-                **kwargs,
-                CorrectionsWorkspace='{}_corr'.format(geometry_type)
-        )
-        ApplyPaalmanPingsCorrection(SampleWorkspace=sample_ws,
-                                    CorrectionsWorkspace='{}_corr'.format(geometry_type),
-                                    CanWorkspace=container_ws)
+                mtd[container_ws].getItem(entry_no).setYUnit('')
+                entry.setYUnit('')
+                ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
+                                            CorrectionsWorkspace=correction_ws,
+                                            CanWorkspace=mtd[container_ws].getItem(entry_no),
+                                            OutputWorkspace=entry)
 
-        return ws
+        return sample_ws
 
     def _component_separation(self, ws):
         tmp_names = []
