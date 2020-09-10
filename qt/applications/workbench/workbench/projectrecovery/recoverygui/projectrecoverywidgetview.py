@@ -60,7 +60,7 @@ class ProjectRecoveryWidgetView(QDialog):
 
     def closeEvent(self, _):
         if self.editor is not None:
-            self.editor.disconnect_to_progress_reports()
+            self.editor.disconnect_from_progress_reports()
 
     ######################################################
     #  Slots

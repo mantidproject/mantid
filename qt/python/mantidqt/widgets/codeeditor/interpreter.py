@@ -157,7 +157,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.progressMade.connect(self.sig_progress)
         self.sig_progress.connect(this)
 
-    def disconnect_to_progress_reports(self):
+    def disconnect_from_progress_reports(self):
         self.editor.progressMade.disconnect(self.sig_progress)
 
     def closeEvent(self, event):
