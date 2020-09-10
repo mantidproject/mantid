@@ -417,7 +417,7 @@ class SANSILLIntegration(PythonAlgorithm):
             iq_ws = '__iq' + ws_in
             wedge_angle = 360./n_wedges
             azimuth_axis = NumericAxis.create(n_wedges)
-            azimuth_axis.setUnit("Degrees")
+            azimuth_axis.setUnit("Phi")
             for i in range(n_wedges):
                 azimuth_axis.setValue(i, i * wedge_angle)
             Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=iq_ws,

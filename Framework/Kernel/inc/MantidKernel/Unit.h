@@ -638,6 +638,7 @@ private:
 //=================================================================================================
 /// Phi that has degrees as unit and "Phi" as title
 class MANTID_KERNEL_DLL Phi : public Degrees {
+  const std::string unitID() const override;
   const std::string caption() const override { return "Phi"; }
   Unit *clone() const override { return new Phi(*this); }
 };
