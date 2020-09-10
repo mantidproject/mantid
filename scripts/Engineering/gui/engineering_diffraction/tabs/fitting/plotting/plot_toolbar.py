@@ -64,3 +64,6 @@ class FittingPlotToolbar(NavigationToolbar2QT):
 
     def trigger_fit_toggle_action(self):
         self._actions['toggle_fit'].trigger()
+
+    def set_fit_checkstate(self, checkstate):
+        self._actions['toggle_fit'].setChecked(checkstate)

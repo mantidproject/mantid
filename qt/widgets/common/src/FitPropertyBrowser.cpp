@@ -1871,6 +1871,10 @@ void FitPropertyBrowser::addHandle(
 
 /// workspace was removed
 void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
+  removeWorkspace(wsName);
+}
+
+void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i >= 0) {
@@ -3502,6 +3506,13 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
   } else {
     throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
   }
+}
+
+void FitPropertyBrowser::removeWorkspaceAndSpectra(const std::string &wsName) {
+  removeWorkspace(wsName);
+  // remove spectra
+  QString qWsName = QString::fromStdString(wsName.c_str());
+  m_allowedSpectra.erase(m_allowedSpectra.find(qWsName));
 }
 
 void FitPropertyBrowser::addAllowedTableWorkspace(const QString &wsName) {

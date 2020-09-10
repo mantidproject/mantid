@@ -35,9 +35,11 @@ class FittingPlotPresenter(object):
     def remove_workspace_from_plot(self, ws):
         for ax in self.view.get_axes():
             self.model.remove_workspace_from_plot(ws, ax)
+            self.view.remove_ws_from_fitbrowser(ws)
         self.view.update_figure()
 
     def clear_plot(self):
         for ax in self.view.get_axes():
             self.model.remove_all_workspaces_from_plot(ax)
         self.view.clear_figure()
+        self.view.update_fitbrowser()
