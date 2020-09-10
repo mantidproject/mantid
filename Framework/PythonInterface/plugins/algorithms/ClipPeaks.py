@@ -12,6 +12,12 @@ import numpy as np
 
 
 class ClipPeaks(PythonAlgorithm):
+    """
+    Removes large peaks from data, trying to leave background behind.
+
+    This algorithm is extracted from the SNAPReduce Normalization option.
+    """
+
     def PyInit(self):
         self.declareProperty(
             WorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),
@@ -43,6 +49,15 @@ class ClipPeaks(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Corrections"
 
+    def seeAlso(self):
+        return ["StripPeaks", "StripVanadiumPeaks"]
+
+    def name(self):
+        return "ClipPeaks"
+
+    def summary(self):
+        return "This algorithm is used to remove peaks from the input data, leaving the background intact."
+
     def smooth(self, data, order):
         """
         This smooths data based on linear weighted average around
@@ -51,7 +66,7 @@ class ClipPeaks(PythonAlgorithm):
         weighted 1 this input is only the y values
         """
         sm = np.zeros(len(data))
-        factor = order / 2 + 1
+        factor = int(order / 2) + 1
 
         for i in range(len(data)):
             temp = 0
