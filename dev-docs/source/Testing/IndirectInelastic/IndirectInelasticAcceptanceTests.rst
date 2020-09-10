@@ -30,7 +30,8 @@ Data reduction
 #. Check the ``Create RES`` box
 #. Click ``Run``
 #. This should generate a workspace with ``_res`` at the end
-#. Click ``Plot result`` - should produce two plots
+#. In the ``Output`` options, select the ``_res`` workspace and click ``Plot Spectra``. This should produce a spectrum plot.
+#. Then select the ``_calib`` workspace and use the down arrow to click ``Plot Bins``. This should produce a bin plot.
 #. Enter ``Run number`` 55878-55879 and check ``Sum Files``
 #. Click ``Run``, this should produce a ``_calib`` workspace
 #. Make sure that you keep the ``_calib`` workspace, it is needed for the next test
@@ -53,7 +54,7 @@ Data reduction
 #. In the main GUI right-click on the ``iris26184_multi_graphite002_red`` workspace
 #. Choose ``Plot spectrum``, note the number of spectra, should be 51
 #. Click ``Cancel``
-#. In the ``Data reduction`` GUI, change the setting ``Mode`` to Groups
+#. In the ``Data reduction`` GUI, change the ``Detector Grouping`` to Groups
 #. Set ``Groups`` to 5
 #. Click ``Run``
 #. In the main GUI right-click on the ``iris26184_multi_graphite002_red`` workspace
@@ -61,13 +62,12 @@ Data reduction
 #. Choose ``Plot All``, this should result in a plot of all 6 spectra
 #. Go to the ``S(Q, W)`` tab
 #. Change ``File`` to ``Workspace`` and load the ``_red`` workspace just created
-#. Set ``Q-Low`` - ``Q-width`` - ``Q-High`` to 0.2, 0.2, 1.8
-#. Click ``Run``
-#. Should create a ``_sqw`` workspace
+#. ``Q-Low`` and ``Q-High`` should be automatically updated to the y axis range of the contour plot.
+#. ``E-Low`` and ``E-High`` should be automatically updated to the x axis range of the contour plot.
+#. Click ``Run``. An ``_sqw`` workspace should be created.
 #. Check ``Rebin in energy``
-#. Set ``E-Low`` - ``E-width`` - ``E-High`` to -0.5, 0.01, 0.5
 #. Click ``Run``
-#. Within the ``Plot Output`` section, click the down arrow on the ``Plot Spectra`` button and then select ``Plot Contour``, this should result in a 2D contour plot
+#. Within the ``Output`` section, click the down arrow on the ``Plot Spectra`` button and then select ``Plot Contour``, this should result in a 2D contour plot
 #. Click ``Manage User Directories`` and set the default save location
 #. Click ``Save Result``
 #. Check that the ``.nxs`` file was created in the correct location
@@ -133,17 +133,17 @@ Data analysis Conv Fit
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
 #. Set ``Fit spectra`` to 0 - 5
-#. Set ``Fit type`` to Two Lorentzians
+#. Set ``Lorentzians`` to 2
 #. Set ``Max iterations`` to 400
 #. Click ``Run``
 #. Three new workspaces should be created in the main GUI - ``Parameters``, ``Result`` and ``Workspaces``
 #. In the ``Fit`` tab, change ``Fit spectra`` to String and enter 3
 #. Click ``Run`` the plot should update and new workspaces are created in the main Mantid GUI
-#. Set ``Fit spectra`` to String 3
+#. Set ``Fit spectra`` to String 3-4
 #. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
 #. Try the various ``Plot`` options in the interface
 
-   (a)  ``Plot Output`` set to All and click plot - should give 4 separate plots
+   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 4 separate plots
    (b)  ``Plot Current Preview`` - should result in a plot with three datasets
    (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
 
@@ -191,6 +191,6 @@ Data analysis I(Q, T) Fit
 #. Click ``Plot current preview`` this should open a plot with three datasets plotted
 #. Change ``Range`` to 0 - 5
 #. Click ``Run``
-#. Select Lifetime from the ``Plot Output`` drop-down
+#. Select Lifetime from the ``Output`` drop-down
 #. Click ``Plot`` this should open a new plot with the lifetimes plotted
   
