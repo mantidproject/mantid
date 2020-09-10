@@ -8,8 +8,8 @@
 from mantid.api import FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
     PropertyMode, Progress, PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty, \
     FileAction, AlgorithmFactory
-from mantid.kernel import Direction, EnabledWhenProperty, LogicOperator, PropertyCriterion, \
-    StringListValidator
+from mantid.kernel import Direction, EnabledWhenProperty, IntBoundedValidator, LogicOperator, \
+    PropertyCriterion, StringListValidator
 
 from mantid.simpleapi import *
 
@@ -26,7 +26,17 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     _sampleGeometry = None
     _gyromagnetiRatio = 1.832472e8 # [s^-1 T^-1], from NIST
-    _r0 =  2.817940e-15 # [m], classical e radius,  from NIST
+    _r0 = 2.817940e-15 # [m], classical e radius, from NIST
+
+    @staticmethod
+    def _max_value_per_detector(ws):
+        max_values = np.zeros(mtd[ws].getItem(0).getNumberOfHistograms())
+        for entry in mtd[ws]:
+            for spectrum_no in range(entry.getNumberOfHistograms()):
+                dataY = entry.readY(spectrum_no)
+                if dataY > max_values[spectrum_no]:
+                    max_values = dataY
+        return max_values
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -229,6 +239,19 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc="Detector efficiency calibration type.")
 
         self.setPropertySettings('DetectorEfficiencyCalibration', sample)
+
+        self.declareProperty(name="IncoherentCrossSection",
+                             defaultValue=0,
+                             validator=IntBoundedValidator(lower=0),
+                             direction=Direction.Input,
+                             doc="Cross-section for incoherent scattering, necessary for setting the output on the absolute scale.")
+
+        incoherent = EnabledWhenProperty('DetectorEfficiencyCalibration', PropertyCriterion.IsEqualTo, 'Incoherent')
+
+        absoluteNormalisation = EnabledWhenProperty('AbsoluteUnitsNormalisation', PropertyCriterion.IsDefault)
+
+        self.setPropertySettings('IncoherentCrossSection', EnabledWhenProperty(incoherent, absoluteNormalisation,
+                                                                               LogicOperator.Or))
 
         self.declareProperty(FileProperty('InstrumentParameterFile', '',
                                           action=FileAction.OptionalLoad,
@@ -513,32 +536,38 @@ class PolDiffILLReduction(PythonAlgorithm):
                 for entry_no, entry in enumerate(mtd[ws]):
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
                     tmp_names.append(ws_name)
-                    raise RunTimeError("Paramagnetic calibration has not been implemented yet, missing: gamma, r0 definitions")
                     const = (2.0/3.0) * math.pow(self._gyromagneticRatio*self._r0, 2)
+                    paramagneticComponent = mtd[conjoined_components].getItem(2)
                     Divide(LHSWorkspace=const * entry * (entry+1),
-                           RHSWorkspace=paramagnetic,
+                           RHSWorkspace=paramagneticComponent,
                            OutputWorkspace=ws_name)
             else: # Incoherent
                 if self._mode == 'TOF':
                     raise RuntimeError('Incoherent calibration is not valid in the TOF mode.')
-                raise RunTimeError("Incoherent calibration has not been implemented yet, missing: NSI-cross section input")
-                if normaliseToAbsoluteUnits:
-                    normFactor = -1.0 #placeholder, magnetic component??
-                for entry_no, entry in enumerate(mtd[components_ws]):
-                    if not normaliseToAbsoluteUnits:
-                        normFactor = math.max(entry.readY())
+                dataY = np.zeros(mtd[conjoined_components].getItem(1).getNumberOfHistograms())
+                for spectrum_no in range(mtd[conjoined_components].getItem(1).getNumberOfHistograms()):
+                    if normaliseToAbsoluteUnits:
+                        normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
+                        CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
+                    else:
+                        normalisationFactors = self._max_values_per_detector(vanadium_ws)
+                        dataE = np.sqrt(normalisationFactors)
+                        CreateWorkspace(dataX=mtd[vanadium_ws].getItem(0).readX(0), dataY=normalisationFactors,
+                                        dataE=dataE,
+                                        NSpec=mtd[vanadium_ws].getItem(0).getNumberOfHistograms(),
+                                        OutputWorkspace='normalisation_ws')
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
                     tmp_names.append(ws_name)
-                    Divide(LHSWorkspace=normFactor,
-                           RHSWorkspace=component_ws,
-                           OutputWorkspace=ws_name)
+
+                Divide(LHSWorkspace='normalisation_ws',
+                       RHSWorkspace=component_ws,
+                       OutputWorkspace=ws_name)
 
         GroupWorkspaces(tmp_names, OutputWorkspace='det_efficiency')
 
         for entry_no, entry in enumerate(mtd[ws]):
-            Multiply(LHSWorkspace=mtd['det_efficiency'].getItem(entry_no),
-                     #there might be different number of entries for efficiency workspace and sample
-                     RHSWorkspace=entry,
+            Multiply(LHSWorkspace=entry,
+                     RHSWorkspace=mtd['det_efficiency'].getItem(entry_no),
                      OutputWorkspace=entry)
 
         return ws
