@@ -269,7 +269,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         elif nEntriesPerNumor == 2:
             self._method = 'Uniaxial'
         else:
-            print(self.getPropertyValue('ProcessAs'))
             if self.getPropertyValue("ProcessAs") not in ['Beam', 'Transmission']:
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10-point. \
                     The provided input does not fit in any of these measurement types.")
@@ -332,7 +331,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _background_subtract(self, ws, ws_absorber, ws_container, ws_transmission):
-        """ Subtracs empty container and cadmium scaled by transmission."""
+        """ Subtracts empty container and cadmium scaled by transmission."""
         for entry_no, entry in enumerate(mtd[ws]):
             ws_absorber_entry = mtd[ws_absorber].getItem(entry_no).name()
             ws_container_entry = mtd[ws_container].getItem(entry_no).name()
@@ -357,7 +356,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                    RHSWorkspace=(2*flipper_eff-1)*mtd[ws_00]+mtd[ws_01],
                    OutputWorkspace=tmp_name)
             tmp_names.append(tmp_name)
-            print (entry_no, index, tmp_name, self._method, entry_no%6)
             if self._method == 'Uniaxial' and entry_no % 2 == 1:
                 index += 1
             elif self._method == 'XYZ' and entry_no % 6 == 5:
@@ -544,7 +542,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             else: # Incoherent
                 if self._mode == 'TOF':
                     raise RuntimeError('Incoherent calibration is not valid in the TOF mode.')
-                dataY = np.zeros(mtd[conjoined_components].getItem(1).getNumberOfHistograms())
                 for spectrum_no in range(mtd[conjoined_components].getItem(1).getNumberOfHistograms()):
                     if normaliseToAbsoluteUnits:
                         normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
@@ -643,7 +640,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._apply_polarization_corrections(ws, pol_eff_ws)
                     progress.report()
                 self._read_sample_geometry()
-                self._apply_self_attenuation_correction(ws, container_ws)
+                if self.getPropertyValue('SampleGeometry') != 'None':
+                    self._apply_self_attenuation_correction(ws, container_ws)
                 progress.report()
                 self._component_separation(ws)
                 progress.report()
