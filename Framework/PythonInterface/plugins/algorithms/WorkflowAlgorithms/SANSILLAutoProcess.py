@@ -135,6 +135,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         ref_dim = self.getPropertyValue('ReferenceFiles').count(',')
         maxqxy_dim = self.getPropertyValue('MaxQxy').count(',')
         deltaq_dim = self.getPropertyValue('DeltaQ').count(',')
+        output_type = self.getPropertyValue('OutputType')
+        n_wedges = self.getProperty('NumberOfWedges').value
         if self.getPropertyValue('SampleRuns') == '':
             result['SampleRuns'] = 'Please provide at least one sample run.'
         if abs_dim != sample_dim and abs_dim != 0:
@@ -167,6 +169,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             result['DeltaQ'] = message_value.format('DeltaQ',
                                                     deltaq_dim,
                                                     sample_dim)
+        if output_type == 'I(Phi,Q)' and n_wedges == 0:
+            result['NumberOfWedges'] = "For I(Phi,Q) processing, the number " \
+                                       "of wedges must be different from 0."
 
         return result
 
