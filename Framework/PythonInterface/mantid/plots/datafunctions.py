@@ -382,7 +382,9 @@ def get_bin_indices(workspace):
     if is_range:
         return range(range_start + 1, range_end)
     else:
-        indices = np.where(np.isin(range(total_range), monitors_indices, invert=True))[0]
+        indices = np.where(np.isin(range(total_range), monitors_indices, invert=True))
+        # this check is necessary as numpy may return a tuple or a plain array based on platform.
+        indices = indices[0] if isinstance(indices, tuple) else indices
         return indices
 
 
