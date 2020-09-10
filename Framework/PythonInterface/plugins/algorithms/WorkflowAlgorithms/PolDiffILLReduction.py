@@ -475,25 +475,28 @@ class PolDiffILLReduction(PythonAlgorithm):
         return sample_ws
 
     def _component_separation(self, ws):
-        tmp_names = []
+        tmpNames = []
         nMeasurements = 0
+        nComponents = 0
+        componentNames = ['Coherent', 'Incoherent', 'Magnetic']
         if self._method == '10-p':
             raise RuntimeError("10-p component separation not implemented")
         elif self._method == 'XYZ':
             nMeasurements = 6
+            nComponents = 3
         elif self._method == 'Uniaxial':
             nMeasurements = 2
+            nComponents = 2
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
-            dataX = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), 3))
             dataY = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), 3))
             for spectrum in range(mtd[ws].getItem(entry_no).getNumberHistograms()):
                 sigma_z_sf = mtd[ws].getItem(entry_no).readY(spectrum)
                 sigma_z_nsf = mtd[ws].getItem(entry_no+1).readY(spectrum)
                 if nMeasurements == 2:
-                    dataY[spectrum][0] = 0 # Magnetic
-                    dataY[spectrum][1] = 2.0 * sigma_z_nsf - sigma_z_sf  # Nuclear coherent
-                    dataY[spectrum][2] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
+                    dataY[spectrum][0] = 2.0 * sigma_z_nsf - sigma_z_sf  # Nuclear coherent
+                    dataY[spectrum][1] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
+                    dataY[spectrum][2] = 0 # Magnetic
                 elif nMeasurements == 6 or nMeasurements == 10:
                     sigma_y_sf = mtd[ws].getItem(entry_no+2).readY(spectrum)
                     sigma_y_nsf = mtd[ws].getItem(entry_no+3).readY(spectrum)
@@ -501,11 +504,13 @@ class PolDiffILLReduction(PythonAlgorithm):
                     sigma_x_nsf = mtd[ws].getItem(entry_no+5).readY(spectrum)
                     if nMeasurements == 6:
                         # Magnetic component
-                        dataY[spectrum][0] = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
-                        # Nuclear coherent
-                        dataY[spectrum][1] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf) - sigma_x_sf - sigma_y_sf - sigma_z_sf ) / 6.0
-                        # Incoherent
-                        dataY[spectrum][2] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - dataY[spectrum][0]
+                        magneticComponent = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
+                        # Nuclear coherent component
+                        dataY[spectrum][0] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf) - sigma_x_sf - sigma_y_sf - sigma_z_sf ) / 6.0
+                        # Incoherent component
+                        dataY[spectrum][1] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magneticComponent
+                        # Magnetic component
+                        dataY[spectrum][2] = magneticComponent
                     else:
                         # sigma_xmy_sf = mtd[ws].getItem(entry_no+6).readY(spectrum)
                         # sigma_xmy_nsf = mtd[ws].getItem(entry_no+7).readY(spectrum)
@@ -513,34 +518,58 @@ class PolDiffILLReduction(PythonAlgorithm):
                         # sigma_xpy_nsf = mtd[ws].getItem(entry_no+9).readY(spectrum)
 
                         raise RuntimeError('10-point method has not been implemented yet')
-
-                dataX[spectrum] = range(3)
-                dataE = np.sqrt(dataY)
-                tmp_name = str(mtd[ws].getItem(entry_no).name())[:-1] + 'comp_sep'
-                tmp_names.append(tmp_name)
-                CreateWorkspace(DataX=dataX, DataY=dataY, dataE=dataE,
+            for component in range(nComponents):
+                dataX = mtd[ws].getItem(entry_no).readX(0)
+                dataE = np.sqrt(abs(dataY[:, component]))
+                tmpName = str(mtd[ws].getItem(entry_no).name())[:-1] + componentNames[component]
+                tmpNames.append(tmpName)
+                CreateWorkspace(DataX=dataX, DataY=dataY[:, component], dataE=dataE,
                                 Nspec=mtd[ws].getItem(entry_no).getNumberHistograms(),
-                                OutputWorkspace=tmp_name)
+                                OutputWorkspace=tmpName)
 
-        GroupWorkspaces(tmp_names, OutputWorkspace='component_separation')
+        GroupWorkspaces(tmpNames, OutputWorkspace='component_separation')
 
-    def _detector_efficiency(self, ws):
+    def _conjoin_components(self, ws):
+        components = [[], []]
+        # list_incoherent = []
+        componentNames = ['Incoherent', 'Coherent', 'Magnetic']
+        if '10-p' in self._method or 'XYZ' in self._method:
+            components.append([])
+        for entry in mtd[ws]:
+            entryName = entry.name()
+            for component_no, componentName in enumerate(componentNames):
+                if componentName in entryName:
+                    components[component_no].append(entryName)
+        ws_names = []
+        for component_no, compList in enumerate(components):
+            strList = '.'.join(compList)
+            ws_name = '{}_component'.format(componentNames[component_no])
+            ws_names.append(ws_name)
+            ConjoinXRuns(InputWorkspace=strList, OutputWorkspace=ws_name)
+        output_name = 'conjoined_components'
+        GroupWorkspaces(ws_names, OutputWorkspace=output_name)
+        return output_name
+
+    def _detector_efficiency(self, ws, component_ws):
+        conjoined_components = self._conjoin_components(component_ws)
         calibrationType = self.getPropertyValue('DetectorEfficiencyCalibration')
         normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation')
         tmp_name = 'det_eff'
         tmp_names = []
         if calibrationType == 'Vanadium':
-            ws_vanadium = self.getPropertyValue('VanadiumWorkspaceInput')
+            vanadium_ws = self.getPropertyValue('VanadiumWorkspaceInput')
             if normaliseToAbsoluteUnits:
-                normFactor = self._formulaUnits
+                normFactor = self._sampleGeometry['formula_units']
+                CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
             else:
-                for entry_no, entry in enumerate(mtd[ws_vanadium]):
-                    if not normaliseToAbsoluteUnits:
-                        normFactor = math.max(entry.readY())
+                normalisationFactors = self._max_values_per_detector(vanadium_ws)
+                dataE = np.sqrt(normalisationFactors)
+                CreateWorkspace(dataX=mtd[vanadium_ws].getItem(0).readX(0), dataY=normalisationFactors, dataE=dataE,
+                                NSpec=mtd[vanadium_ws].getItem(0).getNumberOfHistograms(), OutputWorkspace='normalisation_ws')
             ws_name = '{0}_{1}'.format(tmp_name, entry_no)
             tmp_names.append(ws_name)
-            Divide(LHSWorkspace=ws_vanadium,
-                   RHSWorkspace=CreateSingleValuedWorkspace(normFactor),
+            Divide(LHSWorkspace=vanadium_ws,
+                   RHSWorkspace='normalisation_ws',
                    OutputWorkspace=ws_name)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
@@ -588,7 +617,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _output_vanadium(self, ws, n_atoms):
         if self._mode != 'TOF':
-            Divide(LHSWorkspace=CreateSingleValuedWorkspace(0.404*n_atoms), RHSWorkspace=ws, OutputWorkspace=ws)
+            Divide(LHSWorkspace=CreateSingleValuedWorkspace(0.404e-28*n_atoms), RHSWorkspace=ws, OutputWorkspace=ws)
         else:
             raise RuntimeError("TOF reduction not implemented")
         return ws
