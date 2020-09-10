@@ -42,8 +42,7 @@ class ProjectRecoveryWidgetView(QDialog):
 
     def connect_progress_bar(self):
         self.editor = self.presenter.project_recovery.loader.multi_file_interpreter.current_editor()
-        self.editor.sig_progress.connect(self.update_progress_bar)
-        self.editor.connect_editor_to_sig_process()
+        self.editor.connect_editor_to_sig_process_and_connect_this_to_sig_process(self.update_progress_bar)
 
     def emit_abort_script(self):
         self.abort_project_recovery_script.connect(
