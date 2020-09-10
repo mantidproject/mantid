@@ -382,7 +382,9 @@ def get_bin_indices(workspace):
     if is_range:
         return range(range_start + 1, range_end)
     else:
-        indices = np.where(np.isin(range(total_range), monitors_indices, invert=True))
+        # the following two lines can be replaced by np.isin when > version 1.7.0 is used on RHEL7
+        total_range = np.asarray(range(total_range))
+        indices = np.where(np.in1d(total_range, monitors_indices, invert=True).reshape(total_range.shape))
         # this check is necessary as numpy may return a tuple or a plain array based on platform.
         indices = indices[0] if isinstance(indices, tuple) else indices
         return indices
@@ -478,7 +480,7 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         max_value = np.finfo(np.float64).min
 
         for spectrum_index in range(workspace.getNumberHistograms()):
-            if not(spec_info and spec_info.hasDetectors(spectrum_index) and spec_info.isMonitor(spectrum_index)):
+            if not (spec_info and spec_info.hasDetectors(spectrum_index) and spec_info.isMonitor(spectrum_index)):
                 xtmp = workspace.readX(spectrum_index)
                 if workspace.isHistogramData():
                     # input x is edges
@@ -499,9 +501,9 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
             min_value = xtmp.min()
         if max_value == np.finfo(np.float64).min:
             max_value = xtmp.max()
-        num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
+        num_edges = int(np.ceil((max_value - min_value) / delta)) + 1
         x_centers = np.linspace(min_value, max_value, num=num_edges)
-        y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())   
+        y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
     else:
         x_edges = np.linspace(extent[0], extent[1], int(xbins + 1))
         x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
@@ -537,14 +539,16 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
             counts[index, :] = counts[index - 1]
             continue
         previous_index = workspace_index
-        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(workspace_index)):
-            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index, normalize_by_bin_width=normalize_by_bin_width,
+        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(
+                workspace_index)):
+            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index,
+                                               normalize_by_bin_width=normalize_by_bin_width,
                                                withDy=False, withDx=False)
             interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
                                               fill_value="extrapolate")
             # only set values in the range of workspace
             x_range = np.where((x >= workspace.readX(workspace_index)[0]) &
-                                   (x <= workspace.readX(workspace_index)[-1]))
+                               (x <= workspace.readX(workspace_index)[-1]))
             # set values outside x data to nan
             counts[index, x_range] = interpolation_function(x[x_range])
     counts = np.ma.masked_invalid(counts, copy=False)

@@ -21,7 +21,7 @@ from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces,
                               CreateMDHistoWorkspace, CreateSampleWorkspace,
-                              CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, Load)
+                              CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, LoadRaw)
 
 
 def add_workspace_with_data(func):
@@ -841,7 +841,7 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertTrue(isinstance(bin_indices, range))
 
     def test_get_bin_indices_returns_a_numpy_ndarray_with_monitors(self):
-        ws = Load("GEM40979")
+        ws = LoadRaw("GEM40979", SpectrumMin=1, SpectrumMax=102)
         bin_indices = funcs.get_bin_indices(ws)
         self.assertTrue(isinstance(bin_indices, np.ndarray))
 
