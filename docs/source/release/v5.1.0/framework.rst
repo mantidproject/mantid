@@ -69,7 +69,7 @@ Data Handling
   run status and period filtering will now work as expected, as it did when you first load the file from a raw or NeXus file.
 - The sample environment xml file now supports the geometry being supplied in the form of a .3mf format file (so far on the Windows platform only). Previously it only supported .stl files. The .3mf format is a 3D printing format that allows multiple mesh objects to be stored in a single file that can be generated from many popular CAD applications. As part of this change the algorithms :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` and :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` have been updated to also support the .3mf format
 - Nexus log data alarms are now supported by Mantid. Log data that is marked as invalid will trigger a warning in the log and be filtered by default.  If the entire log is marked as invalid, then the values will be used as unfiltered as no better values exist, but the warning will still appear in the log.
-
+- A new IDF definition for NIMROD is now shipped with Mantid. It replaces the existing definition.
 
 The :ref:`LoadISISNexus <algm-LoadISISNexus>` algorithm has been modified to remove the need for the VMS compatibility block.
 This has lead to the removal of the following variables from the sample logs as they were deemed unnecessary: dmp,
