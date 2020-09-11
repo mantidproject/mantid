@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import PythonAlgorithm, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import *
-from mantid.kernel import Direction
+from mantid.kernel import Direction, IntBoundedValidator
 
 import numpy as np
 
@@ -20,7 +20,7 @@ class ClipPeaks(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),
+            WorkspaceProperty("InputWorkspace", "", Direction.Input),
             "The workspace containing the normalization data.")
 
         self.declareProperty(
@@ -34,13 +34,17 @@ class ClipPeaks(PythonAlgorithm):
         )
 
         self.declareProperty(
-            "SmoothingRange", 10,
-            "The size of the window used for smoothing data. No smoothing if set to 0."
+            name="SmoothingRange",
+            defaultValue=10,
+            validator=IntBoundedValidator(lower=0),
+            doc="The size of the window used for smoothing data. No smoothing if set to 0."
         )
 
         self.declareProperty(
-            "WindowSize", 10,
-            "The size of the peak clipping window to be used."
+            name="WindowSize",
+            defaultValue=10,
+            validator=IntBoundedValidator(lower=0),
+            doc="The size of the peak clipping window to be used."
         )
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
@@ -87,7 +91,7 @@ class ClipPeaks(PythonAlgorithm):
 
         return out
 
-    def Inv_log_log_sqrt_transformation(self, input):
+    def inv_log_log_sqrt_transformation(self, input):
         """
         See Function LLS function above
         """
@@ -125,7 +129,7 @@ class ClipPeaks(PythonAlgorithm):
                     temp[i] = np.min(average[:int(len(average) / 2)])
 
         if LLS:
-            temp = self.Inv_log_log_sqrt_transformation(temp)
+            temp = self.inv_log_log_sqrt_transformation(temp)
 
         self.log().information('Minimum of starting data - peak clipped data: {0}'.format(str(min(start_data - temp))))
 
