@@ -277,6 +277,25 @@ int getLinkedYCol(ITableWorkspace &self, const object &column) {
 }
 
 /**
+ * Link a data column associated with a Y error column
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of error column
+ * @return index of the associated Y column
+ */
+void setLinkedYCol(ITableWorkspace &self, const object &errColumn,
+                  const int dataColomn) {
+  // Find the column
+  Mantid::API::Column_sptr colptr;
+  if (STR_CHECK(errColumn.ptr())) {
+    colptr = self.getColumn(extract<std::string>(errColumn)());
+  } else {
+    colptr = self.getColumn(extract<int>(errColumn)());
+  }
+
+  colptr->setLinkedYCol(dataColomn);
+}
+
+/**
  * Access a cell and return a corresponding Python type
  * @param self A reference to the TableWorkspace python object that we were
  * called on
@@ -657,8 +676,11 @@ void export_ITableWorkspace() {
               "Label)."))
 
       .def("getLinkedYCol", &getLinkedYCol, (arg("self"), arg("column")),
-           "Get the plot type of given column as an integer. "
-           "Accepts column name or index. ")
+           "set the data column associated with a given error column. ")
+
+      .def("setLinkedYCol", &setLinkedYCol,
+           (arg("self"), arg("errColumn"), arg("dataColumn")),
+           "set the data column associated with a given error column. ")
 
       .def("removeColumn", &ITableWorkspace::removeColumn,
            (arg("self"), arg("name")), "Remove the named column.")
