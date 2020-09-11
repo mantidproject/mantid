@@ -265,7 +265,7 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
             TransmissionBeamRuns=tr_beam,
             OutputWorkspace='iphiq',
             OutputPanels=True,
-            NumberOfWedges=4,
+            NumberOfWedges=60,
             OutputType='I(Phi,Q)'
         )
 
