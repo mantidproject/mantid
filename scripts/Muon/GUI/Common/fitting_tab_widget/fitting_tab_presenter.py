@@ -315,7 +315,6 @@ class FittingTabPresenter(object):
                 self.view.function_name += ',TFAsymmetry'
                 self.model.function_name = self.view.function_name
         else:
-            self.view.select_workspaces_to_fit_button.setEnabled(True)
             new_global_parameters = [item[9:] for item in global_parameters]
             if self.automatically_update_fit_name:
                 self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
