@@ -8,7 +8,7 @@ import unittest
 
 import numpy as np
 
-from mantid.simpleapi import ClipPeaks, CreateWorkspace, Subtract
+from mantid.simpleapi import AnalysisDataService, ClipPeaks, CreateWorkspace, DeleteWorkspace, DeleteWorkspaces
 
 
 class ClipPeaksTest(unittest.TestCase):
@@ -17,11 +17,14 @@ class ClipPeaksTest(unittest.TestCase):
     # How many data points are used between [1,length]
     resolution = 1000
     # How many peaks are randomly added to the baseline
-    npeaks = 50
+    npeaks = 10
     # Controls the size of peaks
     peak_amplitude = 1.0
+    # Min/Max border (from the resolution) that a peak can be placed on
+    peak_border_lim = 50
     # Specify a specific seed to used for adding peaks.  Set to 'None' to get a new seed.
-    rand_seed = 57689
+    #rand_seed = 57689
+    rand_seed = None
 
     # Whether to add random noise to the base function (with normal distribution)
     add_background_noise = True
@@ -31,6 +34,8 @@ class ClipPeaksTest(unittest.TestCase):
     noise_mean = 0.0
     # Std dev. for the normal dist. used in adding noise
     noise_scale = 0.1
+    # Tolerance (rel err) accepted
+    tolerance = 6e-02
 
     def setUp(self):
         return
@@ -38,34 +43,70 @@ class ClipPeaksTest(unittest.TestCase):
     def tearDown(self):
         return
 
-    def testClipPeakBasic(self):
-        x = np.linspace(start=1, stop=self.length, num=self.resolution)
+    def __setupTestWS(self):
+        """
+        Creates the workspace for testing, sets up a simple baseline log+sin^2 function.
+        """
+        x = np.linspace(start=1.0, stop=self.length, num=self.resolution)
         y = np.log(x) + np.square(np.sin(x))
 
         # Save the original function to use for validation.
-        BaselineData = CreateWorkspace(DataX=x, DataY=y, WorkspaceTitle="FakeBaselineData")
+        CreateWorkspace(OutputWorkspace="Baseline", DataX=x, DataY=y, NSpec=1)
 
-        if self.add_background_noise:
-            # Add some random background noise using a normal distribution
-            noise_gen = np.random.default_rng(self.noise_seed)
-            y = np.add(y, noise_gen.normal(self.noise_mean, self.noise_scale, self.resolution))
+    def __addNoise(self, mean=0.0, scale=0.1):
+        """
+        Add some random background noise to the baseline using a normal distribution
+        """
+        noise_gen = np.random.default_rng(self.noise_seed)
+        self.assertTrue(AnalysisDataService.doesExist("Baseline"))
+        basews = AnalysisDataService.retrieve("Baseline")
+        y = basews.extractY()
+        y = np.add(y, noise_gen.normal(mean, scale, self.resolution))
+        basews.setY(y)
 
+    def __createRandPeaksWS(self, amplitude=1.0):
+        """
+        Creates a test WS with random peaks added to the baseline function
+        """
         # Create a new generator, get a permutation of indices used to add peaks to the data.
         gen = np.random.default_rng(self.rand_seed)
-        noise = gen.choice(self.resolution, self.npeaks)
-        # print(noise)
+        peaklist = np.random.randint(self.peak_border_lim, self.resolution - self.peak_border_lim, self.npeaks)
+
+        self.assertTrue(AnalysisDataService.doesExist("Baseline"))
+        basews = AnalysisDataService.retrieve("Baseline")
+        x = basews.extractX()
+        y = basews.extractY()
 
         # Add a simple peak to the indices chosen by the random permutation
-        for i in noise:
-            y[i] = y[i] + self.peak_amplitude * np.abs(np.sin(x[i]))
+        for i in peaklist:
+            y[0][i] = y[0][i] + amplitude * np.abs(np.sin(x[0][i]))
 
-        NoiseData = CreateWorkspace(DataX=x, DataY=y, WorkspaceTitle="FakeDataWithPeaks")
+        CreateWorkspace(DataX=x, DataY=y, OutputWorkspace="PeakData")
 
-        PeakClippedData = ClipPeaks(NoiseData, LLSCorrection=False, IncreasingWindow=True, SmoothingRange=10,
-                                    WindowSize=20)
+    def testNoNans(self):
+        # If y field is 0, then make sure this doesn't return nans
+        x = np.linspace(1.0, 100.0, 10)
+        y = np.zeros(10)
+        test = CreateWorkspace(DataX=x, DataY=y)
+        res = ClipPeaks(test)
+        self.assertTrue(np.allclose(res.extractY(), 0.0))
+        DeleteWorkspace(test)
 
-        # Validate by subtracting peak clip results with baseline
-        Diff = Subtract(PeakClippedData, BaselineData)
+    def testNoBackgroundNoiseDefaults(self):
+        self.__setupTestWS()
+        self.__createRandPeaksWS(self.peak_amplitude)
+
+        basews = AnalysisDataService.retrieve("Baseline")
+        peakws = AnalysisDataService.retrieve("PeakData")
+
+        clippedws = ClipPeaks(peakws, LLSCorrection=True, IncreasingWindow=False, SmoothingRange=10,
+                              WindowSize=10, OutputWorkspace="clipout")
+
+        # Validate by subtracting peak clip results with baseline function
+        np.testing.assert_allclose(clippedws.extractY(), basews.extractY(), rtol=self.tolerance)
+
+        DeleteWorkspaces(WorkspaceList=["Baseline", "PeakData", "clipout"])
+
 
 if __name__ == '__main__':
     unittest.main()
