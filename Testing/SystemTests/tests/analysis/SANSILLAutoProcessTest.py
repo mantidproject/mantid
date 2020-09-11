@@ -114,19 +114,14 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             TransmissionBeamRuns=beam_tr,
             SampleThickness=thick,
             CalculateResolution='MildnerCarpenter',
-            NumberOfWedges=4,
+            NumberOfWedges=2,
             OutputWorkspace='iq'
             )
-
-        # here, 4 symmetric wedges with an offset of 0 will produce 2 times the
-        # same outputs. NumberOfWedges=2 would have made more sense.
 
         GroupWorkspaces(
             InputWorkspaces=['iq_1', 'iq_2', 'iq_3',
                              'iq_wedge_1_1', 'iq_wedge_1_2', 'iq_wedge_1_3',
-                             'iq_wedge_2_1', 'iq_wedge_2_2', 'iq_wedge_2_3',
-                             'iq_wedge_3_1', 'iq_wedge_3_2', 'iq_wedge_3_3',
-                             'iq_wedge_4_1', 'iq_wedge_4_2', 'iq_wedge_4_3'],
+                             'iq_wedge_2_1', 'iq_wedge_2_2', 'iq_wedge_2_3'],
             OutputWorkspace='out'
             )
 
