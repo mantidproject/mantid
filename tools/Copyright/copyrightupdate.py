@@ -43,7 +43,7 @@ directories_to_ignore = ["external", "CMake", "GSoapGenerated", "buildconfig"]
 # Accepted file extensions
 accepted_file_extensions = [".py", ".cpp", ".h", ".tcc", ".in", ".hh"]
 # excluded_file_tokens
-excluded_files = [".cmake.in", ".rb.in", ".py.in", "systemtest.in", "systemtest.bat.in"]
+excluded_files = [".cmake.in", ".desktop.in", ".rb.in", ".py.in", "systemtest.in", "systemtest.bat.in"]
 # python file exxtensions
 python_file_extensions = [".py"]
 # extensions to ignore, don't even report these
