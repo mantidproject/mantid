@@ -18,6 +18,16 @@ class PlottingWidgetViewMeta(type(QtWidgets.QWidget), ABCMeta):
 class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
 
     @abstractmethod
+    def show_plot_diff(self):
+        """Shows Plot Difference Checkbox"""
+        pass
+
+    @abstractmethod
+    def hide_plot_diff(self):
+        """Hides Plot Difference checkbox"""
+        pass
+
+    @abstractmethod
     def setup_plot_type_options(self, options: List[str]):
         """
         Setup the options which are displayed in the plot type combo box
@@ -62,6 +72,13 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         """
         Checks if tiled plot is currently requested
         :return: A boolean which is true if it is a tiled plot
+        """
+        pass
+
+    @abstractmethod
+    def is_plot_diff(self):
+        """
+        Checks if tiled plot is currently requested
         """
         pass
 
@@ -117,6 +134,13 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         """
         Connect the tiled_by combo box to the input slot
         :param slot: call back function for the signal
+        """
+        pass
+
+    @abstractmethod
+    def on_plot_diff_checkbox_changed(self,slot):
+        """
+        Connect the plot difference checkbox to the input slot
         """
         pass
 

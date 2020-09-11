@@ -21,14 +21,14 @@ import numpy as np
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.simpleapi import CreateWorkspace
+from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
 from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
                                          manage_workspace_names, plot, plot_from_names,
-                                         pcolormesh_from_names)
+                                         pcolormesh_from_names, plot_surface)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -325,6 +325,17 @@ class FunctionsTest(TestCase):
             self.assertEqual(ax.get_xlabel(), err_ax.get_xlabel())
             # Compare title
             self.assertEqual(ax.get_title(), err_ax.get_title())
+
+    def test_colorbar_limits_not_default_values_on_surface_plot_with_monitor(self):
+        ws = CreateSampleWorkspace(NumMonitors=1)
+        fig = plt.figure()
+        plot_surface([ws], fig=fig)
+        ax = fig.get_axes()
+        cmin, cmax = ax[0].collections[0].get_clim()
+
+        # the colorbar limits default to +-0.1 when it can't find max and min of array
+        self.assertNotEqual(cmax, 0.1)
+        self.assertNotEqual(cmin, -0.1)
 
 
 if __name__ == '__main__':

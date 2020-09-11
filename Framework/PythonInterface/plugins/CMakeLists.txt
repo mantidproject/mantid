@@ -180,6 +180,7 @@ set(PYTHON_PLUGINS
   algorithms/LoadAndMerge.py
   algorithms/USANSSimulation.py
   algorithms/SaveNexusPD.py
+  algorithms/SaveGSSCW.py
   algorithms/ApplyDetectorScanEffCorr.py
   algorithms/MaskAngle.py
   algorithms/fractional_indexing.py
