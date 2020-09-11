@@ -1,0 +1,46 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include "MantidAPI/CatalogSession.h"
+#include "MantidAPI/ICatalog.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidICat/CatalogSearchParam.h"
+
+namespace Mantid {
+
+class FakeCatalog : public API::ICatalog {
+public:
+  FakeCatalog();
+  ~FakeCatalog() override;
+
+  API::CatalogSession_sptr login(std::string const &username,
+                                 std::string const &password,
+                                 std::string const &endPoint,
+                                 std::string const &facility) override;
+  void logout() override;
+
+  void search(ICat::CatalogSearchParam const &inputs,
+              API::ITableWorkspace_sptr &outputWorkspace, int const &offset,
+              int const &limit) override;
+  int64_t
+  getNumberOfSearchResults(ICat::CatalogSearchParam const &inputs) override;
+
+  void myData(API::ITableWorkspace_sptr &outputWorkspace) override;
+  void getDataSets(std::string const &investigationID,
+                   API::ITableWorkspace_sptr &outputWorkspace) override;
+  void getDataFiles(std::string const &investigationID,
+                    API::ITableWorkspace_sptr &outputWorkspace) override;
+
+  void listInstruments(std::vector<std::string> &instruments) override;
+  void
+  listInvestigationTypes(std::vector<std::string> &investigationTypes) override;
+
+  void keepAlive() override;
+};
+
+} // namespace Mantid

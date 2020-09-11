@@ -6,7 +6,7 @@ if(CXXTEST_FOUND)
   # class into the test executable. It will go out of scope at the end of this
   # file so doesn't need un-setting
   set(TESTHELPER_SRCS
-      FakeICatalog.cpp
+      FakeCatalog.cpp
       ICatTestHelper.cpp
       ../../TestHelpers/src/TearDownWorld.cpp)
 

@@ -3,6 +3,8 @@
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
+  <catalog name="FakeCatalog"/>
+
   <livedata listener="MockLiveListener"/>
 
   <instrument name="MINITOPAZ">
