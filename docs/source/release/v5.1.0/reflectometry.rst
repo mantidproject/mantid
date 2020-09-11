@@ -31,6 +31,7 @@ Bug fixes
 
 - :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` has been fixed to update the sample logs of chopper gap and chopper position with correct units regardless the wrong setting in nexus files.
 - The history for :ref:`algm-ReflectometryReductionOne` has been fixed so that the conversion to Q is now always included in the history.
+- The sort function in `LRDirectBeamSort <algm-LRDirectBeamSort>` has been updated for Python3
 
 Removed
 -------
