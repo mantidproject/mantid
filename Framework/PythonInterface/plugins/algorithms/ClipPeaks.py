@@ -99,7 +99,7 @@ class ClipPeaks(PythonAlgorithm):
         start_data = np.copy(data)
 
         window = win
-        self.log().information(str(smooth_window))
+        self.log().information('Smoothing window: {0}'.format(str(smooth_window)))
 
         if smooth_window > 0:
             data = self.smooth(data, smooth_window)
@@ -127,7 +127,7 @@ class ClipPeaks(PythonAlgorithm):
         if LLS:
             temp = self.Inv_log_log_sqrt_transformation(temp)
 
-        self.log().information(str(min(start_data - temp)))
+        self.log().information('Minimum of starting data - peak clipped data: {0}'.format(str(min(start_data - temp))))
 
         index = np.where((start_data - temp) == min(start_data - temp))[0][0]
 
@@ -154,7 +154,7 @@ class ClipPeaks(PythonAlgorithm):
 
         n_histo = WS.getNumberHistograms()
 
-        peak_clip_WS = CloneWorkspace(WS)
+        peak_clip_WS = CloneWorkspace(WS, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
 
         x = WS.extractX()
         y = WS.extractY()
