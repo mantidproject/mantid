@@ -69,7 +69,7 @@ class ClipPeaksTest(unittest.TestCase):
         Creates a test WS with random peaks added to the baseline function
         """
         # Create a new generator, get a permutation of indices used to add peaks to the data.
-        gen = np.random.default_rng(self.rand_seed)
+        np.random.seed(self.rand_seed)
         peaklist = np.random.randint(self.peak_border_lim, self.resolution - self.peak_border_lim, self.npeaks)
 
         self.assertTrue(AnalysisDataService.doesExist("Baseline"))
