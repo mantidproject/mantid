@@ -80,6 +80,7 @@ Bug fixes
 - Fixed an issue with setting the current workspace before adding a function.
 - Fixed an issue with the results tab not updating correctly after multiple fits with different functions.
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis gui was not properly disabling during calculations.
+- Fixed issue where select data was incorrectly enabling.
 
 
 Elemental Analysis 
