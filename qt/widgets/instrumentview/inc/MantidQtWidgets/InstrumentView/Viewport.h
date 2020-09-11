@@ -8,6 +8,7 @@
 
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include <QSize>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,12 +47,12 @@ transformation to the model.
 class Viewport {
 public:
   enum ProjectionType { ORTHO, PERSPECTIVE };
-  Viewport(int w,
-           int h); ///< Constructor with Width (w) and Height(h) as inputs
-                   /// Called by the display device when viewport is resized
-  void resize(int /*w*/, int /*h*/);
+  /// Constructor with Width (w) and Height(h) as inputs
+  /// Called by the display device when viewport is resized
+  explicit Viewport(QSize logicalPixelSize);
+  void resize(QSize logicalPixelSize);
   /// Get the viewport width and height.
-  void getViewport(int &w, int &h) const;
+  QSize logicalPixelSize() const;
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
@@ -138,8 +139,7 @@ protected:
   /* Projection */
 
   ProjectionType m_projectionType; ///< Type of display projection
-  int m_width;                     ///< Width of the viewport in pixels
-  int m_height;                    ///< Height of the viewport in pixels
+  QSize m_logicalPixelSize;
   double m_left; ///< Ortho/Prespective Projection xmin value (Left side of the
   /// x axis)
   double m_right; ///< Ortho/Prespective Projection xmax value (Right side of

@@ -91,6 +91,7 @@ private:
   WorkspaceReplacementFlagHolder();
   bool &m_worskpaceReplacementFlag;
 };
+
 } // namespace
 
 // Name of the QSettings group to store the InstrumentWindw settings
@@ -487,9 +488,8 @@ void InstrumentWidget::setSurfaceType(int type) {
         if (m_instrumentActor->hasGridBank())
           m_maskTab->setDisabled(true);
 
-        surface = new Projection3D(m_instrumentActor.get(),
-                                   getInstrumentDisplayWidth(),
-                                   getInstrumentDisplayHeight());
+        surface =
+            new Projection3D(m_instrumentActor.get(), glWidgetPixelSize());
       } else if (surfaceType <= CYLINDRICAL_Z) {
         m_renderTab->forceLayers(true);
         surface =
@@ -1169,24 +1169,17 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
   }
 }
 
-/// Return the width of the instrunemt display
-int InstrumentWidget::getInstrumentDisplayWidth() const {
-  if (m_InstrumentDisplay) {
-    return m_InstrumentDisplay->width();
-  } else if (m_simpleDisplay) {
-    return m_simpleDisplay->width();
-  }
-  return 0;
-}
-
-/// Return the height of the instrunemt display
-int InstrumentWidget::getInstrumentDisplayHeight() const {
-  if (m_InstrumentDisplay) {
-    return m_InstrumentDisplay->height();
-  } else if (m_simpleDisplay) {
-    return m_simpleDisplay->height();
-  }
-  return 0;
+/// Return the size of the OpenGL display widget in logical pixels
+QSize InstrumentWidget::glWidgetPixelSize() {
+  auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
+    return QSize(w->width(), w->height());
+  };
+  if (m_InstrumentDisplay)
+    return sizeinLogicalPixels(m_InstrumentDisplay);
+  else if (m_simpleDisplay)
+    return sizeinLogicalPixels(m_simpleDisplay);
+  else
+    return QSize(0, 0);
 }
 
 /// Redraw the instrument view
