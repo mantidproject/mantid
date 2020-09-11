@@ -49,10 +49,10 @@ public:
   enum ProjectionType { ORTHO, PERSPECTIVE };
   /// Constructor with Width (w) and Height(h) as inputs
   /// Called by the display device when viewport is resized
-  explicit Viewport(QSize logicalPixelSize);
-  void resize(QSize logicalPixelSize);
+  explicit Viewport(QSize glWidgetDimensions);
+  void resize(QSize glWidgetDimensions);
   /// Get the viewport width and height.
-  QSize logicalPixelSize() const;
+  QSize dimensions() const;
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
@@ -139,7 +139,7 @@ protected:
   /* Projection */
 
   ProjectionType m_projectionType; ///< Type of display projection
-  QSize m_logicalPixelSize;
+  QSize m_dimensions;
   double m_left; ///< Ortho/Prespective Projection xmin value (Left side of the
   /// x axis)
   double m_right; ///< Ortho/Prespective Projection xmax value (Right side of

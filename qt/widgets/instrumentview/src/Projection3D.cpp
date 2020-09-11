@@ -209,7 +209,7 @@ void Projection3D::getSelectedDetectors(std::vector<size_t> &detIndices) {
   double xmin, xmax, ymin, ymax, zmin, zmax;
   m_viewport.getInstantProjection(xmin, xmax, ymin, ymax, zmin, zmax);
   QRect rect = selectionRect();
-  auto size = m_viewport.logicalPixelSize();
+  auto size = m_viewport.dimensions();
   const auto w(size.width()), h(size.height());
 
   double xLeft = xmin + (xmax - xmin) * rect.left() / w;

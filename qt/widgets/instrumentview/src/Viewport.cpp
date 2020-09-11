@@ -22,12 +22,11 @@ namespace MantidWidgets {
 
 /**
  * Initialize with defaults.
- * @param logicalPixelSize Viewport width/height in logical pixels
+ * @param glWidgetDimensions Viewport width/height in device pixels
  */
-Viewport::Viewport(QSize logicalPixelSize)
-    : m_projectionType(Viewport::ORTHO),
-      m_logicalPixelSize(std::move(logicalPixelSize)), m_left(-1), m_right(1),
-      m_bottom(-1), m_top(1), m_near(-1), m_far(1),
+Viewport::Viewport(QSize dimensions)
+    : m_projectionType(Viewport::ORTHO), m_dimensions(std::move(dimensions)),
+      m_left(-1), m_right(1), m_bottom(-1), m_top(1), m_near(-1), m_far(1),
       m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0),
       m_yTrans(0.0), m_zTrans(0.0) {
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
@@ -35,17 +34,17 @@ Viewport::Viewport(QSize logicalPixelSize)
 
 /**
  * Resize the viewport = size of the displaying widget.
- * @param logicalPixelSize Viewport width/height in logical pixels
+ * @param dimensions Viewport width/height in device pixels
  */
-void Viewport::resize(QSize logicalPixelSize) {
-  m_logicalPixelSize = std::move(logicalPixelSize);
+void Viewport::resize(QSize dimensions) {
+  m_dimensions = std::move(dimensions);
 }
 
 /**
  * Get the size of the viewport in logical pixels (size of the displaying
  * widget).
  */
-QSize Viewport::logicalPixelSize() const { return m_logicalPixelSize; }
+QSize Viewport::dimensions() const { return m_dimensions; }
 
 /**
  * This will set the projection. The parameters describe the dimensions of a
@@ -114,8 +113,7 @@ void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax,
   // and correct the extent to make it loook normal
   double xSize = m_right - m_left;
   double ySize = m_top - m_bottom;
-  double r = ySize * m_logicalPixelSize.width() /
-             (xSize * m_logicalPixelSize.height());
+  double r = ySize * m_dimensions.width() / (xSize * m_dimensions.height());
   if (r < 1.0) {
     // ySize is too small
     ySize /= r;
@@ -159,7 +157,7 @@ void Viewport::setTranslation(double xval, double yval) {
  * Issue the OpenGL commands that define the viewport and projection.
  */
 void Viewport::applyProjection() const {
-  glViewport(0, 0, m_logicalPixelSize.width(), m_logicalPixelSize.height());
+  glViewport(0, 0, m_dimensions.width(), m_dimensions.height());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   OpenGLError::check("GLViewport::issueGL()");
@@ -205,10 +203,10 @@ void Viewport::applyProjection() const {
 void Viewport::projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const {
   // z initiaised to zero if out of the sphere
   double z = 0;
-  auto x = static_cast<double>((2.0 * a - m_logicalPixelSize.width()) /
-                               m_logicalPixelSize.width());
-  auto y = static_cast<double>((m_logicalPixelSize.height() - 2.0 * b) /
-                               m_logicalPixelSize.height());
+  auto x = static_cast<double>((2.0 * a - m_dimensions.width()) /
+                               m_dimensions.width());
+  auto y = static_cast<double>((m_dimensions.height() - 2.0 * b) /
+                               m_dimensions.height());
   double norm = x * x + y * y;
   if (norm > 1.0) // The point is inside the sphere
   {
@@ -335,11 +333,11 @@ void Viewport::setRotation(const Mantid::Kernel::Quat &rot) {
 void Viewport::initZoomFrom(int a, int b) {
   if (a <= 0 || b <= 0)
     return;
-  if (a >= m_logicalPixelSize.width() || b >= m_logicalPixelSize.height())
+  if (a >= m_dimensions.width() || b >= m_dimensions.height())
     return;
   double z = 0;
-  auto x = static_cast<double>(m_logicalPixelSize.width() - a);
-  auto y = static_cast<double>(b - m_logicalPixelSize.height());
+  auto x = static_cast<double>(m_dimensions.width() - a);
+  auto y = static_cast<double>(b - m_dimensions.height());
   m_lastpoint(x, y, z);
 }
 
@@ -350,10 +348,10 @@ void Viewport::initZoomFrom(int a, int b) {
  * @param b :: The y mouse coordinate
  */
 void Viewport::generateZoomTo(int a, int b) {
-  if (a >= m_logicalPixelSize.width() || b >= m_logicalPixelSize.height() ||
-      a <= 0 || b <= 0)
+  if (a >= m_dimensions.width() || b >= m_dimensions.height() || a <= 0 ||
+      b <= 0)
     return;
-  auto y = static_cast<double>(b - m_logicalPixelSize.height());
+  auto y = static_cast<double>(b - m_dimensions.height());
   if (y == 0)
     y = m_lastpoint[1];
   double diff = m_lastpoint[1] / y;
@@ -461,11 +459,9 @@ void Viewport::generateTranslationPoint(int a, int b,
   double xmin, xmax, ymin, ymax, zmin, zmax;
   correctForAspectRatioAndZoom(xmin, xmax, ymin, ymax, zmin, zmax);
   x = static_cast<double>(
-      (xmin +
-       ((xmax - xmin) * ((double)a / (double)m_logicalPixelSize.width()))));
-  y = static_cast<double>(
-      (ymin + ((ymax - ymin) * (m_logicalPixelSize.height() - b) /
-               m_logicalPixelSize.height())));
+      (xmin + ((xmax - xmin) * ((double)a / (double)m_dimensions.width()))));
+  y = static_cast<double>((ymin + ((ymax - ymin) * (m_dimensions.height() - b) /
+                                   m_dimensions.height())));
   point(x, y, z);
 }
 

@@ -250,8 +250,8 @@ protected:
   void setBackgroundColor(const QColor &color);
   /// Get the surface info string
   QString getSurfaceInfoText() const;
-  /// Return the size of the OpenGL display widget in logical pixels
-  QSize glWidgetPixelSize();
+  /// Return the size of the OpenGL display widget in device pixels
+  QSize glWidgetDimensions();
   /// Select the OpenGL or simple widget for instrument display
   void selectOpenGLDisplay(bool yes);
   /// Set the surface type.
