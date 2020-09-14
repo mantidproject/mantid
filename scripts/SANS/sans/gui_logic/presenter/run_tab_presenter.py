@@ -963,7 +963,7 @@ class RunTabPresenter(PresenterCommon):
         row_entry = self._table_model.get_row(row_index)
         states, errors = self.get_states(row_entries=[row_entry], file_lookup=file_lookup,
                                          suppress_warnings=suppress_warnings)
-        if states is None:
+        if not states:
             if not suppress_warnings:
                 self.sans_logger.warning(
                     "There does not seem to be data for a row {}.".format(row_index))

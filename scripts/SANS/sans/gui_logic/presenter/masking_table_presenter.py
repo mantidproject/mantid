@@ -157,7 +157,7 @@ class MaskingTablePresenter(object):
             raise e  # propagate errors for run_tab_presenter to deal with
 
         if not state:
-            self._logger.error("You can only show a masked workspace if a user file has been loaded and there"
+            self._logger.error("You can only show a masked workspace if a user file has been loaded and a"
                                "valid sample scatter entry has been provided in the selected row.")
             self._view.set_display_mask_button_to_normal()
             return
