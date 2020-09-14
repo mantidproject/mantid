@@ -103,6 +103,11 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         maskAngle = self.getProperty("MaskAngle").value
         outWS = self.getPropertyValue("OutputWorkspace")
 
+        _get_scale = lambda x : {
+                None: 1,
+                "Monitor": x.run().getProtonCharge(),
+                "Time":    x.run().getLogData("duration").value,
+            }[normaliseBy]
 
         data_scale = 1
         cal_scale = 1
