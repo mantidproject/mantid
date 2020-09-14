@@ -27,32 +27,30 @@ using PreviewRegister =
 class MANTID_API_DLL PreviewManagerImpl {
 public:
   std::vector<std::string> getPreviews(const std::string &facility,
-                                       const std::string &technique = "") {
-    std::vector<std::string> previews;
-    for (const auto &pvs : m_previews[facility]) {
-      for (const auto &pv : pvs.second) {
-        if (technique.empty() || pvs.first == technique) {
-          previews.push_back(pv.first);
-        }
-      }
-    }
-    return previews;
-  }
+                                       const std::string &technique = "");
   const IPreview &getPreview(const std::string &facility,
                              const std::string &technique,
-                             const std::string &preview) {
-    return *m_previews[facility][technique][preview];
-  }
+                             const std::string &preview);
   template <class T> void subscribe() {
     static_assert(std::is_base_of<IPreview, T>::value);
     T preview;
     const auto facility = preview.facility();
     const auto technique = preview.technique();
     const auto name = preview.name();
+    if (checkPreview(facility, technique, name)) {
+      throw std::runtime_error(
+          "Preview with the same name is already registered for the same "
+          "facility and technique.");
+    }
     m_previews[facility][technique][name] = std::make_unique<T>();
   }
 
 private:
+  bool checkFacility(const std::string &facility);
+  bool checkTechnique(const std::string &facility,
+                      const std::string &technique);
+  bool checkPreview(const std::string &facility, const std::string &technique,
+                    const std::string &preview);
   PreviewRegister m_previews;
 };
 

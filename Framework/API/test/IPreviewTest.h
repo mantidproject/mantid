@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IPreview.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::IPreview;
 using Mantid::API::MatrixWorkspace_sptr;
@@ -17,11 +17,15 @@ using Mantid::API::WorkspaceFactory;
 
 namespace {
 class BasicPreview : public IPreview {
+ public:
   PreviewType type() const override { return IPreview::PreviewType::SVIEW; }
   std::string name() const override { return "BasicPreview"; }
   std::string facility() const override { return "TestFacility"; }
   std::string technique() const override { return "SANS"; }
-  MatrixWorkspace_sptr preview(MatrixWorkspace_sptr ws) const override { return ws->clone();}
+private:
+  MatrixWorkspace_sptr preview(MatrixWorkspace_sptr ws) const override {
+    return ws->clone();
+  }
 };
 
 IPreview *createBasicPreview() { return new BasicPreview(); }
@@ -32,11 +36,10 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static IPreviewTest *createSuite() { return new IPreviewTest(); }
-  static void destroySuite( IPreviewTest *suite ) { delete suite; }
+  static void destroySuite(IPreviewTest *suite) { delete suite; }
 
-  void test_basic_preview()
-  {
-    IPreview* preview = createBasicPreview();
+  void test_basic_preview() {
+    IPreview *preview = createBasicPreview();
     TS_ASSERT_EQUALS(preview->name(), "BasicPreview")
     TS_ASSERT_EQUALS(preview->facility(), "TestFacility")
     TS_ASSERT_EQUALS(preview->technique(), "SANS")
@@ -44,5 +47,4 @@ public:
     auto outWS = preview->view(inWS);
     TS_ASSERT_DIFFERS(outWS, inWS);
   }
-
 };
