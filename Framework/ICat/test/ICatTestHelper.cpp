@@ -8,22 +8,17 @@
 
 #include "MantidAPI/CatalogManager.h"
 
-namespace ICatTestHelper {
+using namespace Mantid::API;
 
-bool skipTests() { return false; }
+namespace ICatTestHelper {
 
 FakeICatLogin::FakeICatLogin()
     : m_loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {
-  m_session = Mantid::API::CatalogManager::Instance().login("", "", "", "TEST");
+  m_session = CatalogManager::Instance().login("", "", "", "TEST");
 }
 
 FakeICatLogin::~FakeICatLogin() {
-  Mantid::API::CatalogManager::Instance().destroyCatalog(
-      m_session->getSessionId());
+  CatalogManager::Instance().destroyCatalog(m_session->getSessionId());
 }
-
-bool login() { return true; }
-
-void logout() {}
 
 } // namespace ICatTestHelper
