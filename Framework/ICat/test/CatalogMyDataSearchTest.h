@@ -7,14 +7,12 @@
 #pragma once
 
 #include "ICatTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogMyDataSearch.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;
+using namespace ICatTestHelper;
 
 class CatalogMyDataSearchTest : public CxxTest::TestSuite {
 public:
@@ -24,22 +22,15 @@ public:
   }
   static void destroySuite(CatalogMyDataSearchTest *suite) { delete suite; }
 
-  /// Skip all unit tests if ICat server is down
-  bool skipTests() override { return ICatTestHelper::skipTests(); }
-
-  CatalogMyDataSearchTest() { API::FrameworkManager::Instance(); }
+  CatalogMyDataSearchTest() : m_fakeLogin(std::make_unique<FakeICatLogin>()) {}
 
   void testInit() {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
-                                                        "ISIS");
     CatalogMyDataSearch mydata;
     TS_ASSERT_THROWS_NOTHING(mydata.initialize());
     TS_ASSERT(mydata.isInitialized());
   }
   void testMyDataSearch() {
     CatalogMyDataSearch mydata;
-
-    TS_ASSERT(ICatTestHelper::login());
 
     if (!mydata.isInitialized())
       mydata.initialize();
@@ -48,7 +39,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(mydata.execute());
     TS_ASSERT(mydata.isExecuted());
-
-    ICatTestHelper::logout();
   }
+
+private:
+  std::unique_ptr<FakeICatLogin> m_fakeLogin;
 };
