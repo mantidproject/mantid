@@ -9,8 +9,7 @@ Powder Diffraction
 ------------------
 New features
 ############
-- New ``D7`` instrument definition for ILL.
-- New :ref:`SaveGSSCW <algm-SaveGSSCW>` algorithm is implemented for constant wavelength diffractometers.
+- New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 
 Improvements
 ############
