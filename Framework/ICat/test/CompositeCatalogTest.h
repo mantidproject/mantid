@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ICatTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/CompositeCatalog.h"
@@ -91,9 +90,6 @@ public:
     return new CompositeCatalogTest();
   }
   static void destroySuite(CompositeCatalogTest *suite) { delete suite; }
-
-  /// Skip all unit tests if ICat server is down
-  bool skipTests() override { return ICatTestHelper::skipTests(); }
 
   CompositeCatalogTest() { Mantid::API::FrameworkManager::Instance(); }
 
