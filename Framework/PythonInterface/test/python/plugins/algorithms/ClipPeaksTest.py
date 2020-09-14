@@ -91,6 +91,7 @@ class ClipPeaksTest(unittest.TestCase):
         res = ClipPeaks(test)
         self.assertTrue(np.allclose(res.extractY(), 0.0))
         DeleteWorkspace(test)
+        DeleteWorkspace(res)
 
     def testNoBackgroundNoiseDefaults(self):
         self.__setupTestWS()
@@ -107,6 +108,35 @@ class ClipPeaksTest(unittest.TestCase):
 
         DeleteWorkspaces(WorkspaceList=["Baseline", "PeakData", "clipout"])
 
+    def testNoBackgroundNoiseIncreasing(self):
+        self.__setupTestWS()
+        self.__createRandPeaksWS(self.peak_amplitude)
+
+        basews = AnalysisDataService.retrieve("Baseline")
+        peakws = AnalysisDataService.retrieve("PeakData")
+
+        clippedws = ClipPeaks(peakws, LLSCorrection=True, IncreasingWindow=True, SmoothingRange=10,
+                              WindowSize=10, OutputWorkspace="clipout")
+
+        # Validate by subtracting peak clip results with baseline function
+        np.testing.assert_allclose(clippedws.extractY(), basews.extractY(), rtol=self.tolerance)
+
+        DeleteWorkspaces(WorkspaceList=["Baseline", "PeakData", "clipout"])
+
+    def testNoBackgroundNoiseNoLLS(self):
+        self.__setupTestWS()
+        self.__createRandPeaksWS(self.peak_amplitude)
+
+        basews = AnalysisDataService.retrieve("Baseline")
+        peakws = AnalysisDataService.retrieve("PeakData")
+
+        clippedws = ClipPeaks(peakws, LLSCorrection=False, IncreasingWindow=False, SmoothingRange=10,
+                              WindowSize=10, OutputWorkspace="clipout")
+
+        # Validate by subtracting peak clip results with baseline function
+        np.testing.assert_allclose(clippedws.extractY(), basews.extractY(), rtol=self.tolerance)
+
+        DeleteWorkspaces(WorkspaceList=["Baseline", "PeakData", "clipout"])
 
 if __name__ == '__main__':
     unittest.main()
