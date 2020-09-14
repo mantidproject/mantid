@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, PropertyMode, WorkspaceProperty
+from mantid.api import PythonAlgorithm, WorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import Direction, IntBoundedValidator
 
@@ -177,5 +177,6 @@ class ClipPeaks(PythonAlgorithm):
             peak_clip_WS.setE(h, e[h])
 
         self.setProperty("OutputWorkspace", peak_clip_WS)
+
 
 AlgorithmFactory.subscribe(ClipPeaks)
