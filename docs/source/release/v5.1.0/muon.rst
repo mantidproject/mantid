@@ -82,6 +82,7 @@ Bug fixes
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis gui was not properly disabling during calculations.
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis was not correctly resetting DeadTime property to default when a user changes the instrument
 - Fixed issue where select data was incorrectly enabling.
+- Fixed a bug in simultaneous TF asymmetry mode fitting, which would cause a crash when the run was incremented.
 
 Elemental Analysis 
 ##################
