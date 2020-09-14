@@ -140,6 +140,10 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         xMin = _xMin if xMin is None else xMin
         xMax = _xMax if xMax is None else xMax
 
+        _data_tmp_list = [me for me in temp_workspace_list if '__data_tmp_' in me]
+        for i, _wsn in enumerate(_data_tmp_list):
+            ResampleX(InputWorkspace=_wsn, OutputWorkspace=_wsn, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
+
         if cal is not None:
             ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
             if isinstance(mtd['__cal_tmp'], IEventWorkspace):
