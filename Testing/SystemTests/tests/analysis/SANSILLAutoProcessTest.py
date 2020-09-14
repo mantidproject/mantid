@@ -317,6 +317,7 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            SampleTransmissionRuns=transmission_water,
                            ContainerTransmissionRuns=transmission_water_cell,
                            OutputWorkspace='water',
+                           TransmissionBeamRadius=1,
                            BeamRadius=1,
                            ContainerRuns=empty_cell_water,
                            ThetaDependent=False,
@@ -344,5 +345,6 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            ThetaDependent=False,
                            WaterCrossSection=0.87,
                            SampleThickness=0.2,
+                           TransmissionBeamRadius=1,
                            BeamRadius=1,
                            ReferenceFiles=",".join(water_dir))
