@@ -91,5 +91,8 @@ New Features
 - Added a deselect all elements button.
 - Fixed an issue where groups were all being plotted on the same tiled plot.
 
+Bug fixes
+---------
+- Fixed an issue with reloading data after closing gui.
 
 :ref:`Release 5.1.0 <v5.1.0>`
