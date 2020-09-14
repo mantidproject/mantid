@@ -118,10 +118,10 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             Scale(InputWorkspace=_ws, OutputWorkspace=_ws, Factor=_get_scale(cal)/_get_scale(_ws), EnableLogging=False)
 
             ExtractMask(_ws, OutputWorkspace="__mask_tmp", EnableLogging=False)
-        if maskAngle != Property.EMPTY_DBL:
+            if maskAngle != Property.EMPTY_DBL:
                 MaskAngle(Workspace="__mask_tmp", MinAngle=maskAngle, Angle="Phi", EnableLogging=False)
 
-        if mask is not None:
+            if mask is not None:
                 BinaryOperateMasks(InputWorkspace1="__mask_tmp", InputWorkspace2=mask,
                                OperationType="OR", OutputWorkspace=f"__mask_tmp", EnableLogging=False)
 
@@ -136,7 +136,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             _ws = AnalysisDataService.retrieve(f"__data_tmp_{n}")
 
             _xMin, _xMax = min(_xMin, _ws.readX(0).min()), max(_xMax, _ws.readX(0).max())
-        
+
         xMin = _xMin if xMin is None else xMin
         xMax = _xMax if xMax is None else xMax
 
@@ -175,7 +175,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         for i, _wsn in enumerate(_data_tmp_list[1:]):
             if cal is not None:
                 Divide(LHSWorkspace=_wsn, RHSWorkspace='__cal_tmp', OutputWorkspace=_wsn, EnableLogging=False)
-        if bkg is not None:
+            if bkg is not None:
                 Minus(LHSWorkspace=_wsn, RHSWorkspace='__bkg_tmp_0', OutputWorkspace=_wsn, EnableLogging=False)
             ConjoinWorkspaces(InputWorkspace1=outWS,
                               InputWorkspace2=_wsn,
