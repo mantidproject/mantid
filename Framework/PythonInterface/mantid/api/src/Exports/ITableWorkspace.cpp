@@ -283,7 +283,7 @@ int getLinkedYCol(ITableWorkspace &self, const object &column) {
  * @return index of the associated Y column
  */
 void setLinkedYCol(ITableWorkspace &self, const object &errColumn,
-                  const int dataColomn) {
+                   const int dataColomn) {
   // Find the column
   Mantid::API::Column_sptr colptr;
   if (STR_CHECK(errColumn.ptr())) {
