@@ -91,6 +91,8 @@ void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace,
 void ALCBaselineModellingView::setCorrectedCurve(
     MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   const auto kwargs = getPlotKwargs(m_ui.correctedPlot, "Corrected");
+
+  m_ui.correctedPlot->clear();
   m_ui.correctedPlot->addSpectrum("Corrected", workspace, workspaceIndex,
                                   Qt::blue, kwargs);
 }
