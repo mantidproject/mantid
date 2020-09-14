@@ -25,6 +25,7 @@ Install the following:
 
     * ``Windows Universal CRT SDK``
     * The latest Windows 10 SDK
+  * If your machine has less than 32GB of memory Mantid may not build. If you have problems change the maximum number of parallel project builds to 1 in Visual Studio in Tools -> Options -> Projects and Solutions -> Build And Run.
 
 
 * `Git <https://git-scm.com/>`_.
