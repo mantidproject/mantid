@@ -60,7 +60,7 @@ class ClipPeaks(PythonAlgorithm):
         return "ClipPeaks"
 
     def summary(self):
-        return "This algorithm is used to remove peaks from the input data, leaving the background intact."
+        return "Removes peaks from the input data, providing an estimation of the background in spectra."
 
     def smooth(self, data, order):
         """
