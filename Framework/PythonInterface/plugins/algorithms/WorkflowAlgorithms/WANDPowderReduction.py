@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory,
-                        MatrixWorkspaceProperty, PropertyMode,
-                        IEventWorkspace)
+from mantid.api import (ADSValidator, AlgorithmFactory, DataProcessorAlgorithm,
+                        IEventWorkspace,
+                        MatrixWorkspaceProperty, PropertyMode)
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (ConvertSpectrumAxis, Transpose,
                               ResampleX, CopyInstrumentParameters,
@@ -38,19 +38,34 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
 
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '',
-                                                     direction=Direction.Input),
-                             doc='The main input workspace.')
+        # self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '',
+        #                                              direction=Direction.Input),
+        #                      doc='The main input workspace.')
+        self.declareProperty(StringArrayProperty(
+                                "InputWorkspace",
+                                direction=Direction.Input,
+                                validator=ADSValidator(),
+                                ),
+                            doc='The main input workspace[s].',
+                        )
+
+        # self.declareProperty(MatrixWorkspaceProperty("BackgroundWorkspace", '',
+        #                                              optional=PropertyMode.Optional,
+        #                                              direction=Direction.Input),
+        #                      doc='The background workspace to be subtracted.')
+        self.declareProperty(StringArrayProperty(
+                                "BackgroundWorkspace",
+                                optional=PropertyMode.Optional,
+                                direction=Direction.Input,
+                                validator=ADSValidator(),
+                                ),
+                             doc='The background workspace[s] to be subtracted.',
+                        )
 
         self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc='The calibration (vandiaum) workspace.')
-
-        self.declareProperty(MatrixWorkspaceProperty("BackgroundWorkspace", '',
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Input),
-                             doc='The background workspace to be subtracted.')
 
         self.declareProperty("BackgroundScale", 1.0,
                              validator=FloatBoundedValidator(0.0),
@@ -76,8 +91,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         data = self.getProperty("InputWorkspace").value
-        cal = self.getProperty("CalibrationWorkspace").value
         bkg = self.getProperty("BackgroundWorkspace").value
+        cal = self.getProperty("CalibrationWorkspace").value
         mask = self.getProperty("MaskWorkspace").value
         target = self.getProperty("Target").value
         eFixed = self.getProperty("EFixed").value
@@ -87,6 +102,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         normaliseBy = self.getProperty("NormaliseBy").value
         maskAngle = self.getProperty("MaskAngle").value
         outWS = self.getPropertyValue("OutputWorkspace")
+
 
         data_scale = 1
         cal_scale = 1
