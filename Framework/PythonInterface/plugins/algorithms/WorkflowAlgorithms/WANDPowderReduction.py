@@ -166,7 +166,11 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             Transpose(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
             ResampleX(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
 
-        Scale(InputWorkspace=outWS, OutputWorkspace=outWS, Factor=cal_scale/data_scale, EnableLogging=False)
+            Divide(LHSWorkspace='__data_tmp_0', RHSWorkspace='__cal_tmp', OutputWorkspace=outWS, EnableLogging=False)
+            if bkg is not None:
+                Minus(LHSWorkspace=outWS, RHSWorkspace='__bkg_tmp_0', OutputWorkspace=outWS, EnableLogging=False)
+        else:
+            CloneWorkspace(InputWorkspace="__data_tmp_0", OutputWorkspace=outWS)
 
         if bkg is not None:
             ExtractUnmaskedSpectra(InputWorkspace=bkg, MaskWorkspace='__mask_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
