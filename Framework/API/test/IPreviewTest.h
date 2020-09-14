@@ -17,11 +17,12 @@ using Mantid::API::WorkspaceFactory;
 
 namespace {
 class BasicPreview : public IPreview {
- public:
+public:
   PreviewType type() const override { return IPreview::PreviewType::SVIEW; }
   std::string name() const override { return "BasicPreview"; }
   std::string facility() const override { return "TestFacility"; }
   std::string technique() const override { return "SANS"; }
+
 private:
   MatrixWorkspace_sptr preview(MatrixWorkspace_sptr ws) const override {
     return ws->clone();
