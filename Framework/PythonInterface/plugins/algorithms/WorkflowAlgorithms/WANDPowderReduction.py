@@ -144,6 +144,19 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         for i, _wsn in enumerate(_data_tmp_list):
             ResampleX(InputWorkspace=_wsn, OutputWorkspace=_wsn, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
 
+        if bkg is not None:
+            for n, bgn in enumerate(bkg):
+                temp_workspace_list.append(f'__bkg_tmp_{n}')
+                ExtractUnmaskedSpectra(InputWorkspace=bkg, MaskWorkspace='__mask_tmp', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
+                if isinstance(mtd[f'__bkg_tmp_{n}'], IEventWorkspace):
+                    Integration(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
+                CopyInstrumentParameters(data, f'__bkg_tmp_{n}', EnableLogging=False)
+                ConvertSpectrumAxis(InputWorkspace=f'__bkg_tmp_{n}', Target=target, EFixed=eFixed, OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
+                Transpose(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
+                ResampleX(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
+                Scale(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', Factor=_get_scale(cal)/_get_scale(bkg), EnableLogging=False)
+                Scale(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', Factor=self.getProperty('BackgroundScale').value, EnableLogging=False)
+
         if cal is not None:
             ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
             if isinstance(mtd['__cal_tmp'], IEventWorkspace):
