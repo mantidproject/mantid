@@ -676,11 +676,11 @@ void export_ITableWorkspace() {
               "Label)."))
 
       .def("getLinkedYCol", &getLinkedYCol, (arg("self"), arg("column")),
-           "set the data column associated with a given error column. ")
+           "Get the data column associated with a given error column. ")
 
       .def("setLinkedYCol", &setLinkedYCol,
            (arg("self"), arg("errColumn"), arg("dataColumn")),
-           "set the data column associated with a given error column. ")
+           "Set the data column associated with a given error column. ")
 
       .def("removeColumn", &ITableWorkspace::removeColumn,
            (arg("self"), arg("name")), "Remove the named column.")

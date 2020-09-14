@@ -275,6 +275,8 @@ class ResultsTabModel(object):
             if _param_error_should_be_displayed(name):
                 table.addColumn('float', _error_column_name(name),
                                 TableColumnType.YErr.value)
+                # The error column will be the most recent one added (columnCount-1) and is corresponding value will be
+                # the second to last (columnCount-2).
                 table.setLinkedYCol(table.columnCount()-1, table.columnCount()-2)
         return table
 
