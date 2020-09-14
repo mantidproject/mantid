@@ -48,6 +48,6 @@ void export_IPreview() {
       .def("type", &IPreview::type, arg("self"), "Get the type of the preview.")
       .def("view", viewWS, (arg("self"), arg("ws")),
            "Perform the preview operation on the workspace.")
-      .def("view", viewGR, (arg("self"), arg("ws")),
+      .def("view", viewGR, (arg("self"), arg("gr")),
            "Perform the preview operation on the workspace group.");
 }
