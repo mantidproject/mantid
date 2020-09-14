@@ -154,6 +154,8 @@ public:
         std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "Time")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "t")
 
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 186.64, 0.01)
@@ -212,6 +214,95 @@ public:
 
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[511], 3573.04, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[512], 3579.68, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 0.00, 0.01)
+  }
+
+  void test_D7_timeOfFlight_timechannels() {
+    // Tests loading TOF data for D7
+    LoadILLPolarizedDiffraction alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TOFUnits", "TimeChannels"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT(outputWS->isGroup())
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
+    do_test_general_features(outputWS, "TOF");
+
+    MatrixWorkspace_sptr workspaceEntry1 =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
+    TS_ASSERT(workspaceEntry1)
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "Label")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(),
+                     "Time channel")
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(0)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(0)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(0)[511], 511)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(0)[512], 512)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(0)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[511], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(1)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(1)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(1)[511], 511)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(1)[512], 512)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(1)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[511], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(130)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(130)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(130)[365], 365)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(130)[366], 366)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(130)[365], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[365], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(131)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(131)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(131)[365], 365)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(131)[366], 366)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(131)[365], 1)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[365], 1.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(132)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(132)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 5468)
+    TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 73.94, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(132)[511], 511)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(132)[512], 512)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(132)[511], 5394)
+    TS_ASSERT_DELTA(workspaceEntry1->e(132)[511], 73.44, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(133)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(133)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(133)[511], 511)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(133)[512], 512)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 0.00, 0.01)
   }
@@ -625,10 +716,7 @@ public:
         TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(),
                          "Wavelength")
       } else if (measurementMode == "TOF") {
-        {
-          TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(), "Time")
-          TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512)
-        }
+        { TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512) }
       }
     }
   }

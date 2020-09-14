@@ -120,6 +120,11 @@ void LoadILLPolarizedDiffraction::init() {
   declareProperty("TransposeMonochromatic", false,
                   "Transpose the 2D workspace with monochromatic data",
                   Direction::Input);
+  const std::vector<std::string> TOFUnitOptions{"UncalibratedTime",
+                                                "TimeChannels"};
+  declareProperty("TOFUnits", TOFUnitOptions[0],
+                  std::make_shared<StringListValidator>(TOFUnitOptions),
+                  "Transpose the 2D workspace with monochromatic data");
 }
 
 std::map<std::string, std::string>
@@ -286,13 +291,20 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   acquisitionMode.load();
   m_acquisitionMode = acquisitionMode[0];
   if (m_acquisitionMode == TOF_MODE_ON) {
-    workspace->getAxis(0)->unit() = UnitFactory::Instance().create("Time");
+    if (getPropertyValue("TOFUnits") == "TimeChannels") {
+      std::shared_ptr<Kernel::Units::Label> lblUnit =
+          std::dynamic_pointer_cast<Kernel::Units::Label>(
+              UnitFactory::Instance().create("Label"));
+      lblUnit->setLabel("Time channel", Units::Symbol::EmptyLabel);
+      workspace->getAxis(0)->unit() = lblUnit;
+    } else {
+      workspace->getAxis(0)->unit() = UnitFactory::Instance().create("Time");
+    }
   } else {
     workspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("Wavelength");
   }
   // Set y axis unit
-
   workspace->setYUnit("Counts");
 
   // check the polarization direction and set the workspace title
@@ -413,12 +425,17 @@ LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
   if (acquisitionMode[0] == TOF_MODE_ON) {
     NXFloat timeOfFlightInfo = entry.openNXFloat("D7/Detector/time_of_flight");
     timeOfFlightInfo.load();
-    auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
     m_numberOfChannels = size_t(timeOfFlightInfo[1]);
+    auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
     auto tofDelay = timeOfFlightInfo[2];
     for (auto channel_no = 0;
          channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
-      axes.push_back(static_cast<double>(tofDelay + channel_no * channelWidth));
+      if (getPropertyValue("TOFUnits") == "UncalibratedTime") {
+        axes.push_back(
+            static_cast<double>(tofDelay + channel_no * channelWidth));
+      } else {
+        axes.push_back(static_cast<double>(channel_no));
+      }
     }
   } else {
     m_numberOfChannels = 1;
