@@ -164,13 +164,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             CopyInstrumentParameters(data, '__cal_tmp', EnableLogging=False)
             ConvertSpectrumAxis(InputWorkspace='__cal_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__cal_tmp', EnableLogging=False)
             Transpose(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
-            ResampleX(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', XMin=xMin, XMax=xMax, NumberBins=numberBins,
-                      EnableLogging=False)
-            Divide(LHSWorkspace=outWS, RHSWorkspace='__cal_tmp', OutputWorkspace=outWS, EnableLogging=False)
-            if normaliseBy == "Monitor":
-                cal_scale = cal.run().getProtonCharge()
-            elif normaliseBy == "Time":
-                cal_scale = cal.run().getLogData('duration').value
+            ResampleX(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
 
         Scale(InputWorkspace=outWS, OutputWorkspace=outWS, Factor=cal_scale/data_scale, EnableLogging=False)
 
