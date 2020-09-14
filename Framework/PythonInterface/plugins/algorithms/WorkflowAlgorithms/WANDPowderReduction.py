@@ -172,25 +172,17 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         else:
             CloneWorkspace(InputWorkspace="__data_tmp_0", OutputWorkspace=outWS)
 
-        if bkg is not None:
-            ExtractUnmaskedSpectra(InputWorkspace=bkg, MaskWorkspace='__mask_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
-            if isinstance(mtd['__bkg_tmp'], IEventWorkspace):
-                Integration(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
-            CopyInstrumentParameters(data, '__bkg_tmp', EnableLogging=False)
-            ConvertSpectrumAxis(InputWorkspace='__bkg_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__bkg_tmp', EnableLogging=False)
-            Transpose(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
-            ResampleX(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', XMin=xMin, XMax=xMax, NumberBins=numberBins,
-                      EnableLogging=False)
+        for i, _wsn in enumerate(_data_tmp_list[1:]):
             if cal is not None:
-                Divide(LHSWorkspace='__bkg_tmp', RHSWorkspace='__cal_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
-            if normaliseBy == "Monitor":
-                bkg_scale = bkg.run().getProtonCharge()
-            elif normaliseBy == "Time":
-                bkg_scale = bkg.run().getLogData('duration').value
-            Scale(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', Factor=cal_scale/bkg_scale, EnableLogging=False)
-            Scale(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp',
-                  Factor=self.getProperty('BackgroundScale').value, EnableLogging=False)
-            Minus(LHSWorkspace=outWS, RHSWorkspace='__bkg_tmp', OutputWorkspace=outWS, EnableLogging=False)
+                Divide(LHSWorkspace=_wsn, RHSWorkspace='__cal_tmp', OutputWorkspace=_wsn, EnableLogging=False)
+        if bkg is not None:
+                Minus(LHSWorkspace=_wsn, RHSWorkspace='__bkg_tmp_0', OutputWorkspace=_wsn, EnableLogging=False)
+            ConjoinWorkspaces(InputWorkspace1=outWS,
+                              InputWorkspace2=_wsn,
+                              CheckOverlapping=False,
+                            )
+
+        SumSpectra(InputWorkspace=outWS, OutputWorkspace=outWS, WeightedSum=True, MultiplyBySpectra=False, StoreInADS=False)
 
         self.setProperty("OutputWorkspace", outWS)
 
