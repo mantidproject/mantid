@@ -275,6 +275,7 @@ class ResultsTabModel(object):
             if _param_error_should_be_displayed(name):
                 table.addColumn('float', _error_column_name(name),
                                 TableColumnType.YErr.value)
+                table.setLinkedYCol(table.columnCount()-1, table.columnCount()-2)
         return table
 
     def on_new_fit_performed(self):
