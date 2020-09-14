@@ -171,6 +171,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         if instrument != self._model._data.instrument:
             self._model._data.instrument = instrument
             self._view.set_instrument(instrument, block=True)
+            self._model.set_dead_time_from_data()
 
     def handle_double_pulse_time_changed(self):
         double_pulse_time = self._view.get_double_pulse_time()
