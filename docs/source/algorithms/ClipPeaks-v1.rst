@@ -66,7 +66,7 @@ After clipping, the inverse function is applied:
 
     Y = ( \exp \, ( \exp( Y \, ) - 1 ) - 1)^2 - 1
 
-More information about the LLS correction can be found in [1]_, [2]_, and [4]_.
+More information about the LLS correction can be found in [1]_, [2]_, and [3]_.
 
 Usage
 -----
@@ -86,9 +86,7 @@ References
 
 .. [2] Morháč, Miroslav, and Vladislav Matoušek. *Peak Clipping Algorithms for Background Estimation in Spectroscopic Data.* Applied Spectroscopy **62.1** (2008): 91–106 doi: `10.1366%2F000370208783412762 <https://doi.org/10.1366%2F000370208783412762>`_
 
-.. [3] Meng-Hua, Zhu et al. *Automatic Estimation of Peak Regions in Gamma-Ray Spectra Measured by NaI Detector.* Chinese Physics Letters **25.11** (2008): 3942–3945 doi: `10.1088/0256-307x/25/11/029 <https://doi.org/10.1088/0256-307x/25/11/029>`_
-
-.. [4] Morhac, Miroslav. *Sophisticated algorithms of analysis of spectroscopic data.* XII Advanced Computing and Analysis Techniques in Physics Research. **70** (2009): 77 doi: `10.22323/1.070.0077 <https://doi.org/10.22323/1.070.0077>`_
+.. [3] Morhac, Miroslav. *Sophisticated algorithms of analysis of spectroscopic data.* XII Advanced Computing and Analysis Techniques in Physics Research. **70** (2009): 77 doi: `10.22323/1.070.0077 <https://doi.org/10.22323/1.070.0077>`_
 
 .. categories::
 
