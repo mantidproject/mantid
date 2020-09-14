@@ -109,30 +109,36 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 "Time":    x.run().getLogData("duration").value,
             }[normaliseBy]
 
-        data_scale = 1
-        cal_scale = 1
-        bkg_scale = 1
+        _xMin = 1e16
+        _xMax = -1e16
+        for n, _wsn in enumerate(data):
+            temp_workspace_list.append(f"__data_tmp_{n}")
+            _ws = AnalysisDataService.retrieve(_wsn)
 
-        if normaliseBy == "Monitor":
-            data_scale = data.run().getProtonCharge()
-        elif normaliseBy == "Time":
-            data_scale = data.run().getLogData('duration').value
+            Scale(InputWorkspace=_ws, OutputWorkspace=_ws, Factor=_get_scale(cal)/_get_scale(_ws), EnableLogging=False)
 
-        ExtractMask(data, OutputWorkspace='__mask_tmp', EnableLogging=False)
-
+            ExtractMask(_ws, OutputWorkspace="__mask_tmp", EnableLogging=False)
         if maskAngle != Property.EMPTY_DBL:
-            MaskAngle(Workspace='__mask_tmp', MinAngle=maskAngle, Angle='Phi', EnableLogging=False)
+                MaskAngle(Workspace="__mask_tmp", MinAngle=maskAngle, Angle="Phi", EnableLogging=False)
 
         if mask is not None:
-            BinaryOperateMasks(InputWorkspace1='__mask_tmp', InputWorkspace2=mask,
-                               OperationType='OR', OutputWorkspace='__mask_tmp', EnableLogging=False)
+                BinaryOperateMasks(InputWorkspace1="__mask_tmp", InputWorkspace2=mask,
+                               OperationType="OR", OutputWorkspace=f"__mask_tmp", EnableLogging=False)
 
-        ExtractUnmaskedSpectra(InputWorkspace=data, MaskWorkspace='__mask_tmp', OutputWorkspace='__data_tmp', EnableLogging=False)
-        if isinstance(mtd['__data_tmp'], IEventWorkspace):
-            Integration(InputWorkspace='__data_tmp', OutputWorkspace='__data_tmp', EnableLogging=False)
-        ConvertSpectrumAxis(InputWorkspace='__data_tmp', Target=target, EFixed=eFixed, OutputWorkspace=outWS, EnableLogging=False)
-        Transpose(InputWorkspace=outWS, OutputWorkspace=outWS, EnableLogging=False)
-        ResampleX(InputWorkspace=outWS, OutputWorkspace=outWS, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
+            ExtractUnmaskedSpectra(InputWorkspace=_ws, MaskWorkspace="__mask_tmp", OutputWorkspace=f"__data_tmp_{n}", EnableLogging=False)
+
+            if isinstance(mtd[f"__data_tmp_{n}"], IEventWorkspace):
+                Integration(InputWorkspace=f"__data_tmp_{n}", OutputWorkspace=f"__data_tmp_{n}", EnableLogging=False)
+
+            ConvertSpectrumAxis(InputWorkspace=f"__data_tmp_{n}", Target=target, EFixed=eFixed, OutputWorkspace=f"__data_tmp_{n}", EnableLogging=False)
+            Transpose(InputWorkspace=f"__data_tmp_{n}", OutputWorkspace=f"__data_tmp_{n}", EnableLogging=False)
+
+            _ws = AnalysisDataService.retrieve(f"__data_tmp_{n}")
+
+            _xMin, _xMax = min(_xMin, _ws.readX(0).min()), max(_xMax, _ws.readX(0).max())
+        
+        xMin = _xMin if xMin is None else xMin
+        xMax = _xMax if xMax is None else xMax
 
         if cal is not None:
             ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
