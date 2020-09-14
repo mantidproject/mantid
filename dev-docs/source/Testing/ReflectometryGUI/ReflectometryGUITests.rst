@@ -143,11 +143,10 @@ Closing the interface
 ---------------------
 
 - Open the interface and load some data.
-- Edit or process the data.
+- Go to the Tools menu and select Options. Ensure the warnings are all enabled.
+- Edit the data (note that processing does not count as an edit even though it changes the state displayed).
 - Close the interface using the `x` button at the top.
 - The interface should show a 'Save/Discard/Cancel' dialogue.
-
-Note that closing the Mantid main window should work and will not give you the option to save.
 
 Saving
 ------
