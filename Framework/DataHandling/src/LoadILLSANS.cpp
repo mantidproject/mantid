@@ -876,34 +876,5 @@ LoadILLSANS::getVariableTimeBinning(const NXEntry &entry,
   }
   return binEdges;
 }
-
-class DLLExport RawIvewPreview : public API::IPreview {
-public:
-    std::string name() const override {
-        return "RawIvewPreview";
-    }
-    PreviewType type() const override {
-        return PreviewType::IVIEW;
-    }
-    std::string technique() const override {
-        return "SANS";
-    }
-};
-class DLLExport RawSviewPreview : public API::IPreview {
-public:
-    std::string name() const override {
-        return "RawSviewPreview";
-    }
-    PreviewType type() const override {
-        return PreviewType::SVIEW;
-    }
-    std::string technique() const override {
-        return "SANS";
-    }
-};
-
-DECLARE_PREVIEW(RawIvewPreview);
-DECLARE_PREVIEW(RawSviewPreview);
-
 } // namespace DataHandling
 } // namespace Mantid
