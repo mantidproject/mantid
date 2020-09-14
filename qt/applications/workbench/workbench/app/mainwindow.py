@@ -254,7 +254,7 @@ class MainWindow(QMainWindow):
                                     shortcut="Ctrl+Q")
         action_clear_all_memory = create_action(self,
                                                 "Clear All Memory",
-                                                on_triggered=self.clear_all_memory,
+                                                on_triggered=self.clear_all_memory_action,
                                                 shortcut="Ctrl+Shift+L")
 
         menu_recently_closed_scripts = RecentlyClosedScriptsMenu(self)
@@ -624,14 +624,25 @@ class MainWindow(QMainWindow):
         settings.show()
         settings.general_settings.focus_layout_box()
 
-    def clear_all_memory(self):
-        msg = QMessageBox(QMessageBox.Question, "Clear All", "All workspaces and windows will be removed.\nAre you sure?")
+    def clear_all_memory_action(self):
+        """
+        Creates Question QMessageBox to check user wants to clear all memory
+        when action is pressed from file menu
+        """
+        msg = QMessageBox(QMessageBox.Question,
+                          "Clear All", "All workspaces and windows will be removed.\nAre you sure?")
         msg.addButton(QMessageBox.Ok)
         msg.addButton(QMessageBox.Cancel)
-        msg.setWindowIcon(QIcon(':/images/mantid_workbench.png'))
+        msg.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         reply = msg.exec()
         if reply == QMessageBox.Ok:
-            FrameworkManager.Instance().clear()
+            self.clear_all_memory()
+
+    def clear_all_memory(self):
+        """
+        Wrapper for call to FrameworkManager to clear all memory
+        """
+        FrameworkManager.Instance().clear()
 
     def config_updated(self):
         """
