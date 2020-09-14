@@ -125,8 +125,7 @@ def mask_with_mask_files(mask_info, workspace):
         load_options = {"Instrument": idf_path,
                         "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
-        dummy_params = {"OutputWorkspace": EMPTY_NAME}
-        mask_alg = create_unmanaged_algorithm("MaskInstrument", **dummy_params)
+        mask_alg = create_unmanaged_algorithm("MaskDetectors")
 
         # Masker
         for mask_file in mask_files:
@@ -141,11 +140,10 @@ def mask_with_mask_files(mask_info, workspace):
             # a) Extract detectors to mask from MaskWorkspace
             det_ids = masking_workspace.getMaskedDetectors()
             # b) Mask the detector ids on the instrument
-            mask_alg.setProperty("InputWorkspace", workspace)
-            mask_alg.setProperty("OutputWorkspace", workspace)
-            mask_alg.setProperty("DetectorIDs", det_ids)
+            mask_alg.setProperty("Workspace", workspace)
+            mask_alg.setProperty("DetectorList", det_ids)
             mask_alg.execute()
-            workspace = mask_alg.getProperty("OutputWorkspace").value
+            workspace = mask_alg.getProperty("Workspace").value
     return workspace
 
 
