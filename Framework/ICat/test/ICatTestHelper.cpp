@@ -5,39 +5,25 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ICatTestHelper.h"
-#include "MantidKernel/Logger.h"
 
-namespace {
-Mantid::Kernel::Logger logger("ICatTest");
-}
+#include "MantidAPI/CatalogManager.h"
 
 namespace ICatTestHelper {
-/// Skip all unit tests if ICat server is down
-bool skipTests() {
-  Mantid::Kernel::ConfigService::Instance().setString("default.facility",
-                                                      "ISIS");
-  if (!login()) {
-    logger.error() << "ICat server seems to be down. Skipping tests\n";
-    return true;
-  } else {
-    logout();
-    return false;
-  }
+
+bool skipTests() { return false; }
+
+FakeICatLogin::FakeICatLogin()
+    : m_loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {
+  m_session = Mantid::API::CatalogManager::Instance().login("", "", "", "TEST");
 }
 
-bool login() {
-  Mantid::ICat::CatalogLogin loginobj;
-  loginobj.initialize();
-  loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-  loginobj.setPropertyValue("Password", "MantidTestUser4");
-  loginobj.setProperty("KeepSessionAlive", false);
-  loginobj.execute();
-  return loginobj.isExecuted();
+FakeICatLogin::~FakeICatLogin() {
+  Mantid::API::CatalogManager::Instance().destroyCatalog(
+      m_session->getSessionId());
 }
 
-void logout() {
-  Mantid::ICat::CatalogLogout logoutobj;
-  logoutobj.initialize();
-  logoutobj.execute();
-}
+bool login() { return true; }
+
+void logout() {}
+
 } // namespace ICatTestHelper

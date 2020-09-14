@@ -6,11 +6,21 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidICat/CatalogLogin.h"
-#include "MantidICat/CatalogLogout.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/CatalogSession.h"
+#include "MantidTestHelpers/FacilityHelper.h"
 
 namespace ICatTestHelper {
+
+class FakeICatLogin {
+public:
+  FakeICatLogin();
+  ~FakeICatLogin();
+
+private:
+  Mantid::API::CatalogSession_sptr m_session;
+  FacilityHelper::ScopedFacilities m_loadTESTFacility;
+};
+
 /// Skip all unit tests if ICat server is down
 bool skipTests();
 
