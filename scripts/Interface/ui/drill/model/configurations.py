@@ -60,7 +60,6 @@ class RundexSettings(object):
                 "MaskFiles",
                 "ReferenceFiles",
                 "OutputWorkspace",
-                "WedgeWorkspace",
                 "SampleThickness",
                 "CustomOptions"
                 ],
@@ -128,9 +127,10 @@ class RundexSettings(object):
                 "WedgeAngle": "30",
                 "WedgeOffset": "0",
                 "AsymmetricWedges": False,
-                "MaxQxy": "0",
-                "DeltaQ": "0",
-                "IQxQyLogBinning": False
+                "MaxQxy": "-1",
+                "DeltaQ": "-1",
+                "IQxQyLogBinning": False,
+                "OutputPanels": False
                 },
             REFL_POL : {
                 "PolarizationEfficiencyFile": "",

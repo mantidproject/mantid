@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, SaveNexusProcessed, LoadNexusProcessed, config, mtd
+from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, \
+                             SaveNexusProcessed, LoadNexusProcessed, config, mtd
 import systemtesting
 from tempfile import gettempdir
 import os
@@ -66,6 +67,105 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
 
 
+class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
+    """
+    AutoProcess test with wedges for d11 data.
+    """
+
+    def __init__(self):
+        super(D11_AutoProcess_Wedges_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['out', 'D11_AutoProcess_Wedges_Reference.nxs']
+
+    def runTest(self):
+
+        beams = '2866,2867+2868,2878'
+        containers = '2888+2971,2884+2960,2880+2949'
+        container_tr = '2870+2954'
+        beam_tr = '2867+2868'
+        sample = '3187,3177,3167'
+        sample_tr = '2869'
+        thick = 0.2
+
+        # reduce samples
+        # this also tests that already loaded workspace can be passed instead of a file
+        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
+        SANSILLAutoProcess(
+            SampleRuns=sample,
+            BeamRuns=beams,
+            ContainerRuns=containers,
+            MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
+            SensitivityMaps='sens-lamp',
+            SampleTransmissionRuns=sample_tr,
+            ContainerTransmissionRuns=container_tr,
+            TransmissionBeamRuns=beam_tr,
+            SampleThickness=thick,
+            CalculateResolution='MildnerCarpenter',
+            NumberOfWedges=2,
+            OutputWorkspace='iq'
+            )
+
+        GroupWorkspaces(
+            InputWorkspaces=['iq_1', 'iq_2', 'iq_3',
+                             'iq_wedge_1_1', 'iq_wedge_1_2', 'iq_wedge_1_3',
+                             'iq_wedge_2_1', 'iq_wedge_2_2', 'iq_wedge_2_3'],
+            OutputWorkspace='out'
+            )
+
+
+class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11 with output type as I(Qx, Qy).
+    """
+
+    def __init__(self):
+        super(D11_AutoProcess_IQxQy_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['iqxy', 'D11_AutoProcess_IQxQy_Reference.nxs']
+
+    def runTest(self):
+        SANSILLAutoProcess(
+            SampleRuns='3187,3177,3167',
+            BeamRuns='2866,2867+2868,2878',
+            ContainerRuns='2888+2971,2884+2960,2880+2949',
+            MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
+            SensitivityMaps='sens-lamp.nxs',
+            SampleTransmissionRuns='3172',
+            ContainerTransmissionRuns='2870+2954',
+            TransmissionBeamRuns='2867+2868',
+            SampleThickness=0.2,
+            CalculateResolution='MildnerCarpenter',
+            OutputWorkspace='iqxy',
+            OutputType='I(Qx,Qy)'
+        )
+
+
 class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     """
     Tests auto process with D33 monochromatic data
@@ -110,10 +210,62 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns=can_tr,
             TransmissionBeamRuns=tr_beam,
             OutputWorkspace='iq',
-            PanelOutputWorkspaces='panels'
+            OutputPanels=True
         )
 
-        GroupWorkspaces(InputWorkspaces=['iq', 'panels'], OutputWorkspace='out')
+        GroupWorkspaces(InputWorkspaces=['iq', 'iq_panels'], OutputWorkspace='out')
+
+
+class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process with D33 data.
+    Separation of panels and I(Phi, Q) output.
+    """
+
+    def __init__(self):
+        super(D33_AutoProcess_IPhiQ_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D33'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D33/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['out', 'D33_AutoProcess_IPhiQ_Reference.nxs']
+
+    def runTest(self):
+
+        absorber = '002227'
+        tr_beam = '002192'
+        can_tr = '002193'
+        empty_beam = '002219'
+        can = '002228'
+        mask = 'D33Mask2.nxs'
+
+        SANSILLAutoProcess(
+            SampleRuns='001464',
+            SampleTransmissionRuns='002197',
+            MaskFiles=mask,
+            AbsorberRuns=absorber,
+            BeamRuns=empty_beam,
+            ContainerRuns=can,
+            ContainerTransmissionRuns=can_tr,
+            TransmissionBeamRuns=tr_beam,
+            OutputWorkspace='iphiq',
+            OutputPanels=True,
+            NumberOfWedges=60,
+            OutputType='I(Phi,Q)'
+        )
+
+        GroupWorkspaces(InputWorkspaces=['iphiq', 'iphiq_panels'],
+                        OutputWorkspace='out')
 
 
 class D16_AutoProcess_Test(systemtesting.MantidSystemTest):

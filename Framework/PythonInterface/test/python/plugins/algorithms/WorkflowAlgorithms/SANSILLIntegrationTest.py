@@ -53,7 +53,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         azimuth_axis = mtd['iq'].getAxis(1)
         self.assertTrue(azimuth_axis.isNumeric())
         self.assertEqual(len(azimuth_axis),36)
-        self.assertEqual(azimuth_axis.getUnit().unitID(), "Degrees")
+        self.assertEqual(azimuth_axis.getUnit().unitID(), "Phi")
         for phi in range(36):
             self.assertTrue(mtd['iq'].hasDx(phi))
 
