@@ -90,10 +90,10 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                              doc="Output Workspace")
 
     def PyExec(self):
-        data = self.getProperty("InputWorkspace").value
-        bkg = self.getProperty("BackgroundWorkspace").value
-        cal = self.getProperty("CalibrationWorkspace").value
-        mask = self.getProperty("MaskWorkspace").value
+        data = self.getProperty("InputWorkspace").value             # [1~n]
+        bkg = self.getProperty("BackgroundWorkspace").value         # [1~n]
+        cal = self.getProperty("CalibrationWorkspace").value        # [1]
+        mask = self.getProperty("MaskWorkspace").value              # [1]
         target = self.getProperty("Target").value
         eFixed = self.getProperty("EFixed").value
         xMin = self.getProperty("XMin").value
