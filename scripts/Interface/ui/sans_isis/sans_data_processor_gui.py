@@ -364,7 +364,7 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_wavelength_step_type_changed(self):
         if self.wavelength_step_type == RangeStepType.RANGE_LIN:
             self.wavelength_stacked_widget.setCurrentIndex(1)
-            self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
+            self.wavelength_step_label.setText(u'Step [\u00c5]')
         elif self.wavelength_step_type == RangeStepType.RANGE_LOG:
             self.wavelength_stacked_widget.setCurrentIndex(1)
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
@@ -373,7 +373,7 @@ class SANSDataProcessorGui(QMainWindow,
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
         elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
-            self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
+            self.wavelength_step_label.setText(u'Step [\u00c5]')
 
     def create_data_table(self):
         # Delete an already existing table
