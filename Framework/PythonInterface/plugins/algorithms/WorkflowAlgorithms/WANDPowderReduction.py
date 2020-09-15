@@ -140,18 +140,18 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         xMin = _xMin if xMin is None else xMin
         xMax = _xMax if xMax is None else xMax
 
-        _data_tmp_list = [me for me in temp_workspace_list if '__data_tmp_' in me]
+        _data_tmp_list = [me for me in self.temp_workspace_list if '__data_tmp_' in me]
         for i, _wsn in enumerate(_data_tmp_list):
             ResampleX(InputWorkspace=_wsn, OutputWorkspace=_wsn, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
 
         if bkg is not None:
             bkg = bkg.split(",")  # need to do a manual splitting here since StringArrayProperty can't be optional
             for n, bgn in enumerate(bkg):
-                temp_workspace_list.append(f'__bkg_tmp_{n}')
+                self.temp_workspace_list.append(f'__bkg_tmp_{n}')
                 ExtractUnmaskedSpectra(InputWorkspace=bkg, MaskWorkspace='__mask_tmp', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
                 if isinstance(mtd[f'__bkg_tmp_{n}'], IEventWorkspace):
                     Integration(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
-                CopyInstrumentParameters(data, f'__bkg_tmp_{n}', EnableLogging=False)
+                CopyInstrumentParameters('__data_tmp_0', f'__bkg_tmp_{n}', EnableLogging=False)
                 ConvertSpectrumAxis(InputWorkspace=f'__bkg_tmp_{n}', Target=target, EFixed=eFixed, OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
                 Transpose(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
                 ResampleX(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
@@ -162,7 +162,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
             if isinstance(mtd['__cal_tmp'], IEventWorkspace):
                 Integration(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
-            CopyInstrumentParameters(data, '__cal_tmp', EnableLogging=False)
+            CopyInstrumentParameters('__data_tmp_0', '__cal_tmp', EnableLogging=False)
             ConvertSpectrumAxis(InputWorkspace='__cal_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__cal_tmp', EnableLogging=False)
             Transpose(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
             ResampleX(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
