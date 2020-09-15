@@ -41,6 +41,12 @@ public:
   listInvestigationTypes(std::vector<std::string> &investigationTypes) override;
 
   void keepAlive() override;
+
+  static void setCount(std::size_t const &count);
+  static std::size_t count();
+
+private:
+  static std::size_t m_counter;
 };
 
 } // namespace Mantid

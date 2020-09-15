@@ -7,6 +7,7 @@
 #include "FakeCatalog.h"
 
 #include "MantidAPI/CatalogFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::API;
 
@@ -24,31 +25,55 @@ API::CatalogSession_sptr FakeCatalog::login(std::string const &username,
   return std::make_shared<API::CatalogSession>("", facility, endPoint);
 }
 
-void FakeCatalog::logout(){};
+void FakeCatalog::logout() { m_counter++; };
 
 void FakeCatalog::search(ICat::CatalogSearchParam const &inputs,
                          ITableWorkspace_sptr &outputWorkspace,
-                         int const &offset, int const &limit) {}
+                         int const &offset, int const &limit) {
+  outputWorkspace->appendRow();
+  m_counter++;
+}
 
 int64_t
 FakeCatalog::getNumberOfSearchResults(ICat::CatalogSearchParam const &inputs) {
-  int64_t numberOfSearchResults = 5;
-  return numberOfSearchResults;
+  m_counter++;
+  return 5;
 }
 
-void FakeCatalog::myData(ITableWorkspace_sptr &outputWorkspace) {}
+void FakeCatalog::myData(ITableWorkspace_sptr &outputWorkspace) {
+  outputWorkspace->appendRow();
+  m_counter++;
+}
 
 void FakeCatalog::getDataSets(std::string const &investigationID,
-                              ITableWorkspace_sptr &outputWorkspace) {}
+                              ITableWorkspace_sptr &outputWorkspace) {
+  outputWorkspace->appendRow();
+  m_counter++;
+}
 
 void FakeCatalog::getDataFiles(std::string const &investigationID,
-                               ITableWorkspace_sptr &outputWorkspace) {}
+                               ITableWorkspace_sptr &outputWorkspace) {
+  outputWorkspace->appendRow();
+  m_counter++;
+}
 
-void FakeCatalog::listInstruments(std::vector<std::string> &instruments) {}
+void FakeCatalog::listInstruments(std::vector<std::string> &instruments) {
+  instruments.emplace_back("");
+  m_counter++;
+}
 
 void FakeCatalog::listInvestigationTypes(
-    std::vector<std::string> &investigationTypes) {}
+    std::vector<std::string> &investigationTypes) {
+  investigationTypes.emplace_back("");
+  m_counter++;
+}
 
-void FakeCatalog::keepAlive() {}
+void FakeCatalog::keepAlive() { m_counter++; }
+
+void FakeCatalog::setCount(std::size_t const &count) { m_counter = count; }
+
+std::size_t FakeCatalog::count() { return m_counter; }
+
+std::size_t FakeCatalog::m_counter(0);
 
 } // namespace Mantid
