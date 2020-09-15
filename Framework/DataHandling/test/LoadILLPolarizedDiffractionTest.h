@@ -154,8 +154,8 @@ public:
         std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
-    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "Time")
-    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "t")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "TOF")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "Time-of-flight")
 
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 186.64, 0.01)

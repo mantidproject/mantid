@@ -298,7 +298,7 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
       lblUnit->setLabel("Time channel", Units::Symbol::EmptyLabel);
       workspace->getAxis(0)->unit() = lblUnit;
     } else {
-      workspace->getAxis(0)->unit() = UnitFactory::Instance().create("Time");
+      workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     }
   } else {
     workspace->getAxis(0)->unit() =
