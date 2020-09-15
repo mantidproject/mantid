@@ -157,45 +157,49 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         xMin = _xMin if xMin.size == 0 else xMin
         xMax = _xMax if xMax.size == 0 else xMax
 
-            _ws = AnalysisDataService.retrieve(f"__data_tmp_{n}")
+        # Step_2: process each spectra with xMin and xMax
+        # BEGIN_FOR: prcess_spectra
+        for n, _wsn in enumerate(data):
+            _mskn = f"__mask_{n}"  # calculated in previous loop
 
-            _xMin, _xMax = min(_xMin, _ws.readX(0).min()), max(_xMax, _ws.readX(0).max())
+            # resample spectra
+            _ws_resampled = ResampleX(
+                InputWorkspace=f"__ws_{n}",
+                XMin=xMin, 
+                XMax=xMax, 
+                NumberBins=numberBins,
+                EnableLogging=False,
+                )
+            
+            # calibration
+            if cal is not None:
+                _ws_cal = ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace=_mskn,  EnableLogging=False)
+                _ws_cal = Integration(InputWorkspace=_ws_cal, EnableLogging=False)
+                CopyInstrumentParameters(InputWorkspace=_wsn, OutputWorkspace=_ws_cal, EnableLogging=False)
+                _ws_cal = ConvertSpectrumAxis(InputWorkspace=_ws_cal, Target=target, EFixed=eFixed,  EnableLogging=False)
+                _ws_cal = Transpose(InputWorkspace=_ws_cal, EnableLogging=False)
+                _ws_cal_resampled = ResampleX(InputWorkspace=_ws_cal, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
+                _ws_resampled = Divide(LHSWorkspace=_ws_resampled, RHSWorkspace=_ws_cal_resampled, EnableLogging=False)
 
-        xMin = _xMin if xMin is None else xMin
-        xMax = _xMax if xMax is None else xMax
-
-        _data_tmp_list = [me for me in self.temp_workspace_list if '__data_tmp_' in me]
-        for i, _wsn in enumerate(_data_tmp_list):
-            ResampleX(InputWorkspace=_wsn, OutputWorkspace=_wsn, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
-
-        if bkg is not None:
-            bkg = bkg.split(",")  # need to do a manual splitting here since StringArrayProperty can't be optional
-            for n, bgn in enumerate(bkg):
-                self.temp_workspace_list.append(f'__bkg_tmp_{n}')
-                ExtractUnmaskedSpectra(InputWorkspace=bkg, MaskWorkspace='__mask_tmp', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
-                if isinstance(mtd[f'__bkg_tmp_{n}'], IEventWorkspace):
-                    Integration(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
-                CopyInstrumentParameters('__data_tmp_0', f'__bkg_tmp_{n}', EnableLogging=False)
-                ConvertSpectrumAxis(InputWorkspace=f'__bkg_tmp_{n}', Target=target, EFixed=eFixed, OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
-                Transpose(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
-                ResampleX(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
-                Scale(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', Factor=_get_scale(cal)/_get_scale(bkg), EnableLogging=False)
-                Scale(InputWorkspace=f'__bkg_tmp_{n}', OutputWorkspace=f'__bkg_tmp_{n}', Factor=self.getProperty('BackgroundScale').value, EnableLogging=False)
-
-        if cal is not None:
-            ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
-            if isinstance(mtd['__cal_tmp'], IEventWorkspace):
-                Integration(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
-            CopyInstrumentParameters('__data_tmp_0', '__cal_tmp', EnableLogging=False)
-            ConvertSpectrumAxis(InputWorkspace='__cal_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__cal_tmp', EnableLogging=False)
-            Transpose(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
-            ResampleX(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
-
-            Divide(LHSWorkspace='__data_tmp_0', RHSWorkspace='__cal_tmp', OutputWorkspace=outWS, EnableLogging=False)
+            # background
             if bkg is not None:
-                Minus(LHSWorkspace=outWS, RHSWorkspace='__bkg_tmp_0', OutputWorkspace=outWS, EnableLogging=False)
-        else:
-            CloneWorkspace(InputWorkspace="__data_tmp_0", OutputWorkspace=outWS)
+                bgn = bkg[n]
+                _ws_bkg = ExtractUnmaskedSpectra(InputWorkspace=bgn, MaskWorkspace=_mskn, EnableLogging=False)
+                _ws_bkg = Integration(InputWorkspace=_ws_bkg, EnableLogging=False)
+                CopyInstrumentParameters(InputWorkspace=_wsn, OutputWorkspace=_ws_bkg, EnableLogging=False)
+                _ws_bkg = ConvertSpectrumAxis(InputWorkspace=_ws_bkg, Target=target, EFixed=eFixed, EnableLogging=False)
+                _ws_bkg = Transpose(InputWorkspace=_ws_bkg, EnableLogging=False)
+                _ws_bkg_resampled = ResampleX(InputWorkspace=_ws_bkg, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
+                _ws_bkg_resampled = Scale(InputWorkspace=_ws_bkg_resampled, Factor=_get_scale(cal)/_get_scale(bgn), EnableLogging=False)
+                _ws_bkg_resampled = Scale(InputWorkspace=_ws_bkg_resampled, Factor=self.getProperty('BackgroundScale').value, EnableLogging=False)
+                _ws_resampled = Minus(LHSWorkspace=_ws_resampled, RHSWorkspace=_ws_bkg_resampled, EnableLogging=False)
+
+            # conjoin
+            if n < 1:
+                CloneWorkspace(InputWorkspace=_ws_resampled, OutputWorkspace="__ws_conjoined", EnableLogging=False)
+            else:
+                ConjoinWorkspaces(InputWorkspace1="__ws_conjoined", InputWorkspace2=_ws_resampled, CheckOverlapping=False, EnableLogging=False)
+        # END_FOR: prcess_spectra
 
         for i, _wsn in enumerate(_data_tmp_list[1:]):
             if cal is not None:
