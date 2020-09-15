@@ -37,10 +37,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         return issues
 
     def PyInit(self):
-
-        # self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '',
-        #                                              direction=Direction.Input),
-        #                      doc='The main input workspace.')
         self.declareProperty(StringArrayProperty(
                                 "InputWorkspace",
                                 direction=Direction.Input,
@@ -212,6 +208,5 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         # Step_4: remove temp workspaces
         [DeleteWorkspace(ws, EnableLogging=False) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
-
 
 AlgorithmFactory.subscribe(WANDPowderReduction)
