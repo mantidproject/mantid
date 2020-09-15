@@ -317,12 +317,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.declareProperty('TransmissionBeamRadius', 0.05,
                              validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam radius [m]; used for beam center '
-                             'finding, transmission and flux calculations.')
+                             doc='Beam radius [m]; used for transmission '
+                             'calculations.')
 
         self.declareProperty(FloatArrayProperty('BeamRadius', values=[0.05]),
                              doc='Beam radius [m]; used for beam center '
-                             'finding, transmission and flux calculations.')
+                             'finding and flux calculations.')
 
         self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
                                                           'used only if the absolute scale is done by dividing to water.')
