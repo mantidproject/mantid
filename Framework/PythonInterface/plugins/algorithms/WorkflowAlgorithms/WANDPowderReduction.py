@@ -112,7 +112,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         _xMin = 1e16
         _xMax = -1e16
         for n, _wsn in enumerate(data):
-            temp_workspace_list.append(f"__data_tmp_{n}")
+            self.temp_workspace_list.append(f"__data_tmp_{n}")
             _ws = AnalysisDataService.retrieve(_wsn)
 
             Scale(InputWorkspace=_ws, OutputWorkspace=_ws, Factor=_get_scale(cal)/_get_scale(_ws), EnableLogging=False)
