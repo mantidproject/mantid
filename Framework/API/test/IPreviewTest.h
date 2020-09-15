@@ -7,10 +7,12 @@
 #pragma once
 
 #include "MantidAPI/IPreview.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <cxxtest/TestSuite.h>
 
+using Mantid::API::FrameworkManager;
 using Mantid::API::IPreview;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceFactory;
@@ -38,6 +40,10 @@ public:
   // This means the constructor isn't called when running other tests
   static IPreviewTest *createSuite() { return new IPreviewTest(); }
   static void destroySuite(IPreviewTest *suite) { delete suite; }
+
+  void setUp() override {
+      FrameworkManager::Instance();
+  }
 
   void test_basic_preview() {
     IPreview *preview = createBasicPreview();
