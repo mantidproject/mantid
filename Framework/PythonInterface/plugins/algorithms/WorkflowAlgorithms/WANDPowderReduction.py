@@ -18,7 +18,7 @@ from mantid.kernel import StringListValidator, Direction, Property, FloatBounded
 
 
 class WANDPowderReduction(DataProcessorAlgorithm):
-    temp_workspace_list = ['__data_tmp', '__cal_tmp', '__mask_tmp', '__bkg_tmp']
+    temp_workspace_list = ["__ws_conjoined", "_ws_cal", "_ws_cal_resampled", "_ws_tmp", "_ws_resampled"]
 
     def category(self):
         return "Diffraction\\Reduction"
