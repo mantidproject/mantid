@@ -528,7 +528,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                         magneticComponent = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
                         # Nuclear coherent component
                         dataY_nuclear[spectrum] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
-                                                  - sigma_x_sf - sigma_y_sf - sigma_z_sf ) / 6.0
+                                                   - sigma_x_sf - sigma_y_sf - sigma_z_sf) / 6.0
                         # Incoherent component
                         dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magneticComponent
                         # Magnetic component
