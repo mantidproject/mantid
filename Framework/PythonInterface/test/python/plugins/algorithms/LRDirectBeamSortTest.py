@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import LoadEventNexus, LRDirectBeamSort, DeleteWorkspace
 import unittest
-from testhelpers import assertRaisesNothing
-from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
 
 class LRDirectBeamSortTest(unittest.TestCase):
