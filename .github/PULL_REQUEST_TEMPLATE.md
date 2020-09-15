@@ -17,6 +17,8 @@ Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 *This does not require release notes* because **fill in an explanation of why**
 -->
 
+<!-- Finally, don't forget to add the appropriate labels, milestones, etc.!  -->
+
 ---
 
 #### Reviewer ####
