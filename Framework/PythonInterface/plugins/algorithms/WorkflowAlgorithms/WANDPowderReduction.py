@@ -109,6 +109,14 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 "Time":    x.run().getLogData("duration").value,
             }[normaliseBy]
 
+        # NOTE:
+        # StringArrayProperty cannot be optional, so the background can only be passed in as a string
+        # or a list, which will be manually unpacked here
+        try:
+            bkg = bkg.split(",") if bkg is not None else bkg
+        except:
+            _bg = AnalysisDataService.retrieve(bkg[0])  # invalid background ws will be detected here
+
         _xMin = 1e16
         _xMax = -1e16
         for n, _wsn in enumerate(data):
