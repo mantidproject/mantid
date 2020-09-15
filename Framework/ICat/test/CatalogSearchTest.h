@@ -7,7 +7,6 @@
 #pragma once
 
 #include "ICatTestHelper.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogSearch.h"
 #include <cxxtest/TestSuite.h>
