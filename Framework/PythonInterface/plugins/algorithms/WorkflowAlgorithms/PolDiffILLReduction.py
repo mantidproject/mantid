@@ -597,11 +597,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                 dataE = np.sqrt(normalisationFactors)
                 CreateWorkspace(dataX=mtd[vanadium_ws].getItem(0).readX(0), dataY=normalisationFactors, dataE=dataE,
                                 NSpec=mtd[vanadium_ws].getItem(0).getNumberOfHistograms(), OutputWorkspace='normalisation_ws')
-            ws_name = '{0}_{1}'.format(tmp_name, entry_no)
-            tmp_names.append(ws_name)
             Divide(LHSWorkspace=vanadium_ws,
                    RHSWorkspace='normalisation_ws',
-                   OutputWorkspace=ws_name)
+                   OutputWorkspace='det_efficiency')
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
                 if self._mode == 'TOF':
@@ -624,11 +622,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                         normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
                         CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
                     else:
-                        normalisationFactors = self._max_values_per_detector(vanadium_ws)
+                        normalisationFactors = self._max_values_per_detector(mtd[conjoined_components].getItem(1).name())
                         dataE = np.sqrt(normalisationFactors)
-                        CreateWorkspace(dataX=mtd[vanadium_ws].getItem(0).readX(0), dataY=normalisationFactors,
+                        CreateWorkspace(dataX=mtd[conjoined_components].getItem(1).readX(0), dataY=normalisationFactors,
                                         dataE=dataE,
-                                        NSpec=mtd[vanadium_ws].getItem(0).getNumberOfHistograms(),
+                                        NSpec=mtd[conjoined_components].getItem(1).getNumberOfHistograms(),
                                         OutputWorkspace='normalisation_ws')
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
                     tmp_names.append(ws_name)
