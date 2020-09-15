@@ -635,7 +635,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                        RHSWorkspace=component_ws,
                        OutputWorkspace=ws_name)
 
-        GroupWorkspaces(tmp_names, OutputWorkspace='det_efficiency')
+            GroupWorkspaces(tmp_names, OutputWorkspace='det_efficiency')
 
         for entry_no, entry in enumerate(mtd[ws]):
             Multiply(LHSWorkspace=entry,
