@@ -8,6 +8,7 @@
 
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid::API;
 
@@ -22,7 +23,7 @@ API::CatalogSession_sptr FakeCatalog::login(std::string const &username,
                                             std::string const &password,
                                             std::string const &endPoint,
                                             std::string const &facility) {
-  return std::make_shared<API::CatalogSession>("", facility, endPoint);
+  return std::make_shared<API::CatalogSession>("FakeID", facility, endPoint);
 }
 
 void FakeCatalog::logout() { m_counter++; };
@@ -69,6 +70,25 @@ void FakeCatalog::listInvestigationTypes(
 }
 
 void FakeCatalog::keepAlive() { m_counter++; }
+
+std::string const FakeCatalog::getFileLocation(long long const &fileID) {
+  return "";
+}
+
+std::string const FakeCatalog::getDownloadURL(long long const &fileID) {
+  return "";
+}
+
+std::string const
+FakeCatalog::getUploadURL(std::string const &investigationID,
+                          std::string const &createFileName,
+                          std::string const &dataFileDescription) {
+  return "";
+}
+
+ITableWorkspace_sptr FakeCatalog::getPublishInvestigations() {
+  return API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+}
 
 void FakeCatalog::setCount(std::size_t const &count) { m_counter = count; }
 

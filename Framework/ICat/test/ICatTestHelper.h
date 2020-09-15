@@ -16,6 +16,8 @@ public:
   FakeICatLogin();
   ~FakeICatLogin();
 
+  std::string getSessionId() const;
+
 private:
   Mantid::API::CatalogSession_sptr m_session;
   FacilityHelper::ScopedFacilities m_loadTESTFacility;

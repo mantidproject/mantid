@@ -21,4 +21,8 @@ FakeICatLogin::~FakeICatLogin() {
   CatalogManager::Instance().destroyCatalog(m_session->getSessionId());
 }
 
+std::string FakeICatLogin::getSessionId() const {
+  return m_session->getSessionId();
+}
+
 } // namespace ICatTestHelper

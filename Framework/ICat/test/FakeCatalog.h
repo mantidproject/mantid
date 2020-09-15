@@ -8,12 +8,13 @@
 
 #include "MantidAPI/CatalogSession.h"
 #include "MantidAPI/ICatalog.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid {
 
-class FakeCatalog : public API::ICatalog {
+class FakeCatalog : public API::ICatalog, public API::ICatalogInfoService {
 public:
   FakeCatalog();
   ~FakeCatalog() override;
@@ -41,6 +42,14 @@ public:
   listInvestigationTypes(std::vector<std::string> &investigationTypes) override;
 
   void keepAlive() override;
+
+  std::string const getFileLocation(long long const &fileID) override;
+  std::string const getDownloadURL(long long const &fileID) override;
+  std::string const
+  getUploadURL(std::string const &investigationID,
+               std::string const &createFileName,
+               std::string const &dataFileDescription) override;
+  API::ITableWorkspace_sptr getPublishInvestigations() override;
 
   static void setCount(std::size_t const &count);
   static std::size_t count();
