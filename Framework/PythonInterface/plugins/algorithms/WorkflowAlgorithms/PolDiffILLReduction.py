@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
-    PropertyMode, Progress, PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty, \
+    NumericAxis, PropertyMode, Progress, PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty, \
     FileAction, AlgorithmFactory
 from mantid.kernel import Direction, EnabledWhenProperty, IntBoundedValidator, LogicOperator, \
     PropertyCriterion, StringListValidator
@@ -551,16 +551,23 @@ class PolDiffILLReduction(PythonAlgorithm):
             components.append([])
         for entry in mtd[ws]:
             entryName = entry.name()
+            ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
             for component_no, componentName in enumerate(componentNames):
                 if componentName in entryName:
                     components[component_no].append(entryName)
+
+        x_axis = NumericAxis.create(len(components[0]))
+        for index in range(len(components[0])):
+            x_axis.setValue(index, index)
+        x_axis.setUnit("Label").setLabel('Scan step', '')
+
         ws_names = []
         for component_no, compList in enumerate(components):
-            strList = '.'.join(compList)
             ws_name = '{}_component'.format(componentNames[component_no])
             ws_names.append(ws_name)
-            ConjoinXRuns(InputWorkspace=strList, OutputWorkspace=ws_name)
-        output_name = 'conjoined_components'
+            ConjoinXRuns(InputWorkspaces=compList, OutputWorkspace=ws_name)
+            mtd[ws_name].replaceAxis(0, x_axis)
+        output_name = '{}_conjoined_components'.format(self.getPropertyValue('ProcessAs'))
         GroupWorkspaces(ws_names, OutputWorkspace=output_name)
         return output_name
 
