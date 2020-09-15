@@ -31,6 +31,7 @@ class LModel(object):
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def load_run(self):
+
         to_load = search_user_dirs(self.run)
         if not to_load:
             return None
@@ -48,6 +49,11 @@ class LModel(object):
         for ws_name in workspaces.values():
             loaded_detectors[ws_name[0]] = 1
         num_loaded_detectors = len(loaded_detectors)
+
+        if mantid.AnalysisDataService.Instance().doesExist(str(self.run)):
+            run_workspace = mantid.AnalysisDataService.Instance().retrieve(str(self.run))
+            mantid.DeleteWorkspace(run_workspace)
+
         self._load(workspaces)
         self.loaded_runs.update({self.run: merge_workspaces(self.run, workspaces.values())})
         self.num_loaded_detectors[self.run] = num_loaded_detectors

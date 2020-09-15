@@ -94,6 +94,7 @@ New Features
 Bug fixes
 ---------
 - Fixed an issue where Elemental Analysis gui was crashing when any peak checkbox was unselected.
+- Fixed an issue with reloading data after closing gui.
 
 
 :ref:`Release 5.1.0 <v5.1.0>`
