@@ -117,29 +117,45 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         except:
             _bg = AnalysisDataService.retrieve(bkg[0])  # invalid background ws will be detected here
 
+        # NOTE:
+        # Due to range difference among incoming spectra, a common bin para is needed
+        # such that all data can be binned exactly the same way.
+
+        # Step_1: Find the global bin from all spectrum
         _xMin = 1e16
         _xMax = -1e16
+        # BEGIN_FOR: located_global_xMin&xMax
         for n, _wsn in enumerate(data):
-            self.temp_workspace_list.append(f"__data_tmp_{n}")
             _ws = AnalysisDataService.retrieve(_wsn)
+            _mskn = f"__mask_{n}"
+            self.temp_workspace_list.append(_mskn)
 
-            Scale(InputWorkspace=_ws, OutputWorkspace=_ws, Factor=_get_scale(cal)/_get_scale(_ws), EnableLogging=False)
-
-            ExtractMask(_ws, OutputWorkspace="__mask_tmp", EnableLogging=False)
+            ExtractMask(_ws, OutputWorkspace=_mskn, EnableLogging=False)
             if maskAngle != Property.EMPTY_DBL:
-                MaskAngle(Workspace="__mask_tmp", MinAngle=maskAngle, Angle="Phi", EnableLogging=False)
-
+                MaskAngle(Workspace=_mskn, MinAngle=maskAngle, Angle="Phi", EnableLogging=False)
             if mask is not None:
-                BinaryOperateMasks(InputWorkspace1="__mask_tmp", InputWorkspace2=mask,
-                               OperationType="OR", OutputWorkspace=f"__mask_tmp", EnableLogging=False)
+                BinaryOperateMasks(
+                    InputWorkspace1=_mskn, 
+                    InputWorkspace2=mask,
+                    OperationType="OR", 
+                    OutputWorkspace=_mskn, 
+                    EnableLogging=False,
+                    )
+            
+            _ws_tmp = Scale(InputWorkspace=_wsn, Factor=_get_scale(cal)/_get_scale(_ws), EnableLogging=False)
+            _ws_tmp = ExtractUnmaskedSpectra(InputWorkspace=_ws_tmp, MaskWorkspace=_mskn, EnableLogging=False)
+            _ws_tmp = Integration(InputWorkspace=_ws_tmp, EnableLogging=False)
+            _ws_tmp = ConvertSpectrumAxis(InputWorkspace=_ws_tmp, Target=target, EFixed=eFixed, EnableLogging=False)
+            _ws_tmp = Transpose(InputWorkspace=_ws_tmp, OutputWorkspace=f"__ws_{n}", EnableLogging=False)
 
-            ExtractUnmaskedSpectra(InputWorkspace=_ws, MaskWorkspace="__mask_tmp", OutputWorkspace=f"__data_tmp_{n}", EnableLogging=False)
+            _xMin = min(_xMin, _ws_tmp.readX(0).min())
+            _xMax = max(_xMax, _ws_tmp.readX(0).max())
+        # END_FOR: located_global_xMin&xMax
 
-            if isinstance(mtd[f"__data_tmp_{n}"], IEventWorkspace):
-                Integration(InputWorkspace=f"__data_tmp_{n}", OutputWorkspace=f"__data_tmp_{n}", EnableLogging=False)
-
-            ConvertSpectrumAxis(InputWorkspace=f"__data_tmp_{n}", Target=target, EFixed=eFixed, OutputWorkspace=f"__data_tmp_{n}", EnableLogging=False)
-            Transpose(InputWorkspace=f"__data_tmp_{n}", OutputWorkspace=f"__data_tmp_{n}", EnableLogging=False)
+        # NOTE:
+        # xMin and xMax are initialized as empty numpy.array (np.array([])).
+        xMin = _xMin if xMin.size == 0 else xMin
+        xMax = _xMax if xMax.size == 0 else xMax
 
             _ws = AnalysisDataService.retrieve(f"__data_tmp_{n}")
 
