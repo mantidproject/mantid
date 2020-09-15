@@ -225,7 +225,7 @@ class SliceViewerDataView(QWidget):
         plotter.delete_line_plot_lines()
         self._line_plots.disconnect()
         self._line_plots = toolcls(plotter, exporter)
-        self.status_bar.showMessage(self._line_plots.status_message())
+        self.status_bar_label.setText(self._line_plots.status_message())
         self.canvas.setFocus()
         self.canvas.draw_idle()
 
@@ -236,7 +236,7 @@ class SliceViewerDataView(QWidget):
             return
 
         self._line_plots.plotter.close()
-        self.status_bar.clearMessage()
+        self.status_bar_label.clear()
         self._line_plots = None
         self.line_plots_active = False
 
@@ -316,7 +316,10 @@ class SliceViewerDataView(QWidget):
             if self.line_plots_active:
                 self._line_plots.plotter.delete_line_plot_lines()
             self.image_info_widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
-            self.ax.remove_artists_if(lambda art: art == self.image)
+            if hasattr(self.ax, "remove_artists_if"):
+                self.ax.remove_artists_if(lambda art: art == self.image)
+            else:
+                self.image.remove()
             self.image = None
 
     def clear_figure(self):

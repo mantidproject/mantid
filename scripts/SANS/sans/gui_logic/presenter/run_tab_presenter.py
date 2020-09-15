@@ -703,7 +703,7 @@ class RunTabPresenter(PresenterCommon):
             return
 
         with self.disable_buttons():
-            default_filename = self._table_model.batch_file
+            default_filename = self._model.batch_file
             filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
             filename = self._get_filename_to_save(filename)
 

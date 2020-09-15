@@ -220,6 +220,16 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.dead_time_file_selector.itemText(3), 'table_3')
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
 
+    def test_that_when_deadtime_option_is_not_fromFile_is_set_to_fromFile_on_instrument_change_and_update_occurs(self):
+        self.view.set_instrument('EMU')
+        self.view.dead_time_selector.setCurrentIndex(DEADTIME_WORKSPACE)
+        self.context.gui_context['DeadTimeSource'] = 'FromADS'
+        self.view.set_instrument('MUSR')
+        self.presenter.update_view_from_model()
+
+        self.assertEqual(self.context.gui_context['DeadTimeSource'], "FromFile")
+        self.assertEqual(self.view.dead_time_selector.currentIndex(), DEADTIME_DATA_FILE)
+
     def test_that_returning_to_None_options_hides_table_workspace_selector(self):
         self.view.dead_time_selector.setCurrentIndex(DEADTIME_WORKSPACE)
         self.context.gui_context['DeadTimeSource'] = 'FromADS'
