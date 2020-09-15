@@ -112,16 +112,19 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_loadButton = new QPushButton("Load");
   m_saveButton = new QPushButton("Save");
   m_deleteButton = new QPushButton("Delete");
+  m_clearButton = new QPushButton("Clear");
   m_groupButton = new QPushButton("Group");
   m_sortButton = new QPushButton("Sort");
 
   if (m_groupButton)
     m_groupButton->setEnabled(false);
   m_deleteButton->setEnabled(false);
+  m_clearButton->setEnabled(false);
   m_saveButton->setEnabled(false);
 
   buttonLayout->addWidget(m_loadButton);
   buttonLayout->addWidget(m_deleteButton);
+  buttonLayout->addWidget(m_clearButton);
   buttonLayout->addWidget(m_groupButton);
   buttonLayout->addWidget(m_sortButton);
   buttonLayout->addWidget(m_saveButton);
@@ -157,6 +160,8 @@ void WorkspaceTreeWidget::setupConnections() {
           SLOT(filterWorkspaceTree(const QString &)));
   connect(m_deleteButton, SIGNAL(clicked()), this,
           SLOT(onClickDeleteWorkspaces()));
+  connect(m_clearButton, SIGNAL(clicked()), this,
+          SLOT(onClickClearWorkspaces()));
   connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this,
           SLOT(clickedWorkspace(QTreeWidgetItem *, int)));
   connect(m_tree, SIGNAL(itemSelectionChanged()), this,
@@ -844,6 +849,7 @@ void WorkspaceTreeWidget::populateTopLevel(const TopLevelItems &topLevelItems,
       if (shouldBeSelected(name))
         node->setSelected(true);
     }
+
     m_selectedNames.clear();
     m_renameMap.clear();
   }
@@ -1148,6 +1154,29 @@ void WorkspaceTreeWidget::onClickDeleteWorkspaces() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 }
 
+/**
+ * Gets confirmation from user that they meant to press clear workspaces button
+ * @return True if yes is pressed, false if no is pressed
+ */
+bool WorkspaceTreeWidget::clearWorkspacesConfirmation() const {
+  return askUserYesNo(
+      "Clear Workspaces",
+      "Are you sure you want to clear all workspaces and hidden workspaces?");
+}
+
+/**
+ * Enables and disables the Clear Workspaces Button
+ * @param enable : true for enable and false for disable
+ */
+void WorkspaceTreeWidget::enableClearButton(bool enable) {
+  m_clearButton->setEnabled(enable);
+}
+
+/// Handles clear button trigger
+void WorkspaceTreeWidget::onClickClearWorkspaces() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ClearWorkspaces);
+}
+
 void WorkspaceTreeWidget::clickedWorkspace(QTreeWidgetItem *item,
                                            int /*unused*/) {
   Q_UNUSED(item);
@@ -1230,6 +1259,8 @@ void WorkspaceTreeWidget::handleUpdateTree(const TopLevelItems &items) {
   setTreeUpdating(true);
   populateTopLevel(items, expanded);
   setTreeUpdating(false);
+
+  enableClearButton(n > 0);
 
   // Re-sort
   m_tree->sort();
@@ -1758,6 +1789,7 @@ void WorkspaceTreeWidget::hideButtonToolbar() {
   m_loadButton->hide();
   m_saveButton->hide();
   m_deleteButton->hide();
+  m_clearButton->hide();
   m_groupButton->hide();
   m_sortButton->hide();
 }

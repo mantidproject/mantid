@@ -29,6 +29,8 @@ public:
   std::map<std::string, Mantid::API::Workspace_sptr>
   topLevelItems() const override;
 
+  size_t size() const override;
+
   std::string getOldName() const override;
   std::string getNewName() const override;
 

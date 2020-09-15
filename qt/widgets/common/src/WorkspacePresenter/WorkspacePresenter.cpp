@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 
@@ -79,6 +80,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
     break;
   case ViewNotifiable::Flag::DeleteWorkspaces:
     deleteWorkspaces();
+    break;
+  case ViewNotifiable::Flag::ClearWorkspaces:
+    clearWorkspaces();
     break;
   case ViewNotifiable::Flag::SaveSingleWorkspace:
     saveSingleWorkspace();
@@ -263,6 +267,13 @@ void WorkspacePresenter::deleteWorkspaces() {
     m_view->deleteWorkspaces(selected);
 }
 
+void WorkspacePresenter::clearWorkspaces() {
+  if (m_view->clearWorkspacesConfirmation()) {
+    Mantid::API::AnalysisDataService::Instance().clear();
+    m_view->enableClearButton(false);
+  }
+}
+
 void WorkspacePresenter::saveSingleWorkspace() {
   m_view->saveWorkspace(m_view->getSelectedWorkspace()->getName(),
                         m_view->getSaveFileType());
@@ -369,6 +380,7 @@ void WorkspacePresenter::workspacesCleared() { m_view->clearView(); }
 /// Update the view by publishing the ADS contents.
 void WorkspacePresenter::updateView() {
   m_view->updateTree(m_adapter->topLevelItems());
+  //m_view->enableClearButton(m_adapter->size() > 0);
 }
 
 } // namespace MantidWidgets
