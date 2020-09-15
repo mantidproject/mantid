@@ -344,6 +344,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         for entry_no, entry in enumerate(mtd[ws]):
             ws_absorber_entry = mtd[ws_absorber].getItem(entry_no).name()
             ws_container_entry = mtd[ws_container].getItem(entry_no).name()
+            if (mtd[ws_absorber_entry].YUnit() != mtd[ws_container_entry]
+               or mtd[ws_transmission].YUnit() != mtd[ws_container_entry]):
+                mtd[ws_container_entry].setYUnit('Counts/Counts')
+                mtd[ws_absorber_entry].setYUnit('Counts/Counts')
+                mtd[ws_transmission].setYUnit('Counts/Counts')
             Minus(LHSWorkspace=entry.name(),
                   RHSWorkspace=mtd[ws_transmission] * mtd[ws_container_entry]
                   + (1-mtd[ws_transmission]) * mtd[ws_absorber_entry],
@@ -472,10 +477,10 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                      ContainerWorkspace=mtd[container_ws].getItem(entry_no),
                                                      **kwargs)
                     for correction in mtd[correction_ws]:
-                        correction.setYUnit('')
+                        correction.setYUnit('Counts/Counts')
 
-                mtd[container_ws].getItem(entry_no).setYUnit('')
-                entry.setYUnit('')
+                mtd[container_ws].getItem(entry_no).setYUnit('Counts/Counts')
+                entry.setYUnit('Counts/Counts')
                 ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
                                             CorrectionsWorkspace=correction_ws,
                                             CanWorkspace=mtd[container_ws].getItem(entry_no),
