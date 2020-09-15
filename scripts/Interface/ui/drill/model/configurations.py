@@ -116,6 +116,7 @@ class RundexSettings(object):
                 "NormaliseBy": "Timer",
                 "SampleThickness": "0.1",
                 "BeamRadius": "0.1",
+                "TransmissionBeamRadius": "0.1",
                 "WaterCrossSection": "1",
                 "OutputType": "I(Q)",
                 "CalculateResolution": "None",
