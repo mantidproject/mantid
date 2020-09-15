@@ -315,12 +315,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
                              doc='Sample thickness [cm]')
 
-        self.declareProperty('TransmissionBeamRadius', 0.05,
+        self.declareProperty('TransmissionBeamRadius', 0.1,
                              validator=FloatBoundedValidator(lower=0.),
                              doc='Beam radius [m]; used for transmission '
                              'calculations.')
 
-        self.declareProperty(FloatArrayProperty('BeamRadius', values=[0.05]),
+        self.declareProperty(FloatArrayProperty('BeamRadius', values=[0.1]),
                              doc='Beam radius [m]; used for beam center '
                              'finding and flux calculations.')
 
