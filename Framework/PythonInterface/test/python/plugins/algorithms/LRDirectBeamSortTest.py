@@ -12,9 +12,9 @@ class LRDirectBeamSortTest(unittest.TestCase):
     medium = 'air'
    
     def __init__(self, *args):
-        LoadEventNexus(Filename='/SNS/REF_L/IPTS-26010/nexus/REF_L_179926.nxs.h5',
+        LoadEventNexus(Filename='REF_L_179926.nxs.h5',
             OutputWorkspace='REF_L_179926')
-        LoadEventNexus(Filename='/SNS/REF_L/IPTS-26010/nexus/REF_L_179927.nxs.h5',
+        LoadEventNexus(Filename='REF_L_179927.nxs.h5',
             OutputWorkspace='REF_L_179927')
         unittest.TestCase.__init__(self, *args)
     
