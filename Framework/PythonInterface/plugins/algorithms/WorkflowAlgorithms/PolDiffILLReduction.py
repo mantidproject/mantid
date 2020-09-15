@@ -253,6 +253,15 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('IncoherentCrossSection', EnabledWhenProperty(incoherent, absoluteNormalisation,
                                                                                LogicOperator.Or))
 
+        self.declareProperty(name="TOFUnit",
+                             defaultValue="TimeChannels",
+                             validator=StringListValidator(["TimeChannels", "UncalibratedTime", "Energy"]),
+                             direction=Direction.Input,
+                             doc="The choice to display the TOF data either as a function of the time channel or the uncalibrated time.\
+                             It has no effect if the measurement mode is monochromatic.")
+
+        self.setPropertySettings('SampleGeometry', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+
         self.declareProperty(FileProperty('InstrumentParameterFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.xml']),
@@ -647,7 +656,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         Load(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLPolarizedDiffraction',
              PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentParameterFile'),
-             OutputWorkspace=ws)
+             TOFUnit=self.getPropertyValue('TOFUnit'), OutputWorkspace=ws)
 
         self._instrument = mtd[ws].getItem(0).getInstrument().getName()
         run = mtd[ws].getItem(0).getRun()
