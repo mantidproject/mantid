@@ -11,10 +11,10 @@ from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (AnalysisDataService, ConvertSpectrumAxis, ConjoinWorkspaces, Transpose,
                               ResampleX, CopyInstrumentParameters,
                               Divide, DeleteWorkspace, Scale,
-                              MaskAngle, ExtractMask, Minus,
+                              MaskAngle, ExtractMask, Minus, SumSpectra,
                               ExtractUnmaskedSpectra, mtd,
                               BinaryOperateMasks, Integration)
-from mantid.kernel import StringListValidator, Direction, Property, FloatBoundedValidator
+from mantid.kernel import StringListValidator, Direction, Property, FloatBoundedValidator, StringArrayProperty
 
 
 class WANDPowderReduction(DataProcessorAlgorithm):
