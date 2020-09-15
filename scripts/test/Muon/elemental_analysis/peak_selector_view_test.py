@@ -69,12 +69,12 @@ class PeakSelectorViewTest(unittest.TestCase):
         name = 'type: value'
         peak_type, value = self.view._parse_checkbox_name(name)
         self.assertEqual(peak_type, 'type')
-        self.assertEqual(value, 'value')
+        self.assertEqual(value, ' value')
 
     def test_parse_checkbox_name_does_not_convert_value_to_float(self):
         name = 'type: 1.0'
         peak_type, value = self.view._parse_checkbox_name(name)
-        self.assertEqual(value, '1.0')
+        self.assertEqual(value, ' 1.0')
 
     def test_remove_value_from_new_data_removes_existing_key_from_new_data(self):
         self.view.new_data['type'] = 'value'
@@ -82,9 +82,12 @@ class PeakSelectorViewTest(unittest.TestCase):
         self.view._remove_value_from_new_data(checkbox)
         self.assertIs('type' in self.view.new_data.keys(), False)
 
-    def test_remove_value_from_new_data_raises_KeyError_is_type_not_in_new_data(self):
+    def test_remove_value_from_new_data_does_not_raise_KeyError_if_type_not_in_new_data(self):
         checkbox = Checkbox('type: value')
-        self.assertRaises(KeyError, self.view._remove_value_from_new_data, checkbox)
+        try:
+            self.view._remove_value_from_new_data(checkbox)
+        except KeyError:
+            raise AssertionError
 
     def test_add_value_to_new_data(self):
         self.new_data = {}
