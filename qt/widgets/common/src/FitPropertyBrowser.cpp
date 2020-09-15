@@ -3511,7 +3511,7 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
 void FitPropertyBrowser::removeWorkspaceAndSpectra(const std::string &wsName) {
   removeWorkspace(wsName);
   // remove spectra
-  QString qWsName = QString::fromStdString(wsName.c_str());
+  QString qWsName = QString::fromStdString(wsName);
   m_allowedSpectra.erase(m_allowedSpectra.find(qWsName));
 }
 
