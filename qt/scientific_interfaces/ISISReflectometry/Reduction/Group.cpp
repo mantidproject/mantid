@@ -136,13 +136,19 @@ void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
 }
 
+/** Insert a row into a group and sort rows by the angle column. If the
+ * row/angle is not initialized, add it at the end of the group.
+ *
+ * @param row : the row to insert
+ * @returns : the index of the inserted row in the group's list of rows
+ */
 int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
   Item::resetState();
 
   // If the row is not sortable, or there is nothing in the list yet, append it
   if (!row.is_initialized() || m_rows.size() == 0) {
     appendRow(row);
-    return static_cast<int>(m_rows.size());
+    return static_cast<int>(m_rows.size() - 1);
   }
 
   // Find the first row with theta greater than the row we're inserting (or
