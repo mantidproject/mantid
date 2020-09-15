@@ -9,7 +9,7 @@ from mantid.api import (ADSValidator, AlgorithmFactory, DataProcessorAlgorithm,
                         MatrixWorkspaceProperty, PropertyMode)
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (AnalysisDataService, ConvertSpectrumAxis, ConjoinWorkspaces, Transpose,
-                              ResampleX, CopyInstrumentParameters,
+                              ResampleX, CopyInstrumentParameters, CloneWorkspace,
                               Divide, DeleteWorkspace, Scale,
                               MaskAngle, ExtractMask, Minus, SumSpectra,
                               ExtractUnmaskedSpectra, mtd,
