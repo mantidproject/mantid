@@ -8,7 +8,6 @@ from mantid.api import (
     ADSValidator,
     AlgorithmFactory,
     DataProcessorAlgorithm,
-    IEventWorkspace,
     MatrixWorkspaceProperty,
     PropertyMode,
 )
@@ -148,11 +147,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         maskAngle = self.getProperty("MaskAngle").value
         outWS = self.getPropertyValue("OutputWorkspace")
 
-        _get_scale = lambda x: {
-            None: 1,
-            "Monitor": x.run().getProtonCharge(),
-            "Time": x.run().getLogData("duration").value,
-        }[normaliseBy]
+        def _get_scale(x):
+            return {
+                None: 1,
+                "Monitor": x.run().getProtonCharge(),
+                "Time": x.run().getLogData("duration").value,
+            }[normaliseBy]
 
         # NOTE:
         # StringArrayProperty cannot be optional, so the background can only be passed in as a string
@@ -160,7 +160,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         try:
             bkg = bkg.split(",") if bkg is not None else bkg
         except:
-            _bg = AnalysisDataService.retrieve(
+            _ = AnalysisDataService.retrieve(
                 bkg[0]
             )  # invalid background ws will be detected here
 
