@@ -253,7 +253,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('IncoherentCrossSection', EnabledWhenProperty(incoherent, absoluteNormalisation,
                                                                                LogicOperator.Or))
 
-        self.declareProperty(name="TOFUnit",
+        self.declareProperty(name="TOFUnits",
                              defaultValue="TimeChannels",
                              validator=StringListValidator(["TimeChannels", "UncalibratedTime", "Energy"]),
                              direction=Direction.Input,
@@ -279,8 +279,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._method = 'Uniaxial'
         else:
             if self.getPropertyValue("ProcessAs") not in ['Beam', 'Transmission']:
-                raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10-point. \
-                    The provided input does not fit in any of these measurement types.")
+                raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10-point. "
+                                   +"The provided input does not fit in any of these measurement types.")
 
     def _merge_polarizations(self, ws):
         """ws_group: large group of many files with the same number of POL directions"""
@@ -339,20 +339,22 @@ class PolDiffILLReduction(PythonAlgorithm):
             DeleteWorkspace(cadmium_mon)
         return ws
 
-    def _background_subtract(self, ws, ws_absorber, ws_container, ws_transmission):
+    def _subtract_background(self, ws, container_ws, transmission_ws):
         """ Subtracts empty container and cadmium scaled by transmission."""
+        if self._method != 'TOF':
+            absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
         for entry_no, entry in enumerate(mtd[ws]):
-            ws_absorber_entry = mtd[ws_absorber].getItem(entry_no).name()
-            ws_container_entry = mtd[ws_container].getItem(entry_no).name()
-            if (mtd[ws_absorber_entry].YUnit() != mtd[ws_container_entry]
-               or mtd[ws_transmission].YUnit() != mtd[ws_container_entry]):
-                mtd[ws_container_entry].setYUnit('Counts/Counts')
-                mtd[ws_absorber_entry].setYUnit('Counts/Counts')
-                mtd[ws_transmission].setYUnit('Counts/Counts')
-            Minus(LHSWorkspace=entry.name(),
-                  RHSWorkspace=mtd[ws_transmission] * mtd[ws_container_entry]
-                  + (1-mtd[ws_transmission]) * mtd[ws_absorber_entry],
-                  OutputWorkspace=entry)
+            container_entry = mtd[container_ws].getItem(entry_no).name()
+            mtd[container_entry].setYUnit('Counts/Counts')
+            mtd[transmission_ws].setYUnit('Counts/Counts')
+            if self._method != 'TOF':
+                absorber_entry = mtd[absorber_ws].getItem(entry_no).name()
+                mtd[absorber_entry].setYUnit('Counts/Counts')
+                Minus(LHSWorkspace=entry,
+                      RHSWorkspace=mtd[transmission_ws] * mtd[container_entry] + (1-mtd[transmission_ws]) * mtd[absorber_entry],
+                      OutputWorkspace=entry)
+            else:
+                raise RuntimeError("TOF requires elastic channel definition")
         return ws
 
     def _calculate_polarizing_efficiencies(self, ws):
@@ -571,14 +573,14 @@ class PolDiffILLReduction(PythonAlgorithm):
         GroupWorkspaces(ws_names, OutputWorkspace=output_name)
         return output_name
 
-    def _detector_efficiency(self, ws, component_ws):
+    def _detector_efficiency_correction(self, ws, component_ws):
         conjoined_components = self._conjoin_components(component_ws)
         calibrationType = self.getPropertyValue('DetectorEfficiencyCalibration')
         normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation')
         tmp_name = 'det_eff'
         tmp_names = []
         if calibrationType == 'Vanadium':
-            vanadium_ws = self.getPropertyValue('VanadiumWorkspaceInput')
+            vanadium_ws = self.getPropertyValue('VanadiumInputWorkspace')
             if normaliseToAbsoluteUnits:
                 normFactor = self._sampleGeometry['formula_units']
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
@@ -668,7 +670,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         Load(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLPolarizedDiffraction',
              PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentParameterFile'),
-             TOFUnit=self.getPropertyValue('TOFUnit'), OutputWorkspace=ws)
+             TOFUnits=self.getPropertyValue('TOFUnits'), OutputWorkspace=ws)
 
         self._instrument = mtd[ws].getItem(0).getInstrument().getName()
         run = mtd[ws].getItem(0).getRun()
@@ -684,11 +686,10 @@ class PolDiffILLReduction(PythonAlgorithm):
         elif process not in ['Beam']:
             self._normalise(ws)
         if process in ['Quartz', 'Vanadium', 'Sample']:
-            absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
             container_ws = self.getPropertyValue('ContainerInputWorkspace')
             transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
             if self.getProperty('SubtractBackground').value:
-                self._background_subtract(ws, absorber_ws, container_ws, transmission_ws)
+                self._subtract_background(ws, container_ws, transmission_ws)
                 progress.report()
 
             if process == 'Quartz':
