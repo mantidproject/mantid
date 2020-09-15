@@ -210,7 +210,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         self.setProperty("OutputWorkspace", outWS)
 
-        # remove temp workspaces
+        # Step_4: remove temp workspaces
         [DeleteWorkspace(ws, EnableLogging=False) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
 
 
