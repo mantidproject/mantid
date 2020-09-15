@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/IPreview.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IPreview.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <cxxtest/TestSuite.h>
@@ -41,9 +41,7 @@ public:
   static IPreviewTest *createSuite() { return new IPreviewTest(); }
   static void destroySuite(IPreviewTest *suite) { delete suite; }
 
-  void setUp() override {
-      FrameworkManager::Instance();
-  }
+  void setUp() override { FrameworkManager::Instance(); }
 
   void test_basic_preview() {
     IPreview *preview = createBasicPreview();
