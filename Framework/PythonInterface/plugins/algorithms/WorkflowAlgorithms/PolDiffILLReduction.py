@@ -436,6 +436,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             * float(self._sampleGeometry['mass']) \
             / float(self._sampleGeometry['density'])
 
+    def _enforce_uniform_units(self, origin_ws, target_ws):
+        for entry_tuple in zip(mtd[origin_ws], mtd[target_ws]):
+            entry_origin, entry_target = entry_tuple
+            if entry_origin.YUnit() != entry_target.YUnit():
+                entry_target.setYUnit(entry_origin.YUnit())
+
     def _apply_self_attenuation_correction(self, sample_ws, container_ws):
         geometry_type = self.getPropertyValue('SampleGeometry')
 
@@ -465,8 +471,10 @@ class PolDiffILLReduction(PythonAlgorithm):
                 kwargs['ContainerInnerRadius'] = self._sampleGeometry['container_inner_radius']
                 kwargs['ContainerOuterRadius'] = self._sampleGeometry['container_outer_radius']
 
+        self._enforce_uniform_units(sample_ws, container_ws)
+
         if geometry_type == 'Custom':
-            pass
+            raise RuntimeError('Custom geometry treatment has not been implemented yet.')
         else:
             for entry_no, entry in enumerate(mtd[sample_ws]):
                 correction_ws = '{}_corr'.format(geometry_type)
@@ -478,11 +486,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                      CorrectionsWorkspace=correction_ws,
                                                      ContainerWorkspace=mtd[container_ws].getItem(entry_no),
                                                      **kwargs)
-                    for correction in mtd[correction_ws]:
-                        correction.setYUnit('Counts/Counts')
-
-                mtd[container_ws].getItem(entry_no).setYUnit('Counts/Counts')
-                entry.setYUnit('Counts/Counts')
                 ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
                                             CorrectionsWorkspace=correction_ws,
                                             CanWorkspace=mtd[container_ws].getItem(entry_no),
