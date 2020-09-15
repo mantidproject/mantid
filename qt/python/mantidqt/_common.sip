@@ -169,6 +169,7 @@ signals:
   void modificationChanged(bool m);
   void textZoomedIn();
   void textZoomedOut();
+  void progressMade(const int);
 
 private:
   ScriptEditor(const ScriptEditor&);
