@@ -49,18 +49,18 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                             doc='The main input workspace[s].',
                         )
 
-        # self.declareProperty(MatrixWorkspaceProperty("BackgroundWorkspace", '',
-        #                                              optional=PropertyMode.Optional,
-        #                                              direction=Direction.Input),
-        #                      doc='The background workspace to be subtracted.')
-        self.declareProperty(StringArrayProperty(
-                                "BackgroundWorkspace",
-                                optional=PropertyMode.Optional,
-                                direction=Direction.Input,
-                                validator=ADSValidator(),
-                                ),
-                             doc='The background workspace[s] to be subtracted.',
-                        )
+        self.declareProperty(MatrixWorkspaceProperty("BackgroundWorkspace", '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc='The background workspace to be subtracted.')
+        # self.declareProperty(StringArrayProperty(
+        #                         "BackgroundWorkspace",
+        #                         # optional=PropertyMode.Optional,
+        #                         direction=Direction.Input,
+        #                         validator=ADSValidator(),
+        #                         ),
+        #                      doc='The background workspace[s] to be subtracted.',
+        #                 )
 
         self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", '',
                                                      optional=PropertyMode.Optional,
