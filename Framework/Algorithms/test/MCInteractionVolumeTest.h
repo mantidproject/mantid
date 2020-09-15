@@ -111,7 +111,7 @@ public:
                                          afterScatter, trackStatistics);
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter,
                         sample.getShape());
-    Mock::VerifyAndClearExpectations(&rng);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
     // force scatter near back (longer distance traversed with before lambda)
     EXPECT_CALL(rng, nextValue())
@@ -174,7 +174,7 @@ public:
                                          afterScatter, trackStatistics);
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter,
                         sample.getEnvironment().getContainer());
-    Mock::VerifyAndClearExpectations(&rng);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
     // force scatter in sample (0)
     EXPECT_CALL(rng, nextInt(0, 1))
@@ -190,7 +190,7 @@ public:
     const double factorSample = interactor.calculateAbsorption(
         beforeScatter, afterScatter, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.73100698, factorSample, 1e-8);
-    Mock::VerifyAndClearExpectations(&rng);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
   }
 
   void test_Sample_And_Environment_Gives_Expected_Absorption() {
@@ -304,7 +304,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(comp1Point = interactor.generatePoint(rng));
     TS_ASSERT(kit->isValid(comp1Point.scatterPoint));
     TS_ASSERT_EQUALS(comp1Point.componentIndex, 0);
-    Mock::VerifyAndClearExpectations(&rng);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
     // Selects second component
     MCInteractionVolume interactor2(sample, maxAttempts);
@@ -321,7 +321,7 @@ public:
     TS_ASSERT(comp2Point.scatterPoint != comp1Point.scatterPoint);
     TS_ASSERT(kit->isValid(comp2Point.scatterPoint));
     TS_ASSERT_EQUALS(comp2Point.componentIndex, 1);
-    Mock::VerifyAndClearExpectations(&rng);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
     // Selects third component
     MCInteractionVolume interactor3(sample, maxAttempts);
@@ -338,7 +338,7 @@ public:
     TS_ASSERT(comp3Point.scatterPoint != comp1Point.scatterPoint);
     TS_ASSERT(kit->isValid(comp3Point.scatterPoint));
     TS_ASSERT_EQUALS(comp3Point.componentIndex, 2);
-    Mock::VerifyAndClearExpectations(&rng);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
   }
 
   void testGeneratePointRespectsActiveRegion() {
@@ -361,7 +361,7 @@ public:
     MCInteractionVolume interactor(sample, maxAttempts);
     // Restrict region to can
     TS_ASSERT_THROWS(interactor.generatePoint(rng), const std::runtime_error &);
-    Mock::VerifyAndClearExpectations(&rng);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
   }
 
 private:
