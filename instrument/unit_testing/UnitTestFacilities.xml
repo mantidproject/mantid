@@ -3,7 +3,9 @@
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
-  <catalog name="FakeCatalog"/>
+  <catalog name="FakeCatalog">
+    <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
+  </catalog>
 
   <livedata listener="MockLiveListener"/>
 
