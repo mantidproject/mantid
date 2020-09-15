@@ -201,17 +201,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 ConjoinWorkspaces(InputWorkspace1="__ws_conjoined", InputWorkspace2=_ws_resampled, CheckOverlapping=False, EnableLogging=False)
         # END_FOR: prcess_spectra
 
-        for i, _wsn in enumerate(_data_tmp_list[1:]):
-            if cal is not None:
-                Divide(LHSWorkspace=_wsn, RHSWorkspace='__cal_tmp', OutputWorkspace=_wsn, EnableLogging=False)
-            if bkg is not None:
-                Minus(LHSWorkspace=_wsn, RHSWorkspace='__bkg_tmp_0', OutputWorkspace=_wsn, EnableLogging=False)
-            ConjoinWorkspaces(InputWorkspace1=outWS,
-                              InputWorkspace2=_wsn,
-                              CheckOverlapping=False,
-                            )
-
-        SumSpectra(InputWorkspace=outWS, OutputWorkspace=outWS, WeightedSum=True, MultiplyBySpectra=False, StoreInADS=False)
+        # Step_3: sum all spectra
+        # ref: https://docs.mantidproject.org/nightly/algorithms/SumSpectra-v1.html
+        if cal is not None:
+            SumSpectra(InputWorkspace="__ws_conjoined", OutputWorkspace=outWS, WeightedSum=True, MultiplyBySpectra=False, EnableLogging=False)
+        else:
+            SumSpectra(InputWorkspace="__ws_conjoined", OutputWorkspace=outWS, WeightedSum=True, MultiplyBySpectra=True, EnableLogging=False)
 
         self.setProperty("OutputWorkspace", outWS)
 
