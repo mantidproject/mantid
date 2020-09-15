@@ -145,6 +145,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             ResampleX(InputWorkspace=_wsn, OutputWorkspace=_wsn, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
 
         if bkg is not None:
+            bkg = bkg.split(",")  # need to do a manual splitting here since StringArrayProperty can't be optional
             for n, bgn in enumerate(bkg):
                 temp_workspace_list.append(f'__bkg_tmp_{n}')
                 ExtractUnmaskedSpectra(InputWorkspace=bkg, MaskWorkspace='__mask_tmp', OutputWorkspace=f'__bkg_tmp_{n}', EnableLogging=False)
