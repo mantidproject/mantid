@@ -508,14 +508,16 @@ class PolDiffILLReduction(PythonAlgorithm):
             nComponents = 2
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
-            dataY = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), 3))
+            dataY_nuclear = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
+            dataY_incoherent = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
+            dataY_magnetic = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
             for spectrum in range(mtd[ws].getItem(entry_no).getNumberHistograms()):
                 sigma_z_sf = mtd[ws].getItem(entry_no).readY(spectrum)
                 sigma_z_nsf = mtd[ws].getItem(entry_no+1).readY(spectrum)
                 if nMeasurements == 2:
-                    dataY[spectrum][0] = 2.0 * sigma_z_nsf - sigma_z_sf  # Nuclear coherent
-                    dataY[spectrum][1] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
-                    dataY[spectrum][2] = 0 # Magnetic
+                    dataY_nuclear[spectrum] = 2.0 * sigma_z_nsf - sigma_z_sf  # Nuclear coherent
+                    dataY_incoherent[spectrum] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
+                    dataY_magnetic[spectrum] = 0 # Magnetic
                 elif nMeasurements == 6 or nMeasurements == 10:
                     sigma_y_sf = mtd[ws].getItem(entry_no+2).readY(spectrum)
                     sigma_y_nsf = mtd[ws].getItem(entry_no+3).readY(spectrum)
@@ -525,11 +527,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                         # Magnetic component
                         magneticComponent = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
                         # Nuclear coherent component
-                        dataY[spectrum][0] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf) - sigma_x_sf - sigma_y_sf - sigma_z_sf ) / 6.0
+                        dataY_nuclear[spectrum] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
+                                                  - sigma_x_sf - sigma_y_sf - sigma_z_sf ) / 6.0
                         # Incoherent component
-                        dataY[spectrum][1] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magneticComponent
+                        dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magneticComponent
                         # Magnetic component
-                        dataY[spectrum][2] = magneticComponent
+                        dataY_magnetic[spectrum] = magneticComponent
                     else:
                         # sigma_xmy_sf = mtd[ws].getItem(entry_no+6).readY(spectrum)
                         # sigma_xmy_nsf = mtd[ws].getItem(entry_no+7).readY(spectrum)
@@ -537,16 +540,18 @@ class PolDiffILLReduction(PythonAlgorithm):
                         # sigma_xpy_nsf = mtd[ws].getItem(entry_no+9).readY(spectrum)
 
                         raise RuntimeError('10-point method has not been implemented yet')
+            dataY = [dataY_nuclear, dataY_incoherent, dataY_magnetic]
             for component in range(nComponents):
                 dataX = mtd[ws].getItem(entry_no).readX(0)
-                dataE = np.sqrt(abs(dataY[:, component]))
+                dataE = np.sqrt(abs(dataY[component]))
                 tmpName = str(mtd[ws].getItem(entry_no).name())[:-1] + componentNames[component]
                 tmpNames.append(tmpName)
-                CreateWorkspace(DataX=dataX, DataY=dataY[:, component], dataE=dataE,
+                CreateWorkspace(DataX=dataX, DataY=dataY[component], dataE=dataE,
                                 Nspec=mtd[ws].getItem(entry_no).getNumberHistograms(),
                                 OutputWorkspace=tmpName)
-
-        GroupWorkspaces(tmpNames, OutputWorkspace='component_separation')
+        outputName = self.getPropertyValue('ProcessAs') + '_component_separation'
+        GroupWorkspaces(tmpNames, OutputWorkspace=outputName)
+        return outputName
 
     def _conjoin_components(self, ws):
         components = [[], []]
@@ -700,28 +705,27 @@ class PolDiffILLReduction(PythonAlgorithm):
                 progress.report()
 
             if process in ['Vanadium', 'Sample']:
-                if self._mode == 'TOF':
-                    if process == 'Vanadium':
-                        self._detector_analyser_energy_efficiency(ws)
-                    else:
-                        self._frame_overlap_correction(ws)
+                if self._mode == 'TOF' and process == 'Sample':
+                    self._frame_overlap_correction(ws)
                     progress.report()
                 pol_eff_ws = self.getPropertyValue('QuartzInputWorkspace')
                 if pol_eff_ws:
                     self._apply_polarization_corrections(ws, pol_eff_ws)
                     progress.report()
+                if self._mode == 'TOF':
+                    self._detector_analyser_energy_efficiency(ws)
+                    progress.report()
                 self._read_sample_geometry()
-                if self.getPropertyValue('SampleGeometry') != 'None':
+                if self.getPropertyValue('SampleGeometry') != 'None' and self._mode != 'TOF':
                     self._apply_self_attenuation_correction(ws, container_ws)
                 progress.report()
-                self._component_separation(ws)
+                component_ws = self._component_separation(ws)
                 progress.report()
                 if process == 'Vanadium':
                     self._output_vanadium(ws, self._sampleGeometry['n_atoms'])
                 else:
-                    self._detector_efficiency_correction(ws)
+                    self._detector_efficiency_correction(ws, component_ws)
                     progress.report()
-                    self._output_sample(ws)
 
         self._finalize(ws, process)
 
