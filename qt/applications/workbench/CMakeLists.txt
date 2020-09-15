@@ -139,6 +139,7 @@ endif()
 # Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
+    workbench/test/mainwindowtest.py
     workbench/test/test_import.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py

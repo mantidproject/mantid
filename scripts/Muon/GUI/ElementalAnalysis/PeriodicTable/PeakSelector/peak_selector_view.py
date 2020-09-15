@@ -142,12 +142,13 @@ class PeakSelectorView(QtWidgets.QListWidget):
         return checkboxes
 
     def _parse_checkbox_name(self, name):
-        peak_type, value = name.replace(" ", "").split(":")
+        peak_type, value = name.split(":")
         return peak_type, value
 
     def _remove_value_from_new_data(self, checkbox):
         peak_type, _ = self._parse_checkbox_name(checkbox.name)
-        del self.new_data[peak_type]
+        if peak_type in self.new_data:
+            del self.new_data[peak_type]
 
     def _add_value_to_new_data(self, checkbox):
         peak_type, value = self._parse_checkbox_name(checkbox.name)
