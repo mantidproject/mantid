@@ -24,6 +24,10 @@ class StateGuiModel(ModelCommon):
         super(StateGuiModel, self).__init__(user_file_items)
         self._user_file_items = user_file_items
 
+        # This is transformed in State* objects so it's purely GUI facing
+        # so store in the GUI model
+        self._wavelength_range = ''
+
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
@@ -382,7 +386,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_range(self):
-        val = self.wavelength_range
+        val = self._wavelength_range
         return val if val else ""
 
     @wavelength_range.setter
@@ -392,7 +396,7 @@ class StateGuiModel(ModelCommon):
         wavelength_stop = [max(wavelength_stop)] + wavelength_stop
         self.wavelength_min = wavelength_start
         self.wavelength_max = wavelength_stop
-        self.wavelength_range = value
+        self._wavelength_range = value
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale properties
