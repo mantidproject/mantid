@@ -62,8 +62,6 @@ ADSAdapter::topLevelItems() const {
   return AnalysisDataService::Instance().topLevelItems();
 }
 
-size_t ADSAdapter::size() const { return AnalysisDataService::Instance().size(); }
-
 /// Locks the presenter as shared_ptr for use internally.
 Presenter_sptr ADSAdapter::lockPresenter() {
   auto psptr = m_presenter.lock();

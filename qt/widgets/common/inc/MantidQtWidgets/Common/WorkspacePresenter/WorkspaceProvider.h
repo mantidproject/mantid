@@ -33,7 +33,6 @@ public:
   virtual bool doesWorkspaceExist(const std::string &wsname) const = 0;
   virtual std::map<std::string, Mantid::API::Workspace_sptr>
   topLevelItems() const = 0;
-  virtual size_t size() const = 0;
   virtual std::string getOldName() const = 0;
   virtual std::string getNewName() const = 0;
 };

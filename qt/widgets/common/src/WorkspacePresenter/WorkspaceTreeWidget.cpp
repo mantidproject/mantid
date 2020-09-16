@@ -1260,7 +1260,8 @@ void WorkspaceTreeWidget::handleUpdateTree(const TopLevelItems &items) {
   populateTopLevel(items, expanded);
   setTreeUpdating(false);
 
-  enableClearButton(n > 0);
+  // enable clear button here if any items in tree
+  enableClearButton(!items.empty());
 
   // Re-sort
   m_tree->sort();

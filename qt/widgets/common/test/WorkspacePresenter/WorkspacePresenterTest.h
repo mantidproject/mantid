@@ -192,7 +192,6 @@ public:
 
     EXPECT_CALL(*mockView.get(), clearWorkspacesConfirmation())
         .Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), enableClearButton(false)).Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::ClearWorkspaces);
 

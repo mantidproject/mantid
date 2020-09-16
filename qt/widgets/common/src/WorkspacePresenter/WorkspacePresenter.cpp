@@ -380,7 +380,6 @@ void WorkspacePresenter::workspacesCleared() { m_view->clearView(); }
 /// Update the view by publishing the ADS contents.
 void WorkspacePresenter::updateView() {
   m_view->updateTree(m_adapter->topLevelItems());
-  //m_view->enableClearButton(m_adapter->size() > 0);
 }
 
 } // namespace MantidWidgets
