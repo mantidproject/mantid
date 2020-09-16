@@ -84,6 +84,13 @@ Bug fixes
 - Fixed issue where select data was incorrectly enabling.
 - Fixed a bug in simultaneous TF asymmetry mode fitting, which would cause a crash when the run was incremented. Note that currently the single fitting tab will not update with the new normalization constants after a new run is loaded.
 
+ALC
+###
+
+Bug fixes
+----------
+- Fixed an issue in the ALC interface baseline fit where corrected data from all fits were plotted at the same time in the corrected data tab. Now only corrected data from the most recent fit is plotted.
+
 Elemental Analysis 
 ##################
 
