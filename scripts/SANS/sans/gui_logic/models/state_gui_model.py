@@ -176,6 +176,7 @@ class StateGuiModel(ModelCommon):
     @reduction_dimensionality.setter
     def reduction_dimensionality(self, value):
         if value is ReductionDimensionality.ONE_DIM or value is ReductionDimensionality.TWO_DIM:
+            self._user_file_items.convert_to_q.reduction_dimensionality = value
             self._user_file_items.reduction.reduction_dimensionality = value
         else:
             raise ValueError("A reduction dimensionality was expected, got instead {}".format(value))
