@@ -161,12 +161,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # NOTE:
         # StringArrayProperty cannot be optional, so the background can only be passed in as a string
         # or a list, which will be manually unpacked here
-        bkg = {
-            "<class 'NoneType'>": None,
-            "<class 'str'>": list(map(str.strip, bkg.split(","))),
-            "<class 'mantid.dataobjects._dataobjects.Workspace2D'>": bkg,
-            "<class 'list'>": bkg,
-        }[str(type(bkg))]
+        bkg = list(map(str.strip, bkg.split(","))) if isinstance(bkg, str) else bkg
 
         # NOTE:
         # Due to range difference among incoming spectra, a common bin para is needed
