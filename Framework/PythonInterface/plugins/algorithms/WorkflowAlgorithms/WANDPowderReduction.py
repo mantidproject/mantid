@@ -10,6 +10,7 @@ from mantid.api import (
     DataProcessorAlgorithm,
     MatrixWorkspaceProperty,
     PropertyMode,
+    IEventWorkspace,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (
@@ -196,7 +197,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             _ws_tmp = ExtractUnmaskedSpectra(
                 InputWorkspace=_ws, MaskWorkspace=_mskn, EnableLogging=False
             )
-            _ws_tmp = Integration(InputWorkspace=_ws_tmp, EnableLogging=False)
+            if isinstance(mtd['_ws_tmp'], IEventWorkspace):
+                _ws_tmp = Integration(InputWorkspace=_ws_tmp, EnableLogging=False)
             _ws_tmp = ConvertSpectrumAxis(
                 InputWorkspace=_ws_tmp,
                 Target=target,
@@ -236,7 +238,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 _ws_cal = ExtractUnmaskedSpectra(
                     InputWorkspace=cal, MaskWorkspace=_mskn, EnableLogging=False
                 )
-                _ws_cal = Integration(InputWorkspace=_ws_cal, EnableLogging=False)
+                if isinstance(mtd['_ws_cal'], IEventWorkspace):
+                    _ws_cal = Integration(InputWorkspace=_ws_cal, EnableLogging=False)
                 CopyInstrumentParameters(
                     InputWorkspace=_wsn, OutputWorkspace=_ws_cal, EnableLogging=False
                 )
@@ -272,7 +275,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 _ws_bkg = ExtractUnmaskedSpectra(
                     InputWorkspace=bgn, MaskWorkspace=_mskn, EnableLogging=False
                 )
-                _ws_bkg = Integration(InputWorkspace=_ws_bkg, EnableLogging=False)
+                if isinstance(mtd['_ws_bkg'], IEventWorkspace):
+                    _ws_bkg = Integration(InputWorkspace=_ws_bkg, EnableLogging=False)
                 CopyInstrumentParameters(
                     InputWorkspace=_wsn, OutputWorkspace=_ws_bkg, EnableLogging=False
                 )
