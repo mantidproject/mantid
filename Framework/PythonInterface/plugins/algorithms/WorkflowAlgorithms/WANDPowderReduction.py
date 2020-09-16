@@ -268,7 +268,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             # background
             if bkg is not None:
-                bgn = bkg[n]
+                bgn = bkg[n] if isinstance(bkg, list) else bkg
                 _ws_bkg = ExtractUnmaskedSpectra(
                     InputWorkspace=bgn, MaskWorkspace=_mskn, EnableLogging=False
                 )
