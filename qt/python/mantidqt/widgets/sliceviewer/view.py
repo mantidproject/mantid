@@ -54,6 +54,7 @@ class SliceViewerDataView(QWidget):
         self.presenter = presenter
 
         self.image = None
+        self.image_is_transposed = False
         self.line_plots_active = False
         self.can_normalise = can_normalise
         self.nonortho_transform = None
@@ -292,9 +293,11 @@ class SliceViewerDataView(QWidget):
         old_extent = None
         if self.image is not None:
             old_extent = self.image.get_extent()
-            if self.image.transpose != self.dimensions.transpose:
+            if self.image_is_transposed != self.dimensions.transpose:
                 e1, e2, e3, e4 = old_extent
                 old_extent = e3, e4, e1, e2
+
+        self.image_is_transposed = self.dimensions.transpose
 
         self.clear_image()
         self.image = self.ax.imshow(
@@ -302,7 +305,6 @@ class SliceViewerDataView(QWidget):
             origin='lower',
             aspect='auto',
             interpolation='none',
-            transpose=self.dimensions.transpose,
             norm=self.colorbar.get_norm(),
             extent=old_extent,
             **kwargs)

@@ -103,7 +103,8 @@ class SliceViewer(object):
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
-        self.view.data_view.plot_matrix(self.model.get_ws(), distribution=not self.normalization)
+        workspace = self.model.get_ws(transpose=self.view.dimensions.transpose)
+        self.view.data_view.plot_matrix(workspace, distribution=not self.normalization)
 
     def update_plot_data_MDH(self):
         """
