@@ -42,6 +42,7 @@ public:
     searchobj.setPropertyValue("RunRange", "1000000-1000001");
     // search ALF instrument it is much faster
     searchobj.setPropertyValue("Instrument", "ALF");
+    searchobj.setPropertyValue("Session", m_fakeLogin->getSessionId());
     searchobj.setPropertyValue("OutputWorkspace", "Investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -57,6 +58,7 @@ public:
     // This is a keyword that is chosen to return an empty dataset - very fast
     searchobj.setPropertyValue("Keywords", ":-)");
     searchobj.setPropertyValue("Instrument", "HRPD");
+    searchobj.setPropertyValue("Session", m_fakeLogin->getSessionId());
     searchobj.setPropertyValue("OutputWorkspace", "Investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -73,6 +75,7 @@ public:
 
     searchobj.setPropertyValue("StartDate", "10/08/1980");
     searchobj.setPropertyValue("EndDate", "22/08/1980");
+    searchobj.setPropertyValue("Session", m_fakeLogin->getSessionId());
     searchobj.setPropertyValue("OutputWorkspace", "Investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -88,7 +91,7 @@ public:
     // start run number > end run number
     searchobj.setPropertyValue("RunRange", "150-102");
     searchobj.setPropertyValue("Instrument", "LOQ");
-
+    searchobj.setPropertyValue("Session", m_fakeLogin->getSessionId());
     searchobj.setPropertyValue("OutputWorkspace", "Investigations");
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
     // should fail

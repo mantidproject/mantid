@@ -29,7 +29,8 @@ public:
   }
 
   CatalogDownloadDataFilesTest()
-      : m_fakeLogin(std::make_unique<FakeICatLogin>()) {}
+      : m_fakeLogin(std::make_unique<FakeICatLogin>()),
+        m_sessionID(m_fakeLogin->getSessionId()) {}
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
@@ -43,6 +44,7 @@ public:
       searchobj.initialize();
     searchobj.setPropertyValue("RunRange", "100-102");
     searchobj.setPropertyValue("Instrument", "HET");
+    searchobj.setPropertyValue("Session", m_sessionID);
     searchobj.setPropertyValue("OutputWorkspace", "investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -51,6 +53,7 @@ public:
     if (!invstObj.isInitialized())
       invstObj.initialize();
     invstObj.setPropertyValue("InvestigationId", "13539191");
+    invstObj.setPropertyValue("Session", m_sessionID);
     invstObj.setPropertyValue("OutputWorkspace",
                               "investigation"); // selected invesigation
 
@@ -61,7 +64,7 @@ public:
       downloadobj.initialize();
 
     downloadobj.setPropertyValue("Filenames", "HET00097.RAW");
-    downloadobj.setPropertyValue("Session", m_fakeLogin->getSessionId());
+    downloadobj.setPropertyValue("Session", m_sessionID);
 
     TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
     TS_ASSERT(downloadobj.isExecuted());
@@ -72,6 +75,7 @@ public:
       searchobj.initialize();
     searchobj.setPropertyValue("RunRange", "17440-17556");
     searchobj.setPropertyValue("Instrument", "EMU");
+    searchobj.setPropertyValue("Session", m_sessionID);
     searchobj.setPropertyValue("OutputWorkspace", "investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -81,7 +85,7 @@ public:
       invstObj.initialize();
 
     invstObj.setPropertyValue("InvestigationId", "24070400");
-
+    invstObj.setPropertyValue("Session", m_sessionID);
     invstObj.setPropertyValue("OutputWorkspace", "investigation");
 
     TS_ASSERT_THROWS_NOTHING(invstObj.execute());
@@ -91,7 +95,7 @@ public:
       downloadobj.initialize();
 
     downloadobj.setPropertyValue("Filenames", "EMU00017452.nxs");
-    downloadobj.setPropertyValue("Session", m_fakeLogin->getSessionId());
+    downloadobj.setPropertyValue("Session", m_sessionID);
 
     TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
     TS_ASSERT(downloadobj.isExecuted());
@@ -102,6 +106,7 @@ public:
       searchobj.initialize();
     searchobj.setPropertyValue("RunRange", "600-601");
     searchobj.setPropertyValue("Instrument", "MERLIN");
+    searchobj.setPropertyValue("Session", m_sessionID);
     searchobj.setPropertyValue("OutputWorkspace", "investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -110,6 +115,7 @@ public:
     if (!invstObj.isInitialized())
       invstObj.initialize();
     invstObj.setPropertyValue("InvestigationId", "24022007");
+    invstObj.setPropertyValue("Session", m_sessionID);
     invstObj.setPropertyValue("OutputWorkspace",
                               "investigation"); // selected invesigation
 
@@ -120,6 +126,7 @@ public:
       downloadobj.initialize();
 
     downloadobj.setPropertyValue("Filenames", "MER00599.raw");
+    downloadobj.setPropertyValue("Session", m_sessionID);
 
     TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
     TS_ASSERT(downloadobj.isExecuted());
@@ -131,4 +138,5 @@ private:
   CatalogDownloadDataFiles downloadobj;
 
   std::unique_ptr<FakeICatLogin> m_fakeLogin;
+  std::string m_sessionID;
 };

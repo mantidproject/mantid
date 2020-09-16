@@ -34,6 +34,7 @@ public:
     if (!invstObj.isInitialized())
       invstObj.initialize();
     invstObj.setPropertyValue("InvestigationId", "12576918");
+    invstObj.setPropertyValue("Session", m_fakeLogin->getSessionId());
     invstObj.setPropertyValue(
         "OutputWorkspace", "investigation"); // selected invesigation data files
 

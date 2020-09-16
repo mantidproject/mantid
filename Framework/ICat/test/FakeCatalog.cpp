@@ -100,7 +100,7 @@ FakeCatalog::getUploadURL(std::string const &investigationID,
 }
 
 ITableWorkspace_sptr FakeCatalog::getPublishInvestigations() {
-  return API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  return WorkspaceFactory::Instance().createTable("TableWorkspace");
 }
 
 void FakeCatalog::setCount(std::size_t const &count) { m_counter = count; }

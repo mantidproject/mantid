@@ -33,6 +33,7 @@ public:
     if (!datasets.isInitialized())
       datasets.initialize();
     datasets.setPropertyValue("InvestigationId", "12576918");
+    datasets.setPropertyValue("Session", m_fakeLogin->getSessionId());
     datasets.setPropertyValue("OutputWorkspace",
                               "investigation"); // selected invesigation
 

@@ -35,6 +35,7 @@ public:
     if (!mydata.isInitialized())
       mydata.initialize();
 
+    mydata.setPropertyValue("Session", m_fakeLogin->getSessionId());
     mydata.setPropertyValue("OutputWorkspace", "MyInvestigations");
 
     TS_ASSERT_THROWS_NOTHING(mydata.execute());
