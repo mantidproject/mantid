@@ -149,10 +149,10 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         def _get_scale(x):
             return {
-                None: 1,
+                "None": 1,
                 "Monitor": x.run().getProtonCharge(),
                 "Time": x.run().getLogData("duration").value,
-            }[normaliseBy]
+            }[str(normaliseBy)]
 
         # NOTE:
         # StringArrayProperty cannot be optional, so the background can only be passed in as a string
