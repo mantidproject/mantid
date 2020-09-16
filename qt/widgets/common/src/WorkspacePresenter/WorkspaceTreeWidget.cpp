@@ -110,11 +110,18 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
 
   auto *buttonLayout = new FlowLayout();
   m_loadButton = new QPushButton("Load");
+  m_loadButton->setToolTip("Load a file or live data");
   m_saveButton = new QPushButton("Save");
+  m_saveButton->setToolTip("Save the selected workspaces");
   m_deleteButton = new QPushButton("Delete");
+  m_deleteButton->setToolTip("Deletes the selected workspaces");
   m_clearButton = new QPushButton("Clear");
+  m_clearButton->setToolTip("Deletes all workspaces");
   m_groupButton = new QPushButton("Group");
+  m_groupButton->setToolTip("Group together two or more selected workspaces");
   m_sortButton = new QPushButton("Sort");
+  m_sortButton->setToolTip(
+      "Sort all workspaces by name, size, or the last time they were modified");
 
   if (m_groupButton)
     m_groupButton->setEnabled(false);
@@ -1159,9 +1166,8 @@ void WorkspaceTreeWidget::onClickDeleteWorkspaces() {
  * @return True if yes is pressed, false if no is pressed
  */
 bool WorkspaceTreeWidget::clearWorkspacesConfirmation() const {
-  return askUserYesNo(
-      "Clear Workspaces",
-      "Are you sure you want to clear all workspaces and hidden workspaces?");
+  return askUserYesNo("Clear Workspaces",
+                      "This will delete all the workspaces, are you sure?");
 }
 
 /**
