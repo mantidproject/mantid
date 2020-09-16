@@ -28,6 +28,7 @@ class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
   const std::string m_d17DirectBeamFile{"ILL/D17/317369.nxs"};
   const std::string m_d17File{"ILL/D17/317370.nxs"};
+  const std::string m_d17Cycle203File{"ILL/D17/564343.nxs"};
   const std::string m_figaroFile{"ILL/Figaro/598488.nxs"};
   const std::string m_d17File_2018{"ILL/D17/000001.nxs"};
   const std::string m_figaroFile_2018{"ILL/Figaro/000002.nxs"};
@@ -157,10 +158,11 @@ public:
         run.getPropertyValueAsType<double>("VirtualChopper.poff");
     const auto openOffset =
         run.getPropertyValueAsType<double>("VirtualChopper.open_offset");
+    const auto chopperWindow = run.getPropertyValueAsType<double>("ChopperWindow");
     const auto tof0 =
         tofDelay -
         60.e6 * (pOffset - 45. + chopper2Phase - chopper1Phase + openOffset) /
-            (2. * 360. * chopper1Speed);
+            (2. * 360. * chopper1Speed);    
     TS_ASSERT_EQUALS(output->blocksize(), channelCount)
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       const auto &xs = output->x(i);
@@ -180,6 +182,18 @@ public:
         run.getProperty("VirtualChopper.chopper2_phase_average")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("VirtualChopper.poff")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("VirtualChopper.open_offset")->units(), "")
+    TS_ASSERT_EQUALS(chopperWindow, 45.)
+  }
+
+  void testD17Cycle203ChopperWindow() {
+    MatrixWorkspace_sptr output;
+    auto prop = emptyProperties();
+    prop.emplace_back("XUnit", "TimeOfFlight");
+    getWorkspaceFor(output, m_d17Cycle203File, m_outWSName, prop);
+    TS_ASSERT_EQUALS(
+        output->run().getPropertyValueAsType<double>("ChopperWindow"), 20.)
+    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("ChopperGap"),
+                     0.082)
   }
 
   void testTOFFigaro() {
