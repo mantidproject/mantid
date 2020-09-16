@@ -152,7 +152,7 @@ void LoadILLDiffraction::exec() {
   progress.report("Setting additional sample logs");
   setSampleLogs();
 
-  if (m_instName != "D2B" && m_scanType == NoScan &&
+  if (m_instName != "D2B" && m_scanType != DetectorScan &&
       getProperty("ConvertAxisAndTranspose"))
     convertAxisAndTranspose();
 
@@ -912,22 +912,25 @@ void LoadILLDiffraction::computeThetaOffset() {
  * Converts the spectrum axis to 2theta and transposes the workspace.
  */
 void LoadILLDiffraction::convertAxisAndTranspose() {
-  auto extractor = createChildAlgorithm("ExtractMonitors");
+  auto extractor = createChildAlgorithm("ExtractSpectra");
   extractor->setProperty("InputWorkspace", m_outWorkspace);
-  extractor->setProperty("DetectorWorkspace", "__unused");
+  extractor->setProperty("StartWorkspaceIndex", 1);
+  extractor->setProperty("OutputWorkspace", "__unused");
   extractor->execute();
-  API::MatrixWorkspace_sptr det = extractor->getProperty("DetectorWorkspace");
+  API::MatrixWorkspace_sptr det = extractor->getProperty("OutputWorkspace");
   auto converter = createChildAlgorithm("ConvertSpectrumAxis");
   converter->setProperty("InputWorkspace", det);
   converter->setProperty("OutputWorkspace", "__unused");
   converter->setProperty("Target", "SignedTheta");
   converter->execute();
-  API::MatrixWorkspace_sptr converted = converter->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr converted =
+      converter->getProperty("OutputWorkspace");
   auto transposer = createChildAlgorithm("Transpose");
   transposer->setProperty("InputWorkspace", converted);
   transposer->setProperty("OutputWorkspace", "__unused");
   transposer->execute();
-  API::MatrixWorkspace_sptr transposed = transposer->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr transposed =
+      transposer->getProperty("OutputWorkspace");
   m_outWorkspace = transposed;
 }
 
