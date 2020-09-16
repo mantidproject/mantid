@@ -82,6 +82,12 @@ Bug fixes
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis gui was not properly disabling during calculations.
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis was not correctly resetting DeadTime property to default when a user changes the instrument
 - Fixed issue where select data was incorrectly enabling.
+
+ALC
+###
+
+Bug fixes
+----------
 - Fixed an issue in the ALC interface baseline fit where corrected data from all fits were plotted at the same time in the corrected data tab. Now only corrected data from the most recent fit is plotted.
 
 Elemental Analysis 
