@@ -20,6 +20,7 @@ class ColorQueue(object):
         e.g [(0, 0, 0), (255, 0, 0)..]
         All the above are supported by matplotlib
         """
+        # Create a cache of the color list, where each entry is a {color: priority} pair
         self._color_cache = {color_list[i]: i for i in range(len(color_list))}
         self._initialise_queue()
 

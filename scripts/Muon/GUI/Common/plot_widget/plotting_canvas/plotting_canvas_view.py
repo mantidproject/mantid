@@ -280,7 +280,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         for i, ax in enumerate(self.fig.axes):
             ax.cla()
             ax.tracked_workspaces.clear()
-            self._color_queue[i].reset()
 
     def resizeEvent(self, event):
         self.fig.tight_layout()

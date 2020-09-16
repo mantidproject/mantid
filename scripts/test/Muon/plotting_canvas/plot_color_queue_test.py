@@ -44,6 +44,7 @@ class PlotColorQueueTest(unittest.TestCase):
         self.color_queue += EXAMPLE_COLOR_QUEUE[0]
         self.assertEqual('C0', self.color_queue())
         self.assertEqual('C1', self.color_queue())
+        self.assertEqual('C9', self.color_queue._queue[-1][1])
 
     def test_that_reset_functions_correctly(self):
         self.color_queue()
