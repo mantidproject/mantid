@@ -8,7 +8,7 @@
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
-
+import functools
 
 THI_TOLERANCE = 0.002
 
@@ -147,7 +147,7 @@ class LRDirectBeamSort(PythonAlgorithm):
         if sort_by_runs is True:
             lr_data_sorted = sorted(lr_data, key=lambda r: r.getRunNumber())
         else:
-            lr_data_sorted = sorted(lr_data, cmp=sorter_function)
+            lr_data_sorted = sorted(lr_data, key=functools.cmp_to_key(sorter_function))
 
         # Set the output properties
         run_numbers = [r.getRunNumber() for r in lr_data_sorted]
