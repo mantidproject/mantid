@@ -65,7 +65,7 @@ Required import:
 
     SaveNexus(InputWorkspace=ws,Filename=savefile.nxs)
 
-:ref:`Plot Spectra from a Workspace <mantidplot.plotSpectrum>`:
+Plot Spectra from a Workspace:
 
 .. code-block:: python
 
