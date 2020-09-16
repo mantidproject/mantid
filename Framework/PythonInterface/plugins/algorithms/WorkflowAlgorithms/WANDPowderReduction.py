@@ -163,9 +163,9 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # or a list, which will be manually unpacked here
         bkg = {
             "<class 'NoneType'>": None,
-            "<class 'str'>": list(map(str.strip,bkg.split(","))),
+            "<class 'str'>": list(map(str.strip, bkg.split(","))),
             "<class 'mantid.dataobjects._dataobjects.Workspace2D'>": bkg,
-            "<class 'list'>": bkg, 
+            "<class 'list'>": bkg,
         }[str(type(bkg))]
 
         # NOTE:
