@@ -60,7 +60,7 @@ Improvements
 - Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to add an option to not auto-correct the time by loaded timezero.
 - Fitting tab in Muon analysis and Frequency domain analysis GUI's are now disabled when no valid fitting data is present.
 - Globals parameters within the function browser will no longer reset when a new function is added/removed.
-- Updated plotting to make line colours more consistent.
+- Updated plotting to make line colours more consistent. The maximum number of unique line colors in each plot is 10.
 - The ALC interface in workbench will now show errors by default. The error bars can also be turned on/off using the right-click plot menu.
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Added in default group and pair selection when loading grouping files from xml.
