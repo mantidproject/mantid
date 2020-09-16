@@ -7,10 +7,12 @@
 from docutils import statemachine
 from docutils.parsers.rst import Directive  # pylint: disable=unused-import
 import re
+from mantid.api import AlgorithmFactory, AlgorithmManager, FunctionFactory
 from mantiddoc import get_logger
 
 ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
 FIT_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)$')
+INITIALIZED_ALGS = {}
 
 
 # ----------------------------------------------------------------------------------------
@@ -38,7 +40,8 @@ def algorithm_name_and_version(docname):
         match = ALG_DOCNAME_RE.match(docname)
         if not match or len(match.groups()) != 2:
             raise RuntimeError(
-                "Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" % docname)
+                "Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst"
+                % docname)
 
         grps = match.groups()
         return (str(grps[0]), int(grps[1]))
@@ -48,7 +51,8 @@ def algorithm_name_and_version(docname):
         match = FIT_DOCNAME_RE.match(docname)
         if not match or len(match.groups()) != 1:
             raise RuntimeError(
-                "Document filename '%s.rst' does not match the expected format: FitFunctionName.rst" % docname)
+                "Document filename '%s.rst' does not match the expected format: FitFunctionName.rst"
+                % docname)
 
         return (str(match.groups()[0]), None)
 
@@ -123,6 +127,7 @@ class BaseDirective(Directive):
 
 # ----------------------------------------------------------------------------------------
 
+
 class AlgorithmBaseDirective(BaseDirective):
     """
     Specialized base directive for an algorithm
@@ -162,7 +167,7 @@ class AlgorithmBaseDirective(BaseDirective):
         Returns:
           str: Return error message string if the directive should be skipped
         """
-        from mantid.api import AlgorithmFactory, FunctionFactory
+        from mantid.api import FunctionFactory
 
         name, version = self.algorithm_name(), self.algorithm_version()
         msg = ""
@@ -199,22 +204,7 @@ class AlgorithmBaseDirective(BaseDirective):
             self._set_algorithm_name_and_version()
         return self.algm_version
 
-    def create_mantid_algorithm_by_name(self, algorithm_name):
-        """
-        Create and initializes a Mantid algorithm using the latest version.
-
-        Args:
-          algorithm_name (str): The name of the algorithm to use for the title.
-
-        Returns:
-          algorithm: An instance of a Mantid algorithm.
-        """
-        from mantid.api import AlgorithmManager
-        alg = AlgorithmManager.createUnmanaged(algorithm_name)
-        alg.initialize()
-        return alg
-
-    def create_mantid_algorithm(self, algorithm_name, version):
+    def create_mantid_algorithm(self, algorithm_name, version=-1):
         """
         Create and initializes a Mantid algorithm.
 
@@ -225,9 +215,17 @@ class AlgorithmBaseDirective(BaseDirective):
         Returns:
           algorithm: An instance of a Mantid algorithm.
         """
-        from mantid.api import AlgorithmManager
-        alg = AlgorithmManager.createUnmanaged(algorithm_name, version)
-        alg.initialize()
+        global INITIALIZED_ALGS
+        if version == -1:
+            version = AlgorithmFactory.Instance().highestVersion(algorithm_name)
+        alg_key = (algorithm_name, version)
+        try:
+            alg = INITIALIZED_ALGS[alg_key]
+        except KeyError:
+            alg = AlgorithmManager.Instance().createUnmanaged(algorithm_name, version)
+            alg.initialize()
+            INITIALIZED_ALGS[alg_key] = alg
+
         return alg
 
     def create_mantid_ifunction(self, function_name):
@@ -240,7 +238,6 @@ class AlgorithmBaseDirective(BaseDirective):
         Returns:
           ifunction: An instance of a Mantid IFunction
         """
-        from mantid.api import FunctionFactory
         return FunctionFactory.createFunction(function_name)
 
     def _set_algorithm_name_and_version(self):

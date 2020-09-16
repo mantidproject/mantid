@@ -5,8 +5,11 @@
 from optparse import OptionParser
 import os
 import re
+import site
 import sys
 from distutils.version import LooseVersion
+
+from qtpy.QtWidgets import QApplication
 
 DOC_EXT = ".rst"
 
@@ -20,6 +23,9 @@ SCREENSHOTS_DIR = "@SCREENSHOTS_DIR@"
 DIAGRAMS_DIR = "@DIAGRAMS_DIR@"
 DOT_EXECUTABLE = "@DOT_EXECUTABLE@"
 BUILD_DIR = "@CMAKE_BINARY_DIR@"
+
+sys.path.insert(0, BUILD_DIR + '/bin')
+site.addsitedir(BUILD_DIR + '/bin')
 
 ###############################################################################
 # Extract sphinx version
@@ -82,29 +88,14 @@ def main(sysarg):
             raise RuntimeError("No tests matched regex '%s'"
                                 % opts.testinclude)
 
-    # Run
-    # IPython monkey patches the RegexLexer.get_tokens_unprocessed method and
-    # causes Sphinx to fall over. We need to put it back while processing
-    # the documentation
-    from pygments.lexer import RegexLexer
-    # Reverse monkeypatch using unpatched function stored in mantid_ipython_widget
-    # if it is available
-    try:
-        RegexLexer.get_tokens_unprocessed = RegexLexer.get_tokens_unprocessed_unpatched
-    except AttributeError:
-        pass
+    qapp = QApplication([])
     try:
         import sphinx.cmdline
         return_value = sphinx.cmdline.main(argv)
     except ModuleNotFoundError:
         from sphinx.cmd import build
         return_value = build.main(argv)
-    finally:
-        try:
-            from qtconsole import pygments_highlighter
-        except ImportError:
-            from IPython.qt.console import pygments_highlighter # deprecated in ipython 4
-        RegexLexer.get_tokens_unprocessed = pygments_highlighter.get_tokens_unprocessed
+
     sys.exit(return_value)
 
 
