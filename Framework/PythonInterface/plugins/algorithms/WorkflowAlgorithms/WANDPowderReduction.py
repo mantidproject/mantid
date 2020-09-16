@@ -194,13 +194,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     EnableLogging=False,
                 )
 
-            _ws_tmp = Scale(
-                InputWorkspace=_wsn,
-                Factor=_get_scale(cal) / _get_scale(_ws),
-                EnableLogging=False,
-            )
             _ws_tmp = ExtractUnmaskedSpectra(
-                InputWorkspace=_ws_tmp, MaskWorkspace=_mskn, EnableLogging=False
+                InputWorkspace=_ws, MaskWorkspace=_mskn, EnableLogging=False
             )
             _ws_tmp = Integration(InputWorkspace=_ws_tmp, EnableLogging=False)
             _ws_tmp = ConvertSpectrumAxis(
@@ -235,6 +230,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 NumberBins=numberBins,
                 EnableLogging=False,
             )
+            _ws_cal_resampled = None
 
             # calibration
             if cal is not None:
@@ -264,6 +260,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     RHSWorkspace=_ws_cal_resampled,
                     EnableLogging=False,
                 )
+
+            _ws_resampled = Scale(
+                InputWorkspace=_ws_resampled,
+                Factor=_get_scale(_ws_cal_resampled) / _get_scale(_ws_resampled),
+                EnableLogging=False,
+                )    
 
             # background
             if bkg is not None:
@@ -320,7 +322,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     EnableLogging=False,
                 )
         # END_FOR: prcess_spectra
-
+        
         # Step_3: sum all spectra
         # ref: https://docs.mantidproject.org/nightly/algorithms/SumSpectra-v1.html
         if cal is not None:
