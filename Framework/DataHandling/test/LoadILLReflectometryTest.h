@@ -158,11 +158,12 @@ public:
         run.getPropertyValueAsType<double>("VirtualChopper.poff");
     const auto openOffset =
         run.getPropertyValueAsType<double>("VirtualChopper.open_offset");
-    const auto chopperWindow = run.getPropertyValueAsType<double>("ChopperWindow");
+    const auto chopperWindow =
+        run.getPropertyValueAsType<double>("ChopperWindow");
     const auto tof0 =
         tofDelay -
         60.e6 * (pOffset - 45. + chopper2Phase - chopper1Phase + openOffset) /
-            (2. * 360. * chopper1Speed);    
+            (2. * 360. * chopper1Speed);
     TS_ASSERT_EQUALS(output->blocksize(), channelCount)
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       const auto &xs = output->x(i);
