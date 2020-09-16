@@ -632,7 +632,7 @@ def imshow(axes, workspace, *args, **kwargs):
                 kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
             else:
                 kwargs['extent'] = [x[0], x[-1], y[0], y[-1]]
-        return mantid.plots.modest_image.imshow(axes, z, transpose=transpose, *args, **kwargs)
+        return mantid.plots.modest_image.imshow(axes, z, *args, **kwargs)
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
         (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
