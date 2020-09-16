@@ -13,6 +13,7 @@
 
 #include <map>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace Mantid {
@@ -42,9 +43,7 @@ public:
           "Preview with the same name is already registered for the same "
           "facility and technique.");
     }
-    m_previews[facility][technique].insert(
-        std::make_pair<std::string, IPreview_uptr>(name,
-                                                   std::make_unique<T>()));
+    m_previews[facility][technique][name] = std::make_unique<T>();
   }
 
 private:

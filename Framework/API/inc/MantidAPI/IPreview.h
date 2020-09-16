@@ -16,11 +16,11 @@ namespace Mantid {
 namespace API {
 
 /** IPreview : This is the abstract base class of the raw data previews.
- * Preview is a basic named operation (view) that is commonly used for a given
- * facility and technique for visualizing the raw data in a meaningful way.
- * Preview also has a type, which tells the client which kind of visualization
- * is relevant for the returned workspace (instrument view, slice view, 1d or
- * color fill plot).
+ * Preview is a stateless, named basic operation (view) that is commonly used
+ * for a given facility and technique for visualizing the raw data in a
+ * meaningful way. Preview also has a type, which tells the client which kind of
+ * visualization is relevant for the returned workspace (instrument view, slice
+ * view, 1d or color fill plot).
  */
 class MANTID_API_DLL IPreview {
 public:
