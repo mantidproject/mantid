@@ -621,7 +621,7 @@ def imshow(axes, workspace, *args, **kwargs):
                         number of bins, the polygons will be aligned with the axes
     :param transpose: ``bool`` to transpose the x and y axes of the plotted dimensions of an MDHistoWorkspace
     '''
-    transpose = kwargs.pop('transpose', False)
+    transpose = kwargs.get('transpose', False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
