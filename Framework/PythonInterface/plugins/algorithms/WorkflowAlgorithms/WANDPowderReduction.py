@@ -199,7 +199,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             _ws_tmp = ExtractUnmaskedSpectra(
                 InputWorkspace=_ws, MaskWorkspace=_mskn, EnableLogging=False
             )
-            if isinstance(mtd['_ws_tmp'], IEventWorkspace):
+            if isinstance(mtd["_ws_tmp"], IEventWorkspace):
                 _ws_tmp = Integration(InputWorkspace=_ws_tmp, EnableLogging=False)
             _ws_tmp = ConvertSpectrumAxis(
                 InputWorkspace=_ws_tmp,
@@ -242,7 +242,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 _ws_cal = ExtractUnmaskedSpectra(
                     InputWorkspace=cal, MaskWorkspace=_mskn, EnableLogging=False
                 )
-                if isinstance(mtd['_ws_cal'], IEventWorkspace):
+                if isinstance(mtd["_ws_cal"], IEventWorkspace):
                     _ws_cal = Integration(InputWorkspace=_ws_cal, EnableLogging=False)
                 CopyInstrumentParameters(
                     InputWorkspace=_ws, OutputWorkspace=_ws_cal, EnableLogging=False
@@ -281,7 +281,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     InputWorkspace=bgn, MaskWorkspace=_mskn, EnableLogging=False
                 )
 
-                if isinstance(mtd['_ws_bkg'], IEventWorkspace):
+                if isinstance(mtd["_ws_bkg"], IEventWorkspace):
                     _ws_bkg = Integration(InputWorkspace=_ws_bkg, EnableLogging=False)
 
                 CopyInstrumentParameters(
@@ -306,10 +306,10 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 )
                 if cal is not None:
                     _ws_bkg_resampled = Divide(
-                        LHSWorkspace=_ws_bkg_resampled, 
-                        RHSWorkspace=_ws_cal_resampled, 
+                        LHSWorkspace=_ws_bkg_resampled,
+                        RHSWorkspace=_ws_cal_resampled,
                         EnableLogging=False,
-                        )
+                    )
 
                 _ws_bkg_resampled = Scale(
                     InputWorkspace=_ws_bkg_resampled,
@@ -322,7 +322,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     Factor=self.getProperty("BackgroundScale").value,
                     EnableLogging=False,
                 )
-                
+
                 _ws_resampled = Minus(
                     LHSWorkspace=_ws_resampled,
                     RHSWorkspace=_ws_bkg_resampled,
