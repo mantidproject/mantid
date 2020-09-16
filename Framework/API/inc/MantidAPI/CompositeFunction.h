@@ -81,10 +81,14 @@ public:
   bool hasParameter(const std::string &name) const override;
   /// Total number of parameters
   size_t nParams() const override;
+  // Total number of attributes
+  size_t nAttributes() const override;
   /// Returns the index of parameter name
   size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i
   std::string parameterName(size_t i) const override;
+  /// Returns the name of attribute i
+  std::string attributeName(size_t i) const;
   /// Returns the description of parameter i
   std::string parameterDescription(size_t i) const override;
   /// Checks if a parameter has been set explicitly
@@ -153,6 +157,7 @@ public:
                           const IFunction_sptr &f_new);
   /// Get the function index
   std::size_t functionIndex(std::size_t i) const;
+  std::size_t attributeFunctionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function
   size_t parameterLocalIndex(size_t i, bool recursive = false) const;
   /// Returns the name of parameter i as it declared in its function
@@ -162,6 +167,7 @@ public:
   /// Remove all member functions
   void clear();
 
+  std::vector<std::string> getAttributeNames() const override;
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes() const { return 0; }
   /// Returns a list of attribute names
@@ -212,10 +218,10 @@ protected:
 
 private:
   /// Extract function index and parameter name from a variable name
-  static void parseName(const std::string &varName, size_t &index,
-                        std::string &name);
-
-  /// Pointers to the included funtions
+  static std::pair<std::string, size_t> parseName(const std::string &varName);
+  // get attribute offset from attribute index
+  size_t getAttributeOffset(size_t attributeIndex) const;
+  /// Pointers to the included functions
   std::vector<IFunction_sptr> m_functions;
   /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared
@@ -224,8 +230,15 @@ private:
   /// Keeps the function index for each declared parameter  (parameter declared
   /// index)
   std::vector<size_t> m_IFunction;
+  // Attribute index vector, where the index is the attribute number and the
+  // value is the containing function e.g the attributes in function 1, {A1},
+  // are given by A1 = {index for index < m_attributeIndex.size() |
+  // m_attributeIndex[index] = 1}
+  std::vector<size_t> m_attributeIndex;
   /// Total number of parameters
   size_t m_nParams;
+  /// Total number of attributes
+  size_t m_nAttributes;
   /// Function counter to be used in nextConstraint
   mutable size_t m_iConstraintFunction;
 };

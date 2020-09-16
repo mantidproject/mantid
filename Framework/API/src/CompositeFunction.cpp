@@ -27,6 +27,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("CompositeFunction");
+const std::string ATTNUMDERIV("NumDeriv");
 } // namespace
 
 using std::size_t;
@@ -35,8 +36,9 @@ DECLARE_FUNCTION(CompositeFunction)
 
 /// Default constructor
 CompositeFunction::CompositeFunction()
-    : IFunction(), m_nParams(0), m_iConstraintFunction(false) {
-  declareAttribute("NumDeriv", Attribute(false));
+    : IFunction(), m_nParams(0), m_nAttributes(0),
+      m_iConstraintFunction(false) {
+  declareAttribute(ATTNUMDERIV, Attribute(false));
 }
 
 /// Function initialization. Declare function parameters in this method.
@@ -68,7 +70,7 @@ std::string CompositeFunction::writeToString(
   }
 
   if (name() != "CompositeFunction" || nAttributes() > 1 ||
-      getAttribute("NumDeriv").asBool() || !parentLocalAttributesStr.empty()) {
+      getAttribute(ATTNUMDERIV).asBool() || !parentLocalAttributesStr.empty()) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = this->getAttributeNames();
     for (const auto &attName : attr) {
@@ -167,7 +169,7 @@ void CompositeFunction::function(const FunctionDomain &domain,
  */
 void CompositeFunction::functionDeriv(const FunctionDomain &domain,
                                       Jacobian &jacobian) {
-  if (getAttribute("NumDeriv").asBool()) {
+  if (getAttribute(ATTNUMDERIV).asBool()) {
     calNumericalDeriv(domain, jacobian);
   } else {
     for (size_t iFun = 0; iFun < nFunctions(); ++iFun) {
@@ -217,11 +219,10 @@ double CompositeFunction::getParameter(size_t i) const {
  */
 bool CompositeFunction::hasParameter(const std::string &name) const {
   try {
-    std::string pname;
-    size_t index;
-    parseName(name, index, pname);
-    return index < m_functions.size() ? m_functions[index]->hasParameter(pname)
-                                      : false;
+    auto [parameterName, index] = parseName(name);
+    return index < m_functions.size()
+               ? m_functions[index]->hasParameter(parameterName)
+               : false;
   } catch (std::invalid_argument &) {
     return false;
   }
@@ -231,15 +232,13 @@ bool CompositeFunction::hasParameter(const std::string &name) const {
  * Sets a new value to a parameter by name.
  * @param name :: The name of the parameter.
  * @param value :: The new value
- * @param explicitlySet :: A boolean falgging the parameter as explicitly set
+ * @param explicitlySet :: A boolean flagging the parameter as explicitly set
  * (by user)
  */
 void CompositeFunction::setParameter(const std::string &name,
                                      const double &value, bool explicitlySet) {
-  std::string pname;
-  size_t index;
-  parseName(name, index, pname);
-  getFunction(index)->setParameter(pname, value, explicitlySet);
+  auto [parameterName, index] = parseName(name);
+  getFunction(index)->setParameter(parameterName, value, explicitlySet);
 }
 
 /**
@@ -249,10 +248,8 @@ void CompositeFunction::setParameter(const std::string &name,
  */
 void CompositeFunction::setParameterDescription(
     const std::string &name, const std::string &description) {
-  std::string pname;
-  size_t index;
-  parseName(name, index, pname);
-  getFunction(index)->setParameterDescription(pname, description);
+  auto [parameterName, index] = parseName(name);
+  getFunction(index)->setParameterDescription(parameterName, description);
 }
 
 /**
@@ -261,25 +258,24 @@ void CompositeFunction::setParameterDescription(
  * @return value of the requested named parameter
  */
 double CompositeFunction::getParameter(const std::string &name) const {
-  std::string pname;
-  size_t index;
-  parseName(name, index, pname);
-  return getFunction(index)->getParameter(pname);
+  auto [parameterName, index] = parseName(name);
+  return getFunction(index)->getParameter(parameterName);
 }
 
 /// Total number of parameters
 size_t CompositeFunction::nParams() const { return m_nParams; }
 
+// Total number of attributes
+size_t CompositeFunction::nAttributes() const { return m_nAttributes; }
 /**
  *
  * @param name :: The name of a parameter
  * @return index of the requested named parameter
  */
 size_t CompositeFunction::parameterIndex(const std::string &name) const {
-  std::string pname;
-  size_t index;
-  parseName(name, index, pname);
-  return getFunction(index)->parameterIndex(pname) + m_paramOffsets[index];
+  auto [parameterName, index] = parseName(name);
+  return getFunction(index)->parameterIndex(parameterName) +
+         m_paramOffsets[index];
 }
 
 /// Returns the name of parameter
@@ -293,6 +289,19 @@ std::string CompositeFunction::parameterName(size_t i) const {
   return ostr.str();
 }
 
+/// Returns the name of the ith attribute
+/// @param index :: The index of the attribute
+/// @return The name of the attribute
+std::string CompositeFunction::attributeName(size_t index) const {
+  size_t functionIndex = attributeFunctionIndex(index);
+  std::cout << "Index is" << functionIndex << std::endl;
+  std::cout << "Offset is" << getAttributeOffset(index) << std::endl;
+  std::ostringstream ostr;
+  ostr << 'f' << functionIndex << '.'
+       << m_functions[functionIndex]->attributeName(getAttributeOffset(index));
+  return ostr.str();
+}
+
 /// Returns the description of parameter
 /// @param i :: The index
 /// @return The description of the parameter
@@ -301,6 +310,19 @@ std::string CompositeFunction::parameterDescription(size_t i) const {
   std::ostringstream ostr;
   ostr << m_functions[iFun]->parameterDescription(i - m_paramOffsets[iFun]);
   return ostr.str();
+}
+
+/// Returns a list of attribute names, including the attributes of the child
+/// functions
+std::vector<std::string> CompositeFunction::getAttributeNames() const {
+  std::vector<std::string> attributeNames;
+  attributeNames.reserve(nAttributes() + 1);
+  // Add global numerical derivative attribute
+  attributeNames.insert(attributeNames.end(), ATTNUMDERIV);
+  // Add child attributes
+  auto names = IFunction::getAttributeNames();
+  attributeNames.insert(attributeNames.end(), names.begin(), names.end());
+  return attributeNames;
 }
 
 /**
@@ -374,6 +396,7 @@ void CompositeFunction::checkFunction() {
   m_nParams = 0;
   m_paramOffsets.clear();
   m_IFunction.clear();
+  m_attributeIndex.clear();
 
   std::vector<IFunction_sptr> functions(m_functions.begin(), m_functions.end());
   m_functions.clear();
@@ -402,14 +425,17 @@ void CompositeFunction::clear() {
  */
 size_t CompositeFunction::addFunction(IFunction_sptr f) {
   m_IFunction.insert(m_IFunction.end(), f->nParams(), m_functions.size());
+  m_attributeIndex.insert(m_attributeIndex.end(), f->nAttributes(),
+                          m_functions.size());
   m_functions.emplace_back(f);
-  //?f->init();
   if (m_paramOffsets.empty()) {
     m_paramOffsets.emplace_back(0);
     m_nParams = f->nParams();
+    m_nAttributes = f->nAttributes();
   } else {
     m_paramOffsets.emplace_back(m_nParams);
     m_nParams += f->nParams();
+    m_nAttributes += f->nAttributes();
   }
   return m_functions.size() - 1;
 }
@@ -425,9 +451,10 @@ void CompositeFunction::removeFunction(size_t i) {
   }
 
   IFunction_sptr fun = getFunction(i);
-  // Reduction in parameters
-  size_t dnp = fun->nParams();
-
+  // Reduction in parameters and attributes
+  m_nParams -= fun->nParams();
+  m_nAttributes -= fun->nAttributes();
+  // Remove ties which are no longer valid
   for (size_t j = 0; j < nParams();) {
     ParameterTie *tie = getTie(j);
     if (tie && tie->findParametersOf(fun.get())) {
@@ -437,24 +464,28 @@ void CompositeFunction::removeFunction(size_t i) {
     }
   }
 
-  // Shift down the function indeces for parameters
-  for (auto it = m_IFunction.begin(); it != m_IFunction.end();) {
-
-    if (*it == i) {
-      it = m_IFunction.erase(it);
+  // Shift down the function indices for parameters and attributes
+  auto shiftDown = [&](auto &functionIndex) {
+    if (functionIndex == i) {
+      return true;
+    } else if (functionIndex > i) {
+      functionIndex -= 1;
+      return false;
     } else {
-      if (*it > i) {
-        *it -= 1;
-      }
-      ++it;
+      return false;
     }
-  }
+  };
+  m_IFunction.erase(
+      std::remove_if(m_IFunction.begin(), m_IFunction.end(), shiftDown),
+      m_IFunction.end());
+  m_attributeIndex.erase(std::remove_if(m_attributeIndex.begin(),
+                                        m_attributeIndex.end(), shiftDown),
+                         m_attributeIndex.end());
 
-  m_nParams -= dnp;
   // Shift the parameter offsets down by the total number of i-th function's
   // params
   for (size_t j = i + 1; j < nFunctions(); j++) {
-    m_paramOffsets[j] -= dnp;
+    m_paramOffsets[j] -= fun->nParams();
   }
   m_paramOffsets.erase(m_paramOffsets.begin() + i);
 
@@ -474,43 +505,46 @@ void CompositeFunction::replaceFunctionPtr(const IFunction_sptr &f_old,
   if (it == m_functions.end())
     return;
   std::vector<IFunction_sptr>::difference_type iFun = it - m_functions.begin();
-  replaceFunction(iFun, std::move(f_new));
+  replaceFunction(iFun, f_new);
 }
 
 /** Replace a function with a new one. The old function is deleted.
  * @param i :: The index of the function to replace
  * @param f :: A pointer to the new function
  */
-void CompositeFunction::replaceFunction(size_t i, const IFunction_sptr &f) {
-  if (i >= nFunctions()) {
-    throw std::out_of_range("Function index (" + std::to_string(i) +
+void CompositeFunction::replaceFunction(size_t functionIndex,
+                                        const IFunction_sptr &f) {
+  if (functionIndex >= nFunctions()) {
+    throw std::out_of_range("Function index (" + std::to_string(functionIndex) +
                             ") out of range (" + std::to_string(nFunctions()) +
                             ").");
   }
 
-  IFunction_sptr fun = getFunction(i);
+  IFunction_sptr fun = getFunction(functionIndex);
   size_t np_old = fun->nParams();
-
   size_t np_new = f->nParams();
 
-  // Modify function indeces: The new function may have different number of
-  // parameters
+  // Modify function parameter and attribute indices:
+  // The new function may have different number of
   {
-    auto itFun = std::find(m_IFunction.begin(), m_IFunction.end(), i);
+    auto itFun =
+        std::find(m_IFunction.begin(), m_IFunction.end(), functionIndex);
+
     if (itFun != m_IFunction.end()) // functions must have at least 1 parameter
     {
       if (np_old > np_new) {
         m_IFunction.erase(itFun, itFun + np_old - np_new);
       } else if (np_old < np_new) {
-        m_IFunction.insert(itFun, np_new - np_old, i);
+        m_IFunction.insert(itFun, np_new - np_old, functionIndex);
       }
     } else if (np_new > 0) // it could happen if the old function is an empty
                            // CompositeFunction
     {
       using std::placeholders::_1;
-      itFun = std::find_if(m_IFunction.begin(), m_IFunction.end(),
-                           std::bind(std::greater<size_t>(), _1, i));
-      m_IFunction.insert(itFun, np_new, i);
+      itFun =
+          std::find_if(m_IFunction.begin(), m_IFunction.end(),
+                       std::bind(std::greater<size_t>(), _1, functionIndex));
+      m_IFunction.insert(itFun, np_new, functionIndex);
     }
   }
 
@@ -518,11 +552,10 @@ void CompositeFunction::replaceFunction(size_t i, const IFunction_sptr &f) {
   m_nParams += dnp;
   // Shift the parameter offsets down by the total number of i-th function's
   // params
-  for (size_t j = i + 1; j < nFunctions(); j++) {
+  for (size_t j = functionIndex + 1; j < nFunctions(); j++) {
     m_paramOffsets[j] += dnp;
   }
-
-  m_functions[i] = f;
+  m_functions[functionIndex] = f;
 }
 
 /**
@@ -551,36 +584,50 @@ size_t CompositeFunction::functionIndex(std::size_t i) const {
   }
   return m_IFunction[i];
 }
+/**
+ * Get the index of the function to which parameter i belongs
+ * @param i :: The parameter index
+ * @return function index of the requested parameter
+ */
+size_t CompositeFunction::attributeFunctionIndex(std::size_t i) const {
+  if (i >= nAttributes()) {
+    throw std::out_of_range("Function attribute index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nAttributes()) +
+                            ").");
+  }
+  return m_attributeIndex[i];
+}
 
 /**
  * @param varName :: The variable name which may contain function index (
  * [f<index.>]name )
  * @param index :: Receives function index or throws std::invalid_argument
- * @param name :: Receives the parameter name
+ * @param name :: Receives the variable name
  */
-void CompositeFunction::parseName(const std::string &varName, size_t &index,
-                                  std::string &name) {
+std::pair<std::string, size_t>
+CompositeFunction::parseName(const std::string &varName) {
   size_t i = varName.find('.');
   if (i == std::string::npos) {
     throw std::invalid_argument("Parameter " + varName + " not found.");
   } else {
+    std::string name;
     if (varName[0] != 'f')
       throw std::invalid_argument(
           "External function parameter name must start with 'f'");
 
     std::string sindex = varName.substr(1, i - 1);
-    index = boost::lexical_cast<int>(sindex);
+    size_t index = boost::lexical_cast<size_t>(sindex);
 
     if (i == varName.size() - 1)
       throw std::invalid_argument("Name cannot be empty");
 
-    name = varName.substr(i + 1);
+    return std::make_pair(varName.substr(i + 1), index);
   }
 }
 
 /** Returns the index of parameter i as it declared in its function
  * @param i :: The parameter index
- * @param recursive :: If true call parameterLocalName recusively until
+ * @param recursive :: If true call parameterLocalName recursively until
  *    a non-composite function is reached.
  * @return The local index of the parameter
  */
@@ -598,7 +645,7 @@ size_t CompositeFunction::parameterLocalIndex(size_t i, bool recursive) const {
 
 /** Returns the name of parameter i as it declared in its function
  * @param i :: The parameter index
- * @param recursive :: If true call parameterLocalName recusively until
+ * @param recursive :: If true call parameterLocalName recursively until
  *    a non-composite function is reached.
  * @return The pure parameter name (without the function identifier f#.)
  */
@@ -642,7 +689,7 @@ void CompositeFunction::clearTies() {
 
 /** Removes i-th parameter's tie if it is tied or does nothing.
  * @param i :: The index of the tied parameter.
- * @return True if successfull
+ * @return True if successful
  */
 bool CompositeFunction::removeTie(size_t i) {
   bool foundAndRemovedTie = IFunction::removeTie(i);
@@ -668,7 +715,7 @@ ParameterTie *CompositeFunction::getTie(size_t i) const {
 }
 
 /**
- * Declare a new parameter. To used in the implementation'c constructor.
+ * Declare a new parameter. To used in the implementation's constructor.
  * @param name :: The parameter name.
  * @param initValue :: The initial value for the parameter
  * @param description :: Parameter documentation
@@ -692,22 +739,8 @@ void CompositeFunction::setUpForFit() {
   for (size_t i = 0; i < nFunctions(); i++) {
     getFunction(i)->setUpForFit();
   }
-  // unfortuately the code below breaks some system tests (IRISFuryAndFuryFit)
-  // it looks as if using numeric derivatives can give different fit results
-  // to fit with analytical ones
-  //
-  // if parameters have non-constant ties enable numerical derivatives
-  // for(size_t i = 0; i < nParams(); ++i)
-  //{
-  //  ParameterTie* tie = getTie( i );
-  //  if ( tie && !tie->isConstant() )
-  //  {
-  //    useNumericDerivatives( true );
-  //    break;
-  //  }
-  //}
 
-  // instead of automatically switching to numeric derivatives
+  // Instead of automatically switching to numeric derivatives
   // log a warning about a danger of not using it
   if (!getAttribute("NumDeriv").asBool()) {
     for (size_t i = 0; i < nParams(); ++i) {
@@ -734,7 +767,7 @@ IConstraint *CompositeFunction::getConstraint(size_t i) const {
 }
 
 /** Remove a constraint
- * @param parName :: The name of a parameter which constarint to remove.
+ * @param parName :: The name of a parameter which constraint to remove.
  */
 void CompositeFunction::removeConstraint(const std::string &parName) {
   auto i = parameterIndex(parName);
@@ -779,7 +812,7 @@ CompositeFunction::getParameterIndex(const ParameterReference &ref) const {
 }
 
 /**
- * Returns the shrared pointer to the function conataining a parameter
+ * Returns the shared pointer to the function containing a parameter
  * @param ref :: The reference
  * @return A function containing parameter pointed to by ref
  */
@@ -840,6 +873,12 @@ CompositeFunction::createEquivalentFunctions() const {
     }
   }
   return funs;
+}
+size_t CompositeFunction::getAttributeOffset(size_t attributeIndex) const {
+  auto functionIndex = m_attributeIndex[attributeIndex];
+  return std::distance(std::find(m_attributeIndex.begin(),
+                                 m_attributeIndex.end(), functionIndex),
+                       m_attributeIndex.begin() + attributeIndex);
 }
 
 } // namespace API

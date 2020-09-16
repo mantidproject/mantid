@@ -495,6 +495,8 @@ public:
   virtual size_t nAttributes() const;
   /// Returns a list of attribute names
   virtual std::vector<std::string> getAttributeNames() const;
+  /// Get name of ith attribute
+  virtual std::string attributeName(size_t index) const;
   /// Return a value of attribute attName
   virtual Attribute getAttribute(const std::string &name) const;
   /// Set a value to attribute attName

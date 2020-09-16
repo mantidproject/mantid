@@ -1355,12 +1355,21 @@ IFunction_sptr IFunction::getFunction(std::size_t) const {
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
-  names.reserve(m_attrs.size());
-
-  std::transform(m_attrs.begin(), m_attrs.end(), std::back_inserter(names),
-                 [](const auto &attr) { return attr.first; });
-
+  names.reserve(this->nAttributes());
+  std::cout << "Calling with number of attributes as" << nAttributes() << std::endl;
+  for (size_t i = 0; i < this->nAttributes(); ++i) {
+    names.emplace_back(this->attributeName(i));
+  }
   return names;
+}
+
+// Name of ith attribute
+std::string IFunction::attributeName(size_t index) const {
+  if (index >= this->nAttributes()) {
+    throw std::out_of_range("Function attribute index out of range.");
+  }
+  auto itr = std::next(m_attrs.begin(), index);
+  return itr->first;
 }
 
 /**
