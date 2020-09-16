@@ -33,4 +33,12 @@ Bugfixes
 - A bug in the validation of temporary workpaces for :ref:`MDNorm <algm-MDNorm>` has been fixed. One can now use temporary workspaces in any order when slicing.
 - Fixed bugs in the DGSPlanner interface, that cause errors when using negative values
 
+MSlice
+######
+
+Bugfixes
+--------
+
+- A bug causing an exception when attempting to overplot on a plot with different axes has been fixed.
+
 :ref:`Release 5.1.0 <v5.1.0>`
