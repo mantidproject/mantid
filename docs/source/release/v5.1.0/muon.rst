@@ -60,7 +60,7 @@ Improvements
 - Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to add an option to not auto-correct the time by loaded timezero.
 - Fitting tab in Muon analysis and Frequency domain analysis GUI's are now disabled when no valid fitting data is present.
 - Globals parameters within the function browser will no longer reset when a new function is added/removed.
-- Updated plotting to make line colours more consistent.
+- Updated plotting to make line colours more consistent. The maximum number of unique line colors in each plot is 10.
 - The ALC interface in workbench will now show errors by default. The error bars can also be turned on/off using the right-click plot menu.
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Added in default group and pair selection when loading grouping files from xml.
@@ -82,6 +82,14 @@ Bug fixes
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis gui was not properly disabling during calculations.
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis was not correctly resetting DeadTime property to default when a user changes the instrument
 - Fixed issue where select data was incorrectly enabling.
+- Fixed a bug in simultaneous TF asymmetry mode fitting, which would cause a crash when the run was incremented. Note that currently the single fitting tab will not update with the new normalization constants after a new run is loaded.
+
+ALC
+###
+
+Bug fixes
+----------
+- Fixed an issue in the ALC interface baseline fit where corrected data from all fits were plotted at the same time in the corrected data tab. Now only corrected data from the most recent fit is plotted.
 
 Elemental Analysis 
 ##################

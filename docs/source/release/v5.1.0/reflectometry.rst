@@ -31,6 +31,7 @@ Bug fixes
 
 - :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` has been fixed to update the sample logs of chopper gap and chopper position with correct units regardless the wrong setting in nexus files.
 - The history for :ref:`algm-ReflectometryReductionOne` has been fixed so that the conversion to Q is now always included in the history.
+- The sort function in `LRDirectBeamSort <algm-LRDirectBeamSort>` has been updated for Python3
 
 Removed
 -------
@@ -71,9 +72,12 @@ Bug fixes
 ---------
 
 - Save/Load settings: A bug has been fixed where Experiment/Instrument settings were not being restored if the instrument changes on load.
+
 - Lost settings on New Batch and Restore Defaults:
 
   - A bug has been fixed where creating a new Batch would result in the Experiment/Instrument settings of all batches being reset to their defaults.
   - A bug has been fixed where clicking Restore Defaults on an Experiment/Instrument tab would cause all Experiment and Instrument tabs in every batch to be reset to defaults. Now, only the tab where you click Restore Defaults is changed.
+
+- A bug has been fixed where Mantid could crash if you transfer search results into an empty group
 
 :ref:`Release 5.1.0 <v5.1.0>`

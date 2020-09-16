@@ -621,7 +621,7 @@ def imshow(axes, workspace, *args, **kwargs):
                         number of bins, the polygons will be aligned with the axes
     :param transpose: ``bool`` to transpose the x and y axes of the plotted dimensions of an MDHistoWorkspace
     '''
-    transpose = kwargs.pop('transpose', False)
+    transpose = kwargs.get('transpose', False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
@@ -632,7 +632,7 @@ def imshow(axes, workspace, *args, **kwargs):
                 kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
             else:
                 kwargs['extent'] = [x[0], x[-1], y[0], y[-1]]
-        return mantid.plots.modest_image.imshow(axes, z, transpose=transpose, *args, **kwargs)
+        return mantid.plots.modest_image.imshow(axes, z, *args, **kwargs)
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
         (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
