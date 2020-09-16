@@ -224,6 +224,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # BEGIN_FOR: prcess_spectra
         for n, _wsn in enumerate(data):
             _mskn = f"__mask_{n}"  # calculated in previous loop
+            _ws = AnalysisDataService.retrieve(_wsn)
 
             # resample spectra
             _ws_resampled = ResampleX(
@@ -237,13 +238,14 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             # calibration
             if cal is not None:
+
                 _ws_cal = ExtractUnmaskedSpectra(
                     InputWorkspace=cal, MaskWorkspace=_mskn, EnableLogging=False
                 )
                 if isinstance(mtd['_ws_cal'], IEventWorkspace):
                     _ws_cal = Integration(InputWorkspace=_ws_cal, EnableLogging=False)
                 CopyInstrumentParameters(
-                    InputWorkspace=_wsn, OutputWorkspace=_ws_cal, EnableLogging=False
+                    InputWorkspace=_ws, OutputWorkspace=_ws_cal, EnableLogging=False
                 )
                 _ws_cal = ConvertSpectrumAxis(
                     InputWorkspace=_ws_cal,
@@ -267,28 +269,34 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             _ws_resampled = Scale(
                 InputWorkspace=_ws_resampled,
-                Factor=_get_scale(_ws_cal_resampled) / _get_scale(_ws_resampled),
+                Factor=_get_scale(cal) / _get_scale(_ws),
                 EnableLogging=False,
             )
 
             # background
             if bkg is not None:
                 bgn = bkg[n] if isinstance(bkg, list) else bkg
+
                 _ws_bkg = ExtractUnmaskedSpectra(
                     InputWorkspace=bgn, MaskWorkspace=_mskn, EnableLogging=False
                 )
+
                 if isinstance(mtd['_ws_bkg'], IEventWorkspace):
                     _ws_bkg = Integration(InputWorkspace=_ws_bkg, EnableLogging=False)
+
                 CopyInstrumentParameters(
-                    InputWorkspace=_wsn, OutputWorkspace=_ws_bkg, EnableLogging=False
+                    InputWorkspace=_ws, OutputWorkspace=_ws_bkg, EnableLogging=False
                 )
+
                 _ws_bkg = ConvertSpectrumAxis(
                     InputWorkspace=_ws_bkg,
                     Target=target,
                     EFixed=eFixed,
                     EnableLogging=False,
                 )
+
                 _ws_bkg = Transpose(InputWorkspace=_ws_bkg, EnableLogging=False)
+
                 _ws_bkg_resampled = ResampleX(
                     InputWorkspace=_ws_bkg,
                     XMin=xMin,
@@ -296,16 +304,25 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     NumberBins=numberBins,
                     EnableLogging=False,
                 )
+                if cal is not None:
+                    _ws_bkg_resampled = Divide(
+                        LHSWorkspace=_ws_bkg_resampled, 
+                        RHSWorkspace=_ws_cal_resampled, 
+                        EnableLogging=False,
+                        )
+
                 _ws_bkg_resampled = Scale(
                     InputWorkspace=_ws_bkg_resampled,
                     Factor=_get_scale(cal) / _get_scale(bgn),
                     EnableLogging=False,
                 )
+
                 _ws_bkg_resampled = Scale(
                     InputWorkspace=_ws_bkg_resampled,
                     Factor=self.getProperty("BackgroundScale").value,
                     EnableLogging=False,
                 )
+                
                 _ws_resampled = Minus(
                     LHSWorkspace=_ws_resampled,
                     RHSWorkspace=_ws_bkg_resampled,
