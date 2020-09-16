@@ -36,7 +36,10 @@ class InterfaceDirective(BaseDirective):
         """
         Called by Sphinx when the ..interface:: directive is encountered
         """
-        picture = self._create_screenshot(widget_name=self.options.get("widget", None))
+        try:
+            picture = self._create_screenshot(widget_name=self.options.get("widget", None))
+        except RuntimeError:
+            picture = None
         self._insert_screenshot_link(picture,
                                      align=self.options.get("align", None),
                                      width=self.options.get("width", None))
@@ -55,21 +58,16 @@ class InterfaceDirective(BaseDirective):
         Returns:
           screenshot: A mantiddoc.tools.Screenshot object
         """
-        try:
-            screenshots_dir = self._screenshot_directory()
-        except RuntimeError:
-            return None
+        screenshots_dir = self._screenshot_directory()
 
         # Generate image
         from mantiddoc.tools.screenshot import custominterface_screenshot
         if not os.path.exists(screenshots_dir):
             os.makedirs(screenshots_dir)
 
-        try:
-            return custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name = widget_name)
-        except RuntimeError:
-            # Assume GUI is not available
-            return None
+        return custominterface_screenshot(self.interface_name(),
+                                          screenshots_dir,
+                                          widget_name=widget_name)
 
     def _insert_screenshot_link(self, picture, align=None, width=None):
         """
