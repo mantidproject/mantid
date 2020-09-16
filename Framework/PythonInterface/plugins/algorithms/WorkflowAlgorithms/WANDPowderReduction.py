@@ -148,11 +148,15 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         outWS = self.getPropertyValue("OutputWorkspace")
 
         def _get_scale(x):
-            return {
-                "None": 1,
-                "Monitor": x.run().getProtonCharge(),
-                "Time": x.run().getLogData("duration").value,
-            }[str(normaliseBy)] if x is not None else 1
+            return (
+                {
+                    "None": 1,
+                    "Monitor": x.run().getProtonCharge(),
+                    "Time": x.run().getLogData("duration").value,
+                }[str(normaliseBy)]
+                if x is not None
+                else 1
+            )
 
         # NOTE:
         # StringArrayProperty cannot be optional, so the background can only be passed in as a string
@@ -265,7 +269,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 InputWorkspace=_ws_resampled,
                 Factor=_get_scale(_ws_cal_resampled) / _get_scale(_ws_resampled),
                 EnableLogging=False,
-                )    
+            )
 
             # background
             if bkg is not None:
@@ -322,7 +326,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     EnableLogging=False,
                 )
         # END_FOR: prcess_spectra
-        
+
         # Step_3: sum all spectra
         # ref: https://docs.mantidproject.org/nightly/algorithms/SumSpectra-v1.html
         if cal is not None:
