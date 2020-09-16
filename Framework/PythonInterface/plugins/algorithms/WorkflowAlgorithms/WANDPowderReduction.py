@@ -152,7 +152,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 "None": 1,
                 "Monitor": x.run().getProtonCharge(),
                 "Time": x.run().getLogData("duration").value,
-            }[str(normaliseBy)]
+            }[str(normaliseBy)] if x is not None else 1
 
         # NOTE:
         # StringArrayProperty cannot be optional, so the background can only be passed in as a string
