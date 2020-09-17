@@ -57,21 +57,16 @@ class PolDiffILLReduction(PythonAlgorithm):
             issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
             issues['CadmiumTransmissionInputWorkspace'] = 'Cadmium transmission input workspace is mandatory for transmission calculation.'
 
-        if process == 'Quartz' and ( self.getProperty('TransmissionInputWorkspace').isDefault
-                                     or self.getProperty('ContainerInputWorkspace').isDefault
-                                     or self.getProperty('AbsorberInputWorkspace').isDefault ) :
-            issues['TransmissionInputWorkspace'] = 'Quartz transmission is mandatory for polarization correction calculation.'
-            issues['ContainerInputWorkspace'] = 'Container input workspace is mandatory for polarization correction calculation.'
-            issues['AbsorberInputWorkspace'] ='Absorber input workspace is mandatory for polarization correction calculation.'
+        if ( (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault) or
+             (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault) ):
+            issues['AbsorberInputWorkspace'] = 'Both Container and Absorber input workspaces are mandatory for background subtraction.'
+            issues['ContainerInputWorkspace'] = 'Both Container and Absorber input workspaces are mandatory for background subtraction.'
 
-        if process == 'Vanadium' and ( self.getProperty('TransmissionInputWorkspace').isDefault
-                                       or self.getProperty('ContainerInputWorkspace').isDefault
-                                       or self.getProperty('QuartzInputWorkspace').isDefault
-                                       or self.getProperty('AbsorberInputWorkspace').isDefault ) :
+        if process == 'Quartz' and self.getProperty('TransmissionInputWorkspace').isDefault:
+            issues['TransmissionInputWorkspace'] = 'Quartz transmission is mandatory for polarization correction calculation.'
+
+        if process == 'Vanadium' and self.getProperty('TransmissionInputWorkspace').isDefault :
             issues['TransmissionInputWorkspace'] = 'Vanadium transmission is mandatory for vanadium data reduction.'
-            issues['QuartzInputWorkspace'] = 'Polarisation correction workspace is mandatory for vanadium data reduction.'
-            issues['ContainerInputWorkspace'] = 'Container input workspace is mandatory for vanadium data reduction.'
-            issues['AbsorberInputWorkspace'] = 'Absorber input workspace is mandatory for vanadium data reduction.'
 
         if process == 'Sample' or process == 'Vanadium':
             if self.getProperty('SampleGeometry') != 'None' and self.getProperty('ChemicalFormula').isDefault:
@@ -80,14 +75,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 issues['SampleGeometryDictionary'] = 'Sample parameters need to be defined.'
 
         if process == 'Sample':
-            if ( self.getProperty('TransmissionInputWorkspace').isDefault
-                 or self.getProperty('QuartzInputWorkspace').isDefault
-                 or self.getProperty('ContainerInputWorkspace').isDefault
-                 or self.getProperty('AbsorberInputWorkspace').isDefault ) :
+            if self.getProperty('TransmissionInputWorkspace').isDefault :
                 issues['TransmissionInputWorkspace'] = 'Sample transmission is mandatory for sample data reduction.'
-                issues['QuartzInputWorkspace'] = 'Vanadium input workspace is mandatory for sample data reduction.'
-                issues['ContainerInputWorkspace'] = 'Container input workspace is mandatory for sample data reduction.'
-                issues['AbsorberInputWorkspace'] = 'Absorber input workspace is mandatory for sample data reduction.'
 
             if (self.getProperty('DetectorEfficiencyCalibration') == 'Vanadium'
                     and self.getProperty('VanadiumInputWorkspace').isDefault):
@@ -187,11 +176,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc='Whether or not to sum the multiple scan steps into a single distribution')
 
         self.setPropertySettings('SumScan', scan)
-
-        self.declareProperty('SubtractBackground', True,
-                             doc='Whether or not to subtract background from the current sample data.')
-
-        self.setPropertySettings('SubtractBackground', reduction)
 
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
@@ -340,9 +324,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _subtract_background(self, ws, container_ws, transmission_ws):
-        """ Subtracts empty container and cadmium scaled by transmission."""
+        """Subtracts empty container and cadmium scaled by transmission."""
         if self._method != 'TOF':
             absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
+            if absorber_ws == "":
+                raise RuntimeError("Absorber input workspace needs to be provided for non-TOF background subtraction.")
         for entry_no, entry in enumerate(mtd[ws]):
             container_entry = mtd[container_ws].getItem(entry_no).name()
             mtd[container_entry].setYUnit('Counts/Counts')
@@ -691,10 +677,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             progress.report()
         elif process not in ['Beam']:
             self._normalise(ws)
+
         if process in ['Quartz', 'Vanadium', 'Sample']:
-            container_ws = self.getPropertyValue('ContainerInputWorkspace')
-            transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
-            if self.getProperty('SubtractBackground').value:
+            if not self.getProperty('ContainerInputWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
+                # Subtracts background if the workspaces for container and transmission are provided
+                container_ws = self.getPropertyValue('ContainerInputWorkspace')
+                transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
                 self._subtract_background(ws, container_ws, transmission_ws)
                 progress.report()
 
