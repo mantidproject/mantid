@@ -14,10 +14,17 @@ from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedVa
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
                               CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
-                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale)
+                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale, SetInstrumentParameter)
 import numpy
 
 _MONSUM_LIMIT = 100
+
+
+def _addEfixedInstrumentParameter(ws):
+    """Adds the [calibrated] Ei as Efixed instrument parameter.
+    This is needed for subsequent QENS analysis routines, if one wishes to do in Mantid."""
+    efixed = ws.getRun().getLogData('Ei').value
+    SetInstrumentParameter(Workspace=ws, ParameterName='Efixed', ParameterType='Number', Value=str(efixed))
 
 
 def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging):
@@ -320,6 +327,9 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         progress.report('Calibrating incident energy')
         mainWS, monWS = self._calibrateEi(mainWS, monWS, monEPPWS)
         self._cleanup.cleanup(monWS, monEPPWS)
+
+        # Add the Ei as Efixed instrument parameter
+        _addEfixedInstrumentParameter(mainWS)
 
         progress.report('Correcting TOF')
         mainWS = self._correctTOFAxis(mainWS)

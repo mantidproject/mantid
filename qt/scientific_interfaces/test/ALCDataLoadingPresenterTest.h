@@ -41,6 +41,7 @@ public:
   MOCK_CONST_METHOD0(firstRun, std::string());
   MOCK_CONST_METHOD0(lastRun, std::string());
   MOCK_CONST_METHOD0(getRuns, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getRunsErrorMessage, std::string());
   MOCK_CONST_METHOD0(log, std::string());
   MOCK_CONST_METHOD0(function, std::string());
   MOCK_CONST_METHOD0(calculationType, std::string());

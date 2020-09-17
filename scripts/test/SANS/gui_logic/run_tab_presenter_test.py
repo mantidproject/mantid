@@ -210,6 +210,13 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertIsNone(state)
         self.presenter.sans_logger.warning.assert_called_once()
 
+    def test_switching_dimensionality_updates_model(self):
+        expected_dim = mock.NonCallableMock()
+        self._mock_view.reduction_dimensionality = expected_dim
+        self.presenter.on_reduction_dimensionality_changed(is_1d=False)
+
+        self.assertEqual(expected_dim, self._mock_model.reduction_dimensionality)
+
     def test_on_data_changed_calls_update_rows(self):
         batch_file_path, user_file_path, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
         self.presenter._masking_table_presenter = mock.MagicMock()

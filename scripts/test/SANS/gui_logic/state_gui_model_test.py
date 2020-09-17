@@ -105,8 +105,12 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_is_set_to_2D_reduction(self):
         state_gui_model = StateGuiModel(AllStates())
-        state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
+        expected = ReductionDimensionality.TWO_DIM
+        state_gui_model.reduction_dimensionality = expected
+
+        self.assertEqual(expected, state_gui_model.reduction_dimensionality)
+        self.assertEqual(expected, state_gui_model.all_states.convert_to_q.reduction_dimensionality)
+        self.assertEqual(expected, state_gui_model.all_states.reduction.reduction_dimensionality)
 
     def test_that_raises_when_not_setting_with_reduction_dim_enum(self):
         def red_dim_wrapper():
@@ -247,8 +251,13 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(not state_gui_model.wavelength_max)
         self.assertTrue(not state_gui_model.wavelength_step)
 
-    def test_that_default_wavelength_step_type_is_linear(self):
+    def test_that_wavelength_step_type_defaults_to_linear_if_none(self):
         state_gui_model = StateGuiModel(AllStates())
+        self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LIN)
+
+    def test_that_wavelength_step_type_defaults_to_linear_if_not_set(self):
+        state_gui_model = StateGuiModel(AllStates())
+        state_gui_model.wavelength_step_type = RangeStepType.NOT_SET
         self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LIN)
 
     def test_that_can_set_wavelength(self):
@@ -258,11 +267,29 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.wavelength_step = .5
         state_gui_model.wavelength_step_type = RangeStepType.LIN
         state_gui_model.wavelength_step_type = RangeStepType.LOG
-        self.assertEqual(state_gui_model.all_states.adjustment.calculate_transmission.wavelength_low, [1.])
-        self.assertEqual(state_gui_model.all_states.adjustment.calculate_transmission.wavelength_high, [2.])
-        self.assertEqual(state_gui_model.all_states.adjustment.calculate_transmission.wavelength_step, .5)
-        self.assertEqual(state_gui_model.all_states.adjustment.calculate_transmission.wavelength_step_type,
-                         RangeStepType.LOG)
+        self._assert_all_wavelengths_match(state_gui_model, [1.], [2.], .5, RangeStepType.LOG)
+
+    def _assert_all_wavelengths_match(self, model, low, high, step, step_type):
+        # Transmission
+        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_low, low)
+        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_high, high)
+        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_step, step)
+        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_step_type, step_type)
+        # Monitor
+        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_low, low)
+        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_high, high)
+        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_step, step)
+        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_step_type, step_type)
+        # Wavelength and pixel adjustment
+        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_low, low)
+        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_high, high)
+        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_step, step)
+        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_step_type, step_type)
+        # Wavelength
+        self.assertEqual(model.all_states.wavelength.wavelength_low, low)
+        self.assertEqual(model.all_states.wavelength.wavelength_high, high)
+        self.assertEqual(model.all_states.wavelength.wavelength_step, step)
+        self.assertEqual(model.all_states.wavelength.wavelength_step_type, step_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale
