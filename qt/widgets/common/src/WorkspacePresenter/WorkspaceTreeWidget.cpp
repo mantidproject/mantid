@@ -114,9 +114,9 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_saveButton = new QPushButton("Save");
   m_saveButton->setToolTip("Save the selected workspaces");
   m_deleteButton = new QPushButton("Delete");
-  m_deleteButton->setToolTip("Deletes the selected workspaces");
+  m_deleteButton->setToolTip("Delete the selected workspaces");
   m_clearButton = new QPushButton("Clear");
-  m_clearButton->setToolTip("Deletes all workspaces");
+  m_clearButton->setToolTip("Delete all workspaces");
   m_groupButton = new QPushButton("Group");
   m_groupButton->setToolTip("Group together two or more selected workspaces");
   m_sortButton = new QPushButton("Sort");
@@ -925,6 +925,7 @@ void WorkspaceTreeWidget::onTreeSelectionChanged() {
       auto grpSptr = std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
       if (grpSptr) {
         m_groupButton->setText("Ungroup");
+        m_groupButton->setToolTip("Ungroup selected workspace");
         m_groupButton->setEnabled(true);
       } else
         m_groupButton->setEnabled(false);
@@ -932,9 +933,13 @@ void WorkspaceTreeWidget::onTreeSelectionChanged() {
     } else if (items.size() >= 2) {
       m_groupButton->setText("Group");
       m_groupButton->setEnabled(true);
+      m_groupButton->setToolTip(
+          "Group together two or more selected workspaces");
     } else if (items.size() == 0) {
       m_groupButton->setText("Group");
       m_groupButton->setEnabled(false);
+      m_groupButton->setToolTip(
+          "Group together two or more selected workspaces");
     }
   }
 
