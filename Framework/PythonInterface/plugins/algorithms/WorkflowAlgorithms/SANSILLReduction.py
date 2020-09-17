@@ -568,6 +568,17 @@ class SANSILLReduction(PythonAlgorithm):
         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws,
                              SampleThickness=thickness)
 
+    def _set_sample_title(self, ws):
+        """
+            Set the workspace title using Nexus file fields.
+            @param ws : input workspace
+        """
+        run = mtd[ws].getRun()
+        title = run.getLogData('sample_description').value
+        if not title:
+            title = run.getLogData('sample.sampleId').value
+        mtd[ws].setTitle(title)
+
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Sample']
@@ -644,6 +655,7 @@ class SANSILLReduction(PythonAlgorithm):
                         if sensitivity_out:
                             self._process_sensitivity(ws, sensitivity_out)
                         self._process_sample(ws)
+                        self._set_sample_title(ws)
                         progress.report()
         self._finalize(ws, process)
 
