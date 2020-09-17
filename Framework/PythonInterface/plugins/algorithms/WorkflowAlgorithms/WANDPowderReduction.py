@@ -76,12 +76,9 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            MatrixWorkspaceProperty(
-                "BackgroundWorkspace",
-                "",
-                optional=PropertyMode.Optional,
-                direction=Direction.Input,
-            ),
+            "BackgroundWorkspace",
+            "",
+            direction=Direction.Input,
             doc="The background workspace to be subtracted.",
         )
 
