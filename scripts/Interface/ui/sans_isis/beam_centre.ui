@@ -38,7 +38,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="lab_centre_label">
            <property name="text">
-            <string>Centre Position LAB</string>
+            <string>Centre Position LAB (mm)</string>
            </property>
           </widget>
          </item>
@@ -55,7 +55,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="hab_centre_label">
            <property name="text">
-            <string>Centre Position HAB</string>
+            <string>Centre Position HAB (mm)</string>
            </property>
           </widget>
          </item>
@@ -176,7 +176,7 @@
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The radius limits which will be considered when finding the beam centre.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
-            <string>Radius Limits(mm)</string>
+            <string>Radius Limits (mm)</string>
            </property>
           </widget>
          </item>

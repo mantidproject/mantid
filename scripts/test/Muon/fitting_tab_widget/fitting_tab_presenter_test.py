@@ -512,7 +512,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         result = self.presenter.get_parameters_for_tf_function_calculation(fit_function)
 
         self.assertEqual(result, {'InputFunction': fit_function, 'WorkspaceList': [new_workspace_list[0]],
-                                  'Mode': 'Construct'})
+                                  'Mode': 'Construct', 'CopyTies': False})
 
     def test_get_parameters_for_tf_function_calculation_for_turning_mode_off(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
@@ -523,7 +523,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         result = self.presenter.get_parameters_for_tf_function_calculation(fit_function)
 
         self.assertEqual(result, {'InputFunction': fit_function, 'WorkspaceList': [new_workspace_list[0]],
-                                  'Mode': 'Extract'})
+                                  'Mode': 'Extract', 'CopyTies': False})
 
     def test_handle_asymmetry_mode_changed_reverts_changed_and_shows_error_if_non_group_selected(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',

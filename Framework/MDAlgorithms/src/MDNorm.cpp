@@ -1045,6 +1045,9 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
               outputMDHWS->getDimension(i)));
       mdHistoDimension->setMDFrame(*hklFrame);
     }
+    // add W_matrix
+    auto ei = outputMDHWS->getExperimentInfo(0);
+    ei->mutableRun().addProperty("W_MATRIX", m_W.getVector(), true);
   }
 
   outputMDHWS->setDisplayNormalization(Mantid::API::NoNormalization);

@@ -275,6 +275,10 @@ public:
   void addHandle(const std::string &wsName,
                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
+  // Remove Workspace
+  void removeWorkspace(const std::string &wsName);
+  void removeWorkspaceAndSpectra(const std::string &wsName);
+
   /// Called when the Fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
 
