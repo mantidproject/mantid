@@ -29,7 +29,7 @@ API::CatalogSession_sptr FakeCatalog::login(std::string const &username,
   return std::make_shared<API::CatalogSession>("FakeID", facility, endPoint);
 }
 
-void FakeCatalog::logout() { m_counter++; };
+void FakeCatalog::logout() { m_counter++; }
 
 void FakeCatalog::search(ICat::CatalogSearchParam const &inputs,
                          ITableWorkspace_sptr &outputWorkspace,
