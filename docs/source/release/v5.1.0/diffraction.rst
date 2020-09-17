@@ -28,6 +28,7 @@ Improvements
 - :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` now accepts the crystalographic density of the sample to correct for the powder density.
 - Square beam profile of 5mm x 5mm added to the PEARL_Definition_new_lowangle instrument definition file
 - running `Polaris.create_total_scattering_pdf` with `debug=true` will preserve the `self_scattering_correction` workspace.
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
 
 Bugfixes
 ^^^^^^^^
