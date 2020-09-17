@@ -34,6 +34,8 @@ from .peaksviewer.view import PeaksViewerCollectionView
 from .peaksviewer.representation.painter import MplPainter
 from .zoom import ScrollZoomMixin
 
+from mantid import logger
+
 # Constants
 DBLMAX = sys.float_info.max
 
@@ -245,6 +247,7 @@ class SliceViewerDataView(QWidget):
         """
         clears the plot and creates a new one using a MDHistoWorkspace
         """
+        logger.warning("OH NO")
         self.clear_image()
         self.image = self.ax.imshow(
             ws,
@@ -266,6 +269,7 @@ class SliceViewerDataView(QWidget):
         self.draw_plot()
 
     def plot_MDH_nonorthogonal(self, ws, **kwargs):
+        logger.warning("OH YES")
         self.clear_image()
         self.image = pcolormesh_nonorthogonal(self.ax,
                                               ws,
@@ -305,6 +309,7 @@ class SliceViewerDataView(QWidget):
             origin='lower',
             aspect='auto',
             interpolation='none',
+            transpose=self.dimensions.transpose,
             norm=self.colorbar.get_norm(),
             extent=old_extent,
             **kwargs)

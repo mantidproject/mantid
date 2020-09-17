@@ -10,6 +10,7 @@ import numpy as np
 
 from mantid.plots.datafunctions import get_matrix_2d_ragged, get_normalize_by_bin_width
 
+from mantid import logger
 
 class SamplingImage(mimage.AxesImage):
     def __init__(self,
@@ -142,19 +143,13 @@ class SamplingImage(mimage.AxesImage):
 def imshow_sampling(axes,
                     workspace,
                     cmap=None,
-                    norm=None,
-                    aspect=None,
-                    interpolation=None,
                     alpha=None,
                     vmin=None,
                     vmax=None,
-                    origin=None,
-                    extent=None,
                     shape=None,
                     filternorm=1,
                     filterrad=4.0,
                     imlim=None,
-                    resample=None,
                     url=None,
                     **kwargs):
     """Copy of imshow but replaced AxesImage with SamplingImage and added
@@ -169,8 +164,16 @@ def imshow_sampling(axes,
     im = imshow_sampling(ax, workspace, aspect='auto', origin='lower')
     fig.show()
     """
-    transpose = kwargs.pop('transpose', False)
+    logger.warning(str(workspace.getNumberHistograms()))
+
     normalization, _ = get_normalize_by_bin_width(workspace, axes, **kwargs)
+    transpose = kwargs.pop('transpose', False)
+    extent = kwargs.pop('extent', None)
+    aspect = kwargs.pop('aspect', None)
+    interpolation = kwargs.pop('interpolation', None)
+    origin = kwargs.pop('origin', None)
+    norm = kwargs.pop('norm', None)
+    resample = kwargs.pop('resample', False)
     kwargs.pop('distribution', None)
 
     if not extent:
