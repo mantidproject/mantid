@@ -165,7 +165,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             bkg = [
                 AnalysisDataService.retrieve(me)
                 for me in map(str.strip, bkg.split(","))
-            ] 
+            ]
 
         # NOTE:
         # Due to range difference among incoming spectra, a common bin para is needed
