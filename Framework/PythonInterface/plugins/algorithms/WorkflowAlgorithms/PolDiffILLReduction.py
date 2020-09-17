@@ -13,6 +13,7 @@ from mantid.kernel import Direction, EnabledWhenProperty, IntBoundedValidator, L
 
 from mantid.simpleapi import *
 
+from scipy.constants import physical_constants
 import numpy as np
 import math
 
@@ -25,8 +26,6 @@ class PolDiffILLReduction(PythonAlgorithm):
     _DEG_2_RAD =  np.pi / 180.0
 
     _sampleGeometry = None
-    _gyromagnetiRatio = 1.832472e8 # [s^-1 T^-1], from NIST
-    _r0 = 2.817940e-15 # [m], classical e radius, from NIST
 
     @staticmethod
     def _max_value_per_detector(ws):
@@ -605,7 +604,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 for entry_no, entry in enumerate(mtd[ws]):
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
                     tmp_names.append(ws_name)
-                    const = (2.0/3.0) * math.pow(self._gyromagneticRatio*self._r0, 2)
+                    const = (2.0/3.0) * math.pow(physical_constants['neutron gyromag. ratio']
+                                                 * physical_constants['classical electron radius'], 2)
                     paramagneticComponent = mtd[conjoined_components].getItem(2)
                     Divide(LHSWorkspace=const * entry * (entry+1),
                            RHSWorkspace=paramagneticComponent,
