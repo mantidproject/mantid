@@ -80,12 +80,12 @@ class ClipPeaks(PythonAlgorithm):
         factor = int(order / 2) + 1
 
         for i in range(len(data)):
-            temp = 0
-            ave = 0
-            for r in range(max(0, i - int(order / 2)), min(i + int(order / 2), len(data) - 1) + 1):
-                temp = temp + (factor - abs(r - i)) * data[r]
-                ave = ave + factor - abs(r - i)
-            sm[i] = temp / ave
+            min_index = max(0, i - int(order / 2))
+            max_index = min(i + int(order / 2), len(data) - 1) + 1
+            distance = np.arange(min_index, max_index) - i
+            temp_sum = np.sum((factor - np.abs(distance)) * data[min_index:max_index])
+            temp_avg = np.sum(factor - np.abs(distance))
+            sm[i] = temp_sum / temp_avg
 
         return sm
 
