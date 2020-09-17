@@ -11,7 +11,7 @@ from typing import Dict, List, Sequence, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos, SpecialCoordinateSystem
 from mantid.plots.datafunctions import get_indices
-from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, Transpose, TransposeMD
+from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 import numpy as np
 
 from .roi import extract_cuts_matrix, extract_roi_matrix
@@ -477,9 +477,7 @@ class SliceViewerModel:
         return help_msg
 
     # private api
-    def _get_ws(self, transpose: bool = False):
-        if transpose:
-            return _transpose_workspace2D(self._ws)
+    def _get_ws(self):
         return self._ws
 
     def _cut_names(self, cut: str):
@@ -600,8 +598,3 @@ def _to_str(seq: Sequence):
     """Given a sequence turn it into a comma-separate string of each element
     """
     return ','.join(map(str, seq))
-
-
-def _transpose_workspace2D(workspace):
-    transposed = Transpose(InputWorkspace=workspace, StoreInADS=False)
-    return transposed
