@@ -57,8 +57,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
             issues['CadmiumTransmissionInputWorkspace'] = 'Cadmium transmission input workspace is mandatory for transmission calculation.'
 
-        if ( (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault) or
-             (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault) ):
+        if ( (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault)
+             or (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault) ):
             issues['AbsorberInputWorkspace'] = 'Both Container and Absorber input workspaces are mandatory for background subtraction.'
             issues['ContainerInputWorkspace'] = 'Both Container and Absorber input workspaces are mandatory for background subtraction.'
 
@@ -253,7 +253,8 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('InstrumentParameterFile', scan)
 
-    def _figureMeasurementMethod(self, ws):
+    def _figure_measurement_method(self, ws):
+        """Figures out the measurement method based on the structure of the input files."""
         nEntriesPerNumor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
         if nEntriesPerNumor == 10:
             self._method = '10-p'
@@ -266,8 +267,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10-point. "
                                    +"The provided input does not fit in any of these measurement types.")
 
-    def _merge_polarizations(self, ws):
-        """ws_group: large group of many files with the same number of POL directions"""
+    def _merge_polarisations(self, ws):
+        """Merges workspaces with the same polarisation inside the provided WorkspaceGroup."""
         pol_directions = set()
         numors = set()
         for name in mtd[ws].getNames():
@@ -286,7 +287,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _normalise(self, ws):
-        """Normalizes the provided WorkspaceGroup to the second monitor."""
+        """Normalises the provided WorkspaceGroup to the monitor 1."""
         monID = 100000
         monitorIndices = "{},{}".format(mtd[ws].getItem(0).getNumberHistograms()-2,
                                         mtd[ws].getItem(0).getNumberHistograms()-1)
@@ -302,6 +303,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _calculate_transmission(self, ws, ws_beam, ws_cadmium):
+        """Calculates transmission based on the measurement of the current sample, empty beam, and cadmium."""
         # extract Monitor2 values
         monID = 100001
         mon = ws + '_mon'
@@ -377,6 +379,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         pass
 
     def _apply_polarization_corrections(self, ws, pol_eff_ws):
+        """Applies the polarisation correction based on the output from quartz reduction."""
         fp = 1 # flipper efficiency, placeholder
         for entry_no in range(mtd[ws].getNumberOfEntries()):
             if entry_no % 2 != 0:
@@ -384,8 +387,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             phi = mtd[pol_eff_ws].getItem(int(entry_no/2)).name()
             intensity_0 = mtd[ws].getItem(entry_no).name()
             intensity_1 = mtd[ws].getItem(entry_no+1).name()
-            tmp_names = [intensity_0 + '_tmp']
-            tmp_names.append(intensity_1 + '_tmp')
+            tmp_names = [intensity_0 + '_tmp', intensity_1 + '_tmp']
 
             Divide(LHSWorkspace=((1.0-mtd[phi])*(1.0-fp) + fp*(1+mtd[phi]))*mtd[intensity_0]
                    -(1.0-mtd[phi])*mtd[intensity_1],
@@ -402,6 +404,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _read_sample_geometry(self):
+        """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
+         such as the beam size."""
         raw_list = (self.getPropertyValue('SampleGeometryDictionary')).split(';')
         self._sampleGeometry = { item.split('=')[0] : item.split('=')[1] for item in raw_list }
         geometry_type = self.getPropertyValue('SampleGeometry')
@@ -429,6 +433,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 entry_target.setYUnit(entry_origin.YUnit())
 
     def _apply_self_attenuation_correction(self, sample_ws, container_ws):
+        """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
+        the sample's material, shape, and dimensions."""
         geometry_type = self.getPropertyValue('SampleGeometry')
 
         kwargs = {}
@@ -480,6 +486,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         return sample_ws
 
     def _component_separation(self, ws):
+        """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
+        current sample. The method used is based on either the user's choice or the provided data structure."""
         tmpNames = []
         nMeasurements = 0
         nComponents = 0
@@ -540,6 +548,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return outputName
 
     def _conjoin_components(self, ws):
+        """Conjoins the component workspaces coming from a theta scan."""
         components = [[], []]
         # list_incoherent = []
         componentNames = ['Incoherent', 'Coherent', 'Magnetic']
@@ -568,6 +577,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return output_name
 
     def _detector_efficiency_correction(self, ws, component_ws):
+        """Corrects detector efficiency and normalises data to either vanadium, incoherent scattering, or paramagnetic scattering."""
         conjoined_components = self._conjoin_components(component_ws)
         calibrationType = self.getPropertyValue('DetectorEfficiencyCalibration')
         normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation')
@@ -627,25 +637,23 @@ class PolDiffILLReduction(PythonAlgorithm):
             Multiply(LHSWorkspace=entry,
                      RHSWorkspace=mtd['det_efficiency'].getItem(entry_no),
                      OutputWorkspace=entry)
+        return ws
 
         return ws
 
     def _output_vanadium(self, ws, n_atoms):
-        if self._mode != 'TOF':
-            Divide(LHSWorkspace=CreateSingleValuedWorkspace(0.404e-28*n_atoms), RHSWorkspace=ws, OutputWorkspace=ws)
-        else:
-            raise RuntimeError("TOF reduction not implemented")
+        """Performs normalisation of the vanadium data to the expected cross-section."""
+        if self._mode == 'TOF':
+            ws = self._sum_TOF_data(ws)
+        Divide(LHSWorkspace=CreateSingleValuedWorkspace(0.404*n_atoms), RHSWorkspace=ws, OutputWorkspace=ws)
         return ws
-
-    def _output_sample(self, ws):
-        pass
 
     def _finalize(self, ws, process):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getItem(0).getRun().addProperty('ProcessedAs', process, True)
         if self.getProperty('SumScan').value and isinstance(mtd[ws], WorkspaceGroup) and mtd[ws].getNumberOfEntries() > 1:
-            self._merge_polarizations(ws)
+            self._merge_polarisations(ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
@@ -654,8 +662,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
-        # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
-        # instead we load and list, and merge once with merge runs
+
         calibration_setting = 'YIGFile'
         if self.getProperty('InstrumentParameterFile').isDefault:
             calibration_setting = 'None'
@@ -668,7 +675,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         run = mtd[ws].getItem(0).getRun()
         if run['acquisition_mode'].value == 1:
             self._mode = 'TOF'
-        self._figureMeasurementMethod(ws)
+        self._figure_measurement_method(ws)
         progress.report()
         if process in ['Transmission']:
             beam_ws = self.getPropertyValue('BeamInputWorkspace')
