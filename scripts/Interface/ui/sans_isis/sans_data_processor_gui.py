@@ -1448,7 +1448,10 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def transmission_sample_fit_type(self):
         fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText()
-        return FitType(fit_type_as_string)
+        try:
+            return FitType(fit_type_as_string)
+        except (RuntimeError, ValueError):
+            return
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
@@ -1461,7 +1464,10 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def transmission_can_fit_type(self):
         fit_type_as_string = self.fit_can_fit_type_combo_box.currentText()
-        return FitType(fit_type_as_string)
+        try:
+            return FitType(fit_type_as_string)
+        except (RuntimeError, ValueError):
+            return None
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):
@@ -1682,7 +1688,7 @@ class SANSDataProcessorGui(QMainWindow,
         q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText()
         try:
             return RangeStepType(q_xy_step_type_as_string)
-        except RuntimeError:
+        except ValueError:
             return None
 
     @q_xy_step_type.setter
