@@ -13,9 +13,9 @@
 #include "MantidAPI/PreviewManager.h"
 
 using Mantid::API::IPreview;
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::PreviewManager;
 using Mantid::API::PreviewManagerImpl;
+using Mantid::API::Workspace_sptr;
 
 namespace {
 class BasicPreview : public IPreview {
@@ -26,7 +26,7 @@ public:
   std::string technique() const override { return "SANS"; }
 
 private:
-  MatrixWorkspace_sptr preview(MatrixWorkspace_sptr ws) const override {
+  Workspace_sptr preview(Workspace_sptr ws) const override {
     return ws->clone();
   }
 };

@@ -7,8 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
-#include "MatrixWorkspace_fwd.h"
-#include "WorkspaceGroup_fwd.h"
+#include "Workspace_fwd.h"
 
 #include <string>
 
@@ -30,18 +29,10 @@ public:
   virtual std::string technique() const = 0;
   virtual std::string facility() const = 0;
   virtual std::string name() const = 0;
-  MatrixWorkspace_sptr view(MatrixWorkspace_sptr ws) const {
-    return preview(ws);
-  }
-  WorkspaceGroup_sptr view(WorkspaceGroup_sptr gr) const { return preview(gr); }
+  Workspace_sptr view(Workspace_sptr ws) const { return preview(ws); }
 
 private:
-  virtual MatrixWorkspace_sptr preview(MatrixWorkspace_sptr ws) const {
-    return ws;
-  }
-  virtual WorkspaceGroup_sptr preview(WorkspaceGroup_sptr gr) const {
-    return gr;
-  }
+  virtual Workspace_sptr preview(Workspace_sptr ws) const { return ws; }
 };
 using IPreview_uptr = std::unique_ptr<IPreview>;
 } // namespace API

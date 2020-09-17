@@ -9,12 +9,16 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IPreview.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <cxxtest/TestSuite.h>
 
+#include <boost/pointer_cast.hpp>
+
 using Mantid::API::FrameworkManager;
 using Mantid::API::IPreview;
-using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Workspace;
+using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceFactory;
 
 namespace {
@@ -26,7 +30,7 @@ public:
   std::string technique() const override { return "SANS"; }
 
 private:
-  MatrixWorkspace_sptr preview(MatrixWorkspace_sptr ws) const override {
+  Workspace_sptr preview(Workspace_sptr ws) const override {
     return ws->clone();
   }
 };
@@ -49,7 +53,9 @@ public:
     TS_ASSERT_EQUALS(preview->facility(), "TestFacility")
     TS_ASSERT_EQUALS(preview->technique(), "SANS")
     auto inWS = WorkspaceFactory::Instance().create("Workspace2D", 5, 8, 7);
-    auto outWS = preview->view(inWS);
+    Workspace_sptr ws = boost::dynamic_pointer_cast<Workspace>(inWS);
+    auto outWS = preview->view(ws);
+    TS_ASSERT(outWS);
     TS_ASSERT_DIFFERS(outWS, inWS);
   }
 };

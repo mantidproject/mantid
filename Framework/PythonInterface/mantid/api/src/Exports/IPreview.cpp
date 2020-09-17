@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAPI/IPreview.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
@@ -18,14 +17,10 @@ GET_POINTER_SPECIALIZATION(IPreview)
 
 using namespace boost::python;
 using Mantid::API::IPreview;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::WorkspaceGroup_sptr;
+using Mantid::API::Workspace_sptr;
 
 namespace {
-MatrixWorkspace_sptr (IPreview::*viewWS)(MatrixWorkspace_sptr) const =
-    &IPreview::view;
-WorkspaceGroup_sptr (IPreview::*viewGR)(WorkspaceGroup_sptr) const =
-    &IPreview::view;
+Workspace_sptr (IPreview::*view)(Workspace_sptr) const = &IPreview::view;
 } // namespace
 
 void export_IPreview() {
@@ -46,8 +41,6 @@ void export_IPreview() {
       .def("technique", &IPreview::technique, arg("self"),
            "Get the technique of the preview.")
       .def("type", &IPreview::type, arg("self"), "Get the type of the preview.")
-      .def("view", viewWS, (arg("self"), arg("ws")),
-           "Perform the preview operation on the workspace.")
-      .def("view", viewGR, (arg("self"), arg("gr")),
-           "Perform the preview operation on the workspace group.");
+      .def("view", view, (arg("self"), arg("ws")),
+           "Perform the preview operation on the workspace.");
 }
