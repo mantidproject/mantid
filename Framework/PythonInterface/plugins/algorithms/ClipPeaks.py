@@ -106,32 +106,30 @@ class ClipPeaks(PythonAlgorithm):
 
         return out
 
-    def peak_clip(self, data, win=30, decrease=True, lls=True, smooth_window=0):
+    def peak_clip(self, data, clip_window_size=30, decrease=True, use_lls=True, smooth_factor=0):
         """
-        Performs peak clipping on the data iteratively over the size of win. The input data can be optionally
-        smoothed if smooth_window is greater than 0. The LLS function can be performed on the data after smoothing
-        to help exaggerate smaller peaks present in the data before clipping. The peak clipping window used for
-        iteration is done with a decreasing window unless decrease is False.
+        Performs peak clipping on the data iteratively over the size of clip_window_size. The input data can be
+        optionally smoothed if smooth_window is greater than 0. The LLS function can be performed on the data after
+        smoothing to help exaggerate smaller peaks present in the data before clipping. The peak clipping window used
+        for iteration is done with a decreasing window unless decrease is False.
 
         :param data: Input (Y) data to clip.
-        :param win: Window size of the clipping (controls the iteration count of the clipping function).
+        :param clip_window_size: Window size of the clipping (controls the iteration count of the clipping function).
         :param decrease: Flag to determine if an increasing/decreasing window is applied to the data.
-        :param lls: Flag to enable/disable applying the LLS function to data before clipping.
-        :param smooth_window: Smoothing factor for the smoothing function. 0 to apply no smoothing.
+        :param use_lls: Flag to enable/disable applying the LLS function to data before clipping.
+        :param smooth_factor: Smoothing factor for the smoothing function. 0 to apply no smoothing.
         :return: np.ndarray of peak clipped data
         """
         start_data = np.copy(data)
 
-        window = win
-        self.log().information('Smoothing window: {0}'.format(str(smooth_window)))
+        window = clip_window_size
+        self.log().information('Smoothing window: {0}'.format(str(smooth_factor)))
 
-        if smooth_window > 0:
-            data = self.smooth(data, smooth_window)
+        if smooth_factor > 0:
+            data = self.smooth(data, smooth_factor)
 
-        if lls:
+        if use_lls:
             data = self.log_log_sqrt_transformation(data)
-
-        temp = data.copy()
 
         if decrease:
             scan = range(window + 1, 0, -1)
@@ -139,27 +137,28 @@ class ClipPeaks(PythonAlgorithm):
             scan = range(1, window + 1)
 
         for w in scan:
-            for i in range(len(temp)):
-                if i < w or i > (len(temp) - w - 1):
+            for i in range(len(data)):
+                if i < w or i > (len(data) - w - 1):
+                    # Skip if current index is outside of the window range
                     continue
                 else:
-                    win_array = temp[i - w:i + w + 1]
+                    win_array = data[i - w:i + w + 1]
                     win_array_reversed = win_array[::-1]
                     average = (win_array + win_array_reversed) / 2
-                    temp[i] = np.min(average[:int(len(average) / 2)])
+                    data[i] = np.min(average[:int(len(average) / 2)])
 
-        if lls:
-            temp = self.inv_log_log_sqrt_transformation(temp)
+        if use_lls:
+            data = self.inv_log_log_sqrt_transformation(data)
 
-        self.log().information('Minimum of starting data - peak clipped data: {0}'.format(str(min(start_data - temp))))
+        self.log().information('Minimum of starting data - peak clipped data: {0}'.format(str(min(start_data - data))))
 
-        index = np.where((start_data - temp) == min(start_data - temp))[0][0]
+        index = np.where((start_data - data) == min(start_data - data))[0][0]
 
-        output = temp * (start_data[index] / temp[index])
+        output = data * (start_data[index] / data[index])
 
         # Return 0 if nan
         if np.any(np.isnan(output)):
-            return temp * 0.0
+            return data * 0.0
 
         return output
 
@@ -188,16 +187,16 @@ class ClipPeaks(PythonAlgorithm):
         y = input_ws.extractY()
         e = input_ws.extractE()
 
-        for h in range(n_histo):
-            peak_clip_ws.setX(h, x[h])
+        for histogram in range(n_histo):
+            peak_clip_ws.setX(histogram, x[histogram])
             peak_clip_ws.setY(
-                h,
-                self.peak_clip(y[h],
-                               win=window,
+                histogram,
+                self.peak_clip(y[histogram],
+                               clip_window_size=window,
                                decrease=decreasing,
-                               lls=lls_set,
-                               smooth_window=smooth_range))
-            peak_clip_ws.setE(h, e[h])
+                               use_lls=lls_set,
+                               smooth_factor=smooth_range))
+            peak_clip_ws.setE(histogram, e[histogram])
 
         self.setProperty("OutputWorkspace", peak_clip_ws)
 
