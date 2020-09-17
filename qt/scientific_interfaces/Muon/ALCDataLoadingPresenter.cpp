@@ -52,7 +52,9 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
 
   // Check not empty
   if (files.empty()) {
-    m_view->displayError("Not a valid expression for runs");
+    m_view->displayError(
+        "Error message:\n" + m_view->getRunsErrorMessage() +
+        "\n\nRange must go in increasing order, e.g.\n10-20,22,25-30");
     return;
   }
 
@@ -93,7 +95,6 @@ int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
 void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
 
   const int currentLastRun = extractRunNumber(m_view->lastRun());
-  // auto currentInput = m_ui.runs->getText().toStdString();
   auto currentInput = m_view->getCurrentRunsText();
 
   // Save old input
