@@ -105,8 +105,12 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_is_set_to_2D_reduction(self):
         state_gui_model = StateGuiModel(AllStates())
-        state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
+        expected = ReductionDimensionality.TWO_DIM
+        state_gui_model.reduction_dimensionality = expected
+
+        self.assertEqual(expected, state_gui_model.reduction_dimensionality)
+        self.assertEqual(expected, state_gui_model.all_states.convert_to_q.reduction_dimensionality)
+        self.assertEqual(expected, state_gui_model.all_states.reduction.reduction_dimensionality)
 
     def test_that_raises_when_not_setting_with_reduction_dim_enum(self):
         def red_dim_wrapper():

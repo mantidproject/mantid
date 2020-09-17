@@ -445,7 +445,6 @@ class RunTabPresenter(PresenterCommon):
 
             # 3. Populate the table
             self._table_model.clear_table_entries()
-
             self._add_multiple_rows_to_table_model(rows=parsed_rows)
 
             # 4. Set the batch file path in the model
@@ -580,6 +579,8 @@ class RunTabPresenter(PresenterCommon):
         Enabled canSAS if switching to 1D.
         :param is_1d: bool. If true then switching TO 1D reduction.
         """
+        self._model.reduction_dimensionality = self._view.reduction_dimensionality
+
         if not self._view.output_mode_memory_radio_button.isChecked():
             # If we're in memory mode, all file types should always be disabled
             if is_1d:
