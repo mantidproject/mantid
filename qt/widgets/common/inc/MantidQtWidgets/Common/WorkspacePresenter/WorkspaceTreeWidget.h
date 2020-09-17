@@ -94,6 +94,8 @@ public:
   bool deleteConfirmation() const override;
   void
   deleteWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
+  bool clearWorkspacesConfirmation() const override;
+  void enableClearButton(bool enable) override;
   void clearView() override;
   std::string getFilterText() const override;
   SaveFileType getSaveFileType() const override;
@@ -174,6 +176,7 @@ public slots:
   void clickedWorkspace(QTreeWidgetItem * /*item*/, int /*unused*/);
   void saveWorkspaceCollection();
   void onClickDeleteWorkspaces();
+  void onClickClearWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem *item);
   void onClickSaveToProgram(const QString &name);
@@ -238,6 +241,7 @@ private:
   QPushButton *m_loadButton;
   QPushButton *m_saveButton;
   QPushButton *m_deleteButton;
+  QPushButton *m_clearButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
   QLineEdit *m_workspaceFilter;
