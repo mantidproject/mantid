@@ -296,6 +296,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if 0 in mtd[mon].readY(0):
                 raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
             else:
+                if self._mode == 'TOF':
+                    Integration(InputWorkspace=mon, OutputWorkspace=mon)
                 Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
                 RemoveSpectra(entry, WorkspaceIndices=monitorIndices, OutputWorkspace=entry)
                 DeleteWorkspace(mon)
@@ -326,7 +328,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _subtract_background(self, ws, container_ws, transmission_ws):
         """Subtracts empty container and cadmium scaled by transmission."""
-        if self._method != 'TOF':
+        if self._mode != 'TOF':
             absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
             if absorber_ws == "":
                 raise RuntimeError("Absorber input workspace needs to be provided for non-TOF background subtraction.")
@@ -334,7 +336,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             container_entry = mtd[container_ws].getItem(entry_no).name()
             mtd[container_entry].setYUnit('Counts/Counts')
             mtd[transmission_ws].setYUnit('Counts/Counts')
-            if self._method != 'TOF':
+            if self._mode != 'TOF':
                 absorber_entry = mtd[absorber_ws].getItem(entry_no).name()
                 mtd[absorber_entry].setYUnit('Counts/Counts')
                 Minus(LHSWorkspace=entry,
@@ -551,7 +553,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         components = [[], []]
         # list_incoherent = []
         componentNames = ['Incoherent', 'Coherent', 'Magnetic']
-        if '10-p' in self._method or 'XYZ' in self._method:
+        if self._method in ['10-p', 'XYZ']:
             components.append([])
         for entry in mtd[ws]:
             entryName = entry.name()
