@@ -92,12 +92,16 @@ private:
   size_t m_blocksize;
 };
 
+template<bool withAttributes=false>
 class Gauss : public IPeakFunction {
 public:
   Gauss() {
     declareParameter("c");
     declareParameter("h", 1.);
     declareParameter("s", 1.);
+    if constexpr (withAttributes) {
+      declareAttribute("GaussAttribute", Attribute("Gauss"));
+    }
   }
 
   std::string name() const override { return "Gauss"; }
@@ -139,11 +143,15 @@ public:
   void setFwhm(const double w) override { setParameter(2, w); }
 };
 
+template <bool withAttributes = false>
 class Linear : public ParamFunction, public IFunction1D {
 public:
   Linear() {
     declareParameter("a");
     declareParameter("b");
+    if constexpr (withAttributes) {
+      declareAttribute("LinearAttribute", Attribute("Linear"));
+    }
   }
 
   std::string name() const override { return "Linear"; }
@@ -158,7 +166,6 @@ public:
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
                        const size_t nData) override {
-    // throw Mantid::Kernel::Exception::NotImplementedError("");
     for (size_t i = 0; i < nData; i++) {
       out->set(static_cast<int>(i), 0, 1.);
       out->set(static_cast<int>(i), 1, xValues[i]);
@@ -166,6 +173,7 @@ public:
   }
 };
 
+template <bool withAttributes = false>
 class Cubic : public ParamFunction, public IFunction1D {
 public:
   Cubic() {
@@ -173,6 +181,9 @@ public:
     declareParameter("c1");
     declareParameter("c2");
     declareParameter("c3");
+    if constexpr (withAttributes) {
+      declareAttribute("CubicAttribute", Attribute("Cubic"));
+    }
   }
 
   std::string name() const override { return "Cubic"; }
@@ -208,7 +219,7 @@ public:
   static void destroySuite(CompositeFunctionTest *suite) { delete suite; }
 
   CompositeFunctionTest() {
-    FunctionFactory::Instance().subscribe<Linear>("Linear");
+    FunctionFactory::Instance().subscribe<Linear<false>>("Linear");
   }
 
   ~CompositeFunctionTest() override {
@@ -1243,5 +1254,80 @@ public:
     TS_ASSERT_EQUALS(fun->parameterLocalName(2, true), "a");
     TS_ASSERT_EQUALS(fun->parameterLocalName(4, true), "a");
     TS_ASSERT_EQUALS(fun->parameterLocalName(6, true), "a");
+  }
+
+  void test_attributes_generated_with_correct_prefix() { 
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    TS_ASSERT_EQUALS(mfun->nAttributes(), 4);
+    TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
+    TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.GaussAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.LinearAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(3), "f2.CubicAttribute");
+  }
+
+  void test_has_attribute_returns_correctly() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    TS_ASSERT_EQUALS(mfun->hasAttribute("NumDeriv"), true);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("Test"), false);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f0.GaussAttribute"), true);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f0.CubicAttribute"), false);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f1.LinearAttribute"), true);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f1.GaussAttribute"), false);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f2.CubicAttribute"), true);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f2.GaussAttribute"), false);
+  }
+
+  void test_get_attribute_names_returns_correctly() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    auto names = mfun->getAttributeNames();
+    // 1 attribute per function + the global numerical derivative attribute
+    TS_ASSERT_EQUALS(names.size(), 4);
+    TS_ASSERT_EQUALS(names[0], "NumDeriv");
+    TS_ASSERT_EQUALS(names[1], "f0.GaussAttribute");
+    TS_ASSERT_EQUALS(names[2], "f1.LinearAttribute");
+    TS_ASSERT_EQUALS(names[3], "f2.CubicAttribute");
+
+  }
+
+  void test_as_string_preserves_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    std::string str = "composite=CompositeFunction,NumDeriv=false;";
+    str += "name=Gauss,GaussAttribute=Gauss,c=0,h=1,s=1;";
+    str += "name=Linear,LinearAttribute=Linear,a=0,b=0;";
+    str += "name=Cubic,CubicAttribute=Cubic,c0=0,c1=0,c2=0,c3=0";
+
+    TS_ASSERT_EQUALS(mfun->asString(), str);
   }
 };
