@@ -54,7 +54,9 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   if (files.empty()) {
     m_view->displayError(
         "Error message:\n" + m_view->getRunsErrorMessage() +
-        "\n\nRange must go in increasing order, e.g.\n10-20,22,25-30");
+        "\n\nCan specify a list of runs by a dash \ne.g. 1-10\nCan specify "
+        "specific runs with a comma separated list \ne.g. 1-10, 15, 20-30\n "
+        "Range must go in increasing order, \ne.g. 1-10, 15, 20-30");
     return;
   }
 
