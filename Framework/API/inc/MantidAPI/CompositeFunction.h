@@ -79,6 +79,7 @@ public:
   double getParameter(const std::string &name) const override;
   /// Check if function has a parameter with this name.
   bool hasParameter(const std::string &name) const override;
+  bool hasAttribute(const std::string &name) const override;
   /// Total number of parameters
   size_t nParams() const override;
   // Total number of attributes
@@ -167,7 +168,7 @@ public:
   /// Remove all member functions
   void clear();
 
-  std::vector<std::string> getAttributeNames() const override;
+  //std::vector < std::string> getAttributeNames() const override;
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes() const { return 0; }
   /// Returns a list of attribute names
@@ -241,6 +242,10 @@ private:
   size_t m_nAttributes;
   /// Function counter to be used in nextConstraint
   mutable size_t m_iConstraintFunction;
+  // Global attributes
+  void createGlobalAttributes();
+  std::vector<std::string> m_globalAttributeNames;
+  size_t m_nGlobalAttributes;
 };
 
 /// shared pointer to the composite function base class

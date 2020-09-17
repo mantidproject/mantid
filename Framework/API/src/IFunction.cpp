@@ -1356,7 +1356,6 @@ IFunction_sptr IFunction::getFunction(std::size_t) const {
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
   names.reserve(this->nAttributes());
-  std::cout << "Calling with number of attributes as" << nAttributes() << std::endl;
   for (size_t i = 0; i < this->nAttributes(); ++i) {
     names.emplace_back(this->attributeName(i));
   }

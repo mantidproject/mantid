@@ -27,7 +27,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("CompositeFunction");
-const std::string ATTNUMDERIV("NumDeriv");
+constexpr char * ATTNUMDERIV = "NumDeriv";
 } // namespace
 
 using std::size_t;
@@ -38,7 +38,14 @@ DECLARE_FUNCTION(CompositeFunction)
 CompositeFunction::CompositeFunction()
     : IFunction(), m_nParams(0), m_nAttributes(0),
       m_iConstraintFunction(false) {
+  createGlobalAttributes();
+}
+
+void CompositeFunction::createGlobalAttributes() {
   declareAttribute(ATTNUMDERIV, Attribute(false));
+  m_nGlobalAttributes = 1;
+  m_globalAttributeNames.emplace_back(ATTNUMDERIV);
+  m_nAttributes = m_nGlobalAttributes;
 }
 
 /// Function initialization. Declare function parameters in this method.
@@ -69,10 +76,10 @@ std::string CompositeFunction::writeToString(
     return "name=" + name();
   }
 
-  if (name() != "CompositeFunction" || nAttributes() > 1 ||
+  if (name() != "CompositeFunction" || nAttributes() > m_nGlobalAttributes ||
       getAttribute(ATTNUMDERIV).asBool() || !parentLocalAttributesStr.empty()) {
     ostr << "composite=" << name();
-    std::vector<std::string> attr = this->getAttributeNames();
+    std::vector<std::string> attr = m_globalAttributeNames;
     for (const auto &attName : attr) {
       std::string attValue = this->getAttribute(attName).value();
       if (!attValue.empty()) {
@@ -229,6 +236,26 @@ bool CompositeFunction::hasParameter(const std::string &name) const {
 }
 
 /**
+ * Check if function has a attribute with a particular name.
+ * @param name :: A name of a attribute.
+ * @return True if the parameter exists.
+ */
+bool CompositeFunction::hasAttribute(const std::string &name) const {
+  try {
+    if (std::find(m_globalAttributeNames.begin(), m_globalAttributeNames.end(),
+                  name) != m_globalAttributeNames.end()) {
+      return true;
+    }
+    auto [attributeName, index] = parseName(name);
+    return index < m_functions.size()
+               ? m_functions[index]->hasAttribute(attributeName)
+               : false;
+  } catch (std::invalid_argument &) {
+    return false;
+  }
+}
+
+/**
  * Sets a new value to a parameter by name.
  * @param name :: The name of the parameter.
  * @param value :: The new value
@@ -293,12 +320,13 @@ std::string CompositeFunction::parameterName(size_t i) const {
 /// @param index :: The index of the attribute
 /// @return The name of the attribute
 std::string CompositeFunction::attributeName(size_t index) const {
-  size_t functionIndex = attributeFunctionIndex(index);
-  std::cout << "Index is" << functionIndex << std::endl;
-  std::cout << "Offset is" << getAttributeOffset(index) << std::endl;
+  if (index < m_nGlobalAttributes)
+    return IFunction::attributeName(index);
+  size_t functionIndex = attributeFunctionIndex(index - m_nGlobalAttributes);
   std::ostringstream ostr;
   ostr << 'f' << functionIndex << '.'
-       << m_functions[functionIndex]->attributeName(getAttributeOffset(index));
+       << m_functions[functionIndex]->attributeName(
+              getAttributeOffset(index - m_nGlobalAttributes));
   return ostr.str();
 }
 
@@ -312,18 +340,18 @@ std::string CompositeFunction::parameterDescription(size_t i) const {
   return ostr.str();
 }
 
-/// Returns a list of attribute names, including the attributes of the child
-/// functions
-std::vector<std::string> CompositeFunction::getAttributeNames() const {
-  std::vector<std::string> attributeNames;
-  attributeNames.reserve(nAttributes() + 1);
-  // Add global numerical derivative attribute
-  attributeNames.insert(attributeNames.end(), ATTNUMDERIV);
-  // Add child attributes
-  auto names = IFunction::getAttributeNames();
-  attributeNames.insert(attributeNames.end(), names.begin(), names.end());
-  return attributeNames;
-}
+///// Returns a list of attribute names, including the attributes of the child
+///// functions
+// std::vector<std::string> CompositeFunction::getAttributeNames() const {
+//  std::vector<std::string> attributeNames;
+//  attributeNames.reserve(nAttributes() + 1);
+//  // Add global numerical derivative attribute
+//  attributeNames.insert(attributeNames.end(), ATTNUMDERIV);
+//  // Add child attributes
+//  auto names = IFunction::getAttributeNames();
+//  attributeNames.insert(attributeNames.end(), names.begin(), names.end());
+//  return attributeNames;
+//}
 
 /**
  * Get the fitting error for a parameter
@@ -394,6 +422,7 @@ CompositeFunction::getParameterStatus(size_t i) const {
  */
 void CompositeFunction::checkFunction() {
   m_nParams = 0;
+  m_nAttributes = m_nGlobalAttributes;
   m_paramOffsets.clear();
   m_IFunction.clear();
   m_attributeIndex.clear();
@@ -417,6 +446,7 @@ void CompositeFunction::clear() {
   m_paramOffsets.clear();
   m_IFunction.clear();
   m_functions.clear();
+  m_attributeIndex.clear();
 }
 
 /** Add a function
@@ -431,7 +461,7 @@ size_t CompositeFunction::addFunction(IFunction_sptr f) {
   if (m_paramOffsets.empty()) {
     m_paramOffsets.emplace_back(0);
     m_nParams = f->nParams();
-    m_nAttributes = f->nAttributes();
+    m_nAttributes = f->nAttributes() + m_nGlobalAttributes;
   } else {
     m_paramOffsets.emplace_back(m_nParams);
     m_nParams += f->nParams();
@@ -451,9 +481,6 @@ void CompositeFunction::removeFunction(size_t i) {
   }
 
   IFunction_sptr fun = getFunction(i);
-  // Reduction in parameters and attributes
-  m_nParams -= fun->nParams();
-  m_nAttributes -= fun->nAttributes();
   // Remove ties which are no longer valid
   for (size_t j = 0; j < nParams();) {
     ParameterTie *tie = getTie(j);
@@ -475,12 +502,17 @@ void CompositeFunction::removeFunction(size_t i) {
       return false;
     }
   };
+
   m_IFunction.erase(
       std::remove_if(m_IFunction.begin(), m_IFunction.end(), shiftDown),
       m_IFunction.end());
   m_attributeIndex.erase(std::remove_if(m_attributeIndex.begin(),
                                         m_attributeIndex.end(), shiftDown),
                          m_attributeIndex.end());
+
+  // Reduction in parameters and attributes
+  m_nParams -= fun->nParams();
+  m_nAttributes -= fun->nAttributes();
 
   // Shift the parameter offsets down by the total number of i-th function's
   // params
@@ -523,6 +555,8 @@ void CompositeFunction::replaceFunction(size_t functionIndex,
   IFunction_sptr fun = getFunction(functionIndex);
   size_t np_old = fun->nParams();
   size_t np_new = f->nParams();
+  size_t at_old = fun->nAttributes();
+  size_t at_new = f->nAttributes();
 
   // Modify function parameter and attribute indices:
   // The new function may have different number of
@@ -549,7 +583,9 @@ void CompositeFunction::replaceFunction(size_t functionIndex,
   }
 
   size_t dnp = np_new - np_old;
+  size_t dna = at_new - at_old;
   m_nParams += dnp;
+  m_nAttributes += dna;
   // Shift the parameter offsets down by the total number of i-th function's
   // params
   for (size_t j = functionIndex + 1; j < nFunctions(); j++) {
