@@ -7,8 +7,9 @@
 #include "FakeCatalog.h"
 
 #include "MantidAPI/CatalogFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+// Required so compiler knows MantidDataObjects library is needed for ICatTests
+#include "MantidDataObjects/TableWorkspace.h"
 
 using namespace Mantid::API;
 
@@ -100,7 +101,7 @@ FakeCatalog::getUploadURL(std::string const &investigationID,
 }
 
 ITableWorkspace_sptr FakeCatalog::getPublishInvestigations() {
-  return WorkspaceFactory::Instance().createTable("TableWorkspace");
+  return std::make_shared<DataObjects::TableWorkspace>();
 }
 
 void FakeCatalog::setCount(std::size_t const &count) { m_counter = count; }
