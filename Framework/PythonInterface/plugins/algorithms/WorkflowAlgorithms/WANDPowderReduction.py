@@ -161,7 +161,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # NOTE:
         # StringArrayProperty cannot be optional, so the background can only be passed in as a string
         # or a list, which will be manually unpacked here
-        if bkg is not "":
+        if bkg != "":
             bkg = [
                 AnalysisDataService.retrieve(me)
                 for me in map(str.strip, bkg.split(","))
@@ -275,7 +275,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             )
 
             # background
-            if bkg is not "":
+            if bkg != "":
                 bgn = bkg[n] if isinstance(bkg, list) else bkg
 
                 _ws_bkg = ExtractUnmaskedSpectra(
