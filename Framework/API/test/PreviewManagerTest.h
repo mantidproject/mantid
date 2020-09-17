@@ -31,7 +31,7 @@ private:
   }
 };
 
-DECLARE_PREVIEW(BasicPreview);
+DECLARE_PREVIEW(BasicPreview)
 } // namespace
 
 class PreviewManagerTest : public CxxTest::TestSuite {
