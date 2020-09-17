@@ -264,6 +264,8 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y.max(), 19.9948756, places=4)
         self.assertAlmostEqual(x[0, y.argmax()], 2.9122841, places=4)
 
+        # NOTE:
+        # Need to check the physics
         pd_out4_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
