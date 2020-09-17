@@ -8,9 +8,11 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -69,6 +71,10 @@ private:
                                                 const std::vector<double> &,
                                                 size_t);
   void runLoadInstrument();
+  void setPanelSpectraMap(const size_t xLim, const size_t yLim,
+                          const size_t xFactor, const size_t yFactor,
+                          size_t &currentIndex,
+                          std::vector<SpectrumDefinition> &specDefs);
   void moveDetectorsD33(const DetectorPosition &);
   void moveDetectorDistance(double, const std::string &);
   void moveDetectorHorizontal(double, const std::string &);
@@ -91,6 +97,7 @@ private:
   bool m_isTOF;          ///< TOF or monochromatic flag
   double m_sourcePos;    ///< Source Z (for D33 TOF)
   bool m_isD16Omega;
+  Indexing::IndexInfo m_spectrumInfo;
 
   void setFinalProperties(const std::string &filename);
   void setPixelSize();

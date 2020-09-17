@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
@@ -23,6 +24,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_cow.h"
 
 #include <Poco/Path.h>
 #include <cmath>
@@ -48,7 +50,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 LoadILLSANS::LoadILLSANS()
     : m_supportedInstruments{"D11", "D22", "D33", "D16"}, m_defaultBinning{0,
                                                                            0},
-      m_resMode("nominal"), m_isTOF(false), m_sourcePos(0.) {}
+      m_resMode("nominal"), m_isTOF(false), m_sourcePos(0.), m_spectrumInfo(0) {
+}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -126,6 +129,8 @@ void LoadILLSANS::exec() {
     initWorkSpaceD33(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
+    m_localWorkspace->setIndexInfo(m_spectrumInfo);
+
     const DetectorPosition detPos =
         getDetectorPositionD33(firstEntry, instrumentPath);
     progress.report("Moving detectors");
@@ -397,6 +402,43 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
   nextIndex =
       loadDataIntoWorkspaceFromVerticalTubes(dataUp, binningUp, nextIndex);
   nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
+
+  std::vector<SpectrumDefinition> specDefs;
+  m_spectrumInfo = Indexing::IndexInfo(numberOfHistograms + N_MONITORS);
+
+  specDefs.reserve(numberOfHistograms);
+
+  size_t currentIndex = 0;
+
+  setPanelSpectraMap(dataRear.dim0(), dataRear.dim1(), 1, dataRear.dim0(),
+                     currentIndex, specDefs);
+
+  setPanelSpectraMap(dataRight.dim0(), dataRight.dim1(), 1, dataRight.dim0(),
+                     currentIndex, specDefs);
+  setPanelSpectraMap(dataLeft.dim0(), dataLeft.dim1(), 1, dataLeft.dim0(),
+                     currentIndex, specDefs);
+  setPanelSpectraMap(dataDown.dim1(), dataDown.dim0(), dataDown.dim0(), 1,
+                     currentIndex, specDefs);
+  setPanelSpectraMap(dataUp.dim1(), dataUp.dim0(), dataUp.dim0(), 1,
+                     currentIndex, specDefs);
+
+  setPanelSpectraMap(N_MONITORS, 1, 1, 1, currentIndex, specDefs);
+
+  m_spectrumInfo.setSpectrumDefinitions(specDefs);
+}
+
+void LoadILLSANS::setPanelSpectraMap(
+    const size_t xLim, const size_t yLim, const size_t xFactor,
+    const size_t yFactor, size_t &currentIndex,
+    std::vector<SpectrumDefinition> &specDefs) {
+  for (size_t x = 0; x < xLim; x++) {
+    for (size_t y = 0; y < yLim; y++) {
+      SpectrumDefinition def;
+      def.add(currentIndex + x * xFactor + y * yFactor);
+      specDefs.emplace_back(def);
+    }
+  }
+  currentIndex += xLim * yLim;
 }
 
 size_t
@@ -448,19 +490,21 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
   // Workaround to get the number of tubes / pixels
   int numberOfTubes;
   int histogramWidth;
+  int numberOfPixelsPerTube;
 
   if (m_isD16Omega) {
     // D16 with omega scan case
     numberOfTubes = data.dim2();
     histogramWidth = data.dim0();
+    numberOfPixelsPerTube = data.dim1();
   } else {
     numberOfTubes = data.dim0();
     histogramWidth = data.dim2();
+    numberOfPixelsPerTube = data.dim1();
   }
-  const int numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  // PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < numberOfTubes; ++i) {
     for (int j = 0; j < numberOfPixelsPerTube; ++j) {
       int *data_p;
