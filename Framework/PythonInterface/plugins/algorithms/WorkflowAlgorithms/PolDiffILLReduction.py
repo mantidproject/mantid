@@ -650,6 +650,16 @@ class PolDiffILLReduction(PythonAlgorithm):
                      OutputWorkspace=entry)
         return ws
 
+    def _sum_TOF_data(self, ws):
+        """Integrates intensities over all time channels or time-of-flight bins."""
+        tofUnits = self.getPropertyValue('TOFUnits')
+        if tofUnits == 'UncalibratedTime':
+            timeBinWidth = mtd[ws].getItem(0).getRun().getLogData('Detector.time_of_flight_0')
+            Multiply(LHSWorkspace=ws, RHSWorkspace=timeBinWidth, OutputWorkspace=ws)
+        if tofUnits == 'Energy':
+            energyBinWidth = 0 # placeholder
+            Multiply(LHSWorkspace=ws, RHSWorkspace=energyBinWidth, OutputWorkspace=ws)
+        Integration(InputWorkspace=ws, OutputWorkspace=ws)
         return ws
 
     def _output_vanadium(self, ws, n_atoms):
