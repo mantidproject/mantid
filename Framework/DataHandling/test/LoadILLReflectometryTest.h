@@ -193,8 +193,9 @@ public:
     getWorkspaceFor(output, m_d17Cycle203File, m_outWSName, prop);
     TS_ASSERT_EQUALS(
         output->run().getPropertyValueAsType<double>("ChopperWindow"), 20.)
-    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("ChopperGap"),
-                     0.082)
+    TS_ASSERT_DELTA(
+        output->run().getPropertyValueAsType<double>("Distance.ChopperGap"),
+        0.075, 1e-3)
   }
 
   void testTOFFigaro() {
@@ -266,6 +267,7 @@ public:
     TS_ASSERT_EQUALS(run.getProperty("VirtualChopper.dist_chop_samp")->units(),
                      "meter")
     TS_ASSERT_EQUALS(run.getProperty("Distance.ChopperGap")->units(), "meter")
+    TS_ASSERT_DELTA(chopperSeparation, 0.082, 1e-3)
   }
 
   void testSampleAndSourcePositionsFigaro() {
