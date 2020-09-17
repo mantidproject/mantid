@@ -367,14 +367,23 @@ class PolDiffILLReduction(PythonAlgorithm):
                 index += 1
             elif self._method == '10-p' and entry_no % 10 == 9:
                 index += 1
-
         GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace='tmp')
         DeleteWorkspaces(ws)
         RenameWorkspace(InputWorkspace='tmp', OutputWorkspace=ws)
         return ws
 
     def _detector_analyser_energy_efficiency(self, ws):
-        pass
+        """Corrects for the detector and analyser energy efficiency."""
+        correction_formula = "1.0 - exp(-13.153/sqrt(e))"
+        h = physical_constants['Planck constant'][0] # in m^2 kg^2 / s^2
+        neutron_mass = physical_constants['neutron mass'][0] # in kg
+        wavelength = mtd[ws].getItem(0).getRun().getLogData('monochromator.wavelength').value * 1e-10 # in m
+        joules_to_mev = 1e3 / physical_constants['electron volt'][0]
+        initialEnergy = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
+        for entry in mtd[ws]:
+            SetInstrumentParameter(entry, ParameterName="formula_eff", Value=correction_formula)
+            DetectorEfficiencyCorUser(InputWorkspace=entry, OutputWorkspace=entry, IncidentEnergy=initialEnergy)
+        return ws
 
     def _frame_overlap_correction(self, ws):
         pass
