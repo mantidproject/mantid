@@ -9,4 +9,14 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Algorithms and instruments
+--------------------------
+
+Improvements
+############
+
+ - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, if sample thickness is set to -1, the algorithm will try to get it
+   from the nexus file.
+ - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the output workspace will get its title from the nexus file.
+
 :ref:`Release 6.0.0 <v6.0.0>`
