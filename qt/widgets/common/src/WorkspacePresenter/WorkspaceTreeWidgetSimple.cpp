@@ -17,6 +17,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 #include <QMenu>
 #include <QSignalMapper>
@@ -56,7 +57,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_plotAdvanced(new QAction("Advanced...", this)),
       m_plotSurface(new QAction("Surface", this)),
       m_plotWireframe(new QAction("Wireframe", this)),
-      m_plotContour(new QAction("Contour", this)) {
+      m_plotContour(new QAction("Contour", this)),
+      m_plotMDHisto1D(new QAction("Plot 1D MDHistogram...", this)){
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) {
@@ -65,6 +67,9 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
 
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
+  connect(m_plotMDHisto1D, SIGNAL(triggered()), this,
+          SLOT(onPlotSpectrumClicked()));
+
   connect(m_plotBin, SIGNAL(triggered()), this, SLOT(onPlotBinClicked()));
   connect(m_overplotSpectrum, SIGNAL(triggered()), this,
           SLOT(onOverplotSpectrumClicked()));
@@ -160,6 +165,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addMenu(plot3DSubMenu);
       }
       if (!singleValued(*matrixWS)) {
+        // regular matrix workspace
         menu->addMenu(plotSubMenu);
         menu->addSeparator();
         menu->addAction(m_showData);
@@ -185,7 +191,24 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     } else if (std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
-      menu->addAction(m_sliceViewer);
+
+      // launch slice viewer or plot spectrum conditionally
+      bool add_slice_viewer = true;
+
+      if (std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace)) {
+        auto mdhist_ws = std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace);
+        if (mdhist_ws->getNumDims() == 1) {
+            add_slice_viewer = false;
+        }
+      }
+
+      if (add_slice_viewer) {
+          menu->addAction(m_sliceViewer);
+      }
+      else {
+          menu->addAction(m_plotMDHisto1D);
+      }
+
     } else if (auto wsGroup =
                    std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
       auto workspaces = wsGroup->getAllItems();

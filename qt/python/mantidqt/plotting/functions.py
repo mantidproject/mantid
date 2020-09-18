@@ -90,11 +90,13 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     """
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
     try:
+        print(f'[DEBUG] Get spectra selection: {workspaces}')
         selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot,
                                           advanced=advanced)
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
         selection = None
+        raise NotImplementedError('DEBUG STOP!')
 
     if selection is None:
         return None
