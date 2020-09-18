@@ -88,19 +88,33 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     :param advanced: If true then the advanced options will be shown in the spectra selector dialog.
     :return: The figure containing the plot or None if selection was cancelled
     """
+    from mantid.api import IMDHistoWorkspace
+    print(f'[DEBUG from_from_names()] plot workspaces {names}, advanced = {advanced}')
+
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
+
+    # Separate MatrixWorkspaces and IMDHistoWorkspace
+    md_ws_list = list()
+    for ws in workspaces:
+        if isinstance(ws, IMDHistoWorkspace):
+            md_ws_list.append(ws)
     try:
+        # Get selected spectra from all MatrixWorkspaces
         print(f'[DEBUG] Get spectra selection: {workspaces}')
         selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot,
                                           advanced=advanced)
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
         selection = None
-        raise NotImplementedError('DEBUG STOP!')
+
+    # Plot for various cases
+    if len(md_ws_list) > 0:
+        return plot(md_ws_list)
 
     if selection is None:
         return None
     elif selection == 'colorfill':
+        # plot mesh for color fill
         return pcolormesh_from_names(names)
 
     log_values = None

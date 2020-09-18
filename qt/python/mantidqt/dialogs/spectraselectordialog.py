@@ -14,7 +14,7 @@ from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
 from mantid.kernel import logger
 from mantid.api import MatrixWorkspace
-#, IMDHistoWorkspace
+from mantid.api import IMDHistoWorkspace
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import load_ui
@@ -67,9 +67,12 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
     @staticmethod
     def get_compatible_workspaces(workspaces):
         matrix_workspaces = []
+        md_workspaces = list()
         for ws in workspaces:
             if isinstance(ws, MatrixWorkspace):
                 matrix_workspaces.append(ws)
+            elif isinstance(ws, IMDHistoWorkspace):
+                md_workspaces.append(ws)
             else:
                 # Log an error but carry on so valid workspaces can be plotted.
                 logger.warning("{}: ** Expected MatrixWorkspace, found {}".format(ws.name(), ws.__class__.__name__))
@@ -81,7 +84,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        workspaces = self.get_compatible_workspaces(workspaces)
+        workspaces, md_workspaces = self.get_compatible_workspaces(workspaces)
 
         # attributes
         self._workspaces = workspaces
@@ -92,6 +95,8 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._overplot = overplot
         self._plottable_spectra = None
         self._advanced = advanced
+
+        self._md_workspaces = md_workspaces
 
         # This is used as a flag to workaround the case in which the error bars checkbox is set before a selection is
         # instantiated, causing it to have no effect. The update is then done in the parse_wksp / parse_spec functions
@@ -108,6 +113,8 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             self.accept()
 
     def on_plot_all_clicked(self):
+        print(f'[DEBUG] Plotting workspace: {[str(ws) for ws in self._workspaces]}')
+
         selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
         selection.plot_type = self._ui.plotType.currentIndex()
