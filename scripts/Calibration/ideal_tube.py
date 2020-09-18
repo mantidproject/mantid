@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import numpy
+import numpy as np
 
 # This class is the ideal tube, which specifies where the peaks formed by slits or edges should occur
 
@@ -33,27 +33,28 @@ class IdealTube(object):
     * :meth:`~ideal_tube.IdealTube.getFunctionalForms`
 
    """
-    def __init__( self ):
+
+    def __init__(self):
         """
         Create empty instance
         """
-        self.positions = numpy.ndarray((0)) # position of the points in metres
-        self.functionalForms = [] # function form of points 1=peak 2=edge. peaks assumed if [].
+        self.positions = np.empty(0, dtype=float)  # position of the points in metres
+        self.functionalForms = []  # function form of points 1=peak 2=edge. peaks assumed if [].
 
-    def setArray ( self, array ):
+    def setArray (self, array):
         """
        Construct an ideal tube directly from an array of positions
 
-       :param points: Array of points where the peaks should be in Metres
+       :param array: Array of points where the peaks should be in Metres
 
        """
-        self.positions =numpy.array( array)
+        self.positions = np.array(array)
 
     def setForm(self, form):
         """Define the functional form for the peaks"""
         self.functionalForms = form
 
-    def setPositionsAndForm ( self, pos, form ):
+    def setPositionsAndForm (self, pos, form):
         """
        Construct and ideal tube directly from an array of positions and functional forms
 
@@ -61,34 +62,34 @@ class IdealTube(object):
        :param form: Array of functional forms of the points 1=peak, 2=edge
 
        """
-        self.positions = numpy.array(pos )
+        self.positions = np.array(pos)
         self.functionalForms = form
 
-    def constructTubeFor3PointsMethod( self, idealAP, idealBP, idealCP, activeTubeLen ):
+    def constructTubeFor3PointsMethod(self, idealAP, idealBP, idealCP, activeTubeLen):
         """
-       Construct and ideal tube for Merlin 3-point calibration
+        Construct and ideal tube for Merlin 3-point calibration
 
-       :param idealAP: Ideal left (AP) in pixels
-       :param idealBP: ideal right (BP) in pixels
-       :param idealCP: ideal centre (CP) in pixels
-       :param activeTubeLen: Active tube length in metres
+        :param idealAP: Ideal left (AP) in pixels
+        :param idealBP: ideal right (BP) in pixels
+        :param idealCP: ideal centre (CP) in pixels
+        :param activeTubeLen: Active tube length in metres
 
-       """
-       #Construct Ideal tube for 3 point calibration of MERLIN standard tube (code could be put into a function)
+        """
+        #Construct Ideal tube for 3 point calibration of MERLIN standard tube (code could be put into a function)
         pixelLen = activeTubeLen/1024  # Pixel length
 
-       # we then convert idealAP, idealCP and idealBP to Y coordinates and put into ideal tube array
-        self.positions = numpy.array([ idealAP*pixelLen - activeTubeLen/2,
-                                       idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2])
-        self.functionalForms = [ 2, 1, 2 ]
+        # we then convert idealAP, idealCP and idealBP to Y coordinates and put into ideal tube array
+        self.positions = np.array([idealAP*pixelLen - activeTubeLen/2,
+                                   idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2])
+        self.functionalForms = [2, 1, 2]
 
-    def getArray( self ):
+    def getArray(self):
         """
        Return the array of of points where the peaks should be in Metres
        """
         return self.positions
 
-    def getFunctionalForms( self ):
+    def getFunctionalForms(self):
         """
        Return the array of of points where the peaks should be in Metres
        """
