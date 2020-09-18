@@ -574,10 +574,15 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws : input workspace
         """
         run = mtd[ws].getRun()
-        title = run.getLogData('sample_description').value
+        title = ''
+        if run.hasProperty('sample_description'):
+            title = run.getLogData('sample_description').value
         if not title:
-            title = run.getLogData('sample.sampleId').value
-        mtd[ws].setTitle(title)
+            if run.hasProperty('sample.sampleId'):
+                title = run.getLogData('sample.sampleId').value
+
+        if title:
+            mtd[ws].setTitle(title)
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
