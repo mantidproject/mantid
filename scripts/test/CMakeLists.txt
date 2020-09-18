@@ -48,6 +48,8 @@ unset(PYUNITTEST_QT_API)
 # Additional tests
 add_subdirectory(Abins)
 add_subdirectory(directtools)
+add_subdirectory(Calibration)
+add_subdirectory(corelli)
 add_subdirectory(MultiPlotting)
 add_subdirectory(Muon)
 add_subdirectory(sample_transmission_calculator)
