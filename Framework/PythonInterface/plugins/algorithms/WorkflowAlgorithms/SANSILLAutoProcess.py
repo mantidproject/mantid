@@ -335,6 +335,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('NormaliseBy', 'Options')
         self.setPropertyGroup('SampleThickness', 'Options')
         self.setPropertyGroup('BeamRadius', 'Options')
+        self.setPropertyGroup('TransmissionBeamRadius', 'Options')
         self.setPropertyGroup('WaterCrossSection', 'Options')
 
         self.declareProperty(FloatArrayProperty('MaxQxy', values=[-1]),
