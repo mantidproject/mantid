@@ -1060,7 +1060,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
       if (spectrumDefinition.size() == 1 &&
           (std::find(monitorIndices.begin(), monitorIndices.end(), i) !=
                monitorIndices.end() ||
-           maskWksp->isMasked(i)))
+           maskWksp->isMasked(static_cast<int>(i))))
         continue;
 
       auto sum = m_specIntegrs[i];
