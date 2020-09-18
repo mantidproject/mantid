@@ -21,7 +21,7 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
     r"""
     Calibration table for one tube of CORELLI
 
-    :workspace:
+    :param workspace: string or handle to ~mantid.dataobjects.Workspace2D
     :param tube_name: string uniquely representing one tube e.g. 'bank88/sixteenpack/tube3'
     :param shadow_height: estimated dip in the background intensity.
     :param shadow_width: estimated width of the shadow cast by the wire, in pixel units
