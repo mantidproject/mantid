@@ -285,8 +285,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                    +"The provided input does not fit in any of these measurement types.")
 
-    def _merge_polarisations(self, ws):
-        """Merges workspaces with the same polarisation inside the provided WorkspaceGroup."""
+    def _merge_polarisations(self, ws, average_detectors=False):
+        """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either by using SumOverlappingTubes
+        or averaging entries for each detector depending on the status of the sumOverDetectors flag."""
         pol_directions = set()
         numors = set()
         for name in mtd[ws].getNames():
@@ -295,20 +296,30 @@ class PolDiffILLReduction(PythonAlgorithm):
         if len(numors) > 1:
             names_list = []
             for direction in sorted(list(pol_directions)):
+                name = '{0}_{1}'.format(ws, direction)
                 list_pol = []
                 for numor in numors:
-                    list_pol.append('{0}_{1}'.format(numor, direction))
-                SumOverlappingTubes(','.join(list_pol), OutputWorkspace='{0}_{1}'.format(ws[2:], direction),
-                                    OutputType='1D', ScatteringAngleBinning=0.5, Normalise=True, HeightAxis='-0.1,0.1')
-                names_list.append('{0}_{1}'.format(ws[2:], direction))
+                    if average_detectors:
+                        try:
+                            Plus(LHSWorkspace=name, RHSWorkspace=mtd[numor + '_' + direction], OutputWorkspace=name)
+                        except ValueError:
+                            CloneWorkspace(InputWorkspace=mtd[numor + '_' + direction], OutputWorkspace=name)
+                    else:
+                        list_pol.append('{0}_{1}'.format(numor, direction))
+                if average_detectors:
+                    Divide(LHSWorkspace=name, RHSWorkspace=len(numors), OutputWorkspace=name)
+                else:
+                    SumOverlappingTubes(','.join(list_pol), OutputWorkspace=name,
+                                        OutputType='1D', ScatteringAngleBinning=0.5, Normalise=True, HeightAxis='-0.1,0.1')
+                names_list.append(name)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
         return ws
 
     def _normalise(self, ws):
         """Normalises the provided WorkspaceGroup to the monitor 1."""
         monID = 100000
-        monitorIndices = "{},{}".format(mtd[ws].getItem(0).getNumberHistograms()-2,
-                                        mtd[ws].getItem(0).getNumberHistograms()-1)
+        monitor_indices = "{},{}".format(mtd[ws].getItem(0).getNumberHistograms()-2,
+                                         mtd[ws].getItem(0).getNumberHistograms()-1)
         for entry_no, entry in enumerate(mtd[ws]):
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=entry, DetectorList=monID, OutputWorkspace=mon)
@@ -318,7 +329,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if self._mode == 'TOF':
                     Integration(InputWorkspace=mon, OutputWorkspace=mon)
                 Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
-                RemoveSpectra(entry, WorkspaceIndices=monitorIndices, OutputWorkspace=entry)
+                RemoveSpectra(entry, WorkspaceIndices=monitor_indices, OutputWorkspace=entry)
                 DeleteWorkspace(mon)
         return ws
 
@@ -371,6 +382,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         nMeasurementsPerPOL = 2
         tmp_names = []
         index = 0
+        if self.getProperty('SumScan').value:
+            ws = self._merge_polarisations(ws, average_detectors=True)
         for entry_no in range(1, mtd[ws].getNumberOfEntries()+1, nMeasurementsPerPOL):
             # two polarizer-analyzer states, fixed flipper_eff
             ws_00 = mtd[ws].getItem(entry_no).name()
