@@ -69,6 +69,10 @@ class MaxEntPresenter(object):
         if self.maxent_alg is not None:
             self.maxent_alg.cancel()
 
+            # Need to set this as sent as part of calculation finished signal
+            self._maxent_output_workspace_name = get_maxent_workspace_name(
+                self.get_parameters_for_maxent_calculation()['InputWorkspace'])
+
     # turn on button
     def activate(self):
         self.view.activateCalculateButton()
