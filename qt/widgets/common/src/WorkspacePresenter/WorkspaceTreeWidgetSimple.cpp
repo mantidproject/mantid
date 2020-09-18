@@ -12,12 +12,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 
 #include <QMenu>
 #include <QSignalMapper>
@@ -58,7 +58,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_plotSurface(new QAction("Surface", this)),
       m_plotWireframe(new QAction("Wireframe", this)),
       m_plotContour(new QAction("Contour", this)),
-      m_plotMDHisto1D(new QAction("Plot 1D MDHistogram...", this)){
+      m_plotMDHisto1D(new QAction("Plot 1D MDHistogram...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) {
@@ -196,17 +196,17 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       bool add_slice_viewer = true;
 
       if (std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace)) {
-        auto mdhist_ws = std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace);
+        auto mdhist_ws =
+            std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace);
         if (mdhist_ws->getNumDims() == 1) {
-            add_slice_viewer = false;
+          add_slice_viewer = false;
         }
       }
 
       if (add_slice_viewer) {
-          menu->addAction(m_sliceViewer);
-      }
-      else {
-          menu->addAction(m_plotMDHisto1D);
+        menu->addAction(m_sliceViewer);
+      } else {
+        menu->addAction(m_plotMDHisto1D);
       }
 
     } else if (auto wsGroup =
