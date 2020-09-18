@@ -503,7 +503,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         nComponents = 0
         componentNames = ['Coherent', 'Incoherent', 'Magnetic']
         if self._method == '10-p':
-            raise RuntimeError("10-p component separation not implemented")
+            nMeasurements = 10
+            nComponents = 3
         elif self._method == 'XYZ':
             nMeasurements = 6
             nComponents = 3
@@ -529,33 +530,50 @@ class PolDiffILLReduction(PythonAlgorithm):
                     sigma_x_nsf = mtd[ws].getItem(entry_no+5).readY(spectrum)
                     if nMeasurements == 6:
                         # Magnetic component
-                        magneticComponent = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
+                        magnetic_component = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
+                        dataY_magnetic[spectrum] = magnetic_component
                         # Nuclear coherent component
                         dataY_nuclear[spectrum] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
-                                                   - sigma_x_sf - sigma_y_sf - sigma_z_sf) / 6.0
+                                                   - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
                         # Incoherent component
-                        dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magneticComponent
-                        # Magnetic component
-                        dataY_magnetic[spectrum] = magneticComponent
+                        dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magnetic_component
                     else:
-                        # sigma_xmy_sf = mtd[ws].getItem(entry_no+6).readY(spectrum)
-                        # sigma_xmy_nsf = mtd[ws].getItem(entry_no+7).readY(spectrum)
-                        # sigma_xpy_sf = mtd[ws].getItem(entry_no+8).readY(spectrum)
-                        # sigma_xpy_nsf = mtd[ws].getItem(entry_no+9).readY(spectrum)
+                        sigma_xmy_sf = mtd[ws].getItem(entry_no+6).readY(spectrum)
+                        sigma_xmy_nsf = mtd[ws].getItem(entry_no+7).readY(spectrum)
+                        sigma_xpy_sf = mtd[ws].getItem(entry_no+8).readY(spectrum)
+                        sigma_xpy_nsf = mtd[ws].getItem(entry_no+9).readY(spectrum)
+                        # Magnetic component
+                        try:
+                            theta_0 = self._sampleGeometry['theta_offset']
+                        except KeyError:
+                            raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10-p method.")
+                        theta = mtd[ws].getItem(entry_no).detectorInfo().twoTheta(spectrum)
+                        alpha = theta - 0.5*np.pi - theta_0
+                        c0 = math.pow(math.cos(alpha), 2)
+                        c4 = math.pow(math.cos(alpha - np.pi/4.0), 2)
+                        magnetic_cos2alpha = (2*c0-4)*sigma_x_nsf + (2*c0+2)*sigma_y_nsf + (2-4*c0)*sigma_z_nsf
+                        magnetic_sin2alpha = (2*c4-4)*sigma_xpy_nsf + (2*c4+2)*sigma_xmy_nsf + (2-4*c4)*sigma_z_nsf
+                        magnetic_component = magnetic_cos2alpha * math.cos(2*alpha) + magnetic_sin2alpha * math.sin(2*alpha)
+                        dataY_magnetic[spectrum] = magnetic_component
+                        # Nuclear coherent component
+                        dataY_nuclear[spectrum] = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nfs)
+                                                   - (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)) / 12.0
+                        # Incoherent component
+                        dataY_incoherent[spectrum] = 0.25 * (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf) \
+                            - magnetic_component
 
-                        raise RuntimeError('10-point method has not been implemented yet')
             dataY = [dataY_nuclear, dataY_incoherent, dataY_magnetic]
             for component in range(nComponents):
                 dataX = mtd[ws].getItem(entry_no).readX(0)
                 dataE = np.sqrt(abs(dataY[component]))
-                tmpName = str(mtd[ws].getItem(entry_no).name())[:-1] + componentNames[component]
-                tmpNames.append(tmpName)
+                tmp_name = str(mtd[ws].getItem(entry_no).name())[:-1] + componentNames[component]
+                tmp_names.append(tmp_name)
                 CreateWorkspace(DataX=dataX, DataY=dataY[component], dataE=dataE,
                                 Nspec=mtd[ws].getItem(entry_no).getNumberHistograms(),
-                                OutputWorkspace=tmpName)
-        outputName = self.getPropertyValue('ProcessAs') + '_component_separation'
-        GroupWorkspaces(tmpNames, OutputWorkspace=outputName)
-        return outputName
+                                OutputWorkspace=tmp_name)
+        output_name = self.getPropertyValue('ProcessAs') + '_component_separation'
+        GroupWorkspaces(tmp_names, OutputWorkspace=output_name)
+        return output_name
 
     def _conjoin_components(self, ws):
         """Conjoins the component workspaces coming from a theta scan."""
