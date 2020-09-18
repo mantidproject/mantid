@@ -34,4 +34,13 @@ Bugfixes
 - Fixed bugs in the DGSPlanner interface, that cause errors when using negative values
 - SliceViewer can now correctly display non-orthogonal axes for output of :ref:`MDNorm <algm-MDNorm>`
 
+MSlice
+######
+
+Bugfixes
+--------
+
+- A bug causing an exception when attempting to overplot workspaces with different axes has been fixed.
+- A crash when clicking cancel while renaming or adding a workspace has been fixed.
+
 :ref:`Release 5.1.0 <v5.1.0>`
