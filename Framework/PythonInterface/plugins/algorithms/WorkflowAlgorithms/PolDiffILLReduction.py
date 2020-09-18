@@ -83,8 +83,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for sample data reduction when \
                     detector efficiency calibration is based "Vanadium".'
 
-            if ( (self.getProperty('DetectorEfficiencyCalibration') == 'Incoherent' or
-                  self.getProperty('DetectorEfficiencyCalibration') == 'Paramagnetic')
+            if ( (self.getProperty('DetectorEfficiencyCalibration') == 'Incoherent'
+                  or self.getProperty('DetectorEfficiencyCalibration') == 'Paramagnetic')
                  and self.getProperty('ComponentSeparationMethod').isDefault):
                 issues['DetectorEfficiencyCalibration'] = 'Chosen sample normalisation requires input from the component separation.'
                 issues['ComponentSeparationMethod'] = 'Chosen sample normalisation requires input from the component separation.'
