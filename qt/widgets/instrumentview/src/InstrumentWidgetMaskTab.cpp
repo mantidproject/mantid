@@ -784,6 +784,7 @@ void InstrumentWidgetMaskTab::clearMask() {
   clearShapes();
   m_detectorsToGroup.clear();
   m_instrWidget->getInstrumentActor().clearMasks();
+  m_instrWidget->getInstrumentActor().updateColors();
   m_instrWidget->updateInstrumentView();
   enableApplyButtons();
 }
