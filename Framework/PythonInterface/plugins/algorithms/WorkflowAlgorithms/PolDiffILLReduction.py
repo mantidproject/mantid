@@ -21,7 +21,8 @@ import math
 class PolDiffILLReduction(PythonAlgorithm):
 
     _mode = 'Monochromatic'
-    _method = 'Uniaxial'
+    _method_data_structure = None # measurement method determined from the data
+    _user_method = None
     _instrument = None
     _DEG_2_RAD =  np.pi / 180.0
 
@@ -81,6 +82,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                     and self.getProperty('VanadiumInputWorkspace').isDefault):
                 issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for sample data reduction when \
                     detector efficiency calibration is based "Vanadium".'
+
+            if ( (self.getProperty('DetectorEfficiencyCalibration') == 'Incoherent' or
+                  self.getProperty('DetectorEfficiencyCalibration') == 'Paramagnetic')
+                 and self.getProperty('ComponentSeparationMethod').isDefault):
+                issues['DetectorEfficiencyCalibration'] = 'Chosen sample normalisation requires input from the component separation.'
+                issues['ComponentSeparationMethod'] = 'Chosen sample normalisation requires input from the component separation.'
 
         return issues
 
@@ -184,6 +191,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to clear the cache of intermediate workspaces.')
 
+        self.declareProperty(name="ComponentSeparationMethod",
+                             defaultValue="None",
+                             validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
+                             direction=Direction.Input,
+                             doc="Whether to perform component separation and what type of method to use.")
+
         # self-attenuation group:
         self.declareProperty(name="SampleGeometry",
                              defaultValue="FlatPlate",
@@ -256,14 +269,20 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Figures out the measurement method based on the structure of the input files."""
         nEntriesPerNumor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
         if nEntriesPerNumor == 10:
-            self._method = '10-p'
+            self._method_data_structure = '10p'
         elif nEntriesPerNumor == 6:
-            self._method = 'XYZ'
+            self._method_data_structure = 'XYZ'
+            if self._user_method == '10p':
+                raise RunTimeError("The provided data cannot support 10-point measurement component separation.")
         elif nEntriesPerNumor == 2:
-            self._method = 'Uniaxial'
+            self._method_data_structure = 'Uniaxial'
+            if self._user_method == '10p':
+                raise RunTimeError("The provided data cannot support 10-point measurement component separation.")
+            if self._user_method == 'XYZ':
+                raise RunTimeError("The provided data cannot support XYZ measurement component separation.")
         else:
             if self.getPropertyValue("ProcessAs") not in ['Beam', 'Transmission']:
-                raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10-point. "
+                raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                    +"The provided input does not fit in any of these measurement types.")
 
     def _merge_polarisations(self, ws):
@@ -361,11 +380,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                    RHSWorkspace=(2*flipper_eff-1)*mtd[ws_00]+mtd[ws_01],
                    OutputWorkspace=tmp_name)
             tmp_names.append(tmp_name)
-            if self._method == 'Uniaxial' and entry_no % 2 == 1:
+            if self._user_method == 'Uniaxial' and entry_no % 2 == 1:
                 index += 1
-            elif self._method == 'XYZ' and entry_no % 6 == 5:
+            elif self._user_method == 'XYZ' and entry_no % 6 == 5:
                 index += 1
-            elif self._method == '10-p' and entry_no % 10 == 9:
+            elif self._user_method == '10p' and entry_no % 10 == 9:
                 index += 1
         GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace='tmp')
         DeleteWorkspaces(ws)
@@ -480,9 +499,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         else:
             for entry_no, entry in enumerate(mtd[sample_ws]):
                 correction_ws = '{}_corr'.format(geometry_type)
-                if ( (self._method == 'Uniaxial' and entry_no % 2 == 0)
-                     or (self._method == 'XYZ' and entry_no % 6 == 0)
-                     or (self._method == '10-p' and entry_no % 10 == 0) ):
+                if ( (self._user_method == 'Uniaxial' and entry_no % 2 == 0)
+                     or (self._user_method == 'XYZ' and entry_no % 6 == 0)
+                     or (self._user_method == '10p' and entry_no % 10 == 0) ):
                     PaalmanPingsMonteCarloAbsorption(SampleWorkspace=entry,
                                                      Shape=geometry_type,
                                                      CorrectionsWorkspace=correction_ws,
@@ -498,20 +517,21 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _component_separation(self, ws):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
-        tmpNames = []
+
         nMeasurements = 0
         nComponents = 0
         componentNames = ['Coherent', 'Incoherent', 'Magnetic']
-        if self._method == '10-p':
+        if self._user_method == '10p':
             nMeasurements = 10
             nComponents = 3
-        elif self._method == 'XYZ':
+        elif self._user_method == 'XYZ':
             nMeasurements = 6
             nComponents = 3
-        elif self._method == 'Uniaxial':
+        elif self._user_method == 'Uniaxial':
             nMeasurements = 2
             nComponents = 2
 
+        tmp_names = []
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
             dataY_nuclear = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
             dataY_incoherent = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
@@ -546,7 +566,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                         try:
                             theta_0 = self._sampleGeometry['theta_offset']
                         except KeyError:
-                            raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10-p method.")
+                            raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
                         theta = mtd[ws].getItem(entry_no).detectorInfo().twoTheta(spectrum)
                         alpha = theta - 0.5*np.pi - theta_0
                         c0 = math.pow(math.cos(alpha), 2)
@@ -580,7 +600,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         components = [[], []]
         # list_incoherent = []
         componentNames = ['Incoherent', 'Coherent', 'Magnetic']
-        if self._method in ['10-p', 'XYZ']:
+        if self._user_method in ['10p', 'XYZ']:
             components.append([])
         for entry in mtd[ws]:
             entryName = entry.name()
@@ -628,7 +648,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             if calibrationType == 'Paramagnetic':
                 if self._mode == 'TOF':
                     raise RuntimeError('Paramagnetic calibration is not valid in the TOF mode.')
-                if self._method == 'Uniaxial':
+                if self._user_method == 'Uniaxial':
                     raise RuntimeError('Paramagnetic calibration is not valid in the Uniaxial measurement mode.')
                 for entry_no, entry in enumerate(mtd[ws]):
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
@@ -714,6 +734,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         run = mtd[ws].getItem(0).getRun()
         if run['acquisition_mode'].value == 1:
             self._mode = 'TOF'
+        self._user_method = self.getPropertyValue('ComponentSeparationMethod')
         self._figure_measurement_method(ws)
         progress.report()
         if process in ['Transmission']:
