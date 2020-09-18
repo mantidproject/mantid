@@ -84,3 +84,7 @@ class TestUtils(unittest.TestCase):
 
     def tearDown(self) -> None:
         DeleteWorkspaces([self.workspace, self.table])
+
+
+if __name__ == "__main__":
+    unittest.main()
