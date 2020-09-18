@@ -1060,6 +1060,10 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("radius_limit_min", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("radius_limit_max", self.DEFAULT_DECIMAL_PLACES_MM)
 
+        # User file and batch file
+        self._set_on_view("user_file")
+        self._set_on_view("batch_file")
+
     def _set_on_view_q_resolution_aperture(self):
         self._set_on_view("q_resolution_source_a", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("q_resolution_sample_a", self.DEFAULT_DECIMAL_PLACES_MM)
@@ -1173,6 +1177,10 @@ class RunTabPresenter(PresenterCommon):
             self._set_on_custom_model("phi_limit_use_mirror", state_model)
             self._set_on_custom_model("radius_limit_min", state_model)
             self._set_on_custom_model("radius_limit_max", state_model)
+
+            # User file and batch file
+            self._set_on_custom_model("user_file", state_model)
+            self._set_on_custom_model("batch_file", state_model)
 
             # Beam Centre
             self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
