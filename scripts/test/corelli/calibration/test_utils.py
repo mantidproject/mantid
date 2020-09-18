@@ -70,7 +70,7 @@ class TestUtils(unittest.TestCase):
         # Check the validators are doing what they're supposed to do
         with self.assertRaises(AssertionError) as exception_info:
             calculate_tube_calibration(None, 'bank42/sixteenpack/tube8')
-        assert 'Cannot process this workspace' in str(exception_info.exception)
+        assert 'Cannot process workspace' in str(exception_info.exception)
         with self.assertRaises(AssertionError) as exception_info:
             calculate_tube_calibration(self.workspace, 'tube42')
         assert 'tube42 does not uniquely specify one tube' in str(exception_info.exception)

@@ -29,7 +29,8 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
 
     :return: table containing detector ID and position vector
     """
-    assert isinstance(workspace, (str, Workspace2D)), 'Cannot process this workspace'
+    message = f'Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle'
+    assert isinstance(workspace, (str, Workspace2D)), message
     assert shadow_height > 0, 'shadow height must be positive'
     for marker in ('bank', 'sixteenpack', 'tube'):
         assert marker in tube_name, f'{tube_name} does not uniquely specify one tube'
