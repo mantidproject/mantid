@@ -61,7 +61,9 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
                 TransmissionBeamRuns=beam_tr,
                 SampleThickness=thick[i],
                 CalculateResolution='MildnerCarpenter',
-                OutputWorkspace='iq_s' + str(i + 1)
+                OutputWorkspace='iq_s' + str(i + 1),
+                BeamRadius='0.05,0.05,0.05',
+                TransmissionBeamRadius=0.05
             )
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
@@ -115,7 +117,9 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             SampleThickness=thick,
             CalculateResolution='MildnerCarpenter',
             NumberOfWedges=2,
-            OutputWorkspace='iq'
+            OutputWorkspace='iq',
+            BeamRadius='0.05,0.05,0.05',
+            TransmissionBeamRadius=0.05
             )
 
         GroupWorkspaces(
@@ -162,7 +166,9 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
             SampleThickness=0.2,
             CalculateResolution='MildnerCarpenter',
             OutputWorkspace='iqxy',
-            OutputType='I(Qx,Qy)'
+            OutputType='I(Qx,Qy)',
+            BeamRadius='0.05,0.05,0.05',
+            TransmissionBeamRadius=0.05
         )
 
 
@@ -210,7 +216,9 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns=can_tr,
             TransmissionBeamRuns=tr_beam,
             OutputWorkspace='iq',
-            OutputPanels=True
+            OutputPanels=True,
+            BeamRadius=0.05,
+            TransmissionBeamRadius=0.05
         )
 
         GroupWorkspaces(InputWorkspaces=['iq', 'iq_panels'], OutputWorkspace='out')
@@ -261,7 +269,9 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
             OutputWorkspace='iphiq',
             OutputPanels=True,
             NumberOfWedges=60,
-            OutputType='I(Phi,Q)'
+            OutputType='I(Phi,Q)',
+            BeamRadius=0.05,
+            TransmissionBeamRadius=0.05
         )
 
         GroupWorkspaces(InputWorkspaces=['iphiq', 'iphiq_panels'],
