@@ -52,7 +52,11 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
 
   // Check not empty
   if (files.empty()) {
-    m_view->displayError("Not a valid expression for runs");
+    m_view->displayError(
+        "Error message:\n" + m_view->getRunsErrorMessage() +
+        "\n\nCan specify a list of runs by a dash \ne.g. 1-10\nCan specify "
+        "specific runs with a comma separated list \ne.g. 1-10, 15, 20-30\n "
+        "Range must go in increasing order, \ne.g. 1-10, 15, 20-30");
     return;
   }
 
@@ -93,7 +97,6 @@ int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
 void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
 
   const int currentLastRun = extractRunNumber(m_view->lastRun());
-  // auto currentInput = m_ui.runs->getText().toStdString();
   auto currentInput = m_view->getCurrentRunsText();
 
   // Save old input
