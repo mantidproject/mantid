@@ -40,6 +40,7 @@ public:
   std::string firstRun() const override;
   std::string lastRun() const override;
   std::vector<std::string> getRuns() const override;
+  std::string getRunsErrorMessage() const override;
   std::string log() const override;
   std::string function() const override;
   std::string deadTimeType() const override;

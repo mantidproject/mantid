@@ -115,6 +115,9 @@ void LoadILLDiffraction::init() {
       std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
                                                 Direction::Input),
       "Apply vertical and horizontal alignment of tubes as defined in IPF");
+  declareProperty("ConvertAxisAndTranspose", false,
+                  "Whether to convert the spectrum axis to 2theta and "
+                  "transpose (for 1D detector and no-scan configuration)");
 }
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
@@ -148,6 +151,10 @@ void LoadILLDiffraction::exec() {
 
   progress.report("Setting additional sample logs");
   setSampleLogs();
+
+  if (m_instName != "D2B" && m_scanType != DetectorScan &&
+      getProperty("ConvertAxisAndTranspose"))
+    convertAxisAndTranspose();
 
   setProperty("OutputWorkspace", m_outWorkspace);
 }
@@ -899,6 +906,32 @@ bool LoadILLDiffraction::containsCalibratedData(
 void LoadILLDiffraction::computeThetaOffset() {
   m_offsetTheta = static_cast<double>(D20_NUMBER_DEAD_PIXELS) * D20_PIXEL_SIZE -
                   D20_PIXEL_SIZE / (static_cast<double>(m_resolutionMode) * 2);
+}
+
+/**
+ * Converts the spectrum axis to 2theta and transposes the workspace.
+ */
+void LoadILLDiffraction::convertAxisAndTranspose() {
+  auto extractor = createChildAlgorithm("ExtractSpectra");
+  extractor->setProperty("InputWorkspace", m_outWorkspace);
+  extractor->setProperty("StartWorkspaceIndex", 1);
+  extractor->setProperty("OutputWorkspace", "__unused");
+  extractor->execute();
+  API::MatrixWorkspace_sptr det = extractor->getProperty("OutputWorkspace");
+  auto converter = createChildAlgorithm("ConvertSpectrumAxis");
+  converter->setProperty("InputWorkspace", det);
+  converter->setProperty("OutputWorkspace", "__unused");
+  converter->setProperty("Target", "SignedTheta");
+  converter->execute();
+  API::MatrixWorkspace_sptr converted =
+      converter->getProperty("OutputWorkspace");
+  auto transposer = createChildAlgorithm("Transpose");
+  transposer->setProperty("InputWorkspace", converted);
+  transposer->setProperty("OutputWorkspace", "__unused");
+  transposer->execute();
+  API::MatrixWorkspace_sptr transposed =
+      transposer->getProperty("OutputWorkspace");
+  m_outWorkspace = transposed;
 }
 
 } // namespace DataHandling

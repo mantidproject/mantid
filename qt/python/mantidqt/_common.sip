@@ -169,6 +169,7 @@ signals:
   void modificationChanged(bool m);
   void textZoomedIn();
   void textZoomedOut();
+  void progressMade(const int);
 
 private:
   ScriptEditor(const ScriptEditor&);
@@ -480,6 +481,7 @@ public:
     void addFitResultWorkspacesToTableWidget();
     void setWorkspaceName(const QString &wsName);
     void postDeleteHandle(const std::string &wsName);
+    void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
 
     SIP_PYOBJECT defaultPeakType();
