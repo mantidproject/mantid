@@ -109,6 +109,10 @@ void ConvertFitFunctionForMuonTFAsymmetry::init() {
   declareProperty(
       std::make_unique<FunctionProperty>("OutputFunction", Direction::Output),
       "The converted fitting function.");
+
+  declareProperty("CopyTies", true,
+                  "Set to true to copy over ties from input function"
+                  "(default is true).");
 }
 
 /*
@@ -237,7 +241,8 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
     multi->addFunction(userFunc);
   }
   // if multi data set we need to do the ties manually
-  if (numDomains > 1) {
+  bool copyTies = getProperty("CopyTies");
+  if (numDomains > 1 && copyTies) {
     auto originalNames = original->getParameterNames();
     for (auto name : originalNames) {
       auto index = original->parameterIndex(name);
@@ -376,7 +381,8 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     multi->addFunction(composite);
   }
   // if multi data set we need to do the ties manually
-  if (numDomains > 1) {
+  bool copyTies = getProperty("CopyTies");
+  if (numDomains > 1 && copyTies) {
     auto originalNames = original->getParameterNames();
     for (auto name : originalNames) {
       auto index = original->parameterIndex(name);

@@ -27,6 +27,8 @@ else:
     from matplotlib.backends.backend_qt4agg import FigureCanvas
 
 DEFAULT_X_LIMITS = [0, 15]
+# Default color cycle using Matplotlib color codes C0, C1...ect
+DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(10)]
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
@@ -49,7 +51,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1,
                                       fig=self.fig)
         self._number_of_axes = 1
-        self._color_queue = [ColorQueue()]
+        self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE)]
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
@@ -88,7 +90,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.toolBar.reset_gridline_flags()
         self._plot_information_list = []
         self._number_of_axes = num_axes
-        self._color_queue = [ColorQueue() for _ in range(num_axes) ]
+        self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE) for _ in range(num_axes)]
         self.fig.clf()
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
                                       fig=self.fig)
@@ -275,10 +277,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         return bottom, top
 
     def _reset_color_cycle(self):
-        for ax in self.fig.axes:
+        for i, ax in enumerate(self.fig.axes):
             ax.cla()
             ax.tracked_workspaces.clear()
-            ax.set_prop_cycle(None)
 
     def resizeEvent(self, event):
         self.fig.tight_layout()
@@ -286,8 +287,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def add_uncheck_autoscale_subscriber(self, observer):
         self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)
 
-    def add_enable_autoscale_subscriber(self,observer):
+    def add_enable_autoscale_subscriber(self, observer):
         self.toolBar.enable_autoscale_notifier.add_subscriber(observer)
 
-    def add_disable_autoscale_subscriber(self,observer):
+    def add_disable_autoscale_subscriber(self, observer):
         self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)

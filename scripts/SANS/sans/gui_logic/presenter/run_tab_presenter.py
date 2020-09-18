@@ -90,6 +90,8 @@ class SaveDirectoryObserver(ConfigPropertyObserver):
 
 
 class RunTabPresenter(PresenterCommon):
+    DEFAULT_DECIMAL_PLACES_MM = 1
+
     class ConcreteRunTabListener(SANSDataProcessorGui.RunTabListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ConcreteRunTabListener, self).__init__()
@@ -443,7 +445,6 @@ class RunTabPresenter(PresenterCommon):
 
             # 3. Populate the table
             self._table_model.clear_table_entries()
-
             self._add_multiple_rows_to_table_model(rows=parsed_rows)
 
             # 4. Set the batch file path in the model
@@ -578,6 +579,8 @@ class RunTabPresenter(PresenterCommon):
         Enabled canSAS if switching to 1D.
         :param is_1d: bool. If true then switching TO 1D reduction.
         """
+        self._model.reduction_dimensionality = self._view.reduction_dimensionality
+
         if not self._view.output_mode_memory_radio_button.isChecked():
             # If we're in memory mode, all file types should always be disabled
             if is_1d:
@@ -703,7 +706,7 @@ class RunTabPresenter(PresenterCommon):
             return
 
         with self.disable_buttons():
-            default_filename = self._table_model.batch_file
+            default_filename = self._model.batch_file
             filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
             filename = self._get_filename_to_save(filename)
 
@@ -963,7 +966,7 @@ class RunTabPresenter(PresenterCommon):
         row_entry = self._table_model.get_row(row_index)
         states, errors = self.get_states(row_entries=[row_entry], file_lookup=file_lookup,
                                          suppress_warnings=suppress_warnings)
-        if states is None:
+        if not states:
             if not suppress_warnings:
                 self.sans_logger.warning(
                     "There does not seem to be data for a row {}.".format(row_index))
@@ -1003,7 +1006,7 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("wavelength_step")
 
         self._set_on_view("absolute_scale")
-        self._set_on_view("z_offset")
+        self._set_on_view("z_offset", self.DEFAULT_DECIMAL_PLACES_MM)
 
         # Q tab
         self._set_on_view_q_rebin_string()
@@ -1016,27 +1019,27 @@ class RunTabPresenter(PresenterCommon):
 
         self._set_on_view("use_q_resolution")
         self._set_on_view_q_resolution_aperture()
-        self._set_on_view("q_resolution_delta_r")
+        self._set_on_view("q_resolution_delta_r", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("q_resolution_collimation_length")
         self._set_on_view("q_resolution_moderator_file")
 
-        self._set_on_view("r_cut")
+        self._set_on_view("r_cut", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("w_cut")
 
         # Mask
         self._set_on_view("phi_limit_min")
         self._set_on_view("phi_limit_max")
         self._set_on_view("phi_limit_use_mirror")
-        self._set_on_view("radius_limit_min")
-        self._set_on_view("radius_limit_max")
+        self._set_on_view("radius_limit_min", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("radius_limit_max", self.DEFAULT_DECIMAL_PLACES_MM)
 
     def _set_on_view_q_resolution_aperture(self):
-        self._set_on_view("q_resolution_source_a")
-        self._set_on_view("q_resolution_sample_a")
-        self._set_on_view("q_resolution_source_h")
-        self._set_on_view("q_resolution_sample_h")
-        self._set_on_view("q_resolution_source_w")
-        self._set_on_view("q_resolution_sample_w")
+        self._set_on_view("q_resolution_source_a", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_a", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_source_h", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_h", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_source_w", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_w", self.DEFAULT_DECIMAL_PLACES_MM)
 
         # If we have h1, h2, w1, and w2 selected then we want to select the rectangular aperture.
         is_rectangular = self._model.q_resolution_source_h and self._model.q_resolution_sample_h and \

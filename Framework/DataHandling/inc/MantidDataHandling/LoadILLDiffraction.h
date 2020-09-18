@@ -94,6 +94,7 @@ private:
   void resolveScanType();
   void setSampleLogs();
   void computeThetaOffset();
+  void convertAxisAndTranspose();
 
   ///< the 2theta offset for D20 to account for dead pixels
   double m_offsetTheta{0.};

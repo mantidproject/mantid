@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import copy
 import os
 import unittest
 from unittest import mock
@@ -73,6 +74,22 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertTrue(isinstance(state, StateGuiModel))
         self.assertEqual(state.all_states.reduction.merge_scale, 1.2)
         self.assertEqual(state.all_states.reduction.merge_shift, 0.5)
+
+    def test_reduction_dim_copied_from_gui(self):
+        state_model = mock.Mock(spec=self._get_state_gui_model())
+        expected_dim = mock.NonCallableMock()
+        # This is set by the user on the main GUI, so should be copied in with a custom user file still
+        state_model.reduction_dimensionality = expected_dim
+
+        # Copy the top level model and reset dim rather than load a file
+        copied_state = copy.deepcopy(state_model)
+        copied_state.reduction_dimensionality = None
+
+        director = GuiStateDirector(state_model, SANSFacility.ISIS)
+        director._load_current_state = mock.Mock(return_value=copied_state)
+        state = director.create_state(self._get_row_entry(), row_user_file="NotThere.txt")
+
+        self.assertEqual(expected_dim, state.reduction_dimensionality)
 
 
 if __name__ == '__main__':

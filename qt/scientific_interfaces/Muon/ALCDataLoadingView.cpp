@@ -86,6 +86,13 @@ std::vector<std::string> ALCDataLoadingView::getRuns() const {
   return returnFiles;
 }
 
+/**
+ * Returns an error message from file finder, empty string if no error
+ */
+std::string ALCDataLoadingView::getRunsErrorMessage() const {
+  return m_ui.runs->getFileProblem().toStdString();
+}
+
 std::string ALCDataLoadingView::log() const {
   return m_ui.logValueSelector->getLog().toStdString();
 }

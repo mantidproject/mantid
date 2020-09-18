@@ -3,7 +3,7 @@ Priority: optional
 Standards-Version: 3.9.2
 
 Package: mantid-developer
-Version: 2.1
+Version: 2.2
 Maintainer: Mantid Project <mantid-tech@mantidproject.org>
 Priority: optional
 Architecture: all
@@ -63,6 +63,7 @@ Depends: git,
   python3-psutil,
   python3-requests,
   python3-toml,
+  python3-pycifrw(>=4.2.1),
   python3-yaml,
   texlive,
   texlive-latex-extra

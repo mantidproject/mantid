@@ -237,7 +237,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
                               "WavelengthLow": wavelength_state.wavelength_low[0],
                               "WavelengthHigh": wavelength_state.wavelength_high[0],
                               "WavelengthStep": wavelength_state.wavelength_step,
-                              "WavelengthStepType": wavelength_state.wavelength_step_type.value,
+                              "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
                               "RebinMode": wavelength_state.rebin_type.value}
 
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
