@@ -39,7 +39,7 @@ MSlice
 Bugfixes
 --------
 
-- A bug causing an exception when attempting to overplot on a plot with different axes has been fixed.
+- A bug causing an exception when attempting to overplot workspaces with different axes has been fixed.
 - A crash when clicking cancel while renaming or adding a workspace has been fixed.
 
 :ref:`Release 5.1.0 <v5.1.0>`
