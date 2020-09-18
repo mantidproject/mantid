@@ -62,6 +62,8 @@ signals:
   void workspaceDoubleClicked(const QString &workspaceName);
   void treeSelectionChanged();
 
+  void plotMDHistoClicked(const QString &workspaceName);
+
 private slots:
   void onPlotSpectrumClicked();
   void onPlotBinClicked();
@@ -85,7 +87,7 @@ private:
       *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs, *m_plotColorfill,
       *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData,
       *m_showAlgorithmHistory, *m_showDetectors, *m_plotAdvanced,
-      *m_plotSurface, *m_plotWireframe, *m_plotContour;
+      *m_plotSurface, *m_plotWireframe, *m_plotContour, *m_plotMDHisto1D;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
