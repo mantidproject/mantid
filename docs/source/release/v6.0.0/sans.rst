@@ -9,4 +9,8 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Improvements
+############
+- Make ILL's D33's tubes orientation match the physical one
+
 :ref:`Release 6.0.0 <v6.0.0>`
