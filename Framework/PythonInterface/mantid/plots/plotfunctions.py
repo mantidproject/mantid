@@ -110,6 +110,9 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
+    print(f'[DEBUG plotfunctions.plot] Input workspaces type = {type(workspaces)}, spectrum {spectrum_nums}, ws index {wksp_indices}')
+
+
     plot_font = ConfigService.getString('plots.font')
     if plot_font:
         if len(mpl.rcParams['font.family']) > 1:
