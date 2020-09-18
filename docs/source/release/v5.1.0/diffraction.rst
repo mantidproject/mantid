@@ -5,42 +5,37 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Powder Diffraction
 ------------------
 New features
 ^^^^^^^^^^^^
-- New ``D7`` instrument definition for ILL
+- New ``D7`` instrument definition for ILL.
 - New :ref:`SaveGSSCW <algm-SaveGSSCW>` is implemented for constant wavelength diffractometers.
 
 Improvements
 ^^^^^^^^^^^^
-- Polaris.create_total_scattering_pdf output workspaces now have the run number in the names.
-- Polaris.create_total_scattering_pdf no longer takes `output_binning` as a parameter, instead binning of the output pdf can be controlled with `delta_r`.
-- Polaris.create_total_scattering_pdf can rebin the Q space workspace before calculating the PDF by being given an input `delta_q`.
-- SampleDetails.set_materials now differentiates between sample density and crystal density for converting between pdf types.
-- :ref:`LoadWAND <algm-LoadWAND>` now adds `duration` log to the workspace
-- Polaris.create_total_scattering_pdf now no longer calculates the PDF with the Lorch filter enabled by default and must be enabled.
-- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been updated to allow for the algorithm to be run on a PDF to obtain a spectrum density function.
-- :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` now accepts the crystalographic density of the sample to correct for the powder density.
-- Square beam profile of 5mm x 5mm added to the PEARL_Definition_new_lowangle instrument definition file
+- The output workspace names from `Polaris.create_total_scattering_pdf` now include run numbers.
+- Control of the output binning of `Polaris.create_total_scattering_pdf` is no longer controlled by the parameter `output_binning`, instead `delta_r` should be used.
+- In `Polaris.create_total_scattering_pdf` the Q space workspace can be rebinned before calculating the PDF by being given an input `delta_q`.
 - running `Polaris.create_total_scattering_pdf` with `debug=true` will preserve the `self_scattering_correction` workspace.
+- The Lorch filter in Polaris.create_total_scattering_pdf is no longer enabled by default and must be enabled with the `lorch_filter` parameter.
+- :ref:`LoadWAND <algm-LoadWAND>` now adds `duration` log to the workspace.
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been updated to allow for the algorithm to be run on a PDF to obtain a spectrum density function.
+- SampleDetails.set_materials now differentiates between sample density and crystal density for converting between pdf types.
+- :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` now accepts the crystalographic density of the sample to correct for the powder density.
+- Square beam profile of 5mm x 5mm added to the PEARL_Definition_new_lowangle instrument definition file.
 
 Bugfixes
 ^^^^^^^^
-- The fourier filter on Polaris.create_total_scattering_pdf no longer produces a jagged mark at the cut off point.
+- The fourier filter on Polaris.create_total_scattering_pdf no longer produces a jagged mark at the filter limit value.
 
 Engineering Diffraction
 -----------------------
 New features
 ^^^^^^^^^^^^
-- New algorithm for estimating background of powder spectra :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` using iterative smoothing.
-- Mantid fitting capability added to fitting tab of Engineering Diffraction UI (with simpler fitpropertybrowser providing only relevant options).
-- Loading focussed runs into the fitting tab now shows the proton charge weighted average and standard deviation of select log values (set in the settings) in a group of table workspaces.
-- Mantid fitting capability added to fitting tab of Engineering Diffraction UI.
+- :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` is a new algorithm for estimating background of powder spectra using iterative smoothing.
+- The fitting tab of Engineering Diffraction UI now functions with standard Mantid fitting capability, but with a simplified browser.
+- Loading focussed runs into the fitting tab now creates a group of table workspaces containing the proton charge weighted average and standard deviation of select log values (set in the settings).
 - Added support for a Circular Beam Profile for use with Monte Carlo Absorption
 
 Improvements
@@ -55,16 +50,16 @@ Improvements
 Bugfixes
 ^^^^^^^^
 - The Engineering diffraction gui no longer goes behind the workbench window when a plot is clicked on.
-- A focussed run cannot be loeaded with the same x unit more than once
+- A focused run cannot be loaded with the same x unit more than once
 
 Single Crystal Diffraction
 --------------------------
 Improvements
 ^^^^^^^^^^^^
 - :ref:`CombinePeaksWorkspaces <algm-CombinePeaksWorkspaces>` now combines the modulation vectors present in the two workspaces, provided the total number of vectors is less than 3.
-- New algorithm :ref:`FindGoniometerFromUB <algm-FindGoniometerFromUB-v1>` for making UBs for runs at different goniometer angles share common indexing and determine the goniometer axis and rotation required to match UBs to a reference.
+- New algorithm :ref:`FindGoniometerFromUB <algm-FindGoniometerFromUB-v1>` for making UBs for runs at different goniometer angles share common indexing, and determine the goniometer axis and rotation required to match UBs to a reference.
 - New instrument geometry for MaNDi instrument at SNS
-- New algorithm :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths-v1>` for calculating the absorption weighted path length for each peak in a peaks workspace. The absorption weighted path length is used downstream from Mantid in extinction correction calculations
+- New algorithm :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths-v1>` for calculating the absorption weighted path length for each peak in a peaks workspace.
 - Can now edit H,K,L in the table of a peaks workspace in workbench (now consistent with Mantid Plot)
 - The peaks workspace table display now contains a column showing the value of the intensity/sigma for each peak.
 - SliceViewer can now correctly display non-orthogonal axes for output of :ref:`MDNorm <algm-MDNorm>`
