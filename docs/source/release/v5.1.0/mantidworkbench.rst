@@ -170,5 +170,6 @@ Bugfixes
 - Use Jemalloc for memory allocation on Linux so memory can be released to the system.
 - Fixed a bug where instrument view would not update on wheel zoom.
 - Fixed a bug which caused workbench to crash midway through closing normally when logging level was set to debug.
+- Fixed a bug where the color map would not update when masking in the instrument viewer.
 
 :ref:`Release 5.1.0 <v5.1.0>`
