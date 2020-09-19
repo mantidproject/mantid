@@ -76,7 +76,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             else:
                 # Log an error but carry on so valid workspaces can be plotted.
                 logger.warning("{}: ** Expected MatrixWorkspace, found {}".format(ws.name(), ws.__class__.__name__))
-                raise NotImplementedError("Debug Stop Plot Spectra")
 
         return matrix_workspaces
 
