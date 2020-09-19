@@ -84,7 +84,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        workspaces, md_workspaces = self.get_compatible_workspaces(workspaces)
+        workspaces = self.get_compatible_workspaces(workspaces)
 
         # attributes
         self._workspaces = workspaces
@@ -95,8 +95,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._overplot = overplot
         self._plottable_spectra = None
         self._advanced = advanced
-
-        self._md_workspaces = md_workspaces
 
         # This is used as a flag to workaround the case in which the error bars checkbox is set before a selection is
         # instantiated, causing it to have no effect. The update is then done in the parse_wksp / parse_spec functions
