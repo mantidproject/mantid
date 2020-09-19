@@ -110,76 +110,88 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
-    print(f'[DEBUG plotfunctions.plot] Input workspaces type = {type(workspaces)}, spectrum {spectrum_nums}, ws index {wksp_indices}')
+    print(f'[DEBUG plotfunctions.plot] Input workspaces type = {type(workspaces)}, spectrum {spectrum_nums},'
+          f'ws index {wksp_indices}')
 
+    # Filter out the
 
-    plot_font = ConfigService.getString('plots.font')
-    if plot_font:
-        if len(mpl.rcParams['font.family']) > 1:
-            mpl.rcParams['font.family'][0] = plot_font
-        else:
-            mpl.rcParams['font.family'].insert(0, plot_font)
+    if len(workspaces) == 1 and isinstance(workspaces[0], MatrixWorkspace) is False:
+        # MDHistoWorkspace
+        num_axes = 1
+        fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
+        axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
+                if not isinstance(ax, MantidAxes) else ax for ax in axes]
+        _do_single_plot_mdhisto_workspace(axes[0], workspaces[0])
 
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
-    workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
-
-    if spectrum_nums is not None:
-        kw, nums = 'specNum', spectrum_nums
     else:
-        kw, nums = 'wkspIndex', wksp_indices
-
-    _add_default_plot_kwargs_from_settings(plot_kwargs, errors)
-
-    num_axes = len(workspaces) * len(nums) if tiled else 1
-
-    fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
-
-    # Convert to a MantidAxes if it isn't already. Ignore legend since
-    # a new one will be drawn later
-    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
-            for ax in axes]
-
-    assert axes, "No axes are associated with this plot"
-
-    if tiled:
-        ws_index = [(ws, index) for ws in workspaces for index in nums]
-        for index, ax in enumerate(axes):
-            if index < len(ws_index):
-                _do_single_plot(ax, [ws_index[index][0]], errors, False, [ws_index[index][1]], kw, plot_kwargs)
+        # Regular MatrixWorkspace
+        plot_font = ConfigService.getString('plots.font')
+        if plot_font:
+            if len(mpl.rcParams['font.family']) > 1:
+                mpl.rcParams['font.family'][0] = plot_font
             else:
-                ax.axis('off')
-    else:
-        show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
-        ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
-        ax.axis('on')
-        _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
+                mpl.rcParams['font.family'].insert(0, plot_font)
 
-    # Can't have a waterfall plot with only one line.
-    if len(nums)*len(workspaces) == 1 and waterfall:
-        waterfall = False
+        if plot_kwargs is None:
+            plot_kwargs = {}
+        _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
+        workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
 
-    # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
-    # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
-    if not overplot:
-        datafunctions.set_initial_dimensions(ax)
+        if spectrum_nums is not None:
+            kw, nums = 'specNum', spectrum_nums
+        else:
+            kw, nums = 'wkspIndex', wksp_indices
 
-    if waterfall:
-        ax.set_waterfall(True)
+        _add_default_plot_kwargs_from_settings(plot_kwargs, errors)
 
-    if not overplot:
-        fig.canvas.set_window_title(figure_title(workspaces, fig.number))
-    else:
-        if ax.is_waterfall():
-            for i in range(len(nums)*len(workspaces)):
-                errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
-                datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
+        num_axes = len(workspaces) * len(nums) if tiled else 1
 
-                if ax.waterfall_has_fill():
-                    datafunctions.waterfall_update_fill(ax)
+        fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
 
-                ax.lines += errorbar_cap_lines
+        # Convert to a MantidAxes if it isn't already. Ignore legend since
+        # a new one will be drawn later
+        axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
+                for ax in axes]
+
+        assert axes, "No axes are associated with this plot"
+
+        if tiled:
+            ws_index = [(ws, index) for ws in workspaces for index in nums]
+            for index, ax in enumerate(axes):
+                if index < len(ws_index):
+                    _do_single_plot(ax, [ws_index[index][0]], errors, False, [ws_index[index][1]], kw, plot_kwargs)
+                else:
+                    ax.axis('off')
+        else:
+            show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
+            ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
+            ax.axis('on')
+            _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
+
+        # Can't have a waterfall plot with only one line.
+        if len(nums) * len(workspaces) == 1 and waterfall:
+            waterfall = False
+
+        # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
+        # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
+        if not overplot:
+            datafunctions.set_initial_dimensions(ax)
+
+        if waterfall:
+            ax.set_waterfall(True)
+
+        if not overplot:
+            fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+        else:
+            if ax.is_waterfall():
+                for i in range(len(nums) * len(workspaces)):
+                    errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
+                    datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
+
+                    if ax.waterfall_has_fill():
+                        datafunctions.waterfall_update_fill(ax)
+
+                    ax.lines += errorbar_cap_lines
 
     # This updates the toolbar so the home button now takes you back to this point.
     # The try catch is in case the manager does not have a toolbar attached.
@@ -375,6 +387,38 @@ def _validate_workspace_names(workspaces):
         return workspaces
     else:
         return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
+
+
+def _do_single_plot_mdhisto_workspace(ax, workspace, errors=False):
+    """Plot IMDHistoWorkspace
+    :param ax:
+    :param workspace:
+    :return:
+    """
+    from mantid.api import IMDHistoWorkspace
+
+    # Check it is a 1D IMDHistoWorkspace
+    if not isinstance(workspace, IMDHistoWorkspace) or workspace.getNumDims() > 1:
+        raise RuntimeError(f'Workspace {str(workspace)} is not an IMDHistoWorkspace or '
+                           f'its dimension is larger than 1')
+
+    # Get X and Y to plot
+    dim_x = workspace.getXDimension()
+    bins = np.arange(dim_x.getNBoundaries()) * dim_x.getBinWidth() + dim_x.getMinimum()
+    vec_x = 0.5 * (bins[1:] + bins[:-1])
+    vec_y = workspace.getSignalArray()
+
+    label_x = dim_x.getName()
+    label_y = 'Signal'
+
+    # Define plot function
+    plot_fn = ax.errorbar if errors else ax.plot
+
+    # Plot
+    ax.set_xlabel(label_x)
+    ax.set_ylabel(label_y)
+    plot_fn(vec_x, vec_y)
+    ax.make_legend()
 
 
 def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, log_name=None, log_values=None):
