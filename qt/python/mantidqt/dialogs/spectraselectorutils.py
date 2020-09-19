@@ -43,7 +43,6 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
         # At least 1 workspace contains only a single spectrum and these are no
         # common spectra
         selection = SpectraSelection(workspaces)
-        print(f'[DEBUG] What is a section {type(selection)}?')
         selection.wksp_indices = [0]
         return selection
     else:
