@@ -24,7 +24,6 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
     :raises ValueError: if the workspaces are not of type MatrixWorkspace
     """
     workspaces = SpectraSelectionDialog.get_compatible_workspaces(workspaces)
-    print(f'[DEBUG get spectra selection] workspace size = {len(workspaces)}, md workspaces size = {len(md_workspaces)}')
     if len(workspaces) == 0:
         return None
 
