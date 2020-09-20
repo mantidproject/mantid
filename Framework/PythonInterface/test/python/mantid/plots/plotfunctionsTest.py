@@ -189,6 +189,16 @@ class FunctionsTest(unittest.TestCase):
 
         self.assertEqual(len(fills), 3)
 
+    def next_test_plot_1d_md(self):
+        """Test to plot 1D IMDHistoWorkspace
+        """
+        print('This is a new test')
+
+    def next_test_plot_matrix_md(self):
+        """Test with both MDHistoWorkspace and MatrixWorkspaces input
+        """
+        print('This is a new test')
+
     # ------------- Failure tests -------------
     def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
         ws = ["some_workspace", self._test_ws]
