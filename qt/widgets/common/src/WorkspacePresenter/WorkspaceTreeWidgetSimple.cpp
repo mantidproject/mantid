@@ -210,6 +210,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
                 if (mdhist_ws->getDimension(d)->getNBins() > 1)
                     ++ num_no_integral_dim;
             }
+            // if non-integral dimension is only 1, then enable to plot spectrum
             if (num_no_integral_dim == 1)
                 add_slice_viewer = false;
             else if (num_no_integral_dim == 0)
