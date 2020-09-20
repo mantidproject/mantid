@@ -402,6 +402,10 @@ def _do_single_plot_mdhisto_workspace(ax, workspace, errors=False):
         raise RuntimeError(f'Workspace {str(workspace)} is not an IMDHistoWorkspace or '
                            f'its dimension is larger than 1')
 
+    if True:
+        ax.plot(workspace)
+        return
+
     # Get X and Y to plot
     dim_x = workspace.getXDimension()
     bins = np.arange(dim_x.getNBoundaries()) * dim_x.getBinWidth() + dim_x.getMinimum()
