@@ -398,9 +398,17 @@ def _do_single_plot_mdhisto_workspace(ax, workspace, errors=False):
     from mantid.api import IMDHistoWorkspace
 
     # Check it is a 1D IMDHistoWorkspace
-    if not isinstance(workspace, IMDHistoWorkspace) or workspace.getNumDims() > 1:
-        raise RuntimeError(f'Workspace {str(workspace)} is not an IMDHistoWorkspace or '
-                           f'its dimension is larger than 1')
+    if not isinstance(workspace, IMDHistoWorkspace):
+        raise RuntimeError(f'Workspace {str(workspace)} is not an IMDHistoWorkspace')
+
+    # Check non-integral dimension
+    num_dim = 0
+    for d in range(workspace.getNumDims()):
+        if workspace.getDimension(d).getNBins() > 1:
+            num_dim +=1
+    if num_dim != 1:
+        raise RuntimeError(f'Workspace {str(workspace)} is an IMDHistoWorkspace with number of non-integral dimension '
+                           f'equal to {num_dim} but not 1.')
 
     if True:
         ax.plot(workspace)
