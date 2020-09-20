@@ -198,23 +198,25 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       if (std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace)) {
         auto mdhist_ws =
             std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace);
-        // if the number of non-integral  if the number of non-integrated dimensions is 1.
+        // if the number of non-integral  if the number of non-integrated
+        // dimensions is 1.
         auto num_dims = mdhist_ws->getNumDims();
         if (num_dims == 1) {
-            // only 1 dimension
-            add_slice_viewer = false;
+          // only 1 dimension
+          add_slice_viewer = false;
         } else {
-            // multiple dimension: check number of non-integral
-            auto num_no_integral_dim = 0;
-            for (size_t d = 0; d < num_dims; ++d) {
-                if (mdhist_ws->getDimension(d)->getNBins() > 1)
-                    ++ num_no_integral_dim;
-            }
-            // if non-integral dimension is only 1, then enable to plot spectrum
-            if (num_no_integral_dim == 1)
-                add_slice_viewer = false;
-            else if (num_no_integral_dim == 0)
-                throw std::runtime_error("Number of non-integral dimension is ZERO");
+          // multiple dimension: check number of non-integral
+          auto num_no_integral_dim = 0;
+          for (size_t d = 0; d < num_dims; ++d) {
+            if (mdhist_ws->getDimension(d)->getNBins() > 1)
+              ++num_no_integral_dim;
+          }
+          // if non-integral dimension is only 1, then enable to plot spectrum
+          if (num_no_integral_dim == 1)
+            add_slice_viewer = false;
+          else if (num_no_integral_dim == 0)
+            throw std::runtime_error(
+                "Number of non-integral dimension is ZERO");
         }
       }
 
