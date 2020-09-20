@@ -17,6 +17,7 @@ import matplotlib as mpl
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
+from mantid.api import IMDHistoWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
 
@@ -113,15 +114,24 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     print(f'[DEBUG plotfunctions.plot] Input workspaces type = {type(workspaces)}, spectrum {spectrum_nums},'
           f'ws index {wksp_indices}')
 
-    # Filter out the
+    # Filter out the MD workspaces
+    md_workspaces = list()
+    matrix_workspaces = list()
 
-    if len(workspaces) == 1 and isinstance(workspaces[0], MatrixWorkspace) is False:
+    for workspace in workspaces:
+        if isinstance(workspace, IMDHistoWorkspace):
+            md_workspaces.append(workspace)
+        else:
+            matrix_workspaces.append(workspace)
+
+    # Plot workspaces
+    if len(md_workspaces) > 0:
         # MDHistoWorkspace
         num_axes = 1
         fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
         axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
                 if not isinstance(ax, MantidAxes) else ax for ax in axes]
-        _do_single_plot_mdhisto_workspace(axes[0], workspaces[0])
+        _do_single_plot_mdhisto_workspace(axes[0], md_workspaces)
 
     else:
         # Regular MatrixWorkspace
@@ -389,47 +399,52 @@ def _validate_workspace_names(workspaces):
         return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
 
 
-def _do_single_plot_mdhisto_workspace(ax, workspace, errors=False):
+def _do_single_plot_mdhisto_workspace(ax, workspaces, errors=False):
     """Plot IMDHistoWorkspace
     :param ax:
-    :param workspace:
+    :param workspaces: list of 1D MDHistoWorkspaces
     :return:
     """
-    from mantid.api import IMDHistoWorkspace
-
-    # Check it is a 1D IMDHistoWorkspace
-    if not isinstance(workspace, IMDHistoWorkspace):
-        raise RuntimeError(f'Workspace {str(workspace)} is not an IMDHistoWorkspace')
-
-    # Check non-integral dimension
-    num_dim = 0
-    for d in range(workspace.getNumDims()):
-        if workspace.getDimension(d).getNBins() > 1:
-            num_dim +=1
-    if num_dim != 1:
-        raise RuntimeError(f'Workspace {str(workspace)} is an IMDHistoWorkspace with number of non-integral dimension '
-                           f'equal to {num_dim} but not 1.')
-
-    if True:
-        ax.plot(workspace)
-        return
-
-    # Get X and Y to plot
-    dim_x = workspace.getXDimension()
-    bins = np.arange(dim_x.getNBoundaries()) * dim_x.getBinWidth() + dim_x.getMinimum()
-    vec_x = 0.5 * (bins[1:] + bins[:-1])
-    vec_y = workspace.getSignalArray()
-
-    label_x = dim_x.getName()
-    label_y = 'Signal'
-
     # Define plot function
     plot_fn = ax.errorbar if errors else ax.plot
 
-    # Plot
-    ax.set_xlabel(label_x)
-    ax.set_ylabel(label_y)
-    plot_fn(vec_x, vec_y)
+    for ws in workspaces:
+        # Check inputs from non-integral dimension
+        if not isinstance(ws, IMDHistoWorkspace):
+            raise RuntimeError(f'Workspace {str(ws)} must be an IMDHistoWorkspace but not {type(ws)}')
+        num_dim = 0
+        for d in range(ws.getNumDims()):
+            if ws.getDimension(d).getNBins() > 1:
+                num_dim += 1
+        if num_dim != 1:
+            raise RuntimeError(f'Workspace {str(ws)} is an IMDHistoWorkspace with number of non-integral dimension '
+                               f'equal to {num_dim} but not 1.')
+
+        # Plot
+        plot_fn(ws)
+    #
+    #
+    #
+    # if True:
+    #     ax.plot(workspace)
+    #     return
+    #
+    # # Get X and Y to plot
+    # dim_x = workspace.getXDimension()
+    # bins = np.arange(dim_x.getNBoundaries()) * dim_x.getBinWidth() + dim_x.getMinimum()
+    # vec_x = 0.5 * (bins[1:] + bins[:-1])
+    # vec_y = workspace.getSignalArray()
+    #
+    # label_x = dim_x.getName()
+    # label_y = 'Signal'
+    #
+    #
+    #
+    # # Plot
+    # ax.set_xlabel(label_x)
+    # ax.set_ylabel(label_y)
+    # plot_fn(vec_x, vec_y)
+    # Legend
     ax.make_legend()
 
 
