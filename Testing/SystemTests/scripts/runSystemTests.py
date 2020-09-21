@@ -166,6 +166,7 @@ def main():
 
     # Configure properties file
     mtdconf = systemtesting.MantidFrameworkConfig(loglevel=options.loglevel,
+                                                  test_sub_dir="framework",
                                                   data_dirs=data_paths,
                                                   save_dir=save_dir,
                                                   archivesearch=options.archivesearch)
