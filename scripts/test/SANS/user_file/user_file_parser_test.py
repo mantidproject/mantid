@@ -429,7 +429,7 @@ class MaskParserTest(unittest.TestCase):
 
         invalid_settings = {"MASK B 12  ": RuntimeError,
                             "MASK V 12 23 ": RuntimeError,
-                            "MASK \Rear V3": RuntimeError}
+                            r"MASK \Rear V3": RuntimeError}
         mask_parser = MaskParser()
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
@@ -473,7 +473,7 @@ class MaskParserTest(unittest.TestCase):
 
         invalid_settings = {"MASK H/12  ": RuntimeError,
                             "MASK H 12 23 ": RuntimeError,
-                            "MASK \Rear H3": RuntimeError}
+                            r"MASK \Rear H3": RuntimeError}
         mask_parser = MaskParser()
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
@@ -912,14 +912,14 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_direct_files_are_parsed_correctly(self):
-        valid_settings = {"MON/DIRECT= C:\path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
+        valid_settings = {r"MON/DIRECT= C:\path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
             file_path="C:/path1/Path2/file.ext", detector_type=DetectorType.HAB),
             monitor_file(file_path="C:/path1/Path2/file.ext", detector_type=DetectorType.LAB)]},
             "MON/ direct  = filE.Ext ": {MonId.DIRECT: [monitor_file(file_path="filE.Ext",
                                                                      detector_type=DetectorType.HAB), monitor_file(
                 file_path="filE.Ext", detector_type=DetectorType.LAB)
                                                         ]},
-            "MON/DIRECT= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
+            r"MON/DIRECT= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
                 file_path="/path1/Path2/file.ext",
                 detector_type=DetectorType.HAB),
                 monitor_file(file_path="/path1/Path2/file.ext",
@@ -945,12 +945,12 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_flat_files_are_parsed_correctly(self):
-        valid_settings = {"MON/FLat  = C:\path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
+        valid_settings = {r"MON/FLat  = C:\path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
             file_path="C:/path1/Path2/file.ext",
             detector_type=DetectorType.LAB)},
             "MON/ flAt  = filE.Ext ": {MonId.FLAT: monitor_file(file_path="filE.Ext",
                                                                 detector_type=DetectorType.LAB)},
-            "MON/flAT= \path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
+            r"MON/flAT= \path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
                 file_path="/path1/Path2/file.ext",
                 detector_type=DetectorType.LAB)},
             "MON/FLat= /path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
@@ -971,13 +971,13 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_hab_files_are_parsed_correctly(self):
-        valid_settings = {"MON/HAB  = C:\path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
+        valid_settings = {r"MON/HAB  = C:\path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
             file_path="C:/path1/Path2/file.ext",
             detector_type=DetectorType.HAB)]},
             "MON/ hAB  = filE.Ext ": {MonId.DIRECT: [monitor_file(
                 file_path="filE.Ext",
                 detector_type=DetectorType.HAB)]},
-            "MON/HAb= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
+            r"MON/HAb= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
                 file_path="/path1/Path2/file.ext",
                 detector_type=DetectorType.HAB)]},
             "MON/hAB= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(

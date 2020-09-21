@@ -856,8 +856,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.background.background.constraints('A1 > 0')
 
         s = cf.makeSpectrumFunction()
-        ties = ','.join(re.findall('ties=\((.*?)\)', s))
-        constraints = ','.join(re.findall('constraints=\((.*?)\)', s))
+        ties = ','.join(re.findall(r'ties=\((.*?)\)', s))
+        constraints = ','.join(re.findall(r'constraints=\((.*?)\)', s))
         self.assertTrue('0<IntensityScaling' in constraints)
         self.assertTrue('B22<4' in constraints)
         self.assertTrue('0<f0.f0.Sigma' in constraints)
@@ -882,7 +882,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks.tieAll('FWHM=2.1', 3)
 
         s = cf.makeSpectrumFunction()
-        ties = ','.join(re.findall('ties=\((.*?)\)', s))
+        ties = ','.join(re.findall(r'ties=\((.*?)\)', s))
         self.assertTrue('f0.FWHM=2.1' in ties)
         self.assertTrue('f1.FWHM=2.1' in ties)
         self.assertTrue('f2.FWHM=2.1' in ties)
@@ -920,7 +920,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks.tieAll('FWHM=f0.FWHM', 1, 4)
 
         s = cf.makeSpectrumFunction()
-        ties = ','.join(re.findall(',ties=\((.*?)\)', s))
+        ties = ','.join(re.findall(r',ties=\((.*?)\)', s))
         self.assertTrue('f0.FWHM=f0.FWHM' not in ties)
         self.assertTrue('f1.FWHM=f0.FWHM' in ties)
         self.assertTrue('f2.FWHM=f0.FWHM' in ties)
@@ -941,7 +941,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks.constrainAll('0.1 < FWHM <=2.1', 3)
 
         s = cf.makeSpectrumFunction()
-        constraints = ','.join(re.findall('constraints=\((.*?)\)', s))
+        constraints = ','.join(re.findall(r'constraints=\((.*?)\)', s))
         self.assertTrue('0.1<f0.FWHM<2.1' in constraints)
         self.assertTrue('0.1<f1.FWHM<2.1' in constraints)
         self.assertTrue('0.1<f2.FWHM<2.1' in constraints)
@@ -960,7 +960,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks.constrainAll('0.1 < FWHM <=2.1', 1, 2)
 
         s = cf.makeSpectrumFunction()
-        constraints = ','.join(re.findall('constraints=\((.*?)\)', s))
+        constraints = ','.join(re.findall(r'constraints=\((.*?)\)', s))
         self.assertTrue('0.1<f0.FWHM<2.1' not in constraints)
         self.assertTrue('0.1<f1.FWHM<2.1' in constraints)
         self.assertTrue('0.1<f2.FWHM<2.1' in constraints)
@@ -990,8 +990,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks[1].constraints('f1.FWHM > 1.1', '1 < f4.FWHM < 2.2')
 
         s = cf.makeMultiSpectrumFunction()
-        ties = ','.join(re.findall(',ties=\((.*?)\)', s))
-        constraints = ','.join(re.findall('constraints=\((.*?)\)', s))
+        ties = ','.join(re.findall(r',ties=\((.*?)\)', s))
+        constraints = ','.join(re.findall(r'constraints=\((.*?)\)', s))
         self.assertTrue('0<IntensityScaling0' in constraints)
         self.assertTrue('IntensityScaling1<2' in constraints)
         self.assertTrue('f0.f0.f0.Height=10.1' in ties)
@@ -1017,7 +1017,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks[1].tieAll('FWHM=3.14', 4)
 
         s = cf.makeMultiSpectrumFunction()
-        ties = ','.join(re.findall(',ties=\((.*?)\)', s))
+        ties = ','.join(re.findall(r',ties=\((.*?)\)', s))
         self.assertTrue('f0.f1.FWHM=f0.f1.FWHM' not in ties)
         self.assertTrue('f0.f2.FWHM=f0.f1.FWHM' in ties)
         self.assertTrue('f0.f3.FWHM=f0.f1.FWHM' in ties)
@@ -1045,7 +1045,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks[1].constrainAll('FWHM > 12.1', 3, 5)
 
         s = cf.makeMultiSpectrumFunction()
-        constraints = ','.join(re.findall('constraints=\((.*?)\)', s))
+        constraints = ','.join(re.findall(r'constraints=\((.*?)\)', s))
         self.assertTrue('0.1<f0.f0.FWHM<2.1' not in constraints)
         self.assertTrue('0.1<f0.f1.FWHM<2.1' in constraints)
         self.assertTrue('0.1<f0.f2.FWHM<2.1' in constraints)

@@ -215,7 +215,7 @@ class DirectToolsTest(unittest.TestCase):
         }
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
         hangles, labels = axes.get_legend_handles_labels()
-        self.assertEqual(labels, [r' $E$ = -1.00 $\pm$ 0.57 meV', u' $E$ = -1.01 $\pm$ 1.02 meV'])
+        self.assertEqual(labels, [r' $E$ = -1.00 $\pm$ 0.57 meV', r' $E$ = -1.01 $\pm$ 1.02 meV'])
 
     def test_plotconstQ_nonListArgsExecutes(self):
         kwargs = {
