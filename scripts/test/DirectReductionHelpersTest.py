@@ -39,7 +39,6 @@ class DirectReductionHelpersTest(unittest.TestCase):
     @staticmethod
     def getInstrument(InstrumentName='MAR'):
         """ test method used to obtain default instrument for testing """
-        idf_dir = config.getString('instrumentDefinition.directory')
         idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
         tmp_ws_name = '__empty_' + InstrumentName
         if not mtd.doesExist(tmp_ws_name):

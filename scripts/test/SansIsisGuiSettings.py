@@ -72,12 +72,11 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
             list_v1 = str1.split(',')
             list_v2 = str2.split(',')
             self.checkFloat(len(list_v1), len(list_v2))
-            for i in range(len(list_v1)):
-                self.checkFloat(float(list_v1[i]), float(list_v2[i]))
+            for j in range(len(list_v1)):
+                self.checkFloat(float(list_v1[j]), float(list_v2[j]))
 
         min_value, max_value, step_value = 0.01, 2.8, 0.02
         opt_pattern = "%f %f %f/%s"
-        read_pattern = "%f, %f, %f"
         option = 'LIN'
         min_max_step_option = opt_pattern % (min_value, max_value, step_value, option)
         i.ReductionSingleton().user_settings.readLimitValues('L/Q ' + min_max_step_option, i.ReductionSingleton())

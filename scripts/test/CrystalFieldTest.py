@@ -1469,7 +1469,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         # Set up a PointCharge object with ligands explicitly specified (2 -2|e| charges at +/-3A in z)
         pc = PointCharge([[-2, 0, 0, 3], [-2, 0, 0, -3]], 'Ce')
         blm = pc.calculate()
-        # For axial ligands, only expect m=0 terms. 
+        # For axial ligands, only expect m=0 terms.
         # For Ce, l=6 term should be zero because only l<2J allowed, and J=2.5 for Ce.
         self.assertEqual(len(blm), 2)
         self.assertTrue('B20' in blm.keys())

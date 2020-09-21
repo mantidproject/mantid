@@ -26,7 +26,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         return super(DirectEnergyConversionTest, self).__init__(methodName)
 
     def setUp(self):
-        if self.reducer == None or type(self.reducer) != type(DirectEnergyConversion):
+        if self.reducer is None or type(self.reducer) != type(DirectEnergyConversion):
             self.reducer = DirectEnergyConversion("MAR")
 
     def tearDown(self):
@@ -337,7 +337,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(len(tof_range), 3)
 
         x = run_tof.readX(3)
-        dx = abs(x[1:] - x[:-1])
         xMin = min(x)
         x = run_tof.readX(5)
         xMax = max(x)

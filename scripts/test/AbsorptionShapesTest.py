@@ -8,6 +8,7 @@ import unittest
 
 import numpy as np
 from Direct.AbsorptionShapes import (anAbsorptionShape, Cylinder, FlatPlate, HollowCylinder, Sphere)
+from mantid.simpleapi import (CreateSampleWorkspace, ConvertUnits, EditInstrumentGeometry)
 
 
 class AbsorbtionShapesTest(unittest.TestCase):
@@ -15,21 +16,21 @@ class AbsorbtionShapesTest(unittest.TestCase):
         return super(AbsorbtionShapesTest, self).__init__(methodName)
 
     def test_an_Absrpn_shape_parent(self):
-        ash = anAbsorptionShape(['V']);
-        res = ash.material;
+        ash = anAbsorptionShape(['V'])
+        res = ash.material
         self.assertEqual(res['ChemicalFormula'], 'V')
 
         ash.material = 'Cr'
-        res = ash.material;
+        res = ash.material
         self.assertEqual(res['ChemicalFormula'], 'Cr')
 
         ash.material = ['Br', 10]
-        res = ash.material;
+        res = ash.material
         self.assertEqual(res['ChemicalFormula'], 'Br')
         self.assertEqual(res['SampleNumberDensity'], 10)
 
         ash.material = {'ChemicalFormula': 'Al', 'SampleNumberDensity': 0.5}
-        res = ash.material;
+        res = ash.material
         self.assertEqual(res['ChemicalFormula'], 'Al')
         self.assertEqual(res['SampleNumberDensity'], 0.5)
 
@@ -37,14 +38,14 @@ class AbsorbtionShapesTest(unittest.TestCase):
         self.assertRaises(TypeError, anAbsorptionShape.material.__set__, ash, [1, 2])
 
         ash = anAbsorptionShape({'AtomicNumber': 12, 'AttenuationXSection': 0.5, 'SampleMassDensity': 120})
-        res = ash.material;
+        res = ash.material
         self.assertEqual(res['AtomicNumber'], 12)
         self.assertEqual(res['AttenuationXSection'], 0.5)
         self.assertEqual(res['SampleMassDensity'], 120)
 
         # Add extra material property, consistent with other properties.
         ash.material = {'ScatteringXSection': 20}
-        res = ash.material;
+        res = ash.material
         self.assertEqual(res['AttenuationXSection'], 0.5)
         self.assertEqual(res['ScatteringXSection'], 20)
         self.assertEqual(len(res), 4)
@@ -65,7 +66,7 @@ class AbsorbtionShapesTest(unittest.TestCase):
         self.assertFalse(ash._axis_is_default)
 
         ash.shape = {'Height': 5, 'Radius': 2, 'Axis': [1, 0, 0], 'Center': [0., 0., 0.]}
-        res = ash.shape;
+        res = ash.shape
         self.assertEqual(res['Height'], 5)
         self.assertEqual(res['Radius'], 2)
         self.assertEqual(res['Axis'], [1, 0, 0])
@@ -108,7 +109,7 @@ class AbsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['Thick'], 0.1)
 
         ash.shape = [5, 1, 0.2, [0, 1, 0], 10]
-        res = ash.shape;
+        res = ash.shape
         self.assertEqual(res['Height'], 5)
         self.assertEqual(res['Width'], 1)
         self.assertEqual(res['Thick'], 0.2)
@@ -116,7 +117,7 @@ class AbsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['Angle'], 10)
 
         ash.shape = {'Height': 5, 'Width': 1, 'Thick': 2, 'Center': [0., 0., 0.], 'Angle': 20}
-        res = ash.shape;
+        res = ash.shape
         self.assertEqual(res['Height'], 5)
         self.assertEqual(res['Width'], 1)
         self.assertEqual(res['Thick'], 2)
@@ -144,7 +145,7 @@ class AbsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['OuterRadius'], 4)
 
         ash.shape = [5, 1, 2, [1, 0, 0], [0, 0, 0]]
-        res = ash.shape;
+        res = ash.shape
         self.assertEqual(res['Height'], 5)
         self.assertEqual(res['InnerRadius'], 1)
         self.assertEqual(res['OuterRadius'], 2)
@@ -152,7 +153,7 @@ class AbsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['Center'], [0, 0, 0])
 
         ash.shape = {'Height': 5, 'InnerRadius': 0.01, 'OuterRadius': 2, 'Center': [0., 0., 0.], 'Axis': [0, 1, 0]}
-        res = ash.shape;
+        res = ash.shape
         self.assertEqual(res['Height'], 5)
         self.assertEqual(res['InnerRadius'], 0.01)
         self.assertEqual(res['OuterRadius'], 2)
@@ -197,14 +198,14 @@ class AbsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['Radius'], 10)
 
         ash.shape = [5, [1, 0, 0]]
-        res = ash.shape;
+        res = ash.shape
         rad = res['Radius']
         self.assertEqual(rad, 5)
         cen = res['Center']
         self.assertEqual(cen, [1, 0, 0])
 
         ash.shape = {'Radius': 3, 'Center': [0., 0., 0.]}
-        res = ash.shape;
+        res = ash.shape
         rad = res['Radius']
         self.assertEqual(rad, 3)
         cen = res['Center']

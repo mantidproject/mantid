@@ -25,7 +25,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         return super(DirectPropertyManagerTest, self).__init__(methodName)
 
     def setUp(self):
-        if self.prop_man == None or type(self.prop_man) != type(PropertyManager):
+        if self.prop_man is None or type(self.prop_man) != type(PropertyManager):
             self.prop_man = PropertyManager("MAR")
 
     def tearDown(self):
@@ -337,7 +337,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertEqual(propman.motor_offset, None)
 
-        sample_ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, \
+        sample_ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,
                                           NumEvents=10, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
 
         propman.motor_offset = 10
@@ -1201,9 +1201,9 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         # Properties acceptable by MoneCarloAbsorption algorithm
         propman.abs_corr_info = {'is_mc': True, 'NumberOfWavelengthPoints': 20, 'EventsPerPoint': '200',
-                                 'SeedValue': 31090, \
+                                 'SeedValue': 31090,
                                  'Interpolation': 'CSpline', 'SparseInstrument': 'True', 'NumberOfDetectorRows': 20,
-                                 'NumberOfDetectorColumns': '10', \
+                                 'NumberOfDetectorColumns': '10',
                                  'MaxScatterPtAttempts': 200}
 
         propss = propman.abs_corr_info
@@ -1219,7 +1219,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertDictEqual(propss, rec_prop)
         # Properties acceptable by AbsorptionCorrection algorithm
-        ac_properties = {'ScatterFrom': 'Sample', 'NumberOfWavelengthPoints': 10, 'ExpMethod': 'FastApprox', \
+        ac_properties = {'ScatterFrom': 'Sample', 'NumberOfWavelengthPoints': 10, 'ExpMethod': 'FastApprox',
                          'EMode': 'Direct', 'EFixed': 10, 'ElementSize': 2}
         ac_properties['is_fast'] = True
         propman.abs_corr_info = str(ac_properties)

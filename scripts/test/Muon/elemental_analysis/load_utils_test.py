@@ -90,8 +90,13 @@ class LoadUtilsTest(unittest.TestCase):
         X_data = np.linspace(0, 400, num_bins)
         # create data in each workspace based on y = mx + specNumber
         m = 0.1
-        Yfunc = lambda x, specNo: m * x + specNo
-        Efunc = lambda x, specNo: 2 * m * x + specNo
+
+        def Yfunc(x, specNo):
+            return m * x + specNo
+
+        def Efunc(x, specNo):
+            return 2 * m * x + specNo
+
         for i in range(0, num_workspaces):
             name = "test_" + str(i)
             workspace_names.append(name)
@@ -122,8 +127,13 @@ class LoadUtilsTest(unittest.TestCase):
         X_data = np.linspace(0, 400, num_bins)
         names = ["Total", "Prompt"]
         # create data in each workspace based on y = mx + specNumber
-        Yfunc = lambda x, specNo: 0.1 * x + specNo
-        Efunc = lambda x, specNo: 2 * 0.1 * x + specNo
+
+        def Yfunc(x, specNo):
+            return 0.1 * x + specNo
+
+        def Efunc(x, specNo):
+            return 2 * 0.1 * x + specNo
+
         for i in range(0, 2):
             name = names[i]
             ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,

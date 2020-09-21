@@ -372,8 +372,9 @@ class AddOperationTest(unittest.TestCase):
 
         # Check that all times of workspace1 and workspace2 can be found in the outputworkspace
         for prop in props_out:
-            if isinstance(prop, FloatTimeSeriesProperty) or isinstance(prop, BoolTimeSeriesProperty) or isinstance(prop,
-                                                                                                                   StringTimeSeriesProperty):
+            if isinstance(prop, FloatTimeSeriesProperty) \
+                    or isinstance(prop, BoolTimeSeriesProperty) \
+                    or isinstance(prop, StringTimeSeriesProperty):
                 prop1 = run1.getProperty(prop.name)
                 prop2 = run2.getProperty(prop.name)
                 self._compare_time_series(prop, prop1, prop2, time1, time2, extra_time_shift, isOverlay)
@@ -728,11 +729,11 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         # Assert
         message.strip()
         self.assertTrue(message)
-        self.assertTrue(not ws_clone_name in mtd)
+        self.assertTrue(ws_clone_name not in mtd)
         self.assertTrue(not complete)
 
         self._removeWorkspace(ws_name)
-        self.assertTrue(not ws_name in mtd)
+        self.assertTrue(ws_name not in mtd)
 
     def test_that_zeros_are_removed_correctly(self):
         # Arrange
@@ -751,8 +752,8 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
 
         self._removeWorkspace(ws_name)
         self._removeWorkspace(ws_clone_name)
-        self.assertTrue(not ws_name in mtd)
-        self.assertTrue(not ws_clone_name in mtd)
+        self.assertTrue(ws_name not in mtd)
+        self.assertTrue(ws_clone_name not in mtd)
 
     def test_throws_for_non_Workspace2D(self):
         # Arrange
@@ -765,7 +766,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         self.assertRaises(ValueError, su.remove_zero_errors_from_workspace, ws)
 
         self._removeWorkspace(ws_name)
-        self.assertTrue(not ws_name in mtd)
+        self.assertTrue(ws_name not in mtd)
 
     def test_removes_zero_errors_correctly(self):
         # Arrange
@@ -791,7 +792,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         self.assertNotEqual(errors(3)[0], su.ZERO_ERROR_DEFAULT)
 
         self._removeWorkspace(ws_name)
-        self.assertTrue(not ws_name in mtd)
+        self.assertTrue(ws_name not in mtd)
 
     def test_that_deletion_of_non_existent_ws_creates_error_message(self):
         # Arrange
@@ -813,7 +814,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         message.strip()
         self.assertTrue(not message)
         self.assertTrue(complete)
-        self.assertTrue(not ws_name in mtd)
+        self.assertTrue(ws_name not in mtd)
 
     def test_non_Q1D_and_Qxy_history_is_not_valid_and_produces_error_message(self):
         # Arrange
@@ -827,7 +828,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         self.assertTrue(not complete)
 
         self._removeWorkspace(ws_name)
-        self.assertTrue(not ws_name in mtd)
+        self.assertTrue(ws_name not in mtd)
 
 
 class TestRenameMonitorsForMultiPeriodEventData(unittest.TestCase):

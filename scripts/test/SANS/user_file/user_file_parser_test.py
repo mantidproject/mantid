@@ -204,9 +204,9 @@ class LimitParserTest(unittest.TestCase):
 
     def test_that_event_time_limit_is_parsed_correctly(self):
         valid_settings = {"L  / EVEnTStime 0,-10,32,434,34523,35": {LimitsId.EVENTS_BINNING:
-                                                                        "0.0,-10.0,32.0,434.0,34523.0,35.0"},
+                                                                    "0.0,-10.0,32.0,434.0,34523.0,35.0"},
                           "L / Eventstime 0 -10 32 434 34523 35": {LimitsId.EVENTS_BINNING:
-                                                                       "0.0,-10.0,32.0,434.0,34523.0,35.0"}}
+                                                                   "0.0,-10.0,32.0,434.0,34523.0,35.0"}}
 
         invalid_settings = {"L  / EEnTStime 0,-10,32,434,34523,35": RuntimeError,
                             "L/EVENTSTIME 123g, sdf": RuntimeError,
@@ -267,18 +267,25 @@ class LimitParserTest(unittest.TestCase):
                                                                                                           "-0.44,"
                                                                                                           "23.0,"
                                                                                                           "-34.8,3.6")},
-                          "L/q -12  , 0.45 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.Q: q_rebin_values(min=-12.,
-                                                                                                           max=5.6,
-                                                                                                           rebin_string="-12.0,-0.45,23.0,-34.8,3.6,"
-                                                                                                                        "-0.123,5.6")},
+                          "L/q -12  , 0.45 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.Q:
+                                                                                    q_rebin_values(min=-12.,
+                                                                                                   max=5.6,
+                                                                                                   rebin_string=
+                                                                                                   "-12.0,-0.45,23.0,"
+                                                                                                   "-34.8,3.6,"
+                                                                                                   "-0.123,5.6")},
                           "L/q -12  , 0.46 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.Q: q_rebin_values(min=-12.,
                                                                                                       max=5.6,
-                                                                                                      rebin_string="-12.0,0.46,23.0,34.8,3.6,"
-                                                                                                                   "-0.123,5.6")},
+                                                                                                      rebin_string=
+                                                                                                      "-12.0,0.46,23.0,"
+                                                                                                      "34.8,3.6,"
+                                                                                                      "-0.123,5.6")},
                           "L/q -12   0.47   23 34.8  3.6, -.123    5.6": {LimitsId.Q: q_rebin_values(min=-12.,
                                                                                                      max=5.6,
-                                                                                                     rebin_string="-12.0,0.47,23.0,34.8,3.6,"
-                                                                                                                  "-0.123,5.6")}
+                                                                                                     rebin_string=
+                                                                                                     "-12.0,0.47,23.0,"
+                                                                                                     "34.8,3.6,"
+                                                                                                     "-0.123,5.6")}
                           }
 
         invalid_settings = {"L/Q 12 2 3 4 5/LUG": RuntimeError,
@@ -414,18 +421,19 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_vertical_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK V 12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=12,
-                                                                                                        detector_type=DetectorType.LAB)},
+        valid_settings = {"MASK V 12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK:
+                                          single_entry_with_detector(entry=12, detector_type=DetectorType.LAB)},
                           "MASK / Rear V  12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                               entry=12, detector_type=DetectorType.LAB)},
-                          "MASK/mAin V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
-                                                                                                           detector_type=DetectorType.LAB)},
-                          "MASK / LaB V  234": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
-                                                                                                              detector_type=DetectorType.LAB)},
+                          "MASK/mAin V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK:
+                                             single_entry_with_detector(entry=234, detector_type=DetectorType.LAB)},
+                          "MASK / LaB V  234": {MaskId.VERTICAL_SINGLE_STRIP_MASK:
+                                                single_entry_with_detector(entry=234,
+                                                                           detector_type=DetectorType.LAB)},
                           "MASK /frOnt V  12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                               entry=12, detector_type=DetectorType.HAB)},
-                          "MASK/HAB V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
-                                                                                                          detector_type=DetectorType.HAB)}}
+                          "MASK/HAB V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK:
+                                            single_entry_with_detector(entry=234, detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK B 12  ": RuntimeError,
                             "MASK V 12 23 ": RuntimeError,
@@ -434,12 +442,12 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_range_vertical_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK V  12 >  V23  ": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(start=12,
-                                                                                                              stop=23,
-                                                                                                              detector_type=DetectorType.LAB)},
-                          "MASK V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(start=123,
-                                                                                                         stop=234,
-                                                                                                         detector_type=DetectorType.LAB)},
+        valid_settings = {"MASK V  12 >  V23  ": {MaskId.VERTICAL_RANGE_STRIP_MASK:
+                                                  range_entry_with_detector(start=12, stop=23,
+                                                                            detector_type=DetectorType.LAB)},
+                          "MASK V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK:
+                                             range_entry_with_detector(start=123,stop=234,
+                                                                       detector_type=DetectorType.LAB)},
                           "MASK / Rear V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
                               start=123, stop=234, detector_type=DetectorType.LAB)},
                           "MASK/mAin  V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
@@ -458,18 +466,18 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_horizontal_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK H 12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=12,
-                                                                                                          detector_type=DetectorType.LAB)},
-                          "MASK / Rear H  12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
-                              entry=12, detector_type=DetectorType.LAB)},
-                          "MASK/mAin H234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
-                                                                                                             detector_type=DetectorType.LAB)},
+        valid_settings = {"MASK H 12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK:
+                                          single_entry_with_detector(entry=12, detector_type=DetectorType.LAB)},
+                          "MASK / Rear H  12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK:
+                                                  single_entry_with_detector(entry=12, detector_type=DetectorType.LAB)},
+                          "MASK/mAin H234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK:
+                                             single_entry_with_detector(entry=234, detector_type=DetectorType.LAB)},
                           "MASK / LaB H  234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                               entry=234, detector_type=DetectorType.LAB)},
                           "MASK /frOnt H  12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                               entry=12, detector_type=DetectorType.HAB)},
-                          "MASK/HAB H234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
-                                                                                                            detector_type=DetectorType.HAB)}}
+                          "MASK/HAB H234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK:
+                                            single_entry_with_detector(entry=234, detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK H/12  ": RuntimeError,
                             "MASK H 12 23 ": RuntimeError,
@@ -882,8 +890,10 @@ class MaskFileParserTest(unittest.TestCase):
         self.assertTrue(MaskFileParser.get_type(), "MASKFILE")
 
     def test_that_gravity_on_off_is_parsed_correctly(self):
-        valid_settings = {"MaskFile= test.xml,   testKsdk2.xml,tesetlskd.xml":
-                              {MaskId.FILE: ["test.xml", "testKsdk2.xml", "tesetlskd.xml"]}}
+        valid_settings = {"MaskFile= test.xml,   testKsdk2.xml,tesetlskd.xml": {MaskId.FILE:
+                                                                                ["test.xml",
+                                                                                 "testKsdk2.xml",
+                                                                                 "tesetlskd.xml"]}}
 
         invalid_settings = {"MaskFile=": RuntimeError,
                             "MaskFile=test.txt": RuntimeError,

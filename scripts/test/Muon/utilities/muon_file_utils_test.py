@@ -31,8 +31,7 @@ class MuonFileUtilsTest(unittest.TestCase):
     def test_parse_user_input_to_files_returns_list_correctly(self):
         user_input = "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs;" \
                                                                          "C:" + os.sep + "dir1" + os.sep + "dir2" + \
-                     os.sep + "EMU0001235.nxs;" \
-                                                                                                                             "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001236.nxs"
+                     os.sep + "EMU0001235.nxs;C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001236.nxs"
         files = ["C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs",
                  "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001235.nxs",
                  "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001236.nxs"]
@@ -43,8 +42,7 @@ class MuonFileUtilsTest(unittest.TestCase):
     def test_parse_user_input_to_files_filters_files_with_incorrect_extension(self):
         user_input = "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs;" \
                                                                          "C:" + os.sep + "dir1" + os.sep + "dir2" + \
-                     os.sep + "EMU0001235.txt;" \
-                                                                                                                             "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001236.png"
+                     os.sep + "EMU0001235.txt;C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001236.png"
         files = ["C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs"]
 
         parsed_file = utils.parse_user_input_to_files(user_input, ['nxs'])

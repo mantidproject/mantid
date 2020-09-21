@@ -134,7 +134,8 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEqual(1, len(fit_context))
 
     def test_get_function_name_returns_correctly_for_composite_functions(self):
-        function_string = 'name=FlatBackground,A0=22.5129;name=Polynomial,n=0,A0=-22.5221;name=ExpDecayOsc,A=-0.172352,Lambda=0.111109, Frequency=-0.280031,Phi=-3.03983'
+        function_string = 'name=FlatBackground,A0=22.5129;name=Polynomial,n=0,A0=-22.5221;' \
+                          'name=ExpDecayOsc,A=-0.172352,Lambda=0.111109, Frequency=-0.280031,Phi=-3.03983'
         function_object = FunctionFactory.createInitialized(function_string)
 
         name_as_string = self.model.get_function_name(function_object)

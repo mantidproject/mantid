@@ -17,6 +17,12 @@ from abins import KpointsData
 class CalculateQToscaTest(unittest.TestCase):
     def setUp(self):
         self._tosca_instrument = abins.instruments.get_instrument("TOSCA")
+
+        atomic_displacements = np.asarray([[[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0],  [1.0, 1.0, 1.0],
+                                             [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],  [1.0, 1.0, 1.0]],
+                                            [[1.0, 1.0, 1.0], [1.0, 1.0, 111.0], [1.0, 1.0, 1.0],
+                                             [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],  [1.0, 1.0, 1.0]]]]).astype(complex)
+
         self._raw_data = KpointsData(k_vectors=np.asarray([[0.0, 0.0, 0.0]]),
                                      weights=np.asarray([0.3]),
                                      # 6 frequencies, globally frequencies are in hartree units if necessary
@@ -24,10 +30,7 @@ class CalculateQToscaTest(unittest.TestCase):
                                      frequencies=(np.asarray([[100.0, 200.0, 300.0, 400.0, 500.0, 600.0]])
                                                   * CM1_2_HARTREE),
                                      # 12 atomic displacements
-                                     atomic_displacements=np.asarray([[[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0],  [1.0, 1.0, 1.0],
-                                                                        [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],  [1.0, 1.0, 1.0]],
-                                                                       [[1.0, 1.0, 1.0], [1.0, 1.0, 111.0], [1.0, 1.0, 1.0],
-                                                                        [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],  [1.0, 1.0, 1.0]]]]).astype(complex),
+                                     atomic_displacements=atomic_displacements,
                                      unit_cell=np.asarray([[7.44, 0., 0.],
                                                            [0., 9.55, 0.],
                                                            [0., 0., 6.92]]))
