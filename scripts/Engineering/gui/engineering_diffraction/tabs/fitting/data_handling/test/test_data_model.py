@@ -228,12 +228,14 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
         self.model._background_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
         self.model._bg_params = {"name1": [True, 80, 1000, False]}
+        self.model._log_values = {"name1": 1, "name2": 2}
 
         self.model.update_workspace_name("name1", "new_name")
 
         self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._loaded_workspaces)
         self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._background_workspaces)
         self.assertEqual({"new_name": [True, 80, 1000, False]}, self.model._bg_params)
+        self.assertEqual({"new_name": 1, "name2": 2}, self.model._log_values)
 
 
 if __name__ == '__main__':
