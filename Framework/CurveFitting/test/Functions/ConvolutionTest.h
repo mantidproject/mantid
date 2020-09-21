@@ -128,7 +128,6 @@ public:
   void setHeight(const double h) override { setParameter(1, h); }
   void setFwhm(const double w) override { setParameter(2, w); }
 };
-
 class ConvolutionTest_Linear : public ParamFunction, public IFunction1D {
 public:
   ConvolutionTest_Linear() {
@@ -155,6 +154,35 @@ public:
     }
   }
 };
+
+class ConvolutionTest_LinearWithAttributes : public ParamFunction, public IFunction1D {
+public:
+  ConvolutionTest_LinearWithAttributes() {
+    declareParameter("a");
+    declareParameter("b");
+    declareAttribute("TestAttribute", Attribute(""));
+  }
+
+  std::string name() const override { return "ConvolutionTest_LinearWithAttributes"; }
+
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override {
+    double a = getParameter("a");
+    double b = getParameter("b");
+    for (size_t i = 0; i < nData; i++) {
+      out[i] = a + b * xValues[i];
+    }
+  }
+  void functionDeriv1D(Jacobian *out, const double *xValues,
+                       const size_t nData) override {
+    for (size_t i = 0; i < nData; i++) {
+      out->set(i, 0, 1.);
+      out->set(i, 1, xValues[i]);
+    }
+  }
+};
+
+
 
 DECLARE_FUNCTION(ConvolutionTest_Gauss)
 DECLARE_FUNCTION(ConvolutionTest_Lorentz)
@@ -355,6 +383,19 @@ public:
       // fconv<<f<<' '<<h1*h2*pi/sqrt(s1*s2)*exp(-pi*pi*f*f*(1./s1+1./s2))<<"
       // 0"<<'\n';
     }
+  }
+
+  void testAttributesSetUpCorrectlyForConvolution() {
+    Convolution conv;
+    auto func =
+        std::make_shared<ConvolutionTest_LinearWithAttributes>();
+    conv.addFunction(func);
+
+    auto names = conv.getAttributeNames();
+    TS_ASSERT_EQUALS(conv.nAttributes(), 3);
+    TS_ASSERT_EQUALS(names[0], "FixResolution");
+    TS_ASSERT_EQUALS(names[1], "NumDeriv");
+    TS_ASSERT_EQUALS(names[2], "f0.TestAttribute");
   }
 
   /*

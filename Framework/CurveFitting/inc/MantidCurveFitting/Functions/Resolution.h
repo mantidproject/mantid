@@ -48,6 +48,8 @@ public:
   void setAttribute(const std::string &attName, const Attribute &) override;
   /// Check if attribute attName exists
   bool hasAttribute(const std::string &attName) const override;
+  // return attribute name from ith attribute
+  std::string attributeName(size_t index) const;
 
 private:
   /// Function that does the actual job

@@ -48,6 +48,8 @@ TabulatedFunction::TabulatedFunction()
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("WorkspaceIndex", Attribute(defaultIndexValue));
+  declareAttribute("X", Attribute(std::vector<double>()));
+  declareAttribute("Y", Attribute(std::vector<double>()));
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
@@ -56,7 +58,6 @@ void TabulatedFunction::eval(double scaling, double xshift, double xscale,
                              const size_t nData) const {
   if (nData == 0)
     return;
-
   setupData();
 
   if (size() == 0)
@@ -68,13 +69,11 @@ void TabulatedFunction::eval(double scaling, double xshift, double xscale,
     value *= xscale;
     value += xshift;
   }
-
   const double xStart = xData.front();
   const double xEnd = xData.back();
 
   if (xStart >= xValues[nData - 1] || xEnd <= xValues[0])
     return;
-
   size_t i = 0;
   while (i < nData - 1 && xValues[i] < xStart) {
     out[i] = 0;
@@ -243,15 +242,16 @@ void TabulatedFunction::setAttribute(const std::string &attName,
 /// Returns the number of attributes associated with the function
 size_t TabulatedFunction::nAttributes() const {
   // additional X and Y attributes
-  return IFunction::nAttributes() + 2;
+  return IFunction::nAttributes();
 }
 
 /// Returns a list of attribute names
 std::vector<std::string> TabulatedFunction::getAttributeNames() const {
   std::vector<std::string> attNames = IFunction::getAttributeNames();
-  attNames.emplace_back("X");
-  attNames.emplace_back("Y");
+  //attNames.emplace_back("X");
+  //attNames.emplace_back("Y");
   return attNames;
+
 }
 
 /// Return a value of attribute attName
@@ -265,16 +265,6 @@ TabulatedFunction::getAttribute(const std::string &attName) const {
   }
   return IFunction::getAttribute(attName);
 }
-
-/// Check if attribute attName exists
-/// @param attName :: The attribute name
-bool TabulatedFunction::hasAttribute(const std::string &attName) const {
-  if (attName == "X" || attName == "Y") {
-    return true;
-  }
-  return IFunction::hasAttribute(attName);
-}
-
 /**
  * Load input file as a Nexus file.
  * @param fname :: The file name

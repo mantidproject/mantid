@@ -88,6 +88,7 @@ public:
     TS_ASSERT(true);
     TabulatedFunction fun;
     fun.setAttributeValue("FileName", m_nexusFileName);
+
     TS_ASSERT_EQUALS(fun.getParameter("Scaling"), 1.0);
     TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(),
                      m_nexusFileName);
@@ -110,6 +111,7 @@ public:
     TabulatedFunction fun;
     fun.setAttributeValue("FileName", m_nexusFileName);
     fun.setAttributeValue("WorkspaceIndex", 10);
+    std::cout << "fun" << fun.asString() << std::endl;
     TS_ASSERT_EQUALS(fun.getParameter("Scaling"), 1.0);
     TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(),
                      m_nexusFileName);

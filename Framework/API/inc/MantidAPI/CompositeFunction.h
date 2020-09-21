@@ -79,11 +79,16 @@ public:
   double getParameter(const std::string &name) const override;
   /// Check if function has a parameter with this name.
   bool hasParameter(const std::string &name) const override;
+  /// Check if a function has an attribute with this name.
   bool hasAttribute(const std::string &name) const override;
+  /// Return a value of attribute attName
+  Attribute getAttribute(const std::string &name) const override;
   /// Total number of parameters
   size_t nParams() const override;
-  // Total number of attributes
+  // Total number of attributes, which includes global and local function attributes
   size_t nAttributes() const override;
+  // Total number of global attributes, defined at the composite function level
+  size_t nGlobalAttributes() const noexcept { return IFunction::nAttributes(); }
   /// Returns the index of parameter name
   size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i
@@ -98,7 +103,6 @@ public:
   double getError(size_t i) const override;
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
-
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
   double activeParameter(size_t i) const override;
@@ -211,6 +215,10 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
+
+ /// Declare a single attribute
+  void declareAttribute(const std::string &name,
+                                const API::IFunction::Attribute &defaultValue) override;
   /// Writes itself into a string
   std::string writeToString(
       const std::string &parentLocalAttributesStr = "") const override;
@@ -243,9 +251,8 @@ private:
   /// Function counter to be used in nextConstraint
   mutable size_t m_iConstraintFunction;
   // Global attributes
-  void createGlobalAttributes();
+  void createDefaultGlobalAttributes();
   std::vector<std::string> m_globalAttributeNames;
-  size_t m_nGlobalAttributes;
 };
 
 /// shared pointer to the composite function base class
