@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import logger
 
-import abins.test_helpers
 import abins.input
+import abins.test_helpers
+
 
 class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
 
@@ -19,7 +19,7 @@ class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
     _gamma_no_h_dmol3 = "Na2SiF6_LoadDMOL3"
     _molecule_dmol3 = "methane_LoadDMOL3"
     _molecule_opt_dmol3 = "methane_opt_LoadDMOL3"
-    
+
     def test_gamma_dmol3(self):
         self.check(name=self._gamma_dmol3, loader=abins.input.DMOL3Loader)
         self.check(name=self._gamma_no_h_dmol3, loader=abins.input.DMOL3Loader)
@@ -27,6 +27,7 @@ class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
     def test_molecule_dmol3(self):
         self.check(name=self._molecule_dmol3, loader=abins.input.DMOL3Loader)
         self.check(name=self._molecule_opt_dmol3, loader=abins.input.DMOL3Loader)
+
 
 if __name__ == '__main__':
     unittest.main()

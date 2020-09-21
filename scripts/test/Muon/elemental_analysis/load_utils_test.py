@@ -147,13 +147,12 @@ class LoadUtilsTest(unittest.TestCase):
             self.assertTrue(np.array_equal(merged_ws.readY(input_index), Yfunc(X_data, i)))
             self.assertTrue(np.array_equal(merged_ws.readE(input_index), Efunc(X_data, i)))
         # check that the y data for delayed response is all zeros
-        self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"]-1)))
-
+        self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"] - 1)))
 
     def test_flatten_run_data(self):
         test_1 = ["1_det_1", "1_det_2"]
         test_2 = ["2_det_1", "2_det_2"]
-        self.assertEquals(lutils.flatten_run_data(test_1,test_2), [test_1,test_2])
+        self.assertEquals(lutils.flatten_run_data(test_1, test_2), [test_1, test_2])
 
     def test_replace_workspace_name_suffix(self):
         tests = {self.test_ws_name: "suffix", "_".join([self.test_ws_name, "test"]): "suffix"}

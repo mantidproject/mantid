@@ -5,15 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid
+
 import SANSUserFileParser as UserFileParser
+
 
 class BackCommandParserTest(unittest.TestCase):
     def test_can_parse_correctly_initial_command(self):
         # Arrange
-        correct1 = "TImE /sdlf/sdf" # Correct MAIN
+        correct1 = "TImE /sdlf/sdf"  # Correct MAIN
         correct2 = "UAMp/sdlf/sdf"  # Correct HAB
-        correct3 = "MON/RUN=1234/sdf/sdf" # Correct Mon/RUN=
+        correct3 = "MON/RUN=1234/sdf/sdf"  # Correct Mon/RUN=
         parser = UserFileParser.BackCommandParser()
 
         # Act and assert
@@ -23,9 +24,9 @@ class BackCommandParserTest(unittest.TestCase):
 
     def test_cannot_parse_correctly_initial_command(self):
         # Arrange
-        correct1 = "FRoNT=/sdlf/sdf" # Wrong specifier
-        correct2 = "MON/sdf/sdf/sdf" # No run number
-        correct3 = "Time/sdf" # Correct first but incorrect length
+        correct1 = "FRoNT=/sdlf/sdf"  # Wrong specifier
+        correct2 = "MON/sdf/sdf/sdf"  # No run number
+        correct3 = "Time/sdf"  # Correct first but incorrect length
 
         parser = UserFileParser.BackCommandParser()
 
@@ -38,7 +39,7 @@ class BackCommandParserTest(unittest.TestCase):
         argument = "TIME/ mEAN/RuN=SANS2D1111111"
         uniform = True
         mean = True
-        run_number ="SANS2D1111111"
+        run_number = "SANS2D1111111"
         is_mon = False
         mon_number = 0
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
@@ -47,7 +48,7 @@ class BackCommandParserTest(unittest.TestCase):
         argument = "Uamp/ToF /Run=2222"
         uniform = False
         mean = False
-        run_number ="2222"
+        run_number = "2222"
         is_mon = False
         mon_number = None
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
@@ -56,7 +57,7 @@ class BackCommandParserTest(unittest.TestCase):
         argument = "TIME/tof/run=LOQ33333333"
         uniform = True
         mean = False
-        run_number ="LOQ33333333"
+        run_number = "LOQ33333333"
         is_mon = False
         mon_number = None
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
@@ -65,7 +66,7 @@ class BackCommandParserTest(unittest.TestCase):
         argument = " UAMP/mean /RuN=444444444"
         uniform = False
         mean = True
-        run_number ="444444444"
+        run_number = "444444444"
         is_mon = False
         mon_number = None
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
@@ -74,11 +75,11 @@ class BackCommandParserTest(unittest.TestCase):
         argument = "MON/RUN=123124/time/mean"
         uniform = True
         mean = True
-        run_number ="123124"
+        run_number = "123124"
         is_mon = True
         mon_number = None
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
-    
+
     def test_rejects_bad_first_value(self):
         argument = "GUN/RUN=123124/time/mean  "
         self.do_test_parsing_fails(argument)
@@ -94,12 +95,12 @@ class BackCommandParserTest(unittest.TestCase):
     def test_rejects_bad_third_value(self):
         argument = "UAMP/mean/RuN 44444"
         self.do_test_parsing_fails(argument)
-    
+
     def test_that_can_pars_M3_RUN_TIME_MEAN(self):
         argument = "M3/RUN=123124/time/mean"
         uniform = True
         mean = True
-        run_number ="123124"
+        run_number = "123124"
         is_mon = True
         mon_number = 3
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
@@ -123,7 +124,7 @@ class BackCommandParserTest(unittest.TestCase):
         parser = UserFileParser.BackCommandParser()
         # Act
         args = [arguments]
-        self.assertRaises(RuntimeError, parser.parse_and_set,*args)
+        self.assertRaises(RuntimeError, parser.parse_and_set, *args)
 
 
 if __name__ == "__main__":

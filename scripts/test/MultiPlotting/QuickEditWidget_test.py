@@ -49,27 +49,28 @@ class QuickEditWidgetTest(unittest.TestCase):
 
     def test_get_selection_one(self):
         name = "one plot"
-        self.pres.widget.current_selection = mock.MagicMock(return_value = name)
+        self.pres.widget.current_selection = mock.MagicMock(return_value=name)
         output = self.widget.get_selection()
         self.assertEqual([name], output)
 
     def test_get_selection_all(self):
         name = "All"
-        self.pres.widget.current_selection = mock.MagicMock(return_value = name)
+        self.pres.widget.current_selection = mock.MagicMock(return_value=name)
         output = self.widget.get_selection()
         self.assertEqual(self.pres.all.call_count, 1)
 
     def test_set_plot_x_range(self):
-        self.widget.set_plot_x_range([0,1])
-        self.pres.set_plot_x_range.assert_called_with([0,1])
+        self.widget.set_plot_x_range([0, 1])
+        self.pres.set_plot_x_range.assert_called_with([0, 1])
 
     def test_set_plot_y_range(self):
-        self.widget.set_plot_y_range([0,1])
-        self.pres.set_plot_y_range.assert_called_with([0,1])
+        self.widget.set_plot_y_range([0, 1])
+        self.pres.set_plot_y_range.assert_called_with([0, 1])
 
     def test_set_errors_TT(self):
         self.widget.set_errors(True)
         self.pres.set_errors.assert_called_with(True)
+
 
 if __name__ == "__main__":
     unittest.main()

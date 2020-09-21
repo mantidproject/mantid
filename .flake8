@@ -2,6 +2,7 @@
 ignore = E114,E115,E116,E121,E123,E126,E133,E2,E704,E722,E741,E743,W503,F403,F405,F999
 exclude =
     .git,
+    build
     buildconfig,
     docs,
     Framework/Algorithms/test,
@@ -9,7 +10,6 @@ exclude =
     Framework/MPIAlgorithms,
     Framework/PythonInterface/mantid,
     Framework/PythonInterface/test,
-    Framework/WorkflowAlgorithms,
     images,
     installers,
     instrument,
@@ -21,7 +21,6 @@ exclude =
     qt/python/mantidqt/dialogs/errorreports/resources_qt5.py
     qt/scientific_interfaces,
     qt/widgets,
-    scripts/test,
     Testing/PerformanceTests,
     Testing/SystemTests/lib,
     Testing/SystemTests/scripts,

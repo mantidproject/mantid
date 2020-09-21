@@ -79,4 +79,5 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         self.view.preserveEventsChanged.emit(False)
         assert_called(self.summation_settings.disable_overlay_event_workspaces)
 
+
 if __name__ == '__main__': unittest.main()

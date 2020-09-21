@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid
-from mantid.simpleapi import *
-import centre_finder as cf
-import ISISCommandInterface as command_iface
+
 from reducer_singleton import ReductionSingleton
-import isis_reduction_steps as reduction_steps
+
+import ISISCommandInterface as command_iface
+import centre_finder as cf
+from mantid.simpleapi import *
 
 
 class SANSBeamCentrePositionUpdater(unittest.TestCase):
@@ -76,13 +76,15 @@ class TestPositionProvider(unittest.TestCase):
         '''
         Mocking out the sample
         '''
+
         def __init__(self, ws_name):
-            super(TestPositionProvider.MockSample,self).__init__()
+            super(TestPositionProvider.MockSample, self).__init__()
             self.wksp_name = ws_name
+
         def get_wksp_name(self):
             return self.wksp_name
 
-    def _provide_reducer(self, is_larmor, is_new = True):
+    def _provide_reducer(self, is_larmor, is_new=True):
         '''
         Provide a reducer with either Larmor or non-Larmor. If we have Larmor,
         then we want to be able to set the run number as well
@@ -91,7 +93,7 @@ class TestPositionProvider(unittest.TestCase):
         if is_larmor and is_new:
             command_iface.LARMOR()
             CreateSampleWorkspace(OutputWorkspace=self.workspace_name)
-            AddSampleLog(Workspace=self.workspace_name,LogName='run_number', LogText='3000', LogType='Number')
+            AddSampleLog(Workspace=self.workspace_name, LogName='run_number', LogText='3000', LogType='Number')
             sample = self.MockSample(self.workspace_name)
             ReductionSingleton()._sample_run = sample
             return ReductionSingleton()
@@ -99,7 +101,7 @@ class TestPositionProvider(unittest.TestCase):
         elif is_larmor and not is_new:
             command_iface.LARMOR()
             CreateSampleWorkspace(OutputWorkspace=self.workspace_name)
-            AddSampleLog(Workspace=self.workspace_name,LogName='run_number', LogText='1000', LogType='Number')
+            AddSampleLog(Workspace=self.workspace_name, LogName='run_number', LogText='1000', LogType='Number')
             sample = self.MockSample(self.workspace_name)
             ReductionSingleton()._sample_run = sample
             return ReductionSingleton()
@@ -119,11 +121,11 @@ class TestPositionProvider(unittest.TestCase):
         is_larmor = False
         reducer = self._provide_reducer(is_larmor)
         # Act
-        factory = cf.PositionProviderFactory(increment_coord1 = increment_coord1,
-                                             increment_coord2 = increment_coord2,
-                                             tolerance = tolerance,
-                                             position_type = cf.FindDirectionEnum.ALL)
-        provider = factory.create_position_provider(reducer = reducer)
+        factory = cf.PositionProviderFactory(increment_coord1=increment_coord1,
+                                             increment_coord2=increment_coord2,
+                                             tolerance=tolerance,
+                                             position_type=cf.FindDirectionEnum.ALL)
+        provider = factory.create_position_provider(reducer=reducer)
         # Asssert
         self.assertTrue(isinstance(provider, cf.PositionProviderXY), "Should create a XY increment provider")
         # Clean up
@@ -138,11 +140,11 @@ class TestPositionProvider(unittest.TestCase):
         is_new = True
         reducer = self._provide_reducer(is_larmor, is_new)
         # Act
-        factory = cf.PositionProviderFactory(increment_coord1 = increment_coord1,
-                                              increment_coord2 = increment_coord2,
-                                              tolerance = tolerance,
-                                              position_type = cf.FindDirectionEnum.ALL)
-        provider = factory.create_position_provider(reducer = reducer)
+        factory = cf.PositionProviderFactory(increment_coord1=increment_coord1,
+                                             increment_coord2=increment_coord2,
+                                             tolerance=tolerance,
+                                             position_type=cf.FindDirectionEnum.ALL)
+        provider = factory.create_position_provider(reducer=reducer)
 
         # Asssert
         self.assertTrue(isinstance(provider, cf.PositionProviderAngleY), "Should create a AngleY increment provider")
@@ -158,11 +160,11 @@ class TestPositionProvider(unittest.TestCase):
         is_new = False
         reducer = self._provide_reducer(is_larmor, is_new)
         # Act
-        factory = cf.PositionProviderFactory(increment_coord1 = increment_coord1,
-                                              increment_coord2 = increment_coord2,
-                                              tolerance = tolerance,
-                                              position_type = cf.FindDirectionEnum.ALL)
-        provider = factory.create_position_provider(reducer = reducer)
+        factory = cf.PositionProviderFactory(increment_coord1=increment_coord1,
+                                             increment_coord2=increment_coord2,
+                                             tolerance=tolerance,
+                                             position_type=cf.FindDirectionEnum.ALL)
+        provider = factory.create_position_provider(reducer=reducer)
 
         # Asssert
         self.assertTrue(isinstance(provider, cf.PositionProviderXY), "Should create a XY increment provider")
@@ -174,17 +176,17 @@ class TestPositionProvider(unittest.TestCase):
         increment_coord1 = 1
         increment_coord2 = 2
         tolerance = 200
-        provider = cf.PositionProviderXY(increment_coord1,increment_coord2,tolerance)
+        provider = cf.PositionProviderXY(increment_coord1, increment_coord2, tolerance)
 
         # Act and Assert
-        self.assertEqual(increment_coord1,  provider.get_increment_coord1())
-        self.assertEqual(increment_coord2,  provider.get_increment_coord2())
+        self.assertEqual(increment_coord1, provider.get_increment_coord1())
+        self.assertEqual(increment_coord2, provider.get_increment_coord2())
 
         provider.half_and_reverse_increment_coord1()
         provider.half_and_reverse_increment_coord2()
 
-        self.assertEqual(-increment_coord1/2.0,  provider.get_increment_coord1())
-        self.assertEqual(-increment_coord2/2.0,  provider.get_increment_coord2())
+        self.assertEqual(-increment_coord1 / 2.0, provider.get_increment_coord1())
+        self.assertEqual(-increment_coord2 / 2.0, provider.get_increment_coord2())
 
     def test_that_AngleY_increment_provider_halves_the_step(self):
         # Arrange
@@ -194,24 +196,25 @@ class TestPositionProvider(unittest.TestCase):
         tolerance_angle = 33
         bench_rotation = 1
         coord1_scale_factor = 1
-        provider = cf.PositionProviderAngleY(increment_coord1,increment_coord2,tolerance,tolerance_angle, bench_rotation, coord1_scale_factor)
+        provider = cf.PositionProviderAngleY(increment_coord1, increment_coord2, tolerance, tolerance_angle,
+                                             bench_rotation, coord1_scale_factor)
 
         # Act and Assert
-        self.assertEqual(increment_coord1,  provider.get_increment_coord1())
-        self.assertEqual(increment_coord2,  provider.get_increment_coord2())
+        self.assertEqual(increment_coord1, provider.get_increment_coord1())
+        self.assertEqual(increment_coord2, provider.get_increment_coord2())
 
         provider.half_and_reverse_increment_coord1()
         provider.half_and_reverse_increment_coord2()
 
-        self.assertEqual(-increment_coord1/2.0,  provider.get_increment_coord1())
-        self.assertEqual(-increment_coord2/2.0,  provider.get_increment_coord2())
+        self.assertEqual(-increment_coord1 / 2.0, provider.get_increment_coord1())
+        self.assertEqual(-increment_coord2 / 2.0, provider.get_increment_coord2())
 
     def test_that_XY_increment_is_smaller_than_tolerance(self):
         # Arrange
         increment_coord1 = 1
         increment_coord2 = 2
         tolerance = 200
-        provider = cf.PositionProviderXY(increment_coord1,increment_coord2,tolerance)
+        provider = cf.PositionProviderXY(increment_coord1, increment_coord2, tolerance)
 
         # Act
         is_smaller_coord1 = provider.is_coord1_increment_smaller_than_tolerance()
@@ -226,7 +229,7 @@ class TestPositionProvider(unittest.TestCase):
         increment_coord1 = 1
         increment_coord2 = 2
         tolerance = 0.2
-        provider = cf.PositionProviderXY(increment_coord1,increment_coord2,tolerance)
+        provider = cf.PositionProviderXY(increment_coord1, increment_coord2, tolerance)
 
         # Act
         is_smaller_coord1 = provider.is_coord1_increment_smaller_than_tolerance()
@@ -244,7 +247,8 @@ class TestPositionProvider(unittest.TestCase):
         tolerance_angle = 233
         bench_rotation = 1
         coord1_scale_factor = 1
-        provider = cf.PositionProviderAngleY(increment_coord1,increment_coord2,tolerance,tolerance_angle, bench_rotation, coord1_scale_factor)
+        provider = cf.PositionProviderAngleY(increment_coord1, increment_coord2, tolerance, tolerance_angle,
+                                             bench_rotation, coord1_scale_factor)
 
         # Act
         is_smaller_coord1 = provider.is_coord1_increment_smaller_than_tolerance()
@@ -262,7 +266,8 @@ class TestPositionProvider(unittest.TestCase):
         tolerance_angle = 0.1
         bench_rotation = 1
         coord1_scale_factor = 1
-        provider = cf.PositionProviderAngleY(increment_coord1,increment_coord2,tolerance,tolerance_angle, bench_rotation, coord1_scale_factor)
+        provider = cf.PositionProviderAngleY(increment_coord1, increment_coord2, tolerance, tolerance_angle,
+                                             bench_rotation, coord1_scale_factor)
 
         # Act
         is_smaller_coord1 = provider.is_coord1_increment_smaller_than_tolerance()

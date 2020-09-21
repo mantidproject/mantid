@@ -9,9 +9,8 @@
 import unittest
 import numpy as np
 
-# Import mantid to setup the python paths to the bundled scripts
-import mantid
 from PyChop import PyChop2
+
 
 class PyChop2Tests(unittest.TestCase):
 
@@ -27,7 +26,7 @@ class PyChop2Tests(unittest.TestCase):
             self.assertRaises(ValueError, chopobj.getResolution)
             chopobj.setChopper('s', 200)
             chopobj.setEi(18)
-            rr, ff = chopobj.getResFlux(np.linspace(0,17,10))
+            rr, ff = chopobj.getResFlux(np.linspace(0, 17, 10))
             res.append(rr)
             flux.append(ff)
         # Checks that the flux should be highest for MERLIN, MARI and MAPS in that order
@@ -59,7 +58,7 @@ class PyChop2Tests(unittest.TestCase):
             self.assertRaises(ValueError, chopobj.getResolution)
             chopobj.setFrequency(200)
             chopobj.setEi(18)
-            rr, ff = chopobj.getResFlux(np.linspace(0,17,10))
+            rr, ff = chopobj.getResFlux(np.linspace(0, 17, 10))
             res.append(rr)
             flux.append(ff)
         # Checks that the flux should be highest for 'High flux', then 'Intermediate', 'High resolution'
@@ -67,12 +66,13 @@ class PyChop2Tests(unittest.TestCase):
         self.assertGreaterEqual(flux[1], flux[2])
         # Checks that the resolution should be best for 'High resolution', then 'Intermediate', 'High flux'
         self.assertLessEqual(res[2][0], res[1][0])
-        self.assertLessEqual(res[1][0], res[0][0]) 
+        self.assertLessEqual(res[1][0], res[0][0])
         # Now tests the standalone function
         for inc, variant in enumerate(variants):
             rr, ff = PyChop2.calculate('LET', variant, 200, 18, 0)
             self.assertAlmostEqual(rr[0], res[inc][0], places=7)
             self.assertAlmostEqual(ff, flux[inc], places=7)
+
 
 if __name__ == "__main__":
     unittest.main()

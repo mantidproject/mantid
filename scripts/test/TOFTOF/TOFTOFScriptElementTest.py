@@ -21,51 +21,51 @@ class TOFTOFScriptElementTest(unittest.TestCase):
     @staticmethod
     def setMinimumValidInputs(scriptElement):
         scriptElement.reset()
-        scriptElement.facility_name   = 'MLZ'
+        scriptElement.facility_name = 'MLZ'
         scriptElement.instrument_name = 'TOFTOF'
 
         # prefix of (some) workspace names
-        scriptElement.prefix   = 'ws'
+        scriptElement.prefix = 'ws'
 
         # data files are here
-        scriptElement.dataDir  = '/Somepath/somewhere/'
+        scriptElement.dataDir = '/Somepath/somewhere/'
 
         # vanadium runs & comment
-        scriptElement.vanRuns  = ''
-        scriptElement.vanCmnt  = ''
-        scriptElement.vanTemp  = OptionalFloat(None)
+        scriptElement.vanRuns = ''
+        scriptElement.vanCmnt = ''
+        scriptElement.vanTemp = OptionalFloat(None)
 
         # empty can runs, comment, and factor
-        scriptElement.ecRuns   = ''
-        scriptElement.ecTemp   = OptionalFloat(None)
+        scriptElement.ecRuns = ''
+        scriptElement.ecTemp = OptionalFloat(None)
         scriptElement.ecFactor = 1
 
         # data runs: [(runs,comment, temperature), ...]
         scriptElement.dataRuns = [[unicode('0:5'), unicode('Comment for Run 0:5'), OptionalFloat(None)]]
 
         # additional parameters
-        scriptElement.binEon        = False
-        scriptElement.binEstart     = 0.0
-        scriptElement.binEstep      = 0.0
-        scriptElement.binEend       = 0.0
+        scriptElement.binEon = False
+        scriptElement.binEstart = 0.0
+        scriptElement.binEstep = 0.0
+        scriptElement.binEend = 0.0
 
-        scriptElement.binQon        = False
-        scriptElement.binQstart     = 0.0
-        scriptElement.binQstep      = 0.0
-        scriptElement.binQend       = 0.0
+        scriptElement.binQon = False
+        scriptElement.binQstart = 0.0
+        scriptElement.binQstep = 0.0
+        scriptElement.binQend = 0.0
 
         scriptElement.maskDetectors = ''
 
         # options
         scriptElement.subtractECVan = False
-        scriptElement.normalise     = TOFTOFScriptElement.NORM_NONE
-        scriptElement.correctTof    = TOFTOFScriptElement.CORR_TOF_NONE
-        scriptElement.replaceNaNs   = False
-        scriptElement.createDiff    = False
-        scriptElement.keepSteps     = False
+        scriptElement.normalise = TOFTOFScriptElement.NORM_NONE
+        scriptElement.correctTof = TOFTOFScriptElement.CORR_TOF_NONE
+        scriptElement.replaceNaNs = False
+        scriptElement.createDiff = False
+        scriptElement.keepSteps = False
 
         # save data
-        scriptElement.saveDir        = ''
+        scriptElement.saveDir = ''
         scriptElement.saveSofTWNxspe = False
         scriptElement.saveSofTWNexus = False
         scriptElement.saveSofTWAscii = False
@@ -75,51 +75,51 @@ class TOFTOFScriptElementTest(unittest.TestCase):
     @staticmethod
     def setValidInputs(scriptElement):
         scriptElement.reset()
-        scriptElement.facility_name   = 'MLZ'
+        scriptElement.facility_name = 'MLZ'
         scriptElement.instrument_name = 'TOFTOF'
 
         # prefix of (some) workspace names
-        scriptElement.prefix   = 'ws'
+        scriptElement.prefix = 'ws'
 
         # data files are here
-        scriptElement.dataDir  = '/Somepath/somewhere/'
+        scriptElement.dataDir = '/Somepath/somewhere/'
 
         # vanadium runs & comment
-        scriptElement.vanRuns  = '1:3'
-        scriptElement.vanCmnt  = 'vanadium comment'
-        scriptElement.vanTemp  = OptionalFloat(None)
+        scriptElement.vanRuns = '1:3'
+        scriptElement.vanCmnt = 'vanadium comment'
+        scriptElement.vanTemp = OptionalFloat(None)
 
         # empty can runs, comment, and factor
-        scriptElement.ecRuns   = ''
-        scriptElement.ecTemp   = OptionalFloat(None)
+        scriptElement.ecRuns = ''
+        scriptElement.ecTemp = OptionalFloat(None)
         scriptElement.ecFactor = 1
 
         # data runs: [(runs,comment, temperature), ...]
         scriptElement.dataRuns = [[unicode('0:5'), unicode('Comment for Run 0:5'), OptionalFloat(None)]]
 
         # additional parameters
-        scriptElement.binEon        = True
-        scriptElement.binEstart     = 0.0
-        scriptElement.binEstep      = 0.1
-        scriptElement.binEend       = 1.0
+        scriptElement.binEon = True
+        scriptElement.binEstart = 0.0
+        scriptElement.binEstep = 0.1
+        scriptElement.binEend = 1.0
 
-        scriptElement.binQon        = True
-        scriptElement.binQstart     = 0.0
-        scriptElement.binQstep      = 0.1
-        scriptElement.binQend       = 1.0
+        scriptElement.binQon = True
+        scriptElement.binQstart = 0.0
+        scriptElement.binQstep = 0.1
+        scriptElement.binQend = 1.0
 
         scriptElement.maskDetectors = ''
 
         # options
         scriptElement.subtractECVan = False
-        scriptElement.normalise     = TOFTOFScriptElement.NORM_NONE
-        scriptElement.correctTof    = TOFTOFScriptElement.CORR_TOF_NONE
-        scriptElement.replaceNaNs   = False
-        scriptElement.createDiff    = False
-        scriptElement.keepSteps     = False
+        scriptElement.normalise = TOFTOFScriptElement.NORM_NONE
+        scriptElement.correctTof = TOFTOFScriptElement.CORR_TOF_NONE
+        scriptElement.replaceNaNs = False
+        scriptElement.createDiff = False
+        scriptElement.keepSteps = False
 
         # save data
-        scriptElement.saveDir        = ''
+        scriptElement.saveDir = ''
         scriptElement.saveSofTWNxspe = False
         scriptElement.saveSofTWNexus = False
         scriptElement.saveSofTWAscii = False
@@ -132,12 +132,12 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
     def tearDown(self):
         self.scriptElement = None
-        #done
+        # done
 
     def test_that_inputs_saved_and_loaded_correctly(self):
         scriptElement2 = TOFTOFScriptElement()
         scriptElement2.from_xml(self.scriptElement.to_xml())
-        scriptElement2.facility_name   = 'MLZ'
+        scriptElement2.facility_name = 'MLZ'
         scriptElement2.instrument_name = 'TOFTOF'
         for name in dir(self.scriptElement):
             if not name.startswith('__') and not hasattr(getattr(self.scriptElement, name), '__call__'):
@@ -152,14 +152,14 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
     def test_that_script_is_executable_in_mantid(self):
         # data files are here
-        self.scriptElement.dataDir  = ''
+        self.scriptElement.dataDir = ''
 
         # vanadium runs & comment
-        self.scriptElement.vanRuns  = 'TOFTOFTestdata.nxs'
+        self.scriptElement.vanRuns = 'TOFTOFTestdata.nxs'
 
         # empty can runs, comment, and factor
-        self.scriptElement.ecRuns   = 'TOFTOFTestdata.nxs'
-        self.scriptElement.ecTemp   = OptionalFloat(21.0)
+        self.scriptElement.ecRuns = 'TOFTOFTestdata.nxs'
+        self.scriptElement.ecTemp = OptionalFloat(21.0)
         self.scriptElement.ecFactor = 0.9
 
         # data runs: [(runs,comment, temperature), ...]
@@ -172,13 +172,13 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
         # options
         self.scriptElement.subtractECVan = True
-        self.scriptElement.normalise     = TOFTOFScriptElement.NORM_MONITOR
-        self.scriptElement.correctTof    = TOFTOFScriptElement.CORR_TOF_VAN
-        self.scriptElement.replaceNaNs   = True
-        self.scriptElement.createDiff    = True
-        self.scriptElement.keepSteps     = True
+        self.scriptElement.normalise = TOFTOFScriptElement.NORM_MONITOR
+        self.scriptElement.correctTof = TOFTOFScriptElement.CORR_TOF_VAN
+        self.scriptElement.replaceNaNs = True
+        self.scriptElement.createDiff = True
+        self.scriptElement.keepSteps = True
 
-        testhelpers.assertRaisesNothing(self, self.execScript, 
+        testhelpers.assertRaisesNothing(self, self.execScript,
                                         self.scriptElement.to_script().replace('import matplotlib.pyplot as plt', ''))
 
     def test_that_script_has_correct_syntax(self):
@@ -196,7 +196,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         except SyntaxError as e:
             self.fail("generated script has a syntax error: '{}'".format(e))
         except HasNullBytesError as e:
-                self.fail("generated script has null bytes: '{}'".format(e))
+            self.fail("generated script has null bytes: '{}'".format(e))
         self.assertIsNotNone(compiledScript)
 
     def test_that_inputs_are_validated_correctly(self):
@@ -212,35 +212,35 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         modifiedValues = [
             ({}, False),
 
-            ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN},                   True),
+            ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN}, True),
             ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN, 'vanRuns': '0:2', 'vanCmnt': 'vanComment'}, False),
 
-            ({'subtractECVan': True, 'vanRuns': '',    'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, True),
-            ({'subtractECVan': True, 'vanRuns': '',    'vanCmnt': '',           'ecRuns': '3:5'}, True),
-            ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': ''},    True),
+            ({'subtractECVan': True, 'vanRuns': '', 'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, True),
+            ({'subtractECVan': True, 'vanRuns': '', 'vanCmnt': '', 'ecRuns': '3:5'}, True),
+            ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': ''}, True),
             ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, False),
 
             ({}, False),
-            ({'binEon': True,  'binEstart': 1.0, 'binEstep': 0.1, 'binEend': 1.0}, True),
-            ({'binEon': True,  'binEstart': 0.0, 'binEstep': 2.0, 'binEend': 1.0}, True),
-            ({'binEon': True,  'binEstart': 0.0, 'binEstep': 0.0, 'binEend': 1.0}, True),
-            ({'binEon': True,  'binEstart': 0.0, 'binEstep':-0.1, 'binEend': 1.0}, True),
-            ({'binEon': False, 'binEstart': 0.0, 'binEstep':-0.1, 'binEend': 1.0}, False),
+            ({'binEon': True, 'binEstart': 1.0, 'binEstep': 0.1, 'binEend': 1.0}, True),
+            ({'binEon': True, 'binEstart': 0.0, 'binEstep': 2.0, 'binEend': 1.0}, True),
+            ({'binEon': True, 'binEstart': 0.0, 'binEstep': 0.0, 'binEend': 1.0}, True),
+            ({'binEon': True, 'binEstart': 0.0, 'binEstep': -0.1, 'binEend': 1.0}, True),
+            ({'binEon': False, 'binEstart': 0.0, 'binEstep': -0.1, 'binEend': 1.0}, False),
 
-            ({'binQon': True,  'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, True),
-            ({'binQon': True,  'binQstart': 0.0, 'binQstep': 2.0, 'binQend': 1.0}, True),
-            ({'binQon': True,  'binQstart': 0.0, 'binQstep': 0.0, 'binQend': 1.0}, True),
-            ({'binQon': True,  'binQstart': 0.0, 'binQstep':-0.1, 'binQend': 1.0}, True),
+            ({'binQon': True, 'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, True),
+            ({'binQon': True, 'binQstart': 0.0, 'binQstep': 2.0, 'binQend': 1.0}, True),
+            ({'binQon': True, 'binQstart': 0.0, 'binQstep': 0.0, 'binQend': 1.0}, True),
+            ({'binQon': True, 'binQstart': 0.0, 'binQstep': -0.1, 'binQend': 1.0}, True),
             ({'binQon': False, 'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, False),
 
-            ({'dataRuns'  : []}, True),
+            ({'dataRuns': []}, True),
 
-            ({'dataRuns'  : [[unicode('0:5'), unicode(''), OptFloat(None)]]}, True),
-            ({'dataRuns'  : [
+            ({'dataRuns': [[unicode('0:5'), unicode(''), OptFloat(None)]]}, True),
+            ({'dataRuns': [
                 [unicode('0:5'), unicode('Comment for Run 0:5'), OptFloat(None)],
                 [unicode('6:7'), unicode(''), OptFloat(None)]
             ]}, True),
-            ({'dataRuns'  : [
+            ({'dataRuns': [
                 [unicode('0:5'), unicode(''), OptFloat(None)],
                 [unicode('6:7'), unicode('Comment for Run 6:7'), OptFloat(None)]
             ]}, True),
@@ -248,9 +248,9 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             ({'vanRuns': '0:2', 'vanCmnt': ''}, True),
             ({'vanRuns': '0:2', 'vanCmnt': 'Comment for Vanadium'}, False),
 
-            ({'saveSofTWNxspe': True, 'saveSofTWAscii': True,  'saveDir': ''}, True),
+            ({'saveSofTWNxspe': True, 'saveSofTWAscii': True, 'saveDir': ''}, True),
             ({'saveSofTWNexus': True, 'saveSofQWNexus': False, 'saveDir': ''}, True),
-            ({'saveSofQWNexus': True, 'saveSofQWAscii': True,  'saveDir': '/some/SaveDir/'}, False),
+            ({'saveSofQWNexus': True, 'saveSofQWAscii': True, 'saveDir': '/some/SaveDir/'}, False),
         ]
 
         def executeSubTest(inputs, shouldThrow):
@@ -273,6 +273,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
                     executeSubTest(inputs, shouldThrow)
             else:
                 executeSubTest(inputs, shouldThrow)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -31,5 +31,3 @@ class label(object):
 
 def errors():
     return tuple([line(), [line()], [line()]])
-
-

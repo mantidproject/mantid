@@ -30,7 +30,8 @@ class MuonFileUtilsTest(unittest.TestCase):
 
     def test_parse_user_input_to_files_returns_list_correctly(self):
         user_input = "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs;" \
-                                                                         "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001235.nxs;" \
+                                                                         "C:" + os.sep + "dir1" + os.sep + "dir2" + \
+                     os.sep + "EMU0001235.nxs;" \
                                                                                                                              "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001236.nxs"
         files = ["C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs",
                  "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001235.nxs",
@@ -41,7 +42,8 @@ class MuonFileUtilsTest(unittest.TestCase):
 
     def test_parse_user_input_to_files_filters_files_with_incorrect_extension(self):
         user_input = "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs;" \
-                                                                         "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001235.txt;" \
+                                                                         "C:" + os.sep + "dir1" + os.sep + "dir2" + \
+                     os.sep + "EMU0001235.txt;" \
                                                                                                                              "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001236.png"
         files = ["C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs"]
 
@@ -67,14 +69,15 @@ class MuonFileUtilsTest(unittest.TestCase):
         utils.check_file_exists = mock.Mock(return_value=True)
         expected_file_name = os.sep + os.sep + "EMU" + os.sep + "data" + os.sep + "autoA"
         test_file_name = StringIO(u"autoA")
-        utils.open = mock.Mock(return_value = test_file_name)
+        utils.open = mock.Mock(return_value=test_file_name)
         current_file_name = utils.get_current_run_filename("EMU")
         self.assertEqual(current_file_name, expected_file_name)
 
     def test_that_get_current_run_throws_if_no_valid_run_in_autosave_run(self):
-        utils.check_file_exists = mock.Mock(side_effect = [True, False])
+        utils.check_file_exists = mock.Mock(side_effect=[True, False])
         with self.assertRaises(ValueError):
             utils.get_current_run_filename("EMU")
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

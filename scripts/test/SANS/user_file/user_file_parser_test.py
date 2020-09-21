@@ -121,7 +121,8 @@ class DetParserTest(unittest.TestCase):
 
     def test_that_detector_setting_is_parsed_correctly(self):
         valid_settings = {"Det/CORR/REAR/X 123": {DetectorId.CORRECTION_X: single_entry_with_detector(entry=123,
-                                                                                                      detector_type=DetectorType.LAB)},  # noqa
+                                                                                                      detector_type=DetectorType.LAB)},
+                          # noqa
                           "DEt/CORR/ frOnt/X +95.7": {DetectorId.CORRECTION_X:
                                                           single_entry_with_detector(entry=95.7,
                                                                                      detector_type=DetectorType.HAB)},
@@ -142,7 +143,7 @@ class DetParserTest(unittest.TestCase):
                                                                                        detector_type=DetectorType.LAB)},
                           " DET/CoRR/FRONT/ SidE -957": {DetectorId.CORRECTION_TRANSLATION:
                                                              single_entry_with_detector(entry=-957,
-                                                                                    detector_type=DetectorType.HAB)},
+                                                                                        detector_type=DetectorType.HAB)},
                           "DeT/ CORR /reAR/ROt 12.3": {DetectorId.CORRECTION_ROTATION:
                                                            single_entry_with_detector(entry=12.3,
                                                                                       detector_type=DetectorType.LAB)},
@@ -151,10 +152,10 @@ class DetParserTest(unittest.TestCase):
                                                                                       detector_type=DetectorType.HAB)},
                           "DeT/ CORR /reAR/Radius 12.3": {DetectorId.CORRECTION_RADIUS:
                                                               single_entry_with_detector(entry=12.3,
-                                                                                     detector_type=DetectorType.LAB)},
+                                                                                         detector_type=DetectorType.LAB)},
                           " DET/CoRR/FRONT/RADIUS 957": {DetectorId.CORRECTION_RADIUS:
                                                              single_entry_with_detector(entry=957,
-                                                                                     detector_type=DetectorType.HAB)}}
+                                                                                        detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"Det/CORR/REAR/X ": RuntimeError,
                             "DEt/CORR/ frOnt/X 12 23": RuntimeError,
@@ -169,9 +170,10 @@ class DetParserTest(unittest.TestCase):
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_DET_OVERLAP_option_is_parsed_correctly(self):
-        valid_settings = {"DET/OVERLAP 0.13 0.15": {DetectorId.MERGE_RANGE: det_fit_range(start=0.13, stop=0.15, use_fit=True)},
-                          "DeT/OverLAP 0.13 0.15": {DetectorId.MERGE_RANGE: det_fit_range(start=0.13, stop=0.15, use_fit=True)}
-                          }
+        valid_settings = {
+            "DET/OVERLAP 0.13 0.15": {DetectorId.MERGE_RANGE: det_fit_range(start=0.13, stop=0.15, use_fit=True)},
+            "DeT/OverLAP 0.13 0.15": {DetectorId.MERGE_RANGE: det_fit_range(start=0.13, stop=0.15, use_fit=True)}
+        }
 
         invalid_settings = {"DET/OVERLAP 0.13 0.15 0.17": RuntimeError,
                             "DET/OVERLAP 0.13": RuntimeError,
@@ -202,9 +204,9 @@ class LimitParserTest(unittest.TestCase):
 
     def test_that_event_time_limit_is_parsed_correctly(self):
         valid_settings = {"L  / EVEnTStime 0,-10,32,434,34523,35": {LimitsId.EVENTS_BINNING:
-                                                                    "0.0,-10.0,32.0,434.0,34523.0,35.0"},
+                                                                        "0.0,-10.0,32.0,434.0,34523.0,35.0"},
                           "L / Eventstime 0 -10 32 434 34523 35": {LimitsId.EVENTS_BINNING:
-                                                                   "0.0,-10.0,32.0,434.0,34523.0,35.0"}}
+                                                                       "0.0,-10.0,32.0,434.0,34523.0,35.0"}}
 
         invalid_settings = {"L  / EEnTStime 0,-10,32,434,34523,35": RuntimeError,
                             "L/EVENTSTIME 123g, sdf": RuntimeError,
@@ -249,25 +251,34 @@ class LimitParserTest(unittest.TestCase):
                           "L/q -12 3.6 2 /LIN": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
                                                                             rebin_string="-12.0,2.0,3.6")},
                           "L/q -12   0.41  23 -34.8 3.6": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
-                                                                                      rebin_string="-12.0,0.41,23.0,-34.8,3.6")},  # noqa
+                                                                                      rebin_string="-12.0,0.41,23.0,"
+                                                                                                   "-34.8,3.6")},
+                          # noqa
                           "L/q -12   0.42  23 -34.8 3.6 /LIn": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
-                                                                                           rebin_string="-12.0,0.42,23.0,34.8,3.6")},
+                                                                                           rebin_string="-12.0,0.42,"
+                                                                                                        "23.0,34.8,"
+                                                                                                        "3.6")},
                           "L/q -12   0.43     23 -34.8 3.6": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
-                                                                                         rebin_string="-12.0,0.43,23.0,-34.8,3.6")},
+                                                                                         rebin_string="-12.0,0.43,"
+                                                                                                      "23.0,-34.8,"
+                                                                                                      "3.6")},
                           "L/q -12   0.44  23  ,34.8,3.6  /Log": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
-                                                                                             rebin_string="-12.0,-0.44,23.0,-34.8,3.6")},
+                                                                                             rebin_string="-12.0,"
+                                                                                                          "-0.44,"
+                                                                                                          "23.0,"
+                                                                                                          "-34.8,3.6")},
                           "L/q -12  , 0.45 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.Q: q_rebin_values(min=-12.,
                                                                                                            max=5.6,
                                                                                                            rebin_string="-12.0,-0.45,23.0,-34.8,3.6,"
-                                                                                 "-0.123,5.6")},
+                                                                                                                        "-0.123,5.6")},
                           "L/q -12  , 0.46 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.Q: q_rebin_values(min=-12.,
                                                                                                       max=5.6,
                                                                                                       rebin_string="-12.0,0.46,23.0,34.8,3.6,"
-                                                                                       "-0.123,5.6")},
+                                                                                                                   "-0.123,5.6")},
                           "L/q -12   0.47   23 34.8  3.6, -.123    5.6": {LimitsId.Q: q_rebin_values(min=-12.,
                                                                                                      max=5.6,
                                                                                                      rebin_string="-12.0,0.47,23.0,34.8,3.6,"
-                                                                                            "-0.123,5.6")}
+                                                                                                                  "-0.123,5.6")}
                           }
 
         invalid_settings = {"L/Q 12 2 3 4 5/LUG": RuntimeError,
@@ -406,15 +417,15 @@ class MaskParserTest(unittest.TestCase):
         valid_settings = {"MASK V 12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=12,
                                                                                                         detector_type=DetectorType.LAB)},
                           "MASK / Rear V  12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(
-                                                  entry=12, detector_type=DetectorType.LAB)},
+                              entry=12, detector_type=DetectorType.LAB)},
                           "MASK/mAin V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
                                                                                                            detector_type=DetectorType.LAB)},
                           "MASK / LaB V  234": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
                                                                                                               detector_type=DetectorType.LAB)},
                           "MASK /frOnt V  12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(
-                                                  entry=12, detector_type=DetectorType.HAB)},
-                          "MASK/HAB V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK:  single_entry_with_detector(entry=234,
-                                                                                                           detector_type=DetectorType.HAB)}}
+                              entry=12, detector_type=DetectorType.HAB)},
+                          "MASK/HAB V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
+                                                                                                          detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK B 12  ": RuntimeError,
                             "MASK V 12 23 ": RuntimeError,
@@ -424,19 +435,21 @@ class MaskParserTest(unittest.TestCase):
 
     def test_that_range_vertical_strip_mask_is_parsed_correctly(self):
         valid_settings = {"MASK V  12 >  V23  ": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(start=12,
-                                                                                                              stop=23, detector_type=DetectorType.LAB)},
+                                                                                                              stop=23,
+                                                                                                              detector_type=DetectorType.LAB)},
                           "MASK V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(start=123,
-                                                                                                         stop=234, detector_type=DetectorType.LAB)},
-                          "MASK / Rear V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK:  range_entry_with_detector(
-                                                    start=123, stop=234, detector_type=DetectorType.LAB)},
+                                                                                                         stop=234,
+                                                                                                         detector_type=DetectorType.LAB)},
+                          "MASK / Rear V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
+                              start=123, stop=234, detector_type=DetectorType.LAB)},
                           "MASK/mAin  V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                   start=123, stop=234, detector_type=DetectorType.LAB)},
+                              start=123, stop=234, detector_type=DetectorType.LAB)},
                           "MASK / LaB V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                   start=123, stop=234, detector_type=DetectorType.LAB)},
+                              start=123, stop=234, detector_type=DetectorType.LAB)},
                           "MASK/frOnt V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                   start=123, stop=234, detector_type=DetectorType.HAB)},
+                              start=123, stop=234, detector_type=DetectorType.HAB)},
                           "MASK/HAB V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                 start=123, stop=234, detector_type=DetectorType.HAB)}}
+                              start=123, stop=234, detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK V 12> V123.5  ": RuntimeError,
                             "MASK V 12 23 ": RuntimeError,
@@ -448,13 +461,13 @@ class MaskParserTest(unittest.TestCase):
         valid_settings = {"MASK H 12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=12,
                                                                                                           detector_type=DetectorType.LAB)},
                           "MASK / Rear H  12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
-                                                  entry=12, detector_type=DetectorType.LAB)},
+                              entry=12, detector_type=DetectorType.LAB)},
                           "MASK/mAin H234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
                                                                                                              detector_type=DetectorType.LAB)},
                           "MASK / LaB H  234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
-                                                entry=234, detector_type=DetectorType.LAB)},
+                              entry=234, detector_type=DetectorType.LAB)},
                           "MASK /frOnt H  12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
-                                                  entry=12, detector_type=DetectorType.HAB)},
+                              entry=12, detector_type=DetectorType.HAB)},
                           "MASK/HAB H234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
                                                                                                             detector_type=DetectorType.HAB)}}
 
@@ -466,19 +479,19 @@ class MaskParserTest(unittest.TestCase):
 
     def test_that_range_horizontal_strip_mask_is_parsed_correctly(self):
         valid_settings = {"MASK H  12 >  H23  ": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                  start=12, stop=23, detector_type=DetectorType.LAB)},
-                          "MASK H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                             start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK / Rear H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                    start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK/mAin H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                  start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK / LaB H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                   start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK/frOnt H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
-                                                   start=123, stop=234, detector_type=DetectorType.HAB)},
-                          "MASK/HAB H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK:  range_entry_with_detector(
-                                                 start=123, stop=234, detector_type=DetectorType.HAB)}}
+            start=12, stop=23, detector_type=DetectorType.LAB)},
+            "MASK H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
+                start=123, stop=234, detector_type=DetectorType.LAB)},
+            "MASK / Rear H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
+                start=123, stop=234, detector_type=DetectorType.LAB)},
+            "MASK/mAin H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
+                start=123, stop=234, detector_type=DetectorType.LAB)},
+            "MASK / LaB H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
+                start=123, stop=234, detector_type=DetectorType.LAB)},
+            "MASK/frOnt H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
+                start=123, stop=234, detector_type=DetectorType.HAB)},
+            "MASK/HAB H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
+                start=123, stop=234, detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK H 12> H123.5  ": RuntimeError,
                             "MASK H 12 23 ": RuntimeError,
@@ -591,7 +604,7 @@ class TransParserTest(unittest.TestCase):
 
     def test_mon_shift_is_parsed_correctly(self):
         valid_settings = {"TRANS/SHIFT = 4000 5": {TransId.SPEC_5_SHIFT: 4000},
-                          "TRANS/SHIFT=4000 4" : {TransId.SPEC_4_SHIFT: 4000},
+                          "TRANS/SHIFT=4000 4": {TransId.SPEC_4_SHIFT: 4000},
                           "TRANS/SHIFT=4000 5": {TransId.SPEC_5_SHIFT: 4000},
                           "TRANS/SHIFT=-100 4": {TransId.SPEC_4_SHIFT: -100},
                           "TRANS/ SHIFT=4000 5": {TransId.SPEC_5_SHIFT: 4000},
@@ -607,17 +620,17 @@ class TransParserTest(unittest.TestCase):
                           }
 
         invalid_settings = {
-                            "TRANS/SHIFT=4000 -1" : RuntimeError,
-                            "TRANS/SHIFT+4000 -1": RuntimeError,
-                            "TRANS/TRANSSHIFT=4000 -1": RuntimeError,
-                            "TRANS/SHIFTAab=4000 -1": RuntimeError,
-                            "TRANS/SHIF=4000 1": RuntimeError,
-                            "TRANS/SHIFT4000": RuntimeError,
-                            "TRANS/SHIFT 1": RuntimeError,
-                            "TRANS/SHIFT 4000": RuntimeError,
-                            "TRANS/SHIFT=4000": RuntimeError,
-                            "TRANS/SHIFT=4000 a": RuntimeError,
-                            }
+            "TRANS/SHIFT=4000 -1": RuntimeError,
+            "TRANS/SHIFT+4000 -1": RuntimeError,
+            "TRANS/TRANSSHIFT=4000 -1": RuntimeError,
+            "TRANS/SHIFTAab=4000 -1": RuntimeError,
+            "TRANS/SHIF=4000 1": RuntimeError,
+            "TRANS/SHIFT4000": RuntimeError,
+            "TRANS/SHIFT 1": RuntimeError,
+            "TRANS/SHIFT 4000": RuntimeError,
+            "TRANS/SHIFT=4000": RuntimeError,
+            "TRANS/SHIFT=4000 a": RuntimeError,
+        }
 
         trans_parser = TransParser()
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
@@ -630,10 +643,10 @@ class TransParserTest(unittest.TestCase):
                           }
 
         invalid_settings = {
-                            "TRANS/TRANSPEC=4/SHIFT/23": RuntimeError,
-                            "TRANS/TRANSPEC=4/SHIFT 23": RuntimeError,
-                            "TRANS/TRANSPEC/SHIFT=23": RuntimeError,
-                            "TRANS/TRANSPEC=6/SHIFT=t": RuntimeError}
+            "TRANS/TRANSPEC=4/SHIFT/23": RuntimeError,
+            "TRANS/TRANSPEC=4/SHIFT 23": RuntimeError,
+            "TRANS/TRANSPEC/SHIFT=23": RuntimeError,
+            "TRANS/TRANSPEC=6/SHIFT=t": RuntimeError}
 
         trans_parser = TransParser()
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
@@ -749,37 +762,53 @@ class FitParserTest(unittest.TestCase):
 
     def test_that_general_fit_is_parsed_correctly(self):
         valid_settings = {"FIT/ trans / LIN 123 3556": {FitId.GENERAL: fit_general(start=123, stop=3556,
-                                                                                   fit_type=FitType.LINEAR, data_type=None, polynomial_order=0)},
+                                                                                   fit_type=FitType.LINEAR,
+                                                                                   data_type=None, polynomial_order=0)},
                           "FIT/ tranS/linear 123 3556": {FitId.GENERAL: fit_general(start=123, stop=3556,
-                                                                                    fit_type=FitType.LINEAR, data_type=None, polynomial_order=0)},
+                                                                                    fit_type=FitType.LINEAR,
+                                                                                    data_type=None,
+                                                                                    polynomial_order=0)},
                           "FIT/TRANS/Straight 123 3556": {FitId.GENERAL: fit_general(start=123, stop=3556,
-                                                                                     fit_type=FitType.LINEAR, data_type=None, polynomial_order=0)},
+                                                                                     fit_type=FitType.LINEAR,
+                                                                                     data_type=None,
+                                                                                     polynomial_order=0)},
                           "FIT/ tranS/LoG 123  3556.6 ": {FitId.GENERAL: fit_general(start=123, stop=3556.6,
-                                                                                     fit_type=FitType.LOGARITHMIC, data_type=None, polynomial_order=0)},  # noqa
+                                                                                     fit_type=FitType.LOGARITHMIC,
+                                                                                     data_type=None,
+                                                                                     polynomial_order=0)},  # noqa
                           "FIT/TRANS/  YlOG 123   3556": {FitId.GENERAL: fit_general(start=123, stop=3556,
-                                                                                     fit_type=FitType.LOGARITHMIC, data_type=None, polynomial_order=0)},  # noqa
+                                                                                     fit_type=FitType.LOGARITHMIC,
+                                                                                     data_type=None,
+                                                                                     polynomial_order=0)},  # noqa
                           "FIT/Trans/Lin": {FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.LINEAR,
                                                                        data_type=None, polynomial_order=0)},
-                          "FIT/Trans/ Log": {FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.LOGARITHMIC,  # noqa
-                                                                        data_type=None, polynomial_order=0)},
+                          "FIT/Trans/ Log": {
+                              FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.LOGARITHMIC,  # noqa
+                                                         data_type=None, polynomial_order=0)},
                           "FIT/Trans/ polYnomial": {FitId.GENERAL: fit_general(start=None, stop=None,
-                                                                               fit_type=FitType.POLYNOMIAL, data_type=None, polynomial_order=2)},
+                                                                               fit_type=FitType.POLYNOMIAL,
+                                                                               data_type=None, polynomial_order=2)},
                           "FIT/Trans/ polYnomial 3": {FitId.GENERAL: fit_general(start=None, stop=None,
                                                                                  fit_type=FitType.POLYNOMIAL,
                                                                                  data_type=None, polynomial_order=3)},
                           "FIT/Trans/Sample/Log 23.4 56.7": {FitId.GENERAL: fit_general(start=23.4, stop=56.7,
-                                                                                        fit_type=FitType.LOGARITHMIC, data_type=DataType.SAMPLE,
+                                                                                        fit_type=FitType.LOGARITHMIC,
+                                                                                        data_type=DataType.SAMPLE,
                                                                                         polynomial_order=0)},
                           "FIT/Trans/can/ lIn 23.4 56.7": {FitId.GENERAL: fit_general(start=23.4, stop=56.7,
-                                                                                      fit_type=FitType.LINEAR, data_type=DataType.CAN,
+                                                                                      fit_type=FitType.LINEAR,
+                                                                                      data_type=DataType.CAN,
                                                                                       polynomial_order=0)},
                           "FIT/Trans / can/polynomiAL 5 23 45": {FitId.GENERAL: fit_general(start=23, stop=45,
-                                                                                            fit_type=FitType.POLYNOMIAL, data_type=DataType.CAN,
+                                                                                            fit_type=FitType.POLYNOMIAL,
+                                                                                            data_type=DataType.CAN,
                                                                                             polynomial_order=5)},
                           "FIT/ trans / clear": {FitId.GENERAL: fit_general(start=None, stop=None,
-                                                                            fit_type=FitType.NO_FIT, data_type=None, polynomial_order=None)},
+                                                                            fit_type=FitType.NO_FIT, data_type=None,
+                                                                            polynomial_order=None)},
                           "FIT/traNS /ofF": {FitId.GENERAL: fit_general(start=None, stop=None,
-                                                                        fit_type=FitType.NO_FIT, data_type=None, polynomial_order=None)}
+                                                                        fit_type=FitType.NO_FIT, data_type=None,
+                                                                        polynomial_order=None)}
                           }
 
         invalid_settings = {"FIT/TRANS/ YlOG 123": RuntimeError,
@@ -854,7 +883,7 @@ class MaskFileParserTest(unittest.TestCase):
 
     def test_that_gravity_on_off_is_parsed_correctly(self):
         valid_settings = {"MaskFile= test.xml,   testKsdk2.xml,tesetlskd.xml":
-                          {MaskId.FILE: ["test.xml", "testKsdk2.xml", "tesetlskd.xml"]}}
+                              {MaskId.FILE: ["test.xml", "testKsdk2.xml", "tesetlskd.xml"]}}
 
         invalid_settings = {"MaskFile=": RuntimeError,
                             "MaskFile=test.txt": RuntimeError,
@@ -884,29 +913,29 @@ class MonParserTest(unittest.TestCase):
 
     def test_that_direct_files_are_parsed_correctly(self):
         valid_settings = {"MON/DIRECT= C:\path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
-                          file_path="C:/path1/Path2/file.ext", detector_type=DetectorType.HAB),
-                          monitor_file(file_path="C:/path1/Path2/file.ext", detector_type=DetectorType.LAB)]},
-                          "MON/ direct  = filE.Ext ": {MonId.DIRECT: [monitor_file(file_path="filE.Ext",
-                                                                                   detector_type=DetectorType.HAB), monitor_file(
-                                                       file_path="filE.Ext", detector_type=DetectorType.LAB)
-                                                                      ]},
-                          "MON/DIRECT= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
-                                                                 file_path="/path1/Path2/file.ext",
-                                                                 detector_type=DetectorType.HAB),
-                                                                 monitor_file(file_path="/path1/Path2/file.ext",
-                                                                              detector_type=DetectorType.LAB)]},
-                          "MON/DIRECT= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
-                                                                                file_path="/path1/Path2/file.ext",
-                                                                                detector_type=DetectorType.HAB),
-                                                                                monitor_file(file_path="/path1/Path2/file.ext",
-                                                                                             detector_type=DetectorType.LAB)]},
-                          "MON/DIRECT/ rear= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
-                                                                       file_path="/path1/Path2/file.ext",
-                                                                       detector_type=DetectorType.LAB)]},
-                          "MON/DIRECT/ frONT= path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
-                                                                       file_path="path1/Path2/file.ext",
-                                                                       detector_type=DetectorType.HAB)]}
-                          }
+            file_path="C:/path1/Path2/file.ext", detector_type=DetectorType.HAB),
+            monitor_file(file_path="C:/path1/Path2/file.ext", detector_type=DetectorType.LAB)]},
+            "MON/ direct  = filE.Ext ": {MonId.DIRECT: [monitor_file(file_path="filE.Ext",
+                                                                     detector_type=DetectorType.HAB), monitor_file(
+                file_path="filE.Ext", detector_type=DetectorType.LAB)
+                                                        ]},
+            "MON/DIRECT= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
+                file_path="/path1/Path2/file.ext",
+                detector_type=DetectorType.HAB),
+                monitor_file(file_path="/path1/Path2/file.ext",
+                             detector_type=DetectorType.LAB)]},
+            "MON/DIRECT= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
+                file_path="/path1/Path2/file.ext",
+                detector_type=DetectorType.HAB),
+                monitor_file(file_path="/path1/Path2/file.ext",
+                             detector_type=DetectorType.LAB)]},
+            "MON/DIRECT/ rear= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
+                file_path="/path1/Path2/file.ext",
+                detector_type=DetectorType.LAB)]},
+            "MON/DIRECT/ frONT= path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
+                file_path="path1/Path2/file.ext",
+                detector_type=DetectorType.HAB)]}
+        }
 
         invalid_settings = {"MON/DIRECT= /path1/ Path2/file.ext ": RuntimeError,
                             "MON/DIRECT /path1/Path2/file.ext ": RuntimeError,
@@ -917,22 +946,22 @@ class MonParserTest(unittest.TestCase):
 
     def test_that_flat_files_are_parsed_correctly(self):
         valid_settings = {"MON/FLat  = C:\path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
-                                                                   file_path="C:/path1/Path2/file.ext",
-                                                                   detector_type=DetectorType.LAB)},
-                          "MON/ flAt  = filE.Ext ": {MonId.FLAT: monitor_file(file_path="filE.Ext",
-                                                                              detector_type=DetectorType.LAB)},
-                          "MON/flAT= \path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
-                                                               file_path="/path1/Path2/file.ext",
-                                                               detector_type=DetectorType.LAB)},
-                          "MON/FLat= /path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
-                                                               file_path="/path1/Path2/file.ext",
-                                                               detector_type=DetectorType.LAB)},
-                          "MON/FLat/ rear= /path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
-                                                                     file_path="/path1/Path2/file.ext",
-                                                                     detector_type=DetectorType.LAB)},
-                          "MON/FLat/ frONT= path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
-                                                                     file_path="path1/Path2/file.ext",
-                                                                     detector_type=DetectorType.HAB)}}
+            file_path="C:/path1/Path2/file.ext",
+            detector_type=DetectorType.LAB)},
+            "MON/ flAt  = filE.Ext ": {MonId.FLAT: monitor_file(file_path="filE.Ext",
+                                                                detector_type=DetectorType.LAB)},
+            "MON/flAT= \path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
+                file_path="/path1/Path2/file.ext",
+                detector_type=DetectorType.LAB)},
+            "MON/FLat= /path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
+                file_path="/path1/Path2/file.ext",
+                detector_type=DetectorType.LAB)},
+            "MON/FLat/ rear= /path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
+                file_path="/path1/Path2/file.ext",
+                detector_type=DetectorType.LAB)},
+            "MON/FLat/ frONT= path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
+                file_path="path1/Path2/file.ext",
+                detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MON/DIRECT= /path1/ Path2/file.ext ": RuntimeError,
                             "MON/DIRECT /path1/Path2/file.ext ": RuntimeError,
@@ -943,17 +972,17 @@ class MonParserTest(unittest.TestCase):
 
     def test_that_hab_files_are_parsed_correctly(self):
         valid_settings = {"MON/HAB  = C:\path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
-                                                                                file_path="C:/path1/Path2/file.ext",
-                                                                                detector_type=DetectorType.HAB)]},
-                          "MON/ hAB  = filE.Ext ": {MonId.DIRECT: [monitor_file(
-                                                                   file_path="filE.Ext",
-                                                                   detector_type=DetectorType.HAB)]},
-                          "MON/HAb= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
-                                                              file_path="/path1/Path2/file.ext",
-                                                              detector_type=DetectorType.HAB)]},
-                          "MON/hAB= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
-                                                              file_path="/path1/Path2/file.ext",
-                                                              detector_type=DetectorType.HAB)]}}
+            file_path="C:/path1/Path2/file.ext",
+            detector_type=DetectorType.HAB)]},
+            "MON/ hAB  = filE.Ext ": {MonId.DIRECT: [monitor_file(
+                file_path="filE.Ext",
+                detector_type=DetectorType.HAB)]},
+            "MON/HAb= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
+                file_path="/path1/Path2/file.ext",
+                detector_type=DetectorType.HAB)]},
+            "MON/hAB= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
+                file_path="/path1/Path2/file.ext",
+                detector_type=DetectorType.HAB)]}}
         invalid_settings = {"MON/HAB= /path1/ Path2/file.ext ": RuntimeError,
                             "MON/hAB /path1/Path2/file.ext ": RuntimeError,
                             "MON/HAB=/path1/Path2/file ": RuntimeError}
@@ -967,10 +996,11 @@ class MonParserTest(unittest.TestCase):
                           "MON/trans/Spectrum = 123 ": {MonId.SPECTRUM: monitor_spectrum(spectrum=123, is_trans=True,
                                                                                          interpolate=False)},
                           "MON/trans/Spectrum = 123 /  interpolate": {MonId.SPECTRUM: monitor_spectrum(spectrum=123,
-                                                                                                       is_trans=True, interpolate=True)},
-                          "MON/Spectrum = 123 /  interpolate": {MonId.SPECTRUM:  monitor_spectrum(spectrum=123,
-                                                                                                  is_trans=False,
-                                                                                                  interpolate=True)}}
+                                                                                                       is_trans=True,
+                                                                                                       interpolate=True)},
+                          "MON/Spectrum = 123 /  interpolate": {MonId.SPECTRUM: monitor_spectrum(spectrum=123,
+                                                                                                 is_trans=False,
+                                                                                                 interpolate=True)}}
         invalid_settings = {}
 
         mon_parser = MonParser()
@@ -985,10 +1015,12 @@ class PrintParserTest(unittest.TestCase):
         valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.PRINT_LINE: "OdlfP slsk 23lksdl2 34l"},
                           "PRiNt OdlfP slsk 23lksdl2 34l": {PrintId.PRINT_LINE: "OdlfP slsk 23lksdl2 34l"},
                           "  PRINT Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells":
-                          {PrintId.PRINT_LINE: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells"}
+                              {
+                                  PrintId.PRINT_LINE: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, "
+                                                      "Sample Changer, Banjo cells"}
                           }
 
-        invalid_settings = {"j PRINT OdlfP slsk 23lksdl2 34l ": RuntimeError,}
+        invalid_settings = {"j PRINT OdlfP slsk 23lksdl2 34l ": RuntimeError, }
 
         print_parser = PrintParser()
         do_test(print_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
@@ -1029,7 +1061,7 @@ class BackParserTest(unittest.TestCase):
         do_test(back_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_trans_mon_is_parsed_correctly(self):
-        valid_settings = {"BACK / TRANS  123 344": {BackId.TRANS:  range_entry(start=123, stop=344)},
+        valid_settings = {"BACK / TRANS  123 344": {BackId.TRANS: range_entry(start=123, stop=344)},
                           "BACK / tranS 123 34": {BackId.TRANS: range_entry(start=123, stop=34)}}
 
         invalid_settings = {"BACK / Trans / 123 34": RuntimeError,
@@ -1080,7 +1112,8 @@ class UserFileParserTest(unittest.TestCase):
         # DetParser
         result = user_file_parser.parse_line(" DET/CoRR/FRONT/ SidE -957")
         assert_valid_result(result, {DetectorId.CORRECTION_TRANSLATION: single_entry_with_detector(entry=-957,
-                                                                                                   detector_type=DetectorType.HAB)}, self.assertTrue)
+                                                                                                   detector_type=DetectorType.HAB)},
+                            self.assertTrue)
 
         # LimitParser
         result = user_file_parser.parse_line("l/Q/WCUT 234.4")

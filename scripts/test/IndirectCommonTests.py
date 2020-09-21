@@ -17,7 +17,6 @@ import IndirectCommon as indirect_common
 
 
 class IndirectCommonTests(unittest.TestCase):
-
     _default_config = {}
 
     def setUp(self):
@@ -54,7 +53,7 @@ class IndirectCommonTests(unittest.TestCase):
         ws_name = indirect_common.getWSprefix(ws)
 
         self.assertEqual(ws_name, 'irs1_graphite002_',
-                        "The workspace prefix does not match the expected value")
+                         "The workspace prefix does not match the expected value")
 
     def test_getWSprefix_ILL(self):
         config['default.facility'] = 'ILL'
@@ -67,7 +66,7 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_getEFixed(self):
         ws = CreateSampleWorkspace()
-        ws = self.load_instrument(ws,'IRIS')
+        ws = self.load_instrument(ws, 'IRIS')
 
         e_fixed = indirect_common.getEfixed(ws.name())
         self.assertEqual(e_fixed, 1.8450,
@@ -89,7 +88,8 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_createQaxis(self):
         ws = self.make_dummy_QENS_workspace()
-        expected_result = [0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526, 0.6487809073399486]
+        expected_result = [0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526,
+                           0.6487809073399486]
         actual_result = indirect_common.createQaxis(ws)
         self.assert_lists_almost_match(expected_result, actual_result)
 
@@ -102,8 +102,9 @@ class IndirectCommonTests(unittest.TestCase):
     def test_GetThetaQ(self):
         ws = self.make_dummy_QENS_workspace()
         expected_theta_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
-        expected_Q_result = [0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525, 0.6487809073399485]
-        actual_theta_result, actual_Q_result =  indirect_common.GetThetaQ(ws)
+        expected_Q_result = [0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525,
+                             0.6487809073399485]
+        actual_theta_result, actual_Q_result = indirect_common.GetThetaQ(ws)
         self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
         self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
 
@@ -120,8 +121,8 @@ class IndirectCommonTests(unittest.TestCase):
         self.assert_lists_match(expected_result, actual_result)
 
     def test_PadArray(self):
-        data = [0,1,2,3,4,5]
-        expected_result = [0,1,2,3,4,5,0,0,0,0]
+        data = [0, 1, 2, 3, 4, 5]
+        expected_result = [0, 1, 2, 3, 4, 5, 0, 0, 0, 0]
         actual_result = indirect_common.PadArray(data, 10)
         self.assert_lists_match(expected_result, actual_result)
 
@@ -172,23 +173,23 @@ class IndirectCommonTests(unittest.TestCase):
         self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
 
     def test_CheckXrange(self):
-        x_range = [1,10]
+        x_range = [1, 10]
         self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
 
     def test_CheckXrange_with_two_ranges(self):
-        x_range = [1,10,15,20]
+        x_range = [1, 10, 15, 20]
         self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
 
     def test_CheckXrange_lower_close_to_zero(self):
-        x_range = [-5,0]
+        x_range = [-5, 0]
         self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
 
     def test_CheckXrange_upper_close_to_zero(self):
-        x_range = [0,5]
+        x_range = [0, 5]
         self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
 
     def test_CheckXrange_invalid_range(self):
-        x_range = [10,5]
+        x_range = [10, 5]
         self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
 
     def test_CheckElimits(self):
@@ -222,18 +223,18 @@ class IndirectCommonTests(unittest.TestCase):
         output_workspace = 'ws2'
         indirect_common.convertToElasticQ(ws, output_ws=output_workspace)
 
-        #check original wasn't modified
+        # check original wasn't modified
         self.assert_workspace_units_match_expected('Label', ws)
         self.assert_has_spectrum_axis(ws)
 
-        #check new workspace matches what we expect
+        # check new workspace matches what we expect
         self.assert_workspace_units_match_expected('MomentumTransfer', output_workspace)
         self.assert_has_numeric_axis(output_workspace)
 
     def test_convertToElasticQ_workspace_already_in_Q(self):
         ws = self.make_dummy_QENS_workspace()
         e_fixed = indirect_common.getEfixed(ws)
-        ConvertSpectrumAxis(ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=ws)
+        ConvertSpectrumAxis(ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed, OutputWorkspace=ws)
 
         indirect_common.convertToElasticQ(ws)
 
@@ -243,10 +244,10 @@ class IndirectCommonTests(unittest.TestCase):
     def test_convertToElasticQ_with_numeric_axis_not_in_Q(self):
         ws = self.make_dummy_QENS_workspace()
 
-        #convert spectrum axis to units of Q
+        # convert spectrum axis to units of Q
         e_fixed = indirect_common.getEfixed(ws)
-        ConvertSpectrumAxis(ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=ws)
-        #set the units to be something we didn't expect
+        ConvertSpectrumAxis(ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed, OutputWorkspace=ws)
+        # set the units to be something we didn't expect
         unit = mtd[ws].getAxis(1).setUnit("Label")
         unit.setLabel('Random Units', '')
 
@@ -268,11 +269,11 @@ class IndirectCommonTests(unittest.TestCase):
         self.assert_table_workspace_dimensions(params_table, expected_row_count=26, expected_column_count=3)
         self.assert_table_workspace_dimensions(output_name, expected_row_count=5, expected_column_count=11)
 
-    #-----------------------------------------------------------
+    # -----------------------------------------------------------
     # Custom assertion functions
-    #-----------------------------------------------------------
+    # -----------------------------------------------------------
 
-    def assert_lists_almost_match(self, expected, actual,decimal=6):
+    def assert_lists_almost_match(self, expected, actual, decimal=6):
         self.assertTrue(isinstance(expected, list))
         np.testing.assert_array_almost_equal(expected, actual, decimal, "The results do not match")
 
@@ -304,11 +305,11 @@ class IndirectCommonTests(unittest.TestCase):
         actual_row_count = mtd[workspace].rowCount()
         actual_column_count = mtd[workspace].columnCount()
         self.assertEqual(expected_row_count, actual_row_count,
-                          "Number of rows does not match expected (%d != %d)"
-                          % (expected_row_count, actual_row_count))
+                         "Number of rows does not match expected (%d != %d)"
+                         % (expected_row_count, actual_row_count))
         self.assertEqual(expected_column_count, actual_column_count,
-                          "Number of columns does not match expected (%d != %d)"
-                          % (expected_column_count, actual_column_count))
+                         "Number of columns does not match expected (%d != %d)"
+                         % (expected_column_count, actual_column_count))
 
     def assert_matrix_workspace_dimensions(self, workspace, expected_num_histograms, expected_blocksize):
         actual_blocksize = mtd[workspace].blocksize()
@@ -329,9 +330,9 @@ class IndirectCommonTests(unittest.TestCase):
                              "The expected value of log %s did not match (%s != %s)" %
                              (log_name, str(log_value), run.getProperty(log_name).value))
 
-    #-----------------------------------------------------------
+    # -----------------------------------------------------------
     # Test helper functions
-    #-----------------------------------------------------------
+    # -----------------------------------------------------------
 
     def make_dummy_workspace_without_instrument(self, output_name):
         """
@@ -355,7 +356,7 @@ class IndirectCommonTests(unittest.TestCase):
     def make_multi_domain_function(self, ws, function):
         """ Make a multi domain function from a regular function string """
         multi_domain_composite = 'composite=MultiDomainFunction,NumDeriv=1;'
-        component =  '(composite=CompositeFunction,$domains=i;%s);' % function
+        component = '(composite=CompositeFunction,$domains=i;%s);' % function
 
         fit_kwargs = {}
         num_spectra = mtd[ws].getNumberHistograms()
@@ -390,5 +391,5 @@ class IndirectCommonTests(unittest.TestCase):
         return ws
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

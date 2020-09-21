@@ -5,16 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
-from mantid.api import FunctionFactory, MultiDomainFunction
-from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
-from unittest import mock
-from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.observer_pattern import GenericObservable
-from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import SeqFittingTabPresenter
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from qtpy.QtWidgets import QApplication
+from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.qt.testing import start_qapplication
+
+from mantid.api import FunctionFactory
+from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
 
 
 def wait_for_thread(thread_model):

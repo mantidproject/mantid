@@ -5,10 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from unittest import mock
+
 from MultiPlotting.subplot.subplot_context import subplotContext
-from mantid import plots
 
 
 class line(object):
