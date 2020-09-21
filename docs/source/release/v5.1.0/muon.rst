@@ -5,12 +5,8 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-Muon Analysis 2
-################
+Muon Analysis 2 and Frequency Domain Analysis
+#############################################
 
 New Features
 ------------
@@ -34,24 +30,19 @@ New Features
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
 - Added multi-period support to the LoadMuonNexusV2 algorithm.
 - Added support for specifying which groups should be used to calculate a group.
+- Added support for specifying which periods should be used to calculate a group.
 - Added two buttons to the Muon analysis and Frequency domain analysis plot toolbar to allow users to show major and minor gridlines.
 - Added a Plot difference checkbox to the Muon Analysis GUI, which allows user to choose whether the fit difference curve is shown.
-- Added support for specifying which periods should be used to calculate a group.
 - Added support for loading and saving group period data from xml files.
 - Added a Help option to the right-click menu in the function browser which brings up a relevant documentation page describing the function.
 
 Improvements
 -------------
-- Improved the plotting code the Muon Analysis interface, with a significant amount of redundant code removed.
-  This code improvement will lead to more maintainable code, which will be more stable and
-  easier to add new functionality in the future.
-- Improved the maintainability of the fitting code in the Muon Analysis interface by removing redundant and duplicated code.
-  These changes will make the addition of new functionality in the future easier.
 - The plot guess option within the fitting tab will now update when a parameter is changed.
-- Have updated the FDA GUI so that it functions correctly for frquency transforms and single fits.
+- Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
 - Updated :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` to allow double pulse fits.
-- Tf asymmetry mode can now be performed on double pulse fits from the muon analysis GUI.
+- Tf asymmetry mode can now be performed on double pulse fits from the Muon Analysis GUI.
 - Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to load a list of time zeros into a new property TimZeroList.
 - Updated :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and  :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` to add an option to not auto-correct the time by loaded timezero.
 - Fitting tab in Muon analysis and Frequency domain analysis GUI's are now disabled when no valid fitting data is present.
@@ -70,13 +61,13 @@ Bug fixes
 - Fixed a bug that caused rebinned data to override non-binned data.
 - Fixed an issue where switching to simultaneous fit mode was occasionally throwing an exception.
 - Fixed an issue where loading additional data in simultaneous fit mode was throwing an exception.
-- Fixed an issue where mantid crashed when the muon analysis plotting window crashed was resized to be too small.
+- Fixed an issue where Mantid crashed when the Muon Analysis plotting window crashed was resized to be too small.
 - Fixed an issue where groups were all being plotted on the same tiled plot.
 - Fixed an issue with setting the current workspace before adding a function.
 - Fixed an issue with the results tab not updating correctly after multiple fits with different functions.
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis gui was not properly disabling during calculations.
-- Fixed an issue where Muon Analysis and Frequency Domain Analysis was not correctly resetting DeadTime property to default when a user changes the instrument
-- Fixed issue where select data was incorrectly enabling.
+- Fixed an issue where Muon Analysis and Frequency Domain Analysis was not correctly resetting the DeadTime property to default when a user changes the instrument.
+- Fixed issue where select data was enabled incorrectly.
 - Fixed a bug in simultaneous TF asymmetry mode fitting, which would cause a crash when the run was incremented. Note that currently the single fitting tab will not update with the new normalization constants after a new run is loaded.
 
 ALC
