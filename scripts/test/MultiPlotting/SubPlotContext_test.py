@@ -173,7 +173,6 @@ class SubPlotContextTest(unittest.TestCase):
             self.context.addLine(ws, 1)
             self.context.addLine(ws2, 2)
 
-        lines = self.context.get_lines_from_WS_name("test")
         expect = ["test"]
         for key in expect:
             self.assertIn(key, "test")

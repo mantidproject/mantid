@@ -12,7 +12,6 @@ from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
 from unittest import mock
 from sans.common.enums import SANSInstrument
-from sans.gui_logic.models import SumRunsModel
 from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_file import SummableRunFile
@@ -81,7 +80,7 @@ class InitializationTest(AddRunsPagePresenterTestCase):
 
     @mock.patch('sans.gui_logic.presenter.add_runs_presenter.SummationSettingsModel', autospec=True)
     @mock.patch('sans.gui_logic.presenter.add_runs_presenter.SummationSettingsPresenter', autospec=True)
-    def test_creates_run_selector_with_child_view(self, patched_presenter, patched_model):
+    def test_creates_run_selector_summation_model_with_child_view(self, patched_presenter, patched_model):
         view = self._make_mock_view()
         parent_view = self._make_mock_parent_view()
 

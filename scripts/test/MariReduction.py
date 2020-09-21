@@ -265,7 +265,7 @@ class ReduceMARI(ReductionWrapper):
         if mpl is not None:
             n_spectra = len(check_spectra)
             if n_spectra == 0:
-                n_specra = corrections.getNumberHistograms()
+                n_spectra = corrections.getNumberHistograms()
             mpl.plotSpectrum(corrections, range(0, n_spectra))
         #
         return corrections

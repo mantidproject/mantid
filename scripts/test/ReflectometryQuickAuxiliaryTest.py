@@ -26,7 +26,7 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
 
     def test_cleanup(self):
         numObjectsOriginal = len(mtd.getObjectNames())
-        todump = CreateSingleValuedWorkspace(OutputWorkspace='_toremove', DataValue=1, ErrorValue=1)
+        CreateSingleValuedWorkspace(OutputWorkspace='_toremove', DataValue=1, ErrorValue=1)
         tokeep = CreateSingleValuedWorkspace(OutputWorkspace='tokeep', DataValue=1, ErrorValue=1)
         self.assertEqual(numObjectsOriginal + 2, len(mtd.getObjectNames()))
         # Should remove workspaces starting with _

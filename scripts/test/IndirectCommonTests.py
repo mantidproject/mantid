@@ -24,7 +24,7 @@ class IndirectCommonTests(unittest.TestCase):
         config['default.facility'] = 'ISIS'
 
     def tearDown(self):
-        config = self._config_defaults
+        mantid.kernel.config = self._config_defaults
 
     def test_getInstrRun_from_name(self):
         ws = self.make_dummy_QENS_workspace()

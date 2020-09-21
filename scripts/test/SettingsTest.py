@@ -45,7 +45,7 @@ Determine if all tests should be skipped. Check for the expat module to decide.
 def skipAllTests():
     skiptests = False
     try:
-        import xml.parsers.expat
+        import xml.parsers.expat  # noqa
     except ImportError:
         skiptests = True
     return skiptests

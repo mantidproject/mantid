@@ -25,9 +25,9 @@ class SingleDomainDoublePulseFitTest(unittest.TestCase):
         N0 = 6.38
         y = N0 * (1 + y1 / 2 + y2 / 2)
         y_norm = y1 / 2 + y2 / 2
-        unnormalised_workspace = CreateWorkspace(x, y)
-        ws_to_normalise = CreateWorkspace(x, y)
-        ws_correctly_normalised = CreateWorkspace(x, y_norm)
+        CreateWorkspace(x, y, OutputWorkspace="unnormalised_workspace")
+        CreateWorkspace(x, y, OutputWorkspace="ws_to_normalise")
+        CreateWorkspace(x, y_norm, OutputWorkspace="ws_correctly_normalised")
         AddSampleLog(Workspace='ws_to_normalise', LogName="analysis_asymmetry_norm", LogText="1")
 
         innerFunction = FunctionFactory.createInitialized('name=GausOsc,A=0.20,Sigma=0.2,Frequency=1.0,Phi=0')

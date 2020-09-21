@@ -100,7 +100,7 @@ class MaxEntPresenterTest(unittest.TestCase):
                                                    ['MUSR22222_phase_table', 'MUSR33333_phase_table',
                                                     'EMU22222_phase_table']]
         self.presenter.update_phase_table_options()
-        maxent_workspace = CreateWorkspace([0], [0])
+        CreateWorkspace([0], [0], OutputWorkspace="maxent_workspace")
 
         self.presenter.add_maxent_workspace_to_ADS('MUSR22725_MaxEnt', 'maxent_workspace', mock.MagicMock())
 

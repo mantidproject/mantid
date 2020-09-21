@@ -34,7 +34,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
     @staticmethod
     def getInstrument(InstrumentName='MAR'):
         """ test method used to obtain default instrument for testing """
-        idf_dir = config.getString('instrumentDefinition.directory')
         idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
         tmp_ws_name = '__empty_' + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
@@ -490,8 +489,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         SetInstrumentParameter(ws, ParameterName="addParam1", Value="Ignore1", ParameterType="String")
         SetInstrumentParameter(ws, ParameterName="addParam2", Value="Ignore2", ParameterType="String")
         SetInstrumentParameter(ws, ParameterName="mask_run", Value="None", ParameterType="String")
-
-        old_changes = propman.getChangedProperties()
 
         changed_prop = propman.update_defaults_from_instrument(ws.getInstrument())
 

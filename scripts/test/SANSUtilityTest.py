@@ -572,7 +572,7 @@ class TestCombineWorkspacesFactory(unittest.TestCase):
         alg = factory.create_add_algorithm(True)
         self.assertTrue(isinstance(alg, su.OverlayWorkspaces))
 
-    def test_that_factory_returns_overlay_class(self):
+    def test_that_factory_returns_overlay_class_add_alg_false(self):
         factory = su.CombineWorkspacesFactory()
         alg = factory.create_add_algorithm(False)
         self.assertTrue(isinstance(alg, su.PlusWorkspaces))
@@ -1352,9 +1352,6 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
     def test_that_non_overlapping_workspaces_have_their_cummulative_sample_log_added_correctly(self):
         # Arrange
         names = ['ws1', 'ws2', 'out']
-        out_ws_name = 'out_ws'
-        time_shift = 0
-
         log_names = ['good_uah_log', 'good_frames', 'new_series']
         start_time_1 = "2010-01-01T00:00:00"
         proton_charge_1 = 10.2
@@ -1408,8 +1405,6 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
     def test_that_overlapping_workspaces_have_their_cummulative_sample_log_added_correctly(self):
         # Arrange
         names = ['ws1', 'ws2', 'out']
-        out_ws_name = 'out_ws'
-        time_shift = 0
         log_names = ['good_uah_log', 'good_frames', 'new_series']
         start_time_1 = "2010-01-01T00:00:00"
         proton_charge_1 = 10.2
@@ -1464,8 +1459,6 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
     def test_that_non_overlapping_workspaces_with_time_shift_have_their_cummulative_sample_log_added_correctly(self):
         # Arrange
         names = ['ws1', 'ws2', 'out']
-        out_ws_name = 'out_ws'
-        time_shift = 0
         log_names = ['good_uah_log', 'good_frames', 'new_series']
 
         start_time_1 = "2010-01-01T00:00:00"
@@ -1523,8 +1516,6 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         # Arrange, note that the values don't make sense since we are not using "make_linear" but
         # this is not releavnt for the bare functionality
         names = ['ws1', 'ws2', 'out']
-        out_ws_name = 'out_ws'
-        time_shift = 0
         log_names = ['good_uah_log', 'good_frames', 'new_series']
 
         start_time = "2010-01-01T00:00:00"
@@ -1743,7 +1734,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
         workspace_t1_T2 = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
                                                 XMin=1, XMax=14, BinWidth=2)
         workspace_name = 'workspace'
-        GroupWorkspaces(InputWorkspaces=['workspace_t0_T1', 'workspace_t1_T2'], OutputWorkspace=workspace_name)
+        GroupWorkspaces(InputWorkspaces=[workspace_t0_T1, workspace_t1_T2], OutputWorkspace=workspace_name)
 
         out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_rear"))
@@ -1804,8 +1795,8 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
             AnalysisDataService.remove("NewName_rear_1D_w1_W2_t1_T2")
 
     def test_for_a_group_workspace_renames_entire_group_if_starts_with_number(self):
-        workspace_t0_T1 = workspace = self._create_sample_workspace(name='12345rear_1D_w1_W2_t0_T1')
-        workspace_t1_T2 = workspace = self._create_sample_workspace(name='12345rear_1D_w1_W2_t1_T2')
+        self._create_sample_workspace(name='12345rear_1D_w1_W2_t0_T1')
+        self._create_sample_workspace(name='12345rear_1D_w1_W2_t1_T2')
         workspace_name = '12345rear_1D_w1_W2'
         GroupWorkspaces(InputWorkspaces=['12345rear_1D_w1_W2_t0_T1', '12345rear_1D_w1_W2_t1_T2'],
                         OutputWorkspace=workspace_name)

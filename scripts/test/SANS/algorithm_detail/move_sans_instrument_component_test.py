@@ -211,7 +211,6 @@ class SANS2DMoveTest(unittest.TestCase):
         # All detectors are moved on SANS2D
         component = None
 
-        move_type = MoveTypes.INITIAL_MOVE
         move_info = _get_state_move_obj(SANSInstrument.SANS2D, z_translation=lab_z_translation_correction)
 
         move_component(component_name=component, workspace=workspace, move_info=move_info,

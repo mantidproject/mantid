@@ -85,7 +85,6 @@ class PhaseTablePresenterTest(unittest.TestCase):
     def test_that_phase_table_added_to_ADS_with_correct_name_and_group(self, mock_workspace_wrapper):
         workspace_wrapper = mock.MagicMock()
         mock_workspace_wrapper.return_value = workspace_wrapper
-        mock_phase_table = mock.MagicMock()
 
         self.presenter.add_phase_table_to_ADS('MUSR22222_period_1; PhaseTable')
 

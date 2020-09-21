@@ -67,7 +67,6 @@ class CrystalFieldTests(unittest.TestCase):
         en, wf, ham = energies(2, B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068)
         self._do_test_eigensystem(en, wf, ham)
         expectedEigenvalues = [0, 0, 4.36, 9.64, 9.64, 20.65, 30.03, 30.03, 52.50]
-        emin = np.amin(en)
         for i in range(9):
             self.assertAlmostEqual(expectedEigenvalues[i], en[i], 1)
         # Now test the eigenvectors by computing the dipole transition matrix elements. Use the magnetic field
@@ -1150,6 +1149,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
     def test_ResolutionModel_func_multi(self):
         from CrystalField import ResolutionModel
+
         def func0(x):
             return np.sin(np.array(x))
 
@@ -1208,7 +1208,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                           Temperature=44.0, FWHM=1.0, ResolutionModel=rm)
-        sp = cf.getSpectrum()
+
         self.assertAlmostEqual(cf.peaks.param[1]['PeakCentre'], 29.0507341109, 8)
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
         self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.581014682, 8)
@@ -1223,7 +1223,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                           Temperature=44.0, FWHM=1.0, ResolutionModel=rm, FWHMVariation=0.3)
-        sp = cf.getSpectrum()
+
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
         self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101, 1)
         self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.85644, 1)
@@ -1527,10 +1527,10 @@ class CrystalFieldFitTest(unittest.TestCase):
                               Temperature=[10, 100], FWHM=[1.1, 1.2])
         ws0 = makeWorkspace(*origin.getSpectrum(0))
         ws1 = makeWorkspace(*origin.getSpectrum(1))
-        wscv = makeWorkspace(*origin.getHeatCapacity())
+        makeWorkspace(*origin.getHeatCapacity())
         wschi = makeWorkspace(*origin.getSusceptibility(Hdir='powder'))
         wsmag = makeWorkspace(*origin.getMagneticMoment(Hdir=[0, 1, 0], Hmag=np.linspace(0, 30, 3)))
-        wsmom = makeWorkspace(*origin.getMagneticMoment(H=100, T=np.linspace(1, 300, 300), Unit='cgs'))
+        makeWorkspace(*origin.getMagneticMoment(H=100, T=np.linspace(1, 300, 300), Unit='cgs'))
 
         # Fits single physical properties dataset
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)

@@ -96,7 +96,7 @@ class PythonTSVTest(unittest.TestCase):
         load = load_TSV(TSV)
         self.assertEqual(value, pythonTSV.loadFromTSV(load, Name, 3))
 
-    def test_saveString(self):
+    def test_readString(self):
         value = "string"
         TSV = MantidQt.API.TSVSerialiser()
         TSV.writeLine(Name)
@@ -104,7 +104,7 @@ class PythonTSVTest(unittest.TestCase):
         load = load_TSV(TSV)
         self.assertEqual(value, pythonTSV.loadFromTSV(load, Name, "test"))
 
-    def test_saveBool(self):
+    def test_readBool(self):
         value = False
         TSV = MantidQt.API.TSVSerialiser()
         TSV.writeLine(Name)
@@ -112,7 +112,7 @@ class PythonTSVTest(unittest.TestCase):
         load = load_TSV(TSV)
         self.assertEqual(value, pythonTSV.loadFromTSV(load, Name, True))
 
-    def test_saveClassFails(self):
+    def test_readClassFails(self):
         value = Class()
         TSV = MantidQt.API.TSVSerialiser()
         TSV.writeLine(Name)

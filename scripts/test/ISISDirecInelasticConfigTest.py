@@ -155,7 +155,6 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertEqual(user._recent_dateID, id)
         self.assertEqual(user._start_dates['2000-01-12'], datetime.date(2000, 1, 12))
 
-        targetDir = self.get_save_dir()
         rbdir = os.path.join(self.userRootDir, 'RB1999666')
         if not os.path.exists(rbdir):
             os.makedirs(rbdir)
@@ -278,7 +277,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         user1.set_user_properties('MARI', rbdir2, 'CYCLE20991', '20990124')
 
         mcf.init_user(user1)
-        source_file = self.makeFakeSourceReductionFile(mcf)
+        self.makeFakeSourceReductionFile(mcf)
 
         mcf.generate_config()
         self.assertEqual(len(mcf._dynamic_configuration), 6)

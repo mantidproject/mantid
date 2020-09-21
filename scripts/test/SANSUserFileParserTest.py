@@ -53,7 +53,7 @@ class BackCommandParserTest(unittest.TestCase):
         mon_number = None
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
-    def test_that_can_parse_TIME_MEAN_RUN(self):
+    def test_that_can_parse_TIME_LOQ_RUN(self):
         argument = "TIME/tof/run=LOQ33333333"
         uniform = True
         mean = False
@@ -84,7 +84,7 @@ class BackCommandParserTest(unittest.TestCase):
         argument = "GUN/RUN=123124/time/mean  "
         self.do_test_parsing_fails(argument)
 
-    def test_rejects_bad_first_value(self):
+    def test_rejects_bad_value(self):
         argument = "mean/UAMP//RuN=444444444"
         self.do_test_parsing_fails(argument)
 

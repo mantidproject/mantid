@@ -23,7 +23,7 @@ class RunDescriptorTest(unittest.TestCase):
         return super(RunDescriptorTest, self).__init__(methodName)
 
     def setUp(self):
-        if self.prop_man == None or type(self.prop_man) != type(PropertyManager):
+        if self.prop_man is None or type(self.prop_man) != type(PropertyManager):
             self.prop_man = PropertyManager("MAR")
 
     def tearDown(self):
@@ -32,7 +32,6 @@ class RunDescriptorTest(unittest.TestCase):
     @staticmethod
     def getInstrument(InstrumentName='MAR'):
         """ test method used to obtain default instrument for testing """
-        idf_dir = config.getString('instrumentDefinition.directory')
         idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
         tmp_ws_name = '__empty_' + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
@@ -91,11 +90,11 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertGreater(len(file), 0)
 
         ext = PropertyManager.sample_run.get_fext()
-        self.assertEqual(ext, '.raw')
+        self.assertEqual(ext.casefold(), '.raw'.casefold())
 
         PropertyManager.sample_run.set_file_ext('nxs')
         ext = PropertyManager.sample_run.get_fext()
-        self.assertEqual(ext, '.nxs')
+        self.assertEqual(ext.casefold(), '.nxs'.casefold())
 
         test_dir = config.getString('defaultsave.directory')
 
@@ -245,9 +244,8 @@ class RunDescriptorTest(unittest.TestCase):
         ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
                                    XMin=2000, XMax=20000, BinWidth=1)
 
-        ws_monitors = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100,
-                                            XUnit='TOF',
-                                            XMin=2000, XMax=20000, BinWidth=1)
+        CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100,
+                              XUnit='TOF', XMin=2000, XMax=20000, BinWidth=1, OutputWorkspace="ws_monitors")
 
         propman.sample_run = ws
 
@@ -563,15 +561,15 @@ class RunDescriptorTest(unittest.TestCase):
         wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
                                      NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
                                      XMin=2000, XMax=20000, BinWidth=1)
-        wksp_monitors = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
-                                              NumBanks=3, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
-                                              XMin=2000, XMax=20000, BinWidth=1)
+        CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
+                              NumBanks=3, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
+                              XMin=2000, XMax=20000, BinWidth=1, OutputWorkspace="wksp_monitors")
         propman = self.prop_man
 
         propman.sample_run = wksp
 
         try:
-            mon_ws = wksp.getMonitorWorkspace()
+            wksp.getMonitorWorkspace()
         except:
             self.fail()
 

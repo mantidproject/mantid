@@ -51,8 +51,6 @@ class SampleTransmissionCalculatorPresenterTest(unittest.TestCase):
 
         self.presenter.calculate()
 
-        call_list = [mock.call(statistics, calculated_values['scattering']),
-                     mock.call('val_2')]
         view.set_output_table.assert_called_with(statistics, calculated_values['scattering'])
         view.plot.assert_called_with(calculated_values['x'], calculated_values['y'])
 

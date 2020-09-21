@@ -334,7 +334,7 @@ class FFTPresenterTest(unittest.TestCase):
         field_mock.assert_called_once_with(fft_mock_return)
         self.presenter.add_fft_workspace_to_ADS.assert_called_once_with(name, Im_name, field_mock_return)
 
-    def test_selection_removed_genWorkspaceName(self):
+    def test_selection_removed_WorkspaceName(self):
         # Remove first group from selection
         self.remove_from_group_selection('top')
 
