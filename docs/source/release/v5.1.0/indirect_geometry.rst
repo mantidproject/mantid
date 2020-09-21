@@ -53,6 +53,7 @@ Bug Fixes
 - Indirect Data Analysis F(Q) fit multiple workspaces can now load more than one spectra from each workspace.
 - Fixed a crash in the corrections interface which occurred when the user attempted to save the results in the Monte Carlo tab.
 - Fixed a bug in the Indirect->Bayes->Quasi Interface, which caused the same parameter to be plotted twice.
+- Fixed a crash in Elwin when plotting the output workspace ending with `_elf`.
 
 New
 ###
