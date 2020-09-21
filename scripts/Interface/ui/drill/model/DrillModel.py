@@ -145,8 +145,9 @@ class DrillModel(QObject):
                 RundexSettings.ACQUISITION_MODES[instrument][0]
             self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
             self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
-            self.settings.update(
+            self.settings = dict.fromkeys(
                     RundexSettings.SETTINGS[self.acquisitionMode])
+            self._setDefaultSettings()
             self._initController()
         else:
             logger.error('Instrument {0} is not supported yet.'
@@ -199,8 +200,9 @@ class DrillModel(QObject):
         else:
             nThreads = QThread.idealThreadCount()
         self.tasksPool.setMaxThreadCount(nThreads)
-        self.settings = dict()
-        self.settings.update(RundexSettings.SETTINGS[self.acquisitionMode])
+        self.settings = dict.fromkeys(
+                RundexSettings.SETTINGS[self.acquisitionMode])
+        self._setDefaultSettings()
         self._initController()
 
     def getAcquisitionMode(self):
@@ -365,6 +367,21 @@ class DrillModel(QObject):
             docs[s] = p.documentation
 
         return (types, values, docs)
+
+    def _setDefaultSettings(self):
+        """
+        Set the settings to their defautl values. This method takes the default
+        values directly from the algorithm.
+        """
+        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+        alg.initialize()
+
+        for s in self.settings:
+            p = alg.getProperty(s)
+            if (isinstance(p, BoolPropertyWithValue)):
+                self.settings[s] = p.value
+            else:
+                self.settings[s] = p.getDefault
 
     def checkParameter(self, param, value, sample=-1):
         """

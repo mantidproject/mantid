@@ -170,8 +170,8 @@ class DrillTest(unittest.TestCase):
                              RundexSettings.COLUMNS[mAcquisitionMode])
             self.assertEqual(mAlgorithm,
                              RundexSettings.ALGORITHM[mAcquisitionMode])
-            self.assertDictEqual(mSettings,
-                                 RundexSettings.SETTINGS[mAcquisitionMode])
+            for s in RundexSettings.SETTINGS[mAcquisitionMode]:
+                self.assertIn(s, mSettings)
 
     def test_changeAcquisitionMode(self):
         # D17 has two acquisition modes
@@ -192,8 +192,8 @@ class DrillTest(unittest.TestCase):
                              RundexSettings.ALGORITHM[mAcquisitionMode])
             self.assertEqual(mColumns,
                              RundexSettings.COLUMNS[mAcquisitionMode])
-            self.assertDictEqual(mSettings,
-                                 RundexSettings.SETTINGS[mAcquisitionMode])
+            for s in RundexSettings.SETTINGS[mAcquisitionMode]:
+                self.assertIn(s, mSettings)
 
     def test_changeCycleAndExperiment(self):
         # only 1 value is set
@@ -255,7 +255,8 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.view.modeSelector.currentText(), "SANS")
         self.assertEqual(self.model.algorithm, RundexSettings.ALGORITHM['SANS'])
         self.assertEqual(self.model.columns, RundexSettings.COLUMNS['SANS'])
-        self.assertDictEqual(self.model.settings, RundexSettings.SETTINGS['SANS'])
+        for s in RundexSettings.SETTINGS['SANS']:
+            self.assertIn(s, self.model.settings)
         self.assertEqual(self.model.samples, [{}])
         self.assertEqual(self.view.table.columnCount(), len(self.model.columns))
 
@@ -272,7 +273,7 @@ class DrillTest(unittest.TestCase):
                 'VisualSettings': {
                     'FoldedColumns': {}
                     },
-                'GlobalSettings': RundexSettings.SETTINGS['SANS'],
+                'GlobalSettings': self.model.settings,
                 'Samples': []
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
