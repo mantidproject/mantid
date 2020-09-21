@@ -40,10 +40,12 @@ class PlotsSaver(object):
                 # have built your project.
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt
+
+                error_string = "Plot: " + str(index) + " was not saved. Error: " + str(e)
                 if not is_project_recovery:
-                    logger.warning("A plot was unable to be saved")
+                    logger.warning(error_string)
                 else:
-                    logger.debug("A plot was unable to be saved")
+                    logger.debug(error_string)
         return plot_list
 
     def get_dict_from_fig(self, fig):
