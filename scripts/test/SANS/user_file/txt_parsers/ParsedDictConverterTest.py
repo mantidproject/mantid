@@ -10,7 +10,7 @@ from unittest import mock
 
 from sans.common.configurations import Configurations
 from sans.common.enums import DetectorType, SANSInstrument, ReductionMode, RangeStepType, RebinType, DataType, FitType
-from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
+from sans.test_helper.user_file_test_helper import base_user_file, create_user_file, sample_user_file
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
@@ -53,8 +53,12 @@ class ParsedDictConverterTest(unittest.TestCase):
         # Detector specific
         lab = move.detectors[DetectorType.LAB.value]
         hab = move.detectors[DetectorType.HAB.value]
+        self.assertEqual(lab.sample_centre_pos1,  155.45/1000.)
+        self.assertEqual(lab.sample_centre_pos2, -169.6/1000.)
         self.assertEqual(lab.x_translation_correction,  -16.0/1000.)
         self.assertEqual(lab.z_translation_correction,  47.0/1000.)
+        self.assertEqual(hab.sample_centre_pos1,  155.45/1000. )
+        self.assertEqual(hab.sample_centre_pos2, -169.6/1000.)
         self.assertEqual(hab.x_translation_correction,  -44.0/1000.)
         self.assertEqual(hab.y_translation_correction,  -20.0/1000.)
         self.assertEqual(hab.z_translation_correction,  47.0/1000.)
@@ -188,6 +192,23 @@ class ParsedDictConverterTest(unittest.TestCase):
         # Assert wide angle correction
         self.assertTrue(state.adjustment.wide_angle_correction)
         self.assertEqual("TUBE_SANS2D_BOTH_31681_25Sept15.nxs", state.adjustment.calibration)
+
+    def test_move_with_hab_centre_uses_hab_centre_value(self):
+        user_file_centre = """
+        set centre 160.2 -170.5
+        set centre/hab 160.5 -170.1
+        """
+        user_file_path = create_user_file(user_file_centre)
+        mocked_sans = self.create_mock_inst_file_information(SANSInstrument.SANS2D)
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, file_information=mocked_sans)
+        state = parser.get_all_states(file_information=mocked_sans)
+        move = state.move
+        lab = move.detectors[DetectorType.LAB.value]
+        hab = move.detectors[DetectorType.HAB.value]
+        self.assertEqual(lab.sample_centre_pos1,  160.2/1000.)
+        self.assertEqual(lab.sample_centre_pos2, -170.5/1000.)
+        self.assertEqual(hab.sample_centre_pos1,  160.5/1000. )
+        self.assertEqual(hab.sample_centre_pos2, -170.1/1000.)
 
 
 if __name__ == '__main__':
