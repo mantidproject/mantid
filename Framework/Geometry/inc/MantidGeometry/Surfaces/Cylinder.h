@@ -33,14 +33,14 @@ class MANTID_GEOMETRY_DLL Cylinder : public Quadratic {
 private:
   static Kernel::Logger &PLog; ///< The official logger
 
-  Kernel::V3D Centre; ///< Kernel::V3D for centre
-  Kernel::V3D Normal; ///< Direction of centre line
-  std::size_t Nvec;   ///< Normal vector is x,y or z :: (1-3) (0 if general)
-  double Radius;      ///< Radius of cylinder
+  Kernel::V3D m_centre;  ///< Kernel::V3D for centre
+  Kernel::V3D m_normal;  ///< Direction of centre line
+  std::size_t m_normVec; ///< Normal vector is x,y or z :: (1-3) (0 if general)
+  double m_radius;       ///< Radius of cylinder
 
   void rotate(const Kernel::Matrix<double> &) override;
   void displace(const Kernel::V3D &) override;
-  void setNvec(); ///< check to obtain orientation
+  void setNormVec(); ///< check to obtain orientation
   Cylinder *doClone() const override;
 
 protected:
@@ -66,12 +66,12 @@ public:
   int setSurface(const std::string &) override;
   void setCentre(const Kernel::V3D &);
   void setNorm(const Kernel::V3D &);
-  Kernel::V3D getCentre() const { return Centre; } ///< Return centre point
-  Kernel::V3D getNormal() const { return Normal; } ///< Return Central line
-  double getRadius() const { return Radius; }      ///< Get Radius
+  Kernel::V3D getCentre() const { return m_centre; } ///< Return centre point
+  Kernel::V3D getNormal() const { return m_normal; } ///< Return Central line
+  double getRadius() const { return m_radius; }      ///< Get Radius
   /// Set Radius
   void setRadius(const double &r) {
-    Radius = r;
+    m_radius = r;
     setBaseEqn();
   }
   void setBaseEqn() override;
