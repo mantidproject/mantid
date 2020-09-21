@@ -854,7 +854,7 @@ class TestManager(object):
         # with data being cleaned up before another process has finished.
         #
         # We create a list of test modules (= different python files in the
-        # 'Testing/SystemTests/tests/analysis' directory) and count how many
+        # 'Testing/SystemTests/tests/<sub_dir>' directory) and count how many
         # tests are in each module. We also create on the fly a list of tests
         # for each module.
         modcounts = dict()
@@ -899,8 +899,8 @@ class TestManager(object):
 
             fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
-            with open(os.path.join(os.path.dirname(self._testDir), "analysis", fname),
-                      "r") as pyfile:
+            sub_dir = self._testDir.split("\\")[-1]
+            with open(os.path.join(os.path.dirname(self._testDir), sub_dir, fname), "r") as pyfile:
                 for line in pyfile.readlines():
 
                     # Search for all instances of '.nxs' or '.raw'
@@ -1058,17 +1058,20 @@ class TestManager(object):
 class MantidFrameworkConfig:
     def __init__(self,
                  sourceDir=None,
+                 test_sub_dir="",
                  data_dirs="",
                  save_dir="",
                  loglevel='information',
                  archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
+        self.__testSubDir = test_sub_dir
+
         # add location of system tests
         self.__testDir = self.__locateTestsDir()
 
-        # add location of the analysis tests
-        sys.path.insert(0, self.__locateTestsDir())
+        # add location of the tests to the system path
+        sys.path.insert(0, self.__testDir)
 
         # setup the rest of the magic directories
         self.__saveDir = save_dir
@@ -1114,13 +1117,12 @@ class MantidFrameworkConfig:
             raise RuntimeError("Failed to find source directory")
 
     def __locateTestsDir(self):
-        loc = os.path.join(self.__sourceDir, "..", "..", "tests", "analysis")
+        loc = os.path.join(self.__sourceDir, "..", "..", "tests", self.__testSubDir)
         loc = os.path.abspath(loc)
         if os.path.isdir(loc):
             return loc
         else:
-            raise RuntimeError(
-                "Expected the analysis tests directory at '%s' but it is not a directory " % loc)
+            raise RuntimeError("Expected a tests directory at '%s' but it is not a directory " % loc)
 
     def __getDataDirsAsString(self):
         return self._dataDirs
