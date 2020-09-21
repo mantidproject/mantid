@@ -117,6 +117,7 @@ Improvements
 - In the instrument widget's rendering tab, added a Reset view button to restore to default projection.
 - In the instrument widget's draw tab, added the option to mask, draw ROI and group single pixel and tube.
 - `TableWorkspaces` can now have columns containing errors linked to corresponding columns containing values, using the `setLinkedYCol(errColumn, dataColumn)`.
+- Reduce log level of project recovery when it fails to save a plot correctly, to debug from warning level, to avoid excess messages in the console.
 - Added a Clear button to the workspaces toolbox which removes all workspaces from the tree including hidden ones
 
 
