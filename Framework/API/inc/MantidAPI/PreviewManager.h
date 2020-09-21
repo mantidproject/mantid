@@ -34,16 +34,16 @@ public:
                              const std::string &preview);
   template <class T> void subscribe() {
     static_assert(std::is_base_of<IPreview, T>::value);
-    T preview;
-    const auto facility = preview.facility();
-    const auto technique = preview.technique();
-    const auto name = preview.name();
+    IPreview_uptr preview = std::make_unique<T>();
+    const auto facility = preview->facility();
+    const auto technique = preview->technique();
+    const auto name = preview->name();
     if (checkPreview(facility, technique, name)) {
       throw std::runtime_error(
           "Preview with the same name is already registered for the same "
           "facility and technique.");
     }
-    m_previews[facility][technique][name] = std::make_unique<T>();
+    m_previews[facility][technique][name] = std::move(preview);
   }
 
 private:
