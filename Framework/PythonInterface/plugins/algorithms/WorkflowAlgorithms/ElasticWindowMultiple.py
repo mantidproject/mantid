@@ -285,7 +285,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         else:
             logger.warning('No sample units found for run: {}'.format(run_name))
 
-        if unit.isspace():
+        if unit is not None and unit.isspace():
             unit = ""
 
         return sample, unit
