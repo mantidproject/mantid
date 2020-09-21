@@ -577,12 +577,15 @@ class SANSILLReduction(PythonAlgorithm):
         title = ''
         if run.hasProperty('sample_description'):
             title = run.getLogData('sample_description').value
-        if not title:
-            if run.hasProperty('sample.sampleId'):
-                title = run.getLogData('sample.sampleId').value
+            if title:
+                mtd[ws].setTitle(title)
+                return
 
-        if title:
-            mtd[ws].setTitle(title)
+        if run.hasProperty('sample.sampleId'):
+            title = run.getLogData('sample.sampleId').value
+            if title:
+                title = "Sample ID = " + title
+                mtd[ws].setTitle(title)
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
