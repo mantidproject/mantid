@@ -231,8 +231,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('ChemicalFormula', EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsNotEqualTo, 'None'))
 
         self.declareProperty(name="DetectorEfficiencyCalibration",
-                             defaultValue="Incoherent",
-                             validator=StringListValidator(["Incoherent", "Vanadium",  "Paramagnetic"]),
+                             defaultValue="None",
+                             validator=StringListValidator(["None", "Vanadium", "Incoherent",  "Paramagnetic"]),
                              direction=Direction.Input,
                              doc="Detector efficiency calibration type.")
 
@@ -389,11 +389,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                    RHSWorkspace=(2*flipper_eff-1)*mtd[ws_00]+mtd[ws_01],
                    OutputWorkspace=tmp_name)
             tmp_names.append(tmp_name)
-            if self._user_method == 'Uniaxial' and entry_no % 2 == 1:
+            if self._method_data_structure == 'Uniaxial' and entry_no % 2 == 1:
                 index += 1
-            elif self._user_method == 'XYZ' and entry_no % 6 == 5:
+            elif self._method_data_structure == 'XYZ' and entry_no % 6 == 5:
                 index += 1
-            elif self._user_method == '10p' and entry_no % 10 == 9:
+            elif self._method_data_structure == '10p' and entry_no % 10 == 9:
                 index += 1
         GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace='tmp')
         DeleteWorkspaces(ws)
@@ -455,6 +455,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             required_keys += ['height', 'radius', 'container_radius']
         if geometry_type == 'Annulus':
             required_keys += ['height', 'inner_radius', 'outer_radius', 'container_inner_radius', 'container_outer_radius']
+
+        if self.getPropertyValue('DetectorEfficiencyCalibration') == 'Incoherent':
+            required_keys.append('sample_spin')
 
         for key in required_keys:
             if key not in self._sampleGeometry:
@@ -789,7 +792,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if self.getPropertyValue('SampleGeometry') != 'None' and self._mode != 'TOF':
                     self._apply_self_attenuation_correction(ws, container_ws)
                 progress.report()
-                component_ws = self._component_separation(ws)
+                if self._user_method != 'None':
+                    component_ws = self._component_separation(ws)
                 progress.report()
                 if process == 'Vanadium':
                     self._output_vanadium(ws, self._sampleGeometry['n_atoms'])
