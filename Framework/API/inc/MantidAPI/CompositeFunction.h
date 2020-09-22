@@ -83,9 +83,13 @@ public:
   bool hasAttribute(const std::string &name) const override;
   /// Return a value of attribute attName
   Attribute getAttribute(const std::string &name) const override;
+  // Set an attribute value
+  void setAttribute(const std::string &name,
+                    const API::IFunction::Attribute &value) override;
   /// Total number of parameters
   size_t nParams() const override;
-  // Total number of attributes, which includes global and local function attributes
+  // Total number of attributes, which includes global and local function
+  // attributes
   size_t nAttributes() const override;
   // Total number of global attributes, defined at the composite function level
   size_t nGlobalAttributes() const noexcept { return IFunction::nAttributes(); }
@@ -172,7 +176,7 @@ public:
   /// Remove all member functions
   void clear();
 
-  //std::vector < std::string> getAttributeNames() const override;
+  // std::vector < std::string> getAttributeNames() const override;
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes() const { return 0; }
   /// Returns a list of attribute names
@@ -216,9 +220,9 @@ protected:
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
 
- /// Declare a single attribute
+  /// Declare a single attribute
   void declareAttribute(const std::string &name,
-                                const API::IFunction::Attribute &defaultValue) override;
+                        const API::IFunction::Attribute &defaultValue) override;
   /// Writes itself into a string
   std::string writeToString(
       const std::string &parentLocalAttributesStr = "") const override;

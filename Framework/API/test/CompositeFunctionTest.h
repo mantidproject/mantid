@@ -92,8 +92,7 @@ private:
   size_t m_blocksize;
 };
 
-template<bool withAttributes=false>
-class Gauss : public IPeakFunction {
+template <bool withAttributes = false> class Gauss : public IPeakFunction {
 public:
   Gauss() {
     declareParameter("c");
@@ -1256,7 +1255,7 @@ public:
     TS_ASSERT_EQUALS(fun->parameterLocalName(6, true), "a");
   }
 
-  void test_attributes_generated_with_correct_prefix() { 
+  void test_attributes_generated_with_correct_prefix() {
     auto mfun = std::make_unique<CompositeFunction>();
     auto gauss = std::make_shared<Gauss<true>>();
     auto background = std::make_shared<Linear<true>>();
@@ -1310,7 +1309,6 @@ public:
     TS_ASSERT_EQUALS(names[1], "f0.GaussAttribute");
     TS_ASSERT_EQUALS(names[2], "f1.LinearAttribute");
     TS_ASSERT_EQUALS(names[3], "f2.CubicAttribute");
-
   }
 
   void test_as_string_preserves_attributes() {
@@ -1329,5 +1327,56 @@ public:
     str += "name=Cubic,CubicAttribute=Cubic,c0=0,c1=0,c2=0,c3=0";
 
     TS_ASSERT_EQUALS(mfun->asString(), str);
+  }
+
+  void test_set_attribute_supports_prefixed_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+    mfun->setAttribute("f2.CubicAttribute",
+                       IFunction::Attribute("NewCubicAttribute"));
+    mfun->setAttribute("f1.LinearAttribute",
+                       IFunction::Attribute("NewLinearAttribute"));
+
+    TS_ASSERT_EQUALS(mfun->getAttribute("f2.CubicAttribute").asString(),
+                     "NewCubicAttribute");
+    TS_ASSERT_EQUALS(mfun->getAttribute("f1.LinearAttribute").asString(),
+                     "NewLinearAttribute");
+  }
+  void test_set_attribute_supports_unprefixed_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    // Set the global NumDeriv attribute
+    mfun->setAttribute("NumDeriv", IFunction::Attribute(true));
+
+    TS_ASSERT_EQUALS(mfun->getAttribute("NumDeriv").asBool(), true);
+  }
+
+  void test_set_attribute_thorws_if_attribute_not_recongized() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    TS_ASSERT_THROWS(
+        mfun->setAttribute("f0.CubicAttribute",
+                           IFunction::Attribute("NewCubicAttribute")),
+        std::invalid_argument &);
   }
 };

@@ -295,18 +295,32 @@ CompositeFunction::getAttribute(const std::string &name) const {
   try {
     if (std::find(m_globalAttributeNames.begin(), m_globalAttributeNames.end(),
                   name) != m_globalAttributeNames.end()) {
-      // Attribute is defined on the composite function, call parent method
       return IFunction::getAttribute(name);
     }
-    // Else assume that attribute is of the form fk.Attribute, so we need to
-    // parse the name
     auto [attributeName, index] = parseName(name);
     return m_functions[index]->getAttribute(attributeName);
-  } catch (...) {
+  } catch (std::invalid_argument &) {
     throw std::invalid_argument(
         "ParamFunctionAttributeHolder::getAttribute - Unknown attribute '" +
         name + "'");
   }
+}
+
+/**
+ *  Set a value to a named attribute. Can be overridden in the inheriting class,
+ * the default
+ *  just stores the value
+ *  @param name :: The name of the attribute
+ *  @param value :: The value of the attribute
+ */
+void CompositeFunction::setAttribute(const std::string &name,
+                                     const API::IFunction::Attribute &value) {
+  if (std::find(m_globalAttributeNames.begin(), m_globalAttributeNames.end(),
+                name) != m_globalAttributeNames.end()) {
+    return IFunction::setAttribute(name, value);
+  }
+  auto [attributeName, index] = parseName(name);
+  return m_functions[index]->setAttribute(attributeName, value);
 }
 
 /// Total number of parameters

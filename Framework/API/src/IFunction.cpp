@@ -1342,9 +1342,9 @@ void IFunction::setAttributeValue(const std::string &attName,
  */
 void IFunction::setAttributeValue(const std::string &attName,
                                   const std::string &value) {
-  Attribute att = getAttribute(attName);
+  Attribute att = this->getAttribute(attName);
   att.setString(value);
-  setAttribute(attName, att);
+  this->setAttribute(attName, att);
 }
 
 /// Returns the pointer to a child function
