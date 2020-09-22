@@ -846,6 +846,56 @@ public:
     TS_ASSERT_DELTA(axisLength, point->Z(), tolerance);
   }
 
+  void testTracksForSphere() {
+    // Sphere centered at origin, 3 mm diameter
+    constexpr double RADIUS{0.0015};
+
+    const V3D BEAM_X{1.0, 0.0, 0.0};
+    const V3D BEAM_Y{0.0, 1.0, 0.0};
+    const V3D BEAM_Z{0.0, 0.0, 1.0};
+
+    auto sphere = ComponentCreationHelper::createSphere(RADIUS);
+
+    // Test center of sphere
+    Track origin(V3D{0.0, 0.0, 0.0}, BEAM_X);
+    sphere->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.front().distInsideObject, RADIUS);
+
+    Track front_midpoint(V3D{0.5*RADIUS, 0.0, 0.0}, BEAM_X);
+    sphere->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.front().distInsideObject, 0.5*RADIUS);
+
+    Track back_midpoint(V3D{-0.5*RADIUS, 0.0, 0.0}, BEAM_X);
+    sphere->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.front().distInsideObject, 1.5*RADIUS);
+
+    // Y axis tests
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_Y);
+    sphere->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.front().distInsideObject, RADIUS);
+
+    front_midpoint = Track(V3D{0.0, 0.5*RADIUS, 0.0}, BEAM_Y);
+    sphere->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.front().distInsideObject, 0.5*RADIUS);
+
+    back_midpoint = Track(V3D{0.0, -0.5*RADIUS, 0.0}, BEAM_Y);
+    sphere->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.front().distInsideObject, 1.5*RADIUS);
+
+    // Z axis tests
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_Z);
+    sphere->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.front().distInsideObject, RADIUS);
+
+    front_midpoint = Track(V3D{0.0, 0.0, 0.5*RADIUS}, BEAM_Z);
+    sphere->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.front().distInsideObject, 0.5*RADIUS);
+
+    back_midpoint = Track(V3D{0.0, 0.0, -0.5*RADIUS}, BEAM_Z);
+    sphere->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.front().distInsideObject, 1.5*RADIUS);
+  }
+
   void testGeneratePointInsideSphere() {
     using namespace ::testing;
 
