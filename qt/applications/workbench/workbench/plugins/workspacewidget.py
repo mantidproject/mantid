@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting import functions
-from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names, plot_md_ws_from_names
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
@@ -45,7 +45,7 @@ class WorkspaceWidget(PluginWidget):
             partial(self._do_plot_spectrum, errors=False, overplot=False))
 
         self.workspacewidget.plotMDHistoClicked.connect(
-            partial(self._do_plot_spectrum, errors=False, overplot=False))
+            partial(self._do_plot_1d_md, errors=False, overplot=False))
 
         self.workspacewidget.plotBinClicked.connect(
             partial(self._do_plot_bin, errors=False, overplot=False))
@@ -126,7 +126,7 @@ class WorkspaceWidget(PluginWidget):
                 QMessageBox.warning(self, "", error_msg)
                 return
         try:
-            plot_from_names(names, errors, overplot, advanced=False)
+            plot_md_ws_from_names(names, errors, overplot)
         except RuntimeError as re:
             logger.error(str(re))
 
