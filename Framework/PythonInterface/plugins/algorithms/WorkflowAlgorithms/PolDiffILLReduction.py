@@ -651,8 +651,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             else:
                 normalisationFactors = self._max_values_per_detector(vanadium_ws)
                 dataE = np.sqrt(normalisationFactors)
-                CreateWorkspace(dataX=mtd[vanadium_ws].getItem(0).readX(0), dataY=normalisationFactors, dataE=dataE,
-                                NSpec=mtd[vanadium_ws].getItem(0).getNumberOfHistograms(), OutputWorkspace='normalisation_ws')
+                entry0 = mtd[vanadium_ws].getItem(0)
+                CreateWorkspace(dataX=entry0.readX(0), dataY=normalisationFactors, dataE=dataE,
+                                NSpec=entry0.getNumberOfHistograms(), OutputWorkspace='normalisation_ws')
             Divide(LHSWorkspace=vanadium_ws,
                    RHSWorkspace='normalisation_ws',
                    OutputWorkspace='det_efficiency')
@@ -668,7 +669,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                     const = (2.0/3.0) * math.pow(physical_constants['neutron gyromag. ratio']
                                                  * physical_constants['classical electron radius'], 2)
                     paramagneticComponent = mtd[conjoined_components].getItem(2)
-                    Divide(LHSWorkspace=const * entry * (entry+1),
+                    spin = self._sampleGeometry['sample_spin']
+                    Divide(LHSWorkspace=const * spin * (spin+1),
                            RHSWorkspace=paramagneticComponent,
                            OutputWorkspace=ws_name)
             else: # Incoherent
