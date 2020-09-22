@@ -309,11 +309,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                     else:
                         list_pol.append('{0}_{1}'.format(numor, direction))
                 if average_detectors:
-                    Divide(LHSWorkspace=name, RHSWorkspace=len(numors), OutputWorkspace=name)
+                    Divide(LHSWorkspace=name, RHSWorkspace=CreateSingleValuedWorkspace(len(numors)), OutputWorkspace=name)
                 else:
                     SumOverlappingTubes(','.join(list_pol), OutputWorkspace=name,
                                         OutputType='1D', ScatteringAngleBinning=0.5, Normalise=True, HeightAxis='-0.1,0.1')
                 names_list.append(name)
+            DeleteWorkspaces(ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
         return ws
 
@@ -734,7 +735,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         if self.getProperty('InstrumentParameterFile').isDefault:
             calibration_setting = 'None'
 
-        Load(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLPolarizedDiffraction',
+        Load(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
              PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentParameterFile'),
              TOFUnits=self.getPropertyValue('TOFUnits'), OutputWorkspace=ws)
 
@@ -746,6 +747,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         self._figure_measurement_method(ws)
         progress.report()
         if process in ['Beam']:
+            if mtd[ws].getNumberOfEntries() > 1:
+                self._merge_polarisations(ws, average_detectors=True)
             cadmium_ws = self.getPropertyValue('CadmiumTransmissionInputWorkspace')
             if cadmium_ws:
                 Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
