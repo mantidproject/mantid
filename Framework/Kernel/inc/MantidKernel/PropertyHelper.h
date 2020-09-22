@@ -17,6 +17,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <type_traits>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -77,6 +78,23 @@ std::string toPrettyString(const T &value, size_t maxLength = 0,
   UNUSED_ARG(collapseLists);
   return Strings::shorten(boost::lexical_cast<std::string>(value), maxLength);
 }
+
+GNU_DIAG_OFF("unused-function")
+
+/** Specialization for double properties.
+ *   This will only print relevant decimals.
+ */
+template <>
+std::string toPrettyString(const double &value, size_t maxLength,
+                           bool collapseLists) {
+  UNUSED_ARG(maxLength);
+  UNUSED_ARG(collapseLists);
+  std::ostringstream ss;
+  ss << value;
+  return ss.str();
+}
+
+GNU_DIAG_ON("unused-function")
 
 /// Throw an exception if a shared pointer is converted to a pretty string.
 template <typename T>
