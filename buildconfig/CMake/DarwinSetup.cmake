@@ -61,6 +61,9 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+# Tag used by dynamic loader to identify directory of loading library
+set(DL_ORIGIN_TAG @loader_path)
+
 # Generate a target to put a mantidpython wrapper in the appropriate directory
 if(NOT TARGET mantidpython)
   if(MAKE_VATES)
@@ -106,6 +109,7 @@ set(BIN_DIR bin)
 set(WORKBENCH_BIN_DIR bin)
 set(ETC_DIR etc)
 set(LIB_DIR lib)
+set(SITE_PACKAGES lib)
 set(PLUGINS_DIR plugins)
 
 # ##############################################################################
@@ -156,6 +160,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
 
     set(BIN_DIR ${INBUNDLE}/MacOS)
     set(LIB_DIR ${INBUNDLE}/MacOS)
+    set(SITE_PACKAGES ${INBUNDLE}MacOS)
     # This is the root of the plugins directory
     set(PLUGINS_DIR ${INBUNDLE}PlugIns)
     # Separate directory of plugins to be discovered by the ParaView framework
@@ -178,28 +183,13 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
     set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)
     set(WORKBENCH_BIN_DIR ${WORKBENCH_BUNDLE}MacOS)
     set(WORKBENCH_LIB_DIR ${WORKBENCH_BUNDLE}MacOS)
+    set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
     set(WORKBENCH_PLUGINS_DIR ${WORKBENCH_BUNDLE}PlugIns)
 
-    # Add launcher application for a Mantid Workbench
-    configure_file(
-      ${CMAKE_MODULE_PATH}/Packaging/osx/MantidWorkbench_osx_launcher.in
-      ${CMAKE_BINARY_DIR}/MantidWorkbench_osx_launcher.install @ONLY
-    )
-
-    install(
-      PROGRAMS ${CMAKE_BINARY_DIR}/MantidWorkbench_osx_launcher.install
-      DESTINATION MantidWorkbench.app/Contents/MacOS/
-      RENAME MantidWorkbench
-    )
     install(
       PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
       DESTINATION MantidWorkbench.app/Contents/MacOS/
       RENAME mantidpython
-    )
-    install(
-      FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidworkbench_Info.plist
-      DESTINATION MantidWorkbench.app/Contents/
-      RENAME Info.plist
     )
     install(
       FILES ${CMAKE_SOURCE_DIR}/images/MantidWorkbench.icns

@@ -20,7 +20,6 @@ using namespace Mantid::DataObjects;
 using Mantid::Crystal::LoadIsawUB;
 using Mantid::Crystal::SetCrystalLocation;
 using Mantid::Crystal::ShowPeakHKLOffsets;
-using Mantid::DataObjects::TableWorkspace;
 using Mantid::Kernel::V3D;
 using namespace Mantid::API;
 

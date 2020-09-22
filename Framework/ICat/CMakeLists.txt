@@ -104,7 +104,6 @@ include_directories(inc)
 
 target_link_libraries(ICat
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${OPENSSL_LIBRARIES}
                       ${JSONCPP_LIBRARIES})

@@ -15,7 +15,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(WorkflowAlgorithmsTest ${TEST_FILES})
   target_link_libraries(WorkflowAlgorithmsTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         WorkflowAlgorithms
                         Algorithms

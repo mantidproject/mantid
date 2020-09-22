@@ -25,7 +25,11 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
     : periodNumbers(pNumbers) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
-  file.getAttr("offset", startTime);
+  // If the offset is not present, use Unix epoch
+  if (!file.hasAttr("offset"))
+    startTime = "1970-01-01T00:00:00Z";
+  else
+    file.getAttr("offset", startTime);
   Mantid::Types::Core::DateAndTime start(startTime);
   // Load the seconds offsets
 

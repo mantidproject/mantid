@@ -17,6 +17,7 @@
 #include "MantidKernel/Logger.h"
 
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
@@ -52,6 +53,8 @@
 namespace {
 const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
+QString removePrefix(QString &param) { return param.split(QString("."))[1]; }
+QString addPrefix(QString &param) { return QString("f0.") + param; }
 } // namespace
 
 namespace MantidQt {
@@ -251,6 +254,10 @@ void FunctionTreeView::createActions() {
   m_actionRemoveConstraint = new QAction("Remove", this);
   connect(m_actionRemoveConstraint, SIGNAL(triggered()), this,
           SLOT(removeConstraint()));
+
+  m_actionFunctionHelp = new QAction("Help", this);
+  connect(m_actionFunctionHelp, SIGNAL(triggered()), this,
+          SIGNAL(functionHelpRequest()));
 
   setErrorsEnabled(false);
 }
@@ -1119,6 +1126,7 @@ void FunctionTreeView::popupMenu(const QPoint &) {
     if (!m_browser->properties().isEmpty()) {
       context.addAction(m_actionToClipboard);
     }
+    context.addAction(m_actionFunctionHelp);
     context.exec(QCursor::pos());
   } else if (isParameter(prop)) { // parameters
     QMenu context(this);
@@ -1195,6 +1203,9 @@ void FunctionTreeView::addFunctionEnd(int result) {
   auto f = Mantid::API::FunctionFactory::Instance().createFunction(
       newFunction.toStdString());
 
+  // get previous global parameters
+  auto globalParameters = getGlobalParameters();
+
   auto prop = m_selectedFunctionProperty;
   if (prop) { // there are other functions defined
     Mantid::API::IFunction_sptr fun =
@@ -1209,6 +1220,9 @@ void FunctionTreeView::addFunctionEnd(int result) {
       cf.reset(new Mantid::API::CompositeFunction);
       auto f0 = getFunction(prop);
       if (f0) {
+        // Modify the previous globals so they have a function prefix
+        std::transform(globalParameters.begin(), globalParameters.end(),
+                       globalParameters.begin(), addPrefix);
         cf->addFunction(f0);
       }
       cf->addFunction(f);
@@ -1220,6 +1234,8 @@ void FunctionTreeView::addFunctionEnd(int result) {
       return;
   }
   emit functionAdded(QString::fromStdString(f->asString()));
+  setGlobalParameters(globalParameters);
+  emit globalsChanged(globalParameters);
 }
 
 /**
@@ -1436,6 +1452,7 @@ void FunctionTreeView::removeFunction() {
   // In this case, the function should be kept but
   // the composite function should be removed
   auto props = m_browser->properties();
+  auto globalParameters = getGlobalParameters();
   if (!props.isEmpty()) {
     // The function browser is not empty
 
@@ -1454,7 +1471,9 @@ void FunctionTreeView::removeFunction() {
       if (nFunctions == 1 && cf->name() == "CompositeFunction") {
         // If only one function remains, remove the composite function:
         // Temporary copy the remaining function
-        auto func = getFunction(m_browser->properties()[0]->subProperties()[1]);
+        auto func = getFunction(props[0]->subProperties()[1]);
+        std::transform(globalParameters.begin(), globalParameters.end(),
+                       globalParameters.begin(), removePrefix);
         // Remove the composite function
         m_browser->removeProperty(topProp);
         // Add the temporary stored function
@@ -1463,6 +1482,8 @@ void FunctionTreeView::removeFunction() {
     }
   }
   emit functionRemoved(functionIndex);
+  setGlobalParameters(globalParameters);
+  emit globalsChanged(globalParameters);
 }
 
 /**
@@ -1661,6 +1682,24 @@ void FunctionTreeView::removeConstraint() {
   if (!constraint.isEmpty()) {
     emit parameterConstraintAdded(functionIndex, constraint);
   }
+}
+/**
+ * Get user selected function
+ */
+IFunction_sptr FunctionTreeView::getSelectedFunction() {
+  auto item = m_browser->currentItem();
+  if (!item)
+    return IFunction_sptr();
+  QtProperty *prop = item->property();
+  if (!isFunction(prop))
+    return IFunction_sptr();
+  return getFunction(prop);
+}
+/**
+ * Show function help page for input functionName
+ */
+void FunctionTreeView::showFunctionHelp(const QString &functionName) const {
+  API::InterfaceManager().showFitFunctionHelp(functionName);
 }
 
 std::pair<QString, QString>

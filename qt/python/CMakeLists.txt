@@ -11,9 +11,9 @@ endif()
 # mantidqt
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   if(APPLE)
-    set(_install_lib_dirs "${LIB_DIR};${WORKBENCH_LIB_DIR}")
+    set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
   else()
-    set(_install_lib_dirs "${WORKBENCH_LIB_DIR}")
+    set(_install_lib_dirs "${WORKBENCH_SITE_PACKAGES}")
   endif()
   add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
 
@@ -62,6 +62,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   set(PYTHON_TEST_FILES
       mantidqt/test/test_algorithm_observer.py
       mantidqt/test/test_import.py
+      mantidqt/dialogs/errorreports/test/test_errorreport_presenter.py
       mantidqt/dialogs/test/test_algorithm_dialog.py
       mantidqt/dialogs/test/test_spectraselectiondialog.py
       mantidqt/dialogs/test/test_spectraselectorutils.py
@@ -79,6 +80,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
       mantidqt/utils/test/test_writetosignal.py
+      mantidqt/utils/qt/test/test_qappthreadcall.py
       mantidqt/widgets/test/test_messagedisplay.py
       mantidqt/widgets/test/test_fitpropertybrowser.py
       mantidqt/widgets/test/test_fitpropertybrowserbase.py
@@ -95,7 +97,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
     # ctest target for widgets that only get tested in qt5, because they are
     # only used in the workbench
     set(PYTHON_WIDGET_QT5_ONLY_TESTS
-        mantidqt/widgets/algorithmselector/test/observer_test.py
+        mantidqt/widgets/algorithmselector/test/test_algorithm_factory_observer.py
         mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
         mantidqt/widgets/codeeditor/test/test_codeeditor.py
         mantidqt/widgets/codeeditor/test/test_completion.py
@@ -118,7 +120,9 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
         mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_sliceinfo.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
@@ -145,7 +149,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
-        mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+        mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_tableworkspace_item.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py

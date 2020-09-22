@@ -169,7 +169,7 @@ public:
   double getL1() const override;
   double getL2() const override;
 
-  double getValueByColName(const std::string &name_in) const;
+  double getValueByColName(std::string colName) const;
 
   /// Get the peak shape.
   const Mantid::Geometry::PeakShape &getPeakShape() const override;

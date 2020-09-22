@@ -115,6 +115,9 @@ if(MSVC)
   # Add to the path so that cmake can configure correctly without the user
   # having to do it
   set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
+  # Set PATH for custom command or target build steps. Avoids the need to
+  # make external PATH updates
+  set(CMAKE_MSVCIDE_RUN_PATH ${THIRD_PARTY_BIN})
 
   # Set variables to help CMake find components
   set(CMAKE_INCLUDE_PATH "${THIRD_PARTY_DIR}/include")

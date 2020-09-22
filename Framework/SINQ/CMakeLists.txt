@@ -167,7 +167,6 @@ endif()
 target_include_directories (SINQ SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(SINQ
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${NEXUS_LIBRARIES}
                       ${WINSOCK})

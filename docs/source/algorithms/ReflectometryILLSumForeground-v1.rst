@@ -57,28 +57,30 @@ Usage
        'HighAngleBkgOffset': 10,
        'HighAngleBkgWidth': 50,
    }
-   
+
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
+       Measurement='DirectBeam',
        **settings
    )
    # We need the summed direct beam for the reflectivity
-   directFgd = ReflectometryILLSumForeground(direct)
+   directFrg = ReflectometryILLSumForeground(direct)
 
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectLineWorkspace=direct,
+       Measurement='ReflectedBeam',
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
-       DirectForegroundWorkspace=directFgd,
+       DirectForegroundWorkspace=directFrg,
        DirectLineWorkspace=direct,
+       SummationType='SumInLambda',
        WavelengthRange=[2, 15],
    )
-   
+
    # Reflectivity is a single histogram
    print('Histograms in reflectivity workspace: {}'.format(reflectivity.getNumberHistograms()))
    # The data is still in wavelength
@@ -105,30 +107,31 @@ Output:
        'HighAngleBkgOffset': 10,
        'HighAngleBkgWidth': 50,
    }
-   
+
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
+       Measurement='DirectBeam',
        **settings
    )
 
    # We need the summed direct beam for the reflectivity
-   directFgd = ReflectometryILLSumForeground(direct)
-   
+   directFrg = ReflectometryILLSumForeground(direct)
+
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectLineWorkspace=direct,
+       Measurement='ReflectedBeam',
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
-       DirectForegroundWorkspace=directFgd,
+       DirectForegroundWorkspace=directFrg,
        DirectLineWorkspace=direct,
        SummationType='SumInQ',
        WavelengthRange=[0., 14.]
    )
-   
+
    # Reflectivity is a single histogram
    print('Histograms in reflectivity workspace: {}'.format(reflectivity.getNumberHistograms()))
    # The data is still in wavelength

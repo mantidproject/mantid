@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -25,14 +24,15 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
-// clang-format off
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-// clang-format on
+#include <nexus/NeXusFile.hpp>
 
-#include <cxxtest/TestSuite.h>
-#include <boost/regex.hpp>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
+#include <boost/regex.hpp>
+#include <cxxtest/TestSuite.h>
 
 #include <set>
 #include <unordered_map>
@@ -350,142 +350,6 @@ public:
         &spectrumInfo.detector(0));
     TS_ASSERT(!detGroup);
     TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
-  }
-
-  struct fromToEntry {
-    std::string path;
-    DateAndTime from;
-    DateAndTime to;
-  };
-
-  // Test that all the IDFs contain valid-to and valid-from dates and that
-  // for a single instrument none of the valid-from dates are equal
-  void testAllDatesInIDFs() {
-    ExperimentInfo helper;
-
-    // Collect all IDF filenames and put them in a multimap where the instrument
-    // identifier is the key
-    std::unordered_multimap<std::string, fromToEntry> idfFiles;
-    std::unordered_set<std::string> idfIdentifiers;
-
-    boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
-    Poco::DirectoryIterator end_iter;
-    for (Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString(
-             "instrumentDefinition.directory"));
-         dir_itr != end_iter; ++dir_itr) {
-      if (!Poco::File(dir_itr->path()).isFile())
-        continue;
-
-      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-
-      if (boost::regex_match(l_filenamePart, regex)) {
-        std::string validFrom, validTo;
-        helper.getValidFromTo(dir_itr->path(), validFrom, validTo);
-
-        size_t found;
-        found = l_filenamePart.find("_Definition");
-        fromToEntry ft;
-        ft.path = dir_itr->path();
-        ft.from.setFromISO8601(validFrom);
-        // Valid TO is optional
-        if (validTo.length() > 0)
-          ft.to.setFromISO8601(validTo);
-        else
-          ft.to.setFromISO8601("2100-01-01T00:00:00");
-
-        idfFiles.emplace(l_filenamePart.substr(0, found), ft);
-        idfIdentifiers.insert(l_filenamePart.substr(0, found));
-      }
-    }
-
-    // iterator to browse through the multimap: paramInfoFromIDF
-    std::unordered_multimap<std::string, fromToEntry>::const_iterator it1, it2;
-    std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
-              std::unordered_multimap<std::string, fromToEntry>::iterator>
-        ret;
-
-    for (const auto &idfIdentifier : idfIdentifiers) {
-      ret = idfFiles.equal_range(idfIdentifier);
-      for (it1 = ret.first; it1 != ret.second; ++it1) {
-        for (it2 = ret.first; it2 != ret.second; ++it2) {
-          if (it1 != it2) {
-            // some more intelligent stuff here later
-            std::stringstream messageBuffer;
-            messageBuffer
-                << "Two IDFs for one instrument have equal valid-from dates"
-                << "IDFs are: " << it1->first << " and " << it2->first
-                << " Date One: " << it1->second.from.toFormattedString()
-                << " Date Two: " << it2->second.from.toFormattedString();
-            TSM_ASSERT_DIFFERS(messageBuffer.str(), it2->second.from,
-                               it1->second.from);
-          }
-        }
-      }
-    }
-  }
-
-  //
-  void testHelperFunctions() {
-    ConfigService::Instance().updateFacilities();
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
-    TS_ASSERT(!boevs.empty());
-  }
-
-  //
-  void testHelper_TOPAZ_No_To_Date() {
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
-    TS_ASSERT(!boevs.empty());
-  }
-
-  void testHelper_ValidDateOverlap() {
-    const std::string instDir =
-        ConfigService::Instance().getInstrumentDirectory();
-    const std::string testDir = instDir + "unit_testing";
-    ConfigService::Instance().setString("instrumentDefinition.directory",
-                                        testDir);
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
-    boevs = helper.getInstrumentFilename("ARGUS", "1909-03-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST2_ValidDateOverlap"), std::string::npos);
-    boevs = helper.getInstrumentFilename("ARGUS", "1909-05-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
-    ConfigService::Instance().setString("instrumentDefinition.directory",
-                                        instDir);
-
-    std::vector<std::string> formats = {"xml"};
-    std::vector<std::string> dirs;
-    dirs.emplace_back(testDir);
-    std::vector<std::string> fnames = helper.getResourceFilenames(
-        "ARGUS", formats, dirs, "1909-01-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_EQUALS(fnames.size(), 1);
-    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
-                                         "1909-03-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST2_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_DIFFERS(fnames[1].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
-                                         "1909-05-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_EQUALS(fnames.size(), 1);
-  }
-
-  void test_nexus_geometry_getInstrumentFilename() {
-    const std::string instrumentName = "LOKI";
-    ExperimentInfo info;
-    const auto path = info.getInstrumentFilename(instrumentName, "");
-    TS_ASSERT(!path.empty());
-    TS_ASSERT(
-        boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
   }
 
   void test_nexus() {

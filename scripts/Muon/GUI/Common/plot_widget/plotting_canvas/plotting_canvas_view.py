@@ -11,6 +11,7 @@ from qtpy import QtWidgets
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
+from Muon.GUI.Common.plot_widget.plotting_canvas.plot_color_queue import ColorQueue
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable
 from mantid.plots.plotfunctions import get_plot_fig
@@ -26,6 +27,8 @@ else:
     from matplotlib.backends.backend_qt4agg import FigureCanvas
 
 DEFAULT_X_LIMITS = [0, 15]
+# Default color cycle using Matplotlib color codes C0, C1...ect
+DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(10)]
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
@@ -48,6 +51,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1,
                                       fig=self.fig)
         self._number_of_axes = 1
+        self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE)]
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
@@ -83,8 +87,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def create_new_plot_canvas(self, num_axes):
         """Creates a new blank plotting canvas"""
+        self.toolBar.reset_gridline_flags()
         self._plot_information_list = []
         self._number_of_axes = num_axes
+        self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE) for _ in range(num_axes)]
         self.fig.clf()
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
                                       fig=self.fig)
@@ -97,6 +103,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             ax.cla()
             ax.tracked_workspaces.clear()
             ax.set_prop_cycle(None)
+
+        for color_queue in self._color_queue:
+            color_queue.reset()
+
         self._plot_information_list = []
 
     def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
@@ -106,15 +116,17 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             workspace_name = workspace_plot_info.workspace_name
             try:
                 workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except RuntimeError:
+            except (RuntimeError, KeyError):
                 continue
             self._plot_information_list.append(workspace_plot_info)
             errors = workspace_plot_info.errors
             ws_index = workspace_plot_info.index
             axis_number = workspace_plot_info.axis
             ax = self.fig.axes[axis_number]
+            plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
+            plot_kwargs['color'] = self._color_queue[axis_number]()
             _do_single_plot(ax, workspace, ws_index, errors=errors,
-                            plot_kwargs=self._get_plot_kwargs(workspace_plot_info))
+                            plot_kwargs=plot_kwargs)
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         for workspace_plot_info in workspace_plot_info_list:
@@ -124,7 +136,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             except RuntimeError:
                 continue
             for plotted_information in self._plot_information_list.copy():
-                if workspace_plot_info == plotted_information:
+                if workspace_plot_info.workspace_name == plotted_information.workspace_name and \
+                        workspace_plot_info.axis == plotted_information.axis:
+                    self._update_color_queue_on_workspace_removal(workspace_plot_info.axis, workspace_name)
                     axis = self.fig.axes[workspace_plot_info.axis]
                     axis.remove_workspace_artists(workspace)
                     self._plot_information_list.remove(plotted_information)
@@ -138,9 +152,23 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         for workspace_plot_info in self._plot_information_list.copy():
             workspace_name = workspace_plot_info.workspace_name
             if workspace_name == workspace.name():
+                self._update_color_queue_on_workspace_removal(workspace_plot_info.axis, workspace_name)
                 axis = self.fig.axes[workspace_plot_info.axis]
                 axis.remove_workspace_artists(workspace)
                 self._plot_information_list.remove(workspace_plot_info)
+
+    def _update_color_queue_on_workspace_removal(self, axis_number, workspace_name):
+        try:
+            artist_info = self.fig.axes[axis_number].tracked_workspaces[workspace_name]
+        except KeyError:
+            return
+        for ws_artist in artist_info:
+            for artist in ws_artist._artists:
+                if isinstance(artist, ErrorbarContainer):
+                    color = artist[0].get_color()
+                else:
+                    color = artist.get_color()
+                self._color_queue[axis_number] += color
 
     # Ads observer functions
     def replace_specified_workspace_in_plot(self, workspace):
@@ -249,10 +277,18 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         return bottom, top
 
     def _reset_color_cycle(self):
-        for ax in self.fig.axes:
+        for i, ax in enumerate(self.fig.axes):
             ax.cla()
             ax.tracked_workspaces.clear()
-            ax.set_prop_cycle(None)
 
     def resizeEvent(self, event):
         self.fig.tight_layout()
+
+    def add_uncheck_autoscale_subscriber(self, observer):
+        self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)
+
+    def add_enable_autoscale_subscriber(self, observer):
+        self.toolBar.enable_autoscale_notifier.add_subscriber(observer)
+
+    def add_disable_autoscale_subscriber(self, observer):
+        self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)

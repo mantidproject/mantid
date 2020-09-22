@@ -15,15 +15,26 @@ New
 - The axis tick markers in a plot can be switched between Log and decimal formats independently of the axes scale.
 - Axes limits and labels can be set simultaneously for all subplots with the `Apply to all` button.
 - A default font for plots can now be set in the workbench settings.
+- Added a Recently Closed Scripts sub-menu to the File menu in workbench, it shows all scripts that have recently been closed in descending order.
+- Spreadsheet based data processing interface is created for ILL data reduction. 
+  SANS and reflectometry are currently supported. See :ref:`DrILL documentation <DrILL-ref>`
+  for more information.
+
+.. figure:: ../../images/drill.png
+   :align: right
 
 Improvements
 ############
+
+- Combo boxes for workspace selection through `OptionsPropertyWidget` and `WorkspaceSelector` are now editable and support popup autocompletion based on the beginning of a string.
 
 .. figure:: ../../images/Plot1DSelectionDialog5-1.png
    :align: right
 
 - The plot selection dialog now correctly shows the full range of valid spectra to plot, not just the min to max range.
 - We have added a Copy to Clipboard button to the plot window.
+- Any changes in the settings menu (currently only changing the default font) that require a restart will be detailed in
+  a pop up notification when leaving the settings window.
 - Tile plots are now reloaded correctly by project recovery.
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
@@ -89,12 +100,26 @@ Improvements
 
 - Added an option in the settings to specify the default legend size.
 - Added an option to the settings window to set the default colormap for image plots.
+- Colorfill plots of very large workspaces now take less than 10 seconds to plot
 - Improved loading of python plugins at startup on slow disks.
 - Added a circular sector shape in the Pick and Mask tab of the instrument view.
 - Workbench will now spot if it is about to create the settings window off the available screen, and will move it so it is all visible. This is important as it is a modal dialog and could freeze the application in an unrecoverable way before.
 - Sliceviewer no longer lists the reversed colourmaps along with the regular, instead they are accessed with a reverse checkbox.
 - Sliceviewer colourmap uses the default colourmap from the settings.
+- Sliceviewer scale remains set when reopened
 - Code completions are now loaded when the code editor is first changed.
+- The ExtractFFTSpectrum algorithm has extra properties (Shift, AutoShift, and AcceptXRoundingErrors) to reflect those of the underlying FFT.
+- Legends in 1D plots are now editable in-situ.
+- Added an option in `figure options` to change the canvas color for an axis.
+- Sliceviewer cut line plots' line widths reduced
+- When line plots are active on the sliceviewer the arrow keys can now be used to move the cursor a pixel at a time.
+- When showing monochromatic workspaces, the instrument widget will not show the integration bar, nor the pick widget the detector spectra graph.
+- In the instrument widget's rendering tab, added a Reset view button to restore to default projection.
+- In the instrument widget's draw tab, added the option to mask, draw ROI and group single pixel and tube.
+- `TableWorkspaces` can now have columns containing errors linked to corresponding columns containing values, using the `setLinkedYCol(errColumn, dataColumn)`.
+- Reduce log level of project recovery when it fails to save a plot correctly, to debug from warning level, to avoid excess messages in the console.
+- Added a Clear button to the workspaces toolbox which removes all workspaces from the tree including hidden ones
+
 
 Bugfixes
 ########
@@ -122,7 +147,7 @@ Bugfixes
 - `plt.show()` now shows the most recently created figure.
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
-- Changing the settings on tiled colorbars now applys to all the plots if there is only one colorbar.
+- Changing the settings on tiled colorbars now applies to all the plots if there is only one colorbar.
 - Colorfill plots now correctly use the workspace name as the plot title.
 - Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
@@ -131,5 +156,20 @@ Bugfixes
 - Fixed a bug which prevented the double click axis editor menus from working for tiled plots.
 - Select image in the plot figure option contains each image rather than each spectra for colorfil plots of workspaces with a numeric vertical axis
 - A bug has been fixed that caused an error if a workspace containing only monitor spectra was attempted to be plotted as a colorfill plot
+- The figure options button on the sliceviewer has been removed as most options did not function correctly.
+- Fixed the bug that caused the fit browser on plots to reset size changes on mouse interactions with the figure.
+- Fix crash when subscribing algorithms from a separate thread
+- The workbench launch scripts have been replaced by an executable on macOS & Windows. On Windows this will stop virus scanners
+  flagging the old ``launch_workbench.exe`` as a threat and quarantining it.
+- Fixed an issue where workbench would not open if PID assigned by project recovery was owned by another programme.
+- Fixed a bug in the 3D Surface Plot where the colorbar limits were incorrect when plotting data with monitors.
+- When running `ExtractFFTSpectrum` with only a real input, there is no longer a blank output on the end of the workspace.
+- `ExtractFFTSpectrum` gives the correct units.
+- Warn users when they attempt to use Generate Recovery Script with no workspaces present.
+- The y axis labels will now appear in the correct order if imshow is called from a script with origin=upper.
+- Fixed a bug with colorfill plot script generation for distribution workspaces.
+- Use Jemalloc for memory allocation on Linux so memory can be released to the system.
+- Fixed a bug where instrument view would not update on wheel zoom.
+- Fixed a bug which caused workbench to crash midway through closing normally when logging level was set to debug.
 
 :ref:`Release 5.1.0 <v5.1.0>`

@@ -7,6 +7,14 @@
 from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group, construct_empty_pair
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.muon_group import MuonRun
+from enum import Enum
+
+
+class RowValid(Enum):
+    invalid_for_all_runs = 0
+    valid_for_all_runs = 2
+    valid_for_some_runs = 1
 
 
 class GroupingTabModel(object):
@@ -29,10 +37,10 @@ class GroupingTabModel(object):
         it doesn't already exist (e.g. if group added to table but no update yet triggered).
         """
         try:
-            workspace = self._groups_and_pairs[group_name].workspace[str(run)].workspace
+            workspace = self._groups_and_pairs[group_name].workspace[MuonRun(run)].workspace
         except AttributeError:
-            workspace = self._context.calculate_group(group_name, str(run), rebin=False)
-            self._groups_and_pairs[group_name].update_counts_workspace(workspace, str(run))
+            workspace = self._context.calculate_group(group_name, run, rebin=False)
+            self._groups_and_pairs[group_name].update_counts_workspace(workspace, MuonRun(run))
         return workspace
 
     @property
@@ -139,8 +147,10 @@ class GroupingTabModel(object):
         return pair
 
     def reset_groups_and_pairs_to_default(self):
+        maximum_number_of_periods = max([self._context.num_periods(run) for run in self._context.current_runs])
+
         self._groups_and_pairs.reset_group_and_pairs_to_default(self._data.current_workspace, self._data.instrument,
-                                                                self._data.main_field_direction)
+                                                                self._data.main_field_direction, maximum_number_of_periods)
 
     def reset_selected_groups_and_pairs(self):
         self._groups_and_pairs.reset_selected_groups_and_pairs()
@@ -190,12 +200,17 @@ class GroupingTabModel(object):
         else:
             return 1
 
-    def update_periods(self, summed_periods, subtracted_periods):
-        self._context.gui_context.update_and_send_signal(SubtractedPeriods=subtracted_periods,
-                                                         SummedPeriods=summed_periods)
+    def validate_periods_list(self, periods):
+        invalid_runs = []
+        current_runs = self._context.current_runs
 
-    def get_summed_periods(self):
-        return self._context.gui_context["SummedPeriods"]
+        for run in current_runs:
+            if any([period < 1 or self._context.num_periods(run) < period for period in periods]):
+                invalid_runs.append(run)
 
-    def get_subtracted_periods(self):
-        return self._context.gui_context["SubtractedPeriods"]
+        if not invalid_runs:
+            return RowValid.valid_for_all_runs
+        elif len(invalid_runs) == len(current_runs):
+            return RowValid.invalid_for_all_runs
+        else:
+            return RowValid.valid_for_some_runs

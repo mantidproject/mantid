@@ -10,9 +10,8 @@ from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
-from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, RowValid
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView, inverse_group_table_columns
 from Muon.GUI.Common.muon_group import MuonGroup
 from mantidqt.utils.observer_pattern import Observer
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
@@ -69,8 +68,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
     # TESTS : Initialization
     # ------------------------------------------------------------------------------------------------------------------
 
-    def test_that_table_has_four_columns_when_initialized(self):
-        self.assertEqual(self.view.num_cols(), 4)
+    def test_that_table_has_five_columns_when_initialized(self):
+        self.assertEqual(self.view.num_cols(), 5)
 
     def test_that_model_is_initialized_as_empty(self):
         self.assert_model_empty()
@@ -252,50 +251,50 @@ class GroupingTablePresenterTest(unittest.TestCase):
         for invalid_ids in invalid_id_lists:
             call_count += 1
 
-            self.view.grouping_table.setCurrentCell(0, 2)
-            self.view.grouping_table.item(0, 2).setText(invalid_ids)
+            self.view.grouping_table.setCurrentCell(0, 3)
+            self.view.grouping_table.item(0, 3).setText(invalid_ids)
 
             self.assertEqual(self.view.warning_popup.call_count, call_count)
 
-            self.assertEqual(self.view.get_table_item_text(0, 2), "1")
+            self.assertEqual(self.view.get_table_item_text(0, 3), "1")
             self.assertEqual(self.model._context.group_pair_context["my_group_0"].detectors, [1])
 
     def test_that_displayed_values_are_simplified_to_least_verbose_form(self):
         self.presenter.handle_add_group_button_clicked()
 
-        self.view.grouping_table.setCurrentCell(0, 2)
-        self.view.grouping_table.item(0, 2).setText("20-25,10,5,4,3,2,1")
+        self.view.grouping_table.setCurrentCell(0, 3)
+        self.view.grouping_table.item(0, 3).setText("20-25,10,5,4,3,2,1")
 
-        self.assertEqual(self.view.get_table_item_text(0, 2), "1-5,10,20-25")
+        self.assertEqual(self.view.get_table_item_text(0, 3), "1-5,10,20-25")
         self.assertEqual(self.model._context.group_pair_context["group_0"].detectors,
                          [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
 
     def test_that_if_detector_list_changed_that_number_of_detectors_updates(self):
         self.presenter.handle_add_group_button_clicked()
-        self.assertEqual(self.view.get_table_item_text(0, 3), "1")
+        self.assertEqual(self.view.get_table_item_text(0, inverse_group_table_columns['number_of_detectors']), "1")
 
-        self.view.grouping_table.setCurrentCell(0, 2)
-        self.view.grouping_table.item(0, 2).setText("1-10")
+        self.view.grouping_table.setCurrentCell(0, inverse_group_table_columns['detector_ids'])
+        self.view.grouping_table.item(0, inverse_group_table_columns['detector_ids']).setText("1-10")
 
-        self.assertEqual(self.view.get_table_item_text(0, 3), "10")
+        self.assertEqual(self.view.get_table_item_text(0, inverse_group_table_columns['number_of_detectors']), "10")
 
     def test_that_detector_numbers_cannot_be_edited(self):
         self.presenter.handle_add_group_button_clicked()
 
-        self.view.grouping_table.setCurrentCell(0, 3)
-        self.view.grouping_table.item(0, 3).setText("25")
+        self.view.grouping_table.setCurrentCell(0, inverse_group_table_columns['detector_ids'])
+        self.view.grouping_table.item(0, inverse_group_table_columns['number_of_detectors']).setText("25")
 
-        self.assertEqual(self.view.get_table_item_text(0, 3), "1")
+        self.assertEqual(self.view.get_table_item_text(0, inverse_group_table_columns['number_of_detectors']), "1")
 
     def test_modifying_detector_ids_to_non_existent_detector_fails(self):
         self.presenter.handle_add_group_button_clicked()
-        self.view.grouping_table.item(0, 2).setText("1000")
+        self.view.grouping_table.item(0, inverse_group_table_columns['detector_ids']).setText("1000")
 
         self.view.warning_popup.assert_called_once_with('Invalid detector list.')
 
     def test_modifying_detector_ids_to_negative_detectors_fails(self):
         self.presenter.handle_add_group_button_clicked()
-        self.view.grouping_table.item(0, 2).setText("-10-10")
+        self.view.grouping_table.item(0, inverse_group_table_columns['detector_ids']).setText("-10-10")
 
         self.view.warning_popup.assert_called_once_with('Invalid detector list.')
 
@@ -370,6 +369,68 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be greater than minimum')
         self.assertEqual(self.view.warning_popup.call_count, 2)
 
+    def test_that_periods_invalid_for_all_runs_return_invalid(self):
+        self.presenter._model._context = mock.MagicMock()
+        self.presenter._model._context.current_runs = [[84447], [84448], [84449], [84450], [84451]]
+        self.presenter._model._context.num_periods = self._fake_num_periods
+
+        valid = self.presenter.validate_periods('1-5')
+
+        self.assertEquals(RowValid.invalid_for_all_runs, valid)
+
+    def test_that_period_valid_for_at_least_one_run_returns_valid(self):
+        self.presenter._model._context = mock.MagicMock()
+        self.presenter._model._context.current_runs = [[84449], [84450], [84451]]
+        self.presenter._model._context.num_periods = self._fake_num_periods
+
+        valid = self.presenter.validate_periods('1-4')
+
+        self.assertEquals(RowValid.valid_for_some_runs, valid)
+
+    def test_that_period_string_containing_not_matching_run_entry_regex_returns_invalid(self):
+        valid = self.presenter.validate_periods('Invalid string')
+
+        self.assertEquals(RowValid.invalid_for_all_runs, valid)
+
+    def _fake_num_periods(self, run):
+        num_periods_dict = {'[84447]': 4, '[84448]': 4, '[84449]': 4, '[84450]':2, '[84451]' :1}
+        return num_periods_dict[str(run)]
+
+    def test_when_adding_group_to_empty_table_it_is_selected(self):
+        self.presenter.add_group(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4]))
+        self.presenter.add_group(MuonGroup(group_name='group_2', detector_ids=[1,2,3,4]))
+
+        self.assertEquals(self.model.selected_groups, ['group_1'])
+
+    def test_update_view_from_model_correctly_adds_warnings_for_invalid_periods(self):
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.invalid_for_all_runs)
+        self.presenter._view.add_entry_to_table = mock.MagicMock()
+        self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
+
+        self.presenter.update_view_from_model()
+
+        self.presenter._view.add_entry_to_table.assert_called_once_with(['group_1', '3', False, '1-4', '4'],
+                                                                        (255, 0, 0), 'Warning: group periods invalid for all runs')
+
+    def test_update_view_from_model_correctly_adds_warnings_for_semi_invalid_periods(self):
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.valid_for_some_runs)
+        self.presenter._view.add_entry_to_table = mock.MagicMock()
+        self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
+
+        self.presenter.update_view_from_model()
+
+        self.presenter._view.add_entry_to_table.assert_called_once_with(['group_1', '3', False, '1-4', '4'],
+                                                                        (255, 255, 0), 'Warning: group periods invalid for some runs')
+
+    def test_update_view_from_model_correctly_adds_warnings_for_valid(self):
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.valid_for_all_runs)
+        self.presenter._view.add_entry_to_table = mock.MagicMock()
+        self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
+
+        self.presenter.update_view_from_model()
+
+        self.presenter._view.add_entry_to_table.assert_called_once_with(['group_1', '3', False, '1-4', '4'],
+                                                                        (255, 255, 255), '')
 
 
 if __name__ == '__main__':

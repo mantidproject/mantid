@@ -5,40 +5,27 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/GroupingLoader.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/ISISRunLogs.h"
-#include "MantidDataHandling/LoadMuonLog.h"
-#include "MantidDataHandling/LoadMuonNexusV2Helper.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadMuonNexusV2NexusHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/UnitLabelTypes.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 using namespace API;
 using namespace NeXus;
-using namespace HistogramData;
 using std::size_t;
 using namespace DataObjects;
 
-namespace NeXusEntry {
-const std::string SAMPLE{"sample"};
-const std::string TEMPERATURE{"temperature"};
-const std::string MAGNETICFIELD{"magnetic_field"};
-} // namespace NeXusEntry
-
 // Constructor
 SinglePeriodLoadMuonStrategy::SinglePeriodLoadMuonStrategy(
-    Kernel::Logger &g_log, const std::string filename, NXEntry &entry,
-    Workspace2D_sptr workspace, int entryNumber, bool isFileMultiPeriod)
-    : LoadMuonStrategy(g_log, filename), m_entry(entry),
-      m_workspace(std::move(workspace)), m_entryNumber(entryNumber),
-      m_isFileMultiPeriod(isFileMultiPeriod),
+    Kernel::Logger &g_log, const std::string filename,
+    LoadMuonNexusV2NexusHelper &nexusLoader, Workspace2D &workspace,
+    int entryNumber, bool isFileMultiPeriod)
+    : LoadMuonStrategy(g_log, filename, nexusLoader), m_workspace(workspace),
+      m_entryNumber(entryNumber), m_isFileMultiPeriod(isFileMultiPeriod),
       m_detectors(getLoadedDetectors()) {}
 
 /**
@@ -47,24 +34,15 @@ SinglePeriodLoadMuonStrategy::SinglePeriodLoadMuonStrategy(
  */
 void SinglePeriodLoadMuonStrategy::loadMuonLogData() {
 
-  auto &run = m_workspace->mutableRun();
-  auto runSample = m_entry.openNXGroup(NeXusEntry::SAMPLE);
-
-  if (runSample.containsDataSet(NeXusEntry::TEMPERATURE)) {
-    float temperature = runSample.getFloat(NeXusEntry::TEMPERATURE);
-    run.addProperty("sample_temp", static_cast<double>(temperature));
-  }
-
-  if (runSample.containsDataSet(NeXusEntry::MAGNETICFIELD)) {
-    float magn_field = runSample.getFloat(NeXusEntry::MAGNETICFIELD);
-    run.addProperty("sample_magn_field", static_cast<double>(magn_field));
-  }
+  auto &run = m_workspace.mutableRun();
+  auto sampleInformation = m_nexusLoader.loadSampleInformationFromNexus();
   std::string mainFieldDirection =
-      LoadMuonNexusV2Helper::loadMainFieldDirectionFromNexus(m_entry);
-  run.addProperty("main_field_direction", mainFieldDirection);
+      m_nexusLoader.loadMainFieldDirectionFromNexus();
+  double firstGoodData = m_nexusLoader.loadFirstGoodDataFromNexus();
 
-  double firstGoodData =
-      LoadMuonNexusV2Helper::loadFirstGoodDataFromNexus(m_entry);
+  run.addProperty("sample_temp", sampleInformation.temperature);
+  run.addProperty("sample_magn_field", sampleInformation.magneticField);
+  run.addProperty("main_field_direction", mainFieldDirection);
   run.addProperty("FirstGoodData", firstGoodData);
 }
 
@@ -74,15 +52,13 @@ void SinglePeriodLoadMuonStrategy::loadMuonLogData() {
 void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
   // Overwrite existing log entry
   std::string goodframeProp{"goodfrm"};
-  auto &run = m_workspace->mutableRun();
+  auto &run = m_workspace.mutableRun();
   run.removeProperty(goodframeProp);
-
-  NXInt goodframes = LoadMuonNexusV2Helper::loadGoodFramesDataFromNexus(
-      m_entry, m_isFileMultiPeriod);
+  NXInt goodframes =
+      m_nexusLoader.loadGoodFramesDataFromNexus(m_isFileMultiPeriod);
 
   if (m_isFileMultiPeriod) {
-    run.addProperty(goodframeProp,
-                    goodframes[static_cast<int>(m_entryNumber - 1)]);
+    run.addProperty(goodframeProp, goodframes[m_entryNumber - 1]);
   } else {
     run.addProperty(goodframeProp, goodframes[0]);
   }
@@ -96,8 +72,8 @@ void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() const {
 
-  auto grouping = LoadMuonNexusV2Helper::loadDetectorGroupingFromNexus(
-      m_entry, m_detectors, m_isFileMultiPeriod);
+  auto grouping = m_nexusLoader.loadDetectorGroupingFromNexus(
+      m_detectors, m_isFileMultiPeriod, m_entryNumber);
   TableWorkspace_sptr table =
       createDetectorGroupingTable(m_detectors, grouping);
 
@@ -105,64 +81,26 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() const {
     return table;
   } else {
     m_logger.notice("Loading grouping information from IDF");
-    return loadDefaultDetectorGrouping();
+    return loadDefaultDetectorGrouping(m_workspace);
   }
 }
 /**
- * Loads default detector grouping, if this isn't present
- * return dummy grouping
- * If no entry in NeXus file for grouping, load it from the IDF.
- * @returns :: Grouping table
- */
-Workspace_sptr
-SinglePeriodLoadMuonStrategy::loadDefaultDetectorGrouping() const {
-
-  auto instrument = m_workspace->getInstrument();
-  auto &run = m_workspace->mutableRun();
-  std::string mainFieldDirection =
-      run.getLogData("main_field_direction")->value();
-  API::GroupingLoader groupLoader(instrument, mainFieldDirection);
-  try {
-    const auto idfGrouping = groupLoader.getGroupingFromIDF();
-    return idfGrouping->toTable();
-  } catch (const std::runtime_error &) {
-    auto dummyGrouping = std::make_shared<Grouping>();
-    if (instrument->getNumberDetectors() != 0) {
-      dummyGrouping = groupLoader.getDummyGrouping();
-    } else {
-      // Make sure it uses the right number of detectors
-      std::ostringstream oss;
-      oss << "1-" << m_workspace->getNumberHistograms();
-      dummyGrouping->groups.emplace_back(oss.str());
-      dummyGrouping->groupNames.emplace_back("all");
-    }
-    return dummyGrouping->toTable();
-  }
-}
-/**
- * Loads dead time table, if this isn't present
+ * Loads deadtime table from nexus file
  * @returns :: Dead time table
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
-  auto deadTimes = LoadMuonNexusV2Helper::loadDeadTimesFromNexus(
-      m_entry, m_detectors, m_isFileMultiPeriod);
+  auto deadTimes = m_nexusLoader.loadDeadTimesFromNexus(
+      m_detectors, m_isFileMultiPeriod, m_entryNumber);
   return createDeadTimeTable(m_detectors, deadTimes);
 }
 /**
- * Performs time-zero correction on the loaded workspace and also changes the
- * unit label on the time axis, which is incorrect due to being loaded using
- * LoadISISNexus2
+ * Performs time-zero correction on the loaded workspace.
  */
 void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
-  double timeZero = LoadMuonNexusV2Helper::loadTimeZeroFromNexusFile(m_entry);
-  auto newUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
-      Kernel::UnitFactory::Instance().create("Label"));
-  newUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
-  m_workspace->getAxis(0)->unit() = newUnit;
-
-  auto numHistograms = m_workspace->getNumberHistograms();
+  double timeZero = m_nexusLoader.loadTimeZeroFromNexusFile();
+  auto numHistograms = m_workspace.getNumberHistograms();
   for (size_t i = 0; i < numHistograms; ++i) {
-    auto &timeAxis = m_workspace->mutableX(i);
+    auto &timeAxis = m_workspace.mutableX(i);
     timeAxis = timeAxis - timeZero;
   }
 }
@@ -170,18 +108,7 @@ void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
  * Finds the detectors which are loaded in the stored workspace
  */
 std::vector<detid_t> SinglePeriodLoadMuonStrategy::getLoadedDetectors() {
-
-  std::vector<detid_t> loadedDetectors;
-  size_t numberOfSpectra = m_workspace->getNumberHistograms();
-
-  for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra;
-       spectraIndex++) {
-    const auto detIdSet =
-        m_workspace->getSpectrum(spectraIndex).getDetectorIDs();
-    // each spectrum should only point to one detector in the Muon file
-    loadedDetectors.emplace_back(*detIdSet.begin());
-  }
-  return loadedDetectors;
+  return getLoadedDetectorsFromWorkspace(m_workspace);
 }
 } // namespace DataHandling
 } // namespace Mantid

@@ -169,6 +169,7 @@ signals:
   void modificationChanged(bool m);
   void textZoomedIn();
   void textZoomedOut();
+  void progressMade(const int);
 
 private:
   ScriptEditor(const ScriptEditor&);
@@ -420,6 +421,22 @@ public:
 };
 
 // ---------------------------------
+// Instrument Selector
+// ---------------------------------
+
+class InstrumentSelector : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/InstrumentSelector.h"
+%End
+public:
+  InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
+  void setTechniques(const QStringList &techniques);
+  void setCurrentIndex(int);
+  QString currentText();
+  int count();
+};
+
+// ---------------------------------
 // Fit Property Browser
 // ---------------------------------
 class FitPropertyBrowser : public QDockWidget {
@@ -453,6 +470,9 @@ public:
     void setWorkspaceIndex(int i);
     QStringList getWorkspaceNames();
     void fit();
+    void toggleSettingsBrowserVisible();
+    void removePropertiesFromSettingsBrowser(const QStringList &propsToRemove);
+    void toggleWsListVisible();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
@@ -461,6 +481,7 @@ public:
     void addFitResultWorkspacesToTableWidget();
     void setWorkspaceName(const QString &wsName);
     void postDeleteHandle(const std::string &wsName);
+    void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
 
     SIP_PYOBJECT defaultPeakType();
@@ -910,9 +931,11 @@ public:
     void setLabelMinWidth(const int);
     void setText(const QString&);
     void setUserInput(const QVariant &);
+    QVariant getUserInput() const;
     void setReadOnly(bool readOnly);
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
+    void isOptional(bool);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
@@ -989,4 +1012,5 @@ class WorkspaceSelector : QComboBox
 %End
 public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
+    void setOptional(bool optional);
 };

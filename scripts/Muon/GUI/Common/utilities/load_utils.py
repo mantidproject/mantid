@@ -219,7 +219,6 @@ def load_workspace_from_filename(filename,
             DeleteWorkspace(Workspace=table)
 
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 3)
-        print("hiii", )
         UnGroupWorkspace(load_result["DeadTimeTable"])
         load_result["DeadTimeTable"] = None
         UnGroupWorkspace(workspace.name())
@@ -276,10 +275,14 @@ def get_table_workspace_names_from_ADS():
 
 
 def combine_loaded_runs(model, run_list, delete_added=False):
+    period_list = [model._data_context.num_periods([run]) for run in run_list]
+    if max(period_list) != min(period_list):
+        raise RuntimeError('Inconsistent periods across co-added runs. This is not supported.')
     return_ws = model._loaded_data_store.get_data(run=[run_list[0]])["workspace"]
     running_total = []
 
-    for index, workspace in enumerate(return_ws["OutputWorkspace"]):
+    for index in range(min(period_list)):
+        workspace = return_ws["OutputWorkspace"][index]
         running_total_item = workspace.workspace.name() + 'CoAdd'
         CloneWorkspace(InputWorkspace=workspace.workspace.name(), OutputWorkspace=running_total_item)
         for run in run_list[1:]:

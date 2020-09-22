@@ -7,15 +7,18 @@
 #pragma once
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace_fwd.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace DataHandling {
+class LoadMuonNexusV2NexusHelper;
 class DLLExport LoadMuonStrategy {
 public:
   // Constructor
-  LoadMuonStrategy(Kernel::Logger &g_log, std::string filename);
+  LoadMuonStrategy(Kernel::Logger &g_log, std::string filename,
+                   LoadMuonNexusV2NexusHelper &nexusLoader);
   // Virtual destructor
   virtual ~LoadMuonStrategy() {}
   // Load muon log data
@@ -38,10 +41,18 @@ protected:
   DataObjects::TableWorkspace_sptr
   createDeadTimeTable(const std::vector<detid_t> &detectorsLoaded,
                       const std::vector<double> &deadTimes) const;
+
+  API::Workspace_sptr loadDefaultDetectorGrouping(
+      const DataObjects::Workspace2D &localWorkspace) const;
+
+  std::vector<detid_t> getLoadedDetectorsFromWorkspace(
+      const DataObjects::Workspace2D &localWorkspace) const;
   // Logger
   Kernel::Logger &m_logger;
   // Filename, used for running child algorithms
   const std::string m_filename;
+  // Nexus file loader, used for manipulating the nexus entry
+  LoadMuonNexusV2NexusHelper &m_nexusLoader;
 };
 } // namespace DataHandling
 } // namespace Mantid

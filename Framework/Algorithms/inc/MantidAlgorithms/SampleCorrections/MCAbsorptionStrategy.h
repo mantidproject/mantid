@@ -8,8 +8,9 @@
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidAlgorithms/SampleCorrections/IMCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
-#include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/DeltaEMode.h"
 #include <tuple>
@@ -33,32 +34,35 @@ class MonteCarloAbsorption;
   instance has a fixed nominal source position, nominal sample
   position & sample + containers shapes.
 
-  The error on all points is defined to be \f$\frac{1}{\sqrt{N}}\f$, where N is
-  the number of events generated.
+  The error on all points is defined to be \f$\frac{SD}{\sqrt{N}}\f$, where SD
+  is the standard deviation of the attenuation factors across the simulated
+  tracks and N is the number of events generated.
 */
-class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy {
+class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy
+    : public IMCAbsorptionStrategy {
 public:
-  MCAbsorptionStrategy(
-      const IBeamProfile &beamProfile, const API::Sample &sample,
-      Kernel::DeltaEMode::Type EMode, const size_t nevents,
-      const size_t maxScatterPtAttempts,
-      const bool regenerateTracksForEachLambda,
-      const MCInteractionVolume::ScatteringPointVicinity pointsIn =
-          MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
-  void calculate(Kernel::PseudoRandomNumberGenerator &rng,
-                 const Kernel::V3D &finalPos,
-                 const std::vector<double> &lambdas, const double lambdaFixed,
-                 std::vector<double> &attenuationFactors,
-                 std::vector<double> &attFactorErrors,
-                 MCInteractionStatistics &stats);
+  MCAbsorptionStrategy(IMCInteractionVolume &interactionVolume,
+                       const IBeamProfile &beamProfile,
+                       Kernel::DeltaEMode::Type EMode, const size_t nevents,
+                       const size_t maxScatterPtAttempts,
+                       const bool regenerateTracksForEachLambda);
+  virtual void calculate(Kernel::PseudoRandomNumberGenerator &rng,
+                         const Kernel::V3D &finalPos,
+                         const std::vector<double> &lambdas,
+                         const double lambdaFixed,
+                         std::vector<double> &attenuationFactors,
+                         std::vector<double> &attFactorErrors,
+                         MCInteractionStatistics &stats) override;
 
 private:
   const IBeamProfile &m_beamProfile;
-  const MCInteractionVolume m_scatterVol;
+  const IMCInteractionVolume &m_scatterVol;
   const size_t m_nevents;
   const size_t m_maxScatterAttempts;
   const Kernel::DeltaEMode::Type m_EMode;
   const bool m_regenerateTracksForEachLambda;
+  IMCInteractionVolume &setActiveRegion(IMCInteractionVolume &interactionVolume,
+                                        const IBeamProfile &beamProfile);
 };
 
 } // namespace Algorithms

@@ -516,7 +516,6 @@ target_link_libraries(Kernel
                       ${TBB_LIBRARIES}
                       ${TBB_MALLOC_LIBRARIES}
                       PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
                       ${NETWORK_LIBRARIES}

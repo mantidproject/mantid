@@ -15,10 +15,12 @@
 set ( BIN_DIR bin )
 set ( ETC_DIR etc )
 set ( LIB_DIR lib )
+set ( SITE_PACKAGES ${LIB_DIR} )
 set ( PLUGINS_DIR plugins )
 
 set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
 set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
 set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
 
 # Separate directory of plugins to be discovered by the ParaView framework
@@ -153,56 +155,37 @@ if [ -n \"\${NXSESSIONID}\" ]; then  # running in nx
   VGLRUN=\"vglrun\"
 elif [ -n \"\${TLSESSIONDATA}\" ]; then  # running in thin-linc
   command -v vglrun >/dev/null 2>&1 || { echo >&2 \"MantidPlot requires VirtualGL but it's not installed.  Aborting.\"; exit 1; }
-  if [ command -v vgl-wrapper.sh ]; then
+  if [ \$(command -v vgl-wrapper.sh) ]; then
     VGLRUN=\"vgl-wrapper.sh\"
   else
     VGLRUN=\"vglrun\"
   fi
 fi" )
 
-# The scripts need tcmalloc to be resolved to the runtime library as the plain
-# .so symlink is only present when a -dev/-devel package is present
-if ( TCMALLOC_FOUND )
-  get_filename_component ( TCMALLOC_RUNTIME_LIB ${TCMALLOC_LIBRARIES} REALPATH )
+# The scripts need jemalloc to be resolved to the runtime library as the plain
+# .so symlink is only present when a -dev/-devel package is presentz
+if ( JEMALLOCLIB_FOUND )
+  get_filename_component ( JEMALLOC_RUNTIME_LIB ${JEMALLOC_LIBRARIES} REALPATH )
   # We only want to use the major version number
-  string( REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" TCMALLOC_RUNTIME_LIB ${TCMALLOC_RUNTIME_LIB} )
+  string( REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" JEMALLOC_RUNTIME_LIB ${JEMALLOC_RUNTIME_LIB} )
 endif ()
 
-# definitions to preload tcmalloc but not if we are using address sanitizer as this confuses things
+# definitions to preload jemalloc but not if we are using address sanitizer as this confuses things
 if ( WITH_ASAN )
-  set ( TCMALLOC_DEFINITIONS
+  set ( JEMALLOC_DEFINITIONS
 "
 LOCAL_PRELOAD=\${LD_PRELOAD}
-TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}
-TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
+"
 )
 else ()
   # Do not indent the string below as it messes up the formatting in the final script
-  set ( TCMALLOC_DEFINITIONS
-"# Define parameters for tcmalloc
-LOCAL_PRELOAD=${TCMALLOC_RUNTIME_LIB}
+  set ( JEMALLOC_DEFINITIONS
+"# Define parameters for jemalloc
+LOCAL_PRELOAD=${JEMALLOC_RUNTIME_LIB}
 if [ -n \"\${LD_PRELOAD}\" ]; then
     LOCAL_PRELOAD=\${LOCAL_PRELOAD}:\${LD_PRELOAD}
 fi
-if [ -z \"\${TCMALLOC_RELEASE_RATE}\" ]; then
-    TCM_RELEASE=10000
-else
-    TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}
-fi
-
-# Define when to report large memory allocation
-if [ -z \"\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}\" ]; then
-    # total available memory
-    TCM_REPORT=\$(grep MemTotal /proc/meminfo --color=never | awk '{print \$2}')
-    # half of available memory
-    TCM_REPORT=`expr 512 \\* \$TCM_REPORT`
-    # minimum is 1GB
-    if [ \${TCM_REPORT} -le 1073741824 ]; then
-        TCM_REPORT=1073741824
-    fi
-else
-    TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}
-fi" )
+" )
 endif()
 
 # chunk of code for launching gdb
@@ -213,7 +196,7 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     GDB=\"gdb --args\"
 fi" )
 
-set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
+set ( ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?" )
 
 ##### Local dev version
 set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
@@ -224,7 +207,6 @@ else ()
 endif ()
 
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin" )
-set ( SCRIPTSDIR ${CMAKE_HOME_DIRECTORY}/scripts)
 
 # used by mantidplot and mantidworkbench
 if (ENABLE_MANTIDPLOT)
@@ -266,7 +248,6 @@ endif ()
 
 # used by mantidplot and mantidworkbench
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
-set ( SCRIPTSDIR "\${INSTALLDIR}/scripts")
 
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot_exe )
@@ -276,7 +257,7 @@ if (ENABLE_MANTIDPLOT)
             DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
 endif ()
 if (ENABLE_WORKBENCH)
-  set ( MANTIDWORKBENCH_EXEC workbench-script ) # what the actual thing is called
+  set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY )
   install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install

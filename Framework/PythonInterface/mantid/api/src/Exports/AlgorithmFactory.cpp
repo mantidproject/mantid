@@ -72,8 +72,9 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
  * @param self :: An instance of AlgorithmFactory.
  * @param includeHidden :: If true hidden algorithms are included.
  */
-list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
-  auto descriptors = self.getDescriptors(includeHidden);
+list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden = false,
+                    bool includeAlias = false) {
+  auto descriptors = self.getDescriptors(includeHidden, includeAlias);
   list pyDescriptors;
   for (auto &descr : descriptors) {
     boost::python::object d(descr);
@@ -154,6 +155,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(getDescriptors_overloads, getDescriptors, 1, 3)
 
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
@@ -188,9 +190,11 @@ void export_AlgorithmFactory() {
            "Register a Python class derived from "
            "PythonAlgorithm into the factory")
       .def("getDescriptors", &getDescriptors,
-           (arg("self"), arg("include_hidden")),
-           "Return a list of descriptors of registered algorithms. Each "
-           "descriptor is a list: [name, version, category, alias].")
+           getDescriptors_overloads(
+               (arg("self"), arg("include_hidden") = false,
+                arg("include_alias") = false),
+               "Return a list of descriptors of registered algorithms. Each "
+               "descriptor is a list: [name, version, category, alias]."))
       .def(
           "getCategoriesandState", &getCategoriesandState,
           "Return the categories of the algorithms. This includes those within "

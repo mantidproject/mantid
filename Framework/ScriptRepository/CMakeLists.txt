@@ -44,7 +44,6 @@ include_directories(inc)
 
 target_link_libraries(ScriptRepository
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${LIBS}
                       ${JSONCPP_LIBRARIES})
 

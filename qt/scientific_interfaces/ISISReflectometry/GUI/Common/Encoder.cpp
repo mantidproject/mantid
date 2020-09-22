@@ -363,8 +363,8 @@ QMap<QString, QVariant> Encoder::encodeSave(const QtSaveView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("savePathEdit"), QVariant(gui->m_ui.savePathEdit->text()));
   map.insert(QString("prefixEdit"), QVariant(gui->m_ui.prefixEdit->text()));
-  map.insert(QString("titleCheckBox"),
-             QVariant(gui->m_ui.titleCheckBox->isChecked()));
+  map.insert(QString("headerCheckBox"),
+             QVariant(gui->m_ui.headerCheckBox->isChecked()));
   map.insert(QString("qResolutionCheckBox"),
              QVariant(gui->m_ui.qResolutionCheckBox->isChecked()));
   map.insert(QString("commaRadioButton"),

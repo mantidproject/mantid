@@ -304,9 +304,15 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   buttonLayout->addWidget(m_scriptButtonFile);
   buttonLayout->addWidget(m_scriptButtonClipboard);
 
+  // Unroll all checkbox below tree layout
+  m_unrollAllHistoryCheckbox = new QCheckBox("Unroll All Algorithms", this);
+  connect(m_unrollAllHistoryCheckbox, SIGNAL(stateChanged(int)), this,
+          SLOT(unrollAll(int)));
+
   // Main layout
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   mainLayout->addLayout(treeLayout);
+  mainLayout->addWidget(m_unrollAllHistoryCheckbox);
   mainLayout->addLayout(environmentLayout);
   mainLayout->addLayout(buttonLayout);
 }
@@ -508,6 +514,20 @@ void AlgorithmHistoryWindow::doUnroll(const std::vector<int> &unrollIndicies) {
 }
 
 void AlgorithmHistoryWindow::doRoll(int index) { m_view->roll(index); }
+
+void AlgorithmHistoryWindow::unrollAll(int state) {
+  // Iterate all items in tree which have child algorithms to be unrolled
+  QTreeWidgetItemIterator it(m_Historytree,
+                             QTreeWidgetItemIterator::HasChildren);
+  while (*it) {
+    // set state of unroll based on checkbox sate
+    if (state == Qt::Checked)
+      (*it)->setCheckState(1, Qt::Checked);
+    else
+      (*it)->setCheckState(1, Qt::Unchecked);
+    ++it;
+  }
+}
 
 //--------------------------------------------------------------------------------------------------
 // AlgHistoryProperties Definitions

@@ -98,7 +98,7 @@ QGroupBox:title {
           </item>
           <item row="6" column="2">
            <widget class="QPushButton" name="button_focus">
-            <property name="enabled">
+		    <property name="enabled">
              <bool>true</bool>
             </property>
             <property name="text">
@@ -132,6 +132,9 @@ QGroupBox:title {
           <item row="6" column="0" colspan="2">
            <widget class="QCheckBox" name="check_plotOutput">
             <property name="enabled">
+             <bool>true</bool>
+            </property>
+		    <property name="checked">
              <bool>true</bool>
             </property>
             <property name="text">

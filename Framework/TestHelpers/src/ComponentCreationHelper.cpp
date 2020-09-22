@@ -30,6 +30,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
@@ -148,66 +149,92 @@ std::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }
 
-//----------------------------------------------------------------------------------------------
-/** Create a cuboid shape for your pixels */
-std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength,
-                                        double zHalfLength) {
+std::string cuboidXML(double xHalfLength, double yHalfLength,
+                      double zHalfLength, Mantid::Kernel::V3D centrePos,
+                      const std::string &id) {
   const double szX = xHalfLength;
   const double szY = (yHalfLength == -1.0 ? szX : yHalfLength);
   const double szZ = (zHalfLength == -1.0 ? szX : zHalfLength);
+
+  // top\bottom along z
+  V3D leftFrontBottom{szX, -szY, -szZ};
+  V3D leftFrontTop{szX, -szY, szZ};
+  V3D leftBackBottom{-szX, -szY, -szZ};
+  V3D rightFrontBottom{szX, szY, -szZ};
+
+  leftFrontBottom += centrePos;
+  leftFrontTop += centrePos;
+  leftBackBottom += centrePos;
+  rightFrontBottom += centrePos;
+
   std::ostringstream xmlShapeStream;
-  xmlShapeStream << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "<left-front-top-point  x=\"" << szX << "\" y=\"" << -szY
-                 << "\" z=\"" << szZ << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << -szX << "\" y=\"" << -szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY
-                 << "\" z=\"" << -szZ << "\"  /> "
+  xmlShapeStream << " <cuboid id=\"" << id << "\"> "
+                 << "<left-front-bottom-point x=\"" << leftFrontBottom.X()
+                 << "\" y=\"" << leftFrontBottom.Y() << "\" z=\""
+                 << leftFrontBottom.Z() << "\"  /> "
+                 << "<left-front-top-point  x=\"" << leftFrontTop.X()
+                 << "\" y=\"" << leftFrontTop.Y() << "\" z=\""
+                 << leftFrontTop.Z() << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << leftBackBottom.X()
+                 << "\" y=\"" << leftBackBottom.Y() << "\" z=\""
+                 << leftBackBottom.Z() << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rightFrontBottom.X()
+                 << "\" y=\"" << rightFrontBottom.Y() << "\" z=\""
+                 << rightFrontBottom.Z() << "\"  /> "
                  << "</cuboid>";
 
-  std::string xmlCuboidShape(xmlShapeStream.str());
+  return xmlShapeStream.str();
+}
+
+//----------------------------------------------------------------------------------------------
+/** Create a cuboid shape for your pixels */
+std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength,
+                                        double zHalfLength,
+                                        Mantid::Kernel::V3D centrePos,
+                                        const std::string &id) {
   ShapeFactory shapeCreator;
-  auto cuboidShape = shapeCreator.createShape(xmlCuboidShape);
-  return cuboidShape;
+  return shapeCreator.createShape(
+      cuboidXML(xHalfLength, yHalfLength, zHalfLength, centrePos, id));
 }
 
 /**
- * Create a cuboid shape rotated around (0, 0, 1) axis and centered at the
+ * Create a cuboid shape rotated around supplied axis and centered at the
  * origin.
  * @param xHalfLength thickness
  * @param yHalfLength width
  * @param zHalfLength height
  * @param angle rotation angle in radians
+ * @param axis the axis to rotate around
  * @return a pointer to the cuboid shape
  */
 std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength,
-                                        double zHalfLength, double angle) {
-  const V2D leftFront{xHalfLength, -yHalfLength};
-  const V2D leftBack{-xHalfLength, -yHalfLength};
-  const V2D rightFront{xHalfLength, yHalfLength};
-  const double sn{std::sin(angle)};
-  const double cs{std::cos(angle)};
-  const V2D rotatedLF{leftFront.X() * cs - leftFront.Y() * sn,
-                      leftFront.X() * sn + leftFront.Y() * cs};
-  const V2D rotatedLB{leftBack.X() * cs - leftBack.Y() * sn,
-                      leftBack.X() * sn + leftBack.Y() * cs};
-  const V2D rotatedRF{rightFront.X() * cs - rightFront.Y() * sn,
-                      rightFront.X() * sn + rightFront.Y() * cs};
+                                        double zHalfLength, double angle,
+                                        Mantid::Kernel::V3D axis) {
+  // top\bottom along z
+  V3D leftFrontBottom{xHalfLength, -yHalfLength, -zHalfLength};
+  V3D leftFrontTop{xHalfLength, -yHalfLength, zHalfLength};
+  V3D leftBackBottom{-xHalfLength, -yHalfLength, -zHalfLength};
+  V3D rightFrontBottom{xHalfLength, yHalfLength, -zHalfLength};
+  Quat rotation(angle, axis);
+  auto rotMatrix = Mantid::Kernel::DblMatrix(rotation.getRotation());
+  leftFrontBottom.rotate(rotMatrix);
+  leftFrontTop.rotate(rotMatrix);
+  leftBackBottom.rotate(rotMatrix);
+  rightFrontBottom.rotate(rotMatrix);
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << rotatedLF.X()
-                 << "\" y=\"" << rotatedLF.Y() << "\" z=\"" << -zHalfLength
-                 << "\"  /> "
-                 << "<left-front-top-point  x=\"" << rotatedLF.X() << "\" y=\""
-                 << rotatedLF.Y() << "\" z=\"" << zHalfLength << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << rotatedLB.X()
-                 << "\" y=\"" << rotatedLB.Y() << "\" z=\"" << -zHalfLength
-                 << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << rotatedRF.X()
-                 << "\" y=\"" << rotatedRF.Y() << "\" z=\"" << -zHalfLength
-                 << "\"  /> "
+                 << "<left-front-bottom-point x=\"" << leftFrontBottom.X()
+                 << "\" y=\"" << leftFrontBottom.Y() << "\" z=\""
+                 << leftFrontBottom.Z() << "\"  /> "
+                 << "<left-front-top-point  x=\"" << leftFrontTop.X()
+                 << "\" y=\"" << leftFrontTop.Y() << "\" z=\""
+                 << leftFrontTop.Z() << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << leftBackBottom.X()
+                 << "\" y=\"" << leftBackBottom.Y() << "\" z=\""
+                 << leftBackBottom.Z() << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rightFrontBottom.X()
+                 << "\" y=\"" << rightFrontBottom.Y() << "\" z=\""
+                 << rightFrontBottom.Z() << "\"  /> "
                  << "</cuboid>";
 
   std::string xmlCuboidShape(xmlShapeStream.str());

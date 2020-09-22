@@ -8,13 +8,13 @@
 
 """State describing the creation of pixel and wavelength adjustment workspaces for SANS reduction."""
 
-import json
 import copy
+import json
 
+from sans.common.enums import (RangeStepType, DetectorType)
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
-from sans.common.enums import (RangeStepType, DetectorType, SANSFacility)
 
 
 class StateAdjustmentFiles(metaclass=JsonSerializable):
@@ -45,6 +45,17 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
 
         self.adjustment_files = {DetectorType.LAB.value: StateAdjustmentFiles(),
                                  DetectorType.HAB.value: StateAdjustmentFiles()}
+
+    @property
+    def wavelength_step_type_lin_log(self):
+        # Return the wavelength step type, converting RANGE_LIN/RANGE_LOG to
+        # LIN/LOG. This is not ideal but is required for workflow algorithms
+        # which only accept a subset of the values in the enum
+        value = self.wavelength_step_type
+        result = RangeStepType.LIN if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN] else \
+            RangeStepType.LOG if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else \
+            RangeStepType.NOT_SET
+        return result
 
     def validate(self):
         is_invalid = {}
@@ -94,7 +105,6 @@ class StateWavelengthAndPixelAdjustmentBuilder(object):
         self.state.idf_path = idf_file_path
 
     def build(self):
-        self.state.validate()
         return copy.copy(self.state)
 
     def set_wavelength_step_type(self, val):
@@ -102,10 +112,4 @@ class StateWavelengthAndPixelAdjustmentBuilder(object):
 
 
 def get_wavelength_and_pixel_adjustment_builder(data_info):
-    facility = data_info.facility
-    if facility is SANSFacility.ISIS:
-        return StateWavelengthAndPixelAdjustmentBuilder(data_info)
-    else:
-        raise NotImplementedError("StateWavelengthAndPixelAdjustmentBuilder: Could not find any valid "
-                                  "wavelength and pixel adjustment builder for the specified "
-                                  "StateData object {0}".format(str(data_info)))
+    return StateWavelengthAndPixelAdjustmentBuilder(data_info=data_info)

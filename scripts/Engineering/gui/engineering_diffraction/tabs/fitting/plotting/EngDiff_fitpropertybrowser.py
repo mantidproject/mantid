@@ -29,3 +29,21 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         :return: None
         """
         return None
+
+    def _get_allowed_spectra(self):
+        """
+        Get the workspaces and spectra that can be fitted from the
+        tracked workspaces.
+        """
+        allowed_spectra = {}
+        output_wsnames = [self.getWorkspaceList().item(ii).text() for ii in range(self.getWorkspaceList().count())]
+        for ax in self.canvas.figure.get_axes():
+            try:
+                for ws_name, artists in ax.tracked_workspaces.items():
+                    # don't allow existing output workspaces (fitted curves) to be added
+                    if ws_name not in output_wsnames:
+                        spectrum_list = [artist.spec_num for artist in artists]
+                        allowed_spectra[ws_name] = spectrum_list
+            except AttributeError:  # scripted plots have no tracked_workspaces
+                pass
+        return allowed_spectra

@@ -16,13 +16,11 @@ from unittest.mock import MagicMock, call
 from mantidqt.utils.qt.testing.gui_window_test import (GuiWindowTest, not_on_windows, get_child, click_on)
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 
-
 skip = unittest.skipIf(not_on_windows(), "It works on windows. I cannot spend too much time trying to "
                                          "fix the other platforms.")
 
 
 class TestFunctionBrowser(GuiWindowTest):
-
     is_multi = False
 
     def create_widget(self):
@@ -51,9 +49,7 @@ class TestFunctionBrowser(GuiWindowTest):
 
 
 def function_browser_test(multi=False):
-
     def wrapper(fun):
-
         cls = type(fun.__name__, (TestFunctionBrowser,), dict(test=fun, is_multi=multi))
         return skip(cls)
 
@@ -65,6 +61,8 @@ def dummy_test(multi=False):
 
 
 function_browser_test_ = function_browser_test
+
+
 # function_browser_test = dummy_test
 
 
@@ -123,7 +121,7 @@ def test_browser_parameters_multi_view(self):
     self.assertEqual(browser.getNumberOfDatasets(), 0)
     pos = view.getVisualRectFunctionProperty('f1.').center()
     tree = view.treeWidget().viewport()
-    yield self.show_context_menu(tree, pos, pause=0)
+    yield self.show_context_menu(tree, pos, pause=2)
     yield self.mouse_trigger_action('remove_function', pause=0)
     self.assertEqual(view.getNumberOfQtProperties(), 2)
     yield 0.1
@@ -131,7 +129,7 @@ def test_browser_parameters_multi_view(self):
 
 @function_browser_test(True)
 def test_browser_parameters_multi_single(self):
-    assert(isinstance(self, TestFunctionBrowser))
+    assert (isinstance(self, TestFunctionBrowser))
     browser = self.widget
     browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
@@ -154,7 +152,7 @@ def test_browser_parameters_multi_single(self):
 
 @function_browser_test(True)
 def test_browser_parameters_multi_multi(self):
-    assert(isinstance(self, TestFunctionBrowser))
+    assert (isinstance(self, TestFunctionBrowser))
     browser = self.widget
     browser.setFunction('name=FlatBackground;name=LinearBackground,A0=1')
     view = browser.view()
@@ -182,7 +180,7 @@ def test_browser_parameters_multi_multi(self):
 
 @function_browser_test(True)
 def test_fit_function_multi(self):
-    assert(isinstance(self, TestFunctionBrowser))
+    assert (isinstance(self, TestFunctionBrowser))
     browser = self.widget
     browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
@@ -202,7 +200,7 @@ def test_fit_function_multi(self):
 
 @function_browser_test(True)
 def test_multi_set_parameters_different_domains(self):
-    assert(isinstance(self, TestFunctionBrowser))
+    assert (isinstance(self, TestFunctionBrowser))
     browser = self.widget
     browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
@@ -242,7 +240,7 @@ def test_paste_from_clipboard(self):
     yield self.mouse_trigger_action('paste_from_clipboard', pause=0)
     fun = self.get_fit_function()
     self.assertEqual(fun.name, 'LinearBackground')
-    self.assertEqual(user.structure_changed.call_count, 1)
+    self.assertEqual(user.structure_changed.call_count, 2)
 
 
 @function_browser_test()
@@ -266,7 +264,7 @@ def test_add_function(self):
     dlg.accept()
     fun = self.get_fit_function()
     self.assertEqual(fun.name, 'FlatBackground')
-    self.assertEqual(user.structure_changed.call_count, 1)
+    self.assertEqual(user.structure_changed.call_count, 2)
 
 
 @function_browser_test()
@@ -299,7 +297,44 @@ def test_add_function_to_composite(self):
     self.assertEqual(fun[1][0].A0, 1.0)
     self.assertEqual(fun[1][1].A0, 2.0)
     self.assertEqual(fun[1][2].A0, 0.0)
-    self.assertEqual(user.structure_changed.call_count, 1)
+    self.assertEqual(user.structure_changed.call_count, 2)
+
+
+@function_browser_test(multi=True)
+def test_converting_to_composite_retains_globals(self):
+    assert (isinstance(self, TestFunctionBrowser))
+    browser = self.widget
+    browser.setFunction('name=FlatBackground')
+    browser.setGlobalParameters(['A0'])
+    view = browser.view()
+    pos = view.getVisualRectFunctionProperty('').center()
+    tree = view.treeWidget().viewport()
+    yield self.show_context_menu(tree, pos, pause=0)
+    yield self.mouse_trigger_action('add_function', pause=0)
+    yield self.wait_for_modal()
+    dlg = self.get_active_modal_widget()
+    tree = get_child(dlg, 'fitTree')
+    item = tree.findItems('Background', Qt.MatchExactly)[0]
+    item.setExpanded(True)
+    item = tree.findItems('BSpline', Qt.MatchRecursive)[0]
+    pos = tree.visualItemRect(item).center()
+    yield click_on(tree.viewport(), pos, pause=10)
+    dlg.accept()
+    self.assertEqual(browser.getGlobalParameters(), ['f0.A0'])
+
+
+@function_browser_test(multi=True)
+def test_converting_to_single_retains_globals(self):
+    assert (isinstance(self, TestFunctionBrowser))
+    browser = self.widget
+    browser.setFunction('name=FlatBackground;name=BSpline')
+    browser.setGlobalParameters(['f0.A0'])
+    view = browser.view()
+    pos = view.getVisualRectFunctionProperty('f1.').center()
+    tree = view.treeWidget().viewport()
+    yield self.show_context_menu(tree, pos, pause=0)
+    yield self.mouse_trigger_action('remove_function', pause=0)
+    self.assertEqual(browser.getGlobalParameters(), ['A0'])
 
 
 if __name__ == '__main__':

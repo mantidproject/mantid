@@ -17,6 +17,8 @@ exclude =
     qt/applications/workbench/workbench/app/resources.py,
     qt/paraview_ext,
     qt/python/mantidqt/resources.py,
+    qt/python/mantidqt/dialogs/errorreports/resources_qt4.py
+    qt/python/mantidqt/dialogs/errorreports/resources_qt5.py
     qt/scientific_interfaces,
     qt/widgets,
     scripts/test,
@@ -25,8 +27,6 @@ exclude =
     Testing/SystemTests/scripts,
     Testing/SystemTests/tests/analysis/reference,
     Testing/Tools,
-
-    scripts/ErrorReporter/ui_errorreport.py,
     scripts/Interface/ui/dataprocessorinterface,
 
 max-complexity = 20

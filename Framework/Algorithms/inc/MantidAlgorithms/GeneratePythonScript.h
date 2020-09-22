@@ -45,6 +45,8 @@ public:
   const std::string category() const override { return "Utility\\Python"; }
 
 protected:
+  /// ExportHistory as alias is overriding a virtual method
+  const std::string alias() const override;
   /// Initialise the properties
   void init() override;
   /// Run the algorithm

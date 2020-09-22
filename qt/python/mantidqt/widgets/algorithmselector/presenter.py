@@ -8,7 +8,6 @@ from collections import namedtuple
 
 from .model import AlgorithmSelectorModel
 
-
 SelectedAlgorithm = namedtuple('SelectedAlgorithm', ['name', 'version'])
 
 

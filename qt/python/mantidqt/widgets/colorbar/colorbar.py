@@ -25,9 +25,14 @@ NORM_OPTS = ["Linear", "SymmetricLog10", "Power"]
 
 class ColorbarWidget(QWidget):
     colorbarChanged = Signal()  # The parent should simply redraw their canvas
+    scaleNormChanged = Signal()
     cmap_list = sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, default_norm_scale=None):
+        """
+        :param default_scale: None uses linear, else either a string or tuple(string, other arguuments), e.g. tuple('Power', exponent)
+        """
+
         super(ColorbarWidget, self).__init__(parent)
 
         self.setWindowTitle("Colorbar")
@@ -59,20 +64,31 @@ class ColorbarWidget(QWidget):
         self.cmax_layout.addWidget(self.cmax)
         self.cmax_layout.addStretch()
 
+        norm_scale = 'Linear'
+        powerscale_value = 2
+        if default_norm_scale in NORM_OPTS:
+            norm_scale = default_norm_scale
+        if isinstance(default_norm_scale, tuple) and default_norm_scale[0] in NORM_OPTS:
+            norm_scale = default_norm_scale[0]
+            if norm_scale == 'Power':
+                powerscale_value = float(default_norm_scale[1])
+
         self.norm_layout = QHBoxLayout()
         self.norm = QComboBox()
         self.norm.addItems(NORM_OPTS)
+        self.norm.setCurrentText(norm_scale)
         self.norm.currentIndexChanged.connect(self.norm_changed)
 
         self.powerscale = QLineEdit()
-        self.powerscale_value = 2
-        self.powerscale.setText("2")
+        self.powerscale_value = powerscale_value
+        self.powerscale.setText(str(powerscale_value))
         self.powerscale.setValidator(QDoubleValidator(0.001,100,3))
         self.powerscale.setMaximumWidth(50)
         self.powerscale.editingFinished.connect(self.norm_changed)
-        self.powerscale.hide()
         self.powerscale_label = QLabel("n=")
-        self.powerscale_label.hide()
+        if norm_scale != 'Power':
+            self.powerscale.hide()
+            self.powerscale_label.hide()
 
         self.norm_layout.addStretch()
         self.norm_layout.addWidget(self.norm)
@@ -169,6 +185,8 @@ class ColorbarWidget(QWidget):
             self.powerscale_label.hide()
         self.colorbar.mappable.set_norm(self.get_norm())
         self.set_mappable(self.colorbar.mappable)
+
+        self.scaleNormChanged.emit()
 
     def get_norm(self):
         """

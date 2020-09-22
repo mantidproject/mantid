@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/GeneratePythonScript.h"
 
@@ -26,7 +27,8 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL RecordPythonScript
     : public Algorithms::GeneratePythonScript,
-      public API::AlgorithmObserver {
+      public API::AlgorithmObserver,
+      public API::DeprecatedAlgorithm {
 public:
   RecordPythonScript();
   /// Algorithm's name for identification
@@ -50,6 +52,7 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+  const std::string alias() const override;
   /** Handler of the start notifications. Must be overriden in inherited
   classes.
   @param alg :: Shared Pointer to the algorithm sending the notification.

@@ -15,9 +15,9 @@ FREQUENCY_DOMAIN_ANALYSIS_FITTING_OPTIONS = []
 
 class FittingTabWidget(object):
     def __init__(self, context, parent):
-        fitting_options = FREQUENCY_DOMAIN_ANALYSIS_FITTING_OPTIONS if isinstance(context, FrequencyDomainAnalysisContext)\
-            else MUON_ANALYSIS_FITTING_OPTIONS
         is_frequency_domain = isinstance(context, FrequencyDomainAnalysisContext)
+        fitting_options = FREQUENCY_DOMAIN_ANALYSIS_FITTING_OPTIONS if is_frequency_domain\
+            else MUON_ANALYSIS_FITTING_OPTIONS
 
         self.fitting_tab_view = FittingTabView(simultaneous_item_list=fitting_options, is_frequency_domain=is_frequency_domain,
                                                parent=parent)

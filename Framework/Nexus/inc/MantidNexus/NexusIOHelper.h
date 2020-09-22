@@ -20,34 +20,42 @@ namespace Mantid {
 namespace NeXus {
 namespace NeXusIOHelper {
 
+struct AllowNarrowing {};
+struct PreventNarrowing {};
+
 namespace {
 
 /// Macro to run a function depending on the type of data in the Nexus file
-#define RUN_NEXUSIOHELPER_FUNCTION(type, func_name, ...)                       \
+#define RUN_NEXUSIOHELPER_FUNCTION(Narrow, type, func_name, ...)               \
   switch (type) {                                                              \
   case ::NeXus::FLOAT32:                                                       \
-    return func_name<T, float>(__VA_ARGS__);                                   \
+    return func_name<T, float, Narrow>(__VA_ARGS__);                           \
   case ::NeXus::FLOAT64:                                                       \
-    return func_name<T, double>(__VA_ARGS__);                                  \
+    return func_name<T, double, Narrow>(__VA_ARGS__);                          \
   case ::NeXus::INT8:                                                          \
-    return func_name<T, int8_t>(__VA_ARGS__);                                  \
+    return func_name<T, int8_t, Narrow>(__VA_ARGS__);                          \
   case ::NeXus::UINT8:                                                         \
-    return func_name<T, uint8_t>(__VA_ARGS__);                                 \
+    return func_name<T, uint8_t, Narrow>(__VA_ARGS__);                         \
   case ::NeXus::INT16:                                                         \
-    return func_name<T, int16_t>(__VA_ARGS__);                                 \
+    return func_name<T, int16_t, Narrow>(__VA_ARGS__);                         \
   case ::NeXus::UINT16:                                                        \
-    return func_name<T, uint16_t>(__VA_ARGS__);                                \
+    return func_name<T, uint16_t, Narrow>(__VA_ARGS__);                        \
   case ::NeXus::INT32:                                                         \
-    return func_name<T, int32_t>(__VA_ARGS__);                                 \
+    return func_name<T, int32_t, Narrow>(__VA_ARGS__);                         \
   case ::NeXus::UINT32:                                                        \
-    return func_name<T, uint32_t>(__VA_ARGS__);                                \
+    return func_name<T, uint32_t, Narrow>(__VA_ARGS__);                        \
   case ::NeXus::INT64:                                                         \
-    return func_name<T, int64_t>(__VA_ARGS__);                                 \
+    return func_name<T, int64_t, Narrow>(__VA_ARGS__);                         \
   case ::NeXus::UINT64:                                                        \
-    return func_name<T, uint64_t>(__VA_ARGS__);                                \
+    return func_name<T, uint64_t, Narrow>(__VA_ARGS__);                        \
   default:                                                                     \
-    throw std::runtime_error("Unknown type in Nexus file");                    \
+    throw std::runtime_error("NeXusIOHelper: Unknown type in Nexus file");     \
   }
+
+int64_t vectorVolume(const std::vector<int64_t> &size) {
+  return std::accumulate(size.begin(), size.end(), int64_t{1},
+                         std::multiplies<>());
+}
 
 std::pair<::NeXus::Info, bool>
 checkIfOpenAndGetInfo(::NeXus::File &file, const std::string &&entry) {
@@ -64,7 +72,8 @@ checkIfOpenAndGetInfo(::NeXus::File &file, const std::string &&entry) {
 /// Use the getData function to read the buffer into vector and close file if
 /// needed
 template <typename T>
-void callGetData(::NeXus::File &file, std::vector<T> &buf, bool close_file) {
+void callGetData(::NeXus::File &file, std::vector<T> &buf,
+                 const bool close_file) {
   file.getData(buf);
   if (close_file)
     file.closeData();
@@ -72,7 +81,7 @@ void callGetData(::NeXus::File &file, std::vector<T> &buf, bool close_file) {
 
 /// Use the getData function to read the buffer and close file if needed
 template <typename T>
-void callGetData(::NeXus::File &file, T &buf, bool close_file) {
+void callGetData(::NeXus::File &file, T &buf, const bool close_file) {
   file.getData(&buf);
   if (close_file)
     file.closeData();
@@ -82,77 +91,118 @@ void callGetData(::NeXus::File &file, T &buf, bool close_file) {
 template <typename T>
 void callGetSlab(::NeXus::File &file, std::vector<T> &buf,
                  const std::vector<int64_t> &start,
-                 const std::vector<int64_t> &size, bool close_file) {
+                 const std::vector<int64_t> &size, const bool close_file) {
   file.getSlab(buf.data(), start, size);
   if (close_file)
     file.closeData();
 }
 
-/** Templated function to read any type of data and store it into another vector
- * type. If the two types are the same, the conversion is skipped.
+/** Templated function to read any type of vector and (potentially) convert it
+ * to another type. If the two types are the same, the conversion is skipped.
  */
-template <typename T, typename U>
-std::vector<T> readNexusAnyVector(::NeXus::File &file, size_t size,
-                                  bool close_file) {
-  if constexpr (sizeof(T) < sizeof(U)) {
+template <typename T, typename U, typename Narrow>
+void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file,
+                          const size_t size, const bool close_file) {
+  if constexpr (sizeof(T) < sizeof(U) &&
+                !std::is_same_v<Narrow, AllowNarrowing>) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
-  } else if constexpr (std::is_same<T, U>::value) {
-    std::vector<T> buf(size);
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
+  } else if constexpr (std::is_same_v<T, U>) {
     if (size > 0)
-      callGetData(file, buf, close_file);
-    return buf;
+      callGetData(file, out, close_file);
   } else {
-    std::vector<T> vec(size);
     if (size > 0) {
       std::vector<U> buf(size);
       callGetData(file, buf, close_file);
-      std::transform(buf.begin(), buf.end(), vec.begin(),
+      std::transform(buf.begin(), buf.end(), out.begin(),
                      [](U a) -> T { return static_cast<T>(a); });
     }
-    return vec;
   }
 }
 
-/** Templated function to read any type of slab and store it into another vector
- * type. If the two types are the same, the conversion is skipped.
+/// Read any type of vector and return it as a new vector.
+template <typename T, typename U, typename Narrow>
+std::vector<T> readNexusAnyVector(::NeXus::File &file, const size_t size,
+                                  const bool close_file) {
+  std::vector<T> vec(size);
+  doReadNexusAnyVector<T, U, Narrow>(vec, file, size, close_file);
+  return vec;
+}
+
+/// Read any type of vector and store it into the provided buffer vector.
+template <typename T, typename U, typename Narrow>
+void readNexusAnyVector(std::vector<T> &out, ::NeXus::File &file,
+                        const size_t size, const bool close_file) {
+  if (out.size() < size)
+    throw std::runtime_error(
+        "The output buffer is too small in NeXusIOHelper::readNexusAnyVector");
+  doReadNexusAnyVector<T, U, Narrow>(out, file, size, close_file);
+}
+
+/** Templated function to read any type of slab and (potentially) convert it to
+ * another type. If the two types are the same, the conversion is skipped.
  */
-template <typename T, typename U>
+template <typename T, typename U, typename Narrow>
+void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
+                        const std::vector<int64_t> &start,
+                        const std::vector<int64_t> &size, const int64_t volume,
+                        const bool close_file) {
+  if constexpr (sizeof(T) < sizeof(U) &&
+                !std::is_same_v<Narrow, AllowNarrowing>) {
+    if (close_file)
+      file.closeData();
+    throw std::runtime_error(
+        "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
+  } else if constexpr (std::is_same_v<T, U>) {
+    if (volume > 0)
+      callGetSlab(file, out, start, size, close_file);
+  } else {
+    if (volume > 0) {
+      std::vector<U> buf(volume);
+      callGetSlab(file, buf, start, size, close_file);
+      std::transform(buf.begin(), buf.end(), out.begin(),
+                     [](U a) -> T { return static_cast<T>(a); });
+    }
+  }
+}
+
+/// Read any type of slab and return it as a new vector.
+template <typename T, typename U, typename Narrow>
 std::vector<T>
 readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
-                 const std::vector<int64_t> &size, bool close_file) {
-  if constexpr (sizeof(T) < sizeof(U)) {
-    if (close_file)
-      file.closeData();
-    throw std::runtime_error(
-        "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
-  } else if constexpr (std::is_same<T, U>::value) {
-    std::vector<T> buf(size[0]);
-    if (size[0] > 0)
-      callGetSlab(file, buf, start, size, close_file);
-    return buf;
-  } else {
-    std::vector<T> vec(size[0]);
-    if (size[0] > 0) {
-      std::vector<U> buf(size[0]);
-      callGetSlab(file, buf, start, size, close_file);
-      std::transform(buf.begin(), buf.end(), vec.begin(),
-                     [](U a) -> T { return static_cast<T>(a); });
-    }
-    return vec;
-  }
+                 const std::vector<int64_t> &size, const bool close_file) {
+  const auto volume = vectorVolume(size);
+  std::vector<T> vec(volume);
+  doReadNexusAnySlab<T, U, Narrow>(vec, file, start, size, volume, close_file);
+  return vec;
 }
 
-template <typename T, typename U>
-T readNexusAnyVariable(::NeXus::File &file, bool close_file) {
-  if constexpr (sizeof(T) < sizeof(U)) {
+/// Read any type of slab and store it into the provided buffer vector.
+template <typename T, typename U, typename Narrow>
+void readNexusAnySlab(std::vector<T> &out, ::NeXus::File &file,
+                      const std::vector<int64_t> &start,
+                      const std::vector<int64_t> &size, const bool close_file) {
+  const auto volume = vectorVolume(size);
+  if (out.size() < static_cast<size_t>(volume))
+    throw std::runtime_error(
+        "The output buffer is too small in NeXusIOHelper::readNexusAnySlab");
+  doReadNexusAnySlab<T, U, Narrow>(out, file, start, size, volume, close_file);
+}
+
+/** Templated function to read any type of variable and (potentially) convert it
+ * to another type. If the two types are the same, the conversion is skipped.
+ */
+template <typename T, typename U, typename Narrow>
+T readNexusAnyVariable(::NeXus::File &file, const bool close_file) {
+  if constexpr (sizeof(T) < sizeof(U) &&
+                !std::is_same_v<Narrow, AllowNarrowing>) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
-        "Downcasting is forbidden in NeXusIOHelper::readAnyVariable");
-  } else if constexpr (std::is_same<T, U>::value) {
+        "Narrowing is forbidden in NeXusIOHelper::readAnyVariable");
+  } else if constexpr (std::is_same_v<T, U>) {
     T buf;
     callGetData(file, buf, close_file);
     return buf;
@@ -167,38 +217,67 @@ T readNexusAnyVariable(::NeXus::File &file, bool close_file) {
 
 /** Opens the data group if needed, finds the data type, computes the data size,
  * and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
+ * Version that allows Narrowing.
  */
-template <typename T>
+template <typename T, typename Narrow = PreventNarrowing>
 std::vector<T> readNexusVector(::NeXus::File &file,
                                const std::string &entry = "") {
-  auto info_and_close =
+  const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  auto dims = (info_and_close.first).dims;
-  auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
-                                    std::multiplies<>());
-  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVector,
-                             file, total_size, info_and_close.second);
+  RUN_NEXUSIOHELPER_FUNCTION(
+      Narrow, (info_and_close.first).type, readNexusAnyVector, file,
+      vectorVolume((info_and_close.first).dims), info_and_close.second);
+}
+
+/** Opens the data group if needed, finds the data type, computes the data size,
+ * and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
+ * The provided output buffer is filled.
+ */
+template <typename T, typename Narrow = PreventNarrowing>
+void readNexusVector(std::vector<T> &out, ::NeXus::File &file,
+                     const std::string &entry = "") {
+  const auto info_and_close =
+      checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
+  RUN_NEXUSIOHELPER_FUNCTION(
+      Narrow, (info_and_close.first).type, readNexusAnyVector, out, file,
+      vectorVolume((info_and_close.first).dims), info_and_close.second);
 }
 
 /** Opens the data group if needed, finds the data type, and calls
  * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
  */
-template <typename T>
+template <typename T, typename Narrow = PreventNarrowing>
 std::vector<T> readNexusSlab(::NeXus::File &file, const std::string &entry,
                              const std::vector<int64_t> &start,
                              const std::vector<int64_t> &size) {
-  auto info_and_close =
+  const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnySlab,
-                             file, start, size, info_and_close.second);
+  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
+                             readNexusAnySlab, file, start, size,
+                             info_and_close.second);
 }
 
-template <typename T>
-T readNexusValue(::NeXus::File &file, const std::string &entry = "") {
-  auto info_and_close =
+/** Opens the data group if needed, finds the data type, and calls
+ * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
+ * The provided output buffer is filled.
+ */
+template <typename T, typename Narrow = PreventNarrowing>
+void readNexusSlab(std::vector<T> &out, ::NeXus::File &file,
+                   const std::string &entry, const std::vector<int64_t> &start,
+                   const std::vector<int64_t> &size) {
+  const auto info_and_close =
       checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
-  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVariable,
-                             file, info_and_close.second);
+  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
+                             readNexusAnySlab, out, file, start, size,
+                             info_and_close.second);
+}
+
+template <typename T, typename Narrow = PreventNarrowing>
+T readNexusValue(::NeXus::File &file, const std::string &entry = "") {
+  const auto info_and_close =
+      checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
+  RUN_NEXUSIOHELPER_FUNCTION(Narrow, (info_and_close.first).type,
+                             readNexusAnyVariable, file, info_and_close.second);
 }
 
 } // namespace NeXusIOHelper

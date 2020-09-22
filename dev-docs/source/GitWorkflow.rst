@@ -10,6 +10,9 @@ Mantid Git Workflow
 Summary
 -------
 
+Go to the :doc:`GitConfig` page to ensure that Git is set up correctly
+before starting.
+
 This page describes the workflow used in conjunction with `Git
 <http://git-scm.com>`_ and `GitHub <https://www.github.com/>`_ for
 those who have push access to the repository.
@@ -101,33 +104,25 @@ For further information about the review process see :ref:`reviewing a pull requ
 Checkout a Pull Request
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-To check out a particular pull request for functional testing use the following commmands:
+To check out a particular pull request for functional testing use the ``test-pr`` alias that was set up in the :doc:`GitConfig` instructions.
 
 .. code-block:: sh
 
-   git fetch <main-remote-name>  +pull/<ID>/merge:pr/<ID>-merged
-   git checkout pr/<ID>-merged
+   git test-pr <remote-name> <ID>
 
-where ``<ID>`` is the pull request number given on GitHub and ``<main-remote-name>`` is the name
+where ``<ID>`` is the pull request number given on GitHub and ``<remote-name>`` is the name
 of the remote pointing to the original ``mantid`` repository. If you cloned directly from `mantid <https://github.com/mantidproject/mantid>`_
-then ``main-remote-name=origin`` else if you cloned from a fork then it is the name of remote that points
+then ``remote-name=origin`` else if you cloned from a fork then it is the name of remote that points
 back to the original repository.
 
 Note that these commands will checkout a temporary branch that has the development branch merged with master and not just
-the development branch on its own. This command can be aliased by adding the following to the ``[alias]`` section of your ``~/.gitconfig``
-file:
+the development branch on its own.
+
+The :doc:`GitConfig` page also provides the follow alias to delete all ``pr/`` prefixed branches, which is useful if you have several:
 
 .. code-block:: sh
 
-   test-pr="!f() { git fetch <main-remote-name> +pull/$1/merge:pr/$1-merged && git checkout pr/$1-merged; }; f"
-
-where again ``<main-remote-name>`` has the same meaning as above. A given pull request can now be checkout with
-
-.. code-block:: sh
-
-   git test-pr <ID>
-
-where ``<ID>`` is the pull request number given on GitHub.
+   git test-pr-remove-all
 
 Stale Pull Requests
 ^^^^^^^^^^^^^^^^^^^

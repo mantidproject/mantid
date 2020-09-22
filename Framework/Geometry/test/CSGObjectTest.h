@@ -1735,8 +1735,8 @@ public:
         m_cuboid(ComponentCreationHelper::createCuboid(0.2, 0.2, 0.1)),
         m_cylinder(ComponentCreationHelper::createCappedCylinder(
             0.1, 0.4, V3D{0., 0., 0.}, V3D{0., 1., 0.}, "cyl")),
-        m_rotatedCuboid(
-            ComponentCreationHelper::createCuboid(0.01, 0.12, 0.12, M_PI / 4.)),
+        m_rotatedCuboid(ComponentCreationHelper::createCuboid(
+            0.01, 0.12, 0.12, M_PI / 4., V3D{0, 0, 1})),
         m_sphere(ComponentCreationHelper::createSphere(0.1)),
         m_sphericalShell(
             ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}

@@ -33,7 +33,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(MuonTest ${TEST_FILES})
   target_link_libraries(MuonTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Algorithms
                         DataHandling

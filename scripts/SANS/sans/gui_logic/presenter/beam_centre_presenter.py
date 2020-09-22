@@ -13,6 +13,8 @@ from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenter(object):
+    DECIMAL_PLACES_CENTRE_POS = 3
+
     class ConcreteBeamCentreListener(BeamCentre.BeamCentreListener):
         def __init__(self, presenter):
             self._presenter = presenter
@@ -57,7 +59,6 @@ class BeamCentrePresenter(object):
         self._view.r_max_line_edit.textChanged.connect(self._validate_radius_values)
 
     def on_update_instrument(self, instrument):
-        self._beam_centre_model.set_scaling(instrument)
         self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
@@ -67,10 +68,10 @@ class BeamCentrePresenter(object):
         # Enable button
         self._view.set_run_button_to_normal()
         # Update Centre Positions in model and GUI
-        self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
-        self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
-        self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
-        self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
+        self._view.lab_pos_1 = round(self._beam_centre_model.lab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_2 = round(self._beam_centre_model.lab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_1 = round(self._beam_centre_model.hab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_2 = round(self._beam_centre_model.hab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
@@ -111,10 +112,10 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.verbose = self._view.verbose
         self._beam_centre_model.COM = self._view.COM
         self._beam_centre_model.up_down = self._view.up_down
-        self._beam_centre_model.lab_pos_1 = self._view.lab_pos_1 / self._beam_centre_model.scale_1
-        self._beam_centre_model.lab_pos_2 = self._view.lab_pos_2 / self._beam_centre_model.scale_2
-        self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1 / self._beam_centre_model.scale_1
-        self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2 / self._beam_centre_model.scale_2
+        self._beam_centre_model.lab_pos_1 = self._view.lab_pos_1
+        self._beam_centre_model.lab_pos_2 = self._view.lab_pos_2
+        self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1
+        self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2
         self._beam_centre_model.q_min = self._view.q_min
         self._beam_centre_model.q_max = self._view.q_max
         self._beam_centre_model.component = self._view.component
@@ -128,11 +129,11 @@ class BeamCentrePresenter(object):
         hab_pos_1 = getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
         hab_pos_2 = getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
 
-        self._view.lab_pos_1 = lab_pos_1
-        self._view.lab_pos_2 = lab_pos_2
+        self._view.lab_pos_1 = round(lab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_2 = round(lab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
 
-        self._view.hab_pos_1 = hab_pos_1
-        self._view.hab_pos_2 = hab_pos_2
+        self._view.hab_pos_1 = round(hab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_2 = round(hab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
 
     def update_hab_selected(self):
         self._beam_centre_model.update_hab = True

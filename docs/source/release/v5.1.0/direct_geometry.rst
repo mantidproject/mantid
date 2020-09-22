@@ -31,5 +31,16 @@ Bugfixes
 
 - A bug introduced in v5.0 causing error values to tend to zero on multiple instances of :ref:`Rebin2D <algm-Rebin2D>` on the same workspace has been fixed.
 - A bug in the validation of temporary workpaces for :ref:`MDNorm <algm-MDNorm>` has been fixed. One can now use temporary workspaces in any order when slicing.
+- Fixed bugs in the DGSPlanner interface, that cause errors when using negative values
+- SliceViewer can now correctly display non-orthogonal axes for output of :ref:`MDNorm <algm-MDNorm>`
+
+MSlice
+######
+
+Bugfixes
+--------
+
+- A bug causing an exception when attempting to overplot workspaces with different axes has been fixed.
+- A crash when clicking cancel while renaming or adding a workspace has been fixed.
 
 :ref:`Release 5.1.0 <v5.1.0>`

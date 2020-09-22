@@ -20,28 +20,40 @@ namespace Algorithms {
 
 /**
  * Constructor
+ * @param interactionVolume A reference to the MCInteractionVolume dependency
  * @param beamProfile A reference to the object the beam profile
- * @param sample A reference to the object defining details of the sample
  * @param EMode The energy mode of the instrument
  * @param nevents The number of Monte Carlo events used in the simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a random
  * point within the object
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
- * @param pointsIn Where to simulate the scattering point
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(
-    const IBeamProfile &beamProfile, const API::Sample &sample,
+    IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
     DeltaEMode::Type EMode, const size_t nevents,
-    const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda,
-    const MCInteractionVolume::ScatteringPointVicinity pointsIn)
+    const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda)
     : m_beamProfile(beamProfile),
-      m_scatterVol(MCInteractionVolume(sample,
-                                       beamProfile.defineActiveRegion(sample),
-                                       maxScatterPtAttempts, pointsIn)),
+      m_scatterVol(setActiveRegion(interactionVolume, beamProfile)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
       m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
+
+/**
+ * Set the active region on the interaction volume as smaller of the sample
+ * bounding box and the beam cross section. Trying to keep the beam details
+ * outside the interaction volume class
+ * @param interactionVolume The interaction volume object
+ * @param beamProfile The beam profile
+ * @return The interaction volume object with active region set
+ */
+IMCInteractionVolume &
+MCAbsorptionStrategy::setActiveRegion(IMCInteractionVolume &interactionVolume,
+                                      const IBeamProfile &beamProfile) {
+  interactionVolume.setActiveRegion(
+      beamProfile.defineActiveRegion(interactionVolume.getFullBoundingBox()));
+  return interactionVolume;
+}
 
 /**
  * Compute the correction for a final position of the neutron and wavelengths

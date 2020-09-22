@@ -11,6 +11,7 @@ from mantid.api import FunctionFactory, MultiDomainFunction
 from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import SeqFittingTabPresenter
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from qtpy import QtWidgets
@@ -203,6 +204,22 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
 
         self.model.get_runs_groups_and_pairs_for_fits.assert_called_once()
         self.view.fit_table.set_fit_workspaces.assert_called_once()
+
+    def test_that_disable_observer_calls_on_view_when_triggered(self):
+        disable_notifier = GenericObservable()
+        disable_notifier.add_subscriber(self.presenter.disable_tab_observer)
+        self.view.setEnabled = mock.MagicMock()
+
+        disable_notifier.notify_subscribers()
+        self.view.setEnabled.assert_called_once_with(False)
+
+    def test_that_enable_observer_calls_on_view_when_triggered(self):
+        enable_notifier = GenericObservable()
+        enable_notifier.add_subscriber(self.presenter.enable_tab_observer)
+        self.view.setEnabled = mock.MagicMock()
+
+        enable_notifier.notify_subscribers()
+        self.view.setEnabled.assert_called_once_with(True)
 
 
 if __name__ == '__main__':

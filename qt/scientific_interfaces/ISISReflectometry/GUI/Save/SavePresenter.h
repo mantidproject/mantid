@@ -77,6 +77,7 @@ private:
   void enableAutosave();
   void disableAutosave();
   void updateWidgetEnabledState() const;
+  void updateWidgetStateBasedOnFileFormat() const;
   bool isProcessing() const;
   bool isAutoreducing() const;
 

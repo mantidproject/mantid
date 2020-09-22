@@ -16,7 +16,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 class AsciiSaver : public IAsciiSaver {
 public:
-  static Mantid::API::IAlgorithm_sptr algorithmForFormat(NamedFormat format);
+  static Mantid::API::IAlgorithm_sptr getSaveAlgorithm();
   static std::string extensionForFormat(NamedFormat format);
 
   bool isValidSaveDirectory(std::string const &filePath) const override;

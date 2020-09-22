@@ -29,7 +29,7 @@ def get_workspace_history_list(workspace):
     alg.setProperty("AppendExecCount", True)
     alg.execute()
     history = alg.getPropertyValue("ScriptText")
-    return history.split('\n')[5:]  # trim the header and import
+    return history.split('\n')[6:]  # trim the header and import
 
 
 def convert_list_to_string(to_convert, add_new_line=True, fix_comments=False):

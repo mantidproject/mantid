@@ -380,7 +380,6 @@ set_property(TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework")
 target_include_directories(MDAlgorithms PUBLIC inc SYSTEM ${Boost_INCLUDE_DIRS})
 target_link_libraries(MDAlgorithms
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES}
                       ${NEXUS_LIBRARIES})

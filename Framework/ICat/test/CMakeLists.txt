@@ -12,7 +12,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(ICatTest ${TEST_FILES})
   target_link_libraries(ICatTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         ICat)
   add_dependencies(FrameworkTests ICatTest)

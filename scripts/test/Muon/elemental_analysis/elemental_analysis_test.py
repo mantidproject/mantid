@@ -696,6 +696,42 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.lines.delayed.setChecked.assert_called_with(True)
         self.assertEqual(1, mock_add_line_by_type.call_count)
 
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    def test_deselect_elements(self,mock_remove_element_lines):
+
+        self.gui.ptable.deselect_element = mock.Mock()
+
+        self.gui.peaks.enable_deselect_elements_btn = mock.Mock()
+        self.gui.peaks.disable_deselect_elements_btn = mock.Mock()
+
+        self.gui.deselect_elements()
+
+        self.assertEquals(self.gui.peaks.enable_deselect_elements_btn.call_count , 1)
+        self.assertEquals(self.gui.peaks.disable_deselect_elements_btn.call_count , 1)
+
+        self.assertEquals(self.gui.ptable.deselect_element.call_count , len(self.gui.element_widgets))
+        self.assertEquals(mock_remove_element_lines.call_count , len(self.gui.element_widgets))
+
+        calls = [mock.call(element) for element in self.gui.element_widgets.keys()]
+        self.gui.ptable.deselect_element.assert_has_calls(calls)
+        mock_remove_element_lines.assert_has_calls(calls)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    def test_deselect_elements_fails(self,mock_remove_element_lines):
+
+        self.gui.ptable.deselect_element = mock.Mock()
+
+        self.gui.peaks.enable_deselect_elements_btn = mock.Mock()
+        self.gui.peaks.disable_deselect_elements_btn = mock.Mock()
+
+        self.gui.deselect_elements()
+        #Test passes only if deselect_element is not called with "Hydrogen"
+        with self.assertRaises(AssertionError):
+            self.gui.ptable.deselect_element.assert_any_call("Hydrogen")
+
+        with self.assertRaises(AssertionError):
+            mock_remove_element_lines.assert_any_call("Hydrogen")
+
 
 if __name__ == '__main__':
     unittest.main()

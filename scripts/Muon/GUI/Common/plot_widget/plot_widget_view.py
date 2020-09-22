@@ -22,6 +22,13 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setupUi(self)
+        self.setMinimumSize(600,600)
+
+    def show_plot_diff(self):
+        self.plot_diff_checkbox.setVisible(True)
+
+    def hide_plot_diff(self):
+        self.plot_diff_checkbox.setVisible(False)
 
     def setup_plot_type_options(self, options):
         """
@@ -69,6 +76,12 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         """
         return self.tiled_plot_checkbox.isChecked()
 
+    def is_plot_diff(self):
+        """
+        Checks if plot difference is currently requested
+        """
+        return self.plot_diff_checkbox.isChecked()
+
     def set_is_tiled_plot(self, is_tiled):
         """
         Sets whether a tiled plot should made
@@ -104,6 +117,12 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         Connect the tiled_plot checkbox to the input slot
         """
         self.tiled_plot_checkbox.stateChanged.connect(slot)
+
+    def on_plot_diff_checkbox_changed(self,slot):
+        """
+        Connect the plot difference checkbox to the input slot
+        """
+        self.plot_diff_checkbox.stateChanged.connect(slot)
 
     def on_tiled_by_type_changed(self, slot):
         """

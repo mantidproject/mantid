@@ -63,7 +63,8 @@ public:
                            const std::vector<double> &chiSquared);
   void updateFitStatus(const FitDomainIndex index);
   QString selectedFitType() const;
-  void setConvolveMembers(bool convolveMembers);
+  void setConvolveMembers(bool convolveEnabled);
+  void setOutputCompositeMembers(bool outputEnabled);
   void setFitEnabled(bool enable);
   void setCurrentDataset(FitDomainIndex i);
   FitDomainIndex currentDataset() const;

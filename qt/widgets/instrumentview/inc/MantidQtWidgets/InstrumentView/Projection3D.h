@@ -35,8 +35,7 @@ class Projection3D : public ProjectionSurface {
   };
 
 public:
-  Projection3D(const InstrumentActor *rootActor, int winWidth, int winHeight);
-  ~Projection3D() override;
+  Projection3D(const InstrumentActor *rootActor, QSize viewportSize);
   RectF getSurfaceBounds() const override;
 
   void setViewDirection(const QString &vd);

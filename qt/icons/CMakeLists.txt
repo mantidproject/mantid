@@ -23,7 +23,6 @@ if(ENABLE_MANTIDPLOT)
                       INCLUDE_DIRS
                         ${CMAKE_CURRENT_SOURCE_DIR}/inc
                       LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${POCO_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${JSONCPP_LIBRARIES}
@@ -48,7 +47,6 @@ if(ENABLE_WORKBENCH)
                       INCLUDE_DIRS
                         ${CMAKE_CURRENT_SOURCE_DIR}/inc
                       LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${POCO_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${JSONCPP_LIBRARIES}

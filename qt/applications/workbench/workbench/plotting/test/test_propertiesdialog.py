@@ -22,7 +22,7 @@ from unittest.mock import MagicMock
 from mantid.api import WorkspaceFactory
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.plotting.functions import pcolormesh
-from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor, ColorbarAxisEditor
+from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor, ColorbarAxisEditor, LegendEditor
 
 
 @start_qapplication
@@ -74,6 +74,21 @@ class PropertiesDialogTest(unittest.TestCase):
             self.assertEqual(min_value, fig.axes[ax].collections[0].norm.vmin)
             self.assertEqual(max_value, fig.axes[ax].collections[0].norm.vmax)
             self.assertTrue(isinstance(fig.axes[ax].collections[0].norm, LogNorm))
+
+    def test_legend_editor_correctly_updates_axis_legend(self):
+        # make figure
+        fig, ax = plt.subplots(1, 1)
+        lines = ax.plot([1, 2, 3], [1, 10, 100], 'o', label="Old label")
+        ax.legend()
+        legend_text = ax.get_legend().get_texts()[0]
+        # Make the legend editor
+        legend_editor = LegendEditor(fig.canvas, legend_text, lines[0])
+        legend_editor.ui.editor.text = MagicMock(return_value="New label")
+
+        legend_editor.changes_accepted()
+
+        self.assertEqual(ax.get_legend().get_texts()[0].get_text(), "New label")
+        self.assertEqual(lines[0].get_label(), "New label")
 
 
 if __name__ == '__main__':

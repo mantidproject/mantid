@@ -48,7 +48,6 @@ set_python_properties(PythonDataObjectsModule _dataobjects)
 target_link_libraries(
   PythonDataObjectsModule
   LINK_PRIVATE
-  ${TCMALLOC_LIBRARIES_LINKTIME}
   PythonInterfaceCore
   PythonAPIModule
   PythonGeometryModule
@@ -64,24 +63,10 @@ target_link_libraries(
   ${Boost_LIBRARIES}
 )
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(
-    PythonDataObjectsModule
-    PROPERTIES
-      INSTALL_RPATH
-      "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/"
-  )
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(
-    PythonDataObjectsModule
-    PROPERTIES
-      INSTALL_RPATH
-      "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/;\$ORIGIN/../api/"
-  )
-endif()
-
 # Installation settings
+set_target_properties(PythonDataObjectsModule
+    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/;${DL_ORIGIN_TAG}/../api/")
 mtd_install_targets(
-  TARGETS PythonDataObjectsModule INSTALL_DIRS ${LIB_DIR}/mantid/dataobjects
-  ${WORKBENCH_LIB_DIR}/mantid/dataobjects
+  TARGETS PythonDataObjectsModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/dataobjects
+  ${WORKBENCH_SITE_PACKAGES}/mantid/dataobjects
 )

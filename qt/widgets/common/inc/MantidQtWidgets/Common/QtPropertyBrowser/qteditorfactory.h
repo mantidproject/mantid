@@ -90,11 +90,13 @@
 #include "qtpropertybrowserutils_p.h"
 #include "qtpropertymanager.h"
 
+#include <QApplication>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QLineEdit>
 #include <QScrollBar>
 #include <QSpinBox>
+#include <QTimerEvent>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -104,14 +106,17 @@ class QColor;
 class QLabel;
 class QToolButton;
 
+template <class SpinBox> class QtSpinBoxFactoryPrivateBase;
 class QtSpinBoxFactoryPrivate;
+class QtSpinBoxFactoryNoTimerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactory
+// Base QtSpinBoxFactory class
+template <class SpinBox>
+class QtSpinBoxFactoryBase
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
-  Q_OBJECT
 public:
-  QtSpinBoxFactory(QObject *parent = nullptr);
-  ~QtSpinBoxFactory() override;
+  QtSpinBoxFactoryBase(QObject *parent = nullptr)
+      : QtAbstractEditorFactory<QtIntPropertyManager>(parent){};
 
 protected:
   void connectPropertyManager(QtIntPropertyManager *manager) override;
@@ -119,9 +124,102 @@ protected:
                                   QtProperty *property,
                                   QWidget *parent) override;
   void disconnectPropertyManager(QtIntPropertyManager *manager) override;
+  QtSpinBoxFactoryPrivateBase<SpinBox> *d_ptr;
+  friend class QtSpinBoxFactoryPrivateBase<SpinBox>;
+  void initializeQPtr() { d_ptr->q_ptr = this; }
+};
+/**
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+template <class SpinBox>
+void QtSpinBoxFactoryBase<SpinBox>::connectPropertyManager(
+    QtIntPropertyManager *manager) {
+  connect(manager, SIGNAL(valueChanged(QtProperty *, int)), this,
+          SLOT(slotPropertyChanged(QtProperty *, int)));
+  connect(manager, SIGNAL(rangeChanged(QtProperty *, int, int)), this,
+          SLOT(slotRangeChanged(QtProperty *, int, int)));
+  connect(manager, SIGNAL(singleStepChanged(QtProperty *, int)), this,
+          SLOT(slotSingleStepChanged(QtProperty *, int)));
+}
+
+/**
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+template <class SpinBox>
+QWidget *QtSpinBoxFactoryBase<SpinBox>::createEditorForManager(
+    QtIntPropertyManager *manager, QtProperty *property, QWidget *parent) {
+  auto *editor = d_ptr->createEditor(property, parent);
+  editor->setSingleStep(manager->singleStep(property));
+  editor->setRange(manager->minimum(property), manager->maximum(property));
+  editor->setValue(manager->value(property));
+  editor->setKeyboardTracking(false);
+
+  connect(editor, SIGNAL(valueChanged(int)), this, SLOT(slotSetValue(int)));
+  connect(editor, SIGNAL(destroyed(QObject *)), this,
+          SLOT(slotEditorDestroyed(QObject *)));
+  return editor;
+}
+
+/**
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+template <class SpinBox>
+void QtSpinBoxFactoryBase<SpinBox>::disconnectPropertyManager(
+    QtIntPropertyManager *manager) {
+  disconnect(manager, SIGNAL(valueChanged(QtProperty *, int)), this,
+             SLOT(slotPropertyChanged(QtProperty *, int)));
+  disconnect(manager, SIGNAL(rangeChanged(QtProperty *, int, int)), this,
+             SLOT(slotRangeChanged(QtProperty *, int, int)));
+  disconnect(manager, SIGNAL(singleStepChanged(QtProperty *, int)), this,
+             SLOT(slotSingleStepChanged(QtProperty *, int)));
+}
+
+class QSpinBoxNoTimer : public QSpinBox {
+  Q_OBJECT
+public:
+  QSpinBoxNoTimer(QWidget *parent = nullptr) : QSpinBox(parent){};
 
 private:
-  QtSpinBoxFactoryPrivate *d_ptr;
+  void timerEvent(QTimerEvent *event) override {
+    // Override the timer event method and check if the user is actually holding
+    // the mouse buttons down
+    qApp->processEvents();
+    if (QApplication::mouseButtons() & Qt::LeftButton)
+      QSpinBox::timerEvent(event);
+  }
+};
+
+class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactoryNoTimer
+    : public QtSpinBoxFactoryBase<QSpinBoxNoTimer> {
+  Q_OBJECT
+public:
+  QtSpinBoxFactoryNoTimer(QObject *parent = nullptr);
+  ~QtSpinBoxFactoryNoTimer() override;
+
+private:
+  Q_DECLARE_PRIVATE(QtSpinBoxFactoryNoTimer)
+  Q_DISABLE_COPY(QtSpinBoxFactoryNoTimer)
+  Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
+  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, int, int))
+  Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(QtProperty *, int))
+  Q_PRIVATE_SLOT(d_func(), void slotSetValue(int))
+  Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+};
+
+class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactory
+    : public QtSpinBoxFactoryBase<QSpinBox> {
+  Q_OBJECT
+public:
+  QtSpinBoxFactory(QObject *parent = nullptr);
+  ~QtSpinBoxFactory() override;
+
+private:
   Q_DECLARE_PRIVATE(QtSpinBoxFactory)
   Q_DISABLE_COPY(QtSpinBoxFactory)
   Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
@@ -778,15 +876,97 @@ public:
   void slotSetValue(int value);
 };
 
-class QtSpinBoxFactoryPrivate : public EditorFactoryPrivate<QSpinBox> {
-  QtSpinBoxFactory *q_ptr;
-  Q_DECLARE_PUBLIC(QtSpinBoxFactory)
+template <class SpinBox>
+class QtSpinBoxFactoryPrivateBase : public EditorFactoryPrivate<SpinBox> {
 public:
+  // This q_ptr is public due to the base class QtSpinBoxFactoryBase needing
+  // access to it.
+  QtSpinBoxFactoryBase<SpinBox> *q_ptr;
+  using EditorFactoryPrivate<SpinBox>::m_editorToProperty;
   void slotPropertyChanged(QtProperty *property, int value);
   void slotRangeChanged(QtProperty *property, int min, int max);
   void slotSingleStepChanged(QtProperty *property, int step);
   void slotSetValue(int value);
 };
+
+class QtSpinBoxFactoryPrivate : public QtSpinBoxFactoryPrivateBase<QSpinBox> {
+  Q_DECLARE_PUBLIC(QtSpinBoxFactory)
+};
+
+class QtSpinBoxFactoryNoTimerPrivate
+    : public QtSpinBoxFactoryPrivateBase<QSpinBoxNoTimer> {
+  Q_DECLARE_PUBLIC(QtSpinBoxFactoryNoTimer)
+};
+
+// ------------ QtSpinBoxFactory
+template <class SpinBox>
+void QtSpinBoxFactoryPrivateBase<SpinBox>::slotPropertyChanged(
+    QtProperty *property, int value) {
+  if (!this->m_createdEditors.contains(property))
+    return;
+  QListIterator<SpinBox *> itEditor(this->m_createdEditors[property]);
+  while (itEditor.hasNext()) {
+    auto *editor = itEditor.next();
+    if (editor->value() != value) {
+      editor->blockSignals(true);
+      editor->setValue(value);
+      editor->blockSignals(false);
+    }
+  }
+}
+
+template <class SpinBox>
+void QtSpinBoxFactoryPrivateBase<SpinBox>::slotRangeChanged(
+    QtProperty *property, int min, int max) {
+  if (!this->m_createdEditors.contains(property))
+    return;
+
+  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  if (!manager)
+    return;
+
+  QListIterator<SpinBox *> itEditor(this->m_createdEditors[property]);
+  while (itEditor.hasNext()) {
+    auto *editor = itEditor.next();
+    editor->blockSignals(true);
+    editor->setRange(min, max);
+    editor->setValue(manager->value(property));
+    editor->blockSignals(false);
+  }
+}
+
+template <class SpinBox>
+void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSingleStepChanged(
+    QtProperty *property, int step) {
+  if (!this->m_createdEditors.contains(property))
+    return;
+  QListIterator<SpinBox *> itEditor(this->m_createdEditors[property]);
+  while (itEditor.hasNext()) {
+    auto *editor = itEditor.next();
+    editor->blockSignals(true);
+    editor->setSingleStep(step);
+    editor->blockSignals(false);
+  }
+}
+
+template <class SpinBox>
+void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSetValue(int value) {
+  QObject *object = q_ptr->sender();
+  typename QMap<SpinBox *, QtProperty *>::ConstIterator ecend =
+      this->m_editorToProperty.constEnd();
+  for (typename QMap<SpinBox *, QtProperty *>::ConstIterator itEditor =
+           this->m_editorToProperty.constBegin();
+       itEditor != ecend; ++itEditor) {
+    if (itEditor.key() == object) {
+      QtProperty *property = itEditor.value();
+      QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+      if (!manager)
+        return;
+      manager->setValue(property, value);
+      return;
+    }
+  }
+}
 
 class QtTimeEditFactoryPrivate : public EditorFactoryPrivate<QTimeEdit> {
   QtTimeEditFactory *q_ptr;

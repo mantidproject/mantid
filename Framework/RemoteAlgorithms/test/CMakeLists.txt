@@ -7,7 +7,6 @@ if(CXXTEST_FOUND)
   target_include_directories(RemoteAlgorithmsTest PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
   target_link_libraries(RemoteAlgorithmsTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         API
                         Geometry
                         Kernel

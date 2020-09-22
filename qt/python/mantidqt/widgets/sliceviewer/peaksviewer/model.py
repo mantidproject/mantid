@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 
 # 3rd party imports
-from cycler import cycler
 from mantid.api import AnalysisDataService, SpecialCoordinateSystem
 from mantid.kernel import logger
 
@@ -16,16 +15,6 @@ from mantidqt.widgets.workspacedisplay.table.model \
     import TableWorkspaceDisplayModel
 from .representation.draw import draw_peak_representation
 
-# constants
-# cycle colors for each peaks workspace - it is unlikely there will be more than 3
-FG_COLORS = cycler(fg_color=[
-    '#d62728',  # ~red,
-    '#03ad06',  # ~green
-    '#17becf',  # ~cyan
-    '#e9f02e',  # ~yellow
-    '#e377c2'  # ~pink
-])()
-DEFAULT_BG_COLOR = '0.75'
 # map coordinate system to correct Peak getter
 FRAME_TO_PEAK_CENTER_ATTR = {
     SpecialCoordinateSystem.QLab: 'getQLabFrame',
@@ -38,6 +27,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
+
     def __init__(self, peaks_ws, fg_color, bg_color):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
@@ -124,20 +114,20 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         return peak_center_getter
 
 
-def create_peaksviewermodel(peaks_ws_name):
+def create_peaksviewermodel(peaks_ws_name: str, fg_color: str, bg_color: str):
     """
     A factory function to create a PeaksViewerModel from the given workspace name
     :param peaks_ws_name: A str giving a workspace name that is expected to be a PeaksWorkspace
+    :param fg_color: Color of the glyphs marking the signal region
+    :param bg_color: Color of the glyphs marking the background region
     :return: A new PeaksViewerModel object
     :raises ValueError: if the workspace referred to by the name is not a PeaksWorkspace
     """
-    return PeaksViewerModel(_get_peaksworkspace(peaks_ws_name),
-                            fg_color=next(FG_COLORS)['fg_color'],
-                            bg_color=DEFAULT_BG_COLOR)
+    return PeaksViewerModel(_get_peaksworkspace(peaks_ws_name), fg_color, bg_color)
 
 
 # Private
-def _get_peaksworkspace(name):
+def _get_peaksworkspace(name: str):
     """Return a handle to a PeaksWorkspace
     :param name: The string name of a workspace in the ADS that should be a PeaksWorkspace
     :raises ValueError: if the workspace exists but is not a PeaksWorkspace

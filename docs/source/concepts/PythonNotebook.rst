@@ -1,4 +1,4 @@
-.. _JupyterNotebook:
+.. _PythonNotebook:
 
 ==========================
 MantidPython and Notebook
@@ -116,3 +116,5 @@ Script and Notebook Generation
 ==============================
 
 After processing a workspace in Mantid, the history of how this data was manipulated can be converted to a script or a notebook, with the use of :ref:`algm-GeneratePythonScript` or :ref:`algm-GenerateIPythonNotebook` respectively.
+
+.. categories:: Concepts

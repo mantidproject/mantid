@@ -30,66 +30,67 @@ class MplPainterTest(unittest.TestCase):
         mock_artist.remove.assert_called_once()
 
     def test_circle_draws_circle_patch(self):
-        axes = MagicMock()
-        painter = MplPainter(axes)
+        view = MagicMock()
+        painter = MplPainter(view)
         x, y, radius = 1, 2, 0.8
 
         artist = painter.circle(x, y, radius)
 
-        axes.add_patch.assert_called_once()
+        painter.axes.add_patch.assert_called_once()
         self.assertTrue(artist is not None)
 
     def test_cross_draws_with_only_xy(self):
-        axes = MagicMock()
-        painter = MplPainter(axes)
+        view = MagicMock()
+        painter = MplPainter(view)
         x, y, half_width = 1, 2, 0.1
 
         artist = painter.cross(x, y, half_width)
 
-        axes.add_patch.assert_called_once()
+        painter.axes.add_patch.assert_called_once()
         self.assertTrue(artist is not None)
-        self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=4, alpha=None)
+        self._verify_patch(patch=painter.axes.add_patch.call_args[0][0], nvertices=4, alpha=None)
 
     def test_cross_passes_kwargs_to_mpl(self):
-        axes = MagicMock()
-        painter = MplPainter(axes)
+        view = MagicMock()
+        painter = MplPainter(view)
         x, y, half_width = 1, 2, 0.1
         alpha = 0.8
 
         painter.cross(x, y, half_width, alpha=alpha)
 
-        axes.add_patch.assert_called_once()
-        self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=4, alpha=alpha)
+        painter.axes.add_patch.assert_called_once()
+        self._verify_patch(patch=painter.axes.add_patch.call_args[0][0], nvertices=4, alpha=alpha)
 
     def test_ellipticalshell(self):
-        axes = MagicMock()
-        painter = MplPainter(axes)
+        view = MagicMock()
+        painter = MplPainter(view)
         x, y, outer_width, outer_height, thick = 1, 2, 0.8, 1.0, 0.2
         alpha = 1.0
 
         painter.elliptical_shell(x, y, outer_width, outer_height, thick, alpha=alpha)
 
-        axes.add_patch.assert_called_once()
-        self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=100, alpha=alpha)
+        painter.axes.add_patch.assert_called_once()
+        self._verify_patch(patch=painter.axes.add_patch.call_args[0][0], nvertices=100, alpha=alpha)
 
     def test_shell_adds_patch(self):
-        axes = MagicMock()
-        painter = MplPainter(axes)
+        view = MagicMock()
+        painter = MplPainter(view)
         x, y, outer_radius, thick = 1, 2, 0.8, 0.2
 
         painter.shell(x, y, outer_radius, thick)
 
-        axes.add_patch.assert_called_once()
-        self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=100, alpha=None)
+        painter.axes.add_patch.assert_called_once()
+        self._verify_patch(patch=painter.axes.add_patch.call_args[0][0], nvertices=100, alpha=None)
 
     def test_bbox_returns_ll_and_ur_of_containing_box(self):
-        artist, axes, bbox, inv_trans = (MagicMock(), ) * 4
+        artist, view, axes, bbox, inv_trans = (MagicMock(), ) * 5
         # 1:1 transformation for simplicity
         inv_trans.transform.side_effect = lambda x: x
         axes.transData.inverted.return_value = inv_trans
         artist.get_extents.return_value = bbox
         bbox.min, bbox.max = (1., 1.5), (3., 3.5)
-        painter = MplPainter(axes)
+        view.ax = axes
+        painter = MplPainter(view)
 
         ll, ur = painter.bbox(artist)
 
@@ -104,13 +105,14 @@ class MplPainterTest(unittest.TestCase):
             artist.get_extents.return_value = bbox
             return artist
 
-        axes, inv_trans = MagicMock(), MagicMock()
+        axes, view, inv_trans = MagicMock(), MagicMock(), MagicMock()
         # 1:1 transformation for simplicity
         inv_trans.transform.side_effect = lambda x: x
         axes.transData.inverted.return_value = inv_trans
         artists = create_mock_artist(((1., 1.5), (3., 3.5))), create_mock_artist(
             ((1.1, 1.3), (2.9, 3.6)))
-        painter = MplPainter(axes)
+        view.ax = axes
+        painter = MplPainter(view)
         painted = Painted(painter, artists)
 
         xlim, ylim = painted.viewlimits()

@@ -38,14 +38,12 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.view.lab_pos_1 = 100
         self.view.lab_pos_2 = -100
         self.presenter.set_view(self.view)
-        self.presenter._beam_centre_model.scale_1 = 1000
-        self.presenter._beam_centre_model.scale_2 = 1000
 
         self.presenter.on_run_clicked()
 
         self.assertFalse(self.presenter._beam_centre_model.left_right)
-        self.assertEqual(self.presenter._beam_centre_model.lab_pos_1, 0.1)
-        self.assertEqual(self.presenter._beam_centre_model.lab_pos_2, -0.1)
+        self.assertEqual(self.presenter._beam_centre_model.lab_pos_1, 100)
+        self.assertEqual(self.presenter._beam_centre_model.lab_pos_2, -100)
 
     def test_on_update_rows_skips_no_rows(self):
         self.parent_presenter.num_rows.return_value = 0
@@ -60,18 +58,6 @@ class BeamCentrePresenterTest(unittest.TestCase):
 
         self.BeamCentreModel.reset_inst_defaults.assert_called_with(SANSInstrument.SANS2D)
 
-    def test_that_set_scaling_is_called_on_update_instrument(self):
-        self.presenter.set_view(self.view)
-
-        self.presenter.on_update_instrument(SANSInstrument.LARMOR)
-        self.presenter._beam_centre_model.set_scaling.assert_called_once_with(SANSInstrument.LARMOR)
-
-    def test_that_view_on_update_instrument_is_called_on_update_instrument(self):
-        self.presenter.set_view(self.view)
-
-        self.presenter.on_update_instrument(SANSInstrument.LARMOR)
-        self.view.on_update_instrument.assert_called_once_with(SANSInstrument.LARMOR)
-
     def test_that_on_processing_finished_updates_view(self):
         self.presenter.set_view(self.view)
 
@@ -80,17 +66,12 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.BeamCentreModel.hab_pos_1 = 3
         self.BeamCentreModel.hab_pos_2 = 4
 
-        scale_1 = 1000
-        scale_2 = 2000
-        self.BeamCentreModel.scale_1 = scale_1
-        self.BeamCentreModel.scale_2 = scale_2
-
         self.presenter.on_processing_finished_centre_finder()
-        self.assertEqual(self.BeamCentreModel.lab_pos_1 * scale_1, self.view.lab_pos_1)
-        self.assertEqual(self.BeamCentreModel.lab_pos_2 * scale_2, self.view.lab_pos_2)
+        self.assertEqual(self.BeamCentreModel.lab_pos_1, self.view.lab_pos_1)
+        self.assertEqual(self.BeamCentreModel.lab_pos_2, self.view.lab_pos_2)
 
-        self.assertEqual(self.BeamCentreModel.hab_pos_1 * scale_1, self.view.hab_pos_1)
-        self.assertEqual(self.BeamCentreModel.hab_pos_2 * scale_2, self.view.hab_pos_2)
+        self.assertEqual(self.BeamCentreModel.hab_pos_1, self.view.hab_pos_1)
+        self.assertEqual(self.BeamCentreModel.hab_pos_2, self.view.hab_pos_2)
         self.view.set_run_button_to_normal.assert_called_once_with()
 
     def test_that_update_hab_selected_enabled_hab_and_disabled_lab(self):

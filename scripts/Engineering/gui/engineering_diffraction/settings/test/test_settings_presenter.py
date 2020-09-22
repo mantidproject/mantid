@@ -25,7 +25,8 @@ class SettingsPresenterTest(unittest.TestCase):
         self.model.get_settings_dict.return_value = {
             "save_location": "result",
             "full_calibration": "value",
-            "recalc_vanadium": False
+            "recalc_vanadium": False,
+            "logs": "some,logs"
         }
 
         self.presenter.load_existing_settings()
@@ -33,17 +34,21 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.settings, {
             "full_calibration": "value",
             "save_location": "result",
-            "recalc_vanadium": False
+            "recalc_vanadium": False,
+            "logs": "some,logs"
         })
         self.assertEqual(self.view.set_save_location.call_count, 1)
         self.assertEqual(self.view.set_full_calibration.call_count, 1)
         self.assertEqual(self.view.set_van_recalc.call_count, 1)
+        self.assertEqual(self.view.add_log_checkboxs.call_count, 1)
+        self.assertEqual(self.view.set_checked_logs.call_count, 1)
 
     def test_file_searched_on_opening(self):
         self.model.get_settings_dict.return_value = {
             "save_location": "result",
             "full_calibration": "value",
-            "recalc_vanadium": False
+            "recalc_vanadium": False,
+            "logs": "some,logs"
         }
 
         self.presenter.load_existing_settings()
@@ -56,49 +61,61 @@ class SettingsPresenterTest(unittest.TestCase):
             "foo": "dud",
             "bar": "result"
         }
+        self.presenter.savedir_notifier = mock.MagicMock()
         self.presenter.load_existing_settings()
 
         self.view.set_save_location.assert_called_with(settings_presenter.DEFAULT_SETTINGS["save_location"])
         self.view.set_full_calibration.assert_called_with(settings_presenter.DEFAULT_SETTINGS["full_calibration"])
         self.view.set_van_recalc.assert_called_with(settings_presenter.DEFAULT_SETTINGS["recalc_vanadium"])
+        self.view.set_checked_logs.assert_called_with(settings_presenter.DEFAULT_SETTINGS["logs"])
 
     def test_save_new_settings(self):
         self.view.get_save_location.return_value = "save"
         self.view.get_full_calibration.return_value = "cal"
         self.view.get_van_recalc.return_value = False
+        self.view.get_checked_logs.return_value = "some,logs"
+        self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.save_new_settings()
 
         self.assertEqual(self.presenter.settings, {
             "full_calibration": "cal",
             "save_location": "save",
-            "recalc_vanadium": False
+            "recalc_vanadium": False,
+            "logs": "some,logs"
         })
         self.model.set_settings_dict.assert_called_with({
             "full_calibration": "cal",
             "save_location": "save",
-            "recalc_vanadium": False
+            "recalc_vanadium": False,
+            "logs": "some,logs"
         })
         self.assertEqual(self.view.close.call_count, 0)
+        self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
     def test_save_settings_and_close(self):
         self.view.get_save_location.return_value = "save"
         self.view.get_full_calibration.return_value = "cal"
         self.view.get_van_recalc.return_value = False
+        self.view.get_checked_logs.return_value = "some,logs"
+        self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.save_and_close_dialog()
 
         self.assertEqual(self.presenter.settings, {
             "full_calibration": "cal",
             "save_location": "save",
-            "recalc_vanadium": False
+            "recalc_vanadium": False,
+            "logs": "some,logs"
         })
         self.model.set_settings_dict.assert_called_with({
             "full_calibration": "cal",
             "save_location": "save",
-            "recalc_vanadium": False
+            "recalc_vanadium": False,
+            "logs": "some,logs"
         })
         self.assertEqual(self.view.close.call_count, 1)
+        self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
 
 if __name__ == '__main__':

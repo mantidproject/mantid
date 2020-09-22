@@ -106,7 +106,6 @@ include_directories(inc)
 
 target_link_libraries(Muon
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES})
 

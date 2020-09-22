@@ -127,17 +127,16 @@ class SANSLoadTest(unittest.TestCase):
         if can_direct_period is not None:
             data_builder.set_can_direct_period(can_direct_period)
 
-        # Add the calibration
-        if calibration is not None:
-            data_builder.set_calibration(calibration)
-
         data_info = data_builder.build()
 
         # Get the sample state
         test_director = TestDirector()
         test_director.set_states(data_state=data_info)
 
-        return test_director.construct()
+        state = test_director.construct()
+        state.adjustment.calibration = calibration
+
+        return state
 
     def _evaluate_workspace_type(self, load_alg, num_workspaces, workspace_name, workspace_type, index):
         if num_workspaces == 1:

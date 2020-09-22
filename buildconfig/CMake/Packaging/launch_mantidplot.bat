@@ -48,5 +48,5 @@ set QT_API=pyqt4
 :: sip is now private inside PyQt4 folder but qtpy tries to "import sip" plain. Fixup the path so
 :: it can find the private sip.
 set PYTHONPATH=%_INSTALL_DIR%\bin\Lib\site-packages\PyQt4;%PYTHONPATH%
-python %_INSTALL_DIR%\scripts\ErrorReporter\error_dialog_app.py --exitcode=%errorlevel% --directory=%_BIN_DIR% --application=mantidplot
+python %_BIN_DIR%\mantidqt\dialogs\errorreports\main.py --exitcode=%errorlevel% --application=mantidplot
 )

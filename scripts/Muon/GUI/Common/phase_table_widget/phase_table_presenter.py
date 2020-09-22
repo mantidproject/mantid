@@ -7,22 +7,13 @@
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad
-from mantidqt.utils.observer_pattern import Observer, Observable
+from mantidqt.utils.observer_pattern import Observable,GenericObserver
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
     get_phase_table_workspace_group_name, \
     get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 import mantid
-
-
-class GenericObserver(Observer):
-    def __init__(self, callback):
-        Observer.__init__(self)
-        self.callback = callback
-
-    def update(self, observable, arg):
-        self.callback()
 
 
 class PhaseTablePresenter(object):
@@ -37,6 +28,11 @@ class PhaseTablePresenter(object):
 
         self.phase_table_calculation_complete_notifier = Observable()
         self.phase_quad_calculation_complete_nofifier = Observable()
+        self.enable_editing_notifier = Observable()
+        self.disable_editing_notifier = Observable()
+
+        self.disable_tab_observer = GenericObserver(self.view.disable_widget)
+        self.enable_tab_observer = GenericObserver(self.view.enable_widget)
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
 
@@ -59,7 +55,7 @@ class PhaseTablePresenter(object):
 
     def handle_calulate_phase_table_clicked(self):
         self.update_model_from_view()
-
+        self.disable_editing_notifier.notify_subscribers()
         self.calculation_thread = self.create_calculation_thread()
 
         self.calculation_thread.threadWrapperSetUp(self.handle_phase_table_calculation_started,
@@ -74,7 +70,6 @@ class PhaseTablePresenter(object):
 
     def handle_calculate_phase_quad_button_clicked(self):
         self.update_model_from_view()
-
         self.phasequad_calculation_thread = self.create_phase_quad_calculation_thread()
 
         self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
@@ -120,21 +115,22 @@ class PhaseTablePresenter(object):
         self.phase_quad_calculation_complete_nofifier.notify_subscribers()
 
     def handle_calculation_started(self):
-        self.view.disable_widget()
+        self.disable_editing_notifier.notify_subscribers()
         self.view.enable_phasequad_cancel()
 
     def handle_phase_table_calculation_started(self):
-        self.view.disable_widget()
+        self.disable_editing_notifier.notify_subscribers()
         self.view.enable_cancel()
 
     def handle_calculation_error(self, error):
-        self.view.enable_widget()
+        self.enable_editing_notifier.notify_subscribers()
         self.view.warning_popup(error)
         self.view.disable_cancel()
         self.current_alg = None
 
     def handle_calculation_success(self):
         self.phase_table_calculation_complete_notifier.notify_subscribers()
+        self.enable_editing_notifier.notify_subscribers()
         self.update_current_phase_tables()
         self.view.enable_widget()
         self.view.disable_cancel()

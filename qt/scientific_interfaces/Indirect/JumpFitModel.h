@@ -41,8 +41,10 @@ public:
   getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const;
   boost::optional<std::size_t>
   getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
-  void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex);
-  void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex);
+  void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex,
+                      bool single = true);
+  void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex,
+                     bool single = true);
 
 private:
   bool

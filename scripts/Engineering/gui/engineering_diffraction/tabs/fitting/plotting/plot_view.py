@@ -45,7 +45,13 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.toolbar = FittingPlotToolbar(self.figure.canvas, self, False)
         self.vLayout_plot.addWidget(self.toolbar)
         self.vLayout_plot.addWidget(self.figure.canvas)
-        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas, ToolbarStateManager(self.toolbar)) # self.fitprop_toolbar
+        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas,
+                                                     ToolbarStateManager(self.toolbar))
+        hide_props = ['StartX', 'EndX', 'Minimizer', 'Cost function', 'Max Iterations', 'Output',
+                      'Ignore invalid data', 'Peak Radius', 'Plot Composite Members',
+                      'Convolve Composite Members', 'Show Parameter Errors', 'Evaluate Function As']
+        self.fit_browser.removePropertiesFromSettingsBrowser(hide_props)
+        self.fit_browser.toggleWsListVisible()
         self.fit_browser.closing.connect(self.toolbar.handle_fit_browser_close)
         self.vLayout_fitprop.addWidget(self.fit_browser)
         self.fit_browser.hide()
@@ -85,6 +91,19 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.figure.tight_layout()
         self.update_legend(self.get_axes()[0])
         self.figure.canvas.draw()
+        self.update_fitbrowser()
+
+    def update_fitbrowser(self):
+        is_visible = self.fit_browser.isVisible()
+        self.toolbar.set_fit_checkstate(False)
+        self.fit_browser.hide()
+        if self.fit_browser.getWorkspaceNames() and is_visible:
+            self.toolbar.set_fit_checkstate(True)
+            self.fit_browser.show()
+
+    def remove_ws_from_fitbrowser(self, ws):
+        # only one spectra per workspace
+        self.fit_browser.removeWorkspaceAndSpectra(ws.name())
 
     def update_legend(self, ax):
         if ax.get_lines():

@@ -29,7 +29,6 @@ Guides
    Standards/index
    Testing/index
    DoxygenSetup
-   Python3
 
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
@@ -45,9 +44,6 @@ Guides
 
 :doc:`DoxygenSetup`
    Configure a doxygen build locally.
-
-:doc:`Python3`
-   Building with Python 3 (Ubuntu/Windows).
 
 `C++ Introduction <https://www.mantidproject.org/New_Starter_C%2B%2B_introduction>`_
    Exercises for learning C++.

@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        2.0
+Version:        2.2
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -26,6 +26,7 @@ Requires: graphviz
 Requires: gsl-devel
 Requires: hdf5-devel
 Requires: hdf-devel
+Requires: jemalloc-devel
 Requires: jsoncpp-devel >= 0.7.0
 Requires: librdkafka-devel
 Requires: muParser-devel
@@ -55,7 +56,7 @@ Requires: python%{python3_pkgversion}-setuptools
 Requires: python%{python3_pkgversion}-sphinx
 Requires: python%{python3_pkgversion}-sphinx-bootstrap-theme
 Requires: python%{python3_pkgversion}-toml
-Requires: python%{python3_pkgversion}-PyYAML
+Requires: python%{python3_pkgversion}-PyCifRW
 Requires: poco-devel >= 1.4.6
 Requires: qscintilla-devel
 Requires: qscintilla-qt5-devel

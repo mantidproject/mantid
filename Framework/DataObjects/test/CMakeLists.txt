@@ -22,7 +22,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(DataObjectsTest ${TEST_FILES})
   target_link_libraries(DataObjectsTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         DataObjects
                         ${NEXUS_LIBRARIES}

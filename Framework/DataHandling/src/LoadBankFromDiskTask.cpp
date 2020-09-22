@@ -10,9 +10,8 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidKernel/Unit.h"
-#include <algorithm>
-
 #include "MantidNexus/NexusIOHelper.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace DataHandling {
@@ -60,7 +59,16 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   }
   std::string thisStartTime;
   size_t thisNumPulses = 0;
-  file.getAttr("offset", thisStartTime);
+  // If the offset is not present, use Unix epoch
+  if (!file.hasAttr("offset")) {
+    thisStartTime = "1970-01-01T00:00:00Z";
+    m_loader.alg->getLogger().warning()
+        << "In loadPulseTimes: no ISO8601 offset attribute provided for "
+           "event_time_zero, using UNIX epoch instead\n";
+  } else {
+    file.getAttr("offset", thisStartTime);
+  }
+
   if (!file.getInfo().dims.empty())
     thisNumPulses = file.getInfo().dims[0];
   file.closeData();
@@ -273,12 +281,15 @@ LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     m_loadError = true;
   }
 
-  // The Nexus standard does not specify if event_time_offset should be float or
-  // integer, so we use the NeXusIOHelper to perform the conversion to float on
-  // the fly. If the data field already contains floats, the conversion is
-  // skipped.
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart,
-                                                        m_loadSize);
+  // Mantid assumes event_time_offset to be float.
+  // Nexus only requires event_time_offset to be a NXNumber.
+  // We thus have to consider 32-bit or 64-bit options, and we
+  // explicitly allow downcasting using the additional AllowDowncasting
+  // template argument.
+  auto vec =
+      NeXus::NeXusIOHelper::readNexusSlab<float,
+                                          NeXus::NeXusIOHelper::AllowNarrowing>(
+          file, key, m_loadStart, m_loadSize);
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds

@@ -21,7 +21,7 @@ if(ENABLE_WORKBENCH)
                        Qt5::OpenGL
                        Qt5::Widgets
                      INSTALL_DIR
-                        ${WORKBENCH_LIB_DIR}/mantidqt/widgets/instrumentview
+                        ${WORKBENCH_SITE_PACKAGES}/mantidqt/widgets/instrumentview
                      LINUX_INSTALL_RPATH
                        "\$ORIGIN/../../.."
                      OSX_INSTALL_RPATH

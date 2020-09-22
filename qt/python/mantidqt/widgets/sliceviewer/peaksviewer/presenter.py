@@ -11,8 +11,25 @@ from enum import Enum
 
 # local imports
 from mantidqt.widgets.workspacedisplay.table.presenter \
-    import TableWorkspaceDataPresenter
+    import TableWorkspaceDataPresenter, create_table_item
 from .model import create_peaksviewermodel
+
+
+class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
+    """Override create_item method to format table columns more
+    appropriately
+    """
+    FLOAT_FORMAT_STR = '{:.5f}'
+
+    def create_item(self, data, _):
+        """Create a table item to display the data. The data is always readonly
+        here.
+        """
+        if type(data) == float:
+            data = self.FLOAT_FORMAT_STR.format(data)
+        else:
+            data = str(data)
+        return create_table_item(data, editable=False)
 
 
 class PeaksViewerPresenter(object):
@@ -37,7 +54,7 @@ class PeaksViewerPresenter(object):
         self._model = model
         self._raise_error_if_workspace_incompatible(model.peaks_workspace)
         self._peaks_table_presenter = \
-            TableWorkspaceDataPresenter(model, view.table_view)
+            PeaksWorkspaceDataPresenter(model, view.table_view)
 
         self._view = view
         view.subscribe(self)
@@ -64,7 +81,7 @@ class PeaksViewerPresenter(object):
         elif event == PresenterEvent.PeakSelected:
             self._peak_selected()
         elif event == PresenterEvent.PeaksListChanged:
-            self._peaks_table_presenter.refresh()
+            self._peaks_list_changed()
         elif event == PresenterEvent.ClearPeaks:
             self._clear_peaks()
         else:
@@ -97,7 +114,14 @@ class PeaksViewerPresenter(object):
         #   - first update slice point so we are in the correct plane
         #   - find and set limits required to "zoom" to the selected peak
         self._view.set_slicepoint(self.model.slicepoint(selected_index, self._view.sliceinfo))
-        self._view.set_axes_limits(*self.model.viewlimits(selected_index))
+        self._view.set_axes_limits(*self.model.viewlimits(selected_index), auto_transform=False)
+
+    def _peaks_list_changed(self):
+        """
+        Respond to a change in the peaks list in the model
+        """
+        self._peaks_table_presenter.refresh()
+        self.view.table_view.enable_sorting()
 
     # private api
     @staticmethod
@@ -112,6 +136,18 @@ class PeaksViewerPresenter(object):
 class PeaksViewerCollectionPresenter(object):
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
+
+    # constants
+    # colors for each peaks workspace - it is unlikely there will be more than 3 at once
+    FG_COLORS = [
+        '#d62728',  # ~red,
+        '#03ad06',  # ~green
+        '#17becf',  # ~cyan
+        '#e9f02e',  # ~yellow
+        '#e377c2'  # ~pink
+    ]
+    DEFAULT_BG_COLOR = '0.75'
+
     def __init__(self, view):
         """
         :param view: View displaying the model information
@@ -123,13 +159,14 @@ class PeaksViewerCollectionPresenter(object):
     def view(self):
         return self._view
 
-    def append_peaksworkspace(self, model):
+    def append_peaksworkspace(self, name):
         """
-        Create and append a view for the given workspace
-        :param model: A PeakWorkspace model object.
+        Create and append a view for the given named workspace
+        :param name: The name of a PeaksWorkspace.
         :returns: The child presenter
         """
-        presenter = PeaksViewerPresenter(model, self._view.append_peaksviewer())
+        presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
+                                         self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
         return presenter
 
@@ -156,7 +193,7 @@ class PeaksViewerCollectionPresenter(object):
                 self.remove_peaksworkspace(name)
 
         for name in names_to_overlay_final:
-            self.append_peaksworkspace(create_peaksviewermodel(name))
+            self.append_peaksworkspace(name)
 
         self.notify(PeaksViewerPresenter.Event.OverlayPeaks)
 
@@ -189,3 +226,24 @@ class PeaksViewerCollectionPresenter(object):
         """Dispatch notification to all subpresenters"""
         for presenter in self._child_presenters:
             presenter.notify(event)
+
+    # private api
+    def _create_peaksviewer_model(self, name):
+        """
+        Create a model for the given PeaksWorkspace with an appropriate color
+        :param name: The name of a PeaksWorkspace.
+        :return A new PeaksViewerModel object
+        """
+        # select first unused color
+        used_colors = map(lambda p: p.model.fg_color, self._child_presenters)
+        fg_color = None
+        for color in self.FG_COLORS:
+            if color not in used_colors:
+                fg_color = color
+                break
+
+        if fg_color is None:
+            # use black in this rare case
+            fg_color = '#000000'
+
+        return create_peaksviewermodel(name, fg_color, self.DEFAULT_BG_COLOR)

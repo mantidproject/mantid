@@ -8,7 +8,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(CatalogTest ${TEST_FILES})
   target_link_libraries(CatalogTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Catalog)
   add_dependencies(FrameworkTests CatalogTest)

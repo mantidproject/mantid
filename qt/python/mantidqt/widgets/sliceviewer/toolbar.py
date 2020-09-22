@@ -22,7 +22,6 @@ class ToolItemText:
     OVERLAY_PEAKS = 'OverlayPeaks'
     NONORTHOGONAL_AXES = 'NonOrthogonalAxes'
     SAVE = 'Save'
-    CUSTOMIZE = 'Customize'
 
 
 class SliceViewerNavigationToolbar(NavigationToolbar2QT):
@@ -33,7 +32,6 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     regionSelectionClicked = Signal(bool)
     nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
-    plotOptionsChanged = Signal()
     zoomPanFinished = Signal()
 
     toolitems = (
@@ -54,8 +52,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         (ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
          'nonOrthogonalClicked', False),
         (None, None, None, None, None),
-        (ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None),
-        (ToolItemText.CUSTOMIZE, 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
+        (ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None)
     )
 
     def _init_toolbar(self):
@@ -89,10 +86,6 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
         # Location of a press event
         self._pressed_xy = None
-
-    def edit_parameters(self):
-        NavigationToolbar2QT.edit_parameters(self)
-        self.plotOptionsChanged.emit()
 
     def press(self, event):
         """

@@ -21,17 +21,17 @@ from workbench.utils.windowfinder import find_all_windows_that_are_savable
 # calls from being saved. e.g. MonitorLiveData is ignored because StartLiveData is the only one that is needed
 # to restart this workspace.
 ALGS_TO_IGNORE = ["MonitorLiveData", "EnggSaveGSASIIFitResultsToHDF5",
-                  "EnggSaveSinglePeakFitResultsToHDF5", "ExampleSaveAscii", "SANSSave", "SaveANSTOAscii",
+                  "EnggSaveSinglePeakFitResultsToHDF5", "ExampleSaveAscii", "SANSSave",
                   "SaveAscii", "SaveBankScatteringAngles", "SaveCSV", "SaveCalFile", "SaveCanSAS1D",
                   "SaveDaveGrp", "SaveDetectorsGrouping", "SaveDiffCal", "SaveDiffFittingAscii",
                   "SaveDspacemap", "SaveFITS", "SaveFocusedXYE", "SaveFullprofResolution", "SaveGDA",
                   "SaveGEMMAUDParamFile", "SaveGSASInstrumentFile", "SaveGSS", "SaveHKL",
-                  "SaveILLCosmosAscii", "SaveISISNexus", "SaveIsawDetCal", "SaveIsawPeaks",
+                  "SaveISISNexus", "SaveIsawDetCal", "SaveIsawPeaks",
                   "SaveIsawQvector", "SaveIsawUB", "SaveLauenorm", "SaveMD", "SaveMDWorkspaceToVTK",
                   "SaveMask", "SaveNISTDAT", "SaveNXSPE", "SaveNXTomo", "SaveNXcanSAS", "SaveNexus",
                   "SaveNexusPD", "SaveNexusProcessed", "SaveOpenGenieAscii", "SavePAR", "SavePDFGui",
                   "SavePHX", "SaveParameterFile", "SavePlot1D", "SavePlot1DAsJson", "SaveRKH",
-                  "SaveReflCustomAscii", "SaveReflThreeColumnAscii", "SaveReflections",
+                  "SaveReflections",
                   "SaveReflectometryAscii", "SaveSESANS", "SaveSPE", "SaveTBL", "SaveToSNSHistogramNexus",
                   "SaveVTK", "SaveVulcanGSS", "SaveYDA", "SaveZODS"]
 

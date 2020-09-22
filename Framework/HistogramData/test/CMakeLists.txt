@@ -8,7 +8,6 @@ if(CXXTEST_FOUND)
                              PRIVATE ${Boost_INCLUDE_DIRS})
   target_link_libraries(HistogramDataTest
                         PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         HistogramData
                         Kernel
                         ${Boost_LIBRARIES}

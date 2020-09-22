@@ -309,7 +309,7 @@ public:
     MatrixWorkspace_sptr ws2D =
         DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
-    const std::string instrFilename = "NIM_Definition.xml";
+    const std::string instrFilename = "NIMROD_Definition.xml";
     loaderNIMROD.setPropertyValue("Filename", instrFilename);
     loaderNIMROD.setProperty("RewriteSpectraMap", OptionalBool(true));
     loaderNIMROD.setProperty("Workspace", ws2D);
@@ -323,12 +323,12 @@ public:
     TS_ASSERT(loaderNIMROD.isExecuted());
 
     const auto &detectorInfo = ws2D->detectorInfo();
-    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20201001));
-    TS_ASSERT_EQUALS(ptrDet.getName(), "det 1");
-    TS_ASSERT_EQUALS(ptrDet.getID(), 20201001);
-    TS_ASSERT_DELTA(ptrDet.getPos().X(), -0.0909, 0.0001);
-    TS_ASSERT_DELTA(ptrDet.getPos().Y(), 0.3983, 0.0001);
-    TS_ASSERT_DELTA(ptrDet.getPos().Z(), 4.8888, 0.0001);
+    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20103001));
+    TS_ASSERT_EQUALS(ptrDet.getName(), "pixel");
+    TS_ASSERT_EQUALS(ptrDet.getID(), 20103001);
+    TS_ASSERT_DELTA(ptrDet.getPos().X(), 0.0254, 0.0001);
+    TS_ASSERT_DELTA(ptrDet.getPos().Y(), -0.2084, 0.0001);
+    TS_ASSERT_DELTA(ptrDet.getPos().Z(), 5.5258, 0.0001);
   }
 
   void testExecNIMRODandRetrieveFromIDS() {
@@ -344,7 +344,7 @@ public:
     MatrixWorkspace_sptr ws2D =
         DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
-    const std::string instrFilename = "NIM_Definition.xml";
+    const std::string instrFilename = "NIMROD_Definition.xml";
     loaderNIMROD.setPropertyValue("Filename", instrFilename);
     loaderNIMROD.setProperty("RewriteSpectraMap", OptionalBool(true));
     loaderNIMROD.setProperty("Workspace", ws2D);
@@ -356,17 +356,17 @@ public:
       return;
     // Retrieve the instrument from the InstrumentDataService
     Instrument_const_sptr nimrodInst = IDS.getObjects()[0];
-    TS_ASSERT_EQUALS(nimrodInst->getName(), "NIM");
-    TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(), 1521);
-    int a_random_id = 20201001;
+    TS_ASSERT_EQUALS(nimrodInst->getName(), "NIMROD");
+    TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(), 2337);
+    int a_random_id = 20103001;
     TS_ASSERT_EQUALS((nimrodInst->getDetector(a_random_id))->getID(),
                      a_random_id);
     TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().X(),
-                    -0.0909, 0.0001);
+                    0.0254, 0.0001);
     TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Y(),
-                    0.3983, 0.0001);
+                    -0.2084, 0.0001);
     TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Z(),
-                    4.8888, 0.0001);
+                    5.5258, 0.0001);
   }
 
   void testExecMARIFromInstrName() {

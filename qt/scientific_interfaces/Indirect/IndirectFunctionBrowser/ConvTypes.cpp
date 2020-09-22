@@ -17,8 +17,6 @@ using namespace Mantid::API;
 
 std::map<FitType, bool> FitTypeQDepends =
     std::map<FitType, bool>({{FitType::None, false},
-                             {FitType::OneLorentzian, false},
-                             {FitType::TwoLorentzians, false},
                              {FitType::TeixeiraWater, true},
                              {FitType::StretchedExpFT, false},
                              {FitType::ElasticDiffSphere, true},
@@ -27,9 +25,7 @@ std::map<FitType, bool> FitTypeQDepends =
                              {FitType::ElasticDiffRotDiscreteCircle, true}});
 
 std::unordered_map<FitType, std::string> FitTypeEnumToString(
-    {{FitType::OneLorentzian, "Lorentzian"},
-     {FitType::TwoLorentzians, "Lorentzian"},
-     {FitType::TeixeiraWater, "TeixeiraWaterSQE"},
+    {{FitType::TeixeiraWater, "TeixeiraWaterSQE"},
      {FitType::StretchedExpFT, "StretchedExpFT"},
      {FitType::ElasticDiffSphere, "ElasticDiffSphere"},
      {FitType::InelasticDiffSphere, "InelasticDiffSphere"},
@@ -38,8 +34,7 @@ std::unordered_map<FitType, std::string> FitTypeEnumToString(
      {FitType::ElasticDiffRotDiscreteCircle, "ElasticDiffRotDiscreteCircle"}});
 
 std::unordered_map<std::string, FitType> FitTypeStringToEnum(
-    {{"Lorentzian", FitType::OneLorentzian},
-     {"TeixeiraWaterSQE", FitType::TeixeiraWater},
+    {{"TeixeiraWaterSQE", FitType::TeixeiraWater},
      {"StretchedExpFT", FitType::StretchedExpFT},
      {"ElasticDiffSphere", FitType::ElasticDiffSphere},
      {"InelasticDiffSphere", FitType::InelasticDiffSphere},
@@ -63,7 +58,7 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::TW_CENTRE, "Centre"},
     {ParamID::DELTA_HEIGHT, "Height"},
     {ParamID::DELTA_CENTER, "Centre"},
-    {ParamID::TEMPERATURE, "Temp"},
+    {ParamID::TEMPERATURE, "Temperature"},
     {ParamID::SE_HEIGHT, "Height"},
     {ParamID::SE_TAU, "Tau"},
     {ParamID::SE_BETA, "Beta"},
@@ -91,15 +86,6 @@ template <>
 std::map<FitType, TemplateSubTypeDescriptor>
     TemplateSubTypeImpl<FitType>::g_typeMap{
         {FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-        {FitType::OneLorentzian,
-         {"One Lorentzian",
-          "Lorentzian",
-          {ParamID::LOR1_AMPLITUDE, ParamID::LOR1_FWHM}}},
-        {FitType::TwoLorentzians,
-         {"Two Lorentzians",
-          "Lorentzian",
-          {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1,
-           ParamID::LOR2_FWHM_2}}},
         {FitType::TeixeiraWater,
          {"Teixeira Water",
           "TeixeiraWaterSQE",
@@ -124,6 +110,20 @@ std::map<FitType, TemplateSubTypeDescriptor>
          {"ElasticDiffRotDiscreteCircle",
           "ElasticDiffRotDiscreteCircle",
           {ParamID::EDRDC_HEIGHT, ParamID::EDRDC_RADIUS}}},
+    };
+template <>
+std::map<LorentzianType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<LorentzianType>::g_typeMap{
+        {LorentzianType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {LorentzianType::OneLorentzian,
+         {"One Lorentzian",
+          "Lorentzian",
+          {ParamID::LOR1_AMPLITUDE, ParamID::LOR1_FWHM}}},
+        {LorentzianType::TwoLorentzians,
+         {"Two Lorentzians",
+          "Lorentzian",
+          {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1,
+           ParamID::LOR2_FWHM_2}}},
     };
 
 template <>
@@ -152,11 +152,10 @@ std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
 template <>
 std::map<TempCorrectionType, TemplateSubTypeDescriptor>
     TemplateSubTypeImpl<TempCorrectionType>::g_typeMap{
-        {TempCorrectionType::None,
-         {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {TempCorrectionType::None, {"None", "", {ParamID::NONE}}},
         {TempCorrectionType::Exponential,
          {"Temp Correction",
-          "UserFunction",
+          "ConvTempCorrection",
           {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
     };
 
@@ -166,6 +165,13 @@ void applyToFitType(FitType fitType,
                     const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(FitSubType::g_typeMap[fitType].blocks.front(),
                       FitSubType::g_typeMap[fitType].blocks.back(), paramFun);
+}
+
+void applyToLorentzianType(LorentzianType lorentzianType,
+                           const std::function<void(ParamID)> &paramFun) {
+  applyToParamIDRange(
+      LorentzianSubType::g_typeMap[lorentzianType].blocks.front(),
+      LorentzianSubType::g_typeMap[lorentzianType].blocks.back(), paramFun);
 }
 
 void applyToBackground(BackgroundType bgType,

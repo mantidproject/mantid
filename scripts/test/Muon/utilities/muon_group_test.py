@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_group import MuonGroup, MuonRun
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantid.simpleapi import CreateWorkspace
 from Muon.GUI.Common.test_helpers.general_test_helpers import (create_group_populated_by_two_workspace,
@@ -55,7 +55,7 @@ class MuonGroupTest(unittest.TestCase):
     def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):
         group = MuonGroup(group_name="group1")
         self.assertEqual(group.workspace, {})
-        
+
         with self.assertRaises(AttributeError):
             group.workspace = [1, 2, 3]
         self.assertEqual(group.workspace, {})
@@ -113,7 +113,7 @@ class MuonGroupTest(unittest.TestCase):
 
     def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden(self):
         group = create_group_populated_by_two_workspace()
-        group._asymmetry_estimate[str([22222])].hide()
+        group._asymmetry_estimate[MuonRun([22222])].hide()
 
         workspace_list = group.get_asymmetry_workspace_names([[22222]])
 
@@ -128,7 +128,7 @@ class MuonGroupTest(unittest.TestCase):
 
     def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden_for_rebinned(self):
         group = create_group_populated_by_two_rebinned_workspaces()
-        group._asymmetry_estimate_rebin[str([22222])].hide()
+        group._asymmetry_estimate_rebin[MuonRun([22222])].hide()
 
         workspace_list = group.get_asymmetry_workspace_names_rebinned([[22222]])
 
@@ -175,6 +175,26 @@ class MuonGroupTest(unittest.TestCase):
         rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_33333')
 
         self.assertEqual(rebinned_workspace_name, None)
+
+    def test_that_default_period_for_group_set_correctly(self):
+        group = MuonGroup(group_name="group1")
+
+        self.assertEqual(group.periods, [1])
+
+    def test_get_counts_workspace_for_run_returns_workspace_name_if_it_exists(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        counts_workspace_name = group.get_counts_workspace_for_run([22222], False)
+        rebinned_counts_workspace_name = group.get_counts_workspace_for_run([22222], True)
+
+        self.assertEqual(counts_workspace_name, 'counts_name_22222')
+        self.assertEqual(rebinned_counts_workspace_name, 'counts_name_22222_rebin')
+
+    def test_get_counts_workspace_for_run_throws_a_key_error_if_workspace_not_found(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        with self.assertRaises(KeyError):
+            group.get_counts_workspace_for_run([222223], True)
 
 
 if __name__ == '__main__':

@@ -103,6 +103,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.peaks.gamma.on_checkbox_unchecked(self.gammas_changed)
         self.peaks.electron.on_checkbox_checked(self.electrons_changed)
         self.peaks.electron.on_checkbox_unchecked(self.electrons_changed)
+        self.peaks.set_deselect_elements_slot(self.deselect_elements)
 
         # Line type boxes
         self.lines = LineSelectorPresenter(LineSelectorView())
@@ -427,6 +428,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def minor_peaks_changed(self, minor_peaks):
         for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.secondary_checkboxes, minor_peaks.isChecked())
+
+    def deselect_elements(self):
+        self.peaks.disable_deselect_elements_btn()
+        for element in self.element_widgets.keys():
+            self.ptable.deselect_element(element)
+            self._remove_element_lines(element)
+        self.peaks.enable_deselect_elements_btn()
 
     def add_line_by_type(self, run, _type):
         # Ensure all detectors are enabled

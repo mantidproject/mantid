@@ -106,25 +106,27 @@ createWorkspaceForHistogram(H5::DataSet &dataSet) {
 
 // ----- LOGS
 
+void addLogFromGroupIfExists(H5::Group &sasGroup, std::string const &sasTerm,
+                             Run &run, std::string const &propertyName) {
+  auto value = Mantid::DataHandling::H5Util::readString(sasGroup, sasTerm);
+  if (!value.empty()) {
+    run.addLogData(new PropertyWithValue<std::string>(propertyName, value));
+  }
+}
+
 void loadLogs(H5::Group &entry,
               const Mantid::API::MatrixWorkspace_sptr &workspace) {
   auto &run = workspace->mutableRun();
 
-  // Load UserFile (optional)
+  // Load UserFile and BatchFile (optional)
   auto process = entry.openGroup(sasProcessGroupName);
-  auto userFile =
-      Mantid::DataHandling::H5Util::readString(process, sasProcessTermUserFile);
-  if (!userFile.empty()) {
-    run.addLogData(
-        new PropertyWithValue<std::string>(sasProcessUserFileInLogs, userFile));
-  }
+  addLogFromGroupIfExists(process, sasProcessTermUserFile, run,
+                          sasProcessUserFileInLogs);
+  addLogFromGroupIfExists(process, sasProcessTermBatchFile, run,
+                          sasProcessBatchFileInLogs);
 
   // Load Run (optional)
-  auto runNumber = Mantid::DataHandling::H5Util::readString(entry, sasEntryRun);
-  if (!runNumber.empty()) {
-    run.addLogData(
-        new PropertyWithValue<std::string>(sasEntryRunInLogs, runNumber));
-  }
+  addLogFromGroupIfExists(entry, sasEntryRun, run, sasEntryRunInLogs);
 
   // Load Title (optional)
   auto title = Mantid::DataHandling::H5Util::readString(entry, sasEntryTitle);

@@ -54,6 +54,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self.data_plot_range = self.context.default_data_plot_range
         self.fitting_plot_range = self.context.default_fitting_plot_range
         self.data_plot_tiled_state = None
+        self._view.hide_plot_diff()
 
     def update_view_from_model(self):
         """"Updates the view based on data in the model """
@@ -116,11 +117,13 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view.set_plot_mode(str(plot_mode))
         if plot_mode == PlotMode.Data:
             self._view.enable_plot_type_combo()
+            self._view.hide_plot_diff()
             self.update_plot()
             self.fitting_plot_range = self._figure_presenter.get_plot_x_range()
             self._figure_presenter.set_plot_range(self.data_plot_range)
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
+            self._view.show_plot_diff()
             self.update_plot()
             self.data_plot_range = self._figure_presenter.get_plot_x_range()
             self._figure_presenter.set_plot_range(self.fitting_plot_range)
@@ -136,6 +139,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view.set_plot_mode(str(plot_mode))
         if plot_mode == PlotMode.Data:
             self._view.enable_plot_type_combo()
+            self._view.hide_plot_diff()
             self._view.enable_tile_plotting_options()
             self._view.enable_plot_raw_option()
             self._view.set_is_tiled_plot(self.data_plot_tiled_state)
@@ -144,6 +148,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             self._figure_presenter.set_plot_range(self.data_plot_range)
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
+            self._view.show_plot_diff()
             self._view.disable_tile_plotting_options()
             self._view.disable_plot_raw_option()
             self.data_plot_tiled_state = self._view.is_tiled_plot()
@@ -306,13 +311,13 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list = []
         indices = []
         raw = self._view.is_raw_plot()
+        with_diff = self._view.is_plot_diff()
         if fit_information_list:
             for fit_information in fit_information_list:
                 fit = fit_information.fit
-                fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit)
+                fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit,with_diff)
                 workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces
                 indices += [0] * len(fit_information.input_workspaces) + fit_indices
-
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale)
 
     def match_raw_selection(self, workspace_names, plot_raw):

@@ -70,7 +70,7 @@ target_include_directories(PythonGeometryModule PUBLIC inc)
 # Add the required dependencies
 target_link_libraries(
   PythonGeometryModule
-  PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  PRIVATE
           PythonInterfaceCore
           PythonKernelModule
           Geometry
@@ -83,21 +83,10 @@ target_link_libraries(
           ${TBB_MALLOC_LIBRARIES}
 )
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(
-    PythonGeometryModule
-    PROPERTIES INSTALL_RPATH
-               "@loader_path/../../../MacOS;@loader_path/../kernel/"
-  )
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(
-    PythonGeometryModule
-    PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/"
-  )
-endif()
-
 # Installation settings
+set_target_properties(PythonGeometryModule
+    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/")
 mtd_install_targets(
-  TARGETS PythonGeometryModule INSTALL_DIRS ${LIB_DIR}/mantid/geometry
-  ${WORKBENCH_LIB_DIR}/mantid/geometry
+  TARGETS PythonGeometryModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/geometry
+  ${WORKBENCH_SITE_PACKAGES}/mantid/geometry
 )

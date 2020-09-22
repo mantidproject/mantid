@@ -7,7 +7,9 @@
 #pragma once
 
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+
 #include <array>
+#include <cstddef>
 
 namespace MantidQt {
 namespace SliceViewer {

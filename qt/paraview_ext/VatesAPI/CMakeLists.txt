@@ -187,8 +187,7 @@ set_target_properties(VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI)
 set_property(TARGET VatesAPI PROPERTY FOLDER "MantidVates")
 
 target_link_libraries(VatesAPI
-                      PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-                              ${MANTID_SUBPROJECT_LIBS}
+                      PRIVATE ${MANTID_SUBPROJECT_LIBS}
                               vtkCommonCore
                               vtkCommonDataModel
                               vtkIOLegacy
@@ -246,7 +245,6 @@ set(TESTHELPER_SRCS
 cxxtest_add_test(VatesAPITest ${TEST_FILES})
 target_link_libraries(VatesAPITest
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTID_SUBPROJECT_LIBS}
                       VatesAPI
                       DataHandling

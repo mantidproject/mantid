@@ -14,7 +14,6 @@ set_property(TARGET MantidParaViewPeaksReaderSMPlugin
 
 target_link_libraries(MantidParaViewPeaksReaderSMPlugin
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${CORE_MANTIDLIBS}
                       DataObjects
                       VatesAPI

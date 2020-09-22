@@ -9,8 +9,6 @@ from mantid.api import AnalysisDataService as ads, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 from enum import Enum
 
-from mantidqt.utils.observer_pattern import GenericObserver
-
 # Constants
 DEFAULT_TABLE_NAME = 'ResultsTable'
 ALLOWED_NON_TIME_SERIES_LOGS = ("run_number", "run_start", "run_end", "group",
@@ -52,8 +50,6 @@ class ResultsTabModel(object):
         self._selected_fit_function = None
 
         self._update_selected_fit_function()
-        self._new_fit_observer = GenericObserver(self._on_new_fit_performed)
-        fitting_context.new_fit_results_notifier.add_subscriber(self._new_fit_observer)
 
     def results_table_name(self):
         """Return the current name of the results table"""
@@ -279,21 +275,24 @@ class ResultsTabModel(object):
             if _param_error_should_be_displayed(name):
                 table.addColumn('float', _error_column_name(name),
                                 TableColumnType.YErr.value)
+                # The error column will be the most recent one added (columnCount-1) and is corresponding value will be
+                # the second to last (columnCount-2).
+                table.setLinkedYCol(table.columnCount()-1, table.columnCount()-2)
         return table
 
-    # Private API
-    def _on_new_fit_performed(self):
+    def on_new_fit_performed(self):
         """Called when a new fit has been added to the context.
         The function name is set to the name fit if it is the first time"""
         self._update_selected_fit_function()
 
+    # Private API
     def _update_selected_fit_function(self):
         """
         If there are fits present then set the selected function name or else
         clear it
         """
         if len(self._fit_context) > 0:
-            function_name = self._fit_context.fit_list[0].fit_function_name
+            function_name = self._fit_context.fit_list[-1].fit_function_name
         else:
             function_name = None
 

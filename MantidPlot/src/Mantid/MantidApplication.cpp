@@ -88,13 +88,14 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   }
 
   if (error && Mantid::Kernel::UsageService::Instance().isEnabled()) {
+    // clang-format off
     QString pythonCode(
-        "from ErrorReporter.error_report_presenter import "
-        "ErrorReporterPresenter"
-        "\nfrom ErrorReporter.errorreport import CrashReportPage"
-        "\npage = CrashReportPage(show_continue_terminate=True)"
-        "\npresenter = ErrorReporterPresenter(page, '', 'mantidplot')"
-        "\npresenter.show_view()");
+        "from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter\n"
+        "from mantidqt.dialogs.errorreports.report import CrashReportPage\n"
+        "page = CrashReportPage(show_continue_terminate=True)\n"
+        "presenter = ErrorReporterPresenter(page, '', 'mantidplot')\n"
+        "presenter.show_view()");
+    // clang-format on
 
     emit runAsPythonScript(pythonCode);
   } else if (error) {
