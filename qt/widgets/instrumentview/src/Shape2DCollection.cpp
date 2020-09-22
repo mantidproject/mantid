@@ -553,8 +553,18 @@ void Shape2DCollection::copySelectedShapes() {
  */
 void Shape2DCollection::pasteCopiedShapes() {
   foreach (auto shape, m_copiedShapes) {
-    Shape2D *newShape = shape->clone();
-    newShape->moveBy(QPointF(0.1, 0.1));
+    Shape2D *newShape;
+    if (shape->type() == "sector") {
+      double angleOffset =
+          shape->getDouble("endAngle") - shape->getDouble("startAngle");
+      shape->setDouble("startAngle",
+                       shape->getDouble("startAngle") + angleOffset);
+
+      shape->setDouble("endAngle", shape->getDouble("endAngle") + angleOffset);
+    } else {
+      shape->moveBy(QPointF(0.1, 0.1));
+    }
+    newShape = shape->clone();
     newShape->setFillColor(shape->getFillColor());
     addShape(newShape, false);
   }
