@@ -67,8 +67,9 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
 
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
+  // connect event m_plotMDHisto1D to signal slot onPlotMDHistoWorkspaceClicked
   connect(m_plotMDHisto1D, SIGNAL(triggered()), this,
-          SLOT(onPlotSpectrumClicked()));
+          SLOT(onPlotMDHistoWorkspaceClicked()));
 
   connect(m_plotBin, SIGNAL(triggered()), this, SLOT(onPlotBinClicked()));
   connect(m_overplotSpectrum, SIGNAL(triggered()), this,
@@ -343,6 +344,7 @@ void WorkspaceTreeWidgetSimple::onPlotContourClicked() {
 
 // Define signal
 void WorkspaceTreeWidgetSimple::onPlotMDHistoWorkspaceClicked() {
+  std::cout << ("DEBUG OUTPUT...............1D MD is to be plotted\n");
   emit plotMDHistoClicked(getSelectedWorkspaceNamesAsQList());
 }
 

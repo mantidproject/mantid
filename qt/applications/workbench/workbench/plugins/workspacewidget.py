@@ -43,6 +43,10 @@ class WorkspaceWidget(PluginWidget):
         # behaviour
         self.workspacewidget.plotSpectrumClicked.connect(
             partial(self._do_plot_spectrum, errors=False, overplot=False))
+
+        self.workspacewidget.plotMDHistoClicked.connect(
+            partial(self._do_plot_spectrum, errors=False, overplot=False))
+
         self.workspacewidget.plotBinClicked.connect(
             partial(self._do_plot_bin, errors=False, overplot=False))
         self.workspacewidget.overplotSpectrumClicked.connect(
