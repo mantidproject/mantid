@@ -640,6 +640,7 @@ Shape2DSector::Shape2DSector(const Shape2DSector &sector)
     : Shape2D(), m_innerRadius(sector.m_innerRadius),
       m_outerRadius(sector.m_outerRadius), m_startAngle(sector.m_startAngle),
       m_endAngle(sector.m_endAngle), m_center(sector.m_center) {
+  setColor(sector.getColor());
   resetBoundingRect();
 }
 
