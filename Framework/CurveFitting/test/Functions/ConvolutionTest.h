@@ -155,7 +155,8 @@ public:
   }
 };
 
-class ConvolutionTest_LinearWithAttributes : public ParamFunction, public IFunction1D {
+class ConvolutionTest_LinearWithAttributes : public ParamFunction,
+                                             public IFunction1D {
 public:
   ConvolutionTest_LinearWithAttributes() {
     declareParameter("a");
@@ -163,7 +164,9 @@ public:
     declareAttribute("TestAttribute", Attribute(""));
   }
 
-  std::string name() const override { return "ConvolutionTest_LinearWithAttributes"; }
+  std::string name() const override {
+    return "ConvolutionTest_LinearWithAttributes";
+  }
 
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override {
@@ -181,8 +184,6 @@ public:
     }
   }
 };
-
-
 
 DECLARE_FUNCTION(ConvolutionTest_Gauss)
 DECLARE_FUNCTION(ConvolutionTest_Lorentz)
@@ -387,8 +388,7 @@ public:
 
   void testAttributesSetUpCorrectlyForConvolution() {
     Convolution conv;
-    auto func =
-        std::make_shared<ConvolutionTest_LinearWithAttributes>();
+    auto func = std::make_shared<ConvolutionTest_LinearWithAttributes>();
     conv.addFunction(func);
 
     auto names = conv.getAttributeNames();

@@ -247,11 +247,7 @@ size_t TabulatedFunction::nAttributes() const {
 
 /// Returns a list of attribute names
 std::vector<std::string> TabulatedFunction::getAttributeNames() const {
-  std::vector<std::string> attNames = IFunction::getAttributeNames();
-  //attNames.emplace_back("X");
-  //attNames.emplace_back("Y");
-  return attNames;
-
+  return IFunction::getAttributeNames();
 }
 
 /// Return a value of attribute attName

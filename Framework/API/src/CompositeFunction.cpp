@@ -307,9 +307,7 @@ CompositeFunction::getAttribute(const std::string &name) const {
 }
 
 /**
- *  Set a value to a named attribute. Can be overridden in the inheriting class,
- * the default
- *  just stores the value
+ *  Set a value of a named attribute.
  *  @param name :: The name of the attribute
  *  @param value :: The value of the attribute
  */
@@ -382,20 +380,6 @@ std::string CompositeFunction::parameterDescription(size_t i) const {
   ostr << m_functions[iFun]->parameterDescription(i - m_paramOffsets[iFun]);
   return ostr.str();
 }
-
-///// Returns a list of attribute names, including the attributes of the child
-///// functions
-// std::vector<std::string> CompositeFunction::getAttributeNames() const {
-//  std::vector<std::string> attributeNames;
-//  attributeNames.reserve(nAttributes() + 1);
-//  // Add global numerical derivative attribute
-//  attributeNames.insert(attributeNames.end(), ATTNUMDERIV);
-//  // Add child attributes
-//  auto names = IFunction::getAttributeNames();
-//  attributeNames.insert(attributeNames.end(), names.begin(), names.end());
-//  return attributeNames;
-//}
-
 /**
  * Get the fitting error for a parameter
  * @param i :: The index of a parameter

@@ -90,7 +90,7 @@ public:
   size_t nParams() const override;
   // Total number of attributes, which includes global and local function
   // attributes
-  size_t nAttributes() const override;
+  size_t nAttributes() const noexcept override;
   // Total number of global attributes, defined at the composite function level
   size_t nGlobalAttributes() const noexcept { return IFunction::nAttributes(); }
   /// Returns the index of parameter name
@@ -175,8 +175,6 @@ public:
   void checkFunction();
   /// Remove all member functions
   void clear();
-
-  // std::vector < std::string> getAttributeNames() const override;
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes() const { return 0; }
   /// Returns a list of attribute names
