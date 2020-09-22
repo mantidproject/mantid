@@ -21,6 +21,7 @@ public:
           subtrees,
       boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
           subtreeRoots) const = 0;
+  virtual IClipboard *createClipboard() const = 0;
 };
 
 } // namespace ISISReflectometry

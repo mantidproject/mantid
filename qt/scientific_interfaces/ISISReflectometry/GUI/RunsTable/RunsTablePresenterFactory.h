@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "../../../qt/scientific_interfaces/ISISReflectometry/Common/IClipboardFactory.h"
 #include "Common/DllConfig.h"
 #include "GUI/Common/Plotter.h"
 #include "IRunsTablePresenter.h"
@@ -21,8 +22,7 @@ class IRunsTableView;
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenterFactory {
 public:
   RunsTablePresenterFactory(std::vector<std::string> const &instruments,
-                            double thetaTolerance,
-                            IClipboardFactory m_clipboardFactory,
+                            double thetaTolerance, IClipboardFactory *cbf,
                             Plotter plotter);
   virtual std::unique_ptr<IRunsTablePresenter>
   operator()(IRunsTableView *view) const;
@@ -31,6 +31,7 @@ protected:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
   Plotter m_plotter;
+  IClipboardFactory *m_cbf;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtMainWindowView.h"
+#include "../../../qt/scientific_interfaces/ISISReflectometry/Common/ClipboardFactory.h"
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchPresenterFactory.h"
 #include "GUI/Batch/QtBatchView.h"
@@ -75,7 +76,10 @@ void QtMainWindowView::initLayout() {
 #else
   Plotter plotter;
 #endif
-  auto makeRunsTablePresenter = RunsTablePresenterFactory(instruments, thetaTolerance, std::move(plotter));
+  // pass reference to concrete clipboard factory
+  ClipboardFactory &cbf = ClipboardFactory();
+  auto makeRunsTablePresenter = RunsTablePresenterFactory(
+      instruments, thetaTolerance, &cbf, std::move(plotter));
 
   auto messageHandler = this;
   auto fileHandler = this;

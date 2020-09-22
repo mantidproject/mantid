@@ -144,6 +144,7 @@ private:
 
   IRunsTableView *m_view;
   RunsTable m_model;
+  ClipboardFactory m_defaultCBF = ClipboardFactory();
   IClipboard *m_clipboard;
   IClipboardFactory *m_clipboardFactory;
   JobsViewUpdater m_jobViewUpdater;

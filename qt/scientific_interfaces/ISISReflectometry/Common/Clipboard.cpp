@@ -130,8 +130,7 @@ std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &Clipboard::subtr
 std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &Clipboard::mutableSubtreeRoots() {
   return m_subtreeRoots.get();
 }
-
-bool containsGroups(Clipboard const &clipboard) {
+bool containsGroups(IClipboard const &clipboard) {
   if (!clipboard.isInitialized())
     throw std::runtime_error("Attempted to access invalid value in clipboard");
 

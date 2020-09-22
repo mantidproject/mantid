@@ -34,12 +34,6 @@ public:
   virtual std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &
   mutableSubtreeRoots() = 0;
 };
-bool containsGroups(IClipboard const &clipboard) {
-  if (!clipboard.isInitialized())
-    throw std::runtime_error("Attempted to access invalid value in clipboard");
-
-  return containsGroups(clipboard.subtreeRoots());
-}
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

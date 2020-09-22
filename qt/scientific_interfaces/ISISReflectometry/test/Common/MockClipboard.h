@@ -16,24 +16,24 @@ class DLLExport MockClipboard : public IClipboard {
 public:
   MockClipboard() = default;
 
-  MOCK_METHOD(bool, isInitialized, (), (const override));
-  MOCK_METHOD(int, numberOfRoots, (), (const override));
-  MOCK_METHOD(bool, isGroupLocation, (int rootIndex), (const override));
-  MOCK_METHOD(std::string, groupName, (int rootIndex), (const override));
+  MOCK_METHOD(bool, isInitialized, (), (const));
+  MOCK_METHOD(int, numberOfRoots, (), (const));
+  MOCK_METHOD(bool, isGroupLocation, (int rootIndex), (const));
+  MOCK_METHOD(std::string, groupName, (int rootIndex), (const));
   MOCK_METHOD(void, setGroupName,
               (int rootIndex, std::string const &groupName));
-  MOCK_METHOD(Group, createGroupForRoot, (int rootIndex), (const override));
+  MOCK_METHOD(Group, createGroupForRoot, (int rootIndex), (const));
   MOCK_METHOD(std::vector<boost::optional<Row>>, createRowsForAllRoots, (),
-              (const override));
+              (const));
 
   MOCK_METHOD(std::vector<MantidQt::MantidWidgets::Batch::Subtree> &, subtrees,
-              (), (const override));
+              (), (const));
   MOCK_METHOD(std::vector<MantidQt::MantidWidgets::Batch::Subtree> &,
-              mutableSubtrees, (), (const override));
+              mutableSubtrees, ());
   MOCK_METHOD(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &,
-              subtreeRoots, (), (const override));
+              subtreeRoots, (), (const));
   MOCK_METHOD(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &,
-              mutableSubtreeRoots, (), (const override));
+              mutableSubtreeRoots, ());
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

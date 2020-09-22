@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IClipBoard.h"
+#include "IClipboard.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "Reduction/Group.h"
@@ -56,7 +56,7 @@ private:
   std::vector<boost::optional<Row>> createRowsForRootChildren(int rootIndex) const;
   std::vector<boost::optional<Row>> createRowsForSubtree(MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
 };
-bool MANTIDQT_ISISREFLECTOMETRY_DLL containsGroups(Clipboard const &clipboard);
+bool containsGroups(IClipboard const &clipboard);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

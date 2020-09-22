@@ -24,6 +24,7 @@ public:
           subtreeRoots) const override {
     return new Clipboard(subtrees, subtreeRoots);
   }
+  IClipboard *createClipboard() const override { return new Clipboard(); }
 };
 
 } // namespace ISISReflectometry

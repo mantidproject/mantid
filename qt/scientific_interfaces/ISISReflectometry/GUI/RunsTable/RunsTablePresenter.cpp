@@ -138,10 +138,9 @@ RunsTablePresenter::RunsTablePresenter(
     double thetaTolerance, ReductionJobs jobs,
     IClipboardFactory *clipboardFactory, const IPlotter &plotter)
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
-      m_clipboardFactory(clipboardFactory), m_clipboard(),
       m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
-
+  m_clipboard = m_clipboardFactory->createClipboard();
   // Add Group to view and model, add row to this group in view and model.
   ensureAtLeastOneGroupExists();
 }
