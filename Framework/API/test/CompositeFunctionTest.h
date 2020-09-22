@@ -1379,4 +1379,49 @@ public:
                            IFunction::Attribute("NewCubicAttribute")),
         std::invalid_argument &);
   }
+
+  void test_remove_function_correctly_shifts_down_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    mfun->removeFunction(1);
+
+    TS_ASSERT_EQUALS(mfun->nAttributes(), 3);
+    TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
+    TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.GaussAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.CubicAttribute");
+
+  }
+
+  void test_replace_function_correctly_adds_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<false>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+    auto gaussWithAttributes = std::make_shared<Gauss<true>>();
+
+
+    mfun->addFunction(background);
+    mfun->addFunction(gauss);
+    mfun->addFunction(cubic);
+
+    TS_ASSERT_EQUALS(mfun->nAttributes(), 3);
+    TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
+    TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.LinearAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(2), "f2.CubicAttribute");
+
+    mfun->replaceFunction(1, gaussWithAttributes);
+
+    TS_ASSERT_EQUALS(mfun->nAttributes(), 4);
+    TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
+    TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.LinearAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.GaussAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(3), "f2.CubicAttribute");
+
+  }
 };

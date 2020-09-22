@@ -90,7 +90,7 @@ public:
   size_t nParams() const override;
   // Total number of attributes, which includes global and local function
   // attributes
-  size_t nAttributes() const noexcept override;
+  size_t nAttributes() const override;
   // Total number of global attributes, defined at the composite function level
   size_t nGlobalAttributes() const noexcept { return IFunction::nAttributes(); }
   /// Returns the index of parameter name
@@ -160,7 +160,7 @@ public:
   /// Remove a function
   void removeFunction(size_t i);
   /// Replace a function
-  void replaceFunction(size_t i, const IFunction_sptr &f);
+  void replaceFunction(size_t functionIndex, const IFunction_sptr &f);
   /// Replace a function
   void replaceFunctionPtr(const IFunction_sptr &f_old,
                           const IFunction_sptr &f_new);
