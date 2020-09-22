@@ -171,6 +171,8 @@ public:
   const Kernel::V3D &startPoint() const { return m_line.getOrigin(); }
   /// Returns the direction as a unit vector
   const Kernel::V3D &direction() const { return m_line.getDirect(); }
+  /// Returns the sum of all the links distInsideObject in the track
+  double totalDistInsideObject() const;
   /// Returns an interator to the start of the set of links
   LType::iterator begin() { return m_links.begin(); }
   /// Returns an interator to one-past-the-end of the set of links
