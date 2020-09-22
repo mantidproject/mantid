@@ -106,8 +106,27 @@ class WorkspaceWidget(PluginWidget):
                 QMessageBox.warning(self, "", error_msg)
                 return
         try:
-            print(f'[DEBUG] plot from names @ L275')
             plot_from_names(names, errors, overplot, advanced=advanced)
+        except RuntimeError as re:
+            logger.error(str(re))
+
+    def _do_plot_1d_md(self, names, errors, overplot):
+        """
+        Plot 1D IMDHistoWorlspaces
+
+        :param names: list of workspace names
+        :param errors: boolean.  if true, the error bar will be plotted
+        :param overplot: boolean.  If true, then add these plots to the current figure if one exists
+                                   and it is a compatible figure
+        :return:
+        """
+        if overplot:
+            compatible, error_msg = can_overplot()
+            if not compatible:
+                QMessageBox.warning(self, "", error_msg)
+                return
+        try:
+            plot_from_names(names, errors, overplot, advanced=False)
         except RuntimeError as re:
             logger.error(str(re))
 
