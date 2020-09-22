@@ -16,7 +16,7 @@ list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/INTER)
 list(
   APPEND
     DATA_DIRS
-    ${ExternalData_BINARY_ROOT}/Testing/SystemTests/tests/analysis/reference)
+    ${ExternalData_BINARY_ROOT}/Testing/SystemTests/tests/framework/reference)
 # Unit tests
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest)
 # Doc tests

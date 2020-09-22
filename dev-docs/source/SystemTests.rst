@@ -40,7 +40,7 @@ test, implement the method ``requiredFiles`` which should return a list of
 filenames without paths. The file to validate against should be included as 
 well. If any of those files are missing the test will be marked as skipped.
 
-The tests should be added to the ``Testing/SystemTests/tests/analysis``,
+The tests should be added to the ``Testing/SystemTests/tests/framework``,
 with the template result going in the ``reference`` sub-folder. It will
 then be included in the suite of tests from the following night.
 
