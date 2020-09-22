@@ -16,8 +16,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <type_traits>
 #include <sstream>
+#include <type_traits>
 
 namespace Mantid {
 namespace Kernel {
