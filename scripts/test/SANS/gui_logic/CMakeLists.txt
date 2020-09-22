@@ -4,6 +4,7 @@ add_subdirectory(model_tests)
 add_subdirectory(presenter_tests)
 
 set(TEST_PY_FILES
+    concrete_run_tab_listener_test.py
     gui_state_director_test.py
     gui_common_test.py
     masking_table_presenter_test.py

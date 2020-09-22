@@ -39,6 +39,17 @@ class StateNormalizeToMonitor(metaclass=JsonSerializable):
 
         self.incident_monitor = None  # : Int (Positive)
 
+    @property
+    def wavelength_step_type_lin_log(self):
+        # Return the wavelength step type, converting RANGE_LIN/RANGE_LOG to
+        # LIN/LOG. This is not ideal but is required for workflow algorithms
+        # which only accept a subset of the values in the enum
+        value = self.wavelength_step_type
+        result = RangeStepType.LIN if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN] else \
+            RangeStepType.LOG if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else \
+            RangeStepType.NOT_SET
+        return result
+
     def validate(self):
         is_invalid = {}
         # -----------------

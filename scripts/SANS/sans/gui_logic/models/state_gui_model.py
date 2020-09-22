@@ -15,6 +15,7 @@ from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStep
 from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
+from SANSUtility import (meter_2_millimeter, millimeter_2_meter)
 
 
 class StateGuiModel(ModelCommon):
@@ -23,6 +24,10 @@ class StateGuiModel(ModelCommon):
             "Expected AllStates, got %r, could be a legacy API caller" % repr(user_file_items)
         super(StateGuiModel, self).__init__(user_file_items)
         self._user_file_items = user_file_items
+
+        # This is transformed in State* objects so it's purely GUI facing
+        # so store in the GUI model
+        self._wavelength_range = ''
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -105,44 +110,44 @@ class StateGuiModel(ModelCommon):
     @property
     def lab_pos_1(self):
         val = self._user_file_items.move.detectors[DetectorType.LAB.value].sample_centre_pos1
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @lab_pos_1.setter
     def lab_pos_1(self, value):
-        self._user_file_items.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = value
+        self._user_file_items.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = millimeter_2_meter(value)
 
     @property
     def lab_pos_2(self):
         val = self._user_file_items.move.detectors[DetectorType.LAB.value].sample_centre_pos2
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @lab_pos_2.setter
     def lab_pos_2(self, value):
-        self._user_file_items.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = value
+        self._user_file_items.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = millimeter_2_meter(value)
 
     @property
     def hab_pos_1(self):
         val = None
         if DetectorType.HAB.value in self._user_file_items.move.detectors:
             val = self._user_file_items.move.detectors[DetectorType.HAB.value].sample_centre_pos1
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
         if DetectorType.HAB.value in self._user_file_items.move.detectors:
-            self._user_file_items.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = value
+            self._user_file_items.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = millimeter_2_meter(value)
 
     @property
     def hab_pos_2(self):
         val = None
         if DetectorType.HAB.value in self._user_file_items.move.detectors:
             val = self._user_file_items.move.detectors[DetectorType.HAB.value].sample_centre_pos2
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):
         if DetectorType.HAB.value in self._user_file_items.move.detectors:
-            self._user_file_items.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = value
+            self._user_file_items.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = millimeter_2_meter(value)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -176,6 +181,7 @@ class StateGuiModel(ModelCommon):
     @reduction_dimensionality.setter
     def reduction_dimensionality(self, value):
         if value is ReductionDimensionality.ONE_DIM or value is ReductionDimensionality.TWO_DIM:
+            self._user_file_items.convert_to_q.reduction_dimensionality = value
             self._user_file_items.reduction.reduction_dimensionality = value
         else:
             raise ValueError("A reduction dimensionality was expected, got instead {}".format(value))
@@ -382,7 +388,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_range(self):
-        val = self.wavelength_range
+        val = self._wavelength_range
         return val if val else ""
 
     @wavelength_range.setter
@@ -392,7 +398,7 @@ class StateGuiModel(ModelCommon):
         wavelength_stop = [max(wavelength_stop)] + wavelength_stop
         self.wavelength_min = wavelength_start
         self.wavelength_max = wavelength_stop
-        self.wavelength_range = value
+        self._wavelength_range = value
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale properties
@@ -449,11 +455,11 @@ class StateGuiModel(ModelCommon):
     @property
     def z_offset(self):
         val = self._user_file_items.move.sample_offset
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @z_offset.setter
     def z_offset(self, value):
-        self._user_file_items.move.sample_offset = value
+        self._user_file_items.move.sample_offset = millimeter_2_meter(value)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -503,11 +509,11 @@ class StateGuiModel(ModelCommon):
     @property
     def r_cut(self):
         val = self._user_file_items.convert_to_q.radius_cutoff
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @r_cut.setter
     def r_cut(self, value):
-        self._user_file_items.convert_to_q.radius_cutoff = value
+        self._user_file_items.convert_to_q.radius_cutoff = millimeter_2_meter(value)
 
     @property
     def w_cut(self):
@@ -554,65 +560,65 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_source_a(self):
         val = self._user_file_items.convert_to_q.q_resolution_a1
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @q_resolution_source_a.setter
     def q_resolution_source_a(self, value):
-        self._user_file_items.convert_to_q.q_resolution_a1 = value
+        self._user_file_items.convert_to_q.q_resolution_a1 = millimeter_2_meter(value)
 
     @property
     def q_resolution_sample_a(self):
         val = self._user_file_items.convert_to_q.q_resolution_a2
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @q_resolution_sample_a.setter
     def q_resolution_sample_a(self, value):
-        self._user_file_items.convert_to_q.q_resolution_a2 = value
+        self._user_file_items.convert_to_q.q_resolution_a2 = millimeter_2_meter(value)
 
     @property
     def q_resolution_source_h(self):
         val = self._user_file_items.convert_to_q.q_resolution_h1
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @q_resolution_source_h.setter
     def q_resolution_source_h(self, value):
-        self._user_file_items.convert_to_q.q_resolution_h1 = value
+        self._user_file_items.convert_to_q.q_resolution_h1 = millimeter_2_meter(value)
 
     @property
     def q_resolution_sample_h(self):
         val = self._user_file_items.convert_to_q.q_resolution_h2
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @q_resolution_sample_h.setter
     def q_resolution_sample_h(self, value):
-        self._user_file_items.convert_to_q.q_resolution_h2 = value
+        self._user_file_items.convert_to_q.q_resolution_h2 = millimeter_2_meter(value)
 
     @property
     def q_resolution_source_w(self):
         val = self._user_file_items.convert_to_q.q_resolution_w1
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @q_resolution_source_w.setter
     def q_resolution_source_w(self, value):
-        self._user_file_items.convert_to_q.q_resolution_w1 = value
+        self._user_file_items.convert_to_q.q_resolution_w1 = millimeter_2_meter(value)
 
     @property
     def q_resolution_sample_w(self):
         val = self._user_file_items.convert_to_q.q_resolution_w2
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @q_resolution_sample_w.setter
     def q_resolution_sample_w(self, value):
-        self._user_file_items.convert_to_q.q_resolution_w2 = value
+        self._user_file_items.convert_to_q.q_resolution_w2 = millimeter_2_meter(value)
 
     @property
     def q_resolution_delta_r(self):
         val = self._user_file_items.convert_to_q.q_resolution_delta_r
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @q_resolution_delta_r.setter
     def q_resolution_delta_r(self, value):
-        self._user_file_items.convert_to_q.q_resolution_delta_r = value
+        self._user_file_items.convert_to_q.q_resolution_delta_r = millimeter_2_meter(value)
 
     @property
     def q_resolution_moderator_file(self):
@@ -674,20 +680,20 @@ class StateGuiModel(ModelCommon):
     @property
     def radius_limit_min(self):
         val = self._user_file_items.mask.radius_min
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @radius_limit_min.setter
     def radius_limit_min(self, value):
-        self._user_file_items.mask.radius_min = value
+        self._user_file_items.mask.radius_min = millimeter_2_meter(value)
 
     @property
     def radius_limit_max(self):
         val = self._user_file_items.mask.radius_max
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @radius_limit_max.setter
     def radius_limit_max(self, value):
-        self._user_file_items.mask.radius_max = value
+        self._user_file_items.mask.radius_max = millimeter_2_meter(value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Mask files

@@ -717,11 +717,13 @@ ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
     refRoi->setProperty("ScatteringAngle", theta);
     refRoi->execute();
     IvsQ = refRoi->getProperty("OutputWorkspace");
-    // RefRoi outputs as distribution data but ConvertUnits outputs as
-    // counts. For now make this consistent with the original behaviour using
-    // ConvertUnits but we may wish to change this in future.
-    IvsQ->setYUnitLabel("Counts");
-    IvsQ->setDistribution(false);
+    // RefRoi outputs as distribution data but ConvertUnits outputs as counts
+    // if the input is counts. For now make this consistent with the original
+    // behaviour using ConvertUnits but we may wish to change this in future.
+    if (!inputWS->isDistribution()) {
+      IvsQ->setYUnitLabel("Counts");
+      IvsQ->setDistribution(false);
+    }
   }
   return IvsQ;
 }

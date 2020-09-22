@@ -28,6 +28,7 @@ Improvements
 - :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` now accepts the crystalographic density of the sample to correct for the powder density.
 - Square beam profile of 5mm x 5mm added to the PEARL_Definition_new_lowangle instrument definition file
 - running `Polaris.create_total_scattering_pdf` with `debug=true` will preserve the `self_scattering_correction` workspace.
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
 
 Bugfixes
 ^^^^^^^^
@@ -50,6 +51,7 @@ Improvements
 - The currently loaded calibration is now shown at the bottom of the GUI.
 - The location of the saved output files from the GUI is now shown in the messages log.
 - The save directory is now displayed in the status bar of the GUI.
+- The Inspect Background button of the Fitting tab is now only enabled when the selected run has had a background subtraction.
 
 Bugfixes
 ^^^^^^^^
@@ -66,5 +68,6 @@ Improvements
 - New algorithm :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths-v1>` for calculating the absorption weighted path length for each peak in a peaks workspace. The absorption weighted path length is used downstream from Mantid in extinction correction calculations
 - Can now edit H,K,L in the table of a peaks workspace in workbench (now consistent with Mantid Plot)
 - The peaks workspace table display now contains a column showing the value of the intensity/sigma for each peak.
+- SliceViewer can now correctly display non-orthogonal axes for output of :ref:`MDNorm <algm-MDNorm>`
 
 :ref:`Release 5.1.0 <v5.1.0>`

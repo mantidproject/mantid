@@ -437,6 +437,9 @@ public:
       : hist(BinEdges(binSize, LinearGenerator(0, 1))) {
     Counts counts(binSize - 1, LinearGenerator(10, 0.1));
     hist.setCounts(counts);
+
+    CountStandardDeviations errors(binSize - 1, LinearGenerator(10, 0.1));
+    hist.setCountStandardDeviations(errors);
   }
 
   void testInterpolateLinearSmallStep() {

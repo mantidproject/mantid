@@ -40,6 +40,8 @@ public:
   MOCK_CONST_METHOD0(isPromptDelete, bool());
   MOCK_CONST_METHOD0(deleteConfirmation, bool());
   MOCK_METHOD1(deleteWorkspaces, void(const StringList &wsNames));
+  MOCK_CONST_METHOD0(clearWorkspacesConfirmation, bool());
+  MOCK_METHOD1(enableClearButton, void(bool enable));
   MOCK_METHOD0(clearView, void());
   MOCK_METHOD2(recordWorkspaceRename,
                void(const std::string &oldName, const std::string &newName));

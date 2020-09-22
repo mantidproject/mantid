@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import xml.etree.ElementTree as ET
+import xml.dom.minidom as MD
 import Muon.GUI.Common.utilities.run_string_utils as run_string_utils
 
 from Muon.GUI.Common.muon_group import MuonGroup
@@ -71,10 +72,11 @@ def save_grouping_to_XML(groups, pairs, filename, save=True, description=''):
     # handle pairs
     _create_XML_subElement_for_pairs(root, pairs)
 
-    tree = ET.ElementTree(root)
     if save:
-        tree.write(filename)
-    return tree
+        prettyXML = MD.parseString(ET.tostring(root)).toprettyxml(indent="\t")
+        with open(filename, "w") as xmlfile:
+            xmlfile.write(prettyXML)
+    return ET.ElementTree(root)
 
 
 def load_grouping_from_XML(filename):
