@@ -26,9 +26,17 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include <QMessageBox>
+#include <regex>
 #include <utility>
 
 using std::size_t;
+
+namespace {
+const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
+inline bool variableIsPrefixed(const std::string &name) {
+  return std::regex_match(name, PREFIX_REGEX);
+}
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -205,6 +213,8 @@ void PropertyHandler::initAttributes() {
   m_attributes.clear();
   m_vectorMembers.clear();
   for (const auto &attName : attNames) {
+    if (variableIsPrefixed(attName))
+      continue;
     QString aName = QString::fromStdString(attName);
     Mantid::API::IFunction::Attribute att = function()->getAttribute(attName);
     CreateAttributeProperty tmp(m_browser, this, aName);
@@ -982,8 +992,8 @@ void PropertyHandler::clearError(QtProperty *prop) {
  */
 Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
   if (prop == m_type) {
-    // if (!m_parent) return m_browser->compositeFunction();// dont replace the
-    // root composite function
+    // if (!m_parent) return m_browser->compositeFunction();// dont replace
+    // the root composite function
 
     // Create new function
     int i = m_browser->m_enumManager->value(prop);
@@ -1484,12 +1494,11 @@ QList<PropertyHandler *> PropertyHandler::getPeakList() {
 void PropertyHandler::plotRemoved() { m_hasPlot = false; }
 
 /**
- * Updates the high-level structure tooltip of this handler's property, updating
- * those of
- * sub-properties recursively first.
+ * Updates the high-level structure tooltip of this handler's property,
+ * updating those of sub-properties recursively first.
  *
- * For non-empty composite functions: something like ((Gaussian * Lorentzian) +
- * FlatBackground)
+ * For non-empty composite functions: something like ((Gaussian * Lorentzian)
+ * + FlatBackground)
  *
  * For non-composite functions: function()->name().
  *
