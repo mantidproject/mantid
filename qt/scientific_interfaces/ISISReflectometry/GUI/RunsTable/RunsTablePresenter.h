@@ -6,8 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../Runs/IRunsPresenter.h"
-#include "Common/Clipboard.h"
 #include "Common/DllConfig.h"
+#include "Common/IClipboard.h"
+#include "Common/IClipboardFactory.h"
+#include "Common/ClipboardFactory.h"
+#include "Common/Clipboard.h"
 #include "GUI/Common/IPlotter.h"
 #include "IRunsTablePresenter.h"
 #include "IRunsTableView.h"
@@ -22,8 +25,11 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter : public IRunsTablePresenter, public RunsTableViewSubscriber {
 public:
-  RunsTablePresenter(IRunsTableView *view, std::vector<std::string> const &instruments, double thetaTolerance,
-                     ReductionJobs reductionJobs, const IPlotter &plotter);
+  RunsTablePresenter(IRunsTableView *view,
+                     std::vector<std::string> const &instruments,
+                     double thetaTolerance, ReductionJobs reductionJobs,
+                     IClipboardFactory *clipboardFactory,
+                     const IPlotter &plotter);
 
   void notifyRemoveAllRowsAndGroupsRequested() override;
 
@@ -138,7 +144,8 @@ private:
 
   IRunsTableView *m_view;
   RunsTable m_model;
-  Clipboard m_clipboard;
+  IClipboard *m_clipboard;
+  IClipboardFactory *m_clipboardFactory;
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;
