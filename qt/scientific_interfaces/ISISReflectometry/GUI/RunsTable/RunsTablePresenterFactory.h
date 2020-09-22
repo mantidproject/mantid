@@ -21,7 +21,9 @@ class IRunsTableView;
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenterFactory {
 public:
   RunsTablePresenterFactory(std::vector<std::string> const &instruments,
-                            double thetaTolerance, IClipboardFactory m_clipboardFactory, Plotter plotter);
+                            double thetaTolerance,
+                            IClipboardFactory m_clipboardFactory,
+                            Plotter plotter);
   virtual std::unique_ptr<IRunsTablePresenter>
   operator()(IRunsTableView *view) const;
 

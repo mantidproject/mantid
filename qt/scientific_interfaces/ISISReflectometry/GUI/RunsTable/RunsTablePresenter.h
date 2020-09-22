@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../Runs/IRunsPresenter.h"
+#include "Common/Clipboard.h"
+#include "Common/ClipboardFactory.h"
 #include "Common/DllConfig.h"
 #include "Common/IClipboard.h"
 #include "Common/IClipboardFactory.h"
-#include "Common/ClipboardFactory.h"
-#include "Common/Clipboard.h"
 #include "GUI/Common/IPlotter.h"
 #include "IRunsTablePresenter.h"
 #include "IRunsTableView.h"

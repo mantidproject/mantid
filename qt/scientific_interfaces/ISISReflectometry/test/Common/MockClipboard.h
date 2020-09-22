@@ -14,7 +14,6 @@ namespace ISISReflectometry {
 
 class DLLExport MockClipboard : public IClipboard {
 public:
-
   MockClipboard() = default;
 
   MOCK_METHOD(bool, isInitialized, (), (const override));

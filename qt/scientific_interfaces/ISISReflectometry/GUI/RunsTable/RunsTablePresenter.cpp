@@ -16,7 +16,9 @@
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
 
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace ISISReflectometry {
 namespace Colour {
 constexpr const char *DEFAULT = "#ffffff"; // white
 constexpr const char *INVALID = "#dddddd"; // very pale grey
@@ -34,20 +36,27 @@ void clearStateStyling(MantidWidgets::Batch::Cell &cell) {
 
 void applyInvalidStateStyling(MantidWidgets::Batch::Cell &cell) {
   cell.setBackgroundColor(Colour::INVALID);
-  cell.setToolTip("Row will not be processed: it either contains invalid cell values, "
-                  "or duplicates a reduction in another row");
+  cell.setToolTip(
+      "Row will not be processed: it either contains invalid cell values, "
+      "or duplicates a reduction in another row");
 }
 
-void applyRunningStateStyling(MantidWidgets::Batch::Cell &cell) { cell.setBackgroundColor(Colour::RUNNING); }
+void applyRunningStateStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor(Colour::RUNNING);
+}
 
-void applyCompletedStateStyling(MantidWidgets::Batch::Cell &cell) { cell.setBackgroundColor(Colour::SUCCESS); }
+void applyCompletedStateStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor(Colour::SUCCESS);
+}
 
-void applyErrorStateStyling(MantidWidgets::Batch::Cell &cell, std::string const &errorMessage) {
+void applyErrorStateStyling(MantidWidgets::Batch::Cell &cell,
+                            std::string const &errorMessage) {
   cell.setBackgroundColor(Colour::FAILURE);
   cell.setToolTip(errorMessage);
 }
 
-void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell, std::string const &errorMessage) {
+void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
+                              std::string const &errorMessage) {
   cell.setBackgroundColor(Colour::WARNING);
   cell.setToolTip(errorMessage);
 }
@@ -57,8 +66,9 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell, std::string cons
  * @param jobs : the model to compare against
  * @rootsToIgnore : rows to ignore in the check
  */
-bool groupNameExists(std::string const &groupName, ReductionJobs const &jobs,
-                     std::vector<MantidWidgets::Batch::RowLocation> const &rootsToIgnore) {
+bool groupNameExists(
+    std::string const &groupName, ReductionJobs const &jobs,
+    std::vector<MantidWidgets::Batch::RowLocation> const &rootsToIgnore) {
 
   // Check if the group name exists in the jobs
   auto maybeExistingGroupIndex = jobs.indexOfGroupWithName(groupName);
@@ -66,9 +76,10 @@ bool groupNameExists(std::string const &groupName, ReductionJobs const &jobs,
     return false;
 
   // If it exists but in one of the roots to ignore, return false
-  auto existingGroupLocation =
-      MantidWidgets::Batch::RowLocation(MantidWidgets::Batch::RowPath{maybeExistingGroupIndex.get()});
-  if (std::find(rootsToIgnore.cbegin(), rootsToIgnore.cend(), existingGroupLocation) != rootsToIgnore.cend())
+  auto existingGroupLocation = MantidWidgets::Batch::RowLocation(
+      MantidWidgets::Batch::RowPath{maybeExistingGroupIndex.get()});
+  if (std::find(rootsToIgnore.cbegin(), rootsToIgnore.cend(),
+                existingGroupLocation) != rootsToIgnore.cend())
     return false;
 
   return true;
@@ -79,17 +90,21 @@ bool groupNameExists(std::string const &groupName, ReductionJobs const &jobs,
  * @param clipboard : the clipboard to compare against
  * @indexToIgnore : the index of the original item which should be ignored
  */
-bool groupNameExists(std::string const &groupName, IClipboard const *clipboard, int indexToIgnore) {
-  for (auto compareIndex = 0; compareIndex < clipboard->numberOfRoots(); ++compareIndex) {
-    if (compareIndex != indexToIgnore && groupName == clipboard->groupName(compareIndex))
+bool groupNameExists(std::string const &groupName, IClipboard const *clipboard,
+                     int indexToIgnore) {
+  for (auto compareIndex = 0; compareIndex < clipboard->numberOfRoots();
+       ++compareIndex) {
+    if (compareIndex != indexToIgnore &&
+        groupName == clipboard->groupName(compareIndex))
       return true;
   }
   return false;
 }
 
-void makePastedGroupNamesUnique(IClipboard *clipboard, int rootIndex,
-                                std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
-                                ReductionJobs const &jobs) {
+void makePastedGroupNamesUnique(
+    IClipboard *clipboard, int rootIndex,
+    std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
+    ReductionJobs const &jobs) {
 
   if (!clipboard->isGroupLocation(rootIndex))
     return;
@@ -99,26 +114,31 @@ void makePastedGroupNamesUnique(IClipboard *clipboard, int rootIndex,
     return;
 
   // Replace the group name until it is unique in the model and clipboard
-  while (groupNameExists(groupName, jobs, replacementRoots) || groupNameExists(groupName, clipboard, rootIndex))
+  while (groupNameExists(groupName, jobs, replacementRoots) ||
+         groupNameExists(groupName, clipboard, rootIndex))
     groupName.append(" (copy)");
 
   // Set the new name
   clipboard->setGroupName(rootIndex, groupName);
 }
 
-void makePastedGroupNamesUnique(IClipboard *clipboard,
-                                std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
-                                ReductionJobs const &jobs) {
-  for (auto rootIndex = 0; rootIndex < clipboard->numberOfRoots(); ++rootIndex) {
+void makePastedGroupNamesUnique(
+    IClipboard *clipboard,
+    std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
+    ReductionJobs const &jobs) {
+  for (auto rootIndex = 0; rootIndex < clipboard->numberOfRoots();
+       ++rootIndex) {
     makePastedGroupNamesUnique(clipboard, rootIndex, replacementRoots, jobs);
   }
 }
 } // namespace
 
-RunsTablePresenter::RunsTablePresenter(IRunsTableView *view, std::vector<std::string> const &instruments,
-                                       double thetaTolerance, ReductionJobs jobs, IClipboardFactory *clipboardFactory,
-                                       const IPlotter &plotter)
-    : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)), m_clipboardFactory(clipboardFactory), m_clipboard(),
+RunsTablePresenter::RunsTablePresenter(
+    IRunsTableView *view, std::vector<std::string> const &instruments,
+    double thetaTolerance, ReductionJobs jobs,
+    IClipboardFactory *clipboardFactory, const IPlotter &plotter)
+    : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
+      m_clipboardFactory(clipboardFactory), m_clipboard(),
       m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
 
@@ -129,25 +149,31 @@ RunsTablePresenter::RunsTablePresenter(IRunsTableView *view, std::vector<std::st
 void RunsTablePresenter::appendRowAndGroup() {
   // Calculate
   std::vector<int> localGroupIndices;
-  localGroupIndices.emplace_back(static_cast<int>(m_model.reductionJobs().groups().size()));
+  localGroupIndices.emplace_back(
+      static_cast<int>(m_model.reductionJobs().groups().size()));
   appendEmptyGroupInModel();
   appendEmptyGroupInView();
   appendRowsToGroupsInView(localGroupIndices);
   appendRowsToGroupsInModel(localGroupIndices);
 }
 
-void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
+void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
 
 RunsTable const &RunsTablePresenter::runsTable() const { return m_model; }
 
 RunsTable &RunsTablePresenter::mutableRunsTable() { return m_model; }
 
-void RunsTablePresenter::mergeAdditionalJobs(ReductionJobs const &additionalJobs) {
-  mergeJobsInto(m_model.mutableReductionJobs(), additionalJobs, m_model.thetaTolerance(), m_jobViewUpdater);
+void RunsTablePresenter::mergeAdditionalJobs(
+    ReductionJobs const &additionalJobs) {
+  mergeJobsInto(m_model.mutableReductionJobs(), additionalJobs,
+                m_model.thetaTolerance(), m_jobViewUpdater);
   updateProgressBar();
 }
 
-void RunsTablePresenter::removeRowsFromModel(std::vector<MantidWidgets::Batch::RowLocation> rows) {
+void RunsTablePresenter::removeRowsFromModel(
+    std::vector<MantidWidgets::Batch::RowLocation> rows) {
   std::sort(rows.begin(), rows.end());
   for (auto row = rows.crbegin(); row != rows.crend(); ++row) {
     auto const groupIndex = groupOf(*row);
@@ -195,19 +221,27 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
   }
 }
 
-void RunsTablePresenter::removeGroupsFromView(std::vector<int> const &groupIndicesOrderedLowToHigh) {
-  for (auto it = groupIndicesOrderedLowToHigh.crbegin(); it < groupIndicesOrderedLowToHigh.crend(); ++it)
+void RunsTablePresenter::removeGroupsFromView(
+    std::vector<int> const &groupIndicesOrderedLowToHigh) {
+  for (auto it = groupIndicesOrderedLowToHigh.crbegin();
+       it < groupIndicesOrderedLowToHigh.crend(); ++it)
     m_view->jobs().removeRowAt(MantidWidgets::Batch::RowLocation({*it}));
 }
 
-void RunsTablePresenter::removeGroupsFromModel(std::vector<int> const &groupIndicesOrderedLowToHigh) {
-  for (auto it = groupIndicesOrderedLowToHigh.crbegin(); it < groupIndicesOrderedLowToHigh.crend(); ++it)
+void RunsTablePresenter::removeGroupsFromModel(
+    std::vector<int> const &groupIndicesOrderedLowToHigh) {
+  for (auto it = groupIndicesOrderedLowToHigh.crbegin();
+       it < groupIndicesOrderedLowToHigh.crend(); ++it)
     removeGroup(m_model.mutableReductionJobs(), *it);
 }
 
-void RunsTablePresenter::notifyResumeReductionRequested() { m_mainPresenter->notifyResumeReductionRequested(); }
+void RunsTablePresenter::notifyResumeReductionRequested() {
+  m_mainPresenter->notifyResumeReductionRequested();
+}
 
-void RunsTablePresenter::notifyPauseReductionRequested() { m_mainPresenter->notifyPauseReductionRequested(); }
+void RunsTablePresenter::notifyPauseReductionRequested() {
+  m_mainPresenter->notifyPauseReductionRequested();
+}
 
 void RunsTablePresenter::notifyInsertRowRequested() {
   if (isProcessing() || isAutoreducing())
@@ -227,7 +261,8 @@ void RunsTablePresenter::notifyInsertRowRequested() {
 
 void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
   try {
-    auto regexFilter = filterFromRegexString(filterString, m_view->jobs(), m_model.reductionJobs());
+    auto regexFilter = filterFromRegexString(filterString, m_view->jobs(),
+                                             m_model.reductionJobs());
     m_view->jobs().filterRowsBy(std::move(regexFilter));
   } catch (boost::regex_error &) {
   }
@@ -247,54 +282,86 @@ void RunsTablePresenter::updateWidgetEnabledState() {
   auto const autoreducing = isAutoreducing();
 
   m_view->setJobsTableEnabled(!processing && !autoreducing);
-  m_view->setInstrumentSelectorEnabled(!isAnyBatchProcessing() && !isAnyBatchAutoreducing());
+  m_view->setInstrumentSelectorEnabled(!isAnyBatchProcessing() &&
+                                       !isAnyBatchAutoreducing());
   m_view->setProcessButtonEnabled(!processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::Process, !processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::Pause, processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::InsertRow, !processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::InsertGroup, !processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::DeleteRow, !processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::DeleteGroup, !processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::Copy, !processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::Paste, !processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::Cut, !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Process,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Pause,
+                           processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::InsertRow,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::InsertGroup,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::DeleteRow,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::DeleteGroup,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Copy,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Paste,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Cut,
+                           !processing && !autoreducing);
 }
 
-void RunsTablePresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyReductionResumed() {
+  updateWidgetEnabledState();
+}
 
 void RunsTablePresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
 
-void RunsTablePresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::notifyAnyBatchReductionResumed() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyAnyBatchReductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::notifyAnyBatchReductionPaused() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyAnyBatchReductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::notifyAnyBatchAutoreductionResumed() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyAnyBatchAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::notifyAnyBatchAutoreductionPaused() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyAnyBatchAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::notifyInstrumentChanged(std::string const &instrumentName) {
+void RunsTablePresenter::notifyInstrumentChanged(
+    std::string const &instrumentName) {
   m_view->setInstrumentName(instrumentName);
 }
 
-void RunsTablePresenter::setTablePrecision(int &precision) { m_jobViewUpdater.setPrecision(precision); }
+void RunsTablePresenter::setTablePrecision(int &precision) {
+  m_jobViewUpdater.setPrecision(precision);
+}
 
-void RunsTablePresenter::resetTablePrecision() { m_jobViewUpdater.resetPrecision(); }
+void RunsTablePresenter::resetTablePrecision() {
+  m_jobViewUpdater.resetPrecision();
+}
 
 void RunsTablePresenter::settingsChanged() {
   m_model.resetState();
   notifyRowStateChanged();
 }
 
-void RunsTablePresenter::appendRowsToGroupsInView(std::vector<int> const &groupIndices) {
+void RunsTablePresenter::appendRowsToGroupsInView(
+    std::vector<int> const &groupIndices) {
   for (auto const &groupIndex : groupIndices)
-    m_view->jobs().appendChildRowOf(MantidWidgets::Batch::RowLocation({groupIndex}));
+    m_view->jobs().appendChildRowOf(
+        MantidWidgets::Batch::RowLocation({groupIndex}));
 }
 
-void RunsTablePresenter::appendRowsToGroupsInModel(std::vector<int> const &groupIndices) {
+void RunsTablePresenter::appendRowsToGroupsInModel(
+    std::vector<int> const &groupIndices) {
   for (auto const &groupIndex : groupIndices)
     appendEmptyRow(m_model.mutableReductionJobs(), groupIndex);
 }
@@ -317,10 +384,13 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
   notifyRowStateChanged();
 }
 
-void RunsTablePresenter::appendEmptyGroupInModel() { appendEmptyGroup(m_model.mutableReductionJobs()); }
+void RunsTablePresenter::appendEmptyGroupInModel() {
+  appendEmptyGroup(m_model.mutableReductionJobs());
+}
 
 void RunsTablePresenter::appendEmptyGroupInView() {
-  auto location = m_view->jobs().appendChildRowOf(MantidWidgets::Batch::RowLocation());
+  auto location =
+      m_view->jobs().appendChildRowOf(MantidWidgets::Batch::RowLocation());
   applyGroupStylingToRow(location);
   // TODO: Consider using the other version of appendChildRowOf
 }
@@ -334,7 +404,8 @@ void RunsTablePresenter::insertEmptyRowInModel(int groupIndex, int beforeRow) {
 }
 
 void RunsTablePresenter::insertEmptyGroupInView(int beforeGroup) {
-  auto location = m_view->jobs().insertChildRowOf(MantidWidgets::Batch::RowLocation(), beforeGroup);
+  auto location = m_view->jobs().insertChildRowOf(
+      MantidWidgets::Batch::RowLocation(), beforeGroup);
   applyGroupStylingToRow(location);
 }
 
@@ -359,7 +430,8 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   if (group.rows().size() > 0)
     return;
 
-  auto location = MantidWidgets::Batch::RowLocation(MantidWidgets::Batch::RowPath{0});
+  auto location =
+      MantidWidgets::Batch::RowLocation(MantidWidgets::Batch::RowPath{0});
   auto cells = m_view->jobs().cellsAt(location);
 
   // Groups should only have one cell
@@ -381,17 +453,24 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   removeGroupsFromView({0});
 }
 
-void RunsTablePresenter::notifyExpandAllRequested() { m_view->jobs().expandAll(); }
+void RunsTablePresenter::notifyExpandAllRequested() {
+  m_view->jobs().expandAll();
+}
 
-void RunsTablePresenter::notifyCollapseAllRequested() { m_view->jobs().collapseAll(); }
+void RunsTablePresenter::notifyCollapseAllRequested() {
+  m_view->jobs().collapseAll();
+}
 
 namespace {
-bool isGroup(MantidWidgets::Batch::RowLocation const &location) { return isGroupLocation(location); }
+bool isGroup(MantidWidgets::Batch::RowLocation const &location) {
+  return isGroupLocation(location);
+}
 } // namespace
 
 void RunsTablePresenter::notifyFillDown() {
   auto selected = m_view->jobs().selectedRowLocations();
-  selected.erase(std::remove_if(selected.begin(), selected.end(), isGroup), selected.end());
+  selected.erase(std::remove_if(selected.begin(), selected.end(), isGroup),
+                 selected.end());
   std::sort(selected.begin(), selected.end());
 
   if (selected.size() < 1)
@@ -410,39 +489,45 @@ void RunsTablePresenter::notifyFillDown() {
   }
 }
 
-std::vector<std::string>
-RunsTablePresenter::cellTextFromViewAt(MantidWidgets::Batch::RowLocation const &location) const {
-  return map(m_view->jobs().cellsAt(location), [](MantidWidgets::Batch::Cell const &cell) -> std::string {
-    if (cell.isOutput())
-      return std::string();
-    else
-      return cell.contentText();
-  });
+std::vector<std::string> RunsTablePresenter::cellTextFromViewAt(
+    MantidWidgets::Batch::RowLocation const &location) const {
+  return map(m_view->jobs().cellsAt(location),
+             [](MantidWidgets::Batch::Cell const &cell) -> std::string {
+               if (cell.isOutput())
+                 return std::string();
+               else
+                 return cell.contentText();
+             });
 }
 
-void RunsTablePresenter::clearInvalidCellStyling(std::vector<MantidWidgets::Batch::Cell> &cells) {
+void RunsTablePresenter::clearInvalidCellStyling(
+    std::vector<MantidWidgets::Batch::Cell> &cells) {
   for (auto &cell : cells)
     clearInvalidCellStyling(cell);
 }
 
-void RunsTablePresenter::clearInvalidCellStyling(MantidWidgets::Batch::Cell &cell) {
+void RunsTablePresenter::clearInvalidCellStyling(
+    MantidWidgets::Batch::Cell &cell) {
   cell.setIconFilePath("");
   cell.setBorderColor("darkGrey");
 }
 
-void RunsTablePresenter::showAllCellsOnRowAsValid(MantidWidgets::Batch::RowLocation const &itemIndex) {
+void RunsTablePresenter::showAllCellsOnRowAsValid(
+    MantidWidgets::Batch::RowLocation const &itemIndex) {
   auto cells = m_view->jobs().cellsAt(itemIndex);
   clearInvalidCellStyling(cells);
   m_view->jobs().setCellsAt(itemIndex, cells);
 }
 
-void RunsTablePresenter::applyInvalidCellStyling(MantidWidgets::Batch::Cell &cell) {
+void RunsTablePresenter::applyInvalidCellStyling(
+    MantidWidgets::Batch::Cell &cell) {
   cell.setIconFilePath(":/invalid.png");
   cell.setBorderColor("darkRed");
 }
 
-void RunsTablePresenter::showCellsAsInvalidInView(MantidWidgets::Batch::RowLocation const &itemIndex,
-                                                  std::vector<int> const &invalidColumns) {
+void RunsTablePresenter::showCellsAsInvalidInView(
+    MantidWidgets::Batch::RowLocation const &itemIndex,
+    std::vector<int> const &invalidColumns) {
   auto cells = m_view->jobs().cellsAt(itemIndex);
   clearInvalidCellStyling(cells);
   for (auto &column : invalidColumns)
@@ -450,9 +535,11 @@ void RunsTablePresenter::showCellsAsInvalidInView(MantidWidgets::Batch::RowLocat
   m_view->jobs().setCellsAt(itemIndex, cells);
 }
 
-void RunsTablePresenter::updateGroupName(MantidWidgets::Batch::RowLocation const &itemIndex, int column,
-                                         std::string const &oldValue, std::string const &newValue) {
-  assertOrThrow(column == 0, "Changed value of cell which should be uneditable");
+void RunsTablePresenter::updateGroupName(
+    MantidWidgets::Batch::RowLocation const &itemIndex, int column,
+    std::string const &oldValue, std::string const &newValue) {
+  assertOrThrow(column == 0,
+                "Changed value of cell which should be uneditable");
   auto const groupIndex = groupOf(itemIndex);
   if (!setGroupName(m_model.mutableReductionJobs(), groupIndex, newValue)) {
     auto cell = m_view->jobs().cellAt(itemIndex, column);
@@ -461,8 +548,9 @@ void RunsTablePresenter::updateGroupName(MantidWidgets::Batch::RowLocation const
   }
 }
 
-void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const &itemIndex, int column,
-                                        std::string const &, std::string const &) {
+void RunsTablePresenter::updateRowField(
+    MantidWidgets::Batch::RowLocation const &itemIndex, int column,
+    std::string const &, std::string const &) {
   // User has edited the text so reset the output-value flag as it now contains
   // an input
   auto cell = m_view->jobs().cellAt(itemIndex, column);
@@ -472,7 +560,8 @@ void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const 
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
   auto rowValidationResult = validateRow(cellTextFromViewAt(itemIndex));
-  updateRow(m_model.mutableReductionJobs(), groupIndex, rowIndex, rowValidationResult.validElseNone());
+  updateRow(m_model.mutableReductionJobs(), groupIndex, rowIndex,
+            rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
   } else {
@@ -480,8 +569,9 @@ void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const 
   }
 }
 
-void RunsTablePresenter::notifyCellTextChanged(MantidWidgets::Batch::RowLocation const &itemIndex, int column,
-                                               std::string const &oldValue, std::string const &newValue) {
+void RunsTablePresenter::notifyCellTextChanged(
+    MantidWidgets::Batch::RowLocation const &itemIndex, int column,
+    std::string const &oldValue, std::string const &newValue) {
   if (isGroupLocation(itemIndex))
     updateGroupName(itemIndex, column, oldValue, newValue);
   else
@@ -494,15 +584,18 @@ void RunsTablePresenter::notifySelectionChanged() {
   m_model.setSelectedRowLocations(m_view->jobs().selectedRowLocations());
 }
 
-void RunsTablePresenter::applyGroupStylingToRow(MantidWidgets::Batch::RowLocation const &location) {
+void RunsTablePresenter::applyGroupStylingToRow(
+    MantidWidgets::Batch::RowLocation const &location) {
   auto cells = m_view->jobs().cellsAt(location);
   if (cells.size() > 0) {
-    boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()), m_view->jobs().deadCell());
+    boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()),
+                m_view->jobs().deadCell());
     m_view->jobs().setCellsAt(location, cells);
   }
 }
 
-void RunsTablePresenter::notifyRowInserted(MantidWidgets::Batch::RowLocation const &newRowLocation) {
+void RunsTablePresenter::notifyRowInserted(
+    MantidWidgets::Batch::RowLocation const &newRowLocation) {
   if (newRowLocation.depth() > DEPTH_LIMIT) {
     m_view->jobs().removeRowAt(newRowLocation);
   } else if (isGroupLocation(newRowLocation)) {
@@ -518,7 +611,8 @@ void RunsTablePresenter::notifyRowInserted(MantidWidgets::Batch::RowLocation con
 void RunsTablePresenter::removeRowsAndGroupsFromModel(
     std::vector<MantidWidgets::Batch::RowLocation> locationsOfRowsToRemove) {
   std::sort(locationsOfRowsToRemove.begin(), locationsOfRowsToRemove.end());
-  for (auto location = locationsOfRowsToRemove.crbegin(); location != locationsOfRowsToRemove.crend(); ++location) {
+  for (auto location = locationsOfRowsToRemove.crbegin();
+       location != locationsOfRowsToRemove.crend(); ++location) {
     auto const groupIndex = groupOf(*location);
     if (isRowLocation(*location)) {
       auto const rowIndex = rowOf(*location);
@@ -529,14 +623,19 @@ void RunsTablePresenter::removeRowsAndGroupsFromModel(
   }
 }
 
-void RunsTablePresenter::removeAllRowsAndGroupsFromModel() { removeAllRowsAndGroups(m_model.mutableReductionJobs()); }
+void RunsTablePresenter::removeAllRowsAndGroupsFromModel() {
+  removeAllRowsAndGroups(m_model.mutableReductionJobs());
+}
 
 void RunsTablePresenter::removeRowsAndGroupsFromView(
-    std::vector<MantidWidgets::Batch::RowLocation> const &locationsOfRowsToRemove) {
+    std::vector<MantidWidgets::Batch::RowLocation> const
+        &locationsOfRowsToRemove) {
   m_view->jobs().removeRows(locationsOfRowsToRemove);
 }
 
-void RunsTablePresenter::removeAllRowsAndGroupsFromView() { m_view->jobs().removeAllRows(); }
+void RunsTablePresenter::removeAllRowsAndGroupsFromView() {
+  m_view->jobs().removeAllRows();
+}
 
 void RunsTablePresenter::notifyAppendAndEditAtChildRowRequested() {
   if (isProcessing() || isAutoreducing())
@@ -560,7 +659,8 @@ void RunsTablePresenter::notifyEditAtRowAboveRequested() {
 }
 
 void RunsTablePresenter::notifyRemoveRowsRequested(
-    std::vector<MantidWidgets::Batch::RowLocation> const &locationsOfRowsToRemove) {
+    std::vector<MantidWidgets::Batch::RowLocation> const
+        &locationsOfRowsToRemove) {
   if (isProcessing() || isAutoreducing())
     return;
 
@@ -615,7 +715,8 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
   auto maybeReplacementRoots = m_view->jobs().selectedSubtreeRoots();
   if (maybeReplacementRoots.is_initialized() && m_clipboard->isInitialized()) {
     auto &replacementRoots = maybeReplacementRoots.get();
-    makePastedGroupNamesUnique(m_clipboard, replacementRoots, m_model.reductionJobs());
+    makePastedGroupNamesUnique(m_clipboard, replacementRoots,
+                               m_model.reductionJobs());
     if (replacementRoots.empty())
       pasteGroupsAtEnd();
     else if (containsGroups(*m_clipboard) && containsGroups(replacementRoots))
@@ -630,7 +731,8 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
   }
 }
 
-void RunsTablePresenter::pasteRowsOntoRows(std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
+void RunsTablePresenter::pasteRowsOntoRows(
+    std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
   // Paste rows onto given locations. Only possible if the depth is the same.
   // Also limit source and destination sizes to be equal for now for
   // simplicity.
@@ -644,7 +746,8 @@ void RunsTablePresenter::pasteRowsOntoRows(std::vector<MantidWidgets::Batch::Row
     auto replacementRows = m_clipboard->createRowsForAllRoots();
     auto replacementRow = replacementRows.begin();
     auto replacementPoint = replacementRoots.cbegin();
-    for (; replacementRow < replacementRows.end() && replacementPoint < replacementRoots.cend();
+    for (; replacementRow < replacementRows.end() &&
+           replacementPoint < replacementRoots.cend();
          ++replacementRow, ++replacementPoint) {
       auto &group = groups[groupOf(*replacementPoint)];
       auto &rows = group.mutableRows();
@@ -655,12 +758,14 @@ void RunsTablePresenter::pasteRowsOntoRows(std::vector<MantidWidgets::Batch::Row
   }
 }
 
-void RunsTablePresenter::pasteRowsOntoGroup(std::vector<MantidWidgets::Batch::RowLocation> &) {
+void RunsTablePresenter::pasteRowsOntoGroup(
+    std::vector<MantidWidgets::Batch::RowLocation> &) {
   // Not currently supported
   m_view->invalidSelectionForPaste();
 }
 
-void RunsTablePresenter::pasteGroupsOntoGroups(std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
+void RunsTablePresenter::pasteGroupsOntoGroups(
+    std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
   // Paste onto given locations. Only possible if the depth is the same.
   if (containsGroups(replacementRoots) && containsGroups(*m_clipboard) &&
       static_cast<int>(replacementRoots.size()) ==
@@ -671,7 +776,8 @@ void RunsTablePresenter::pasteGroupsOntoGroups(std::vector<MantidWidgets::Batch:
     auto &groups = m_model.mutableReductionJobs().mutableGroups();
     int clipboardIndex = 0;
     for (auto const &replacementPoint : replacementRoots) {
-      groups[groupOf(replacementPoint)] = m_clipboard->createGroupForRoot(clipboardIndex);
+      groups[groupOf(replacementPoint)] =
+          m_clipboard->createGroupForRoot(clipboardIndex);
       ++clipboardIndex;
     }
   } else {
@@ -684,32 +790,39 @@ void RunsTablePresenter::pasteGroupsAtEnd() {
   // the clipboard contains groups
   if (containsGroups(*m_clipboard)) {
     // Update view
-    m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(), m_clipboard->subtrees());
+    m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
+                                    m_clipboard->subtrees());
     // Update model
-    for (int rootIndex = 0; rootIndex < m_clipboard.numberOfRoots();
+    for (int rootIndex = 0; rootIndex < m_clipboard->numberOfRoots();
          ++rootIndex) {
       m_model.mutableReductionJobs().appendGroup(
-          m_clipboard.createGroupForRoot(rootIndex));
+          m_clipboard->createGroupForRoot(rootIndex));
     }
   } else {
     m_view->invalidSelectionForPaste();
   }
 }
 
-void RunsTablePresenter::forAllCellsAt(MantidWidgets::Batch::RowLocation const &location, UpdateCellFunc updateFunc) {
+void RunsTablePresenter::forAllCellsAt(
+    MantidWidgets::Batch::RowLocation const &location,
+    UpdateCellFunc updateFunc) {
   auto cells = m_view->jobs().cellsAt(location);
   std::for_each(cells.begin(), cells.end(), updateFunc);
   m_view->jobs().setCellsAt(location, cells);
 }
 
-void RunsTablePresenter::forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
-                                       UpdateCellWithTooltipFunc updateFunc, std::string const &tooltip) {
+void RunsTablePresenter::forAllCellsAt(
+    MantidWidgets::Batch::RowLocation const &location,
+    UpdateCellWithTooltipFunc updateFunc, std::string const &tooltip) {
   auto cells = m_view->jobs().cellsAt(location);
-  std::for_each(cells.begin(), cells.end(), [&](MantidWidgets::Batch::Cell &cell) { updateFunc(cell, tooltip); });
+  std::for_each(
+      cells.begin(), cells.end(),
+      [&](MantidWidgets::Batch::Cell &cell) { updateFunc(cell, tooltip); });
   m_view->jobs().setCellsAt(location, cells);
 }
 
-void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
+void RunsTablePresenter::setRowStylingForItem(
+    MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
   switch (item.state()) {
   case State::ITEM_NOT_STARTED: // fall through
   case State::ITEM_STARTING:
@@ -730,9 +843,13 @@ void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowPath cons
   };
 }
 
-void RunsTablePresenter::updateProgressBar() { m_view->setProgress(m_mainPresenter->percentComplete()); }
+void RunsTablePresenter::updateProgressBar() {
+  m_view->setProgress(m_mainPresenter->percentComplete());
+}
 
-void RunsTablePresenter::notifyTableChanged() { m_mainPresenter->notifyTableChanged(); }
+void RunsTablePresenter::notifyTableChanged() {
+  m_mainPresenter->notifyTableChanged();
+}
 
 void RunsTablePresenter::notifyRowStateChanged() {
   updateProgressBar();
@@ -758,7 +875,8 @@ void RunsTablePresenter::notifyRowStateChanged() {
   }
 }
 
-void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
+void RunsTablePresenter::notifyRowStateChanged(
+    boost::optional<Item const &> item) {
   if (!item)
     return;
 
@@ -783,7 +901,8 @@ void RunsTablePresenter::notifyRowOutputsChanged() {
   }
 }
 
-void RunsTablePresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
+void RunsTablePresenter::notifyRowOutputsChanged(
+    boost::optional<Item const &> item) {
   if (!item.is_initialized() || item->isGroup())
     return;
 
@@ -792,13 +911,21 @@ void RunsTablePresenter::notifyRowOutputsChanged(boost::optional<Item const &> i
   m_jobViewUpdater.rowModified(groupOf(path), rowOf(path), row);
 }
 
-bool RunsTablePresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
+bool RunsTablePresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
+}
 
-bool RunsTablePresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
+bool RunsTablePresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
+}
 
-bool RunsTablePresenter::isAnyBatchProcessing() const { return m_mainPresenter->isAnyBatchProcessing(); }
+bool RunsTablePresenter::isAnyBatchProcessing() const {
+  return m_mainPresenter->isAnyBatchProcessing();
+}
 
-bool RunsTablePresenter::isAnyBatchAutoreducing() const { return m_mainPresenter->isAnyBatchAutoreducing(); }
+bool RunsTablePresenter::isAnyBatchAutoreducing() const {
+  return m_mainPresenter->isAnyBatchAutoreducing();
+}
 
 void RunsTablePresenter::notifyPlotSelectedPressed() {
   std::vector<std::string> workspaces;
@@ -829,4 +956,6 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
 
   m_plotter.reflectometryPlot(workspaces);
 }
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+} // namespace ISISReflectometry
+} // namespace CustomInterfaces
+} // namespace MantidQt

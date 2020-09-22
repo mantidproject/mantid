@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../../ISISReflectometry/Common/IClipboardFactory.h"
 #include "../../ISISReflectometry/Common/Clipboard.h"
+#include "../../ISISReflectometry/Common/IClipboardFactory.h"
 #include "DllConfig.h"
 
 namespace MantidQt {

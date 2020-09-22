@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Clipboard: public IClipboard {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Clipboard : public IClipboard {
 public:
   struct Item {
     Item(MantidQt::MantidWidgets::Batch::RowLocation location, MantidQt::MantidWidgets::Batch::Subtree subtree)
