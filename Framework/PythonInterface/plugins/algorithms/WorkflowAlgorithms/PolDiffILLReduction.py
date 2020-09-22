@@ -305,8 +305,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         pol_directions = set()
         numors = set()
         for name in mtd[ws].getNames():
-            numors.add(name[:-2])
-            pol_directions.add(name[-1])
+            last_underscore = name.rfind("_")
+            numors.add(name[:last_underscore])
+            pol_directions.add(name[last_underscore+1:])
         if len(numors) > 1:
             names_list = []
             for direction in sorted(list(pol_directions)):
