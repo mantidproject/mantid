@@ -15,6 +15,10 @@ from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
 InputWorkspace = Union[str, Workspace2D]  # type alias
 
+TUBE_LENGTH = 0.9001  # in meters
+PIXELS_PER_TUBE = 256
+WIRE_GAP = 52.8 / 1000  # in meters, distance between consecutive wires
+
 
 def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow_height: float = 1000,
                                shadow_width: float = 4, fit_domain: float = 7) -> TableWorkspace:
@@ -35,9 +39,9 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
     for marker in ('bank', 'sixteenpack', 'tube'):
         assert marker in tube_name, f'{tube_name} does not uniquely specify one tube'
     peak_height, peak_width = -shadow_height, shadow_width
-    wire_gap = (2 * 25.4 + 2) / 1000  # gap along the Y-coordinate between consecutive wire centers
     # the center of the 16 wires is aligned with the center of the tube, set to Y == 0
-    wire_positions = np.arange(-7.5 * wire_gap, 8.5 * wire_gap, wire_gap)
+    bottom_wire_position, topmost_wire_position = -7.5 * WIRE_GAP, 8.5 * WIRE_GAP
+    wire_positions = np.arange(bottom_wire_position, topmost_wire_position, WIRE_GAP)
     # Fit only the inner 14 dips because the extrema wires are too close to the tube tips.
     # The dead zone in the tube tips interferes with the shadow cast by the extrema  wires
     # preventing a good fitting
@@ -47,10 +51,9 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
     # Initial guess for the peak positions, assuming:
     # - the center of the the wire mesh coincides with the center ot the tube_calib_fit_params
     # - wires cast a shadow on a perfectly calibrated tube
-    tube_length, pixels_per_tube = 0.9001, 256
-    fit_extent = (fit_domain / pixels_per_tube) * tube_length  # fit domain in meters
-    assert fit_extent < wire_gap, 'The fit domain cannot be larger than the distance between consecutive wires'
-    wire_pixel_positions = (pixels_per_tube / tube_length) * wire_positions + pixels_per_tube / 2
+    fit_extent = (fit_domain / PIXELS_PER_TUBE) * TUBE_LENGTH  # fit domain in meters
+    assert fit_extent < WIRE_GAP, 'The fit domain cannot be larger than the distance between consecutive wires'
+    wire_pixel_positions = (PIXELS_PER_TUBE / TUBE_LENGTH) * wire_positions + PIXELS_PER_TUBE / 2
     fit_par = TubeCalibFitParams(wire_pixel_positions, height=peak_height, width=peak_width, margin=fit_domain)
     fit_par.setAutomatic(True)
     return tube.calibrate(workspace, tube_name, wire_positions, peaks_form, fitPar=fit_par)
