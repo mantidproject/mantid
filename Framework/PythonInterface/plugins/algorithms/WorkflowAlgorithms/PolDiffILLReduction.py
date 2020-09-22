@@ -434,7 +434,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             elif self._method_data_structure == '10p':
                 nPolarisations = 5
             if mtd[pol_eff_ws].getNumberOfEntries() != nPolarisations:
-               raise RuntimeError("Incompatible number of polarisations between quartz input and sample.")
+                raise RuntimeError("Incompatible number of polarisations between quartz input and sample.")
 
         for entry_no in range(mtd[ws].getNumberOfEntries()):
             if entry_no % 2 != 0:
