@@ -180,8 +180,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('VanadiumInputWorkspace', EnabledWhenProperty('DetectorEfficiencyCalibration',
                                                                                PropertyCriterion.IsEqualTo, 'Vanadium'))
 
+        self.declareProperty('AverageScan', False,
+                             doc='Whether or not to average the detector counts from multiple scan steps.')
+        self.setPropertySettings('AverageScan', scan)
+
         self.declareProperty('SumScan', False,
-                             doc='Whether or not to sum the multiple scan steps into a single distribution')
+                             doc='Whether or not to sum the multiple scan steps into a single distribution in TwoTheta angle.')
 
         self.setPropertySettings('SumScan', scan)
 
@@ -378,7 +382,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         nMeasurementsPerPOL = 2
         tmp_names = []
         index = 0
-        if self.getProperty('SumScan').value:
+        if self.getProperty('AverageScan').value:
             ws = self._merge_polarisations(ws, average_detectors=True)
         for entry_no in range(1, mtd[ws].getNumberOfEntries()+1, nMeasurementsPerPOL):
             # two polarizer-analyzer states, fixed flipper_eff
