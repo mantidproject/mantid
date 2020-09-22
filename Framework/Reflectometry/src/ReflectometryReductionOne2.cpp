@@ -384,6 +384,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   int step = 1;
 
   if (summingInQ()) {
+    // Background subtraction
+    result = backgroundSubtraction(result);
+    outputDebugWorkspace(result, wsName, "_subtracted_bkg", debug, step);
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);

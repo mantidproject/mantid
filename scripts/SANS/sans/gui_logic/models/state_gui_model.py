@@ -15,7 +15,7 @@ from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStep
 from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
-from SANSUtility import (meter_2_millimeter, millimeter_2_meter)
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
 class StateGuiModel(ModelCommon):
