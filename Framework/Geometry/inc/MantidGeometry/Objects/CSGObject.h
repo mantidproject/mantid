@@ -75,22 +75,23 @@ public:
   }
 
   /// Return the top rule
-  const Rule *topRule() const { return TopRule.get(); }
+  const Rule *topRule() const { return m_topRule.get(); }
   void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
 
-  void setName(const int nx) { ObjNum = nx; }     ///< Set Name
-  int getName() const override { return ObjNum; } ///< Get Name
+  void setName(const int nx) { m_objNum = nx; }     ///< Set Name
+  int getName() const override { return m_objNum; } ///< Get Name
 
   void setMaterial(const Kernel::Material &material) override;
   const Kernel::Material &material() const override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
-  int setObject(const int ON, const std::string &Ln);
+  int setObject(const int objName, const std::string &lineStr);
   int procString(const std::string &Line);
-  int complementaryObject(const int Cnum,
-                          std::string &Ln); ///< Process a complementary object
+  int complementaryObject(
+      const int cellNum,
+      std::string &lineStr); ///< Process a complementary object
   int hasComplement() const;
 
   int populate(const std::map<int, std::shared_ptr<Surface>> &);
@@ -194,7 +195,8 @@ public:
   std::string getShapeXML() const;
 
 private:
-  int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
+  int procPair(std::string &lineStr,
+               std::map<int, std::unique_ptr<Rule>> &ruleMap,
                int &compUnit) const;
   std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
   int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
@@ -216,7 +218,7 @@ private:
   double singleShotMonteCarloVolume(const int shotSize,
                                     const size_t seed) const;
   /// Top rule [ Geometric scope of object]
-  std::unique_ptr<Rule> TopRule;
+  std::unique_ptr<Rule> m_topRule;
   /// Object's bounding box
   BoundingBox m_boundingBox;
   // -- DEPRECATED --
@@ -229,7 +231,7 @@ private:
   mutable bool boolBounded; ///< flag true if a bounding box exists, either by
 
   /// Creation number
-  int ObjNum;
+  int m_objNum;
   /// Geometry Handle for rendering
   std::shared_ptr<GeometryHandler> m_handler;
   friend class GeometryHandler;
