@@ -297,7 +297,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         else:
             if self.getPropertyValue("ProcessAs") not in ['Beam', 'Transmission']:
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
-                                   +"The provided input does not fit in any of these measurement types.")
+                                   + "The provided input does not fit in any of these measurement types.")
 
     def _merge_polarisations(self, ws, average_detectors=False):
         """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either by using SumOverlappingTubes
@@ -648,7 +648,8 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _detector_efficiency_correction(self, ws, component_ws):
         """Corrects detector efficiency and normalises data to either vanadium, incoherent scattering, or paramagnetic scattering."""
-        conjoined_components = self._conjoin_components(component_ws)
+        if component_ws:
+            conjoined_components = self._conjoin_components(component_ws)
         calibrationType = self.getPropertyValue('DetectorEfficiencyCalibration')
         normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation')
         tmp_name = 'det_eff'
@@ -806,6 +807,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 progress.report()
                 if self._user_method != 'None':
                     component_ws = self._component_separation(ws)
+                else:
+                    component_ws = ''
                 progress.report()
                 if process == 'Vanadium':
                     self._output_vanadium(ws, self._sampleGeometry['n_atoms'].value)
