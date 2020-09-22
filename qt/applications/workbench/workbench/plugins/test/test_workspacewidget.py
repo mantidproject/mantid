@@ -78,6 +78,12 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         self.ws_widget._do_plot_spectrum([self.ws_names[0]], False, False)
         mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False, advanced=False)
 
+    @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
+    def test_plot_with_1d_mdhistoworkspace(self, mock_plot_from_names):
+        self.ws_widget._do_plot_1d_md([self.ws_names[0]], False, False)
+        print(f'DEBUG: mock_plot_from_names: {mock_plot_from_names} of type {type(mock_plot_from_names)}')
+        mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False, advanced=False)
+
     @mock.patch('workbench.plugins.workspacewidget.pcolormesh', autospec=True)
     def test_plot_with_plot_colorfill(self, mock_plot_colorfill):
         self.ws_widget._do_plot_colorfill([self.ws_names[0]])
