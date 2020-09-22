@@ -101,6 +101,10 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
           SLOT(selectMultipleMasks(QRect)));
   connect(drawController, SIGNAL(finishSelection(QRect)), this,
           SIGNAL(shapeChangeFinished()));
+  connect(drawController, SIGNAL(copySelectedShapes()), &m_maskShapes,
+          SLOT(copySelectedShapes()));
+  connect(drawController, SIGNAL(pasteCopiedShapes()), &m_maskShapes,
+          SLOT(pasteCopiedShapes()));
 
   InputControllerDrawAndErase *freeDrawController =
       new InputControllerDrawAndErase(this);
