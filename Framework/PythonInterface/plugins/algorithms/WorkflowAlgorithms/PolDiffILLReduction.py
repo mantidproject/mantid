@@ -649,6 +649,15 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _detector_efficiency_correction(self, ws, component_ws):
         """Corrects detector efficiency and normalises data to either vanadium, incoherent scattering, or paramagnetic scattering."""
+
+        nMeasurements = 0
+        if self._method_data_structure == '10p':
+            nMeasurements = 10
+        elif self._method_data_structure == 'XYZ':
+            nMeasurements = 6
+        elif self._method_data_structure == 'Uniaxial':
+            nMeasurements = 2
+
         if component_ws:
             conjoined_components = self._conjoin_components(component_ws)
         calibrationType = self.getPropertyValue('DetectorEfficiencyCalibration')
@@ -708,9 +717,15 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             GroupWorkspaces(tmp_names, OutputWorkspace='det_efficiency')
 
+        single_efficiency_per_POL = False
+        if mtd[ws].getNumberOfEntries() != mtd['det_efficiency'].getNumberOfEntries():
+            single_efficiency_per_POL = True
         for entry_no, entry in enumerate(mtd[ws]):
+            det_eff_entry_no = entry_no
+            if single_efficiency_per_POL:
+                det_eff_entry_no = det_eff_entry_no % nMeasurements
             Multiply(LHSWorkspace=entry,
-                     RHSWorkspace=mtd['det_efficiency'].getItem(entry_no),
+                     RHSWorkspace=mtd['det_efficiency'].getItem(det_eff_entry_no),
                      OutputWorkspace=entry)
         return ws
 
@@ -806,6 +821,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if self.getPropertyValue('SampleGeometry') != 'None' and self._mode != 'TOF':
                     self._apply_self_attenuation_correction(ws, container_ws)
                 progress.report()
+                if self.getProperty('AverageScan').value:
+                    self._merge_polarisations(ws, average_detectors=True)
                 if self._user_method != 'None':
                     component_ws = self._component_separation(ws)
                 else:
