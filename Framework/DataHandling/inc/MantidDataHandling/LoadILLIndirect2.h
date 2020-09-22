@@ -44,6 +44,7 @@ private:
   void initWorkSpace();
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
+  std::string getDataPath(NeXus::NXEntry &entry);
   void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry);
   void loadDiffractionData(NeXus::NXEntry &entry);
