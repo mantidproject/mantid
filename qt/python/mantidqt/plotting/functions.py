@@ -75,6 +75,33 @@ def current_figure_or_none():
         return None
 
 
+def plot_md_ws_from_names(names, errors, overplot, fig=None):
+    """
+    Given a list of names of 1-dimensional IMDHistoWorkspaces and plot
+
+    :param names:
+    :param errors:
+    :param overplot:
+    :param fig:
+    :return: The figure containing the plot or None if selection was cancelled
+    """
+    from mantid.api import IMDHistoWorkspace
+
+    print(f'[DEBUG from_1d_md_names()] plot workspaces {names}')
+
+    # Get workspaces
+    workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
+
+    # Check input workspace type
+    for ws in workspaces:
+        if not isinstance(ws, IMDHistoWorkspace):
+            raise RuntimeError(f'Workspace {str(ws)} is {type(ws)} but not an IMDHistoWorkspace')
+
+    # Plot for various cases
+    if len(workspaces) > 0:
+        return plot(workspaces, errors=errors, overplot=overplot, fig=fig)
+
+
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False):
     """
     Given a list of names of workspaces, raise a dialog asking for the
@@ -88,16 +115,9 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     :param advanced: If true then the advanced options will be shown in the spectra selector dialog.
     :return: The figure containing the plot or None if selection was cancelled
     """
-    from mantid.api import IMDHistoWorkspace
-    print(f'[DEBUG from_from_names()] plot workspaces {names}, advanced = {advanced}')
-
+    # Get workspaces from ADS with names
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
 
-    # Separate MatrixWorkspaces and IMDHistoWorkspace
-    md_ws_list = list()
-    for ws in workspaces:
-        if isinstance(ws, IMDHistoWorkspace):
-            md_ws_list.append(ws)
     try:
         # Get selected spectra from all MatrixWorkspaces
         print(f'[DEBUG] Get spectra selection: {workspaces}')
@@ -106,10 +126,6 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
         selection = None
-
-    # Plot for various cases
-    if len(md_ws_list) > 0:
-        return plot(md_ws_list)
 
     if selection is None:
         return None

@@ -12,7 +12,7 @@ from unittest import mock
 
 import matplotlib as mpl
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace,
-                              GroupWorkspaces, CreateSingleValuedWorkspace)
+                              GroupWorkspaces, CreateSingleValuedWorkspace, CreateMDHistoWorkspace)
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from qtpy.QtWidgets import QMainWindow
@@ -39,8 +39,17 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         table_ws = CreateEmptyTableWorkspace()
         group_ws = GroupWorkspaces([mat_ws, table_ws])
         single_val_ws = CreateSingleValuedWorkspace(5, 6)
-        self.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws]
-        self.ws_names = ['MatWS', 'TableWS', 'GroupWS', 'SingleValWS']
+        # create md workspace
+        md_ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,2,1',
+                                       ErrorInput='1,1,1,1,1,1',
+                                       Dimensionality=3,
+                                       Extents='-1,1,-1,1,0.5,6.5',
+                                       NumberOfBins='1,1,6',
+                                       Names='x,y,|Q|',
+                                       Units='mm,km,AA^-1',
+                                       OutputWorkspace='MDHistoWS1D')
+        self.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws, md_ws]
+        self.ws_names = ['MatWS', 'TableWS', 'GroupWS', 'SingleValWS', 'MDHistoWS1D']
         for ws_name, ws in zip(self.ws_names, self.w_spaces):
             self.ws_widget._ads.add(ws_name, ws)
 
@@ -78,11 +87,11 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         self.ws_widget._do_plot_spectrum([self.ws_names[0]], False, False)
         mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False, advanced=False)
 
-    @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
-    def test_plot_with_1d_mdhistoworkspace(self, mock_plot_from_names):
+    @mock.patch('workbench.plugins.workspacewidget.plot_md_ws_from_names', autospec=True)
+    def test_plot_with_1d_mdhistoworkspace(self, mock_plot_md_from_names):
         self.ws_widget._do_plot_1d_md([self.ws_names[0]], False, False)
-        print(f'DEBUG: mock_plot_from_names: {mock_plot_from_names} of type {type(mock_plot_from_names)}')
-        mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False, advanced=False)
+        print(f'DEBUG: mock_plot_from_names: {mock_plot_md_from_names} of type {type(mock_plot_md_from_names)}')
+        mock_plot_md_from_names.assert_called_once_with([self.ws_names[4]], False, False)
 
     @mock.patch('workbench.plugins.workspacewidget.pcolormesh', autospec=True)
     def test_plot_with_plot_colorfill(self, mock_plot_colorfill):
