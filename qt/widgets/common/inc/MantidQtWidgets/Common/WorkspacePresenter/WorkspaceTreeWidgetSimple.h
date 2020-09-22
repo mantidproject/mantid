@@ -60,9 +60,10 @@ signals:
   void plotContourClicked(const QStringList &workspaceNames);
 
   void workspaceDoubleClicked(const QString &workspaceName);
-  void treeSelectionChanged();
+  void treeSelectionChanged(const QString &workspaceName);
 
-  void plotMDHistoClicked(const QString &workspaceName);
+  // Signal when plot MDHistogram clicked
+  void plotMDHistoClicked(const QStringList &workspaceNames);
 
 private slots:
   void onPlotSpectrumClicked();
@@ -81,6 +82,7 @@ private slots:
   void onPlotSurfaceClicked();
   void onPlotWireframeClicked();
   void onPlotContourClicked();
+  void onPlotMDHistoWorkspaceClicked();  // Linked to plotMDHistoClicked
 
 private:
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum,

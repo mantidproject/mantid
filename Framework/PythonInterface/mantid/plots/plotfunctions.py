@@ -421,29 +421,9 @@ def _do_single_plot_mdhisto_workspace(ax, workspaces, errors=False):
                                f'equal to {num_dim} but not 1.')
 
         # Plot
-        plot_fn(ws)
-    #
-    #
-    #
-    # if True:
-    #     ax.plot(workspace)
-    #     return
-    #
-    # # Get X and Y to plot
-    # dim_x = workspace.getXDimension()
-    # bins = np.arange(dim_x.getNBoundaries()) * dim_x.getBinWidth() + dim_x.getMinimum()
-    # vec_x = 0.5 * (bins[1:] + bins[:-1])
-    # vec_y = workspace.getSignalArray()
-    #
-    # label_x = dim_x.getName()
-    # label_y = 'Signal'
-    #
-    #
-    #
-    # # Plot
-    # ax.set_xlabel(label_x)
-    # ax.set_ylabel(label_y)
-    # plot_fn(vec_x, vec_y)
+        plot_fn(ws, label=str(ws))
+        # set label is not implemented
+
     # Legend
     ax.make_legend()
 
