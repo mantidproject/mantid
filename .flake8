@@ -25,7 +25,7 @@ exclude =
     Testing/PerformanceTests,
     Testing/SystemTests/lib,
     Testing/SystemTests/scripts,
-    Testing/SystemTests/tests/analysis/reference,
+    Testing/SystemTests/tests/framework/reference,
     Testing/Tools,
     scripts/Interface/ui/dataprocessorinterface,
 

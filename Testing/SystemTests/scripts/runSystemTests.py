@@ -36,7 +36,7 @@ def kill_children(processes):
 def main():
     info = [
         "This program will configure mantid run all of the system tests located in",
-        "the 'tests/analysis' directory.",
+        "the 'tests/<sub_dir>' directory.",
         "This program will create a temporary 'Mantid.user.properties' file which",
         "it will rename to 'Mantid.user.properties.systest' upon completion. The",
         "current version of the code does not print to stdout while the test is",
