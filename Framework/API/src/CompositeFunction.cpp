@@ -609,7 +609,7 @@ void CompositeFunction::replaceFunction(size_t functionIndex,
 
   // Modify function parameter and attribute indices:
   replaceVariableIndexRange(m_IFunction, np_old, np_new, functionIndex);
-  replaceVariableIndexRange(m_attributeIndex, at_old, at_new,functionIndex);
+  replaceVariableIndexRange(m_attributeIndex, at_old, at_new, functionIndex);
 
   // Decrement attribute and parameter counts
   size_t dnp = np_new - np_old;

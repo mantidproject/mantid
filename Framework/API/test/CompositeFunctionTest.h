@@ -1395,7 +1395,6 @@ public:
     TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
     TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.GaussAttribute");
     TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.CubicAttribute");
-
   }
 
   void test_replace_function_correctly_adds_attributes() {
@@ -1404,7 +1403,6 @@ public:
     auto background = std::make_shared<Linear<true>>();
     auto cubic = std::make_shared<Cubic<true>>();
     auto gaussWithAttributes = std::make_shared<Gauss<true>>();
-
 
     mfun->addFunction(background);
     mfun->addFunction(gauss);
@@ -1422,6 +1420,5 @@ public:
     TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.LinearAttribute");
     TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.GaussAttribute");
     TS_ASSERT_EQUALS(mfun->attributeName(3), "f2.CubicAttribute");
-
   }
 };
