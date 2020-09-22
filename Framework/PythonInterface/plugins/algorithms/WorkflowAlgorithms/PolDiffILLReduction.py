@@ -108,15 +108,17 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='The output workspace based on the value of ProcessAs.')
 
-        sample = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Sample')
+        absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Absorber')
 
-        transmission = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Transmission')
+        beam = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Beam')
 
         container = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Container')
 
-        absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Absorber')
+        sample = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Sample')
 
         quartz = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Quartz')
+
+        transmission = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Transmission')
 
         vanadium = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Vanadium')
 
@@ -146,7 +148,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The name of the cadmium transmission input workspace.')
 
-        self.setPropertySettings('CadmiumTransmissionInputWorkspace', transmission)
+        self.setPropertySettings('CadmiumTransmissionInputWorkspace', EnabledWhenProperty(transmission, beam, LogicOperator.Or))
 
         self.declareProperty(MatrixWorkspaceProperty('TransmissionInputWorkspace', '',
                                                      direction=Direction.Input,
@@ -317,7 +319,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _normalise(self, ws):
         """Normalises the provided WorkspaceGroup to the monitor 1."""
-        monID = 100000
+        monID = 100000 # monitor 1
         monitor_indices = "{},{}".format(mtd[ws].getItem(0).getNumberHistograms()-2,
                                          mtd[ws].getItem(0).getNumberHistograms()-1)
         for entry_no, entry in enumerate(mtd[ws]):
@@ -333,27 +335,20 @@ class PolDiffILLReduction(PythonAlgorithm):
                 DeleteWorkspace(mon)
         return ws
 
-    def _calculate_transmission(self, ws, ws_beam, ws_cadmium):
+    def _calculate_transmission(self, ws, beam_ws, cadmium_ws):
         """Calculates transmission based on the measurement of the current sample, empty beam, and cadmium."""
         # extract Monitor2 values
-        monID = 100001
+        monID = 100001 # monitor 2
+        if cadmium_ws: # remove cadmium from the current transmission measurement if cadmium_ws is defined
+            Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
         mon = ws + '_mon'
         ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
         if 0 in mtd[mon].getItem(0).readY(0):
             raise RuntimeError('Cannot calculate transmission; monitor has 0 counts.')
-        beam_mon = ws_beam + '_mon'
-        ExtractSpectra(InputWorkspace=ws_beam, DetectorList=monID, OutputWorkspace=beam_mon)
-        if 0 in mtd[beam_mon].readY(0):
+        if 0 in mtd[beam_ws].readY(0):
             raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
-        cadmium_mon = ws_cadmium + '_mon'
-        ExtractSpectra(InputWorkspace=ws_cadmium, DetectorList=monID, OutputWorkspace=cadmium_mon)
-        if 0 in mtd[beam_mon].readY(0):
-            raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
-        else:
-            Divide(LHSWorkspace=mtd[mon]-mtd[cadmium_mon], RHSWorkspace=mtd[beam_mon]-mtd[cadmium_mon], OutputWorkspace=ws)
-            DeleteWorkspace(mon)
-            DeleteWorkspace(beam_mon)
-            DeleteWorkspace(cadmium_mon)
+        Divide(LHSWorkspace=mon, RHSWorkspace=beam_ws, OutputWorkspace=ws)
+        DeleteWorkspace(mon)
         return ws
 
     def _subtract_background(self, ws, container_ws, transmission_ws):
@@ -750,14 +745,20 @@ class PolDiffILLReduction(PythonAlgorithm):
         self._user_method = self.getPropertyValue('ComponentSeparationMethod')
         self._figure_measurement_method(ws)
         progress.report()
-        if process in ['Transmission']:
+        if process in ['Beam']:
+            cadmium_ws = self.getPropertyValue('CadmiumTransmissionInputWorkspace')
+            if cadmium_ws:
+                Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
+            monID = 100001 # monitor 2
+            ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
+        elif process in ['Transmission']:
             beam_ws = self.getPropertyValue('BeamInputWorkspace')
             cadmium_ws = self.getPropertyValue('CadmiumTransmissionInputWorkspace')
             self._calculate_transmission(ws, beam_ws, cadmium_ws)
             progress.report()
         elif process not in ['Beam']:
             self._normalise(ws)
-
+            progress.report()
         if process in ['Quartz', 'Vanadium', 'Sample']:
             if not self.getProperty('ContainerInputWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
                 # Subtracts background if the workspaces for container and transmission are provided
