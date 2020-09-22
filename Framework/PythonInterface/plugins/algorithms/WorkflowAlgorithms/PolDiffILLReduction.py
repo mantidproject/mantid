@@ -423,10 +423,26 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _apply_polarization_corrections(self, ws, pol_eff_ws):
         """Applies the polarisation correction based on the output from quartz reduction."""
         fp = 1 # flipper efficiency, placeholder
+        nPolarisations = None
+        singleCorrectionPerPOL = False
+        if mtd[ws].getNumberOfEntries() != mtd[pol_eff_ws].getNumberOfEntries():
+            singleCorrectionPerPOL = True
+            if self._method_data_structure == 'Uniaxial':
+                nPolarisations = 2
+            elif self._method_data_structure == 'XYZ':
+                nPolarisations = 3
+            elif self._method_data_structure == '10p':
+                nPolarisations = 5
+            if mtd[pol_eff_ws].getNumberOfEntries() != nPolarisations:
+               raise RuntimeError("Incompatible number of polarisations between quartz input and sample.")
+
         for entry_no in range(mtd[ws].getNumberOfEntries()):
             if entry_no % 2 != 0:
                 continue
-            phi = mtd[pol_eff_ws].getItem(int(entry_no/2)).name()
+            polarisation_entry_no = int(entry_no/2)
+            if singleCorrectionPerPOL:
+                polarisation_entry_no = int(polarisation_entry_no % nPolarisations)
+            phi = mtd[pol_eff_ws].getItem(polarisation_entry_no).name()
             intensity_0 = mtd[ws].getItem(entry_no).name()
             intensity_1 = mtd[ws].getItem(entry_no+1).name()
             tmp_names = [intensity_0 + '_tmp', intensity_1 + '_tmp']
