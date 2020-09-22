@@ -81,7 +81,7 @@ inline bool operator<(const TrackDirection left, const TrackDirection right) {
 }
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
-                                             TrackDirection direction);
+                                             const TrackDirection &direction);
 
 /**
  * Stores a point of intersection along a track. The component intersected

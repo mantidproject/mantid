@@ -400,9 +400,9 @@ CSGObject::CSGObject() : CSGObject("") {}
  *  @param shapeXML : string with original shape xml.
  */
 CSGObject::CSGObject(const std::string &shapeXML)
-    : TopRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
-      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), ObjNum(0),
-      m_handler(), bGeometryCaching(false),
+    : m_topRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0),
+      AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
+      m_objNum(0), m_handler(), bGeometryCaching(false),
       vtkCacheReader(std::shared_ptr<vtkGeometryCacheReader>()),
       vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
@@ -423,7 +423,7 @@ CSGObject::CSGObject(const CSGObject &A) : CSGObject() { *this = A; }
  */
 CSGObject &CSGObject::operator=(const CSGObject &A) {
   if (this != &A) {
-    TopRule = (A.TopRule) ? A.TopRule->clone() : nullptr;
+    m_topRule = (A.m_topRule) ? A.m_topRule->clone() : nullptr;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
     AABBzMax = A.AABBzMax;
@@ -431,7 +431,7 @@ CSGObject &CSGObject::operator=(const CSGObject &A) {
     AABByMin = A.AABByMin;
     AABBzMin = A.AABBzMin;
     boolBounded = A.boolBounded;
-    ObjNum = A.ObjNum;
+    m_objNum = A.m_objNum;
     m_handler = A.m_handler->clone();
     bGeometryCaching = A.bGeometryCaching;
     vtkCacheReader = A.vtkCacheReader;
@@ -440,7 +440,7 @@ CSGObject &CSGObject::operator=(const CSGObject &A) {
     m_id = A.m_id;
     m_material = std::make_unique<Material>(A.material());
 
-    if (TopRule)
+    if (m_topRule)
       createSurfaceList();
   }
   return *this;
@@ -469,30 +469,30 @@ const Kernel::Material &CSGObject::material() const {
 /**
  * Returns whether this object has a valid shape
  * @returns True if the surface list is populated and there is a
- * defined TopRule, false otherwise.
+ * defined m_topRule, false otherwise.
  */
 bool CSGObject::hasValidShape() const {
-  // Assume invalid shape if object has no 'TopRule' or surfaces
-  return (TopRule != nullptr && !m_SurList.empty());
+  // Assume invalid shape if object has no 'm_topRule' or surfaces
+  return (m_topRule != nullptr && !m_SurList.empty());
 }
 
 /**
  * Object line ==  cell
- * @param ON :: Object name
+ * @param objName :: Object name
  * @param Ln :: Input string must be :  {rules}
  * @returns 1 on success and zero on failure
  */
-int CSGObject::setObject(const int ON, const std::string &Ln) {
+int CSGObject::setObject(const int objName, const std::string &lineStr) {
   // Split line
   // Does the string now contain junk...
   static const boost::regex letters("[a-zA-Z]");
-  if (Mantid::Kernel::Strings::StrLook(Ln, letters))
+  if (Mantid::Kernel::Strings::StrLook(lineStr, letters))
     return 0;
 
-  if (procString(Ln)) // this currently does not fail:
+  if (procString(lineStr)) // this currently does not fail:
   {
     m_SurList.clear();
-    ObjNum = ON;
+    m_objNum = objName;
     return 1;
   }
 
@@ -503,7 +503,7 @@ int CSGObject::setObject(const int ON, const std::string &Ln) {
 /**
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
- * @return Cell String (from TopRule)
+ * @return Cell String (from m_topRule)
  * @todo Break infinite recusion
  */
 void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
@@ -515,7 +515,7 @@ void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
 /**
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
- * @return Cell String (from TopRule)
+ * @return Cell String (from m_topRule)
  * @todo Break infinite recusion
  */
 std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
@@ -551,13 +551,13 @@ std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
  * Calcluate if there are any complementary components in
  * the object. That is lines with #(....)
  * @throw ColErr::ExBase :: Error with processing
- * @param Ln :: Input string must:  ID Mat {Density}  {rules}
- * @param Cnum :: Number for cell since we don't have one
+ * @param lineStr :: Input string must:  ID Mat {Density}  {rules}
+ * @param cellNum :: Number for cell since we don't have one
  * @retval 0 on no work to do
  * @retval 1 :: A (maybe there are many) #(...) object found
  */
-int CSGObject::complementaryObject(const int Cnum, std::string &Ln) {
-  std::string::size_type posA = Ln.find("#(");
+int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
+  std::string::size_type posA = lineStr.find("#(");
   // No work to do ?
   if (posA == std::string::npos)
     return 0;
@@ -566,28 +566,28 @@ int CSGObject::complementaryObject(const int Cnum, std::string &Ln) {
   // First get the area to be removed
   int brackCnt;
   std::string::size_type posB;
-  posB = Ln.find_first_of("()", posA);
+  posB = lineStr.find_first_of("()", posA);
   if (posB == std::string::npos)
-    throw std::runtime_error("Object::complement :: " + Ln);
+    throw std::runtime_error("Object::complement :: " + lineStr);
 
-  brackCnt = (Ln[posB] == '(') ? 1 : 0;
+  brackCnt = (lineStr[posB] == '(') ? 1 : 0;
   while (posB != std::string::npos && brackCnt) {
-    posB = Ln.find_first_of("()", posB);
+    posB = lineStr.find_first_of("()", posB);
     if (posB == std::string::npos)
       break;
-    brackCnt += (Ln[posB] == '(') ? 1 : -1;
+    brackCnt += (lineStr[posB] == '(') ? 1 : -1;
     posB++;
   }
 
-  std::string Part = Ln.substr(posA, posB - (posA + 1));
+  std::string Part = lineStr.substr(posA, posB - (posA + 1));
 
-  ObjNum = Cnum;
+  m_objNum = cellNum;
   if (procString(Part)) {
     m_SurList.clear();
-    Ln.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
+    lineStr.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
     std::ostringstream CompCell;
-    CompCell << Cnum << " ";
-    Ln.insert(posA - 1, CompCell.str());
+    CompCell << cellNum << " ";
+    lineStr.insert(posA - 1, CompCell.str());
     return 1;
   }
 
@@ -602,21 +602,22 @@ int CSGObject::complementaryObject(const int Cnum, std::string &Ln) {
  */
 int CSGObject::hasComplement() const {
 
-  if (TopRule)
-    return TopRule->isComplementary();
+  if (m_topRule)
+    return m_topRule->isComplementary();
   return 0;
 }
 
 /**
  * Goes through the cell objects and adds the pointers
  * to the SurfPoint keys (using their keyN)
- * @param Smap :: Map of surface Keys and Surface Pointers
+ * @param surfMap :: Map of surface Keys and Surface Pointers
  * @retval 1000+ keyNumber :: Error with keyNumber
  * @retval 0 :: successfully populated all the whole Object.
  */
-int CSGObject::populate(const std::map<int, std::shared_ptr<Surface>> &Smap) {
+int CSGObject::populate(
+    const std::map<int, std::shared_ptr<Surface>> &surfMap) {
   std::deque<Rule *> Rst;
-  Rst.emplace_back(TopRule.get());
+  Rst.emplace_back(m_topRule.get());
   while (!Rst.empty()) {
     Rule *T1 = Rst.front();
     Rst.pop_front();
@@ -625,8 +626,8 @@ int CSGObject::populate(const std::map<int, std::shared_ptr<Surface>> &Smap) {
       auto *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV) {
         // Ensure that we have a it in the surface list:
-        auto mf = Smap.find(KV->getKeyN());
-        if (mf != Smap.end()) {
+        auto mf = surfMap.find(KV->getKeyN());
+        if (mf != surfMap.end()) {
           KV->setKey(mf->second);
         } else {
           throw Kernel::Exception::NotFoundError("Object::populate",
@@ -649,18 +650,18 @@ int CSGObject::populate(const std::map<int, std::shared_ptr<Surface>> &Smap) {
 }
 
 /**
- * This takes a string Ln, finds the first two
+ * This takes a string lineStr, finds the first two
  * Rxxx function, determines their join type
  * make the rule,  adds to vector then removes two old rules from
  * the vector, updates string
- * @param Ln :: String to porcess
- * @param Rlist :: Map of rules (added to)
+ * @param lineStr :: String to process
+ * @param ruleMap :: Map of rules (added to)
  * @param compUnit :: Last computed unit
  * @retval 0 :: No rule to find
  * @retval 1 :: A rule has been combined
  */
-int CSGObject::procPair(std::string &Ln,
-                        std::map<int, std::unique_ptr<Rule>> &Rlist,
+int CSGObject::procPair(std::string &lineStr,
+                        std::map<int, std::unique_ptr<Rule>> &ruleMap,
                         int &compUnit) const
 
 {
@@ -668,71 +669,75 @@ int CSGObject::procPair(std::string &Ln,
   unsigned int Rend;
   int Ra, Rb;
 
-  for (Rstart = 0; Rstart < Ln.size() && Ln[Rstart] != 'R'; Rstart++)
+  for (Rstart = 0; Rstart < lineStr.size() && lineStr[Rstart] != 'R'; Rstart++)
     ;
 
   int type = 0; // intersection
 
   // plus 1 to skip 'R'
-  if (Rstart == Ln.size() ||
-      !Mantid::Kernel::Strings::convert(Ln.c_str() + Rstart + 1, Ra) ||
-      Rlist.find(Ra) == Rlist.end())
+  if (Rstart == lineStr.size() ||
+      !Mantid::Kernel::Strings::convert(lineStr.c_str() + Rstart + 1, Ra) ||
+      ruleMap.find(Ra) == ruleMap.end())
     return 0;
 
-  for (Rend = Rstart + 1; Rend < Ln.size() && Ln[Rend] != 'R'; Rend++) {
-    if (Ln[Rend] == ':')
+  for (Rend = Rstart + 1; Rend < lineStr.size() && lineStr[Rend] != 'R';
+       Rend++) {
+    if (lineStr[Rend] == ':')
       type = 1; // make union
   }
-  if (Rend == Ln.size() ||
-      !Mantid::Kernel::Strings::convert(Ln.c_str() + Rend + 1, Rb) ||
-      Rlist.find(Rb) == Rlist.end()) {
+  if (Rend == lineStr.size() ||
+      !Mantid::Kernel::Strings::convert(lineStr.c_str() + Rend + 1, Rb) ||
+      ruleMap.find(Rb) == ruleMap.end()) {
     // No second rule but we did find the first one
     compUnit = Ra;
     return 0;
   }
   // Get end of number (digital)
-  for (Rend++; Rend < Ln.size() && Ln[Rend] >= '0' && Ln[Rend] <= '9'; Rend++)
+  for (Rend++;
+       Rend < lineStr.size() && lineStr[Rend] >= '0' && lineStr[Rend] <= '9';
+       Rend++)
     ;
 
   // Get rules
-  auto RRA = std::move(Rlist[Ra]);
-  auto RRB = std::move(Rlist[Rb]);
+  auto RRA = std::move(ruleMap[Ra]);
+  auto RRB = std::move(ruleMap[Rb]);
   auto Join = (type) ? std::unique_ptr<Rule>(std::make_unique<Union>(
                            std::move(RRA), std::move(RRB)))
                      : std::unique_ptr<Rule>(std::make_unique<Intersection>(
                            std::move(RRA), std::move(RRB)));
-  Rlist[Ra] = std::move(Join);
-  Rlist.erase(Rlist.find(Rb));
+  ruleMap[Ra] = std::move(Join);
+  ruleMap.erase(ruleMap.find(Rb));
 
   // Remove space round pair
   int fb;
-  for (fb = Rstart - 1; fb >= 0 && Ln[fb] == ' '; fb--)
+  for (fb = Rstart - 1; fb >= 0 && lineStr[fb] == ' '; fb--)
     ;
   Rstart = (fb < 0) ? 0 : fb;
-  for (fb = Rend; fb < static_cast<int>(Ln.size()) && Ln[fb] == ' '; fb++)
+  for (fb = Rend; fb < static_cast<int>(lineStr.size()) && lineStr[fb] == ' ';
+       fb++)
     ;
   Rend = fb;
 
   std::stringstream cx;
   cx << " R" << Ra << " ";
-  Ln.replace(Rstart, Rend, cx.str());
+  lineStr.replace(Rstart, Rend, cx.str());
   compUnit = Ra;
   return 1;
 }
 
 /**
  * Takes a Rule item and makes it a complementary group
- * @param RItem :: to encapsulate
+ * @param ruleItem :: to encapsulate
  * @returns the complementary group
  */
 std::unique_ptr<CompGrp>
-CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
-  if (!RItem)
+CSGObject::procComp(std::unique_ptr<Rule> ruleItem) const {
+  if (!ruleItem)
     return std::make_unique<CompGrp>();
 
-  Rule *Pptr = RItem->getParent();
-  Rule *RItemptr = RItem.get();
-  auto CG = std::make_unique<CompGrp>(Pptr, std::move(RItem));
+  Rule *Pptr = ruleItem->getParent();
+  Rule *RItemptr = ruleItem.get();
+  auto CG = std::make_unique<CompGrp>(Pptr, std::move(ruleItem));
   if (Pptr) {
     const int Ln = Pptr->findLeaf(RItemptr);
     Pptr->setLeaf(std::move(CG), Ln);
@@ -792,18 +797,18 @@ bool CSGObject::isOnSide(const Kernel::V3D &point) const {
  * Determine if a point is valid by checking both
  * directions of the normal away from the line
  * A good point will have one valid and one invalid.
- * @param C :: Point on a basic surface to check
- * @param Nm :: Direction +/- to be checked
+ * @param point :: Point on a basic surface to check
+ * @param direction :: Direction +/- to be checked
  * @retval +1 ::  Point outlayer (ie not in object)
  * @retval -1 :: Point included (e.g at convex intersection)
  * @retval 0 :: success
  */
-int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
-                                 const Kernel::V3D &Nm) const {
+int CSGObject::checkSurfaceValid(const Kernel::V3D &point,
+                                 const Kernel::V3D &direction) const {
   int status(0);
-  Kernel::V3D tmp = C + Nm * (Kernel::Tolerance * 5.0);
+  Kernel::V3D tmp = point + direction * (Kernel::Tolerance * 5.0);
   status = (!isValid(tmp)) ? 1 : -1;
-  tmp -= Nm * (Kernel::Tolerance * 10.0);
+  tmp -= direction * (Kernel::Tolerance * 10.0);
   status += (!isValid(tmp)) ? 1 : -1;
   return status / 2;
 }
@@ -814,9 +819,9 @@ int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
  * @returns 1 if true and 0 if false
  */
 bool CSGObject::isValid(const Kernel::V3D &point) const {
-  if (!TopRule)
+  if (!m_topRule)
     return false;
-  return TopRule->isValid(point);
+  return m_topRule->isValid(point);
 }
 
 /**
@@ -825,9 +830,9 @@ bool CSGObject::isValid(const Kernel::V3D &point) const {
  * @returns 1 if true and 0 if false
  */
 bool CSGObject::isValid(const std::map<int, int> &SMap) const {
-  if (!TopRule)
+  if (!m_topRule)
     return false;
-  return TopRule->isValid(SMap);
+  return m_topRule->isValid(SMap);
 }
 
 /**
@@ -839,7 +844,7 @@ bool CSGObject::isValid(const std::map<int, int> &SMap) const {
 int CSGObject::createSurfaceList(const int outFlag) {
   m_SurList.clear();
   std::stack<const Rule *> TreeLine;
-  TreeLine.push(TopRule.get());
+  TreeLine.push(m_topRule.get());
   while (!TreeLine.empty()) {
     const Rule *tmpA = TreeLine.top();
     TreeLine.pop();
@@ -894,9 +899,9 @@ std::vector<int> CSGObject::getSurfaceIndex() const {
  * @return number of surfaces removes
  */
 int CSGObject::removeSurface(const int SurfN) {
-  if (!TopRule)
+  if (!m_topRule)
     return -1;
-  const int cnt = Rule::removeItem(TopRule, SurfN);
+  const int cnt = Rule::removeItem(m_topRule, SurfN);
   if (cnt)
     createSurfaceList();
   return cnt;
@@ -911,9 +916,9 @@ int CSGObject::removeSurface(const int SurfN) {
  */
 int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
                               const std::shared_ptr<Surface> &SPtr) {
-  if (!TopRule)
+  if (!m_topRule)
     return 0;
-  const int out = TopRule->substituteSurf(SurfN, NsurfN, SPtr);
+  const int out = m_topRule->substituteSurf(SurfN, NsurfN, SPtr);
   if (out)
     createSurfaceList();
   return out;
@@ -926,7 +931,7 @@ void CSGObject::print() const {
   std::deque<Rule *> Rst;
   std::vector<int> Cells;
   int Rcount(0);
-  Rst.emplace_back(TopRule.get());
+  Rst.emplace_back(m_topRule.get());
   Rule *TA, *TB; // Temp. for storage
 
   while (!Rst.empty()) {
@@ -948,7 +953,7 @@ void CSGObject::print() const {
     }
   }
 
-  logger.debug() << "Name == " << ObjNum << '\n';
+  logger.debug() << "Name == " << m_objNum << '\n';
   logger.debug() << "Rules == " << Rcount << '\n';
   std::vector<int>::const_iterator mc;
   logger.debug() << "Surface included == ";
@@ -962,16 +967,16 @@ void CSGObject::print() const {
  * Takes the complement of a group
  */
 void CSGObject::makeComplement() {
-  std::unique_ptr<Rule> NCG = procComp(std::move(TopRule));
-  TopRule = std::move(NCG);
+  std::unique_ptr<Rule> NCG = procComp(std::move(m_topRule));
+  m_topRule = std::move(NCG);
 }
 
 /**
  * Displays the rule tree
  */
 void CSGObject::printTree() const {
-  logger.debug() << "Name == " << ObjNum << '\n';
-  logger.debug() << TopRule->display() << '\n';
+  logger.debug() << "Name == " << m_objNum << '\n';
+  logger.debug() << m_topRule->display() << '\n';
 }
 
 /**
@@ -981,8 +986,8 @@ void CSGObject::printTree() const {
  */
 std::string CSGObject::cellCompStr() const {
   std::ostringstream cx;
-  if (TopRule)
-    cx << TopRule->display();
+  if (m_topRule)
+    cx << m_topRule->display();
   return cx.str();
 }
 
@@ -993,9 +998,9 @@ std::string CSGObject::cellCompStr() const {
  */
 std::string CSGObject::str() const {
   std::ostringstream cx;
-  if (TopRule) {
-    cx << ObjNum << " ";
-    cx << TopRule->display();
+  if (m_topRule) {
+    cx << m_objNum << " ";
+    cx << m_topRule->display();
   }
   return cx.str();
 }
@@ -1019,7 +1024,7 @@ void CSGObject::write(std::ostream &OX) const {
  * @returns 1 on success
  */
 int CSGObject::procString(const std::string &Line) {
-  TopRule = nullptr;
+  m_topRule = nullptr;
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0; // Current index (not necessary size of RuleList
   // SURFACE REPLACEMENT
@@ -1088,7 +1093,7 @@ int CSGObject::procString(const std::string &Line) {
   }
 
   if (RuleList.size() == 1) {
-    TopRule = std::move((RuleList.begin())->second);
+    m_topRule = std::move((RuleList.begin())->second);
   } else {
     throw std::logic_error("Object::procString() - Unexpected number of "
                            "surface rules found. Expected=1, found=" +
@@ -1642,7 +1647,7 @@ const BoundingBox &CSGObject::getBoundingBox() const {
 
   // If we don't know the extent of the object, the bounding box doesn't mean
   // anything
-  if (!TopRule) {
+  if (!m_topRule) {
     const_cast<CSGObject *>(this)->setNullBoundingBox();
     return m_boundingBox;
   }
@@ -1684,7 +1689,7 @@ const BoundingBox &CSGObject::getBoundingBox() const {
  */
 void CSGObject::calcBoundingBoxByRule() {
   // Must have a top rule for this to work
-  if (!TopRule)
+  if (!m_topRule)
     return;
 
   // Set up some unreasonable values that will be refined
@@ -1694,7 +1699,7 @@ void CSGObject::calcBoundingBoxByRule() {
   double maxX(huge), maxY(huge), maxZ(huge);
 
   // Try to use the Rule system to derive the box
-  TopRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  m_topRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
 
   // Check whether values are reasonable now. Rule system will fail to produce
   // a reasonable box if the shape is not axis-aligned.
@@ -1883,7 +1888,7 @@ void CSGObject::calcBoundingBoxByGeometry() {
  */
 void CSGObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                double &xmin, double &ymin, double &zmin) const {
-  if (!TopRule) { // If no rule defined then return zero boundbing box
+  if (!m_topRule) { // If no rule defined then return zero boundbing box
     xmax = ymax = zmax = xmin = ymin = zmin = 0.0;
     return;
   }
@@ -1894,8 +1899,8 @@ void CSGObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
     AABBxMin = xmin;
     AABByMin = ymin;
     AABBzMin = zmin;
-    TopRule->getBoundingBox(AABBxMax, AABByMax, AABBzMax, AABBxMin, AABByMin,
-                            AABBzMin);
+    m_topRule->getBoundingBox(AABBxMax, AABByMax, AABBzMax, AABBxMin, AABByMin,
+                              AABBzMin);
     if (AABBxMax >= xmax || AABBxMin <= xmin || AABByMax >= ymax ||
         AABByMin <= ymin || AABBzMax >= zmax || AABBzMin <= zmin)
       boolBounded = false;
