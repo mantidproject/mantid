@@ -82,7 +82,7 @@ private slots:
   void onPlotSurfaceClicked();
   void onPlotWireframeClicked();
   void onPlotContourClicked();
-  void onPlotMDHistoWorkspaceClicked();  // Linked to plotMDHistoClicked
+  void onPlotMDHistoWorkspaceClicked(); // Linked to plotMDHistoClicked
 
 private:
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum,

@@ -343,7 +343,7 @@ void WorkspaceTreeWidgetSimple::onPlotContourClicked() {
 
 // Define signal
 void WorkspaceTreeWidgetSimple::onPlotMDHistoWorkspaceClicked() {
-    emit plotMDHistoClicked(getSelectedWorkspaceNamesAsQList());
+  emit plotMDHistoClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets
