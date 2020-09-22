@@ -674,7 +674,6 @@ CompositeFunction::parseName(const std::string &varName) {
   if (i == std::string::npos) {
     throw std::invalid_argument("Variable " + varName + " not found.");
   } else {
-    std::string name;
     if (varName[0] != 'f')
       throw std::invalid_argument(
           "External function variable name must start with 'f'");
