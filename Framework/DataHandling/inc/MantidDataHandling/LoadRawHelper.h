@@ -20,6 +20,10 @@
 class ISISRAW;
 class ISISRAW2;
 
+namespace Poco {
+class Path;
+}
+
 namespace Mantid {
 namespace API {
 class SpectrumDetectorMapping;
@@ -242,16 +246,14 @@ private:
 
   /// Search for the log files in the workspace, and output their names as a
   /// set.
-  std::list<std::string> searchForLogFiles(const std::string &pathToRawFile);
+  std::list<std::string> searchForLogFiles(const Poco::Path &pathToRawFile);
   /// Extract the log name from the path to the specific log file.
   std::string extractLogName(const std::string &path);
-  /// Checks if the file is an ASCII file
-  bool isAscii(const std::string &filename);
   /// if  alternate data stream named checksum exists for the raw file
-  bool adsExists(const std::string &pathToFile);
+  bool hasAlternateDataStream(const Poco::Path &pathToFile);
   /// returns the list of log files from ADS checksum
   std::set<std::string>
-  getLogFilenamesfromADS(const std::string &pathToRawFile);
+  logFilesFromAlternateDataStream(const Poco::Path &pathToRawFile);
 };
 
 } // namespace DataHandling
