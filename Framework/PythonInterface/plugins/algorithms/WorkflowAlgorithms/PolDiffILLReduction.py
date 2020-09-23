@@ -437,7 +437,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         fp = 1 # flipper efficiency, placeholder
         nPolarisations = None
         singleCorrectionPerPOL = False
-        if mtd[ws].getNumberOfEntries() != mtd[pol_eff_ws].getNumberOfEntries():
+        if mtd[ws].getNumberOfEntries() != 2*mtd[pol_eff_ws].getNumberOfEntries():
             singleCorrectionPerPOL = True
             if self._method_data_structure == 'Uniaxial':
                 nPolarisations = 2
@@ -477,9 +477,10 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
          such as the beam size and calculates derived parameters."""
         self._sampleGeometry = self.getProperty('SamplePropertiesDictionary').value
-        self._sampleGeometry['n_atoms'] = float(self._sampleGeometry['number_density'].value) \
-            * float(self._sampleGeometry['mass'].value) \
-            / float(self._sampleGeometry['density'].value)
+        if 'n_atoms' not in self._sampleGeometry:
+            self._sampleGeometry['n_atoms'] = float(self._sampleGeometry['number_density'].value) \
+                * float(self._sampleGeometry['mass'].value) \
+                / float(self._sampleGeometry['density'].value)
 
     def _enforce_uniform_units(self, origin_ws, target_ws):
         for entry_tuple in zip(mtd[origin_ws], mtd[target_ws]):
@@ -519,15 +520,14 @@ class PolDiffILLReduction(PythonAlgorithm):
                 kwargs['ContainerOuterRadius'] = self._sampleGeometry['container_outer_radius'].value
 
         self._enforce_uniform_units(sample_ws, container_ws)
-
         if geometry_type == 'Custom':
             raise RuntimeError('Custom geometry treatment has not been implemented yet.')
         else:
             for entry_no, entry in enumerate(mtd[sample_ws]):
                 correction_ws = '{}_corr'.format(geometry_type)
-                if ( (self._user_method == 'Uniaxial' and entry_no % 2 == 0)
-                     or (self._user_method == 'XYZ' and entry_no % 6 == 0)
-                     or (self._user_method == '10p' and entry_no % 10 == 0) ):
+                if ( (self._method_data_structure == 'Uniaxial' and entry_no % 2 == 0)
+                     or (self._method_data_structure == 'XYZ' and entry_no % 6 == 0)
+                     or (self._method_data_structure == '10p' and entry_no % 10 == 0) ):
                     PaalmanPingsMonteCarloAbsorption(SampleWorkspace=entry,
                                                      Shape=geometry_type,
                                                      CorrectionsWorkspace=correction_ws,
