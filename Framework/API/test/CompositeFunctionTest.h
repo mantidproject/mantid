@@ -1321,8 +1321,7 @@ public:
     mfun->addFunction(background);
     mfun->addFunction(cubic);
 
-    std::string str = "composite=CompositeFunction,NumDeriv=false;";
-    str += "name=Gauss,GaussAttribute=Gauss,c=0,h=1,s=1;";
+    std::string str = "name=Gauss,GaussAttribute=Gauss,c=0,h=1,s=1;";
     str += "name=Linear,LinearAttribute=Linear,a=0,b=0;";
     str += "name=Cubic,CubicAttribute=Cubic,c0=0,c1=0,c2=0,c3=0";
 
