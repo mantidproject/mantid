@@ -337,34 +337,34 @@ class DrillModel(QObject):
                 of them uses the setting name as key. The type is a str:
                 "file", "workspace", "combobox", "bool" or "string".
         """
-        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
-        alg.initialize()
-
         types = dict()
         values = dict()
         docs = dict()
-        for s in self.settings:
-            p = alg.getProperty(s)
-            if (isinstance(p, FileProperty)):
-                t = "file"
-            elif (isinstance(p, MultipleFileProperty)):
-                t = "files"
-            elif ((isinstance(p, WorkspaceGroupProperty))
-                  or (isinstance(p, MatrixWorkspaceProperty))):
-                t = "workspace"
-            elif (isinstance(p, StringPropertyWithValue)):
-                if (p.allowedValues):
-                    t = "combobox"
+        if self.algorithm:
+            alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+            alg.initialize()
+            for s in self.settings:
+                p = alg.getProperty(s)
+                if (isinstance(p, FileProperty)):
+                    t = "file"
+                elif (isinstance(p, MultipleFileProperty)):
+                    t = "files"
+                elif ((isinstance(p, WorkspaceGroupProperty))
+                      or (isinstance(p, MatrixWorkspaceProperty))):
+                    t = "workspace"
+                elif (isinstance(p, StringPropertyWithValue)):
+                    if (p.allowedValues):
+                        t = "combobox"
+                    else:
+                        t = "string"
+                elif (isinstance(p, BoolPropertyWithValue)):
+                    t = "bool"
                 else:
                     t = "string"
-            elif (isinstance(p, BoolPropertyWithValue)):
-                t = "bool"
-            else:
-                t = "string"
 
-            types[s] = t
-            values[s] = p.allowedValues
-            docs[s] = p.documentation
+                types[s] = t
+                values[s] = p.allowedValues
+                docs[s] = p.documentation
 
         return (types, values, docs)
 
@@ -373,6 +373,8 @@ class DrillModel(QObject):
         Set the settings to their defautl values. This method takes the default
         values directly from the algorithm.
         """
+        if not self.algorithm:
+            return
         alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
         alg.initialize()
 
