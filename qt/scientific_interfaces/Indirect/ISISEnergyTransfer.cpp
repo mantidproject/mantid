@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 #include "IndirectDataValidationHelper.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -144,8 +143,13 @@ double loadSampleLog(std::string const &filename,
   auto loader = loadAlgorithm(filename, temporaryWorkspace);
   loader->execute();
 
-  return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames,
-                      defaultValue);
+  if (doesExistInADS(temporaryWorkspace)) {
+
+    return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames,
+                        defaultValue);
+  } else {
+    return -1;
+  }
 }
 
 void convertSpectrumAxis(std::string const &inputWorkspace,
