@@ -479,7 +479,7 @@ bool CSGObject::hasValidShape() const {
 /**
  * Object line ==  cell
  * @param objName :: Object name
- * @param Ln :: Input string must be :  {rules}
+ * @param lineStr :: Input string must be :  {rules}
  * @returns 1 on success and zero on failure
  */
 int CSGObject::setObject(const int objName, const std::string &lineStr) {
