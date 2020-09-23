@@ -78,7 +78,7 @@ Bug fixes
 - Fixed an issue where Muon Analysis and Frequency Domain Analysis was not correctly resetting DeadTime property to default when a user changes the instrument
 - Fixed issue where select data was incorrectly enabling.
 - Fixed a bug in simultaneous TF asymmetry mode fitting, which would cause a crash when the run was incremented. Note that currently the single fitting tab will not update with the new normalization constants after a new run is loaded.
-- Fixed a bug were fitting in TF asymmetry mode for group data, then switching instrument and loading pair data would cause mantid to crash
+- Fixed a bug were fitting in TF asymmetry mode for group data, then switching instrument and loading pair data would cause mantid to crash.
 
 ALC
 ###

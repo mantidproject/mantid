@@ -609,9 +609,6 @@ class FittingTabPresenter(object):
             return []
 
     def instrument_changed(self):
-        self.deactivate_tf_asymmetry()
-
-    def deactivate_tf_asymmetry(self):
         self.view.tf_asymmetry_mode = False
 
     def _get_selected_groups_and_pairs(self):
