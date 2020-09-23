@@ -263,6 +263,15 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('IncoherentCrossSection', EnabledWhenProperty(incoherent, absoluteNormalisation,
                                                                                LogicOperator.Or))
 
+        self.declareProperty(name="OutputUnits",
+                             defaultValue="TwoTheta",
+                             validator=StringListValidator(["TwoTheta", "Q"]),
+                             direction=Direction.Input,
+                             doc="The choice to display the reduced data either as a function of the detector twoTheta or the momentum"+
+                                 "exchange.")
+
+        self.setPropertySettings('OutputUnits', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+
         self.declareProperty(name="TOFUnits",
                              defaultValue="TimeChannels",
                              validator=StringListValidator(["TimeChannels", "UncalibratedTime", "Energy"]),
@@ -746,8 +755,17 @@ class PolDiffILLReduction(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getItem(0).getRun().addProperty('ProcessedAs', process, True)
-        if self.getProperty('SumScan').value and isinstance(mtd[ws], WorkspaceGroup) and mtd[ws].getNumberOfEntries() > 1:
-            self._merge_polarisations(ws)
+        outputUnits = self.getPropertyValue('OutputUnits')
+        if outputUnits == 'TwoTheta':
+            if self.getProperty('SumScan').value and isinstance(mtd[ws], WorkspaceGroup) and mtd[ws].getNumberOfEntries() > 1:
+                self._merge_polarisations(ws)
+            else:
+                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta')
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
+        elif outputUnits == 'Q':
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ', EFixed=self._sampleGeometry['initial_energy'])
+            Transpose(InputWorkspace=ws, OutputWorkspace=ws)
+
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
