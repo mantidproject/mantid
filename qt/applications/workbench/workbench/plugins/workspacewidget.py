@@ -295,7 +295,6 @@ class WorkspaceWidget(PluginWidget):
                          wksp_indices=[0],
                          plot_kwargs=plot_kwargs)
             else:
-                print(f'[DEBUG] plot from names @ L275')
                 plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 
     def refresh_workspaces(self):
