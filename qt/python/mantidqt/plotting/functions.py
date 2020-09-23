@@ -23,6 +23,8 @@ from mantid.plots.datafunctions import add_colorbar_label
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
+from mantid.api import IMDHistoWorkspace
+
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -79,14 +81,13 @@ def plot_md_ws_from_names(names, errors, overplot, fig=None):
     """
     Given a list of names of 1-dimensional IMDHistoWorkspaces and plot
 
-    :param names:
-    :param errors:
-    :param overplot:
-    :param fig:
+    :param names: A list of workspaces names
+    :param errors: If true then error bars will be plotted on the points
+    :param overplot: If true then the add to the current figure if one
+                     exists and it is a compatible figure
+    :param fig: If not None then use this figure object to plot
     :return: The figure containing the plot or None if selection was cancelled
     """
-    from mantid.api import IMDHistoWorkspace
-
     print(f'[DEBUG from_1d_md_names()] plot workspaces {names}')
 
     # Get workspaces
