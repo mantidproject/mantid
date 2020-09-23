@@ -17,7 +17,8 @@ import numpy as np
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
-                                       create_subplots, raise_if_not_sequence
+                                       create_subplots, raise_if_not_sequence, plot_md_histo_ws
+
 from mantid.kernel import Logger, ConfigService
 from mantid.plots.datafunctions import add_colorbar_label
 from mantid.plots.utility import get_single_workspace_log_value
@@ -88,8 +89,6 @@ def plot_md_ws_from_names(names, errors, overplot, fig=None):
     :param fig: If not None then use this figure object to plot
     :return: The figure containing the plot or None if selection was cancelled
     """
-    print(f'[DEBUG from_1d_md_names()] plot workspaces {names}')
-
     # Get workspaces
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
 
@@ -100,7 +99,8 @@ def plot_md_ws_from_names(names, errors, overplot, fig=None):
 
     # Plot for various cases
     if len(workspaces) > 0:
-        return plot(workspaces, errors=errors, overplot=overplot, fig=fig)
+        return plot_md_histo_ws(workspaces, errors=errors, overplot=overplot, fig=fig,
+                                ax_properties=None, window_title=None)
 
 
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False):

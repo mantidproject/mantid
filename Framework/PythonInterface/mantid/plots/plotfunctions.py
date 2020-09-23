@@ -87,6 +87,31 @@ def figure_title(workspaces, fig_num):
 
 
 @manage_workspace_names
+def plot_md_histo_ws(workspaces, errors=False, overplot=False, fig=None, ax_properties=None, window_title=None):
+    """
+
+    :param workspaces:
+    :param errors:
+    :param overplot:
+    :param fig:
+    :return:
+    """
+    print(f'[DEBUG plotfunctions.plot] Input workspaces type = {type(workspaces)}')
+
+    # MDHistoWorkspace
+    # Get figure and Axes
+    num_axes = 1
+    fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
+    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
+            if not isinstance(ax, MantidAxes) else ax for ax in axes]
+
+    # Plot MD
+    _do_single_plot_mdhisto_workspace(axes[0], workspaces, errors)
+
+    return _update_show_figure(fig)
+
+
+@manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
          window_title=None, tiled=False, waterfall=False, log_name=None, log_values=None):
@@ -111,29 +136,15 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
-    print(f'[DEBUG plotfunctions.plot] Input workspaces type = {type(workspaces)}, spectrum {spectrum_nums},'
-          f'ws index {wksp_indices}')
-
-    # Filter out the MD workspaces
-    md_workspaces = list()
+    # Select the MatrixWorkspaces
     matrix_workspaces = list()
 
     for workspace in workspaces:
-        if isinstance(workspace, IMDHistoWorkspace):
-            md_workspaces.append(workspace)
-        else:
+        if isinstance(workspace, MatrixWorkspace):
             matrix_workspaces.append(workspace)
 
     # Plot workspaces
-    if len(md_workspaces) > 0:
-        # MDHistoWorkspace
-        num_axes = 1
-        fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
-        axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
-                if not isinstance(ax, MantidAxes) else ax for ax in axes]
-        _do_single_plot_mdhisto_workspace(axes[0], md_workspaces)
-
-    else:
+    if len(matrix_workspaces) > 0:
         # Regular MatrixWorkspace
         plot_font = ConfigService.getString('plots.font')
         if plot_font:
@@ -203,6 +214,25 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
                     ax.lines += errorbar_cap_lines
 
+    # This updates the toolbar so the home button now takes you back to this point.
+    # The try catch is in case the manager does not have a toolbar attached.
+    try:
+        fig.canvas.manager.toolbar.update()
+    except AttributeError:
+        pass
+
+    fig.canvas.draw()
+    # This displays the figure, but only works if a manager is attached to the figure.
+    # The try catch is in case a figure manager is not present
+    try:
+        fig.show()
+    except AttributeError:
+        pass
+
+    return fig
+
+
+def _update_show_figure(fig):
     # This updates the toolbar so the home button now takes you back to this point.
     # The try catch is in case the manager does not have a toolbar attached.
     try:
