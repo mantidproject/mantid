@@ -861,39 +861,39 @@ public:
     sphere->interceptSurface(origin);
     TS_ASSERT_EQUALS(origin.totalDistInsideObject(), RADIUS);
 
-    Track front_midpoint(V3D{0.5*RADIUS, 0.0, 0.0}, BEAM_X);
+    Track front_midpoint(V3D{0.5 * RADIUS, 0.0, 0.0}, BEAM_X);
     sphere->interceptSurface(front_midpoint);
-    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5*RADIUS);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5 * RADIUS);
 
-    Track back_midpoint(V3D{-0.5*RADIUS, 0.0, 0.0}, BEAM_X);
+    Track back_midpoint(V3D{-0.5 * RADIUS, 0.0, 0.0}, BEAM_X);
     sphere->interceptSurface(back_midpoint);
-    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5*RADIUS);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5 * RADIUS);
 
     // Y axis tests
     origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_Y);
     sphere->interceptSurface(origin);
     TS_ASSERT_EQUALS(origin.totalDistInsideObject(), RADIUS);
 
-    front_midpoint = Track(V3D{0.0, 0.5*RADIUS, 0.0}, BEAM_Y);
+    front_midpoint = Track(V3D{0.0, 0.5 * RADIUS, 0.0}, BEAM_Y);
     sphere->interceptSurface(front_midpoint);
-    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5*RADIUS);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5 * RADIUS);
 
-    back_midpoint = Track(V3D{0.0, -0.5*RADIUS, 0.0}, BEAM_Y);
+    back_midpoint = Track(V3D{0.0, -0.5 * RADIUS, 0.0}, BEAM_Y);
     sphere->interceptSurface(back_midpoint);
-    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5*RADIUS);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5 * RADIUS);
 
     // Z axis tests
     origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_Z);
     sphere->interceptSurface(origin);
     TS_ASSERT_EQUALS(origin.totalDistInsideObject(), RADIUS);
 
-    front_midpoint = Track(V3D{0.0, 0.0, 0.5*RADIUS}, BEAM_Z);
+    front_midpoint = Track(V3D{0.0, 0.0, 0.5 * RADIUS}, BEAM_Z);
     sphere->interceptSurface(front_midpoint);
-    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5*RADIUS);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5 * RADIUS);
 
-    back_midpoint = Track(V3D{0.0, 0.0, -0.5*RADIUS}, BEAM_Z);
+    back_midpoint = Track(V3D{0.0, 0.0, -0.5 * RADIUS}, BEAM_Z);
     sphere->interceptSurface(back_midpoint);
-    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5*RADIUS);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5 * RADIUS);
   }
 
   void testGeneratePointInsideSphere() {
