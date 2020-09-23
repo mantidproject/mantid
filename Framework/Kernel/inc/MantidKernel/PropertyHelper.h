@@ -16,6 +16,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <limits>
 #include <sstream>
 #include <type_traits>
 
@@ -90,6 +91,7 @@ std::string toPrettyString(const double &value, size_t maxLength,
   UNUSED_ARG(maxLength);
   UNUSED_ARG(collapseLists);
   std::ostringstream ss;
+  ss.precision(std::numeric_limits<double>::digits10);
   ss << value;
   return ss.str();
 }
