@@ -69,7 +69,7 @@ struct IndexPeaksArgs {
       // Use inputs from algorithm
       maxOrderToUse = maxOrderFromAlg;
       crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
-      modVectorsToUse = validModulationVectors(
+      modVectorsToUse = addModulationVectors(
           alg.getProperty(ModulationProperties::ModVector1),
           alg.getProperty(ModulationProperties::ModVector2),
           alg.getProperty(ModulationProperties::ModVector3));
