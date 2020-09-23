@@ -60,7 +60,7 @@ signals:
   void plotContourClicked(const QStringList &workspaceNames);
 
   void workspaceDoubleClicked(const QString &workspaceName);
-  void treeSelectionChanged(const QString &workspaceName);
+  void treeSelectionChanged();
 
   // Signal when plot MDHistogram clicked
   void plotMDHistoClicked(const QStringList &workspaceNames);
