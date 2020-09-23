@@ -21,7 +21,7 @@ import numpy as np
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace
+from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, CreateMDHistoWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
 from unittest import mock
@@ -48,11 +48,22 @@ def workspace_names_dummy_func(workspaces):
 class FunctionsTest(TestCase):
 
     _test_ws = None
+    _test_md_ws = None
 
     def setUp(self):
         if self._test_ws is None:
             self.__class__._test_ws = WorkspaceFactory.Instance().create(
                 "Workspace2D", NVectors=2, YLength=5, XLength=5)
+
+        if self._test_md_ws is None:
+            self._test_md_ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,2,1',
+                                                      ErrorInput='1,1,1,1,1,1',
+                                                      Dimensionality=3,
+                                                      Extents='-1,1,-1,1,0.5,6.5',
+                                                      NumberOfBins='1,1,6',
+                                                      Names='x,y,|Q|',
+                                                      Units='mm,km,AA^-1',
+                                                      OutputWorkspace='test_plot_md_from_names_ws')
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
@@ -148,7 +159,8 @@ class FunctionsTest(TestCase):
 
         :return:
         """
-        self._do_plot_md_from_names_test(expected_labels='|Q|', errors=False, overplot=False, target_fig=None)
+        self._do_plot_md_from_names_test(expected_labels=['test_plot_md_from_names_ws'],
+                                         errors=False, overplot=False, target_fig=None)
 
     @mock.patch('mantidqt.plotting.functions.pcolormesh')
     def test_pcolormesh_from_names_calls_pcolormesh(self, pcolormesh_mock):
@@ -322,14 +334,14 @@ class FunctionsTest(TestCase):
         """
         Do plot_md_ws_from_names test (in general)
 
-        :param expected_labels:
+        :param expected_labels: list of strings as expected labels of a plot (i.e., workspace name)
         :param errors:
         :param overplot:
         :param target_fig:
         :return:
         """
-        ws_name = 'test_plot_md_from_names'
-        # AnalysisDataService.Instance().addOrPlace(ws_name, self._test_md_ws)
+        ws_name = 'test_plot_md_from_names_ws'
+        AnalysisDataService.Instance().addOrReplace(ws_name, self._test_md_ws)
 
         # call method to test
         test_fig = plot_md_ws_from_names([ws_name], errors, overplot, target_fig)
@@ -340,6 +352,7 @@ class FunctionsTest(TestCase):
 
         # Check lines plotted
         plotted_lines = test_fig.gca().get_legend().get_lines()
+
         # number of plotted lines must be equal to expected values
         self.assertEqual(len(expected_labels), len(plotted_lines))
         # check legend labels
