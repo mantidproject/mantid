@@ -896,6 +896,56 @@ public:
     TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5 * RADIUS);
   }
 
+  void testTracksForSolidCylinder() {
+    // solid cylinder at the origin with the symmetry axis along y
+    // using PAC06 dimensions: 2.95mm radius x 5.68mm height
+    constexpr double RADIUS{0.00295};
+    constexpr double HEIGHT{0.00568};
+    V3D BOTTOM_CENTRE{0., -.5 * HEIGHT, 0.};
+    V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(
+        RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    const V3D BEAM_DIRECTION{0., 0., 1.}; // along z-axis
+
+    // centre of sample
+    Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), RADIUS);
+
+    constexpr double HALF_RADIUS{0.5 * RADIUS};
+
+    // Right midpoint between origin and radius (front wrt beam dir)
+    Track front_midpt(V3D{0., 0., HALF_RADIUS}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_EQUALS(front_midpt.totalDistInsideObject(), 0.5 * RADIUS);
+
+    // Left midpoint between origin and radius (back wrt beam dir)
+    Track back_midpt(V3D{0., 0., -HALF_RADIUS}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_EQUALS(back_midpt.totalDistInsideObject(), 1.5 * RADIUS);
+
+    // Put the cylinder with the symmetry axis along Z and repeat tests
+    AXIS_SYMM = V3D{0.0, 0.0, 1.0};
+    BOTTOM_CENTRE = V3D{0.0, 0.0, -0.5 * HEIGHT};
+    cylinder = ComponentCreationHelper::createCappedCylinder(
+        RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.5 * HEIGHT);
+
+    // Front midpoint between origin and top (height/2)
+    front_midpt = Track(V3D{0., 0., 0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_EQUALS(front_midpt.totalDistInsideObject(), 0.25 * HEIGHT);
+
+    // Back midpoint between origin and bottom (-height/2)
+    back_midpt = Track(V3D{0., 0., -0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_EQUALS(back_midpt.totalDistInsideObject(), 0.75 * HEIGHT);
+  }
+
   void testGeneratePointInsideSphere() {
     using namespace ::testing;
 
