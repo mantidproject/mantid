@@ -121,7 +121,6 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
 
     try:
         # Get selected spectra from all MatrixWorkspaces
-        print(f'[DEBUG] Get spectra selection: {workspaces}')
         selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot,
                                           advanced=advanced)
     except Exception as exc:
