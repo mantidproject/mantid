@@ -79,7 +79,7 @@ Improvements
   different goniometer angles share common indexing, and determine the goniometer axis and rotation
   required to match UBs to a reference.
 - New instrument geometry for MaNDi instrument at SNS
-- :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths-v1>`is a new algorithm
+- :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths-v1>` is a new algorithm
   for calculating the absorption weighted path length for each peak in a peaks workspace.
 - H,K,L can now be edited in the table of a peaks workspace in workbench (now consistent with Mantid Plot)
 - The peaks workspace table display now contains a column showing the value of the intensity/sigma for each peak.
