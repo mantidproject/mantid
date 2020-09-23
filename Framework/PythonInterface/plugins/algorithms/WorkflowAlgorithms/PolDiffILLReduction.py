@@ -349,20 +349,14 @@ class PolDiffILLReduction(PythonAlgorithm):
                 DeleteWorkspace(mon)
         return ws
 
-    def _calculate_transmission(self, ws, beam_ws, cadmium_ws):
+    def _calculate_transmission(self, ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample, empty beam, and cadmium."""
         # extract Monitor2 values
-        monID = 100001 # monitor 2
-        if cadmium_ws: # remove cadmium from the current transmission measurement if cadmium_ws is defined
-            Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
-        mon = ws + '_mon'
-        ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
-        if 0 in mtd[mon].getItem(0).readY(0):
+        if 0 in mtd[ws].getItem(0).readY(0):
             raise RuntimeError('Cannot calculate transmission; monitor has 0 counts.')
         if 0 in mtd[beam_ws].readY(0):
             raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
-        Divide(LHSWorkspace=mon, RHSWorkspace=beam_ws, OutputWorkspace=ws)
-        DeleteWorkspace(mon)
+        Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
 
     def _subtract_background(self, ws, container_ws, transmission_ws):
@@ -778,7 +772,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self._user_method = self.getPropertyValue('ComponentSeparationMethod')
         self._figure_measurement_method(ws)
         progress.report()
-        if process in ['Beam']:
+        if process in ['Beam', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws, average_detectors=True)
             cadmium_ws = self.getPropertyValue('CadmiumTransmissionInputWorkspace')
@@ -786,14 +780,14 @@ class PolDiffILLReduction(PythonAlgorithm):
                 Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
             monID = 100001 # monitor 2
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
-        elif process in ['Transmission']:
-            beam_ws = self.getPropertyValue('BeamInputWorkspace')
-            cadmium_ws = self.getPropertyValue('CadmiumTransmissionInputWorkspace')
-            self._calculate_transmission(ws, beam_ws, cadmium_ws)
+            if process in ['Transmission']:
+                beam_ws = self.getPropertyValue('BeamInputWorkspace')
+                self._calculate_transmission(ws, beam_ws)
             progress.report()
-        elif process not in ['Beam']:
+        else:
             self._normalise(ws)
             progress.report()
+
         if process in ['Quartz', 'Vanadium', 'Sample']:
             if not self.getProperty('ContainerInputWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
                 # Subtracts background if the workspaces for container and transmission are provided
