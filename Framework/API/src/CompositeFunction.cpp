@@ -28,6 +28,7 @@ namespace {
 /// static logger
 Kernel::Logger g_log("CompositeFunction");
 constexpr char *ATTNUMDERIV = "NumDeriv";
+constexpr int NUMDEFAULTATTRIBUTES = 1;
 template <typename T>
 void replaceVariableIndexRange(std::vector<T> &variableFunctionIndexList,
                                size_t oldSize, size_t newSize,
@@ -65,7 +66,7 @@ CompositeFunction::CompositeFunction()
 void CompositeFunction::createDefaultGlobalAttributes() {
   m_globalAttributeNames.clear();
   declareAttribute(ATTNUMDERIV, Attribute(false));
-  m_nAttributes = 1;
+  m_nAttributes = NUMDEFAULTATTRIBUTES;
 }
 
 /// Function initialization. Declare function parameters in this method.
@@ -96,7 +97,8 @@ std::string CompositeFunction::writeToString(
     return "name=" + name();
   }
 
-  if (name() != "CompositeFunction" || nAttributes() > nGlobalAttributes() ||
+  if (name() != "CompositeFunction" ||
+      nGlobalAttributes() > NUMDEFAULTATTRIBUTES ||
       getAttribute(ATTNUMDERIV).asBool() || !parentLocalAttributesStr.empty()) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = m_globalAttributeNames;

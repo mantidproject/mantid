@@ -223,10 +223,6 @@ size_t FunctionGenerator::nAttributes() const {
 std::vector<std::string> FunctionGenerator::getAttributeNames() const {
   checkTargetFunction();
   std::vector<std::string> attNames = IFunction::getAttributeNames();
-  auto cfNames = m_source->getAttributeNames();
-  auto spNames = m_target->getAttributeNames();
-  attNames.insert(attNames.end(), cfNames.begin(), cfNames.end());
-  attNames.insert(attNames.end(), spNames.begin(), spNames.end());
   return attNames;
 }
 
@@ -269,6 +265,19 @@ bool FunctionGenerator::hasAttribute(const std::string &attName) const {
   } else {
     checkTargetFunction();
     return m_target->hasAttribute(attName);
+  }
+}
+
+std::string FunctionGenerator::attributeName(size_t i) const {
+  if (i < IFunction::nAttributes()) {
+    return IFunction::attributeName(i);
+  } else if (i < IFunction::nAttributes() + m_source->nAttributes()) {
+    return m_source->attributeName(i - IFunction::nAttributes());
+  } else if (i < nAttributes()) {
+    return m_target->attributeName(
+        i - (IFunction::nAttributes() + m_source->nAttributes()));
+  } else {
+    throw(std::runtime_error("Attribute index out of range"));
   }
 }
 

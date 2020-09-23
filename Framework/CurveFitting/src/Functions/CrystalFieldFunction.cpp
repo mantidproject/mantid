@@ -401,8 +401,12 @@ void CrystalFieldFunction::buildAttributeNames() const {
   if (!m_attributeNames.empty()) {
     return;
   }
-  m_attributeNames = IFunction::getAttributeNames();
+  auto numAttributes = IFunction::nAttributes();
+  for (int i = 0; i < numAttributes; ++i) {
+    m_attributeNames.emplace_back(IFunction::attributeName(i));
+  }
   auto controlAttributeNames = m_control.getAttributeNames();
+
   // Lambda function that moves a attribute name from controlAttributeNames
   // to attNames.
   auto moveAttributeName = [&](const std::string &name) {
@@ -417,7 +421,7 @@ void CrystalFieldFunction::buildAttributeNames() const {
   auto prependPrefix = [&](const std::string &prefix,
                            const std::vector<std::string> &names) {
     for (auto name : names) {
-      if (name == "NumDeriv")
+      if (name.find("NumDeriv") != std::string::npos)
         continue;
       name.insert(name.begin(), prefix.begin(), prefix.end());
       m_attributeNames.emplace_back(name);
@@ -428,9 +432,13 @@ void CrystalFieldFunction::buildAttributeNames() const {
   moveAttributeName("Symmetries");
   moveAttributeName("Temperatures");
   moveAttributeName("Background");
-  // Copy the rest of the names
-  m_attributeNames.insert(m_attributeNames.end(), controlAttributeNames.begin(),
-                          controlAttributeNames.end());
+
+  // Only copy the unprefixed attributes - as the loop below will include
+  // And modify the prefixed attributes accordingly
+  std::copy_if(controlAttributeNames.begin(), controlAttributeNames.end(),
+               std::back_inserter(m_attributeNames), [](const auto &name) {
+                 return name.find(".") == std::string::npos;
+               });
   // Get
   for (size_t iSpec = 0; iSpec < m_control.nFunctions(); ++iSpec) {
     std::string prefix(SPECTRUM_PREFIX);
