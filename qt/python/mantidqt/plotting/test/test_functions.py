@@ -27,7 +27,7 @@ from mantid.plots import MantidAxes
 from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
-                                         manage_workspace_names, plot, plot_from_names,
+                                         manage_workspace_names, plot, plot_from_names, plot_md_ws_from_names,
                                          pcolormesh_from_names, plot_surface)
 
 
@@ -142,6 +142,13 @@ class FunctionsTest(TestCase):
         self._do_plot_from_names_test(get_spectra_selection_mock, expected_labels=["spec 1", "spec 2"],
                                       wksp_indices=[1], errors=False, overplot=True,
                                       target_fig=fig)
+
+    def test_plot_md_ws_from_names(self):
+        """Test 1 workspace
+
+        :return:
+        """
+        self._do_plot_md_from_names_test(expected_labels='|Q|', errors=False, overplot=False, target_fig=None)
 
     @mock.patch('mantidqt.plotting.functions.pcolormesh')
     def test_pcolormesh_from_names_calls_pcolormesh(self, pcolormesh_mock):
@@ -310,6 +317,35 @@ class FunctionsTest(TestCase):
                 self.assertTrue(label_part in line.get_label(),
                                 msg="Label fragment '{}' not found in line label".format(label_part))
         return fig
+
+    def _do_plot_md_from_names_test(self, expected_labels, errors, overplot, target_fig):
+        """
+        Do plot_md_ws_from_names test (in general)
+
+        :param expected_labels:
+        :param errors:
+        :param overplot:
+        :param target_fig:
+        :return:
+        """
+        ws_name = 'test_plot_md_from_names'
+        # AnalysisDataService.Instance().addOrPlace(ws_name, self._test_md_ws)
+
+        # call method to test
+        test_fig = plot_md_ws_from_names([ws_name], errors, overplot, target_fig)
+
+        # Verification: with target figure, new plot will be plotted on the same one
+        if target_fig is not None:
+            self.assertEqual(target_fig, test_fig)
+
+        # Check lines plotted
+        plotted_lines = test_fig.gca().get_legend().get_lines()
+        # number of plotted lines must be equal to expected values
+        self.assertEqual(len(expected_labels), len(plotted_lines))
+        # check legend labels
+        for label_part, line in zip(expected_labels, plotted_lines):
+            if label_part is not None:
+                self.assertTrue(label_part in line.get_label())
 
     def _compare_errorbar_labels_and_title(self):
         ws = self._test_ws
