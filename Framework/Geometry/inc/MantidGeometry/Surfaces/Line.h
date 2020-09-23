@@ -42,7 +42,7 @@ changed to normal destructor
 class MANTID_GEOMETRY_DLL Line {
 
 private:
-  Kernel::V3D m_origin; ///< Orign point (on plane)
+  Kernel::V3D m_origin;    ///< Orign point (on plane)
   Kernel::V3D m_direction; ///< Direction of outer surface (Unit Vector)
 
   int lambdaPair(

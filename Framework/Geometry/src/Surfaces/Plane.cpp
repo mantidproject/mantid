@@ -261,16 +261,16 @@ std::size_t Plane::planeType() const
  *   Sets the general equation for a plane
  */
 void Plane::setBaseEqn() {
-  BaseEqn[0] = 0.0;      // A x^2
-  BaseEqn[1] = 0.0;      // B y^2
-  BaseEqn[2] = 0.0;      // C z^2
-  BaseEqn[3] = 0.0;      // D xy
-  BaseEqn[4] = 0.0;      // E xz
-  BaseEqn[5] = 0.0;      // F yz
+  BaseEqn[0] = 0.0;          // A x^2
+  BaseEqn[1] = 0.0;          // B y^2
+  BaseEqn[2] = 0.0;          // C z^2
+  BaseEqn[3] = 0.0;          // D xy
+  BaseEqn[4] = 0.0;          // E xz
+  BaseEqn[5] = 0.0;          // F yz
   BaseEqn[6] = m_normVec[0]; // G x
   BaseEqn[7] = m_normVec[1]; // H y
   BaseEqn[8] = m_normVec[2]; // J z
-  BaseEqn[9] = -m_distance;    // K const
+  BaseEqn[9] = -m_distance;  // K const
 }
 
 /**
@@ -284,7 +284,8 @@ void Plane::write(std::ostream &OX) const {
   cx.precision(Surface::Nprecision);
   const std::size_t ptype = planeType();
   if (!ptype)
-    cx << "p " << m_normVec[0] << " " << m_normVec[1] << " " << m_normVec[2] << " " << m_distance;
+    cx << "p " << m_normVec[0] << " " << m_normVec[1] << " " << m_normVec[2]
+       << " " << m_distance;
   else if (m_normVec[ptype - 1] < 0)
     cx << "p"
        << "xyz"[ptype - 1] << " " << -m_distance;
@@ -306,8 +307,9 @@ int Plane::LineIntersectionWithPlane(V3D startpt, V3D endpt, V3D &output) {
   double const sprod = this->getNormal().scalar_prod(startpt - endpt);
   if (sprod == 0)
     return 0;
-  double const projection =
-      m_normVec[0] * startpt[0] + m_normVec[1] * startpt[1] + m_normVec[2] * startpt[2];
+  double const projection = m_normVec[0] * startpt[0] +
+                            m_normVec[1] * startpt[1] +
+                            m_normVec[2] * startpt[2];
   double s1 = (projection - m_distance) / sprod;
   if (s1 < 0 || s1 > 1)
     return 0;

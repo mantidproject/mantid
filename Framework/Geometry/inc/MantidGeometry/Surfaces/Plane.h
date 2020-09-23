@@ -35,7 +35,7 @@ the origin
 class MANTID_GEOMETRY_DLL Plane : public Quadratic {
 private:
   Kernel::V3D m_normVec; ///< Normal vector
-  double m_distance;       ///< Distance from origin
+  double m_distance;     ///< Distance from origin
 
   std::size_t planeType() const; ///< are we alined on an axis
   Plane *doClone() const override;
