@@ -765,6 +765,7 @@ void InstrumentWidgetMaskTab::applyMask() {
   storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_instrWidget->getInstrumentActor().applyMaskWorkspace();
+  m_instrWidget->setupColorMap();
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
 }
@@ -774,6 +775,7 @@ void InstrumentWidgetMaskTab::applyMask() {
  */
 void InstrumentWidgetMaskTab::applyMaskToView() {
   storeMask();
+  m_instrWidget->setupColorMap();
   enableApplyButtons();
 }
 
@@ -784,6 +786,8 @@ void InstrumentWidgetMaskTab::clearMask() {
   clearShapes();
   m_detectorsToGroup.clear();
   m_instrWidget->getInstrumentActor().clearMasks();
+  m_instrWidget->getInstrumentActor().updateColors();
+  m_instrWidget->setupColorMap();
   m_instrWidget->updateInstrumentView();
   enableApplyButtons();
 }

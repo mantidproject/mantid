@@ -136,9 +136,14 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.reduction.reduction_mode, ReductionMode.HAB)
         self.assertTrue(state.convert_to_q.use_gravity)
         self.assertEqual(state.convert_to_q.gravity_extra_length,  12.4)
-        self.assertEqual(state.move.detectors[DetectorType.HAB.value].sample_centre_pos1,  12.4/1000.)
-        self.assertTrue(state.move.detectors[DetectorType.HAB.value].sample_centre_pos2
-                        == 23.54/1000.)
+        self.assertEqual(state.move.detectors[DetectorType.LAB.value].sample_centre_pos1,
+                         108.1/1000.)
+        self.assertEqual(state.move.detectors[DetectorType.LAB.value].sample_centre_pos2,
+                         -83.0/1000.)
+        self.assertEqual(state.move.detectors[DetectorType.HAB.value].sample_centre_pos1,
+                         108.1/1000.)
+        self.assertEqual(state.move.detectors[DetectorType.HAB.value].sample_centre_pos2,
+                         -83.0/1000.)
         self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].fit_type
                         is FitType.LOGARITHMIC)
         self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].polynomial_order

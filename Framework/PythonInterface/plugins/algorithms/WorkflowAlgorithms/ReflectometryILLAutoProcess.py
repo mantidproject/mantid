@@ -327,7 +327,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.WAVELENGTH_LOWER,
-                values=[0.],
+                values=[2.],
                 validator=nonnegativeFloatArray
             ),
             doc='The lower wavelength bound (Angstrom)'
@@ -335,7 +335,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.WAVELENGTH_UPPER,
-                values=[35.],
+                values=[30.],
                 validator=nonnegativeFloatArray
             ),
             doc='The upper wavelength bound (Angstrom)'
@@ -361,7 +361,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.LOW_FRG_HALF_WIDTH_DIRECT,
-                values=[1],
+                values=[2],
                 validator=nonnegativeInts
             ),
             doc='Number of foreground pixels at lower angles from the centre pixel.'
@@ -370,7 +370,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.LOW_BKG_OFFSET_DIRECT,
-                values=[7],
+                values=[5],
                 validator=nonnegativeInts,
             ),
             doc='Distance of flat background region towards smaller detector angles from the '
@@ -390,7 +390,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.HIGH_FRG_HALF_WIDTH_DIRECT,
-                values=[1],
+                values=[2],
                 validator=nonnegativeInts
             ),
             doc='Number of foreground pixels at higher angles from the centre pixel.'
@@ -399,7 +399,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.HIGH_BKG_OFFSET_DIRECT,
-                values=[7],
+                values=[5],
                 validator=nonnegativeInts,
             ),
             doc='Distance of flat background region towards larger detector angles from the '
@@ -453,7 +453,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.LOW_FRG_HALF_WIDTH,
-                values=[1],
+                values=[2],
                 validator=nonnegativeInts,
             ),
             doc='Number of foreground pixels at lower angles from the centre pixel.'
@@ -462,7 +462,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.LOW_BKG_OFFSET,
-                values=[7],
+                values=[5],
                 validator=nonnegativeInts,
             ),
             doc='Distance of flat background region towards smaller detector angles from the '
@@ -482,7 +482,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.HIGH_FRG_HALF_WIDTH,
-                values=[1],
+                values=[2],
                 validator=nonnegativeInts,
             ),
             doc='Number of foreground pixels at higher angles from the centre pixel.'
@@ -491,7 +491,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropertyNames.HIGH_BKG_OFFSET,
-                values=[7],
+                values=[5],
                 validator=nonnegativeInts,
             ),
             doc='Distance of flat background region towards larger detector angles from the '

@@ -13,7 +13,7 @@ are not available in the model associated with the data table.
 from sans.common.enums import SANSInstrument, DataType, DetectorType, RebinType
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.StateObjects.StateCalculateTransmission import StateTransmissionFit
-from SANSUtility import (meter_2_millimeter, millimeter_2_meter)
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
 class SettingsAdjustmentModel(ModelCommon):
