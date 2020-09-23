@@ -100,7 +100,7 @@ class MaxEntPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.calculation_finished_notifier.notify_subscribers(self._maxent_output_workspace_name)
+        self.calculation_finished_notifier.notify_subscribers(self._maxent_output_workspace_name_maxent_output_workspace_name)
 
     def handle_error(self, error):
         self.activate()
