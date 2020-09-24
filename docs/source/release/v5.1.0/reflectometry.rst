@@ -6,17 +6,17 @@ Reflectometry Changes
    :local:
 
 Algorithms
-##########
+----------
 
 New
-----
+###
 
 - :ref:`algm-LRReductionWithReference` is a new algorithm to use a measured standard with a model reflectivity
   curve calculated by the `refl1d` package to produce a normalization curve for a sample reduction.
   This requires `refl1d` to be installed separately.
 
 Improvements
-------------
+############
 
 - The ensemble of ILL reflectometry reduction is improved to produce results more consistent with the
   legacy software for D17 instrument.
@@ -32,25 +32,25 @@ Improvements
   columns and includes the 4th column header if applicable.
   
 Bug fixes
----------
+#########
 
 - The :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` algorithm has been fixed to update the sample
   logs of chopper gap and chopper position with correct units regardless the wrong setting in nexus files.
 - The history for the :ref:`algm-ReflectometryReductionOne` algorithm has been fixed so that the conversion
   to Q is now always included in the history.
-- The sort function in the `LRDirectBeamSort <algm-LRDirectBeamSort>` algorithm has been updated for Python3.
+- The sort function in the :ref:`LRDirectBeamSort <algm-LRDirectBeamSort>` algorithm has been updated for Python3.
 
 Removed
--------
+#######
 
 - The following deprecated algorithms have been removed: ``SaveANSTOAscii``, ``SaveILLCosmosAscii``,
   ``SaveReflCustomAscii``, and ``SaveReflThreeColumnAscii``. They have been replaced by :ref:`algm-SaveReflectometryAscii`.
   
 ISIS Reflectometry Interface
-############################
+----------------------------
 
 New
----
+###
 
 - **Background subtraction** options have been added to the ISIS Reflectometry Interface. The subtraction is
   performed using the :ref:`algm-ReflectometryBackgroundSubtraction` algorithm.
@@ -81,7 +81,7 @@ New
   rounding precision.
 
 Bug fixes
----------
+#########
 
 - A bug has been fixed where Experiment/Instrument settings were not being restored if the instrument changes on load.
 - A bug has been fixed where creating a new Batch would result in the Experiment/Instrument

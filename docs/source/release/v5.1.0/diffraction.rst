@@ -8,33 +8,30 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 New features
-^^^^^^^^^^^^
+############
 - New ``D7`` instrument definition for ILL.
 - New :ref:`SaveGSSCW <algm-SaveGSSCW>` algorithm is implemented for constant wavelength diffractometers.
 
 Improvements
-^^^^^^^^^^^^
-- The output workspace names from `Polaris.create_total_scattering_pdf` now include run numbers.
-- Control of the output binning of `Polaris.create_total_scattering_pdf` is no longer controlled by
-  the parameter `output_binning`, instead `delta_r` should be used.
-- In `Polaris.create_total_scattering_pdf` the Q space workspace can be rebinned before calculating
-  the PDF by being given an input `delta_q`.
-- running `Polaris.create_total_scattering_pdf` with `debug=true` will preserve the
-  `self_scattering_correction` workspace.
-- The Lorch filter in Polaris.create_total_scattering_pdf is no longer enabled by default and must
-  be enabled with the `lorch_filter` parameter.
+############
+- Various improvements have been made to Polaris.create_total_scattering_pdf:
+  - The output workspace names now include run numbers.
+  - Control of the output binning is no longer controlled by the parameter `output_binning`, instead `delta_r` should be used.
+  - The Q space workspace can be rebinned before calculating the PDF by being given an input `delta_q`.
+  - Running `Polaris.create_total_scattering_pdf` with `debug=true` will preserve the `self_scattering_correction` workspace.
+  - The Lorch filter is no longer enabled by default and must be enabled with the `lorch_filter` parameter.
 - The :ref:`LoadWAND <algm-LoadWAND>` algorithm now adds `duration` log to the workspace.
 - The :ref:`PDFFourierTransform <algm-PDFFourierTransform>` algorithm has been updated to allow for
   the algorithm to be run on a PDF to obtain a spectrum density function.
 - SampleDetails.set_materials now differentiates between sample density and crystal density for converting
   between pdf types.
 - The :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` algorithm now accepts
-  the crystalographic density of the sample to correct for the powder density.
+  The crystallographic density of the sample to correct for the powder density.
 - Square beam profile of 5mm x 5mm added to the PEARL_Definition_new_lowangle instrument definition file.
 
 Bugfixes
-^^^^^^^^
-- The fourier filter on `Polaris.create_total_scattering_pdf` no longer produces a jagged mark at the filter limit value.
+########
+- The Fourier filter on `Polaris.create_total_scattering_pdf` no longer produces a jagged mark at the filter limit value.
 
 Engineering Diffraction
 -----------------------
@@ -45,17 +42,16 @@ Engineering Diffraction
    :align: right
 
 New features
-^^^^^^^^^^^^
+############
 - :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` is a new algorithm for
   estimating background of powder spectra using iterative smoothing.
-- The fitting tab of Engineering Diffraction UI now functions with standard Mantid fitting capability,
-  but with a simplified browser.
+- **The fitting tab of Engineering Diffraction UI now functions with standard Mantid fitting capability,
+  but with a simplified browser.**
 - Loading focussed runs into the fitting tab now creates a group of table workspaces containing the
   proton charge weighted average and standard deviation of select log values (set in the settings).
-- Added support for a Circular Beam Profile for use with Monte Carlo Absorption
 
 Improvements
-^^^^^^^^^^^^
+############
 - TOPAS files (`.abc`) have replaced the `.dat` files generated when focusing using the GUI.
 - Focusing with the GUI will now generate a CSV containing the averaged values of all numerical sample logs.
 - The currently loaded calibration is now shown at the bottom of the GUI.
@@ -65,14 +61,14 @@ Improvements
   run has had a background subtraction.
 
 Bugfixes
-^^^^^^^^
+########
 - The Engineering diffraction gui no longer goes behind the workbench window when a plot is clicked on.
 - A focused run cannot be loaded with the same x unit more than once
 
 Single Crystal Diffraction
 --------------------------
 Improvements
-^^^^^^^^^^^^
+############
 - The :ref:`CombinePeaksWorkspaces <algm-CombinePeaksWorkspaces>` algorithm now combines the modulation
   vectors present in the two workspaces, provided the total number of vectors is less than 3.
 - :ref:`FindGoniometerFromUB <algm-FindGoniometerFromUB-v1>` is a new algorithm for making UBs for runs at
@@ -84,5 +80,6 @@ Improvements
 - H,K,L can now be edited in the table of a peaks workspace in workbench (now consistent with Mantid Plot)
 - The peaks workspace table display now contains a column showing the value of the intensity/sigma for each peak.
 - SliceViewer can now correctly display non-orthogonal axes for output of the :ref:`MDNorm <algm-MDNorm>` algorithm.
+- Ellipsoid integration now supported in IntegratePeaksMD with option to fix orientation of ellipsoid to have one axis parallel to Q of peak.
 
 :ref:`Release 5.1.0 <v5.1.0>`

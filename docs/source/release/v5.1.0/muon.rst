@@ -6,7 +6,7 @@ MuSR Changes
    :local:
 
 Muon Analysis 2 and Frequency Domain Analysis
-#############################################
+---------------------------------------------
 
 .. figure:: ../../images/MuonAnalysis_release_5_1_0.png
    :class: screenshot
@@ -14,7 +14,7 @@ Muon Analysis 2 and Frequency Domain Analysis
    :align: right
 
 New Features
-------------
+############
 - The plotting logic within the Muon Analysis 2 GUI has updated to prevent all the workspaces from a
   fit being plotted at the same time. Instead, the choice of which fit workspace to plot can be made in
   fitting and sequential fitting tabs.
@@ -29,7 +29,7 @@ New Features
   also improves the clarity of the workspace history, as the number of algorithms present in the history is now reduced.
 - On the fitting tab, only one fit object (fit output and input workspaces) will be shown at a time.
 - Addition of background correction algorithm (PSIBackgroundCorrection) to remove the background present in
-  PSI bin data loaded using LoadPSIMuonBin.
+  PSI bin data loaded using :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>`.
 - Addition of a LoadMuonNexusV2 algorithm to load the new Muon V2 files, see :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>`.
 - Updated rounding for time zero and first good data to be 3 decimal places.
 - Added double pulse analysis, see :ref:`Muon home tab <muon_home_tab-ref>`.
@@ -45,7 +45,7 @@ New Features
   documentation page describing the function.
 
 Improvements
--------------
+############
 - The plot guess option within the fitting tab will now update when a parameter is changed.
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Updated :ref:`DoublePulseFit <algm-DoublePulseFit>` to allow composite function input.
@@ -57,7 +57,7 @@ Improvements
   add an option to not auto-correct the time by loaded timezero.
 - Fitting tab in Muon analysis and Frequency domain analysis GUI's are now disabled when
   no valid fitting data is present.
-- Globals parameters within the function browser will no longer reset when a new function is added/removed.
+- Global parameters within the function browser will no longer reset when a new function is added/removed.
 - Updated plotting to make line colours more consistent. The maximum number of unique line colors in each plot is 10.
 - Have updated the FDA GUI so that it functions correctly for frequency transforms and single fits.
 - Added in default group and pair selection when loading grouping files from xml.
@@ -87,7 +87,7 @@ Bug fixes
   loading pair data would cause mantid to crash.
 
 ALC
-###
+---
 
 New Features
 ------------
@@ -96,17 +96,17 @@ New Features
   See :ref:`Muon ALC <MuonALC-ref>` for more.
 
 Improvements
-------------
+############
 - The ALC interface in workbench will now show errors by default. The error bars can also be
   turned on/off using the right-click plot menu.
   
 Bug fixes
-----------
+##########
 - Fixed an issue in the ALC interface baseline fit where corrected data from all fits were plotted at
   the same time in the corrected data tab. Now only corrected data from the most recent fit is plotted.
 
 Elemental Analysis 
-##################
+------------------
 
 New Features
 ------------
@@ -122,7 +122,7 @@ Algorithms
 ##########
 
 New Features
-------------
+############
 - A new parameter has been added to the :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm
   which accepts a range of runs to be processed.
 - In the :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm parameters 'FirstRun' and

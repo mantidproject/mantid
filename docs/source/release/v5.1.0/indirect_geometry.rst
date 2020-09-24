@@ -6,9 +6,9 @@ Indirect Geometry Changes
    :local:
 
 Improvements
-############
+------------
 
-.. figure:: ../../images/Indirect_Data_Analysis_5_1_0.png
+.. figure:: ../../images/Indirect_Data_Analysis_5_1_0.jpg
    :class: screenshot
    :width: 700px
    :align: right
@@ -31,7 +31,7 @@ Improvements
   will now work  also for ILL fixed window scan reduced data, in which case the
   correction will be calculated for elastic wavelength.
 - The centre parameter has been added to delta function in the ConvFit tab of Indirect Data Analysis.
-- :ref- :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` will produce
+- :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` will produce
   energy transfer axis which takes into account that doppler channels are linear in
   velocity (not in time, neither energy as was assumed before). This will affect doppler mode QENS only.
 - Added docking and undocking to the plot window and function browser window for the fit
@@ -59,9 +59,9 @@ Improvements
   the Y axis label as being the natural log of eq1.
 
 Bug Fixes
-#########
+---------
 
-.. figure:: ../../images/Indirect_Data_Analysis_5_1_0.png
+.. figure:: ../../images/Indirect_Data_Analysis_temp_5_1_0.jpg
    :class: screenshot
    :width: 700px
    :align: right
@@ -76,8 +76,8 @@ Bug Fixes
 - Abins now supports vibrational calculations performed within the DMOL3 quantum chemistry code
   with open boundary conditions (i.e. free molecules). Previously, data files from such calculations
   would yield a parsing error.
-- Fixed errors with the temperature correction in the ConvFit tab of the Indirect Data Analysis interface.
-  These issues occurred when the function was evaluated at Q=0, where it is undefined.
+- **Fixed errors with the temperature correction in the ConvFit tab of the Indirect Data Analysis interface.
+  These issues occurred when the function was evaluated at Q=0, where it is undefined.**
 - F(Q) fit in the Indirect Data Analysis interface can now load more than one spectra from each workspace.
 - Fixed a crash in the corrections interface which occurred when the user attempted to save the results
   in the Monte Carlo tab.
@@ -85,7 +85,7 @@ Bug Fixes
 - Fixed a crash in Elwin when plotting the output workspace ending with `_elf`.
 
 New
-###
+---
 
 - :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` is a new algorithm that has been added as a
   beta method for analysing Vesuvio data.

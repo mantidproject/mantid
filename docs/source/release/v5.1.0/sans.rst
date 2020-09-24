@@ -22,7 +22,7 @@ Improvements
   for I(Q) processing and several distances.
 - Wedges processing in :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` is now functional.
 - For the ILL D33 instrument, the detector panels can be processed individually (OutputPanels option, see
-  the :ref:`SANSILLAutoProcess documentation <algm-SANSILLAutoProcess>` algorithm). This options is also
+  the :ref:`SANSILLAutoProcess documentation <algm-SANSILLAutoProcess>` algorithm). This option is also
   available in the :ref:`DrILL interface <DrILL-ref>`.
 
 Bug Fixed
