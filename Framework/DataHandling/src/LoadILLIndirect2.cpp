@@ -98,7 +98,8 @@ void LoadILLIndirect2::exec() {
 
   m_loadOption = getPropertyValue("LoadDetectors");
 
-  Progress progress(this, 0., 1., 7);
+  size_t progressSteps = m_loadOption == "Diffractometer" ? 5 : 7;
+  Progress progress(this, 0., 1., progressSteps);
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
