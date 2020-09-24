@@ -8,6 +8,8 @@ Mantid Workbench Changes
 Improvements
 ############
 
+- Enable workbench to plot 1D spectrum from an IMDHistoWorkspace whose non-integral dimension is equal to 1 but not to launch slice viewer.
+
 Bugfixes
 ########
 

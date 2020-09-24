@@ -96,8 +96,6 @@ def plot_md_histo_ws(workspaces, errors=False, overplot=False, fig=None, ax_prop
     :param fig:
     :return:
     """
-    print(f'[DEBUG plotfunctions.plot] Input workspaces type = {type(workspaces)}')
-
     # MDHistoWorkspace
     # Get figure and Axes
     num_axes = 1
