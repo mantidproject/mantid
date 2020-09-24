@@ -76,9 +76,9 @@ public:
                       double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a sphere
-  constexpr static int g_nslices = 5;
+  constexpr static int g_NSLICES = 5;
   /// The number of stacks to approximate a sphere
-  constexpr static int g_nstacks = 5;
+  constexpr static int g_NSTACKS = 5;
 #ifdef ENABLE_OPENCASCADE
   TopoDS_Shape createShape() override;
 #endif

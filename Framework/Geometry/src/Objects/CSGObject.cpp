@@ -104,19 +104,19 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
   const Quat transform(initial_axis, axis_direction);
 
   // Do the base cap which is a point at the centre and nslices points around it
-  constexpr double angle_step = 2 * M_PI / Mantid::Geometry::Cone::g_nslices;
+  constexpr double angle_step = 2 * M_PI / Mantid::Geometry::Cone::g_NSLICES;
   // Store the (x,y) points as they are used quite frequently
-  std::array<double, Mantid::Geometry::Cone::g_nslices> cos_table;
-  std::array<double, Mantid::Geometry::Cone::g_nslices> sin_table;
+  std::array<double, Mantid::Geometry::Cone::g_NSLICES> cos_table;
+  std::array<double, Mantid::Geometry::Cone::g_NSLICES> sin_table;
 
   double solid_angle(0.0);
-  for (int sl = 0; sl < Mantid::Geometry::Cone::g_nslices; ++sl) {
+  for (int sl = 0; sl < Mantid::Geometry::Cone::g_NSLICES; ++sl) {
     int vertex = sl;
     cos_table[vertex] = std::cos(angle_step * vertex);
     sin_table[vertex] = std::sin(angle_step * vertex);
     V3D pt2 = V3D(radius * cos_table[vertex], radius * sin_table[vertex], 0.0);
 
-    if (sl < Mantid::Geometry::Cone::g_nslices - 1) {
+    if (sl < Mantid::Geometry::Cone::g_NSLICES - 1) {
       vertex = sl + 1;
       cos_table[vertex] = std::cos(angle_step * vertex);
       sin_table[vertex] = std::sin(angle_step * vertex);
@@ -137,16 +137,16 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
   }
 
   // Now the main section
-  const double z_step = height / Cone::g_nstacks;
-  const double r_step = height / Cone::g_nstacks;
+  const double z_step = height / Cone::g_NSTACKS;
+  const double r_step = height / Cone::g_NSTACKS;
   double z0(0.0), z1(z_step);
   double r0(radius), r1(r0 - r_step);
 
-  for (int st = 1; st < Cone::g_nstacks; ++st) {
-    for (int sl = 0; sl < Cone::g_nslices; ++sl) {
+  for (int st = 1; st < Cone::g_NSTACKS; ++st) {
+    for (int sl = 0; sl < Cone::g_NSLICES; ++sl) {
       int vertex = sl;
       V3D pt1 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
-      if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+      if (sl < Mantid::Geometry::Cone::g_NSLICES - 1)
         vertex = sl + 1;
       else
         vertex = 0;
@@ -154,7 +154,7 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
 
       vertex = sl;
       V3D pt2 = V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
-      if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+      if (sl < Mantid::Geometry::Cone::g_NSLICES - 1)
         vertex = sl + 1;
       else
         vertex = 0;
@@ -190,11 +190,11 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
   transform.rotate(top_centre);
   top_centre += centre;
 
-  for (int sl = 0; sl < Cone::g_nslices; ++sl) {
+  for (int sl = 0; sl < Cone::g_NSLICES; ++sl) {
     int vertex = sl;
     V3D pt2 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
 
-    if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+    if (sl < Mantid::Geometry::Cone::g_NSLICES - 1)
       vertex = sl + 1;
     else
       vertex = 0;
@@ -317,21 +317,21 @@ double cylinderSolidAngle(const V3D &observer, const V3D &centre,
 
   // Do the base cap which is a point at the centre and nslices points around it
   constexpr double angle_step =
-      2 * M_PI / static_cast<double>(Cylinder::g_nslices);
+      2 * M_PI / static_cast<double>(Cylinder::g_NSLICES);
 
-  const double z_step = height / Cylinder::g_nstacks;
+  const double z_step = height / Cylinder::g_NSTACKS;
   double z0(0.0), z1(z_step);
   double solid_angle(0.0);
-  for (int st = 1; st <= Cylinder::g_nstacks; ++st) {
-    if (st == Cylinder::g_nstacks)
+  for (int st = 1; st <= Cylinder::g_NSTACKS; ++st) {
+    if (st == Cylinder::g_NSTACKS)
       z1 = height;
 
-    for (int sl = 0; sl < Cylinder::g_nslices; ++sl) {
+    for (int sl = 0; sl < Cylinder::g_NSLICES; ++sl) {
       double x = radius * std::cos(angle_step * sl);
       double y = radius * std::sin(angle_step * sl);
       V3D pt1 = V3D(x, y, z0);
       V3D pt2 = V3D(x, y, z1);
-      int vertex = (sl + 1) % Cylinder::g_nslices;
+      int vertex = (sl + 1) % Cylinder::g_NSLICES;
       x = radius * std::cos(angle_step * vertex);
       y = radius * std::sin(angle_step * vertex);
       V3D pt3 = V3D(x, y, z0);
