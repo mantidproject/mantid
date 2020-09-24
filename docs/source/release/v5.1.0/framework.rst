@@ -108,6 +108,8 @@ Improvements
 Bugfixes
 --------
 - Fix an uncaught exception when loading empty fields from NeXus files. Now returns an empty vector.
+- Fixed a bug in LoadRaw where it would try to load non-existent log files that were listed in the alternate
+  data stream.
 
 Deprecations
 ------------
