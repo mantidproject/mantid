@@ -82,14 +82,8 @@ struct IndexPeaksArgs {
       maxOrderToUse = lattice.getMaxOrder(); // the lattice can return a 0 here
       // if lattice has maxOrder, we will use the modVec from it, otherwise
       // stick to the input got from previous assignment
-      // NOTE:
-      // The non-zero modVectors check are turned off in the initilization step
-      // as it will lead to unexpected errors for users not relying on this
-      // feature.  For projects/processing that relyies on non-zero modVectors,
-      // it is the application responsibility to ensure that non-zero vectors
-      // are passed to IndexPeaks.
       if (maxOrderToUse > 0) {
-        modVectorsToUse = addModulationVectors(
+        modVectorsToUse = validModulationVectors(
             lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
       }
     }
@@ -463,9 +457,24 @@ void IndexPeaks::exec() {
     auto &lattice = args.workspace->mutableSample().getOrientedLattice();
     lattice.setMaxOrder(args.satellites.maxOrder);
     lattice.setCrossTerm(args.satellites.crossTerms);
-    lattice.setModVec1(args.satellites.modVectors[0]);
-    lattice.setModVec2(args.satellites.modVectors[1]);
-    lattice.setModVec3(args.satellites.modVectors[2]);
+    
+    if (args.satellites.modVectors[0].nullVector()){
+      g_log.warning("empty modVector 1, skipping saving");
+    } else {
+      lattice.setModVec1(args.satellites.modVectors[0]);
+    }
+
+    if (args.satellites.modVectors[1].nullVector()){
+      g_log.warning("empty modVector 2, skipping saving");
+    } else {
+      lattice.setModVec2(args.satellites.modVectors[1]);
+    }
+
+    if (args.satellites.modVectors[2].nullVector()){
+      g_log.warning("empty modVector 2, skipping saving");
+    } else {
+      lattice.setModVec3(args.satellites.modVectors[2]);
+    }    
   }
 
   CombinedIndexingStats indexingInfo;
