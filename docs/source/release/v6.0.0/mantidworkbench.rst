@@ -8,6 +8,8 @@ Mantid Workbench Changes
 Improvements
 ############
 
+- Add the possibility to copy and paste shapes in the instrument viewer.
+
 Bugfixes
 ########
 

@@ -132,6 +132,8 @@ of them.
 
 Only translation is possible for a multiple selection.
 
+It is possible to copy/paste selected shapes using Ctrl+C / Ctrl+V
+
 
 Sum selected detectors
 ----------------------
