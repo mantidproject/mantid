@@ -25,7 +25,7 @@ public:
   }
 
   bool tearDownWorld() override {
-    delete m_app;
+    m_app->quit();
     return true;
   }
 
