@@ -431,7 +431,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         correction_formula = "1.0 - exp(-13.153/sqrt(e))"
         for entry in mtd[ws]:
             SetInstrumentParameter(entry, ParameterName="formula_eff", Value=correction_formula)
-            DetectorEfficiencyCorUser(InputWorkspace=entry, OutputWorkspace=entry, IncidentEnergy=self._experimentProperties['initial_energy'].value)
+            DetectorEfficiencyCorUser(InputWorkspace=entry, OutputWorkspace=entry,
+                                      IncidentEnergy=self._experimentProperties['initial_energy'].value)
         return ws
 
     def _frame_overlap_correction(self, ws):
@@ -770,7 +771,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta')
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
         elif output_unit == 'Q':
-            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ', EFixed=self._experimentProperties['initial_energy'].value)
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
+                                EFixed=self._experimentProperties['initial_energy'].value)
         for entry in mtd[ws]:
             unit = ''
             if output_unit == 'TwoTheta':
