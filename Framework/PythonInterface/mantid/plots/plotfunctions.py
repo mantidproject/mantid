@@ -134,100 +134,76 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
-    # Select the MatrixWorkspaces
-    matrix_workspaces = list()
+    plot_font = ConfigService.getString('plots.font')
+    if plot_font:
+        if len(mpl.rcParams['font.family']) > 1:
+            mpl.rcParams['font.family'][0] = plot_font
+        else:
+            mpl.rcParams['font.family'].insert(0, plot_font)
 
-    for workspace in workspaces:
-        if isinstance(workspace, MatrixWorkspace):
-            matrix_workspaces.append(workspace)
+    if plot_kwargs is None:
+        plot_kwargs = {}
+    _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
+    workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
 
-    # Plot workspaces
-    if len(matrix_workspaces) > 0:
-        # Regular MatrixWorkspace
-        plot_font = ConfigService.getString('plots.font')
-        if plot_font:
-            if len(mpl.rcParams['font.family']) > 1:
-                mpl.rcParams['font.family'][0] = plot_font
+    if spectrum_nums is not None:
+        kw, nums = 'specNum', spectrum_nums
+    else:
+        kw, nums = 'wkspIndex', wksp_indices
+
+    _add_default_plot_kwargs_from_settings(plot_kwargs, errors)
+
+    num_axes = len(workspaces) * len(nums) if tiled else 1
+
+    fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
+
+    # Convert to a MantidAxes if it isn't already. Ignore legend since
+    # a new one will be drawn later
+    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
+            for ax in axes]
+
+    assert axes, "No axes are associated with this plot"
+
+    if tiled:
+        ws_index = [(ws, index) for ws in workspaces for index in nums]
+        for index, ax in enumerate(axes):
+            if index < len(ws_index):
+                _do_single_plot(ax, [ws_index[index][0]], errors, False, [ws_index[index][1]], kw, plot_kwargs)
             else:
-                mpl.rcParams['font.family'].insert(0, plot_font)
+                ax.axis('off')
+    else:
+        show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
+        ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
+        ax.axis('on')
+        _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
 
-        if plot_kwargs is None:
-            plot_kwargs = {}
-        _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
-        workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
+    # Can't have a waterfall plot with only one line.
+    if len(nums)*len(workspaces) == 1 and waterfall:
+        waterfall = False
 
-        if spectrum_nums is not None:
-            kw, nums = 'specNum', spectrum_nums
-        else:
-            kw, nums = 'wkspIndex', wksp_indices
+    # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
+    # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
+    if not overplot:
+        datafunctions.set_initial_dimensions(ax)
 
-        _add_default_plot_kwargs_from_settings(plot_kwargs, errors)
+    if waterfall:
+        ax.set_waterfall(True)
 
-        num_axes = len(workspaces) * len(nums) if tiled else 1
+    if not overplot:
+        fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    else:
+        if ax.is_waterfall():
+            for i in range(len(nums)*len(workspaces)):
+                errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
+                datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
 
-        fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
+                if ax.waterfall_has_fill():
+                    datafunctions.waterfall_update_fill(ax)
 
-        # Convert to a MantidAxes if it isn't already. Ignore legend since
-        # a new one will be drawn later
-        axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
-                for ax in axes]
+                ax.lines += errorbar_cap_lines
 
-        assert axes, "No axes are associated with this plot"
-
-        if tiled:
-            ws_index = [(ws, index) for ws in workspaces for index in nums]
-            for index, ax in enumerate(axes):
-                if index < len(ws_index):
-                    _do_single_plot(ax, [ws_index[index][0]], errors, False, [ws_index[index][1]], kw, plot_kwargs)
-                else:
-                    ax.axis('off')
-        else:
-            show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
-            ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
-            ax.axis('on')
-            _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
-
-        # Can't have a waterfall plot with only one line.
-        if len(nums) * len(workspaces) == 1 and waterfall:
-            waterfall = False
-
-        # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
-        # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
-        if not overplot:
-            datafunctions.set_initial_dimensions(ax)
-
-        if waterfall:
-            ax.set_waterfall(True)
-
-        if not overplot:
-            fig.canvas.set_window_title(figure_title(workspaces, fig.number))
-        else:
-            if ax.is_waterfall():
-                for i in range(len(nums) * len(workspaces)):
-                    errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
-                    datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
-
-                    if ax.waterfall_has_fill():
-                        datafunctions.waterfall_update_fill(ax)
-
-                    ax.lines += errorbar_cap_lines
-
-    # This updates the toolbar so the home button now takes you back to this point.
-    # The try catch is in case the manager does not have a toolbar attached.
-    try:
-        fig.canvas.manager.toolbar.update()
-    except AttributeError:
-        pass
-
-    fig.canvas.draw()
-    # This displays the figure, but only works if a manager is attached to the figure.
-    # The try catch is in case a figure manager is not present
-    try:
-        fig.show()
-    except AttributeError:
-        pass
-
-    return fig
+    # update and show figure
+    return _update_show_figure(fig)
 
 
 def _update_show_figure(fig):
