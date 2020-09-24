@@ -261,14 +261,14 @@ class PolDiffILLReduction(PythonAlgorithm):
         absoluteNormalisation = EnabledWhenProperty('AbsoluteUnitsNormalisation', PropertyCriterion.IsDefault)
 
         self.setPropertySettings('IncoherentCrossSection', EnabledWhenProperty(incoherent, absoluteNormalisation,
-                                                                               LogicOperator.Or))
+                                                                               LogicOperator.And))
 
         self.declareProperty(name="OutputUnits",
                              defaultValue="TwoTheta",
                              validator=StringListValidator(["TwoTheta", "Q"]),
                              direction=Direction.Input,
-                             doc="The choice to display the reduced data either as a function of the detector twoTheta or the momentum"+
-                                 "exchange.")
+                             doc="The choice to display the reduced data either as a function of the raw data units, the detector twoTheta,"
+                                 +" or the momentum exchange.")
 
         self.setPropertySettings('OutputUnits', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
@@ -290,14 +290,14 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _figure_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
-        nEntriesPerNumor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
-        if nEntriesPerNumor == 10:
+        entries_per_numor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
+        if entries_per_numor == 10:
             self._method_data_structure = '10p'
-        elif nEntriesPerNumor == 6:
+        elif entries_per_numor == 6:
             self._method_data_structure = 'XYZ'
             if self._user_method == '10p':
                 raise RunTimeError("The provided data cannot support 10-point measurement component separation.")
-        elif nEntriesPerNumor == 2:
+        elif entries_per_numor == 2:
             self._method_data_structure = 'Uniaxial'
             if self._user_method == '10p':
                 raise RunTimeError("The provided data cannot support 10-point measurement component separation.")
@@ -625,7 +625,6 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _conjoin_components(self, ws):
         """Conjoins the component workspaces coming from a theta scan."""
         components = [[], []]
-        # list_incoherent = []
         componentNames = ['Incoherent', 'Coherent', 'Magnetic']
         if self._user_method in ['10p', 'XYZ']:
             components.append([])
@@ -816,7 +815,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 progress.report()
 
             if process == 'Quartz':
-                ws = self._calculate_polarizing_efficiencies(ws)
+                self._calculate_polarizing_efficiencies(ws)
                 progress.report()
 
             if process in ['Vanadium', 'Sample']:
