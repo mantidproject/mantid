@@ -260,8 +260,8 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 elif banknum == 2:
                     return 'wing_detector'
         elif self.instname == "D33":
-            banks = ["back_detector", "front_detector_left", "front_detector_right", "front_detector_bottom",
-                     "front_detector_top"]
+            banks = ["back_detector", "front_detector_top", "front_detector_right", "front_detector_bottom",
+                     "front_detector_left"]
             return banks[banknum]
         elif self.instname in ["D11", "D11lr", "D22", "D22lr", "D16"]:
             return "detector"
