@@ -5,9 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAbstractItemView
+from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, \
+                           QStyle, QAbstractItemView, QMenu, QAction
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
+
+from mantidqt import icons
 
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate
@@ -36,6 +39,17 @@ class DrillTableWidget(QTableWidget):
                                           None, self)
         minSize = self.fontMetrics().height() + 2 * margin
         self.verticalHeader().setDefaultSectionSize(minSize)
+
+    def setHorizontalHeaderLabels(self, labels):
+        """
+        Overrides QTableWidget::setHorizontalHeaderLabels. This methods calls
+        the base class method and keeps a list of columns label for later use.
+
+        Args:
+            labels (list(str)): columns labels
+        """
+        super(DrillTableWidget, self).setHorizontalHeaderLabels(labels)
+        self.columns = labels
 
     def addRow(self, position):
         """
@@ -389,3 +403,30 @@ class DrillTableWidget(QTableWidget):
                     else:
                         item.setFlags(item.flags() | flags)
         self.blockSignals(False)
+
+    def contextMenuEvent(self, event):
+        """
+        Context menu. It contains:
+        * add/delete menu with a list of visible and hidden columns
+
+        Args:
+            event (QContextMenuEvent): event that triggered the function
+        """
+        position = event.globalPos()
+        header = self.horizontalHeader()
+        rightClickMenu = QMenu(self)
+
+        colMenu = rightClickMenu.addMenu("Add/Delete column")
+        for li in range(len(self.columns)):
+            if header.isSectionHidden(li):
+                colMenu.addAction(icons.get_icon("mdi.close"), self.columns[li])
+            else:
+                colMenu.addAction(icons.get_icon("mdi.check"), self.columns[li])
+
+        selectedItem = rightClickMenu.exec(position)
+        if selectedItem:
+            li = self.columns.index(selectedItem.text())
+            if header.isSectionHidden(li):
+                header.setSectionHidden(li, False)
+            else:
+                header.setSectionHidden(li, True)
