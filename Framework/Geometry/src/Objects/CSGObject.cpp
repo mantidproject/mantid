@@ -473,7 +473,7 @@ const Kernel::Material &CSGObject::material() const {
  */
 bool CSGObject::hasValidShape() const {
   // Assume invalid shape if object has no 'm_topRule' or surfaces
-  return (m_topRule != nullptr && !m_SurList.empty());
+  return (m_topRule != nullptr && !m_surList.empty());
 }
 
 /**
@@ -491,7 +491,7 @@ int CSGObject::setObject(const int objName, const std::string &lineStr) {
 
   if (procString(lineStr)) // this currently does not fail:
   {
-    m_SurList.clear();
+    m_surList.clear();
     m_objNum = objName;
     return 1;
   }
@@ -564,18 +564,18 @@ int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
   posA += 2;
 
   // First get the area to be removed
-  int brackCnt;
+  int numBrackets;
   std::string::size_type posB;
   posB = lineStr.find_first_of("()", posA);
   if (posB == std::string::npos)
     throw std::runtime_error("Object::complement :: " + lineStr);
 
-  brackCnt = (lineStr[posB] == '(') ? 1 : 0;
-  while (posB != std::string::npos && brackCnt) {
+  numBrackets = (lineStr[posB] == '(') ? 1 : 0;
+  while (posB != std::string::npos && numBrackets) {
     posB = lineStr.find_first_of("()", posB);
     if (posB == std::string::npos)
       break;
-    brackCnt += (lineStr[posB] == '(') ? 1 : -1;
+    numBrackets += (lineStr[posB] == '(') ? 1 : -1;
     posB++;
   }
 
@@ -583,7 +583,7 @@ int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
 
   m_objNum = cellNum;
   if (procString(Part)) {
-    m_SurList.clear();
+    m_surList.clear();
     lineStr.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
     std::ostringstream CompCell;
     CompCell << cellNum << " ";
@@ -616,22 +616,22 @@ int CSGObject::hasComplement() const {
  */
 int CSGObject::populate(
     const std::map<int, std::shared_ptr<Surface>> &surfMap) {
-  std::deque<Rule *> Rst;
-  Rst.emplace_back(m_topRule.get());
-  while (!Rst.empty()) {
-    Rule *T1 = Rst.front();
-    Rst.pop_front();
+  std::deque<Rule *> rules;
+  rules.emplace_back(m_topRule.get());
+  while (!rules.empty()) {
+    Rule *T1 = rules.front();
+    rules.pop_front();
     if (T1) {
       // if an actual surface process :
-      auto *KV = dynamic_cast<SurfPoint *>(T1);
-      if (KV) {
+      auto *surface = dynamic_cast<SurfPoint *>(T1);
+      if (surface) {
         // Ensure that we have a it in the surface list:
-        auto mf = surfMap.find(KV->getKeyN());
-        if (mf != surfMap.end()) {
-          KV->setKey(mf->second);
+        auto mapFound = surfMap.find(surface->getKeyN());
+        if (mapFound != surfMap.end()) {
+          surface->setKey(mapFound->second);
         } else {
           throw Kernel::Exception::NotFoundError("Object::populate",
-                                                 KV->getKeyN());
+                                                 surface->getKeyN());
         }
       }
       // Not a surface : Determine leaves etc and add to stack:
@@ -639,9 +639,9 @@ int CSGObject::populate(
         Rule *TA = T1->leaf(0);
         Rule *TB = T1->leaf(1);
         if (TA)
-          Rst.emplace_back(TA);
+          rules.emplace_back(TA);
         if (TB)
-          Rst.emplace_back(TB);
+          rules.emplace_back(TB);
       }
     }
   }
@@ -709,18 +709,19 @@ int CSGObject::procPair(std::string &lineStr,
   ruleMap.erase(ruleMap.find(Rb));
 
   // Remove space round pair
-  int fb;
-  for (fb = Rstart - 1; fb >= 0 && lineStr[fb] == ' '; fb--)
+  int strPos;
+  for (strPos = Rstart - 1; strPos >= 0 && lineStr[strPos] == ' '; strPos--)
     ;
-  Rstart = (fb < 0) ? 0 : fb;
-  for (fb = Rend; fb < static_cast<int>(lineStr.size()) && lineStr[fb] == ' ';
-       fb++)
+  Rstart = (strPos < 0) ? 0 : strPos;
+  for (strPos = Rend;
+       strPos < static_cast<int>(lineStr.size()) && lineStr[strPos] == ' ';
+       strPos++)
     ;
-  Rend = fb;
+  Rend = strPos;
 
-  std::stringstream cx;
-  cx << " R" << Ra << " ";
-  lineStr.replace(Rstart, Rend, cx.str());
+  std::stringstream newRuleStr;
+  newRuleStr << " R" << Ra << " ";
+  lineStr.replace(Rstart, Rend, newRuleStr.str());
   compUnit = Ra;
   return 1;
 }
@@ -767,9 +768,9 @@ CSGObject::procComp(std::unique_ptr<Rule> ruleItem) const {
 */
 bool CSGObject::isOnSide(const Kernel::V3D &point) const {
   std::vector<Kernel::V3D> Snorms; // Normals from the contact surface.
-  Snorms.reserve(m_SurList.size());
+  Snorms.reserve(m_surList.size());
 
-  for (auto vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
+  for (auto vc = m_surList.begin(); vc != m_surList.end(); ++vc) {
     if ((*vc)->onSurface(point)) {
       Snorms.emplace_back((*vc)->surfaceNormal(point));
       // can check direct normal here since one success
@@ -842,7 +843,7 @@ bool CSGObject::isValid(const std::map<int, int> &SMap) const {
  * @return 1 (should be number of surfaces)
  */
 int CSGObject::createSurfaceList(const int outFlag) {
-  m_SurList.clear();
+  m_surList.clear();
   std::stack<const Rule *> TreeLine;
   TreeLine.push(m_topRule.get());
   while (!TreeLine.empty()) {
@@ -858,20 +859,20 @@ int CSGObject::createSurfaceList(const int outFlag) {
     } else {
       const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX) {
-        m_SurList.emplace_back(SurX->getKey());
+        m_surList.emplace_back(SurX->getKey());
       }
     }
   }
   // Remove duplicates
-  sort(m_SurList.begin(), m_SurList.end());
-  auto sc = unique(m_SurList.begin(), m_SurList.end());
-  if (sc != m_SurList.end()) {
-    m_SurList.erase(sc, m_SurList.end());
+  sort(m_surList.begin(), m_surList.end());
+  auto sc = unique(m_surList.begin(), m_surList.end());
+  if (sc != m_surList.end()) {
+    m_surList.erase(sc, m_surList.end());
   }
   if (outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
-    for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
+    for (vc = m_surList.begin(); vc != m_surList.end(); ++vc) {
       logger.debug() << "Point == " << *vc << '\n';
       logger.debug() << (*vc)->getName() << '\n';
     }
@@ -885,7 +886,7 @@ int CSGObject::createSurfaceList(const int outFlag) {
  */
 std::vector<int> CSGObject::getSurfaceIndex() const {
   std::vector<int> out;
-  transform(m_SurList.begin(), m_SurList.end(),
+  transform(m_surList.begin(), m_surList.end(),
             std::insert_iterator<std::vector<int>>(out, out.begin()),
             std::mem_fn(&Surface::getName));
   return out;
@@ -895,30 +896,30 @@ std::vector<int> CSGObject::getSurfaceIndex() const {
  * Removes a surface and then re-builds the
  * cell. This could be done by just removing
  * the surface from the object.
- * @param SurfN :: Number for the surface
- * @return number of surfaces removes
+ * @param surfNum :: Number for the surface
+ * @return number of surfaces removed
  */
-int CSGObject::removeSurface(const int SurfN) {
+int CSGObject::removeSurface(const int surfNum) {
   if (!m_topRule)
     return -1;
-  const int cnt = Rule::removeItem(m_topRule, SurfN);
-  if (cnt)
+  const int nRemoved = Rule::removeItem(m_topRule, surfNum);
+  if (nRemoved)
     createSurfaceList();
-  return cnt;
+  return nRemoved;
 }
 
 /**
  * Removes a surface and then re-builds the cell.
- * @param SurfN :: Number for the surface
- * @param NsurfN :: New surface number
- * @param SPtr :: Surface pointer for surface NsurfN
+ * @param surfNum :: Number for the surface
+ * @param newSurfNum :: New surface number
+ * @param surfPtr :: Surface pointer for surface NsurfN
  * @return number of surfaces substituted
  */
-int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
-                              const std::shared_ptr<Surface> &SPtr) {
+int CSGObject::substituteSurf(const int surfNum, const int newSurfNum,
+                              const std::shared_ptr<Surface> &surfPtr) {
   if (!m_topRule)
     return 0;
-  const int out = m_topRule->substituteSurf(SurfN, NsurfN, SPtr);
+  const int out = m_topRule->substituteSurf(surfNum, newSurfNum, surfPtr);
   if (out)
     createSurfaceList();
   return out;
@@ -928,27 +929,27 @@ int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
  * Prints almost everything
  */
 void CSGObject::print() const {
-  std::deque<Rule *> Rst;
+  std::deque<Rule *> rst;
   std::vector<int> Cells;
   int Rcount(0);
-  Rst.emplace_back(m_topRule.get());
+  rst.emplace_back(m_topRule.get());
   Rule *TA, *TB; // Temp. for storage
 
-  while (!Rst.empty()) {
-    Rule *T1 = Rst.front();
-    Rst.pop_front();
+  while (!rst.empty()) {
+    Rule *T1 = rst.front();
+    rst.pop_front();
     if (T1) {
       Rcount++;
-      auto *KV = dynamic_cast<SurfPoint *>(T1);
-      if (KV)
-        Cells.emplace_back(KV->getKeyN());
+      auto *surface = dynamic_cast<SurfPoint *>(T1);
+      if (surface)
+        Cells.emplace_back(surface->getKeyN());
       else {
         TA = T1->leaf(0);
         TB = T1->leaf(1);
         if (TA)
-          Rst.emplace_back(TA);
+          rst.emplace_back(TA);
         if (TB)
-          Rst.emplace_back(TB);
+          rst.emplace_back(TB);
       }
     }
   }
@@ -985,10 +986,10 @@ void CSGObject::printTree() const {
  * @return Object Line
  */
 std::string CSGObject::cellCompStr() const {
-  std::ostringstream cx;
+  std::ostringstream objStr;
   if (m_topRule)
-    cx << m_topRule->display();
-  return cx.str();
+    objStr << m_topRule->display();
+  return objStr.str();
 }
 
 /**
@@ -997,33 +998,33 @@ std::string CSGObject::cellCompStr() const {
  * @return Object Line
  */
 std::string CSGObject::str() const {
-  std::ostringstream cx;
+  std::ostringstream objStr;
   if (m_topRule) {
-    cx << m_objNum << " ";
-    cx << m_topRule->display();
+    objStr << m_objNum << " ";
+    objStr << m_topRule->display();
   }
-  return cx.str();
+  return objStr.str();
 }
 
 /**
  * Write the object to a standard stream
  * in standard MCNPX output format.
- * @param OX :: Output stream (required for multiple std::endl)
+ * @param outStream :: Output stream (required for multiple std::endl)
  */
-void CSGObject::write(std::ostream &OX) const {
-  std::ostringstream cx;
-  cx.precision(10);
-  cx << str();
-  Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
+void CSGObject::write(std::ostream &outStream) const {
+  std::ostringstream objStr;
+  objStr.precision(10);
+  objStr << str();
+  Mantid::Kernel::Strings::writeMCNPX(objStr.str(), outStream);
 }
 
 /**
  * Processes the cell string. This is an internal function
  * to process a string with - String type has #( and ( )
- * @param Line :: String value
+ * @param lineStr :: String value
  * @returns 1 on success
  */
-int CSGObject::procString(const std::string &Line) {
+int CSGObject::procString(const std::string &lineStr) {
   m_topRule = nullptr;
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0; // Current index (not necessary size of RuleList
@@ -1032,7 +1033,7 @@ int CSGObject::procString(const std::string &Line) {
   std::unique_ptr<SurfPoint> TmpR; // Tempory Rule storage position
   std::unique_ptr<CompObj> TmpO;   // Tempory Rule storage position
 
-  std::string Ln = Line;
+  std::string Ln = lineStr;
   // Remove all surfaces :
   std::ostringstream cx;
   const std::string::size_type length = Ln.length();
@@ -1042,7 +1043,7 @@ int CSGObject::procString(const std::string &Line) {
       int nLen = Mantid::Kernel::Strings::convPartNum(Ln.substr(i), SN);
       if (!nLen)
         throw std::invalid_argument(
-            "Invalid surface string in Object::ProcString : " + Line);
+            "Invalid surface string in Object::ProcString : " + lineStr);
       // Process #Number
       if (i != 0 && Ln[i - 1] == '#') {
         TmpO = std::make_unique<CompObj>();
@@ -1111,7 +1112,7 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
   int originalCount = track.count(); // Number of intersections original track
   // Loop over all the surfaces.
   LineIntersectVisit LI(track.startPoint(), track.direction());
-  for (auto &surface : m_SurList) {
+  for (auto &surface : m_surList) {
     surface->acceptVisitor(LI);
   }
   const auto &IPoints(LI.getPoints());
@@ -1141,7 +1142,7 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
  */
 double CSGObject::distance(const Geometry::Track &track) const {
   LineIntersectVisit LI(track.startPoint(), track.direction());
-  for (auto &surface : m_SurList) {
+  for (auto &surface : m_surList) {
     surface->acceptVisitor(LI);
   }
   const auto &distances(LI.getDistance());

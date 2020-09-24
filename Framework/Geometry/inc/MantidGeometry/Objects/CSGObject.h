@@ -79,7 +79,7 @@ public:
   void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
 
-  void setName(const int nx) { m_objNum = nx; }     ///< Set Name
+  void setName(const int objNum) { m_objNum = objNum; } ///< Set Name
   int getName() const override { return m_objNum; } ///< Get Name
 
   void setMaterial(const Kernel::Material &material) override;
@@ -88,7 +88,7 @@ public:
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
   int setObject(const int objName, const std::string &lineStr);
-  int procString(const std::string &Line);
+  int procString(const std::string &lineStr);
   int complementaryObject(
       const int cellNum,
       std::string &lineStr); ///< Process a complementary object
@@ -97,9 +97,9 @@ public:
   int populate(const std::map<int, std::shared_ptr<Surface>> &);
   int createSurfaceList(const int outFlag = 0); ///< create Surface list
   int addSurfString(const std::string &);       ///< Not implemented
-  int removeSurface(const int SurfN);
-  int substituteSurf(const int SurfN, const int NsurfN,
-                     const std::shared_ptr<Surface> &SPtr);
+  int removeSurface(const int surfNum);
+  int substituteSurf(const int surfNum, const int newSurfNum,
+                     const std::shared_ptr<Surface> &surfPtr);
   void makeComplement();
   void convertComplement(const std::map<int, CSGObject> &);
 
@@ -117,10 +117,10 @@ public:
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
   const std::vector<const Surface *> &getSurfacePtr() const {
-    return m_SurList;
+    return m_surList;
   }
   /// Get the list of surfaces
-  std::vector<const Surface *> &getSurfacePtr() { return m_SurList; }
+  std::vector<const Surface *> &getSurfacePtr() { return m_surList; }
 
   std::string cellCompStr() const;
   std::string cellStr(const std::map<int, CSGObject> &) const;
@@ -258,7 +258,7 @@ private:
   bool m_isFiniteGeometry = true;
 
 protected:
-  std::vector<const Surface *> m_SurList; ///< Full surfaces (make a map
+  std::vector<const Surface *> m_surList; ///< Full surfaces (make a map
   /// including complementary object ?)
 };
 
