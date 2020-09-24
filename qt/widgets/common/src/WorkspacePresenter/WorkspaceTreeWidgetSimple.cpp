@@ -194,23 +194,24 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_sampleLogs);
 
       // launch slice viewer or plot spectrum conditionally
-      bool add_slice_viewer = true;
+      bool add_slice_viewer = false;
+      bool add_1d_plot = false;
 
       auto mdhist_ws = std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace);
       // if the number of non-integral  if the number of non-integrated
       // dimensions is 1.
       auto num_dims = mdhist_ws->getNonIntegratedDimensions().size();
       if (num_dims == 1) {
-        // number of non-integral dimension is 1: do not show slice viewer
-        add_slice_viewer = false;
-      } else if (num_dims == 0) {
-        // there is no no-integral dimension
-        throw std::runtime_error("Number of non-integral dimension is ZERO");
+          // number of non-integral dimension is 1: show menu item to plot spectrum
+          add_1d_plot = true;
+      } else if (num_dims > 1) {
+          // number of non-integral dimension is larger than 1: show menu item to launch slice view
+          add_slice_viewer = true;
       }
 
       if (add_slice_viewer) {
         menu->addAction(m_sliceViewer);
-      } else {
+      } else if (add_1d_plot) {
         menu->addAction(m_plotMDHisto1D);
       }
 
