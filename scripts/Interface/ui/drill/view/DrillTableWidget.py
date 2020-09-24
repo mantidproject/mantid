@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, \
-                           QStyle, QAbstractItemView, QMenu, QAction
+                           QStyle, QAbstractItemView, QMenu
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
 
