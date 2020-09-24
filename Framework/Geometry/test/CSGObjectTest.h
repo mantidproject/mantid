@@ -899,11 +899,11 @@ public:
   void testTracksForHollowCylinder() {
     // hollow cylinder at the origin with the symmetry axis along y
     // using PAC06 dimensions: 2.95mm inner radius, 3.15mm outer radius
-    //   x 5.68mm height
+    //   x 5.68cm height
     constexpr double INNER_RADIUS{0.00295};
     constexpr double OUTER_RADIUS{0.00315};
     constexpr double WALL_THICKNESS{OUTER_RADIUS - INNER_RADIUS};
-    constexpr double HEIGHT{0.00568};
+    constexpr double HEIGHT{0.0568};
     constexpr double TOLERANCE{1e-12};
     constexpr V3D BOTTOM_CENTRE{0., -.5 * HEIGHT, 0.};
     constexpr V3D AXIS_SYMM{0., 1., 0.};
@@ -951,11 +951,11 @@ public:
   void testTracksForHollowCylinderShifted() {
     // hollow cylinder shifted right with the symmetry axis along z
     // using PAC06 dimensions: 2.95mm inner radius, 3.15mm outer radius
-    //   x 5.68mm height
+    //   x 5.68cm height
     constexpr double INNER_RADIUS{0.00295};
     constexpr double OUTER_RADIUS{0.00315};
     constexpr double WALL_THICKNESS{OUTER_RADIUS - INNER_RADIUS};
-    constexpr double HEIGHT{0.00568};
+    constexpr double HEIGHT{0.0568};
     constexpr double TOLERANCE{1e-12};
     V3D BOTTOM_CENTRE{0.0, 0.0, -0.5 * HEIGHT};
 
@@ -1003,6 +1003,59 @@ public:
     cylinder->interceptSurface(back_midpt);
     TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 0.75 * HEIGHT,
                     TOLERANCE);
+  }
+
+  void testTracksForFlatPlate() {
+    // Flat plate centered at origin, 5 mm x 5 mm x 2 mm
+    // Thin side of plate (2mm) is facing the beam
+    constexpr double WIDTH{0.005}; // along x axis
+    constexpr double LENGTH{0.005}; // along y axis
+    constexpr double HEIGHT{0.002}; // along z axis
+
+    // Beam is along X assuming z is "up" y is "right" and x is out of page
+    // This puts the thin side facing the +x axis
+    constexpr V3D BEAM_DIRECTION{1.0, 0.0, 0.0};
+
+    auto plate = ComponentCreationHelper::createCuboid(0.5*WIDTH, 0.5*LENGTH, 0.5*HEIGHT, 0.0, BEAM_DIRECTION);
+
+    // Test center of plate
+    Track origin(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), WIDTH*0.5);
+
+    Track front_midpoint(V3D{0.25 * WIDTH, 0.0, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.25 * WIDTH);
+
+    Track back_midpoint(V3D{-0.25 * WIDTH, 0.0, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 0.75 * WIDTH);
+
+    // Repeat above tests but shift plate to the midpoint along the +y axis
+    Track yshifted(V3D{0.0, 0.25 * LENGTH, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(yshifted);
+    TS_ASSERT_EQUALS(yshifted.totalDistInsideObject(), WIDTH*0.5);
+
+    front_midpoint = Track(V3D{0.25 * WIDTH, 0.25 * LENGTH, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.25 * WIDTH);
+
+    back_midpoint = Track(V3D{-0.25 * WIDTH, 0.25 * LENGTH, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 0.75 * WIDTH);
+
+    // shift plate to the midpoint along the +z axis
+    Track zshifted(V3D{0.0, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    plate->interceptSurface(zshifted);
+    TS_ASSERT_EQUALS(zshifted.totalDistInsideObject(), WIDTH*0.5);
+
+    front_midpoint = Track(V3D{0.25 * WIDTH, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    plate->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.25 * WIDTH);
+
+    back_midpoint = Track(V3D{-0.25 * WIDTH, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    plate->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 0.75 * WIDTH);
   }
 
   void testGeneratePointInsideSphere() {
