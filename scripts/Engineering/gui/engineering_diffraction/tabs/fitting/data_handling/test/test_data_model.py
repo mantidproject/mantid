@@ -44,10 +44,12 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual(self.mock_ws, self.model._loaded_workspaces["a_filename_dSpacing"])
         mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_dSpacing")
 
+    @patch(file_path + '.FittingDataModel.write_table_row')
     @patch(file_path + '.FittingDataModel.update_log_group_name')
     @patch(file_path + '.ADS')
     @patch(file_path + ".Load")
-    def test_loading_single_file_already_loaded_untracked(self, mock_load, mock_ads, mock_update_logname):
+    def test_loading_single_file_already_loaded_untracked(self, mock_load, mock_ads, mock_update_logname,
+                                                          mock_writerow):
         mock_ads.doesExist.return_value = True
         mock_ads.retrieve.return_value = self.mock_ws
 
@@ -56,6 +58,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual(1, len(self.model._loaded_workspaces))
         mock_load.assert_not_called()
         mock_update_logname.assert_called_once()  # needed to patch this as calls ADS.retrieve
+        self.assertEqual(1, mock_writerow.call_count)  # no logs included
 
     @patch(file_path + '.FittingDataModel.update_log_group_name')
     @patch(file_path + ".Load")
@@ -68,7 +71,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.assertEqual(1, len(self.model._loaded_workspaces))
         mock_load.assert_not_called()
-        mock_update_logname.assert_not_called()
+        mock_update_logname.assert_called()
 
     @patch(file_path + '.get_setting')
     @patch(file_path + '.AverageLogData')
@@ -237,19 +240,34 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual({"new_name": [True, 80, 1000, False]}, self.model._bg_params)
         self.assertEqual({"new_name": 1, "name2": 2}, self.model._log_values)
 
+    @patch(file_path + ".FittingDataModel.write_table_row")
+    @patch(file_path + ".ADS")
     @patch(file_path + ".FittingDataModel.update_log_group_name")
     @patch(file_path + ".AverageLogData")
-    def test_reload_calculated_log_values(self, mock_avglogs, mock_update_logname):
+    def test_add_log_to_table(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
         # grouped ws acts like a container/list of ws here
-        self.model._log_workspaces = [mock.MagicMock(), mock.MagicMock()]  # first one is run_info not related to a log
+        self.model._log_workspaces = [mock.MagicMock(), mock.MagicMock()]
+        self.model._log_workspaces[0].name.return_value = "run_info"
         self.model._log_workspaces[1].name.return_value = "LogName"
+        mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._log_workspaces if ws.name() == ws_name][0]
         self.model._log_values = {"name1": {"LogName": [2, 1]}}
+        self.model._log_names = ["LogName"]
 
-        self.model.add_log_to_table("name1", self.mock_ws)
-
-        self.model._log_workspaces[1].addRow.assert_called_with([2, 1])
+        self.model.add_log_to_table("name1", self.mock_ws, 3)
+        mock_writerow.assert_any_call(self.model._log_workspaces[0], ['instrument', 1, 1, 1.0, 'title'], 3)
+        mock_writerow.assert_any_call(self.model._log_workspaces[1], [2, 1], 3)
         mock_avglogs.assert_not_called()
         mock_update_logname.assert_called_once()
+
+    def test_write_table_row(self):
+        table_ws = mock.MagicMock()
+        table_ws.rowCount.return_value = 3
+
+        self.model.write_table_row(table_ws, [1, 2], 3)
+
+        table_ws.setRowCount.assert_called_with(4)  # row added
+        table_ws.setCell.assert_any_call(3, 0, 1)
+        table_ws.setCell.assert_any_call(3, 1, 2)
 
 
 if __name__ == '__main__':
