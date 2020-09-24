@@ -202,11 +202,13 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       // dimensions is 1.
       auto num_dims = mdhist_ws->getNonIntegratedDimensions().size();
       if (num_dims == 1) {
-          // number of non-integral dimension is 1: show menu item to plot spectrum
-          add_1d_plot = true;
+        // number of non-integral dimension is 1: show menu item to plot
+        // spectrum
+        add_1d_plot = true;
       } else if (num_dims > 1) {
-          // number of non-integral dimension is larger than 1: show menu item to launch slice view
-          add_slice_viewer = true;
+        // number of non-integral dimension is larger than 1: show menu item to
+        // launch slice view
+        add_slice_viewer = true;
       }
 
       if (add_slice_viewer) {
