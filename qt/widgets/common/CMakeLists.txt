@@ -16,6 +16,8 @@ set(
   src/FileDialogHandler.cpp
   src/FileFinderWidget.cpp
   src/FilePropertyWidget.cpp
+  src/FindFilesThreadPoolManager.cpp
+  src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
@@ -151,6 +153,9 @@ set(
   inc/MantidQtWidgets/Common/DataSelector.h
   inc/MantidQtWidgets/Common/EditLocalParameterDialog.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
@@ -1014,6 +1019,8 @@ set(
   QT5_TEST_FILES
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
+  test/FindFilesThreadPoolManagerTest.h
+  test/FindFilesWorkerTest.h
   test/FitPropertyBrowserTest.h
   test/ImageInfoModelMatrixWSTest.h
   test/ImageInfoModelMDTest.h
