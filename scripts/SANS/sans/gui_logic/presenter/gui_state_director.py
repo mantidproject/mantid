@@ -54,10 +54,12 @@ class GuiStateDirector(object):
         self._apply_column_options_to_state(row_entry, gui_state)
 
         # 3. Add other columns
+        gui_state.all_states.save = self._state_gui_model.all_states.save
+
         output_name = row_entry.output_name
         if output_name:
             gui_state.output_name = output_name
-        gui_state.save_types = self._state_gui_model.save_types
+        gui_state.reduction_dimensionality = self._state_gui_model.reduction_dimensionality
 
         if row_entry.sample_thickness:
             gui_state.sample_thickness = float(row_entry.sample_thickness)

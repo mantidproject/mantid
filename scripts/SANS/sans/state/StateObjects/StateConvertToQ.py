@@ -166,9 +166,6 @@ class StateConvertToQBuilder(object):
     def set_reduction_dimensionality(self, val):
         self.state.reduction_dimensionality = val
 
-    def set_wavelength_step_type(self, val):
-        self.state.wavelength_step_type = val
-
     def set_q_xy_step_type(self, val):
         self.state.q_xy_step_type = val
 

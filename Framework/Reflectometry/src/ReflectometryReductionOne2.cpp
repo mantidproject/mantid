@@ -384,6 +384,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   int step = 1;
 
   if (summingInQ()) {
+    // Background subtraction
+    result = backgroundSubtraction(result);
+    outputDebugWorkspace(result, wsName, "_subtracted_bkg", debug, step);
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
@@ -717,11 +720,13 @@ ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
     refRoi->setProperty("ScatteringAngle", theta);
     refRoi->execute();
     IvsQ = refRoi->getProperty("OutputWorkspace");
-    // RefRoi outputs as distribution data but ConvertUnits outputs as
-    // counts. For now make this consistent with the original behaviour using
-    // ConvertUnits but we may wish to change this in future.
-    IvsQ->setYUnitLabel("Counts");
-    IvsQ->setDistribution(false);
+    // RefRoi outputs as distribution data but ConvertUnits outputs as counts
+    // if the input is counts. For now make this consistent with the original
+    // behaviour using ConvertUnits but we may wish to change this in future.
+    if (!inputWS->isDistribution()) {
+      IvsQ->setYUnitLabel("Counts");
+      IvsQ->setDistribution(false);
+    }
   }
   return IvsQ;
 }

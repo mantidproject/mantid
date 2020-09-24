@@ -18,6 +18,7 @@ from numpy import full, nan
 class FittingDataModel(object):
     def __init__(self):
         self._log_workspaces = None
+        self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
         self._background_workspaces = {}
         self._last_added = []  # List of workspace names loaded in the last load action.
@@ -73,6 +74,9 @@ class FittingDataModel(object):
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
         if not self._log_workspaces:
             self.create_log_table()
+        # make dict for run if doesn't exist
+        if ws_name not in self._log_values:
+            self._log_values[ws_name] = dict()
         # add run info
         run = ws.getRun()
         self._log_workspaces[0].addRow(
@@ -80,13 +84,18 @@ class FittingDataModel(object):
              run.getProtonCharge(), ws.getTitle()])
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
         for ilog in range(1, len(self._log_workspaces)):
-            try:
-                avg, stdev = AverageLogData(ws_name, LogName=self._log_workspaces[ilog].name(), FixZero=False)
-                self._log_workspaces[ilog].addRow([avg, stdev])
-            except RuntimeError:
-                self._log_workspaces[ilog].addRow(full(2, nan))
-                logger.error(
-                    f"File {ws.name()} does not contain log {self._log_workspaces[ilog].name()}")
+            log_name = self._log_workspaces[ilog].name()
+            if log_name in self._log_values[ws_name]:
+                avg, stdev = self._log_values[ws_name][log_name]
+            else:
+                try:
+                    avg, stdev = AverageLogData(ws_name, LogName=log_name, FixZero=False)
+                    self._log_values[ws_name][log_name] = [avg, stdev]
+                except RuntimeError:
+                    avg, stdev = full(2, nan)
+                    logger.error(
+                        f"File {ws.name()} does not contain log {self._log_workspaces[ilog].name()}")
+            self._log_workspaces[ilog].addRow([avg, stdev])
         self.update_log_group_name()
 
     def remove_log_rows(self, row_numbers):
@@ -121,6 +130,8 @@ class FittingDataModel(object):
                 self._background_workspaces[new_name] = self._background_workspaces.pop(old_name)
             if old_name in self._bg_params:
                 self._bg_params[new_name] = self._bg_params.pop(old_name)
+            if old_name in self._log_values:
+                self._log_values[new_name] = self._log_values.pop(old_name)
         else:
             logger.warning(f"There already exists a workspace with name {new_name}.")
 

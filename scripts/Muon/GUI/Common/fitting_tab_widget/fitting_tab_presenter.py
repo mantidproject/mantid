@@ -54,6 +54,7 @@ class FittingTabPresenter(object):
 
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
+        self.instrument_changed_observer = GenericObserver(self.instrument_changed)
 
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
             self.update_view_from_model)
@@ -284,7 +285,6 @@ class FittingTabPresenter(object):
     def handle_tf_asymmetry_mode_changed(self):
         def calculate_tf_fit_function(original_fit_function):
             tf_asymmetry_parameters = self.get_parameters_for_tf_function_calculation(original_fit_function)
-
             try:
                 tf_function = self.model.convert_to_tf_function(tf_asymmetry_parameters)
             except RuntimeError:
@@ -319,6 +319,7 @@ class FittingTabPresenter(object):
             if self.automatically_update_fit_name:
                 self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
                 self.model.function_name = self.view.function_name
+
         if not self.view.is_simul_fit():
             for index, fit_function in enumerate(self._fit_function):
                 fit_function = fit_function if fit_function else self.view.fit_object.clone()
@@ -350,7 +351,8 @@ class FittingTabPresenter(object):
             self.view.display_workspace]
         return {'InputFunction': fit_function,
                 'WorkspaceList': workspace_list,
-                'Mode': mode}
+                'Mode': mode,
+                'CopyTies': False}
 
     def handle_function_parameter_changed(self):
         if not self.view.is_simul_fit():
@@ -605,6 +607,9 @@ class FittingTabPresenter(object):
                 return [FitPlotInformation(input_workspaces=self.selected_data, fit=fit)]
         else:
             return []
+
+    def instrument_changed(self):
+        self.view.tf_asymmetry_mode = False
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs

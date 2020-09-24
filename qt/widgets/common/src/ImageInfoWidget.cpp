@@ -52,10 +52,10 @@ void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
   setColumnCount(itemCount);
   for (int i = 0; i < itemCount; ++i) {
     auto header = new QTableWidgetItem(info.name(i));
-    header->setFlags(Qt::ItemIsSelectable);
+    header->setFlags(header->flags() & ~Qt::ItemIsEditable);
     setItem(0, i, header);
     auto value = new QTableWidgetItem(info.value(i));
-    value->setFlags(Qt::ItemIsSelectable);
+    value->setFlags(header->flags() & ~Qt::ItemIsEditable);
     setItem(1, i, value);
   }
   horizontalHeader()->setMinimumSectionSize(50);

@@ -87,7 +87,7 @@ def _perform_fit(transmission_workspace, direct_workspace,
     wavelength_low = calculate_transmission_state.wavelength_low[0]
     wavelength_high = calculate_transmission_state.wavelength_high[0]
     wavelength_step = calculate_transmission_state.wavelength_step
-    wavelength_step_type = calculate_transmission_state.wavelength_step_type
+    wavelength_step_type = calculate_transmission_state.wavelength_step_type_lin_log
     prefix = 1.0 if wavelength_step_type is RangeStepType.LIN else -1.0
     wavelength_step *= prefix
     rebin_params = str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
@@ -256,7 +256,7 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
 
     wavelength_step = calculate_transmission_state.wavelength_step
     rebin_type = calculate_transmission_state.rebin_type
-    wavelength_step_type = calculate_transmission_state.wavelength_step_type
+    wavelength_step_type = calculate_transmission_state.wavelength_step_type_lin_log
 
     convert_name = "SANSConvertToWavelengthAndRebin"
     convert_options = {"InputWorkspace": workspace,

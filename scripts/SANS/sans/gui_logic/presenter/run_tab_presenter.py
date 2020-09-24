@@ -15,6 +15,7 @@ import os
 import time
 import traceback
 from contextlib import contextmanager
+from functools import wraps
 from typing import Optional
 
 from qtpy import PYQT4
@@ -80,6 +81,33 @@ def log_times(func):
     return run
 
 
+@contextmanager
+def disable_buttons(presenter):
+    presenter._view.disable_buttons()
+    try:
+        yield
+    finally:
+        presenter._view.enable_buttons()
+
+
+@contextmanager
+def disable_model_updates(presenter):
+    method = presenter.update_model_from_view
+    try:
+        presenter.update_model_from_view = lambda: None
+        yield
+    finally:
+        presenter.update_model_from_view = method
+
+
+def disable_model_updates_decorator(f):
+    @wraps(f)
+    def wrapper(presenter, *args, **kwargs):
+        with disable_model_updates(presenter):
+            return f(presenter, *args, **kwargs)
+    return wrapper
+
+
 class SaveDirectoryObserver(ConfigPropertyObserver):
     def __init__(self, callback):
         super(SaveDirectoryObserver, self).__init__("defaultsave.directory")
@@ -90,10 +118,12 @@ class SaveDirectoryObserver(ConfigPropertyObserver):
 
 
 class RunTabPresenter(PresenterCommon):
+    DEFAULT_DECIMAL_PLACES_MM = 1
+
     class ConcreteRunTabListener(SANSDataProcessorGui.RunTabListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ConcreteRunTabListener, self).__init__()
-            self._presenter = presenter
+            self._presenter: RunTabPresenter = presenter
 
         def on_user_file_load(self):
             self._presenter.on_user_file_load()
@@ -164,6 +194,9 @@ class RunTabPresenter(PresenterCommon):
         def on_sample_geometry_selection(self, show_geometry):
             self._presenter.on_sample_geometry_view_changed(show_geometry)
 
+        def on_field_edit(self):
+            self._presenter.update_model_from_view()
+
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ProcessListener, self).__init__()
@@ -207,7 +240,8 @@ class RunTabPresenter(PresenterCommon):
         self._setup_sub_presenters()
 
         # Presenter needs to have a handle on the view since it delegates it
-        self.set_view(view)
+        with disable_model_updates(self):
+            self.set_view(view)
 
         # Check save dir for display
         self._save_directory_observer = \
@@ -346,14 +380,6 @@ class RunTabPresenter(PresenterCommon):
     def instrument(self):
         return self._model.instrument
 
-    @contextmanager
-    def disable_buttons(self):
-        self._view.disable_buttons()
-        try:
-            yield
-        finally:
-            self._view.enable_buttons()
-
     def on_user_file_load(self):
         """
         Loads the user file. Populates the models and the view.
@@ -443,7 +469,6 @@ class RunTabPresenter(PresenterCommon):
 
             # 3. Populate the table
             self._table_model.clear_table_entries()
-
             self._add_multiple_rows_to_table_model(rows=parsed_rows)
 
             # 4. Set the batch file path in the model
@@ -472,6 +497,7 @@ class RunTabPresenter(PresenterCommon):
 
         if self._file_information != file_info:
             # Reload everything now our file information has updated
+            # so we get our IPF / IDF content. This should be made more granular long-term
             self._file_information = file_info
             self.on_user_file_load()
 
@@ -578,6 +604,8 @@ class RunTabPresenter(PresenterCommon):
         Enabled canSAS if switching to 1D.
         :param is_1d: bool. If true then switching TO 1D reduction.
         """
+        self._model.reduction_dimensionality = self._view.reduction_dimensionality
+
         if not self._view.output_mode_memory_radio_button.isChecked():
             # If we're in memory mode, all file types should always be disabled
             if is_1d:
@@ -702,7 +730,7 @@ class RunTabPresenter(PresenterCommon):
             self.sans_logger.warning("Cannot export table as it is empty.")
             return
 
-        with self.disable_buttons():
+        with disable_buttons(self):
             default_filename = self._model.batch_file
             filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
             filename = self._get_filename_to_save(filename)
@@ -971,7 +999,9 @@ class RunTabPresenter(PresenterCommon):
 
         return states[row_entry].all_states
 
+    @disable_model_updates_decorator
     def update_view_from_model(self):
+        self.sans_logger.debug("Updating SANS View from Model")
         self._set_on_view("instrument")
 
         for presenter in self._common_sub_presenters:
@@ -1003,7 +1033,7 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("wavelength_step")
 
         self._set_on_view("absolute_scale")
-        self._set_on_view("z_offset")
+        self._set_on_view("z_offset", self.DEFAULT_DECIMAL_PLACES_MM)
 
         # Q tab
         self._set_on_view_q_rebin_string()
@@ -1016,27 +1046,31 @@ class RunTabPresenter(PresenterCommon):
 
         self._set_on_view("use_q_resolution")
         self._set_on_view_q_resolution_aperture()
-        self._set_on_view("q_resolution_delta_r")
+        self._set_on_view("q_resolution_delta_r", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("q_resolution_collimation_length")
         self._set_on_view("q_resolution_moderator_file")
 
-        self._set_on_view("r_cut")
+        self._set_on_view("r_cut", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("w_cut")
 
         # Mask
         self._set_on_view("phi_limit_min")
         self._set_on_view("phi_limit_max")
         self._set_on_view("phi_limit_use_mirror")
-        self._set_on_view("radius_limit_min")
-        self._set_on_view("radius_limit_max")
+        self._set_on_view("radius_limit_min", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("radius_limit_max", self.DEFAULT_DECIMAL_PLACES_MM)
+
+        # User file and batch file
+        self._set_on_view("user_file")
+        self._set_on_view("batch_file")
 
     def _set_on_view_q_resolution_aperture(self):
-        self._set_on_view("q_resolution_source_a")
-        self._set_on_view("q_resolution_sample_a")
-        self._set_on_view("q_resolution_source_h")
-        self._set_on_view("q_resolution_sample_h")
-        self._set_on_view("q_resolution_source_w")
-        self._set_on_view("q_resolution_sample_w")
+        self._set_on_view("q_resolution_source_a", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_a", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_source_h", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_h", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_source_w", self.DEFAULT_DECIMAL_PLACES_MM)
+        self._set_on_view("q_resolution_sample_w", self.DEFAULT_DECIMAL_PLACES_MM)
 
         # If we have h1, h2, w1, and w2 selected then we want to select the rectangular aperture.
         is_rectangular = self._model.q_resolution_source_h and self._model.q_resolution_sample_h and \
@@ -1073,6 +1107,7 @@ class RunTabPresenter(PresenterCommon):
         Note that at the moment we have set up the view and the model such that the name of a property must be the same
         in the view and the model. This can be easily changed, but it also provides a good cohesion.
         """
+        self.sans_logger.debug("Updating SANS Model from View")
         state_model = copy.deepcopy(self._model)
 
         # If we don't have a state model then return None
@@ -1082,69 +1117,76 @@ class RunTabPresenter(PresenterCommon):
         for presenter in self._common_sub_presenters:
             presenter.update_model_from_view()
 
-        # Run tab view
-        self._set_on_custom_model("zero_error_free", state_model)
-        self._set_on_custom_model("save_types", state_model)
-        self._set_on_custom_model("compatibility_mode", state_model)
-        self._set_on_custom_model("event_slice_optimisation", state_model)
-        self._set_on_custom_model("merge_scale", state_model)
-        self._set_on_custom_model("merge_shift", state_model)
-        self._set_on_custom_model("merge_scale_fit", state_model)
-        self._set_on_custom_model("merge_shift_fit", state_model)
-        self._set_on_custom_model("merge_q_range_start", state_model)
-        self._set_on_custom_model("merge_q_range_stop", state_model)
-        self._set_on_custom_model("merge_mask", state_model)
-        self._set_on_custom_model("merge_max", state_model)
-        self._set_on_custom_model("merge_min", state_model)
+        try:
+            # Run tab view
+            self._set_on_custom_model("zero_error_free", state_model)
+            self._set_on_custom_model("save_types", state_model)
+            self._set_on_custom_model("compatibility_mode", state_model)
+            self._set_on_custom_model("event_slice_optimisation", state_model)
+            self._set_on_custom_model("merge_scale", state_model)
+            self._set_on_custom_model("merge_shift", state_model)
+            self._set_on_custom_model("merge_scale_fit", state_model)
+            self._set_on_custom_model("merge_shift_fit", state_model)
+            self._set_on_custom_model("merge_q_range_start", state_model)
+            self._set_on_custom_model("merge_q_range_stop", state_model)
+            self._set_on_custom_model("merge_mask", state_model)
+            self._set_on_custom_model("merge_max", state_model)
+            self._set_on_custom_model("merge_min", state_model)
 
-        # Settings tab
-        self._set_on_custom_model("reduction_dimensionality", state_model)
-        self._set_on_custom_model("reduction_mode", state_model)
-        self._set_on_custom_model("event_slices", state_model)
-        self._set_on_custom_model("event_binning", state_model)
+            # Settings tab
+            self._set_on_custom_model("reduction_dimensionality", state_model)
+            self._set_on_custom_model("reduction_mode", state_model)
+            self._set_on_custom_model("event_slices", state_model)
+            self._set_on_custom_model("event_binning", state_model)
 
-        self._set_on_custom_model("wavelength_step_type", state_model)
-        self._set_on_custom_model("wavelength_min", state_model)
-        self._set_on_custom_model("wavelength_max", state_model)
-        self._set_on_custom_model("wavelength_step", state_model)
-        self._set_on_custom_model("wavelength_range", state_model)
+            self._set_on_custom_model("wavelength_step_type", state_model)
+            self._set_on_custom_model("wavelength_min", state_model)
+            self._set_on_custom_model("wavelength_max", state_model)
+            self._set_on_custom_model("wavelength_step", state_model)
+            self._set_on_custom_model("wavelength_range", state_model)
 
-        self._set_on_custom_model("absolute_scale", state_model)
-        self._set_on_custom_model("z_offset", state_model)
+            self._set_on_custom_model("absolute_scale", state_model)
+            self._set_on_custom_model("z_offset", state_model)
 
-        # Q tab
-        self._set_on_state_model_q_1d_rebin_string(state_model)
-        self._set_on_custom_model("q_xy_max", state_model)
-        self._set_on_custom_model("q_xy_step", state_model)
-        self._set_on_custom_model("q_xy_step_type", state_model)
+            # Q tab
+            self._set_on_state_model_q_1d_rebin_string(state_model)
+            self._set_on_custom_model("q_xy_max", state_model)
+            self._set_on_custom_model("q_xy_step", state_model)
+            self._set_on_custom_model("q_xy_step_type", state_model)
 
-        self._set_on_custom_model("gravity_on_off", state_model)
-        self._set_on_custom_model("gravity_extra_length", state_model)
+            self._set_on_custom_model("gravity_on_off", state_model)
+            self._set_on_custom_model("gravity_extra_length", state_model)
 
-        self._set_on_custom_model("use_q_resolution", state_model)
-        self._set_on_custom_model("q_resolution_source_a", state_model)
-        self._set_on_custom_model("q_resolution_sample_a", state_model)
-        self._set_on_custom_model("q_resolution_source_h", state_model)
-        self._set_on_custom_model("q_resolution_sample_h", state_model)
-        self._set_on_custom_model("q_resolution_source_w", state_model)
-        self._set_on_custom_model("q_resolution_sample_w", state_model)
-        self._set_on_custom_model("q_resolution_delta_r", state_model)
-        self._set_on_custom_model("q_resolution_collimation_length", state_model)
-        self._set_on_custom_model("q_resolution_moderator_file", state_model)
+            self._set_on_custom_model("use_q_resolution", state_model)
+            self._set_on_custom_model("q_resolution_source_a", state_model)
+            self._set_on_custom_model("q_resolution_sample_a", state_model)
+            self._set_on_custom_model("q_resolution_source_h", state_model)
+            self._set_on_custom_model("q_resolution_sample_h", state_model)
+            self._set_on_custom_model("q_resolution_source_w", state_model)
+            self._set_on_custom_model("q_resolution_sample_w", state_model)
+            self._set_on_custom_model("q_resolution_delta_r", state_model)
+            self._set_on_custom_model("q_resolution_collimation_length", state_model)
+            self._set_on_custom_model("q_resolution_moderator_file", state_model)
 
-        self._set_on_custom_model("r_cut", state_model)
-        self._set_on_custom_model("w_cut", state_model)
+            self._set_on_custom_model("r_cut", state_model)
+            self._set_on_custom_model("w_cut", state_model)
 
-        # Mask
-        self._set_on_custom_model("phi_limit_min", state_model)
-        self._set_on_custom_model("phi_limit_max", state_model)
-        self._set_on_custom_model("phi_limit_use_mirror", state_model)
-        self._set_on_custom_model("radius_limit_min", state_model)
-        self._set_on_custom_model("radius_limit_max", state_model)
+            # Mask
+            self._set_on_custom_model("phi_limit_min", state_model)
+            self._set_on_custom_model("phi_limit_max", state_model)
+            self._set_on_custom_model("phi_limit_use_mirror", state_model)
+            self._set_on_custom_model("radius_limit_min", state_model)
+            self._set_on_custom_model("radius_limit_max", state_model)
 
-        # Beam Centre
-        self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
-        self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
+            # User file and batch file
+            self._set_on_custom_model("user_file", state_model)
+            self._set_on_custom_model("batch_file", state_model)
+
+            # Beam Centre
+            self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
+            self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
+        except (RuntimeError, ValueError) as e:
+            self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
 
         return state_model
 

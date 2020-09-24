@@ -37,6 +37,8 @@ Improvements
 - Added default parameter estimations to the F(q) tab.
 - The ConvFit tab within the IDA GUI will now output convolved members by default.
 - Added a Help option to the right-click menu in the function browser (in full function view) which brings up a relevant documentation page describing the function.
+- The eq2 workspace output from the Indirect Data analysis Elwin tab now accurately has
+  the Y axis label as being the natural log of eq1.
 
 Bug Fixes
 #########
@@ -53,6 +55,7 @@ Bug Fixes
 - Indirect Data Analysis F(Q) fit multiple workspaces can now load more than one spectra from each workspace.
 - Fixed a crash in the corrections interface which occurred when the user attempted to save the results in the Monte Carlo tab.
 - Fixed a bug in the Indirect->Bayes->Quasi Interface, which caused the same parameter to be plotted twice.
+- Fixed a crash in Elwin when plotting the output workspace ending with `_elf`.
 
 New
 ###
