@@ -41,7 +41,7 @@ class BackCommandParserTest(unittest.TestCase):
         mean = True
         run_number = "SANS2D1111111"
         is_mon = False
-        mon_number = 0
+        mon_number = None
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
     def test_that_can_parse_UAMP_TOF_RUN(self):

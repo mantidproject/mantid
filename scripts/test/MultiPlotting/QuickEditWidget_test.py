@@ -56,6 +56,7 @@ class QuickEditWidgetTest(unittest.TestCase):
     def test_get_selection_all(self):
         name = "All"
         self.pres.widget.current_selection = mock.MagicMock(return_value=name)
+        self.widget.get_selection()
         self.assertEqual(self.pres.all.call_count, 1)
 
     def test_set_plot_x_range(self):
