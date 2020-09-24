@@ -24,7 +24,7 @@ public:
     return true;
   }
 
-  // Removed as it causes a segfault on Ubuntu 20.04 due to PyQt claiming 
+  // Removed as it causes a segfault on Ubuntu 20.04 due to PyQt claiming
   // the Qapplication object and deleting it before tearDownWorld occurs.
   // the memory leak caused by m_app not being deleted in some circumstances
   // Doesn't matter as it executes this on exit
