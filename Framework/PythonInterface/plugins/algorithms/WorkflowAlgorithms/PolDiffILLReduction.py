@@ -270,8 +270,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                                                LogicOperator.And))
 
         self.declareProperty(name="OutputUnits",
-                             defaultValue="TwoTheta",
-                             validator=StringListValidator(["TwoTheta", "Q"]),
+                             defaultValue="Wavelength/TOF",
+                             validator=StringListValidator(["Wavelength/TOF", "TwoTheta", "Q"]),
                              direction=Direction.Input,
                              doc="The choice to display the reduced data either as a function of the raw data units, the detector twoTheta,"
                                  +" or the momentum exchange.")
@@ -761,21 +761,29 @@ class PolDiffILLReduction(PythonAlgorithm):
         Divide(LHSWorkspace=CreateSingleValuedWorkspace(0.404*n_atoms), RHSWorkspace=ws, OutputWorkspace=ws)
         return ws
 
-    def _finalize(self, ws, process):
-        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
-                             NaNError=0, InfinityValue=0, InfinityError=0)
-        mtd[ws].getItem(0).getRun().addProperty('ProcessedAs', process, True)
-        outputUnits = self.getPropertyValue('OutputUnits')
-        if outputUnits == 'TwoTheta':
+    def _set_units(self, ws):
+        output_unit = self.getPropertyValue('OutputUnits')
+        if output_unit == 'TwoTheta':
             if self.getProperty('SumScan').value and isinstance(mtd[ws], WorkspaceGroup) and mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws)
             else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta')
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
-        elif outputUnits == 'Q':
-            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ', EFixed=self._sampleGeometry['initial_energy'])
-            Transpose(InputWorkspace=ws, OutputWorkspace=ws)
+        elif output_unit == 'Q':
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ', EFixed=self._experimentProperties['initial_energy'].value)
+        for entry in mtd[ws]:
+            unit = ''
+            if output_unit == 'TwoTheta':
+                unit = 'S (TwoTheta)'
+            elif output_unit == 'Q':
+                unit = 'S (Q)'
+            entry.setYUnit(unit)
+        return ws
 
+    def _finalize(self, ws, process):
+        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
+                             NaNError=0, InfinityValue=0, InfinityError=0)
+        mtd[ws].getItem(0).getRun().addProperty('ProcessedAs', process, True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
@@ -858,6 +866,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 else:
                     self._detector_efficiency_correction(ws, component_ws)
                     progress.report()
+                self._set_units(ws)
 
         self._finalize(ws, process)
 
