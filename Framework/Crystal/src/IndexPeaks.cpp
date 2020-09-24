@@ -457,24 +457,24 @@ void IndexPeaks::exec() {
     auto &lattice = args.workspace->mutableSample().getOrientedLattice();
     lattice.setMaxOrder(args.satellites.maxOrder);
     lattice.setCrossTerm(args.satellites.crossTerms);
-    
-    if (args.satellites.modVectors[0].nullVector()){
+
+    if (args.satellites.modVectors[0].nullVector()) {
       g_log.warning("empty modVector 1, skipping saving");
     } else {
       lattice.setModVec1(args.satellites.modVectors[0]);
     }
 
-    if (args.satellites.modVectors[1].nullVector()){
+    if (args.satellites.modVectors[1].nullVector()) {
       g_log.warning("empty modVector 2, skipping saving");
     } else {
       lattice.setModVec2(args.satellites.modVectors[1]);
     }
 
-    if (args.satellites.modVectors[2].nullVector()){
+    if (args.satellites.modVectors[2].nullVector()) {
       g_log.warning("empty modVector 2, skipping saving");
     } else {
       lattice.setModVec3(args.satellites.modVectors[2]);
-    }    
+    }
   }
 
   CombinedIndexingStats indexingInfo;
