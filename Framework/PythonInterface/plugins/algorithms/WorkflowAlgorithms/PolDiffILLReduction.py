@@ -215,6 +215,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to clear the cache of intermediate workspaces.')
 
+        self.declareProperty(name="MeasurementTechnique",
+                             defaultValue="Powder",
+                             validator=StringListValidator(["Powder", "SingleCrystal", "TOF"]),
+                             direction=Direction.Input,
+                             doc="Which measurement technique was used to measure the sample.")
+
         self.declareProperty(name="ComponentSeparationMethod",
                              defaultValue="None",
                              validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
@@ -279,7 +285,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc="The choice to display the TOF data either as a function of the time channel or the uncalibrated time.\
                              It has no effect if the measurement mode is monochromatic.")
 
-        self.setPropertySettings('TOFUnits', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+        tofMeasurement = EnabledWhenProperty('MeasurementTechnique', PropertyCriterion.IsEqualTo, 'TOF')
+
+        self.setPropertySettings('TOFUnits', EnabledWhenProperty(tofMeasurement,
+                                                                 EnabledWhenProperty(vanadium, sample, LogicOperator.Or),
+                                                                 LogicOperator.And))
 
         self.declareProperty(FileProperty('InstrumentParameterFile', '',
                                           action=FileAction.OptionalLoad,
@@ -784,9 +794,12 @@ class PolDiffILLReduction(PythonAlgorithm):
              TOFUnits=self.getPropertyValue('TOFUnits'), OutputWorkspace=ws)
 
         self._instrument = mtd[ws].getItem(0).getInstrument().getName()
+        self._mode = self.getPropertyValue('MeasurementTechnique')
         run = mtd[ws].getItem(0).getRun()
-        if run['acquisition_mode'].value == 1:
-            self._mode = 'TOF'
+        if run['acquisition_mode'].value == 1 and self._mode != 'TOF':
+            raise RuntimeError("Monochromatic measurement method chosen but data contains TOF results.")
+        elif self._mode == 'TOF' and run['acquisition_mode'].value == 0:
+            raise RuntimeError("TOF measurement method chosen but data contains monochromatic results.")
         self._user_method = self.getPropertyValue('ComponentSeparationMethod')
         self._figure_measurement_method(ws)
         progress.report()
