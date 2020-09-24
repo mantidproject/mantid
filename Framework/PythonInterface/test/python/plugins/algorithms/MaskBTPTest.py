@@ -216,6 +216,33 @@ class MaskBTPTest(unittest.TestCase):
         masked = MaskBTP(Workspace=wksp, Components='bank3')
         self.assertEqual(10 * 90, len(masked))
 
+    def test_d33(self):
+        ws = LoadEmptyInstrument(InstrumentName='D33', OutputWorkspace="D33")
+        mask_rear = MaskBTP(Workspace=ws, Components='back_detector')
+        mask_front = MaskBTP(Workspace=ws, Bank="1-4", Tube="15", Pixel='0-10')
+
+        self.assertEqual(len(mask_rear), 256 * 128)
+        self.assertEqual(len(mask_front), 4 * 11)
+
+    def test_d11(self):
+        ws = LoadEmptyInstrument(InstrumentName="d11", OutputWorkspace="D11")
+        mask = MaskBTP(Workspace=ws, Pixel="0-10")
+
+        self.assertEquals(len(mask), 256*11)
+
+    def test_d22(self):
+        ws = LoadEmptyInstrument(InstrumentName="d22", OutputWorkspace="D22")
+        mask = MaskBTP(Workspace=ws, Tube="2-5")
+
+        self.assertEquals(len(mask), 256*4)
+
+    def test_d16(self):
+        ws = LoadEmptyInstrument(InstrumentName="d16", OutputWorkspace="D16")
+        mask = MaskBTP(Workspace=ws, Tube="319", Pixel="319")
+
+        self.assertEquals(len(mask), 1)
+
+
 
 if __name__ == '__main__':
     unittest.main()
