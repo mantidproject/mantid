@@ -202,6 +202,8 @@ void ElasticWindow::exec() {
     convUnitQ2->execute();
     outputQSquared = convUnitQ2->getProperty("OutputWorkspace");
   }
+  auto yLabel = outputQSquared->YUnitLabel();
+  outputQSquared->setYUnitLabel("ln(" + yLabel + ")");
 
   setProperty("OutputInQ", outputQ);
   setProperty("OutputInQSquared", outputQSquared);

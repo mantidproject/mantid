@@ -56,13 +56,15 @@ class MultiThreadedLoadNeXusTest(MantidSystemTest):
     NTHREADS = 2
 
     def skipTests(self):
-        """HDF5 is currently not built in threadsafe mode on RHEL"""
+        """HDF5 is currently not built in threadsafe mode on RHEL or macOS"""
         # Ideally this would be a capability check but that's very difficult as
         # the RHEL library doesn't have the H5is_library_threadsafe function
         if sys.platform == 'linux':
             distro = linux_distro_description().lower()
             is_redhat_like = [name in distro for name in ('red hat', 'centos', 'fedora')]
             return any(is_redhat_like)
+        elif sys.platform == 'darwin':
+            return True
         else:
             return False
 

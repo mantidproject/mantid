@@ -55,6 +55,8 @@ Improvements
 - The ConvFit tab within the Indirect Data Analysis interface will now output convolved members by default.
 - Added a Help option to the right-click menu in the function browser (in full function view) which
   brings up a relevant documentation page describing the function.
+- The eq2 workspace output from the Indirect Data analysis Elwin tab now accurately has
+  the Y axis label as being the natural log of eq1.
 
 Bug Fixes
 #########
