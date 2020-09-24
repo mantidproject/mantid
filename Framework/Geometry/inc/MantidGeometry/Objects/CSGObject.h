@@ -80,7 +80,7 @@ public:
   const std::string &id() const override { return m_id; }
 
   void setName(const int objNum) { m_objNum = objNum; } ///< Set Name
-  int getName() const override { return m_objNum; } ///< Get Name
+  int getName() const override { return m_objNum; }     ///< Get Name
 
   void setMaterial(const Kernel::Material &material) override;
   const Kernel::Material &material() const override;
