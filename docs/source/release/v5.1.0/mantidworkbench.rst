@@ -8,14 +8,14 @@ Workbench Changes
 
 
 New and Improved
-################
+----------------
 
 .. figure:: ../../images/drill_release.png
    :align: right
    :width: 550px
 
 Interfaces
-----------
+##########
 
 - **DrILL interface: Spreadsheet based data processing interface is created for ILL data reduction. 
   SANS and reflectometry are currently supported. See** :ref:`DrILL documentation <DrILL-ref>`
@@ -28,7 +28,7 @@ Interfaces
 
 
 Sample Logs Dialog
-------------------
+##################
 
 .. figure:: ../../images/wb_invalid_log_shading.png
    :align: right
@@ -40,7 +40,7 @@ Sample Logs Dialog
 - Now the arrow keys can be used to move between logs.
 
 Plotting
---------
+########
 
 - :ref:`3D plots (surface, contour and wireframe) <3D_Plots>` **can now be created in Workbench.**
 
@@ -149,7 +149,7 @@ Plotting
 
 
 User Settings
--------------
+#############
 
 - **User settings can now be saved and loaded from a file to enable sharing with others.**
 - Any changes in the settings menu that require a restart (currently only changing the default font) will be detailed in
@@ -173,7 +173,7 @@ User Settings
    :width: 400px
 
 Instrument Viewer
------------------
+#################
 
 - **Added a circular sector shape in the Pick and Mask tab.**
 - The instrument viewer now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
@@ -188,7 +188,7 @@ Instrument Viewer
 
 
 Misc
-----
+####
 
 - Added a Clear button to the workspaces toolbox which removes all workspaces from the tree including hidden ones
 - The workbench launch scripts have been replaced by an executable on macOS & Windows. On Windows this will stop virus scanners
@@ -197,27 +197,28 @@ Misc
 - Slow running algorithms will now display an estimated time to completion in their progress bars.
 - Algorithm Dialogs with a Combo box (Drop-down list) for workspace selection, are now editable to support searching and autocompletion.
 - Added an option to matrix workspaces to export bins and spectra to a table workspace.
-- `TableWorkspaces` can now have columns containing errors linked to corresponding columns containing values, using the `setLinkedYCol(errColumn, dataColumn)`.
+- ``TableWorkspaces`` can now have columns containing errors linked to corresponding columns containing values, using the ``setLinkedYCol(errColumn, dataColumn)``.
 - Use Jemalloc for memory allocation on Linux so memory can be released to the system.
 
-**Launch**
-
+Launch
+^^^^^^
 - There is a new profiling option in the workbench launch script, allowing for timing of start-up and other internal processes.
 - Improved loading of python plugins at start-up on slow disks.
 - User data directories are no longer checked at start-up, reducing launch times with slow network drives.
 
-**Scripting**
+Scripting
+^^^^^^^^^^^
 
 - Code completions are now loaded when the code editor is first changed.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
-- When a running script is aborted, Mantid will automatically attempt to cancel the current algorithm rather than wait for it to complete. IOn some cases, this can result a lot of time saved!
+- When a running script is aborted, Mantid will automatically attempt to cancel the current algorithm rather than wait for it to complete. In some cases, this can result a lot of time saved!
 
 
 Bugfixes
-########
+--------
 
 General
--------
+#######
 
 - Workbench launch is no longer blocked when the Process ID assigned by project recovery has been reassigned to another programme.
 - Improved the handling of ``WorkspaceSingleValue`` workspaces in workbench. This fixes a crash which occurred when interacting with workspaces of this type.
@@ -232,7 +233,7 @@ General
 - There is now a warning if ``File > Generate Recovery Script`` is executed with no workspaces present.
 
 Plotting
---------
+########
 
 - ``plt.show()`` now shows the most recently created figure.
 - The logs from a multi-dimensional workspace (that combines several different original workspaces) can be successfully plotted.
@@ -245,7 +246,8 @@ Plotting
 - The plot toolbar now shows the correct toolbar buttons for 3D plots.
 - Reduce log level of project recovery when it fails to save a plot correctly, from warning to debug, to avoid excess messages in the console.
 
-**Colorfill Plots**
+Colorfill Plots
+^^^^^^^^^^^^^^^
 
 - The scale of the color bars on colorfill plots of ragged workspaces now uses the maximum and minimum values of the data.
 - Being able to zoom in and out of colorbars on colorfill plots has been disabled.
@@ -263,7 +265,7 @@ Plotting
 - Changing the normalisation and scale on colorfill plots now safely handles negative limits.
 
 Fitting
--------
+#######
 
 - Defining a new Fit Function after deleting a plot is now handled safely.
 - The plot guess of the ``Bk2BkExpConvPV`` is now correct.

@@ -12,7 +12,7 @@ Concepts
 New Algorithms
 --------------
 
-- :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` will calculate all 4 terms in self attenuation corrections following the Paalman and Pings formalism. Simple shapes are supported: ``FlatPlate``, ``Cylinder``, ``Annulus``. Both elastic and inelastic, as well as direct and indirect geometries, are supported.
+- :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` will calculate all 4 terms in self attenuation corrections following the Paalman and Pings formalism. Simple shapes are supported: ``FlatPlate``, ``Cylinder``, and ``Annulus``. Both elastic and inelastic, as well as direct and indirect geometries, are supported.
 - :ref:`ISISJournalGetExperimentRuns <algm-ISISJournalGetExperimentRuns>` returns run information for a particular experiment from ISIS journal files.
 - :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` reads raw NeXuS ILL files for D7 instrument data.
 
@@ -29,15 +29,16 @@ Algorithms
   - This algorithm now calculates the error on the absorption correction factors based on the spread of the attenuation factors across the simulated paths and the number of simulated paths. The error from any spatial interpolation and any wavelength interpolation performed is also included.
   - The random seed is now incremented for each detector.
   - Bug fixed where setting the ``ResimulateTracksForDifferentWavelengths`` parameter to True was ignored.
+  - Added support for a Circular Beam Profile.
 
-- :ref:`SetSample <algm-SetSample>` is extended to support composite shapes, such as FlatPlateHolder and HollowCylinderHolder. Also, the input validation is made more stringent.
+- :ref:`SetSample <algm-SetSample>` is extended to support composite shapes, such as ``FlatPlateHolder`` and ``HollowCylinderHolder``. Also, the input validation is made more stringent.
 - Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks workspace to be added to that workspace.
 
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can also check the Error axis for unwanted values if the appropriate checkbox is ticked.
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has the following updates:
 
   - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
-  - A new Operator option has been added `NotFinite` that allows you to mask detectors that contain infinite or `NaN <https://en.wikipedia.org/wiki/NaN>`_ values.
+  - A new Operator option has been added ``NotFinite`` that allows you to mask detectors that contain infinite or `NaN <https://en.wikipedia.org/wiki/NaN>`_ values.
 
 - A form of reversible masking that could lead to misleading and incorrect results has been removed from Mantid,
   this means that ClearMaskedSpectra is no longer necessary after calling :ref:`MaskInstrument <algm-MaskInstrument>` and :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>`.
@@ -53,7 +54,7 @@ Algorithms
 
 - Add parameters to :ref:`LoadSampleShape <algm-LoadSampleShape>` to allow the mesh in the input file to be rotated and/or translated
 - Added alias for :ref:`GeneratePythonScript <algm-generatePythonScript>` as **ExportHistory**.
-- :ref:`ExtractFFTSpectrum <algmExtractFFTSpectrum>` has extra properties (Shift, AutoShift, and AcceptXRoundingErrors) to reflect those of the underlying FFT.
+- :ref:`ExtractFFTSpectrum <algm-ExtractFFTSpectrum>` has extra properties (Shift, AutoShift, and AcceptXRoundingErrors) to reflect those of the underlying FFT.
 
 
 Data Handling
@@ -75,7 +76,7 @@ Data Handling
    
    An example of a CAD 3D Geometry - Not typically found on beamlines
 
-- **The sample environment xml file now supports the geometry being supplied in the form of a .3mf format file (so far on the Windows platform only). Previously it only supported** ``.stl`` **files. The **``.3mf`` **format is a 3D printing format that allows multiple mesh objects to be stored in a single file that can be generated from many popular CAD applications. As part of this change the algorithms** :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` **and** :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` **have been updated to also support the .3mf format**
+- **The sample environment xml file now supports the geometry being supplied in the form of a .3mf format file (so far on the Windows platform only). Previously it only supported** ``.stl`` **files. The** ``.3mf`` **format is a 3D printing format that allows multiple mesh objects to be stored in a single file that can be generated from many popular CAD applications. As part of this change the algorithms** :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` **and** :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` **have been updated to also support the .3mf format.**
 
 - Nexus log data alarms are now supported by Mantid. Log data that is marked as invalid will trigger a warning in the log and be filtered by default.  If the entire log is marked as invalid, then the values will be used as unfiltered as no better values exist, but the warning will still appear in the log.
 - A new Instrument Definition File for NIMROD is now shipped with Mantid, replacing the existing definition.
@@ -130,7 +131,7 @@ Bugfixes
 - Running :ref:`algm-ExtractFFTSpectrum` with only a real input, no longer produces a blank output at the end of the workspace.
 - :ref:`algm-ExtractFFTSpectrum` now gives the correct units.
 - Error values no longer tend to zero, after multiple instances of :ref:`Rebin2D <algm-Rebin2D>` on the same workspace.
-
+- LoadRaw no longer tries to load non-existent log files that were listed in the alternate data stream.
 
 Deprecations
 ------------

@@ -151,11 +151,11 @@ Mantid Workbench Changes
 .. contents:: Table of Contents
    :local:
 
-Improvements
-############
+New and Improved
+----------------
 
 Bugfixes
-########
+--------
 '''
     }
 
