@@ -14,7 +14,6 @@ from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
 from mantid.kernel import logger
 from mantid.api import MatrixWorkspace
-from mantid.api import IMDHistoWorkspace
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import load_ui
