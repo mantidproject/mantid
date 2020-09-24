@@ -8,6 +8,11 @@ MuSR Changes
 Muon Analysis 2 and Frequency Domain Analysis
 #############################################
 
+.. figure:: ../../images/MuonAnalysis_release_5_1_0.png
+   :class: screenshot
+   :width: 700px
+   :align: right
+
 New Features
 ------------
 - The plotting logic within the Muon Analysis 2 GUI has updated to prevent all the workspaces from a

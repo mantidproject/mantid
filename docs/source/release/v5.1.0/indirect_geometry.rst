@@ -2,18 +2,16 @@
 Indirect Geometry Changes
 =========================
 
-.. figure:: ../../images/Indirect_Data_Analysis_5_1_0.png
-   :class: screenshot
-   :width: 385px
-   :align: right
-
-   The Engineering Diffraction GUI fitting tab
-
 .. contents:: Table of Contents
    :local:
 
 Improvements
 ############
+
+.. figure:: ../../images/Indirect_Data_Analysis_5_1_0.png
+   :class: screenshot
+   :width: 700px
+   :align: right
 
 - Processing speed of IndirectDataReduction when open has improved.
 - Scientific constraints have been added to all fitting tabs in IndirectDataAnalysis.
@@ -60,6 +58,11 @@ Improvements
 
 Bug Fixes
 #########
+
+.. figure:: ../../images/Indirect_Data_Analysis_5_1_0.png
+   :class: screenshot
+   :width: 700px
+   :align: right
 
 - The :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` algorithm will
   now work correctly for an annular sample in a container.

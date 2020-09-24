@@ -41,7 +41,7 @@ Engineering Diffraction
 
 .. figure:: ../../images/EnggDiff_5_1_0.png
    :class: screenshot
-   :width: 385px
+   :width: 700px
    :align: right
 
 New features
