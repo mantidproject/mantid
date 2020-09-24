@@ -133,6 +133,7 @@ Bugfixes
 - Error values no longer tend to zero, after multiple instances of :ref:`Rebin2D <algm-Rebin2D>` on the same workspace.
 - LoadRaw no longer tries to load non-existent log files that were listed in the alternate data stream.
 
+
 Deprecations
 ------------
 - **CalculateMonteCarloAbsorption** and **SimpleShapeMonteCarloAbsorption** are deprecated and functionality is replaced by the new :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`. While the new one provides more complete and more correct calculation, it can also fall back to the simpler calculation if the container is not specified.
