@@ -187,6 +187,21 @@ Instrument Viewer
 - Failing to open for a certain workspace now outputs useful error messages.
 
 
+Launch
+######
+- There is a new profiling option in the workbench launch script, allowing for timing of start-up and other internal processes.
+- Improved loading of python plugins at start-up on slow disks.
+- User data directories are no longer checked at start-up, reducing launch times with slow network drives.
+
+
+Scripting
+#########
+
+- Code completions are now loaded when the code editor is first changed.
+- Variables assigned in python scripts are now cleared when a script is run in its entirety.
+- When a running script is aborted, Mantid will automatically attempt to cancel the current algorithm rather than wait for it to complete. In some cases, this can result a lot of time saved!
+
+
 Misc
 ####
 
@@ -199,19 +214,6 @@ Misc
 - Added an option to matrix workspaces to export bins and spectra to a table workspace.
 - ``TableWorkspaces`` can now have columns containing errors linked to corresponding columns containing values, using the ``setLinkedYCol(errColumn, dataColumn)``.
 - Use Jemalloc for memory allocation on Linux so memory can be released to the system.
-
-Launch
-^^^^^^
-- There is a new profiling option in the workbench launch script, allowing for timing of start-up and other internal processes.
-- Improved loading of python plugins at start-up on slow disks.
-- User data directories are no longer checked at start-up, reducing launch times with slow network drives.
-
-Scripting
-^^^^^^^^^^^
-
-- Code completions are now loaded when the code editor is first changed.
-- Variables assigned in python scripts are now cleared when a script is run in its entirety.
-- When a running script is aborted, Mantid will automatically attempt to cancel the current algorithm rather than wait for it to complete. In some cases, this can result a lot of time saved!
 
 
 Bugfixes
