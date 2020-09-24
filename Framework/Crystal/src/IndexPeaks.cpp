@@ -65,23 +65,27 @@ struct IndexPeaksArgs {
     std::vector<V3D> modVectorsToUse;
     modVectorsToUse.reserve(3);
     bool crossTermToUse{false};
-    if (maxOrderFromAlg > 0) {
-      // Use inputs from algorithm
-      maxOrderToUse = maxOrderFromAlg;
-      crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
-      modVectorsToUse = validModulationVectors(
-          alg.getProperty(ModulationProperties::ModVector1),
-          alg.getProperty(ModulationProperties::ModVector2),
-          alg.getProperty(ModulationProperties::ModVector3));
-    } else {
+
+    // default behavior: map everything automatically
+    maxOrderToUse = maxOrderFromAlg;
+    crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
+    modVectorsToUse =
+        addModulationVectors(alg.getProperty(ModulationProperties::ModVector1),
+                             alg.getProperty(ModulationProperties::ModVector2),
+                             alg.getProperty(ModulationProperties::ModVector3));
+
+    // deal with special cases
+    if (maxOrderFromAlg <= 0) {
       // Use lattice definitions if they exist
       const auto &lattice = peaksWS->sample().getOrientedLattice();
-      maxOrderToUse = lattice.getMaxOrder();
+      crossTermToUse = lattice.getCrossTerm();
+      maxOrderToUse = lattice.getMaxOrder(); // the lattice can return a 0 here
+      // if lattice has maxOrder, we will use the modVec from it, otherwise
+      // stick to the input got from previous assignment
       if (maxOrderToUse > 0) {
         modVectorsToUse = validModulationVectors(
             lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
       }
-      crossTermToUse = lattice.getCrossTerm();
     }
 
     return {peaksWS,
