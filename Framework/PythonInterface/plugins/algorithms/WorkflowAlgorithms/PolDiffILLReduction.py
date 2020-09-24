@@ -222,8 +222,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc="Whether to perform component separation and what type of method to use.")
 
         self.declareProperty(name="SampleGeometry",
-                             defaultValue="FlatPlate",
-                             validator=StringListValidator(["FlatPlate", "Cylinder", "Annulus", "Custom", "None"]),
+                             defaultValue="None",
+                             validator=StringListValidator(["None", "FlatPlate", "Cylinder", "Annulus", "Custom"]),
                              direction=Direction.Input,
                              doc="Sample geometry for self-attenuation correction to be applied.")
 
