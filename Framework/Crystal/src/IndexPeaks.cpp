@@ -82,8 +82,14 @@ struct IndexPeaksArgs {
       maxOrderToUse = lattice.getMaxOrder(); // the lattice can return a 0 here
       // if lattice has maxOrder, we will use the modVec from it, otherwise
       // stick to the input got from previous assignment
+      // NOTE:
+      // The non-zero modVectors check are turned off in the initilization step
+      // as it will lead to unexpected errors for users not relying on this
+      // feature.  For projects/processing that relyies on non-zero modVectors,
+      // it is the application responsibility to ensure that non-zero vectors
+      // are passed to IndexPeaks.
       if (maxOrderToUse > 0) {
-        modVectorsToUse = validModulationVectors(
+        modVectorsToUse = addModulationVectors(
             lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
       }
     }
