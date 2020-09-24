@@ -932,51 +932,6 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
 
-# Testing
-set(TEST_FILES
-    test/AlgorithmHintStrategyTest.h
-    test/BatchAlgorithmRunnerTest.h
-    test/FileDialogHandlerTest.h
-    test/FindFilesThreadPoolManagerTest.h
-    test/FindFilesWorkerTest.h
-    test/FitPropertyBrowserTest.h
-    test/FunctionModelTest.h
-    test/FunctionMultiDomainPresenterTest.h
-    test/FunctionBrowserUtilsTest.h
-    test/LogValueFinderTest.h
-    test/InterfaceManagerTest.h
-    test/NonOrthogonalTest.h
-    test/ParseKeyValueStringTest.h
-    test/PlotAxisTest.h
-    test/ProgressableViewTest.h
-    test/ProjectSaveModelTest.h
-    test/ProjectSavePresenterTest.h
-    test/RepoModelTest.h
-    test/SelectionNotificationServiceTest.h
-    test/SignalBlockerTest.h
-    test/TrackedActionTest.h
-    test/QtJSONUtilsTest.h
-    test/Batch/BuildSubtreeItemsTest.h
-    test/Batch/ExtractSubtreesTest.h
-    test/Batch/FindSubtreeRootsTest.h
-    test/Batch/QtAdaptedModelTest.h
-    test/Batch/RowLocationTest.h
-    test/DataProcessorUI/CommandsTest.h
-    test/DataProcessorUI/GenerateNotebookTest.h
-    test/DataProcessorUI/GenericDataProcessorPresenterTest.h
-    test/DataProcessorUI/OneLevelTreeManagerTest.h
-    test/DataProcessorUI/PostprocessingAlgorithmTest.h
-    test/DataProcessorUI/PreprocessingAlgorithmTest.h
-    test/DataProcessorUI/PreprocessMapTest.h
-    test/DataProcessorUI/ProcessingAlgorithmBaseTest.h
-    test/DataProcessorUI/ProcessingAlgorithmTest.h
-    test/DataProcessorUI/QOneLevelTreeModelTest.h
-    test/DataProcessorUI/QTwoLevelTreeModelTest.h
-    test/DataProcessorUI/TwoLevelTreeManagerTest.h
-    test/DataProcessorUI/WhiteListTest.h
-    test/WorkspacePresenter/ADSAdapterTest.h
-    test/WorkspacePresenter/WorkspacePresenterTest.h)
-
 set(
   TEST_FILES
   test/AlgorithmHintStrategyTest.h
