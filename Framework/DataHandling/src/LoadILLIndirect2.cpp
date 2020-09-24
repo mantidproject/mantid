@@ -167,7 +167,7 @@ std::string LoadILLIndirect2::getDataPath(NeXus::NXEntry &entry) {
     } else if (entry.containsGroup("dataDiffDet")) {
       return "dataDiffDet/DiffDet_data";
     } else {
-      throw std::runtime_error("Cannot find data path in the Nexus file.");
+      throw std::runtime_error("Cannot find diffraction detector data in the Nexus file. Make sure they exist or load the spectrometer data instead.");
     }
   } else {
     return "data";
