@@ -144,11 +144,10 @@ double loadSampleLog(std::string const &filename,
   loader->execute();
 
   if (doesExistInADS(temporaryWorkspace)) {
-
     return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames,
                         defaultValue);
   } else {
-    return -1;
+    return defaultValue;
   }
 }
 
