@@ -17,14 +17,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     """
 
     # list of supported instruments
-    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'D11', 'D16', 'D22', 'D33', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'MANDI', 'NOMAD',
+    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'D11', 'D11lr', 'D16', 'D22',
+                       'D22lr', 'D33', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'MANDI', 'NOMAD',
                        'POWGEN', 'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
 
     instname = None
     instrument = None
     bankmin = defaultdict(lambda: 1, {'D33': 0, 'SEQUOIA': 23, 'TOPAZ': 10})  # default is one
-    bankmax = {'ARCS': 115, 'BIOSANS': 88, 'CG2': 48, 'CG3': 88, 'CHESS': 163, 'CNCS': 50, 'CORELLI': 91, 'D11': 1,
-               'D16': 1, 'D22': 1, 'D33': 4, 'EQ-SANS': 48, 'GPSANS': 48, 'HYSPEC': 20, 'MANDI': 59, 'NOMAD': 99,
+    bankmax = {'ARCS': 115, 'BIOSANS': 88, 'CG2': 48, 'CG3': 88, 'CHESS': 163, 'CNCS': 50, 'CORELLI': 91, 'D11': 1, 'D11lr': 1,
+               'D16': 1, 'D22': 1, 'D22lr': 1, 'D33': 4, 'EQ-SANS': 48, 'GPSANS': 48, 'HYSPEC': 20, 'MANDI': 59, 'NOMAD': 99,
                'POWGEN': 300, 'REF_M': 1, 'SEQUOIA': 150, 'SNAP': 64, 'SXD': 11, 'TOPAZ': 59, 'WAND': 8, 'WISH': 10}
 
     def category(self):
@@ -262,7 +263,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             banks = ["back_detector", "front_detector_left", "front_detector_right", "front_detector_bottom",
                      "front_detector_top"]
             return banks[banknum]
-        elif self.instname in ["D11", "D22", "D16"]:
+        elif self.instname in ["D11", "D11lr", "D22", "D22lr", "D16"]:
             return "detector"
         else:
             return "bank" + str(banknum)
@@ -274,7 +275,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
         bankIndices = []
         known_banks = {}  # name: index
-        print(bankNames)
         for bank in bankNames:
             if bank in known_banks:  # use the known index
                 bankIndices.append(known_banks[bank])
