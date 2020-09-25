@@ -46,6 +46,7 @@ instruments = {
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians
         'scattering_angle_range': (math.pi * (10 / 180), math.pi / 2),
         # 'n_sampling_angles': 10,  # Could need something like this for sampling?
+        'default_setting': 'Cu(220)',
         'settings': {'Cu(220)': {'Ei_range_meV': (26, 500), 'ei_resolution': 0.025},
                      'Cu(331)': {'Ei_range_meV': (67, 500), 'ei_resolution': 0.0175},
                      'Si(311)': {'Ei_range_meV': (16.5, 60), 'abs_resolution_meV': 0.8},

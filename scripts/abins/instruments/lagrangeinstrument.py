@@ -15,13 +15,22 @@ class LagrangeInstrument(IndirectInstrument):
     """
     parameters = abins.parameters.instruments['Lagrange']
 
+    _q_model_warning_given = False
+
     def __init__(self, name, setting='Cu(220)'):
         super().__init__(name=name, setting=setting)
 
         if setting in self.parameters['settings']:
             self._setting = setting
+        elif setting == '':
+            self._setting = self.parameters['default_setting']
+            print(f'No setting specified for instrument {self.get_name()}. '
+                  f'Using default "{self._setting}". Supported settings: '
+                  + ', '.join(sorted(self.parameters['settings'].keys())))
+
+
         else:
-            raise ValueError('Setting "{}" is uknown for Lagrange '
+            raise ValueError('Setting "{}" is unknown for Lagrange '
                              'instrument. Supported settings: {}'.format(
                                  setting,
                                  ', '.join(sorted(self.parameters['settings'].keys()))))
@@ -33,8 +42,7 @@ class LagrangeInstrument(IndirectInstrument):
 
         return frequencies * ei_resolution + abs_resolution_cm
 
-    @classmethod
-    def calculate_q_powder(cls, input_data=None):
+    def calculate_q_powder(self, input_data=None):
         """Calculates squared Q vectors for Lagrange.
 
         By the cosine law Q^2 = k_f^2 + k_i^2 - 2 k_f k_i cos(theta)
@@ -52,8 +60,10 @@ class LagrangeInstrument(IndirectInstrument):
             constrained by conservation of mass/momentum and TOSCA geometry
         """
 
-        print("WARNING: WORK IN PROGRESS. THIS Q POWDER MODEL IS FOR TOSCA NOT LAGRANGE")
-        k2_i = (input_data + cls.parameters['final_neutron_energy']) * WAVENUMBER_TO_INVERSE_A
-        k2_f = cls.parameters['final_neutron_energy'] * WAVENUMBER_TO_INVERSE_A
-        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * cls.parameters['cos_scattering_angle']
+        if not self._q_model_warning_given:
+            print("WARNING: WORK IN PROGRESS. THIS Q POWDER MODEL IS FOR TOSCA NOT LAGRANGE")
+            self._q_model_warning_given = True
+        k2_i = (input_data + self.parameters['final_neutron_energy']) * WAVENUMBER_TO_INVERSE_A
+        k2_f = self.parameters['final_neutron_energy'] * WAVENUMBER_TO_INVERSE_A
+        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * self.parameters['cos_scattering_angle']
         return result
