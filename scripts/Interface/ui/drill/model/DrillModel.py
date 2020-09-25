@@ -336,12 +336,16 @@ class DrillModel(QObject):
                 of them uses the setting name as key. The type is a str:
                 "file", "workspace", "combobox", "bool" or "string".
         """
-        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
-        alg.initialize()
-
         types = dict()
         values = dict()
         docs = dict()
+
+        if not self.algorithm:
+            return types, values, docs
+
+        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+        alg.initialize()
+
         for s in self.settings:
             p = alg.getProperty(s)
             if (isinstance(p, FileProperty)):
