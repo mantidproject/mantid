@@ -17,7 +17,7 @@ New and Improved
 Interfaces
 ##########
 
-- **DrILL interface: Spreadsheet based data processing interface is created for ILL data reduction. 
+- **DrILL interface: Spreadsheet based data processing interface is created for ILL data reduction.
   SANS and reflectometry are currently supported. See** :ref:`DrILL documentation <DrILL-ref>`
   **for more information.**
 - There is now a Project Saving dialog that allows you to choose between saving *all* workspaces or *only altered* workspaces.
@@ -57,7 +57,7 @@ Plotting
 
     '''2D Plotting - Colorfill and Contour'''
 
-    # Get a figure and axes for 
+    # Get a figure and axes for
     figC,axC = plt.subplots(ncols=2, subplot_kw={'projection':'mantid'}, figsize = (6,4))
 
     # Plot the data as a 2D colorfill: IMPORTANT to set origin to lower
@@ -186,6 +186,10 @@ Instrument Viewer
 - Instrument view now updates on zoom with a mouse wheel.
 - Failing to open for a certain workspace now outputs useful error messages.
 
+Sliceviewer
+###########
+
+In this release many improvements have been made to Sliceviewer and are listed :doc:`separately <sliceviewer>`.
 
 Launch
 ######
