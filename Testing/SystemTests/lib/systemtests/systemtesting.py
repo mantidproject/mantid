@@ -773,7 +773,7 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
     def __init__(self,
-                 test_loc=None,
+                 mantid_config,
                  runner=None,
                  output=[TextResultReporter()],
                  quiet=False,
@@ -796,7 +796,7 @@ class TestManager(object):
         self._clean = clean
         self._showSkipped = showSkipped
 
-        self._testDir = test_loc
+        self._config = mantid_config
         self._quiet = quiet
         self._testsInclude = re.compile(testsInclude) if testsInclude is not None else None
         self._testsExclude = re.compile(testsExclude) if testsExclude is not None else None
@@ -834,20 +834,20 @@ class TestManager(object):
 
     def __generateTestList(self, test_sub_directory):
         # If given option is a directory
-        self._testDir = os.path.join(self._testDir, test_sub_directory)
-        if os.path.isdir(self._testDir):
-            test_dir = os.path.abspath(self._testDir).replace('\\', '/')
+        test_directory = os.path.join(self._config.testDir, test_sub_directory)
+        if os.path.isdir(test_directory):
+            test_dir = os.path.abspath(test_directory).replace('\\', '/')
             sys.path.append(test_dir)
             self._runner.setTestDir(test_dir)
             all_loaded, full_test_list = self.loadTestsFromDir(test_dir)
         else:
-            if not os.path.exists(self._testDir):
-                print('Cannot find file ' + self._testDir + '.py. Please check the path.')
+            if not os.path.exists(test_directory):
+                print('Cannot find file ' + test_directory + '.py. Please check the path.')
                 exit(2)
-            test_dir = os.path.abspath(os.path.dirname(self._testDir)).replace('\\', '/')
+            test_dir = os.path.abspath(os.path.dirname(test_directory)).replace('\\', '/')
             sys.path.append(test_dir)
             self._runner.setTestDir(test_dir)
-            all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
+            all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(test_directory))
 
         if not all_loaded:
             if self._ignore_failed_imports:
@@ -924,8 +924,8 @@ class TestManager(object):
 
             fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
-            sub_directory = self._testDir.split("\\")[-1]
-            with open(os.path.join(os.path.dirname(self._testDir), sub_directory, fname), "r") as pyfile:
+            sub_directory = test_directory.split("\\")[-1]
+            with open(os.path.join(os.path.dirname(test_directory), sub_directory, fname), "r") as pyfile:
                 for line in pyfile.readlines():
 
                     # Search for all instances of '.nxs' or '.raw'
@@ -1345,8 +1345,10 @@ def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, re
             else:
                 raise RuntimeError("Expected a tests directory at '%s' but it is not a directory." % test_directory)
 
+            runner.setTestDir(test_directory)
+
             # Create a TestManager, giving it a pre-compiled list_of_tests
-            mgr = TestManager(test_loc=test_directory,
+            mgr = TestManager(mantid_config=mtdconf,
                               runner=runner,
                               output=[reporter],
                               quiet=options.quiet,

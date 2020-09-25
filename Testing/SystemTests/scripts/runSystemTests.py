@@ -181,7 +181,7 @@ def main():
                                       exec_args=options.execargs.lstrip(),
                                       escape_quotes=True)
 
-    tmgr = systemtesting.TestManager(test_loc=mtdconf.testDir,
+    tmgr = systemtesting.TestManager(mantid_config=mtdconf,
                                      runner=runner,
                                      quiet=options.quiet,
                                      testsInclude=options.testsInclude,
@@ -242,7 +242,7 @@ def main():
                                for k in sorted(test_counts, key=test_counts.get, reverse=True)]
         counter = 0
         for key, value in reverse_sorted_dict:
-            tests_dict[str(counter)] = tuple(test_sub_directories[key], test_list[key])
+            tests_dict[str(counter)] = tuple([test_sub_directories[key], test_list[key]])
             counter += 1
             if not options.quiet:
                 print("Test module {} has {} tests:".format(key, value))
