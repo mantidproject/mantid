@@ -109,6 +109,27 @@ validModulationVectors(const std::vector<double> &modVector1,
 }
 
 /**
+ * Direct add modulation a list to return.
+ * @param modVector1 List of 3 doubles specifying an offset
+ * @param modVector2 List of 3 doubles specifying an offset
+ * @param modVector3 List of 3 doubles specifying an offset
+ * @return A list of valid modulation vectors
+ */
+std::vector<Kernel::V3D>
+addModulationVectors(const std::vector<double> &modVector1,
+                     const std::vector<double> &modVector2,
+                     const std::vector<double> &modVector3) {
+  std::vector<V3D> modVectors;
+  auto addVec = [&modVectors](const auto &modVec) {
+    modVectors.emplace_back(V3D(modVec[0], modVec[1], modVec[2]));
+  };
+  addVec(modVector1);
+  addVec(modVector2);
+  addVec(modVector3);
+  return modVectors;
+}
+
+/**
  * @param maxOrder Integer specifying the multiples of the
  * modulation vector.
  * @param modVectors A list of modulation vectors form the user

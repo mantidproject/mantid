@@ -46,8 +46,6 @@ def qapplication():
     if app is None:
         # attributes that must be set before creating QApplication
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
-        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 
         argv = sys.argv[:]
         argv[0] = APPNAME  # replace application name
