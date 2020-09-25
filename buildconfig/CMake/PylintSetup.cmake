@@ -28,6 +28,7 @@ if ( PYLINT_FOUND )
         Framework/PythonInterface/plugins
         scripts
         Testing/SystemTests/tests/framework
+        Testing/SystemTests/tests/qt
         tools
         docs/sphinxext/mantiddoc
   )

@@ -181,7 +181,7 @@ def main():
                                       exec_args=options.execargs.lstrip(),
                                       escape_quotes=True)
 
-    tmgr = systemtesting.TestManager(mantid_config=mtdconf,
+    tmgr = systemtesting.TestManager(test_loc=mtdconf.testDir,
                                      runner=runner,
                                      quiet=options.quiet,
                                      testsInclude=options.testsInclude,
