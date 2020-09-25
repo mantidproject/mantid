@@ -70,9 +70,10 @@ class DrillModelTest(unittest.TestCase):
         self.addCleanup(patch.stop)
 
         # mock config
+        d = {'default.instrument': 'i1', 'default.facility': 'ILL'}
         patch = mock.patch('Interface.ui.drill.model.DrillModel.config')
         self.mConfig = patch.start()
-        self.mConfig.__getitem__.return_value = "i1"
+        self.mConfig.__getitem__.side_effect = d.__getitem__
         self.addCleanup(patch.stop)
 
         # mock logger
