@@ -32,6 +32,8 @@ Improvements
 Bugfixes
 ########
 - The Fourier filter on `Polaris.create_total_scattering_pdf` no longer produces a jagged mark at the filter limit value.
+- The fourier filter on Polaris.create_total_scattering_pdf no longer produces a jagged mark at the cut off point.
+- Calling IndexPeaks with default modulation vectors `(0,0,0)` and `SaveModulationInfo=True` will no longer result in segmentation fault.
 
 Engineering Diffraction
 -----------------------
