@@ -811,12 +811,9 @@ class TestManager(object):
         self._tests = list_of_tests
 
     def generateMasterTestList(self, test_sub_directories):
-        mod_counts = dict()
-        mod_tests = dict()
-        mod_sub_directories = dict()
-        test_stats = [0, 0, 0]
-        files_required_by_test_module = dict()
+        mod_counts, mod_tests, mod_sub_directories, mod_required_files = dict(), dict(), dict(), dict()
         data_file_lock_status = dict()
+        test_stats = [0, 0, 0]
 
         for sub_directory in test_sub_directories:
             counts, tests, sub_directories, stats, files_required, lock_status = self.__generateTestList(sub_directory)
@@ -826,15 +823,19 @@ class TestManager(object):
             test_stats[0] += stats[0]
             test_stats[1] = max(test_stats[1], stats[1])
             test_stats[2] += stats[2]
-            files_required_by_test_module.update(files_required)
+            mod_required_files.update(files_required)
             data_file_lock_status.update(lock_status)
 
-        return mod_counts, mod_tests, mod_sub_directories, test_stats, files_required_by_test_module, \
-            data_file_lock_status
+        if len(mod_tests.keys()) == 0:
+            print('No tests were found in the test directory {0}. Please ensure all test classes sub class '
+                  'systemtesting.MantidSystemTest.'.format(self._config.testDir))
+            exit(2)
 
-    def __generateTestList(self, test_sub_directory):
+        return mod_counts, mod_tests, mod_sub_directories, test_stats, mod_required_files, data_file_lock_status
+
+    def __generateTestList(self, sub_directory):
         # If given option is a directory
-        test_directory = os.path.join(self._config.testDir, test_sub_directory)
+        test_directory = os.path.join(self._config.testDir, sub_directory)
         if os.path.isdir(test_directory):
             test_dir = os.path.abspath(test_directory).replace('\\', '/')
             sys.path.append(test_dir)
@@ -863,11 +864,6 @@ class TestManager(object):
             if self.__shouldTest(t) or self._showSkipped:
                 reduced_test_list.append(t)
 
-        if len(reduced_test_list) == 0:
-            print('No tests defined in ' + test_dir +
-                  '. Please ensure all test classes sub class systemtesting.MantidSystemTest.')
-            exit(2)
-
         test_stats[0] = len(reduced_test_list)
         for t in reduced_test_list:
             test_stats[1] = max(test_stats[1], len(t._fqtestname))
@@ -891,7 +887,7 @@ class TestManager(object):
             else:
                 modcounts[key] = 1
                 modtests[key] = [t]
-                mod_sub_directories[key] = test_sub_directory
+                mod_sub_directories[key] = sub_directory
 
         # Now we scan each test module (= python file) and list all the data files
         # that are used by that module. The possible ways files are being specified
@@ -924,7 +920,6 @@ class TestManager(object):
 
             fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
-            sub_directory = test_directory.split("\\")[-1]
             with open(os.path.join(os.path.dirname(test_directory), sub_directory, fname), "r") as pyfile:
                 for line in pyfile.readlines():
 
@@ -1337,13 +1332,11 @@ def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, re
                       % (process_number, imodule, modname, len(local_test_list)))
                 sys.stdout.flush()
 
-            test_directory = os.path.join(mtdconf.testDir, test_sub_directory)
-            test_directory = os.path.abspath(test_directory)
+            test_directory = os.path.abspath(os.path.join(mtdconf.testDir, test_sub_directory))
             if os.path.isdir(test_directory):
-                # add location of the tests to the system path
                 sys.path.insert(0, test_directory)
             else:
-                raise RuntimeError("Expected a tests directory at '%s' but it is not a directory." % test_directory)
+                raise RuntimeError("Expected a tests directory at {0}.".format(test_directory))
 
             runner.setTestDir(test_directory)
 
