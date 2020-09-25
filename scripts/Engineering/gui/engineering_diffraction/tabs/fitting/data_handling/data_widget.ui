@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>472</width>
-    <height>257</height>
+    <width>1053</width>
+    <height>372</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -70,7 +70,7 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
-		<item row="2" column="1">
+        <item row="2" column="1">
          <widget class="QComboBox" name="combo_xunit">
           <item>
            <property name="text">
@@ -84,7 +84,7 @@ QGroupBox:title {
           </item>
          </widget>
         </item>
-        <item row="2" column="0" colspan="1">
+        <item row="2" column="0">
          <widget class="QCheckBox" name="check_addToPlot">
           <property name="text">
            <string>Add to Plot</string>
@@ -162,22 +162,22 @@ QGroupBox:title {
           <string>Plot</string>
          </property>
         </column>
-		<column>
+        <column>
          <property name="text">
           <string>Subtract BG</string>
          </property>
         </column>
-		<column>
+        <column>
          <property name="text">
           <string>Niter</string>
          </property>
         </column>
-		<column>
+        <column>
          <property name="text">
           <string>Xwindow</string>
          </property>
         </column>
-		<column>
+        <column>
          <property name="text">
           <string>SG</string>
          </property>
@@ -212,8 +212,11 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
-		<item row="0" column="2">
+        <item row="0" column="2">
          <widget class="QPushButton" name="button_plotBG">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Inspect Background</string>
           </property>

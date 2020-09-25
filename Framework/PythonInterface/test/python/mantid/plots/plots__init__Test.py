@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import matplotlib
+from matplotlib.backend_bases import MouseEvent
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
@@ -354,7 +355,7 @@ class Plots__init__Test(unittest.TestCase):
 
     def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(self):
         plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
-                        'contour', 'contourf', 'tricontour', 'tricontourf']
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                          DataY=[2, 3, 2, 3],
                                          DataE=[1, 2, 1, 2],
@@ -663,6 +664,26 @@ class Plots__init__Test(unittest.TestCase):
 
         # There should still be only two filled areas (one for each line)
         self.assertEqual(len(datafunctions.get_waterfall_fills(ax)), 2)
+
+    def test_imshow_with_origin_upper(self):
+        image = self.ax.imshow(self.ws2d_histo, origin="upper")
+
+        # 0,0 in ax coordinates is the bottom left of figure, add 0.5 to move into canvas
+        xy_pixels = self.ax.transAxes.transform((0, 0)) + (0.5, 0.5)
+        bottom_left_corner = MouseEvent("motion_notify_event", self.fig.canvas, x=xy_pixels[0], y=xy_pixels[1])
+
+        self.assertEqual(image.get_extent(), (10.0, 30.0, 9.0, 3.0))
+        self.assertEqual(image.get_cursor_data(bottom_left_corner), 3.0)
+
+    def test_imshow_with_origin_lower(self):
+        image = self.ax.imshow(self.ws2d_histo, origin="lower")
+
+        # 0,0 in ax coordinates is the bottom left of figure, add 0.5 to move into canvas
+        xy_pixels = self.ax.transAxes.transform((0, 0)) + (0.5, 0.5)
+        bottom_left_corner = MouseEvent("motion_notify_event", self.fig.canvas, x=xy_pixels[0], y=xy_pixels[1])
+
+        self.assertEqual(image.get_extent(), (10.0, 30.0, 3.0, 9.0))
+        self.assertEqual(image.get_cursor_data(bottom_left_corner), 2.0)
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {

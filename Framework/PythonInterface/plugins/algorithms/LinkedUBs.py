@@ -301,12 +301,12 @@ class LinkedUBs(DataProcessorAlgorithm):
             num_peaks_var = self._num_peaks + self._peak_increment * m
 
             # add q_lab and dpsacing values of found peaks to a list
-            qlabs_observed = np.array(self._observed_peaks.column(15))
-            dspacings_observed = np.array(self._observed_peaks.column(8))
+            qlabs_observed = np.array(self._observed_peaks.column("QLab"))
+            dspacings_observed = np.array(self._observed_peaks.column("DSpacing"))
 
             # sort the predicted peaks from largest to smallest dspacing
-            qlabs_predicted = np.array(predictor.column(15))
-            dspacings_predicted = np.array(predictor.column(8))
+            qlabs_predicted = np.array(predictor.column("QLab"))
+            dspacings_predicted = np.array(predictor.column("DSpacing"))
 
             # get the indexing list that sorts dspacing from largest to
             # smallest

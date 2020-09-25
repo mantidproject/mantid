@@ -49,7 +49,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'Run': '317370',
             'DirectRun': '317369',
             'OutputWorkspace': 'outWS',
-            'Theta': 30.2,
+            'AngleOption': 'UserAngle',
+            'Theta': 0.8,
             'rethrow': True,
             'child': True
         }
@@ -57,7 +58,7 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         self.checkOutput(mtd['outWS'], 1)
         self.assertAlmostEqual(mtd['outWS'].getItem(0).spectrumInfo().signedTwoTheta(0),
-                               2.*30.2*numpy.pi/180., delta=0.00001)
+                               2.*0.8*numpy.pi/180., delta=0.00001)
 
     def testSampleAngle(self):
         args = {
@@ -160,8 +161,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         self.assertEqual(algH.getPropertyValue(Prop.SLIT_NORM), 'Slit Normalisation AUTO')
         self.assertEqual(algH.getPropertyValue(Prop.FLUX_NORM_METHOD), 'Normalise To Time')
         self.assertEqual(algH.getPropertyValue(PropertyNames.CACHE_DIRECT_BEAM), '0')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.BKG_METHOD_DIRECT), 'Background Constant Fit')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.BKG_METHOD), 'Background Constant Fit')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.BKG_METHOD_DIRECT), 'Background Average')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.BKG_METHOD), 'Background Average')
         self.assertEqual(algH.getPropertyValue(PropertyNames.START_WS_INDEX_DIRECT), '0')
         self.assertEqual(algH.getPropertyValue(PropertyNames.START_WS_INDEX), '0')
         self.assertEqual(algH.getPropertyValue(PropertyNames.END_WS_INDEX_DIRECT), '255')
@@ -169,10 +170,10 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         self.assertEqual(algH.getPropertyValue(PropertyNames.SUM_TYPE), 'Incoherent')
         self.assertEqual(algH.getPropertyValue(PropertyNames.WAVELENGTH_LOWER), '0')
         self.assertEqual(algH.getPropertyValue(PropertyNames.WAVELENGTH_UPPER), '35')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.LOW_FRG_HALF_WIDTH), '0')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.HIGH_FRG_HALF_WIDTH), '0')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.LOW_FRG_HALF_WIDTH_DIRECT), '0')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.HIGH_FRG_HALF_WIDTH_DIRECT), '0')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.LOW_FRG_HALF_WIDTH), '1')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.HIGH_FRG_HALF_WIDTH), '1')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.LOW_FRG_HALF_WIDTH_DIRECT), '1')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.HIGH_FRG_HALF_WIDTH_DIRECT), '1')
 
     def checkOutput(self, ws_group, n_ws):
         self.assertTrue(isinstance(ws_group, WorkspaceGroup))

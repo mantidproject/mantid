@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
-#
-#
 import unittest
 
 from unittest import mock
@@ -77,6 +75,21 @@ class PythonFileInterpreterTest(unittest.TestCase):
         w._presenter.view.editor.hasSelectedText.return_value = False
         w.execute_async()
         self.assertFalse('x' in w._presenter.model._globals_ns.keys())
+
+    def test_connect_to_progress_reports_connects_sig_process_to_the_code_editor_progress(self):
+        w = PythonFileInterpreter()
+        w.editor = mock.MagicMock()
+        this = mock.MagicMock()
+
+        w.connect_to_progress_reports(this)
+        w.editor.progressMade.connect.assert_called_once()
+
+    def test_disconnect_from_progress_reports_attempts_to_disconnect_sig_process_from_the_code_editor(self):
+        w = PythonFileInterpreter()
+        w.editor = mock.MagicMock()
+
+        w.disconnect_from_progress_reports()
+        w.editor.progressMade.disconnect.assert_called_once()
 
 
 if __name__ == '__main__':

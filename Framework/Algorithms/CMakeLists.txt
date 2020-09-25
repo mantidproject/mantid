@@ -263,6 +263,7 @@ set(SRC_FILES
     src/RunCombinationHelpers/RunCombinationHelper.cpp
     src/RunCombinationHelpers/SampleLogsBehaviour.cpp
     src/SANSCollimationLengthEstimator.cpp
+    src/SampleCorrections/CircularBeamProfile.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
     src/SampleCorrections/MCInteractionStatistics.cpp
@@ -593,6 +594,7 @@ set(INC_FILES
     inc/MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h
     inc/MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h
     inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
+    inc/MantidAlgorithms/SampleCorrections/CircularBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/IMCAbsorptionStrategy.h
@@ -711,6 +713,7 @@ set(TEST_FILES
     ChangeTimeZeroTest.h
     CheckWorkspacesMatchTest.h
     ChopDataTest.h
+    CircularBeamProfileTest.h
     ClearCacheTest.h
     ClearInstrumentParametersTest.h
     ClearMaskFlagTest.h

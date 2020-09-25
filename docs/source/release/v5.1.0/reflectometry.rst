@@ -15,20 +15,23 @@ Algorithms
 New
 ----
 
-- Added new :ref:`algm-LRReductionWithReference` to use a measured standard with a model reflectivity curve calculated by the `refl1d` package to produce a normalization curve for a sample reduction. Requires `refl1d` to be installed seperately. 
+- Added new :ref:`algm-LRReductionWithReference` to use a measured standard with a model reflectivity curve calculated by the `refl1d` package to produce a normalization curve for a sample reduction. Requires `refl1d` to be installed seperately.
 
 Improvements
 ------------
 
+- The ensemble of ILL reflectometry reduction is improved to produce results more consistent with the legacy software for D17 instrument.
 - Sample waviness term is removed from resolution calculation in incoherent mode in :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 - Flag to enable / disable apply scaling factor from `ScalingFactorFile`, called `ApplyScalingFactor`, added to :ref:`algm-LiquidsReflectometryReduction`.
 - Modified :ref:`algm-LRAutoReduction` to allow the option to autoreduce data with a reference measurement for normalization (instead of only direct beam) using the new :ref:`algm-LRReductionWithReference` algorithm of this release
+- :ref:`algm-SaveReflectometryAscii`: leading separator is no longer included for Custom and ANSTO formats; Custom format header now uses the same separator as the columns and includes the 4th column header if applicable.
   
 Bug fixes
 ---------
 
 - :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` has been fixed to update the sample logs of chopper gap and chopper position with correct units regardless the wrong setting in nexus files.
 - The history for :ref:`algm-ReflectometryReductionOne` has been fixed so that the conversion to Q is now always included in the history.
+- The sort function in `LRDirectBeamSort <algm-LRDirectBeamSort>` has been updated for Python3
 
 Removed
 -------
@@ -69,9 +72,12 @@ Bug fixes
 ---------
 
 - Save/Load settings: A bug has been fixed where Experiment/Instrument settings were not being restored if the instrument changes on load.
+
 - Lost settings on New Batch and Restore Defaults:
 
   - A bug has been fixed where creating a new Batch would result in the Experiment/Instrument settings of all batches being reset to their defaults.
   - A bug has been fixed where clicking Restore Defaults on an Experiment/Instrument tab would cause all Experiment and Instrument tabs in every batch to be reset to defaults. Now, only the tab where you click Restore Defaults is changed.
+
+- A bug has been fixed where Mantid could crash if you transfer search results into an empty group
 
 :ref:`Release 5.1.0 <v5.1.0>`

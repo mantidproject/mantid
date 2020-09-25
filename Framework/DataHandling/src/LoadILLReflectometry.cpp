@@ -1,4 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+﻿// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -21,9 +21,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 
@@ -34,12 +36,12 @@ constexpr double DH1Z{1.135}; // Motor DH1 horizontal position
 constexpr double DH2Z{2.077}; // Motor DH2 horizontal position
 } // namespace FIGARO
 
-/// A struct for information needed for detector angle calibration.
-struct PeakInfo {
-  double detectorAngle;
-  double detectorDistance;
-  double peakCentre;
-};
+/// Convert wavelength to TOF
+double wavelengthToTOF(const double lambda, const double l1, const double l2) {
+  return Mantid::Kernel::UnitConversion::run(
+      "Wavelength", "TOF", lambda, l1, l2, 0.,
+      Mantid::Kernel::DeltaEMode::Elastic, 0.);
+}
 
 /** Convert degrees to radians.
  *  @param x an angle in degrees
@@ -59,34 +61,14 @@ constexpr double radToDeg(const double x) { return x * 180. / M_PI; }
  */
 constexpr double mmToMeter(const double x) { return x * 1.e-3; }
 
-/** Create a table with data needed for detector angle calibration.
- * @param info data to be written to the table
- * @return a TableWorkspace containing the beam position info
- */
-Mantid::API::ITableWorkspace_sptr
-createPeakPositionTable(const PeakInfo &info) {
-  auto table = std::make_shared<Mantid::DataObjects::TableWorkspace>();
-  table->addColumn("double", "DetectorAngle");
-  table->addColumn("double", "DetectorDistance");
-  table->addColumn("double", "PeakCentre");
-  table->appendRow();
-  auto col = table->getColumn("DetectorAngle");
-  col->cell<double>(0) = info.detectorAngle;
-  col = table->getColumn("DetectorDistance");
-  col->cell<double>(0) = info.detectorDistance;
-  col = table->getColumn("PeakCentre");
-  col->cell<double>(0) = info.peakCentre;
-  return table;
-}
-
 /** Strip monitors from the beginning and end of a workspace.
  *  @param ws a workspace to work on
  *  @return begin and end ws indices for non-monitor histograms
  */
-std::pair<size_t, size_t>
+std::pair<int, int>
 fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
   const size_t nHisto = ws.getNumberHistograms();
-  size_t begin = 0;
+  int begin = 0;
   const auto &spectrumInfo = ws.spectrumInfo();
   for (size_t i = 0; i < nHisto; ++i) {
     if (!spectrumInfo.isMonitor(i)) {
@@ -94,33 +76,14 @@ fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
     }
     ++begin;
   }
-  size_t end = nHisto - 1;
+  int end = static_cast<int>(nHisto) - 1;
   for (ptrdiff_t i = static_cast<ptrdiff_t>(nHisto) - 1; i != 0; --i) {
     if (!spectrumInfo.isMonitor(i)) {
       break;
     }
     --end;
   }
-  return std::pair<size_t, size_t>{begin, end};
-}
-
-/** Construct a DirectBeamMeasurement object from a beam position table.
- *  @param table a beam position TableWorkspace
- *  @return a DirectBeamMeasurement object corresonding to the table parameter.
- */
-PeakInfo parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
-  if (table.rowCount() != 1) {
-    throw std::runtime_error(
-        "DirectBeamPosition table should have a single row.");
-  }
-  PeakInfo p;
-  auto col = table.getColumn("DetectorAngle");
-  p.detectorAngle = col->cell<double>(0);
-  col = table.getColumn("DetectorDistance");
-  p.detectorDistance = col->cell<double>(0);
-  col = table.getColumn("PeakCentre");
-  p.peakCentre = col->cell<double>(0);
-  return p;
+  return std::pair<int, int>{begin, end};
 }
 
 /** Fill the X values of the first histogram of ws with values 0, 1, 2,...
@@ -195,8 +158,6 @@ using namespace NeXus;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
-const double LoadILLReflectometry::PIXEL_CENTER = 127.5;
-
 /**
  * Return the confidence with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -225,30 +186,46 @@ void LoadILLReflectometry::init() {
                                                  FileProperty::Load, ".nxs",
                                                  Direction::Input),
                   "Name of the Nexus file to load");
-
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", std::string(), Direction::Output),
                   "Name of the output workspace");
+  declareProperty("ForegroundPeakCentre", EMPTY_DBL(),
+                  "Foreground peak position in fractional workspace "
+                  "index (if not given the peak is searched for and fitted).");
   declareProperty(
-      "BeamCentre", EMPTY_DBL(),
-      "Beam position in workspace indices (disables peak finding).");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputBeamPosition", std::string(), Direction::Output,
-                      PropertyMode::Optional),
-                  "Name of the fitted beam position output workspace");
-
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "DirectBeamPosition", std::string(), Direction::Input,
-                      PropertyMode::Optional),
-                  "A workspace defining the beam position; used to calculate "
-                  "the Bragg angle");
-
+      "DetectorCentreFractionalIndex", 127.5,
+      "The fractional workspace index of the geometric centre of "
+      "the detector at incident beam axis (127.5 for D17 and Figaro).");
+  const std::vector<std::string> measurements({"DirectBeam", "ReflectedBeam"});
+  declareProperty("Measurement", "DirectBeam",
+                  std::make_unique<StringListValidator>(measurements),
+                  "Load as direct or reflected beam.");
   declareProperty("BraggAngle", EMPTY_DBL(),
-                  "User defined Bragg angle in degrees");
+                  "The bragg angle necessary for reflected beam.");
+  declareProperty("FitStartWorkspaceIndex", 0,
+                  std::make_unique<BoundedValidator<int>>(0, 255),
+                  "Start workspace index used for peak fitting.");
+  declareProperty("FitEndWorkspaceIndex", 255,
+                  std::make_unique<BoundedValidator<int>>(0, 255),
+                  "End workspace index used for peak fitting.");
+  declareProperty("FitRangeLower", -1.,
+                  "Minimum wavelength used for peak fitting.");
+  declareProperty("FitRangeUpper", -1.,
+                  "Maximum wavelength used for peak fitting.");
   const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
   declareProperty("XUnit", "Wavelength",
                   std::make_shared<StringListValidator>(availableUnits),
                   "X unit of the OutputWorkspace");
+}
+
+/// Validate the inputs
+std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
+  std::map<std::string, std::string> issues;
+  if (getPropertyValue("Measurement") == "ReflectedBeam" &&
+      isDefault("BraggAngle")) {
+    issues["BraggAngle"] = "Bragg angle is mandatory for reflected beam";
+  }
+  return issues;
 }
 
 /// Execute the algorithm.
@@ -278,10 +255,7 @@ void LoadILLReflectometry::exec() {
   placeSource();
   placeDetector();
   placeSlits();
-  // When other components are in-place
   convertTofToWavelength();
-  // Add sample logs loader.two_theta and Facility
-  addSampleLogs();
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 } // exec
@@ -357,6 +331,9 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
 }
 
 /// Call child algorithm ConvertUnits for conversion from TOF to wavelength
+/// Note that DAN calibration is done in preprocess, since it needs information
+/// also from the direct beam so converting to wavelength in the loader will not
+/// be accurate
 void LoadILLReflectometry::convertTofToWavelength() {
   if (m_acqMode && (getPropertyValue("XUnit") == "Wavelength")) {
     auto convertToWavelength =
@@ -655,19 +632,34 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
  * of the maximum (serves as start value for the optimization)
  */
 double LoadILLReflectometry::reflectometryPeak() {
-  if (!isDefault("BeamCentre")) {
-    return getProperty("BeamCentre");
+  if (!isDefault("ForegroundPeakCentre")) {
+    return getProperty("ForegroundPeakCentre");
   }
-  size_t startIndex;
-  size_t endIndex;
-  std::tie(startIndex, endIndex) =
-      fitIntegrationWSIndexRange(*m_localWorkspace);
+  const auto autoIndices = fitIntegrationWSIndexRange(*m_localWorkspace);
+  auto startIndex = autoIndices.first;
+  auto endIndex = autoIndices.second;
+  if (!isDefault("FitStartWorkspaceIndex")) {
+    startIndex = getProperty("FitStartWorkspaceIndex");
+  }
+  if (!isDefault("FitEndWorkspaceIndex")) {
+    endIndex = getProperty("FitEndWorkspaceIndex");
+  }
   IAlgorithm_sptr integration = createChildAlgorithm("Integration");
   integration->initialize();
   integration->setProperty("InputWorkspace", m_localWorkspace);
   integration->setProperty("OutputWorkspace", "__unused_for_child");
-  integration->setProperty("StartWorkspaceIndex", static_cast<int>(startIndex));
-  integration->setProperty("EndWorkspaceIndex", static_cast<int>(endIndex));
+  integration->setProperty("StartWorkspaceIndex", startIndex);
+  integration->setProperty("EndWorkspaceIndex", endIndex);
+  if (!isDefault("FitRangeLower")) {
+    integration->setProperty(
+        "RangeLower", wavelengthToTOF(getProperty("FitRangeLower"),
+                                      m_sourceDistance, m_detectorDistance));
+  }
+  if (!isDefault("FitRangeUpper")) {
+    integration->setProperty(
+        "RangeUpper", wavelengthToTOF(getProperty("FitRangeUpper"),
+                                      m_sourceDistance, m_detectorDistance));
+  }
   integration->execute();
   MatrixWorkspace_sptr integralWS = integration->getProperty("OutputWorkspace");
   IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
@@ -696,7 +688,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   if (revMinFwhmIt == ys.crend() || maxFwhmIt == ys.cend()) {
     g_log.warning() << "Couldn't determine fwhm of beam, using position of max "
                        "value as beam center.\n";
-    return centreByMax;
+    return centreByMax + startIndex;
   }
   const auto fwhm =
       static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
@@ -727,70 +719,30 @@ double LoadILLReflectometry::reflectometryPeak() {
   const std::string fitStatus = fit->getProperty("OutputStatus");
   if (fitStatus != "success") {
     g_log.warning("Fit not successful, using position of max value.\n");
-    return centreByMax;
+    return centreByMax + startIndex;
   }
   const auto centre = gaussian->centre();
   g_log.debug() << "Sigma: " << gaussian->fwhm() << '\n';
   g_log.debug() << "Estimated peak position: " << centre << '\n';
-  return centre;
+  return centre + startIndex;
 }
 
-/// Add sample logs reduction.two_theta and Facility
-void LoadILLReflectometry::addSampleLogs() {
-  // Add two theta to the sample logs
-  m_localWorkspace->mutableRun().addProperty("loader.two_theta",
-                                             m_detectorAngle);
-  m_localWorkspace->mutableRun()
-      .getProperty("loader.two_theta")
-      ->setUnits("degree");
-  // Add Facility to the sample logs
-  m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
-}
-
-/** Compute the detector rotation angle around origin and optionally set the
- *  OutputBeamPosition property.
+/** Compute the detector rotation angle around origin
  *  @return a rotation angle
  */
 double LoadILLReflectometry::detectorRotation() {
-  ITableWorkspace_const_sptr posTable = getProperty("DirectBeamPosition");
   const double peakCentre = reflectometryPeak();
-  g_log.debug() << "Using detector angle (degrees): " << m_detectorAngle
-                << '\n';
-  if (!isDefault("OutputBeamPosition")) {
-    PeakInfo p;
-    p.detectorAngle = m_detectorAngle;
-    p.detectorDistance = m_detectorDistance;
-    p.peakCentre = peakCentre;
-    setProperty("OutputBeamPosition", createPeakPositionTable(p));
+  m_localWorkspace->mutableRun().addProperty("reduction.line_position",
+                                             peakCentre, true);
+  const double detectorCentre = getProperty("DetectorCentreFractionalIndex");
+  const std::string measurement = getPropertyValue("Measurement");
+  const double braggAngle = getProperty("BraggAngle");
+  double two_theta =
+      -offsetAngle(peakCentre, detectorCentre, m_detectorDistance);
+  if (measurement == "ReflectedBeam") {
+    two_theta += 2 * braggAngle;
   }
-  if (!isDefault("BraggAngle")) {
-    if (posTable) {
-      g_log.notice()
-          << "Ignoring DirectBeamPosition, using BraggAngle instead.";
-    }
-    const double userAngle = getProperty("BraggAngle");
-    const double offset =
-        offsetAngle(peakCentre, PIXEL_CENTER, m_detectorDistance);
-    m_log.debug() << "Beam offset angle: " << offset << '\n';
-    return 2. * userAngle - offset;
-  } else if (!posTable) {
-    const double deflection = collimationAngle();
-    if (deflection != 0) {
-      g_log.debug() << "Using incident deflection angle (degrees): "
-                    << deflection << '\n';
-    }
-    return m_detectorAngle + deflection;
-  }
-  const auto dbPeak = parseBeamPositionTable(*posTable);
-  const double dbOffset =
-      offsetAngle(dbPeak.peakCentre, PIXEL_CENTER, dbPeak.detectorDistance);
-  m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
-  const double detectorAngle =
-      m_detectorAngle - dbPeak.detectorAngle - dbOffset;
-
-  m_log.debug() << "Direct beam calibrated detector angle (degrees): "
-                << detectorAngle << '\n';
-  return detectorAngle;
+  return two_theta;
 }
 
 /// Initialize m_pixelWidth from the IDF and check for NeXus consistency.
@@ -829,6 +781,8 @@ void LoadILLReflectometry::initPixelWidth() {
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
   m_detectorDistance = sampleDetectorDistance();
+  m_localWorkspace->mutableRun().addProperty<double>("L2", m_detectorDistance,
+                                                     true);
   m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance << "m.\n";
   const auto detectorRotationAngle = detectorRotation();
@@ -893,11 +847,10 @@ void LoadILLReflectometry::placeSlits() {
 
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
-  double dist;
-  dist = sourceSampleDistance();
-  g_log.debug() << "Source-sample distance " << dist << "m.\n";
+  m_sourceDistance = sourceSampleDistance();
+  g_log.debug() << "Source-sample distance " << m_sourceDistance << "m.\n";
   const std::string source = "chopper1";
-  const V3D newPos{0.0, 0.0, -dist};
+  const V3D newPos{0.0, 0.0, -m_sourceDistance};
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
 
@@ -938,28 +891,32 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
+  double sampleDetectorDistance;
   if (m_instrument != Supported::FIGARO) {
-    return mmToMeter(doubleFromRun("det.value"));
+    sampleDetectorDistance = mmToMeter(doubleFromRun("det.value"));
+  } else {
+    // For FIGARO, the DTR field contains the sample-to-detector distance
+    // when the detector is at the horizontal position (angle = 0).
+    const double restZ = mmToMeter(doubleFromRun("DTR.value"));
+    // Motor DH1 vertical coordinate.
+    const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
+    const double detectorRestY = 0.509;
+    const double detAngle = detectorAngle();
+    const double detectorY =
+        std::sin(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + DH1Y -
+        detectorRestY;
+    const double detectorZ =
+        std::cos(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + FIGARO::DH1Z;
+    const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
+    const double beamY = detectorY + pixelOffset * std::cos(degToRad(detAngle));
+    const double sht1 = mmToMeter(doubleFromRun("SHT1.value"));
+    const double beamZ = detectorZ - pixelOffset * std::sin(degToRad(detAngle));
+    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
+    sampleDetectorDistance =
+        std::hypot(beamY - sht1, beamZ) -
+        m_sampleZOffset / std::cos(degToRad(deflectionAngle));
   }
-  // For FIGARO, the DTR field contains the sample-to-detector distance
-  // when the detector is at the horizontal position (angle = 0).
-  const double restZ = mmToMeter(doubleFromRun("DTR.value"));
-  // Motor DH1 vertical coordinate.
-  const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
-  const double detectorRestY = 0.509;
-  const double detAngle = detectorAngle();
-  const double detectorY =
-      std::sin(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + DH1Y -
-      detectorRestY;
-  const double detectorZ =
-      std::cos(degToRad(detAngle)) * (restZ - FIGARO::DH1Z) + FIGARO::DH1Z;
-  const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
-  const double beamY = detectorY + pixelOffset * std::cos(degToRad(detAngle));
-  const double sht1 = mmToMeter(doubleFromRun("SHT1.value"));
-  const double beamZ = detectorZ - pixelOffset * std::sin(degToRad(detAngle));
-  const double deflectionAngle = doubleFromRun(m_sampleAngleName);
-  return std::hypot(beamY - sht1, beamZ) -
-         m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+  return sampleDetectorDistance;
 }
 
 /// Return the horizontal offset along the z axis.
@@ -989,6 +946,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
                                                  pairSeparation, "meter", true);
       m_localWorkspace->mutableRun().addProperty(
           "VirtualChopper.dist_chop_samp", pairCentre, "meter", true);
+      pairCentre -= 0.5 * pairSeparation;
     } catch (std::runtime_error &) {
       try {
         pairCentre = mmToMeter(doubleFromRun(
@@ -1004,7 +962,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
             "Unable to extract chopper to sample distance");
       }
     }
-    return pairCentre - 0.5 * pairSeparation;
+    return pairCentre;
   } else {
     const double chopperDist =
         mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));

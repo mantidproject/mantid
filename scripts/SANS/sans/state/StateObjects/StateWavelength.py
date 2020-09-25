@@ -8,6 +8,7 @@
 
 import json
 import copy
+from typing import List
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, SANSFacility)
@@ -19,9 +20,9 @@ class StateWavelength(metaclass=JsonSerializable):
     def __init__(self):
         super(StateWavelength, self).__init__()
         self.rebin_type = RebinType.REBIN
-        self.wavelength_low = None  # : List[Float] (Positive)
-        self.wavelength_high = None  # : List[Float] (Positive)
-        self.wavelength_step = None  # : Float (Positive)
+        self.wavelength_low: List[float] = None  # (Positive)
+        self.wavelength_high: List[float] = None  # (Positive)
+        self.wavelength_step: float = None  # (Positive)
         self.wavelength_step_type = RangeStepType.NOT_SET
 
     def validate(self):

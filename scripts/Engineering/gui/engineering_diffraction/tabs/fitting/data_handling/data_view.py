@@ -13,6 +13,7 @@ Ui_data, _ = load_ui(__file__, "data_widget.ui")
 
 class FittingDataView(QtWidgets.QWidget, Ui_data):
     sig_enable_load_button = QtCore.Signal(bool)
+    sig_enable_inspect_bg_button = QtCore.Signal(bool)
 
     def __init__(self, parent=None):
         super(FittingDataView, self).__init__(parent)
@@ -35,8 +36,11 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_on_xunit_changed(self, slot):
         self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_xunit.currentText()))
 
-    def set_enable_button_connection(self, slot):
+    def set_enable_load_button_connection(self, slot):
         self.sig_enable_load_button.connect(slot)
+
+    def set_enable_inspect_bg_button_connection(self, slot):
+        self.sig_enable_inspect_bg_button.connect(slot)
 
     def set_on_remove_all_clicked(self, slot):
         self.button_removeAll.clicked.connect(slot)
@@ -50,12 +54,18 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_on_table_cell_changed(self, slot):
         self.table_selection.cellChanged.connect(slot)  # Row, Col
 
+    def set_table_selection_changed(self, slot):
+        self.table_selection.itemSelectionChanged.connect(slot)
+
     # =================
     # Component Setters
     # =================
 
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
+
+    def set_inspect_bg_button_enabled(self, enabled):
+        self.button_plotBG.setEnabled(enabled)
 
     def add_table_row(self, run_no, bank, checked, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()

@@ -147,6 +147,9 @@ class CreateSANSWavelengthPixelAdjustment(object):
             load_alg.execute()
             output_workspace = load_alg.getProperty("OutputWorkspace").value
 
+            if not idf_path:
+                raise ValueError("No IDF path was found in the provided state")
+
             # Add an instrument to the workspace
             instrument_name = "LoadInstrument"
             instrument_options = {"Workspace": output_workspace,

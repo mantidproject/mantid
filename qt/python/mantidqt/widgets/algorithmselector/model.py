@@ -56,8 +56,9 @@ class AlgorithmSelectorModel(object):
             Here self.algorithm_key == '_'
 
         """
+        include_alias = True
         algm_factory = AlgorithmFactory.Instance()
-        descriptors = algm_factory.getDescriptors(self.include_hidden)
+        descriptors = algm_factory.getDescriptors(self.include_hidden, include_alias)
         data = {}
         for descriptor in descriptors:
             categories = descriptor.category.split(CATEGORY_SEP)
@@ -77,8 +78,10 @@ class AlgorithmSelectorModel(object):
                 d[descriptor.name] = []
             d[descriptor.name].append(descriptor.version)
 
+        # Add hidden algs to search box (hidden on tree)
+        include_hidden = True
         unique_alg_names = set(descr.name
-                               for descr in algm_factory.getDescriptors(True))
+                               for descr in algm_factory.getDescriptors(include_hidden, include_alias))
         return sorted(unique_alg_names), data
 
     def find_input_workspace_property(self, algorithm):

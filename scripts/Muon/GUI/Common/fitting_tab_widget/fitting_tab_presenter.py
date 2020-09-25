@@ -284,7 +284,6 @@ class FittingTabPresenter(object):
     def handle_tf_asymmetry_mode_changed(self):
         def calculate_tf_fit_function(original_fit_function):
             tf_asymmetry_parameters = self.get_parameters_for_tf_function_calculation(original_fit_function)
-
             try:
                 tf_function = self.model.convert_to_tf_function(tf_asymmetry_parameters)
             except RuntimeError:
@@ -315,11 +314,11 @@ class FittingTabPresenter(object):
                 self.view.function_name += ',TFAsymmetry'
                 self.model.function_name = self.view.function_name
         else:
-            self.view.select_workspaces_to_fit_button.setEnabled(True)
             new_global_parameters = [item[9:] for item in global_parameters]
             if self.automatically_update_fit_name:
                 self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
                 self.model.function_name = self.view.function_name
+
         if not self.view.is_simul_fit():
             for index, fit_function in enumerate(self._fit_function):
                 fit_function = fit_function if fit_function else self.view.fit_object.clone()
@@ -351,7 +350,8 @@ class FittingTabPresenter(object):
             self.view.display_workspace]
         return {'InputFunction': fit_function,
                 'WorkspaceList': workspace_list,
-                'Mode': mode}
+                'Mode': mode,
+                'CopyTies': False}
 
     def handle_function_parameter_changed(self):
         if not self.view.is_simul_fit():

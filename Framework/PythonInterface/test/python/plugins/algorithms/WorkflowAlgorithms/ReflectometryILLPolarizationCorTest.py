@@ -5,35 +5,56 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import mtd
-from testhelpers import (assertRaisesNothing, create_algorithm, illhelpers)
+from mantid.api import MatrixWorkspace, WorkspaceGroup
+from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground, ReflectometryILLPolarizationCor, mtd)
 import unittest
 
 
 class ReflectometryILLPolarizationCorTest(unittest.TestCase):
 
-    def tearDown(self):
+    @classmethod
+    def setUpClass(cls):
+        ReflectometryILLPreprocess(Run='ILL/D17/317369.nxs',
+                                   Measurement='DirectBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='db')
+        ReflectometryILLPreprocess(Run='ILL/D17/317370.nxs',
+                                   Measurement='ReflectedBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='rb')
+        # first the direct beam
+        ReflectometryILLSumForeground(InputWorkspace='db',
+                                      OutputWorkspace='db_frg')
+
+        # then the reflected beam
+        ReflectometryILLSumForeground(InputWorkspace='rb',
+                                      OutputWorkspace='rb_frg',
+                                      SummationType='SumInLambda',
+                                      DirectLineWorkspace='db',
+                                      DirectForegroundWorkspace='db_frg')
+
+    @classmethod
+    def tearDownClass(cls):
         mtd.clear()
 
     def testExecutes(self):
-        ws = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.add_flipper_configuration_D17(ws, 1, 1)
-        mtd.add('ws', ws)
-        ws = illhelpers.refl_add_line_position(ws, 128.0)
-        ws = illhelpers.refl_add_two_theta(ws, 6.6)
-        ws = illhelpers.refl_preprocess('ws', ws)
-        illhelpers.refl_sum_foreground('ws', 'SumInLambda', ws)
-        args = {
-            'InputWorkspaces': 'ws',
-            'OutputWorkspace': 'corrected',
-            'EfficiencyFile': 'ILL/D17/PolarizationFactors.txt',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLPolarizationCor', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(mtd.doesExist('corrected_++'))
+        ReflectometryILLPolarizationCor(
+            InputWorkspaces='rb_frg',
+            OutputWorkspace='pol_corrected',
+            EfficiencyFile='ILL/D17/PolarizationFactors.txt'
+        )
+        self.checkOutput(mtd['pol_corrected'], 1, 991)
 
+    def checkOutput(self, ws, items, blocksize):
+        self.assertTrue(ws)
+        self.assertTrue(isinstance(ws, WorkspaceGroup))
+        self.assertEquals(ws.getNumberOfEntries(), items)
+        item = ws[0]
+        self.assertTrue(isinstance(item, MatrixWorkspace))
+        self.assertTrue(item.isHistogramData())
+        self.assertEquals(item.blocksize(), blocksize)
+        self.assertEquals(item.getNumberHistograms(), 1)
+        self.assertEquals(item.getAxis(0).getUnit().unitID(), 'Wavelength')
 
 if __name__ == "__main__":
     unittest.main()

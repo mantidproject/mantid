@@ -15,6 +15,25 @@ class QuickEditPresenter(object):
     def widget(self):
         return self._view
 
+    @property
+    def autoscale(self):
+        return self._view.autoscale_state
+
+    def disable_yaxis_changer(self):
+        self._view.disable_yaxis_changer()
+
+    def enable_yaxis_changer(self):
+        self._view.enable_yaxis_changer()
+
+    def disable_autoscale(self):
+        self._view.disable_autoscale()
+
+    def enable_autoscale(self):
+        self._view.enable_autoscale()
+
+    def uncheck_autoscale(self):
+        self._view.uncheck_autoscale()
+
     def connect_autoscale_changed(self, slot):
         self._view.connect_autoscale_changed(slot)
 

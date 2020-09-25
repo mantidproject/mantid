@@ -6,12 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 
-from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Plus, Minus
+from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Plus, Minus, AverageLogData, \
+    CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from mantid.api import AnalysisDataService as ADS
 from matplotlib.pyplot import subplots
+from numpy import full, nan
 
 
 class FittingDataModel(object):
     def __init__(self):
+        self._log_workspaces = None
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
         self._background_workspaces = {}
         self._last_added = []  # List of workspace names loaded in the last load action.
@@ -22,23 +28,107 @@ class FittingDataModel(object):
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
             ws_name = self._generate_workspace_name(filename, xunit)
+            if ws_name not in self._loaded_workspaces:
+                try:
+                    if not ADS.doesExist(ws_name):
+                        ws = Load(filename, OutputWorkspace=ws_name)
+                        if xunit != "TOF":
+                            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
+                    else:
+                        ws = ADS.retrieve(ws_name)
+                    if ws.getNumberHistograms() == 1:
+                        self._loaded_workspaces[ws_name] = ws
+                        if ws_name not in self._background_workspaces:
+                            self._background_workspaces[ws_name] = None
+                        self._last_added.append(ws_name)
+                        self.add_log_to_table(ws_name, ws)
+                    else:
+                        logger.warning(
+                            f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
+                except RuntimeError as e:
+                    logger.error(
+                        f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
+            else:
+                logger.warning(f"File {ws_name} has already been loaded")
+
+    def create_log_table(self):
+        # run information table
+        run_info = CreateEmptyTableWorkspace()
+        run_info.addColumn(type="str", name="Instrument")
+        run_info.addColumn(type="int", name="Run")
+        run_info.addColumn(type="int", name="Bank")
+        run_info.addColumn(type="float", name="uAmps")
+        run_info.addColumn(type="str", name="Title")
+        self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs')
+        # a table per logs
+        logs = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, "logs")
+        if logs:
+            for log in logs.split(','):
+                ws = CreateEmptyTableWorkspace(OutputWorkspace=log)
+                ws.addColumn(type="float", name="avg")
+                ws.addColumn(type="float", name="stdev")
+                self._log_workspaces.add(log)
+
+    def add_log_to_table(self, ws_name, ws):
+        # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
+        if not self._log_workspaces:
+            self.create_log_table()
+        # add run info
+        run = ws.getRun()
+        self._log_workspaces[0].addRow(
+            [ws.getInstrument().getFullName(), ws.getRunNumber(), run.getProperty('bankid').value,
+             run.getProtonCharge(), ws.getTitle()])
+        # add log data - loop over existing log workspaces not logs in settings as these might have changed
+        for ilog in range(1, len(self._log_workspaces)):
             try:
-                ws = Load(filename, OutputWorkspace=ws_name)
-                if xunit != "TOF":
-                    ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
-                if ws.getNumberHistograms() == 1:
-                    self._loaded_workspaces[ws_name] = ws
-                    self._background_workspaces[ws_name] = None
-                    self._last_added.append(ws_name)
-                else:
-                    logger.warning(
-                        f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
-            except RuntimeError as e:
+                avg, stdev = AverageLogData(ws_name, LogName=self._log_workspaces[ilog].name(), FixZero=False)
+                self._log_workspaces[ilog].addRow([avg, stdev])
+            except RuntimeError:
+                self._log_workspaces[ilog].addRow(full(2, nan))
                 logger.error(
-                    f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
+                    f"File {ws.name()} does not contain log {self._log_workspaces[ilog].name()}")
+        self.update_log_group_name()
+
+    def remove_log_rows(self, row_numbers):
+        DeleteTableRows(TableWorkspace=self._log_workspaces, Rows=list(row_numbers))
+        self.update_log_group_name()
+
+    def clear_logs(self):
+        if self._log_workspaces:
+            ws_name = self._log_workspaces.name()
+            self._log_workspaces = None
+            DeleteWorkspace(ws_name)
+
+    def repopulate_logs(self):
+        self.clear_logs()
+        for ws_name, ws in self._loaded_workspaces.items():
+            self.add_log_to_table(ws_name, ws)
+
+    def update_log_group_name(self):
+        run_info = ADS.retrieve('run_info')
+        if run_info.rowCount() > 0:
+            runs = run_info.column('Run')
+            name = f"{run_info.row(0)['Instrument']}_{min(runs)}-{max(runs)}_logs"
+            if not name == self._log_workspaces.name():
+                RenameWorkspace(InputWorkspace=self._log_workspaces.name(), OutputWorkspace=name)
+        else:
+            self.clear_logs()
+
+    def update_workspace_name(self, old_name, new_name):
+        if new_name not in self._loaded_workspaces:
+            self._loaded_workspaces[new_name] = self._loaded_workspaces.pop(old_name)
+            if old_name in self._background_workspaces:
+                self._background_workspaces[new_name] = self._background_workspaces.pop(old_name)
+            if old_name in self._bg_params:
+                self._bg_params[new_name] = self._bg_params.pop(old_name)
+        else:
+            logger.warning(f"There already exists a workspace with name {new_name}.")
 
     def get_loaded_workspaces(self):
         return self._loaded_workspaces
+
+    def get_log_workspaces_name(self):
+        return [ws.name() for ws in self._log_workspaces] if self._log_workspaces else ''
 
     def get_background_workspaces(self):
         return self._background_workspaces

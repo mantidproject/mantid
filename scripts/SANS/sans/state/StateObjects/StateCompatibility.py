@@ -28,7 +28,7 @@ from sans.state.automatic_setters import automatic_setters
 class StateCompatibility(metaclass=JsonSerializable):
     def __init__(self):
         super(StateCompatibility, self).__init__()
-        self.use_compatibility_mode = False  # : Bool
+        self.use_compatibility_mode = True  # : Bool
         self.use_event_slice_optimisation = False  # : Bool
         self.time_rebin_string = ""  # Str
 

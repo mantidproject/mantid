@@ -9,6 +9,7 @@ import datetime
 import unittest
 
 import matplotlib
+
 matplotlib.use('AGG')  # noqa
 from matplotlib.pyplot import figure
 import numpy as np
@@ -20,7 +21,7 @@ from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces,
                               CreateMDHistoWorkspace, CreateSampleWorkspace,
-                              CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace)
+                              CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, LoadRaw)
 
 
 def add_workspace_with_data(func):
@@ -73,7 +74,7 @@ def add_md_workspace_with_data(dimensions=2):
 
 
 class DataFunctionsTest(unittest.TestCase):
-    
+
     @classmethod
     def setUpClass(cls):
         cls.g1da = config['graph1d.autodistribution']
@@ -454,12 +455,12 @@ class DataFunctionsTest(unittest.TestCase):
 
     def test_get_matrix_2d_data_ragged_with_extent(self):
         x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_point_rag, False, histogram2D=True,
-                                             extent=[2, 4 , 1, 2], xbins=8, ybins=5)
+                                             extent=[2, 4, 1, 2], xbins=8, ybins=5)
         np.testing.assert_allclose(x, np.array([2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4]))
         np.testing.assert_allclose(y, np.array([1, 1.25, 1.5, 1.75, 2.0]))
 
         x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, False, histogram2D=True,
-                                             extent=[2, 6 , 5, 9], xbins=8, ybins=5)
+                                             extent=[2, 6, 5, 9], xbins=8, ybins=5)
         np.testing.assert_allclose(x, np.array([2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]))
         np.testing.assert_allclose(y, np.array([5, 6, 7, 8, 9]))
 
@@ -833,6 +834,16 @@ class DataFunctionsTest(unittest.TestCase):
         [caps.set_visible(False) for caps in container[1] if container[1]]
         [bars.set_visible(False) for bars in container[2]]
         self.assertTrue(mantid.plots.datafunctions.errorbars_hidden(container))
+
+    def test_get_bin_indices_returns_a_range_with_no_monitors(self):
+        ws = self.ws2d_histo
+        bin_indices = funcs.get_bin_indices(ws)
+        self.assertTrue(isinstance(bin_indices, range))
+
+    def test_get_bin_indices_returns_a_numpy_ndarray_with_monitors(self):
+        ws = LoadRaw("GEM40979", SpectrumMin=1, SpectrumMax=102)
+        bin_indices = funcs.get_bin_indices(ws)
+        self.assertTrue(isinstance(bin_indices, np.ndarray))
 
 
 if __name__ == '__main__':

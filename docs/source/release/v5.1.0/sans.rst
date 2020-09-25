@@ -16,6 +16,17 @@ New
 ###
 
  - :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>` algorithm added, used to treat data from ILL's D16 on omega scan mode.
+ - SaveCanSAS1D and SaveNXCanSAS now include the batch file name in their metadata if one was used to produce the output.
+
+Improvements
+############
+
+ - :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`: for I(Q) processing and several
+   distances, an automatically stitched result is also produced.
+ - Wedges processing is functionnal in :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`.
+ - For ILL D33 instrument, the detector panels can be processed individualy (OutputPanels option, see
+   the :ref:`SANSILLAutoProcess documentation <algm-SANSILLAutoProcess>`). This options is also
+   available in the :ref:`DrILL interface <DrILL-ref>`.
 
 Bug Fixed
 #########
@@ -30,9 +41,17 @@ Bug Fixed
 ISIS SANS Interface
 -------------------
 
+New
+###
+
+- TOML File V0 support; The format is pinned to version 0 to allow people to
+  get a feel for the new format. The legacy parser still exists and has not
+  been modified.
+
 Fixed
 #####
 
 - A bug has been fixed where processing old data could fail if it involves -add files produced from 2013 or earlier.
+- Batch file selector now only shows CSV files and will handle loading in non-CSV data (such as mask files) gracefully.
 
 :ref:`Release 5.1.0 <v5.1.0>`

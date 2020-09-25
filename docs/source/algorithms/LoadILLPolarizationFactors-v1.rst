@@ -26,7 +26,7 @@ This algorithm loads reflectometry polarization efficiency data from ILL's IDL-s
 
 :literal:`Phi`
    the combined polarizer-analyzer efficiencies
- 
+
 Note, that the order of the histograms in the output workspace is unspecified. The histograms should be identified by the above labels instead.
 
 The errors in the output histograms are estimated by multiplying the efficiencies by constant factors.
@@ -43,10 +43,10 @@ Usage
    # We need reference wavelengths. Lets use some real data for that.
    # Load direct beam for detector angle calibration.
    db = LoadILLReflectometry(Filename='ILL/D17/317369.nxs',
-                             OutputBeamPosition='direct_beam_pos',
                              XUnit='TimeOfFlight')
    rb = LoadILLReflectometry(Filename='ILL/D17/317370.nxs',
-                             DirectBeamPosition='direct_beam_pos',
+                             Measurement='ReflectedBeam',
+                             BraggAngle=0.8,
                              XUnit='TimeOfFlight')
    # Sum over the reflected beam.
    rb_grouped = GroupDetectors(rb, GroupingPattern='201-203')
@@ -71,4 +71,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

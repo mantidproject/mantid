@@ -74,7 +74,6 @@ else:
 # Iterable containing defaults for each configurable section of the code
 # General application settings are in the main section
 DEFAULTS = {
-    'high_dpi_scaling': True,
     'MainWindow': {
         'size': (1260, 740),
         'position': (10, 10),

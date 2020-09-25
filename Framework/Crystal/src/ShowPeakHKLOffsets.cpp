@@ -9,6 +9,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using Mantid::API::ITableWorkspace;

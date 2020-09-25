@@ -22,7 +22,7 @@ from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 class SliceViewer(object):
     TEMPORARY_STATUS_TIMEOUT = 2000
 
-    def __init__(self, ws, parent=None, model=None, view=None):
+    def __init__(self, ws, parent=None, model=None, view=None, conf=None):
         """
         Create a presenter for controlling the slice display for a workspace
         :param ws: Workspace containing data to display and slice
@@ -47,7 +47,7 @@ class SliceViewer(object):
         self.normalization = False
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
-                                                      self.model.can_normalize_workspace(), parent)
+                                                      self.model.can_normalize_workspace(), parent, conf)
         self.view.data_view.create_axes_orthogonal(
             redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
         self.view.data_view.image_info_widget.setWorkspace(ws)

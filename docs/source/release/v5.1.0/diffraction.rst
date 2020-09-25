@@ -39,6 +39,9 @@ New features
 ^^^^^^^^^^^^
 - New algorithm for estimating background of powder spectra :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` using iterative smoothing.
 - Mantid fitting capability added to fitting tab of Engineering Diffraction UI (with simpler fitpropertybrowser providing only relevant options).
+- Loading focussed runs into the fitting tab now shows the proton charge weighted average and standard deviation of select log values (set in the settings) in a group of table workspaces.
+- Mantid fitting capability added to fitting tab of Engineering Diffraction UI.
+- Added support for a Circular Beam Profile for use with Monte Carlo Absorption
 
 Improvements
 ^^^^^^^^^^^^
@@ -47,10 +50,12 @@ Improvements
 - The currently loaded calibration is now shown at the bottom of the GUI.
 - The location of the saved output files from the GUI is now shown in the messages log.
 - The save directory is now displayed in the status bar of the GUI.
+- The Inspect Background button of the Fitting tab is now only enabled when the selected run has had a background subtraction.
 
 Bugfixes
 ^^^^^^^^
 - The Engineering diffraction gui no longer goes behind the workbench window when a plot is clicked on.
+- A focussed run cannot be loeaded with the same x unit more than once
 
 Single Crystal Diffraction
 --------------------------
@@ -61,5 +66,7 @@ Improvements
 - New instrument geometry for MaNDi instrument at SNS
 - New algorithm :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths-v1>` for calculating the absorption weighted path length for each peak in a peaks workspace. The absorption weighted path length is used downstream from Mantid in extinction correction calculations
 - Can now edit H,K,L in the table of a peaks workspace in workbench (now consistent with Mantid Plot)
+- The peaks workspace table display now contains a column showing the value of the intensity/sigma for each peak.
+- SliceViewer can now correctly display non-orthogonal axes for output of :ref:`MDNorm <algm-MDNorm>`
 
 :ref:`Release 5.1.0 <v5.1.0>`

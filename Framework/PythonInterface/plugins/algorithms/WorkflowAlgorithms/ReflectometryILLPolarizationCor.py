@@ -93,18 +93,14 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
 
     def _commonBinning(self, wss):
         """Rebin all workspaces in wss to the first one."""
-        rebinnedWSs = [wss[0]]
         for i in range(1, len(wss)):
-            rebinnedWSName = self._names.withSuffix('rebinned_to_' + str(wss[0]))
             RebinToWorkspace(
                 WorkspaceToRebin=wss[i],
-                OutputWorkspace=rebinnedWSName,
+                OutputWorkspace=wss[i],
                 WorkspaceToMatch=wss[0],
                 EnableLogging=self._subalgLogging
             )
-            self._cleanup.cleanup(wss[i])
-            rebinnedWSs.append(rebinnedWSName)
-        return rebinnedWSs
+        return wss
 
     def _correct(self, wss, effWS):
         """Return a workspace group containing the polarization efficiency corrected workspaces."""
@@ -156,7 +152,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
                     isAnalyzer.append(True)
                 else:
                     isAnalyzer.append(False)
-                flippers.append(run.getProperty('Flipper1.stateint').value)
+                flippers.append(int(run.getProperty('fl1.value').value))
             if isAnalyzer[0] != isAnalyzer[1]:
                 raise RuntimeError('Analyzer config mismatch: one of the input workspaces has analyzer on, the other off.')
             isAnalyzer = isAnalyzer[0]
@@ -174,8 +170,8 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
             flippers = dict()
             for ws in wss:
                 run = mtd[ws].run()
-                flipper1 = run.getProperty('Flipper1.stateint').value
-                flipper2 = run.getProperty('Flipper2.stateint').value
+                flipper1 = int(run.getProperty('fl1.value').value)
+                flipper2 = int(run.getProperty('fl2.value').value)
                 flippers[(flipper1, flipper2)] = ws
             # Reorder workspaces as expected by PolarizationEfficiencyCor.
             presentFlipper = (0, 1) if (0, 1) in flippers.keys() else (1, 0)
@@ -184,19 +180,20 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
             wss[1] = flippers[presentFlipper]
             wss[2] = flippers[1, 1]
             if missingFlipper == (0, 1):
-                self.log().notice('Performing polarization corrections with missin 01 intensity.')
+                self.log().notice('Performing polarization corrections with missing 01 intensity.')
                 return '00, 10, 11'
             else:
-                self.log().notice('Performing polarization corrections with missin 10 intensity.')
+                self.log().notice('Performing polarization corrections with missing 10 intensity.')
                 return '00, 01, 11'
         # Full corrections.
         self.log().notice('Performing full polarization corrections.')
         flippers = dict()
         for ws in wss:
             run = mtd[ws].run()
-            flipper1 = run.getProperty('Flipper1.stateint').value
-            flipper2 = run.getProperty('Flipper2.stateint').value
+            flipper1 = int(run.getProperty('fl1.value').value)
+            flipper2 = int(run.getProperty('fl2.value').value)
             flippers[(flipper1, flipper2)] = ws
+            self.log().information(ws + ' flipper state found: {0}, {1}'.format(str(flipper1), str(flipper2)))
         wss[0] = flippers[0, 0]
         wss[1] = flippers[0, 1]
         wss[2] = flippers[1, 0]

@@ -91,6 +91,10 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._plottable_spectra = None
         self._advanced = advanced
 
+        # This is used as a flag to workaround the case in which the error bars checkbox is set before a selection is
+        # instantiated, causing it to have no effect. The update is then done in the parse_wksp / parse_spec functions
+        self._errorsset = False
+
         self._init_ui()
         self._set_placeholder_text()
         self._setup_connections()
@@ -325,6 +329,8 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             selection.wksp_indices = wksp_indices
             selection.plot_type = self._ui.plotType.currentIndex()
 
+            selection.errors = self._errorsset
+
             if self._advanced:
                 selection.log_name = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
                 selection.axis_name = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
@@ -346,6 +352,8 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
             selection.plot_type = self._ui.plotType.currentIndex()
+
+            selection.errors = self._errorsset
 
             if self._advanced:
                 selection.log_name = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
@@ -408,6 +416,8 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
     def _toggle_errors(self, enable: bool) -> None:
         if self._parent.selection:
             self._parent.selection.errors = enable
+        else:
+            self._parent._errorsset = enable
 
     def _axis_name_changed(self, text: str) -> None:
         if self._parent.selection:

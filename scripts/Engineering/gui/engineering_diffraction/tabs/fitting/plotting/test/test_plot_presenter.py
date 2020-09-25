@@ -35,6 +35,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.remove_workspace_from_plot("workspace")
 
         self.assertEqual(1, self.view.update_figure.call_count)
+        self.assertEqual(2, self.view.remove_ws_from_fitbrowser.call_count)
         self.assertEqual(2, self.model.remove_workspace_from_plot.call_count)
         self.model.remove_workspace_from_plot.assert_any_call("workspace", "axis1")
         self.model.remove_workspace_from_plot.assert_any_call("workspace", "axis2")
@@ -45,6 +46,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.clear_plot()
 
         self.assertEqual(1, self.view.clear_figure.call_count)
+        self.assertEqual(1, self.view.update_fitbrowser.call_count)
         self.assertEqual(2, self.model.remove_all_workspaces_from_plot.call_count)
         self.model.remove_all_workspaces_from_plot.assert_any_call("axis1")
         self.model.remove_all_workspaces_from_plot.assert_any_call("axis2")

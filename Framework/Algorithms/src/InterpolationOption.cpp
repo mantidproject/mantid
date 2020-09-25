@@ -53,6 +53,14 @@ void InterpolationOption::set(const std::string &kind) {
 }
 
 /**
+ * Sets whether the errors in the spectra should be considered to be independent
+ * or not when interpolating between them
+ */
+void InterpolationOption::setIndependentErrors(const bool independent) {
+  m_independentErrors = independent;
+}
+
+/**
  * Create a property suitable to attach to an algorithm to support interpolation
  * @return A new Property containing the valid list of interpolation methods
  */
@@ -107,10 +115,10 @@ void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
                                        size_t stepSize) const {
   switch (m_value) {
   case Value::Linear:
-    interpolateLinearInplace(inOut, stepSize);
+    interpolateLinearInplace(inOut, stepSize, true, m_independentErrors);
     return;
   case Value::CSpline:
-    interpolateCSplineInplace(inOut, stepSize);
+    interpolateCSplineInplace(inOut, stepSize, true, m_independentErrors);
     return;
   default:
     throw std::runtime_error("InterpolationOption::applyInplace() - "
@@ -128,10 +136,10 @@ void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
                                        HistogramData::Histogram &out) const {
   switch (m_value) {
   case Value::Linear:
-    interpolateLinearInplace(in, out);
+    interpolateLinearInplace(in, out, true, m_independentErrors);
     return;
   case Value::CSpline:
-    interpolateCSplineInplace(in, out);
+    interpolateCSplineInplace(in, out, true, m_independentErrors);
     return;
   default:
     throw std::runtime_error("InterpolationOption::applyInplace() - "

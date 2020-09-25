@@ -171,6 +171,7 @@ set(PYTHON_PLUGINS
   algorithms/USANSSimulation.py
   algorithms/VelocityAutoCorrelations.py
   algorithms/VelocityCrossCorrelations.py
+  algorithms/VesuvioAnalysis.py
   algorithms/VesuvioCorrections.py
   algorithms/VesuvioPeakPrediction.py
   algorithms/VesuvioPreFit.py

@@ -13,7 +13,7 @@ from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 class QuickEditView(QtWidgets.QWidget):
     error_signal = QtCore.Signal(object)
 
-    def __init__(self, subcontext, parent=None):
+    def __init__(self, subcontext, parent=None, auto_btn = False):
         super(QuickEditView, self).__init__(parent)
 
         button_layout = QtWidgets.QHBoxLayout()
@@ -29,8 +29,13 @@ class QuickEditView(QtWidgets.QWidget):
         self.plot_selector.setEditable(False)
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
 
-        self.autoscale = QtWidgets.QPushButton("Autoscale y")
-        self.autoscale.setStyleSheet("background-color:lightgrey")
+        self.autoscale = None
+        if auto_btn:
+            self.autoscale = QtWidgets.QPushButton("Autoscale y")
+            self.autoscale.setStyleSheet("background-color:lightgrey")
+        else:
+            self.autoscale = QtWidgets.QCheckBox("Autoscale y")
+            self.autoscale.setToolTip("While pan or zoom are enabled autoscale is disabled")
 
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
 
@@ -101,10 +106,29 @@ class QuickEditView(QtWidgets.QWidget):
     def get_y_bounds(self):
         return self.y_axis_changer.get_bounds()
 
+    def disable_yaxis_changer(self):
+        self.y_axis_changer.view.setEnabled(False)
+
+    def enable_yaxis_changer(self):
+        self.y_axis_changer.view.setEnabled(True)
+
     """ auto scale selection """
 
     def connect_autoscale_changed(self, slot):
         self.autoscale.clicked.connect(slot)
+
+    @property
+    def autoscale_state(self):
+        return self.autoscale.checkState()
+
+    def disable_autoscale(self):
+        self.autoscale.setEnabled(False)
+
+    def enable_autoscale(self):
+        self.autoscale.setEnabled(True)
+
+    def uncheck_autoscale(self):
+        self.autoscale.setChecked(False)
 
     """ errors selection """
 

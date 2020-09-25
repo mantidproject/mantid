@@ -17,6 +17,7 @@
 #include "MantidKernel/Logger.h"
 
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
@@ -253,6 +254,10 @@ void FunctionTreeView::createActions() {
   m_actionRemoveConstraint = new QAction("Remove", this);
   connect(m_actionRemoveConstraint, SIGNAL(triggered()), this,
           SLOT(removeConstraint()));
+
+  m_actionFunctionHelp = new QAction("Help", this);
+  connect(m_actionFunctionHelp, SIGNAL(triggered()), this,
+          SIGNAL(functionHelpRequest()));
 
   setErrorsEnabled(false);
 }
@@ -1121,6 +1126,7 @@ void FunctionTreeView::popupMenu(const QPoint &) {
     if (!m_browser->properties().isEmpty()) {
       context.addAction(m_actionToClipboard);
     }
+    context.addAction(m_actionFunctionHelp);
     context.exec(QCursor::pos());
   } else if (isParameter(prop)) { // parameters
     QMenu context(this);
@@ -1676,6 +1682,24 @@ void FunctionTreeView::removeConstraint() {
   if (!constraint.isEmpty()) {
     emit parameterConstraintAdded(functionIndex, constraint);
   }
+}
+/**
+ * Get user selected function
+ */
+IFunction_sptr FunctionTreeView::getSelectedFunction() {
+  auto item = m_browser->currentItem();
+  if (!item)
+    return IFunction_sptr();
+  QtProperty *prop = item->property();
+  if (!isFunction(prop))
+    return IFunction_sptr();
+  return getFunction(prop);
+}
+/**
+ * Show function help page for input functionName
+ */
+void FunctionTreeView::showFunctionHelp(const QString &functionName) const {
+  API::InterfaceManager().showFitFunctionHelp(functionName);
 }
 
 std::pair<QString, QString>

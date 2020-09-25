@@ -5,13 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The settings diagnostic tab which visualizes the SANS state object. """
-import os
 import json
+import os
+
+from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 
 from mantid.kernel import Logger
-from sans.state.Serializer import Serializer
-from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from sans.gui_logic.gui_common import JSON_SUFFIX
+from sans.state.AllStates import AllStates
+from sans.state.Serializer import Serializer
 
 
 class SettingsDiagnosticPresenter(object):
@@ -94,7 +96,7 @@ class SettingsDiagnosticPresenter(object):
         self._view.update_rows([])
         self.display_state_diagnostic_tree(state=None)
 
-    def get_state(self, index):
+    def get_state(self, index) -> AllStates:
         return self._parent_presenter.get_state_for_row(index)
 
     def display_state_diagnostic_tree(self, state):

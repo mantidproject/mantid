@@ -6,8 +6,36 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.kernel import UnitConversion, DeltaEModeType
-from mantid.simpleapi import *
+from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, Multiply, mtd
 import scipy.constants as constants
+import h5py
+import numpy
+
+
+def sample_angle(run):
+    """Return the sample theta angle in degrees."""
+    if isinstance(run, list):
+        run = run[0]
+    with h5py.File(run, "r") as nexus:
+        if nexus.get('entry0/instrument/SAN') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
+        elif nexus.get('entry0/instrument/san') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/san/value'), dtype='float'))
+        else:
+            raise RuntimeError('Cannot retrieve sample angle from Nexus file {}.'.format(run))
+
+
+def detector_angle(run):
+    """Return the detector angle in degrees."""
+    if isinstance(run, list):
+        run = run[0]
+    with h5py.File(run, "r") as nexus:
+        if nexus.get('entry0/instrument/DAN') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/DAN/value'), dtype='float'))
+        elif nexus.get('entry0/instrument/dan') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/dan/value'), dtype='float'))
+        else:
+            raise RuntimeError('Cannot retrieve detector angle from Nexus file {}.'.format(run))
 
 
 def chopperOpeningAngle(sampleLogs, instrumentName):
@@ -162,8 +190,6 @@ class SampleLogs:
     SLIT2WIDTH = 'reduction.slit2width'
     SLIT3WIDTH = 'reduction.slit3width'
     SUM_TYPE = 'reduction.foreground.summation_type'
-    TWO_THETA = 'loader.two_theta'
-    REDUCTION_TWO_THETA = 'reduction.two_theta'
 
 
 class WSCleanup:

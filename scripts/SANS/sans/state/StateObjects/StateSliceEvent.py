@@ -25,6 +25,7 @@ class StateSliceEvent(metaclass=JsonSerializable):
 
         self.start_time = None  # : List[Float]
         self.end_time = None  # : List[Float]
+        self.event_slice_str: str = ""
 
     def validate(self):
         is_invalid = dict()

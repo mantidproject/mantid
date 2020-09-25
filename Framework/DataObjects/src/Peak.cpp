@@ -13,7 +13,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 #include "boost/make_shared.hpp"
 
@@ -969,15 +968,15 @@ double Peak::getL1() const { return (samplePos - sourcePos).norm(); }
 double Peak::getL2() const { return (detPos - samplePos).norm(); }
 
 // -------------------------------------------------------------------------------------
-/** Helper function for displaying/sorting peaks in MantidPlot
+/** Helper function for displaying/sorting peaks
  *
- * @param name_in :: name of the column in the table workspace
+ * @param name :: name of the column in the table workspace. The matching is
+ * case-insensitive.
  * @return a double representing that value (if that's possible)
  * @throw std::runtime_error if you asked for a column that can't convert to
  *double.
  */
-double Peak::getValueByColName(const std::string &name_in) const {
-  std::string name = name_in;
+double Peak::getValueByColName(std::string name) const {
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   if (name == "runnumber")
     return double(this->getRunNumber());
@@ -1001,6 +1000,8 @@ double Peak::getValueByColName(const std::string &name_in) const {
     return this->getIntensity();
   else if (name == "sigint")
     return this->getSigmaIntensity();
+  else if (name == "intens/sigint")
+    return this->getIntensityOverSigma();
   else if (name == "bincount")
     return this->getBinCount();
   else if (name == "row")

@@ -31,7 +31,7 @@ Algorithms
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Bug fixed where setting ResimulateTracksForDifferentWavelengths parameter to True was being ignored
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections are not calculated anymore for masked spectra
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Corrections can be calculated for a workspace without a sample eg container only
-- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now calculates the error on the absorption correction factors
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now calculates the error on the absorption correction factors based on the spread of the attenuation factors across the simulated paths and the number of simulated paths. The error from any spatial interpolation and any wavelength interpolation performed is also included.
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has received a number of updates:
 
   - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
@@ -70,7 +70,7 @@ Data Handling
   run status and period filtering will now work as expected, as it did when you first load the file from a raw or NeXus file.
 - The sample environment xml file now supports the geometry being supplied in the form of a .3mf format file (so far on the Windows platform only). Previously it only supported .stl files. The .3mf format is a 3D printing format that allows multiple mesh objects to be stored in a single file that can be generated from many popular CAD applications. As part of this change the algorithms :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` and :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` have been updated to also support the .3mf format
 - Nexus log data alarms are now supported by Mantid. Log data that is marked as invalid will trigger a warning in the log and be filtered by default.  If the entire log is marked as invalid, then the values will be used as unfiltered as no better values exist, but the warning will still appear in the log.
-
+- A new IDF definition for NIMROD is now shipped with Mantid. It replaces the existing definition.
 
 The :ref:`LoadISISNexus <algm-LoadISISNexus>` algorithm has been modified to remove the need for the VMS compatibility block.
 This has lead to the removal of the following variables from the sample logs as they were deemed unnecessary: dmp,
@@ -81,6 +81,11 @@ Data Objects
 
 - Added MatrixWorkspace::findY to find the histogram and bin with a given value
 - Matrix Workspaces now ignore non-finite values when integrating values for the instrument view.  Please note this is different from the :ref:`Integration <algm-Integration>` algorithm.
+
+HistogramData
+-------------
+
+- The linear and spline interpolation functionality that acts on histograms has been updated to add the ability to calculate errors. This has involved swapping out the gsl implementations of linear and spline interpolation and replacing with a native Mantid implementation. The new functionality is off by default and has been explicitly enabled for the MonteCarloAbsorption algorithm. The histogram interpolation functionality is currently used by these algorithms: :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` , :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`, LoadILLPolarizationFactors, Join ISISPolarizationEfficiences.
 
 Python
 ------
@@ -99,6 +104,7 @@ Improvements
 ------------
 - Updated the convolution function in the fitting framework to allow the convolution of two composite functions.
 - Added an unroll all checkbox in Algorithm History Window which allows all algorithms to be unrolled at once when copying the script
+- Added a function to the Matrix class to support an analytic calculation of the inverse of a symmetric tridiagonal matrix
 
 Bugfixes
 --------

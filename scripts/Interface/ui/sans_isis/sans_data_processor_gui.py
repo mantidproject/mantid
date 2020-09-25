@@ -364,7 +364,7 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_wavelength_step_type_changed(self):
         if self.wavelength_step_type == RangeStepType.RANGE_LIN:
             self.wavelength_stacked_widget.setCurrentIndex(1)
-            self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
+            self.wavelength_step_label.setText(u'Step [\u00c5]')
         elif self.wavelength_step_type == RangeStepType.RANGE_LOG:
             self.wavelength_stacked_widget.setCurrentIndex(1)
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
@@ -373,7 +373,7 @@ class SANSDataProcessorGui(QMainWindow,
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
         elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
-            self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
+            self.wavelength_step_label.setText(u'Step [\u00c5]')
 
     def create_data_table(self):
         # Delete an already existing table
@@ -547,8 +547,8 @@ class SANSDataProcessorGui(QMainWindow,
         Load the user file
         """
         # Load the user file
-        load_file(self.user_file_line_edit, "*.txt", self.__generic_settings, self.__path_key,
-                  self.get_user_file_path)
+        load_file(self.user_file_line_edit, "TOML Files (*.toml, *.TOML);; Text Files (*.txt)",
+                  self.__generic_settings, self.__path_key, self.get_user_file_path)
 
         # Set full user file path for default loading
         self.gui_properties_handler.set_setting("user_file", self.get_user_file_path())
@@ -609,7 +609,7 @@ class SANSDataProcessorGui(QMainWindow,
         Load the batch file
         """
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Loaded Batch File"], False)
-        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
+        load_file(self.batch_line_edit, "CSV Files(*.csv)", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 

@@ -8,7 +8,7 @@ import unittest
 
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument)
 from sans.state.StateObjects.StateCalculateTransmission import (StateCalculateTransmission, StateCalculateTransmissionLOQ,
-                                                                get_calculate_transmission_builder)
+                                                                get_calculate_transmission)
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
@@ -82,7 +82,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
         self.check_bad_and_good_values(bad_trans={"incident_monitor": None, "default_incident_monitor": None},
                                        good_trans={"incident_monitor": 1, "default_incident_monitor": None})
         self.check_bad_and_good_values(bad_trans={"incident_monitor": None, "default_incident_monitor": None},
-                                       good_trans={"incident_monitor": None, "default_incident_monitor": 1})
+                                       good_trans={"incident_monitor": 1, "default_incident_monitor": 1})
 
     def test_that_raises_when_no_transmission_is_specified(self):
         self.check_bad_and_good_values(bad_trans={"transmission_monitor": None, "default_transmission_monitor": None,
@@ -202,85 +202,82 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Act
-        builder = get_calculate_transmission_builder(data_info)
-        self.assertTrue(builder)
+        state_transmission = get_calculate_transmission(data_info.instrument)
 
-        builder.set_prompt_peak_correction_min(12.0)
-        builder.set_prompt_peak_correction_max(17.0)
+        state_transmission.prompt_peak_correction_min = 12.0
+        state_transmission.prompt_peak_correction_max = 17.0
 
-        builder.set_incident_monitor(1)
-        builder.set_default_incident_monitor(2)
-        builder.set_transmission_monitor(3)
-        builder.set_default_transmission_monitor(4)
-        builder.set_transmission_radius_on_detector(1.)
-        builder.set_transmission_roi_files(["sdfs", "sddfsdf"])
-        builder.set_transmission_mask_files(["sdfs", "bbbbbb"])
+        state_transmission.incident_monitor = 1
+        state_transmission.default_incident_monitor = 2
+        state_transmission.transmission_monitor = 3
+        state_transmission.default_transmission_monitor = 4
+        state_transmission.transmission_radius_on_detector = 1.
+        state_transmission.transmission_roi_files = ["sdfs", "sddfsdf"]
+        state_transmission.transmission_mask_files = ["sdfs", "bbbbbb"]
 
-        builder.set_rebin_type(RebinType.REBIN)
-        builder.set_wavelength_low([1.5])
-        builder.set_wavelength_high([2.7])
-        builder.set_wavelength_step(0.5)
-        builder.set_wavelength_step_type(RangeStepType.LIN)
-        builder.set_use_full_wavelength_range(True)
-        builder.set_wavelength_full_range_low(12.)
-        builder.set_wavelength_full_range_high(24.)
+        state_transmission.rebin_type = RebinType.REBIN
+        state_transmission.wavelength_low = [1.5]
+        state_transmission.wavelength_high = [2.7]
+        state_transmission.wavelength_step = 0.5
+        state_transmission.wavelength_step_type = RangeStepType.LIN
+        state_transmission.use_full_wavelength_range = True
+        state_transmission.wavelength_full_range_low = 12.
+        state_transmission.wavelength_full_range_high = 24.
 
-        builder.set_background_TOF_general_start(1.4)
-        builder.set_background_TOF_general_stop(34.4)
-        builder.set_background_TOF_monitor_start({"1": 123, "2": 123})
-        builder.set_background_TOF_monitor_stop({"1": 234, "2": 2323})
-        builder.set_background_TOF_roi_start(1.4)
-        builder.set_background_TOF_roi_stop(34.4)
+        state_transmission.background_TOF_general_start = 1.4
+        state_transmission.background_TOF_general_stop = 34.4
+        state_transmission.background_TOF_monitor_start = {"1": 123, "2": 123}
+        state_transmission.background_TOF_monitor_stop = {"1": 234, "2": 2323}
+        state_transmission.background_TOF_roi_start = 1.4
+        state_transmission.background_TOF_roi_stop = 34.4
 
-        builder.set_sample_fit_type(FitType.LINEAR)
-        builder.set_sample_polynomial_order(0)
-        builder.set_sample_wavelength_low(10.0)
-        builder.set_sample_wavelength_high(20.0)
+        state_transmission.set_sample_fit_type(FitType.LINEAR)
+        state_transmission.set_sample_polynomial_order(0)
+        state_transmission.set_sample_wavelength_low(10.0)
+        state_transmission.set_sample_wavelength_high(20.0)
 
-        builder.set_can_fit_type(FitType.POLYNOMIAL)
-        builder.set_can_polynomial_order(3)
-        builder.set_can_wavelength_low(10.0)
-        builder.set_can_wavelength_high(20.0)
-
-        state = builder.build()
+        state_transmission.set_can_fit_type(FitType.POLYNOMIAL)
+        state_transmission.set_can_polynomial_order(3)
+        state_transmission.set_can_wavelength_low(10.0)
+        state_transmission.set_can_wavelength_high(20.0)
 
         # Assert
-        self.assertEqual(state.prompt_peak_correction_min,  12.0)
-        self.assertEqual(state.prompt_peak_correction_max,  17.0)
+        self.assertEqual(state_transmission.prompt_peak_correction_min,  12.0)
+        self.assertEqual(state_transmission.prompt_peak_correction_max,  17.0)
 
-        self.assertEqual(state.incident_monitor,  1)
-        self.assertEqual(state.default_incident_monitor,  2)
-        self.assertEqual(state.transmission_monitor,  3)
-        self.assertEqual(state.default_transmission_monitor,  4)
-        self.assertEqual(state.transmission_radius_on_detector,  1.)
-        self.assertEqual(state.transmission_roi_files,  ["sdfs", "sddfsdf"])
-        self.assertEqual(state.transmission_mask_files,  ["sdfs", "bbbbbb"])
+        self.assertEqual(state_transmission.incident_monitor,  1)
+        self.assertEqual(state_transmission.default_incident_monitor,  2)
+        self.assertEqual(state_transmission.transmission_monitor,  3)
+        self.assertEqual(state_transmission.default_transmission_monitor,  4)
+        self.assertEqual(state_transmission.transmission_radius_on_detector,  1.)
+        self.assertEqual(state_transmission.transmission_roi_files,  ["sdfs", "sddfsdf"])
+        self.assertEqual(state_transmission.transmission_mask_files,  ["sdfs", "bbbbbb"])
 
-        self.assertEqual(state.rebin_type, RebinType.REBIN)
-        self.assertEqual(state.wavelength_low,  [1.5])
-        self.assertEqual(state.wavelength_high,  [2.7])
-        self.assertEqual(state.wavelength_step,  0.5)
-        self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
-        self.assertEqual(state.use_full_wavelength_range, True)
-        self.assertEqual(state.wavelength_full_range_low,  12.)
-        self.assertEqual(state.wavelength_full_range_high,  24.)
+        self.assertEqual(state_transmission.rebin_type, RebinType.REBIN)
+        self.assertEqual(state_transmission.wavelength_low,  [1.5])
+        self.assertEqual(state_transmission.wavelength_high,  [2.7])
+        self.assertEqual(state_transmission.wavelength_step,  0.5)
+        self.assertEqual(state_transmission.wavelength_step_type, RangeStepType.LIN)
+        self.assertEqual(state_transmission.use_full_wavelength_range, True)
+        self.assertEqual(state_transmission.wavelength_full_range_low,  12.)
+        self.assertEqual(state_transmission.wavelength_full_range_high,  24.)
 
-        self.assertEqual(state.background_TOF_general_start,  1.4)
-        self.assertEqual(state.background_TOF_general_stop,  34.4)
-        self.assertEqual(len(set(state.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())), 2)
-        self.assertEqual(len(set(state.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())), 2)
-        self.assertEqual(state.background_TOF_roi_start,  1.4)
-        self.assertEqual(state.background_TOF_roi_stop,  34.4)
+        self.assertEqual(state_transmission.background_TOF_general_start,  1.4)
+        self.assertEqual(state_transmission.background_TOF_general_stop,  34.4)
+        self.assertEqual(len(set(state_transmission.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())), 2)
+        self.assertEqual(len(set(state_transmission.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())), 2)
+        self.assertEqual(state_transmission.background_TOF_roi_start,  1.4)
+        self.assertEqual(state_transmission.background_TOF_roi_stop,  34.4)
 
-        self.assertEqual(state.fit[DataType.SAMPLE.value].fit_type, FitType.LINEAR)
-        self.assertEqual(state.fit[DataType.SAMPLE.value].polynomial_order, 0)
-        self.assertEqual(state.fit[DataType.SAMPLE.value].wavelength_low, 10.)
-        self.assertEqual(state.fit[DataType.SAMPLE.value].wavelength_high, 20.)
+        self.assertEqual(state_transmission.fit[DataType.SAMPLE.value].fit_type, FitType.LINEAR)
+        self.assertEqual(state_transmission.fit[DataType.SAMPLE.value].polynomial_order, 0)
+        self.assertEqual(state_transmission.fit[DataType.SAMPLE.value].wavelength_low, 10.)
+        self.assertEqual(state_transmission.fit[DataType.SAMPLE.value].wavelength_high, 20.)
 
-        self.assertEqual(state.fit[DataType.CAN.value].fit_type, FitType.POLYNOMIAL)
-        self.assertEqual(state.fit[DataType.CAN.value].polynomial_order, 3)
-        self.assertEqual(state.fit[DataType.CAN.value].wavelength_low, 10.)
-        self.assertEqual(state.fit[DataType.CAN.value].wavelength_high, 20.)
+        self.assertEqual(state_transmission.fit[DataType.CAN.value].fit_type, FitType.POLYNOMIAL)
+        self.assertEqual(state_transmission.fit[DataType.CAN.value].polynomial_order, 3)
+        self.assertEqual(state_transmission.fit[DataType.CAN.value].wavelength_low, 10.)
+        self.assertEqual(state_transmission.fit[DataType.CAN.value].wavelength_high, 20.)
 
 
 if __name__ == '__main__':

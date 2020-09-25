@@ -48,8 +48,8 @@ class SettingsAdjustmentPresenter(PresenterCommon):
         self._set_on_view("transmission_mask_files")
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
-        self._set_on_view("transmission_mn_4_shift")
-        self._set_on_view("transmission_mn_5_shift")
+        self._set_on_view("transmission_mn_4_shift",1)
+        self._set_on_view("transmission_mn_5_shift",1)
 
         self._set_on_view_transmission_fit()
 

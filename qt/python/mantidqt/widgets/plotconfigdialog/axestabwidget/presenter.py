@@ -8,6 +8,7 @@
 
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
+from mantid.plots import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.view import AxesTabWidgetView
@@ -53,6 +54,7 @@ class AxesTabWidgetPresenter:
         ax = self.get_selected_ax()
 
         self.set_ax_title(ax, self.current_view_props['title'])
+        self.set_ax_canvas_color(ax, self.current_view_props['canvas_color'])
 
         if not isinstance(ax, Axes3D):
             if self.current_view_props['minor_ticks']:
@@ -104,6 +106,8 @@ class AxesTabWidgetPresenter:
         self.axis_changed()
         view_props = self.current_view_props
         for ax in self.axes_names_dict.values():
+
+            self.set_ax_canvas_color(ax, view_props['canvas_color'])
 
             if self.current_view_props['minor_ticks']:
                 ax.minorticks_on()
@@ -181,6 +185,10 @@ class AxesTabWidgetPresenter:
         ax.set_title(new_title)
         self.rename_selected_axes(generate_ax_name(ax))
 
+    def set_ax_canvas_color(self, ax, color_rgb):
+        """Set axes canvas color"""
+        ax.set_facecolor(color_rgb)
+
     def update_view(self):
         """Update the properties in the view from the selected axes"""
         self.current_view_props.clear()
@@ -206,6 +214,9 @@ class AxesTabWidgetPresenter:
         ax = self.view.get_axis()
         self.view.set_title(ax_props.title)
 
+        color_hex = convert_color_to_hex(ax_props["canvas_color"])
+        self.view.set_canvas_color(color_hex)
+
         if not plot_is_3d:
             self.view.set_show_minor_ticks(ax_props.minor_ticks)
             self.view.show_minor_gridlines_check_box.setEnabled(ax_props.minor_ticks)
@@ -228,6 +239,7 @@ class AxesTabWidgetPresenter:
         self.current_view_props[f"{ax}lim"] = (self.view.get_lower_limit(), self.view.get_upper_limit())
         self.current_view_props[f"{ax}label"] = self.view.get_label()
         self.current_view_props[f"{ax}scale"] = self.view.get_scale()
+        self.current_view_props["canvas_color"] = self.view.get_canvas_color()
 
         new_ax = self.view.get_axis()
         self.current_axis = new_ax

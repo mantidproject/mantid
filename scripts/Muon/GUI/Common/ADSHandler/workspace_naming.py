@@ -31,11 +31,7 @@ def _base_run_name(instrument, run=None):
 
 
 def get_group_data_workspace_name(context, group_name, run, period_string, rebin):
-    if context.data_context.is_multi_period():
-        name = context.data_context._base_run_name(run) + group_str + group_name + \
-               "; Counts; Periods; " + period_string + ";"
-    else:
-        name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
+    name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])
@@ -46,11 +42,7 @@ def get_group_data_workspace_name(context, group_name, run, period_string, rebin
 
 
 def get_group_asymmetry_name(context, group_name, run, period_string, rebin):
-    if context.data_context.is_multi_period():
-        name = context.data_context._base_run_name(run) + group_str + group_name + \
-               "; Asymmetry; Periods; " + period_string + ";"
-    else:
-        name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry;"
+    name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry;"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])
@@ -96,22 +88,6 @@ def get_raw_data_directory(context, run):
         return context.data_context._base_run_name(run) + "; Raw Data" + context.workspace_suffix + "/"
     else:
         return context.data_context._base_run_name(run) + " Raw Data" + context.workspace_suffix + "/"
-
-
-def get_group_data_directory(context, run):
-    if context.data_context.is_multi_period():
-        return context.data_context._base_run_name(run) + " Period " + context.gui_context.period_string(
-            run) + "; Groups" + context.workspace_suffix + "/"
-    else:
-        return context.data_context._base_run_name(run) + " Groups" + context.workspace_suffix + "/"
-
-
-def get_pair_data_directory(context, run):
-    if context.data_context.is_multi_period():
-        return context.data_context._base_run_name(run) + " Period " + context.gui_context.period_string(
-            run) + "; Pairs" + context.workspace_suffix + "/"
-    else:
-        return context.data_context._base_run_name(run) + " Pairs" + context.workspace_suffix + "/"
 
 
 def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group):
