@@ -156,6 +156,13 @@ class DrillTest(unittest.TestCase):
         self.presenter = self.view._presenter
         self.model = self.presenter.model
 
+        # mock popup
+        self.view._saveDataQuestion = mock.Mock()
+
+        # shown window
+        self.view.isHidden = mock.Mock()
+        self.view.isHidden.return_value = False
+
     def tearDown(self):
         config['default.facility'] = self.facility
 
