@@ -164,7 +164,7 @@ double DetectorInfo::twoTheta(const size_t index) const {
   } catch (const std::runtime_error &e) {
     Kernel::Logger g_log("DetectorInfo");
     g_log.warning(e.what());
-    return 0.0;
+    return std::nan("");
   }
 }
 
@@ -188,7 +188,7 @@ double DetectorInfo::twoTheta(const std::pair<size_t, size_t> &index) const {
   } catch (const std::runtime_error &e) {
     Kernel::Logger g_log("DetectorInfo");
     g_log.warning(e.what());
-    return 0.0;
+    return std::nan("");
   }
 }
 

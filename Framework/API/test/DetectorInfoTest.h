@@ -152,7 +152,7 @@ public:
     const auto oldPos = detectorInfo.position(0);
     V3D newPos(0.0, 0.0, 0.0);
     detectorInfo.setPosition(0, newPos);
-    TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
+    TS_ASSERT(std::isnan(detectorInfo.twoTheta(1)));
     detectorInfo.setPosition(0, oldPos);
   }
 
@@ -177,7 +177,7 @@ public:
     const auto oldPos = detectorInfo.position(0);
     V3D newPos(0.0, 0.0, 0.0);
     detectorInfo.setPosition(0, newPos);
-    TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
+    TS_ASSERT(std::isnan(detectorInfo.signedTwoTheta(1)));
     detectorInfo.setPosition(0, oldPos);
   }
 
