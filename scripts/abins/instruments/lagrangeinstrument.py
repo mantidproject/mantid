@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import numpy as np
+
 import abins
 from abins.constants import MILLI_EV_TO_WAVENUMBER, WAVENUMBER_TO_INVERSE_A
 from .indirectinstrument import IndirectInstrument
@@ -27,8 +29,6 @@ class LagrangeInstrument(IndirectInstrument):
             print(f'No setting specified for instrument {self.get_name()}. '
                   f'Using default "{self._setting}". Supported settings: '
                   + ', '.join(sorted(self.parameters['settings'].keys())))
-
-
         else:
             raise ValueError('Setting "{}" is unknown for Lagrange '
                              'instrument. Supported settings: {}'.format(
@@ -38,9 +38,21 @@ class LagrangeInstrument(IndirectInstrument):
     def get_sigma(self, frequencies):
         ei_resolution = self.parameters['settings'][self._setting].get('ei_resolution', 0)
         abs_resolution_meV = self.parameters['settings'][self._setting].get('abs_resolution_meV', 0)
+
+        if isinstance(abs_resolution_meV, list):  # interpret as polynomial in energy units
+            abs_resolution_meV = np.abs(np.polyval(abs_resolution_meV, frequencies / MILLI_EV_TO_WAVENUMBER))
+
         abs_resolution_cm = abs_resolution_meV * MILLI_EV_TO_WAVENUMBER
 
-        return frequencies * ei_resolution + abs_resolution_cm
+        sigma = frequencies * ei_resolution + abs_resolution_cm
+
+        low_energy_indices = frequencies < (self.parameters['settings'][self._setting]
+                                            .get('low_energy_cutoff_meV', float('-Inf')))
+        sigma[low_energy_indices] = (self.parameters['settings'][self._setting]
+                                     .get('low_energy_resolution_meV', 0)
+                                     * MILLI_EV_TO_WAVENUMBER)
+
+        return sigma
 
     def calculate_q_powder(self, input_data=None):
         """Calculates squared Q vectors for Lagrange.
