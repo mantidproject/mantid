@@ -773,7 +773,6 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
     def __init__(self,
-                 mantid_config=None,
                  test_loc=None,
                  runner=None,
                  output=[TextResultReporter()],
@@ -796,8 +795,6 @@ class TestManager(object):
             r._output_on_failure = output_on_failure
         self._clean = clean
         self._showSkipped = showSkipped
-
-        self._mantid_config = mantid_config
 
         self._testDir = test_loc
         self._quiet = quiet
@@ -825,7 +822,7 @@ class TestManager(object):
             counts, tests, sub_directories, stats, files_required, lock_status = self.__generateTestList(sub_directory)
             mod_counts.update(counts)
             mod_tests.update(tests)
-            mod_sub_directories(sub_directories)
+            mod_sub_directories.update(sub_directories)
             test_stats[0] += stats[0]
             test_stats[1] = max(test_stats[1], stats[1])
             test_stats[2] += stats[2]
@@ -1093,7 +1090,11 @@ class MantidFrameworkConfig:
                  archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
+        # add location of system tests
         self.__testDir = self.__locateTestsDir()
+
+        # add location of the analysis tests
+        sys.path.insert(0, self.__testDir)
 
         # setup the rest of the magic directories
         self.__saveDir = save_dir
@@ -1309,7 +1310,7 @@ def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, re
                 # Check for the lock status of the required files for this test module
                 modname = tests_dict[str(i)][1][0]._modname
                 no_files_are_locked = True
-                for f in required_files_dict[tests_dict[str(i)][1][0]._modname]:
+                for f in required_files_dict[modname]:
                     if locked_files_dict[f]:
                         no_files_are_locked = False
                         break

@@ -44,6 +44,9 @@ The tests should be added to the ``Testing/SystemTests/tests/framework``,
 with the template result going in the ``reference`` sub-folder. It will
 then be included in the suite of tests from the following night.
 
+Alternatively, any tests relating to testing qt interfaces should be added to
+the ``Testing/SystemTests/tests/qt`` directory.
+
 Specifying Validation
 ---------------------
 
