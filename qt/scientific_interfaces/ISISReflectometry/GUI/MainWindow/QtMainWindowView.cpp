@@ -76,8 +76,7 @@ void QtMainWindowView::initLayout() {
 #else
   Plotter plotter;
 #endif
-  // pass reference to concrete clipboard factory
-  ClipboardFactory &cbf = ClipboardFactory();
+  ClipboardFactory cbf = ClipboardFactory();
   auto makeRunsTablePresenter = RunsTablePresenterFactory(
       instruments, thetaTolerance, &cbf, std::move(plotter));
 

@@ -29,18 +29,22 @@ public:
   Clipboard(boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>> subtrees,
             boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> subtreeRoots);
 
-  bool isInitialized() const;
-  int numberOfRoots() const;
-  bool isGroupLocation(int rootIndex) const;
-  std::string groupName(int rootIndex) const;
-  void setGroupName(int rootIndex, std::string const &groupName);
-  Group createGroupForRoot(int rootIndex) const;
-  std::vector<boost::optional<Row>> createRowsForAllRoots() const;
+  bool isInitialized() const override;
+  int numberOfRoots() const override;
+  bool isGroupLocation(int rootIndex) const override;
+  std::string groupName(int rootIndex) const override;
+  void setGroupName(int rootIndex, std::string const &groupName) override;
+  Group createGroupForRoot(int rootIndex) const override;
+  std::vector<boost::optional<Row>> createRowsForAllRoots() const override;
 
-  std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &subtrees() const;
-  std::vector<MantidQt::MantidWidgets::Batch::Subtree> &mutableSubtrees();
-  std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &subtreeRoots() const;
-  std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &mutableSubtreeRoots();
+  std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &
+  subtrees() const override;
+  std::vector<MantidQt::MantidWidgets::Batch::Subtree> &
+  mutableSubtrees() override;
+  std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
+  subtreeRoots() const override;
+  std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &
+  mutableSubtreeRoots() override;
 
 private:
   // The subtrees for each of the roots. Note that the Rows here contain

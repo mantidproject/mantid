@@ -30,8 +30,8 @@ public:
 protected:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
-  Plotter m_plotter;
   IClipboardFactory *m_cbf;
+  Plotter m_plotter;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
