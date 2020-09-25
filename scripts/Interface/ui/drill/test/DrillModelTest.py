@@ -154,9 +154,6 @@ class DrillModelTest(unittest.TestCase):
     def test_getInstrument(self):
         self.assertEqual(self.model.getInstrument(), self.model.instrument)
 
-    def test_getAvailableTechniques(self):
-        self.assertEqual(self.model.getAvailableTechniques(), ["t1"])
-
     def test_setAcquisitionMode(self):
         # invalid aquisition mode
         self.mController.reset_mock()

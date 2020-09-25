@@ -166,16 +166,6 @@ class DrillModel(QObject):
         """
         return self.instrument
 
-    def getAvailableTechniques(self):
-        """
-        Get the list of techniques available.
-
-        Returns:
-            list(str): list of techniques
-        """
-        return [technique for (instrument, technique)
-                in RundexSettings.TECHNIQUE.items()]
-
     def setAcquisitionMode(self, mode):
         """
         Set the acquisition mode. The acquisition mode is modified only if it

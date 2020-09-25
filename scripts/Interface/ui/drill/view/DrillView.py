@@ -587,16 +587,6 @@ class DrillView(QMainWindow):
     # for model calls                                                         #
     ###########################################################################
 
-    def set_available_instruments(self, techniques):
-        """
-        Change the available instruments in the comboxbox based on the
-        supported techniques.
-
-        Args:
-            techniques (list(str)): list of supported techniques
-        """
-        self.instrumentselector.setTechniques(techniques)
-
     def set_available_modes(self, modes):
         """
         Set the available acquisition modes in the comboxbox.

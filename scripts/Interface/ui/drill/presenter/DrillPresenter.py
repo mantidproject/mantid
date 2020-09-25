@@ -22,7 +22,6 @@ class DrillPresenter:
         """
         self.model = DrillModel()
         self.view = view
-        self.view.set_available_instruments(self.model.getAvailableTechniques())
 
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
