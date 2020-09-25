@@ -221,6 +221,7 @@ foo()
         task = executor.execute_async(code, line_no, filename)
         task.join()
         QCoreApplication.processEvents()
+        QCoreApplication.processEvents()
 
         return executor, recv
 
