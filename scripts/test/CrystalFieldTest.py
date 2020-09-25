@@ -296,6 +296,14 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(y1[139], 0.17385222868511149, 8)
         self.assertAlmostEqual(y1[142], 0.17671738547959939, 8)
 
+    def test_api_CrystalField_when_using_cubic_crystal_structures(self):
+        from CrystalField import CrystalField
+
+        cf = CrystalField('Ce', 'Oh', B40=1, B60=0.1, Temperature=0.01, FWHM=1)
+
+        np.testing.assert_allclose(np.array(cf.getEigenvalues()), np.array([0.0, 0.0, 360.0, 360.0, 360.0, 360.0]))
+        np.testing.assert_allclose(np.array(cf.getPeakList()[0]), np.array([360.0, 0.0]))
+
     def test_api_CrystalField_spectrum_background(self):
         from CrystalField import CrystalField, Background, Function
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
