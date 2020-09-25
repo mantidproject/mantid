@@ -773,6 +773,7 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
     def __init__(self,
+                 mantid_config=None,
                  test_loc=None,
                  runner=None,
                  output=[TextResultReporter()],
@@ -796,6 +797,8 @@ class TestManager(object):
         self._clean = clean
         self._showSkipped = showSkipped
 
+        self._mantid_config = mantid_config
+
         self._testDir = test_loc
         self._quiet = quiet
         self._testsInclude = re.compile(testsInclude) if testsInclude is not None else None
@@ -810,8 +813,31 @@ class TestManager(object):
 
         self._tests = list_of_tests
 
-    def generateMasterTestList(self):
+    def generateMasterTestList(self, test_sub_directories):
+        mod_counts = dict()
+        mod_tests = dict()
+        mod_sub_directories = dict()
+        test_stats = [0, 0, 0]
+        files_required_by_test_module = dict()
+        data_file_lock_status = dict()
+
+        for sub_directory in test_sub_directories:
+            counts, tests, sub_directories, stats, files_required, lock_status = self.__generateTestList(sub_directory)
+            mod_counts.update(counts)
+            mod_tests.update(tests)
+            mod_sub_directories(sub_directories)
+            test_stats[0] += stats[0]
+            test_stats[1] = max(test_stats[1], stats[1])
+            test_stats[2] += stats[2]
+            files_required_by_test_module.update(files_required)
+            data_file_lock_status.update(lock_status)
+
+        return mod_counts, mod_tests, mod_sub_directories, test_stats, files_required_by_test_module, \
+            data_file_lock_status
+
+    def __generateTestList(self, test_sub_directory):
         # If given option is a directory
+        self._testDir = os.path.join(self._testDir, test_sub_directory)
         if os.path.isdir(self._testDir):
             test_dir = os.path.abspath(self._testDir).replace('\\', '/')
             sys.path.append(test_dir)
@@ -854,11 +880,12 @@ class TestManager(object):
         # with data being cleaned up before another process has finished.
         #
         # We create a list of test modules (= different python files in the
-        # 'Testing/SystemTests/tests/<sub_dir>' directory) and count how many
+        # 'Testing/SystemTests/tests/<sub_directory>' directory) and count how many
         # tests are in each module. We also create on the fly a list of tests
         # for each module.
         modcounts = dict()
         modtests = dict()
+        mod_sub_directories = dict()
         for t in reduced_test_list:
             key = t._modname
             if key in modcounts.keys():
@@ -867,6 +894,7 @@ class TestManager(object):
             else:
                 modcounts[key] = 1
                 modtests[key] = [t]
+                mod_sub_directories[key] = test_sub_directory
 
         # Now we scan each test module (= python file) and list all the data files
         # that are used by that module. The possible ways files are being specified
@@ -899,8 +927,8 @@ class TestManager(object):
 
             fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
-            sub_dir = self._testDir.split("\\")[-1]
-            with open(os.path.join(os.path.dirname(self._testDir), sub_dir, fname), "r") as pyfile:
+            sub_directory = self._testDir.split("\\")[-1]
+            with open(os.path.join(os.path.dirname(self._testDir), sub_directory, fname), "r") as pyfile:
                 for line in pyfile.readlines():
 
                     # Search for all instances of '.nxs' or '.raw'
@@ -953,7 +981,8 @@ class TestManager(object):
                 for s in files_required_by_test_module[key]:
                     print(s)
 
-        return modcounts, modtests, test_stats, files_required_by_test_module, data_file_lock_status
+        return modcounts, modtests, mod_sub_directories, test_stats, files_required_by_test_module, \
+            data_file_lock_status
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
@@ -1058,20 +1087,13 @@ class TestManager(object):
 class MantidFrameworkConfig:
     def __init__(self,
                  sourceDir=None,
-                 test_sub_dir="",
                  data_dirs="",
                  save_dir="",
                  loglevel='information',
                  archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
-        self.__testSubDir = test_sub_dir
-
-        # add location of system tests
         self.__testDir = self.__locateTestsDir()
-
-        # add location of the tests to the system path
-        sys.path.insert(0, self.__testDir)
 
         # setup the rest of the magic directories
         self.__saveDir = save_dir
@@ -1117,7 +1139,7 @@ class MantidFrameworkConfig:
             raise RuntimeError("Failed to find source directory")
 
     def __locateTestsDir(self):
-        loc = os.path.join(self.__sourceDir, "..", "..", "tests", self.__testSubDir)
+        loc = os.path.join(self.__sourceDir, "..", "..", "tests")
         loc = os.path.abspath(loc)
         if os.path.isdir(loc):
             return loc
@@ -1235,11 +1257,11 @@ def using_gsl_v1():
 # and finds the next element that has a 0 value). This aims to have all
 # threads end calculation approximately at the same time.
 #########################################################################
-def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
-                    res_array, stat_dict, total_number_of_tests, maximum_name_length, tests_done,
+def testThreadsLoop(mtdconf, options, tests_dict, tests_lock, tests_left, res_array,
+                    stat_dict, total_number_of_tests, maximum_name_length, tests_done,
                     process_number, lock, required_files_dict, locked_files_dict):
     try:
-        testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
+        testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left,
                             res_array, stat_dict, total_number_of_tests, maximum_name_length,
                             tests_done, process_number, lock, required_files_dict,
                             locked_files_dict)
@@ -1253,9 +1275,9 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict, tests_lock, 
     sys.exit(exit_code)
 
 
-def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
-                        res_array, stat_dict, total_number_of_tests, maximum_name_length,
-                        tests_done, process_number, lock, required_files_dict, locked_files_dict):
+def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, res_array,
+                        stat_dict, total_number_of_tests, maximum_name_length, tests_done,
+                        process_number, lock, required_files_dict, locked_files_dict):
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)
@@ -1271,6 +1293,8 @@ def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lo
     # Begin loop: as long as there are still some test modules that
     # have not been run, keep looping
     while tests_left.value > 0:
+        # Sub directory of tests
+        test_sub_directory = None
         # Empty test list
         local_test_list = None
         # Get the lock to inspect the global list of tests
@@ -1283,19 +1307,19 @@ def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lo
             # for this particular loop
             if tests_lock[i] == 0:
                 # Check for the lock status of the required files for this test module
-                modname = tests_dict[str(i)][0]._modname
+                modname = tests_dict[str(i)][1][0]._modname
                 no_files_are_locked = True
-                for f in required_files_dict[tests_dict[str(i)][0]._modname]:
+                for f in required_files_dict[tests_dict[str(i)][1][0]._modname]:
                     if locked_files_dict[f]:
                         no_files_are_locked = False
                         break
-                # If all failes are available, we can proceed with this module
+                # If all files are available, we can proceed with this module
                 if no_files_are_locked:
                     # Lock the data files for this test module
                     for f in required_files_dict[modname]:
                         locked_files_dict[f] = True
                     # Set the current test list to the chosen module
-                    local_test_list = tests_dict[str(i)]
+                    test_sub_directory, local_test_list = tests_dict[str(i)]
                     tests_lock[i] = 1
                     imodule = i
                     tests_left.value -= 1
@@ -1305,15 +1329,23 @@ def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lo
 
         # Check if local_test_list exists: if all data was locked,
         # then there is no test list
-        if local_test_list:
+        if local_test_list and test_sub_directory:
 
             if not options.quiet:
                 print("##### Thread %2i will execute module: [%3i] %s (%i tests)" \
                       % (process_number, imodule, modname, len(local_test_list)))
                 sys.stdout.flush()
 
+            test_directory = os.path.join(mtdconf.testDir, test_sub_directory)
+            test_directory = os.path.abspath(test_directory)
+            if os.path.isdir(test_directory):
+                # add location of the tests to the system path
+                sys.path.insert(0, test_directory)
+            else:
+                raise RuntimeError("Expected a tests directory at '%s' but it is not a directory." % test_directory)
+
             # Create a TestManager, giving it a pre-compiled list_of_tests
-            mgr = TestManager(test_loc=testDir,
+            mgr = TestManager(test_loc=test_directory,
                               runner=runner,
                               output=[reporter],
                               quiet=options.quiet,
@@ -1347,7 +1379,7 @@ def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lo
 
     # Report the errors
     local_dict = dict()
-    with open(os.path.join(saveDir, "TEST-systemtests-%i.xml" % process_number), 'w') as xml_report:
+    with open(os.path.join(mtdconf.saveDir, "TEST-systemtests-%i.xml" % process_number), 'w') as xml_report:
         xml_report.write(reporter.getResults(local_dict))
 
     for key in local_dict.keys():
