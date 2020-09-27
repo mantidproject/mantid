@@ -39,8 +39,9 @@ class TestBank(unittest.TestCase):
                           '124023_bank10', '124023_bank14', '124023_bank15', '124023_banks_14_15'):
             workspace = 'CORELLI_' + bank_case
             # DEBUG
-            save_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
-            LoadNexusProcessed(Filename=save_dir + workspace + '.nxs', OutputWorkspace=workspace)
+            #save_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
+            #LoadNexusProcessed(Filename=save_dir + workspace + '.nxs', OutputWorkspace=workspace)
+            LoadNexusProcessed(Filename=workspace + '.nxs', OutputWorkspace=workspace)
             cls.cases[bank_case] = workspace
 
         def assert_missing_tube(cls_other, calibration_table, tube_number):

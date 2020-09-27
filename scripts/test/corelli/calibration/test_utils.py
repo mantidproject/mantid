@@ -84,8 +84,9 @@ class TestUtils(unittest.TestCase):
         # loading a nexus processed file
         config.appendDataSearchSubDir('CORELLI/calibration')
         # DEBUG
-        save_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
-        workspace = load_banks(save_dir + 'CORELLI_123454_bank58.nxs', '58', output_workspace='jambalaya')
+        #save_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
+        #workspace = load_banks(save_dir + 'CORELLI_123454_bank58.nxs', '58', output_workspace='jambalaya')
+        workspace = load_banks('CORELLI_123454_bank58.nxs', '58', output_workspace='jambalaya')
         self.assertAlmostEqual(workspace.readY(42)[0], 13297.0)
         DeleteWorkspaces(['jambalaya'])
 
