@@ -5,11 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from os import path
 import numpy as np
-from typing import Union
+from typing import List, Union
 
 # imports from Mantid
+from mantid.api import mtd
 from mantid.dataobjects import TableWorkspace, Workspace2D
+from mantid.simpleapi import Integration, LoadEventNexus, LoadNexusProcessed
 from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
@@ -18,6 +21,42 @@ InputWorkspace = Union[str, Workspace2D]  # type alias
 TUBE_LENGTH = 0.9001  # in meters
 PIXELS_PER_TUBE = 256
 WIRE_GAP = 52.8 / 1000  # in meters, distance between consecutive wires
+
+
+def bank_numbers(bank_selection: str) -> List[str]:
+    r"""
+
+    :param bank_selection:
+    :return:
+    """
+    banks = list()  # list of bank numbers, as string
+    ranges = [r.strip() for r in bank_selection.split(',')]  # split by comma
+    for r in ranges:
+        if '-' in r:
+            start, end = [int(n.strip()) for n in r.split('-')]
+            banks.extend([str(n) for n in range(start, end + 1)])
+        else:
+            banks.append(r)
+    return banks
+
+
+def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Workspace2D:
+    r"""
+
+    :param filename: Filename to an Event nexus file or a processed nexus file
+    :param bank_selection:
+    :param output_workspace:
+    :return:
+    """
+    assert path.exists(filename), f'File {filename} does not exist'
+    bank_names = ','.join(['bank' + b for b in bank_numbers(bank_selection)])
+    try:
+        LoadEventNexus(Filename=filename, OutputWorkspace=output_workspace,
+                       BankName=bank_names, LoadMonitors=False, LoadLogs=False)
+    except (RuntimeError, ValueError):
+        LoadNexusProcessed(Filename=filename, OutputWorkspace=output_workspace)
+    Integration(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
+    return mtd[output_workspace]
 
 
 def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow_height: float = 1000,
