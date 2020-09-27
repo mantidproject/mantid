@@ -10,8 +10,10 @@ from numpy.testing import assert_allclose, assert_equal
 import unittest
 
 # Mantid imports
-from corelli.calibration.bank import (wire_positions, fit_bank, criterium_peak_pixel_position, sufficient_intensity)
-from mantid import AnalysisDataService, config
+from corelli.calibration.bank import (append_bank_number, calibrate_bank, calibrate_banks,
+                                      criterium_peak_pixel_position, fit_bank,
+                                      mask_bank, purge_table, sufficient_intensity, wire_positions)
+from mantid import AnalysisDataService, config, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
 
 
@@ -20,7 +22,7 @@ class TestBank(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         r"""
-        Load the tests cases, consisting of data for only one bank
+        Load the tests cases for calibrate_bank, consisting of data for only one bank
         CORELLI_123455_bank20, control bank, it has no problems
         CORELLI_123454_bank58, beam center intensity spills over adjacent tubes, tube15 and tube16
         CORELLI_124018_bank45, tube11 is not working at all
@@ -28,14 +30,30 @@ class TestBank(unittest.TestCase):
         CORELLI_124023_bank10, tube 13 has shadows at pixel numbers quite different from the rest
         CORELLI_124023_bank14, wire shadows very faint, only slightly larger than fluctuations of the background
         CORELLI_124023_bank15, one spurious shadow in tube14
+        Load the test case for calibrate_banks, consisting of data for two banks
+        CORELLI_124023_banks_14_15
         """
         config.appendDataSearchSubDir('CORELLI/calibration')
         cls.cases = dict()
         for bank_case in ('123454_bank58', '124018_bank45', '123555_bank20', '123455_bank20',
-                          '124023_bank10', '124023_bank14', '124023_bank15'):
+                          '124023_bank10', '124023_bank14', '124023_bank15', '124023_banks_14_15'):
             workspace = 'CORELLI_' + bank_case
-            LoadNexusProcessed(Filename=workspace + '.nxs', OutputWorkspace=workspace)
+            # DEBUG
+            save_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
+            LoadNexusProcessed(Filename=save_dir + workspace + '.nxs', OutputWorkspace=workspace)
             cls.cases[bank_case] = workspace
+
+        def assert_missing_tube(cls_other, calibration_table, tube_number):
+            r"""Check detector ID's from a failing tube are not in the calibration table"""
+            table = mtd[str(calibration_table)]
+            first = table.cell('Detector ID', 0)  # first detector ID
+            # Would-be first and last detectors ID's for the failing tube
+            begin, end = first + (tube_number - 1) * 256, first + tube_number * 256 - 1
+            detectors_ids = table.column(0)
+            assert begin not in detectors_ids
+            assert end not in detectors_ids
+        # sneak in a class method, make sure it's loaded before any tests is executed
+        cls.assert_missing_tube = assert_missing_tube
 
     @classmethod
     def tearDown(cls) -> None:
@@ -86,6 +104,8 @@ class TestBank(unittest.TestCase):
         assert AnalysisDataService.doesExist('table_20')
         assert AnalysisDataService.doesExist('pixel_20')
 
+        DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
+
     def test_criterium_peak_pixel_position(self):
 
         # control bank, it has no problems
@@ -117,6 +137,113 @@ class TestBank(unittest.TestCase):
         fit_bank(self.cases['124023_bank15'], 'bank15')
         expected = np.ones(16, dtype=bool)
         assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+
+        DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
+
+    def test_append_bank_number(self):
+        with self.assertRaises(AssertionError) as exception_info:
+            append_bank_number('I am not here', 'bank51')
+        assert 'Cannot process table I am not here' in str(exception_info.exception)
+
+        # overwrite table with an extra column
+        fit_bank(self.cases['123455_bank20'], 'bank20', calibration_table='table')
+        append_bank_number('table', 'bank20')
+        assert mtd['table'].getColumnNames()[2] == 'Bank Number'
+        assert mtd['table'].column(2) == [20] * 4096
+
+        # clone table and append and extra column
+        fit_bank(self.cases['123455_bank20'], 'bank20', calibration_table='table')
+        append_bank_number('table', 'bank20', output_table='other_table')
+        assert mtd['other_table'].getColumnNames()[2] == 'Bank Number'
+        assert mtd['other_table'].column(2) == [20] * 4096
+
+        DeleteWorkspaces(['table', 'other_table', 'PeakTable', 'masked_tubes', 'masked_tubes'])  # a bit of clean-up
+
+    def test_purge_table(self):
+        with self.assertRaises(AssertionError) as exception_info:
+            purge_table('I am not here', 'bank51', 'table', [True, False])
+        assert 'Input workspace I am not here does not exists' in str(exception_info.exception)
+
+        with self.assertRaises(AssertionError) as exception_info:
+            purge_table(self.cases['123455_bank20'], 'bank51', 'I am not here', [True, False])
+        assert 'Input table I am not here does not exists' in str(exception_info.exception)
+
+        # control bank, it has no problems. Thus, no tubes to purge
+        fit_bank(self.cases['123455_bank20'], 'bank20')
+        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        unpurged_row_count = mtd['CalibTable'].rowCount()
+        purge_table(self.cases['123455_bank20'], 'bank20', 'CalibTable', tube_fit_success)
+        assert mtd['CalibTable'].rowCount() == unpurged_row_count
+
+        # tube11 is not working at all. Thus, purge only one tube
+        fit_bank(self.cases['124018_bank45'], 'bank45')
+        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        unpurged_row_count = mtd['CalibTable'].rowCount()
+        purge_table(self.cases['124018_bank45'], 'bank45', 'CalibTable', tube_fit_success)
+        assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256
+        self.assert_missing_tube('CalibTable', 11)
+
+        # tubes 3, 8, and 13 have very faint wire shadows. Thus, purge three tubes
+        fit_bank(self.cases['124023_bank14'], 'bank14')
+        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        unpurged_row_count = mtd['CalibTable'].rowCount()
+        purge_table(self.cases['124023_bank14'], 'bank14', 'CalibTable', tube_fit_success)
+        assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256 * 3
+        for tube_number in (3, 8, 13):
+            self.assert_missing_tube('CalibTable', tube_number)
+
+        DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
+
+    def test_mask_bank(self):
+        # control bank, it has no problems. Thus, no mask to be created
+        fit_bank(self.cases['123455_bank20'], 'bank20')
+        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        assert mask_bank('bank20', tube_fit_success, 'masked_tubes') is None
+
+        # tube11 is not working at all. Thus, mask this tube
+        fit_bank(self.cases['124018_bank45'], 'bank45')
+        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        mask_bank('bank45', tube_fit_success, 'masked_tubes')
+        detector_ids = mtd['masked_tubes'].column(0)
+        assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 256]
+
+        # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
+        fit_bank(self.cases['124023_bank14'], 'bank14')
+        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        mask_bank('bank14', tube_fit_success, 'masked_tubes')
+        detector_ids = mtd['masked_tubes'].column(0)
+        assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 3 * 256]
+
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'masked_tubes'])  # a bit of clean-up
+
+    def test_calibrate_bank(self):
+        # control bank, it has no problems. Thus, no mask to be created
+        calibration, mask = calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table')
+        assert calibration.rowCount() == 256 * 16
+        assert calibration.columnCount() == 3
+        assert AnalysisDataService.doesExist('calibration_table')
+        assert mask is None
+        assert AnalysisDataService.doesExist('MaskTable') is False
+
+        # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
+        calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14',
+                                           calibration_table='calibration_table')
+        assert calibration.rowCount() == 256 * (16 - 3)
+        assert calibration.columnCount() == 3
+        assert AnalysisDataService.doesExist('calibration_table')
+        assert mask.rowCount() == 256 * 3
+        assert mask.columnCount() == 1
+        assert AnalysisDataService.doesExist('MaskTable')
+
+        DeleteWorkspaces(['calibration_table', 'MaskTable'])  # a bit of clean-up
+
+    def test_calibrate_banks(self):
+        calibrations, masks = calibrate_banks(self.cases['124023_banks_14_15'], '14-15')
+        assert list(calibrations.getNames()) == ['calib14', 'calib15']
+        assert list(masks.getNames()) == ['mask14']
+        assert mtd['calib14'].rowCount() == 256 * (16 - 3)
+        assert mtd['mask14'].rowCount() == 256 * 3
+        assert mtd['calib15'].rowCount() == 256 * 16
 
 
 if __name__ == "__main__":
