@@ -12,10 +12,10 @@ from typing import Any, Callable, Optional, Tuple, Union
 
 # imports from Mantid
 from mantid import AnalysisDataService, mtd
-from mantid.api import WorkspaceGroup
+from mantid.api import TextAxis, WorkspaceGroup
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, DeleteTableRows, DeleteWorkspaces,
-                              GroupWorkspaces, MaskBTP, RenameWorkspace)
+from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateWorkspace, DeleteTableRows,
+                              DeleteWorkspaces, GroupWorkspaces, MaskBTP, RenameWorkspace)
 from Calibration import tube
 from Calibration.tube_spec import TubeSpec
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
@@ -84,6 +84,7 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
     :param calibration_table:
     :param peak_pixel_positions_table:
     :return:
+    :return:
     """
     message = f'Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle'
     assert isinstance(workspace, (str, Workspace2D)), message
@@ -115,8 +116,8 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
 InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
 
 
-def criterium_peak_pixel_position(peak_table: InputTable, zscore_threshold: float = 2.5,
-                                  deviation_threshold: float = 3.0) -> np.ndarray:
+def criterium_peak_pixel_position(peak_table: InputTable, summary: Optional[str] = None,
+                                  zscore_threshold: float = 2.5, deviation_threshold: float = 3.0) -> np.ndarray:
     r"""
     Flag tubes whose peak pixel positions deviate considerably from the peak pixel positions when
     averaged for all tubes in the bank.
@@ -128,6 +129,7 @@ def criterium_peak_pixel_position(peak_table: InputTable, zscore_threshold: floa
       assert d_j < threshold
 
     :param peak_table: pixel positions of the peaks for each tube
+    :param summary: name of output Workspace2D containing deviations and Z-score for each tube.
     :param zscore_threshold: maximum Z-score for the pixels positions of a tube.
     :param deviation_threshold: maximum deviation (in pixels) for the pixels positions of a tube.
     :return: array of booleans, one per tube. `True` is the tube passes the acceptance criterium, `False` otherwise.
@@ -167,6 +169,20 @@ def criterium_peak_pixel_position(peak_table: InputTable, zscore_threshold: floa
     if len(outlier_values) > 0:
         failure_indexes = [deviations.index(value) for value in outlier_values]
         criterium_pass[failure_indexes] = False
+
+    # create an analysis summary if so requested
+    if isinstance(summary, str) and len(summary) > 0:
+        x_values = list(range(1, 1 + TUBES_IN_BANK))
+        mean, std = np.mean(deviations), np.std(deviations)
+        z_scores = np.abs((deviations - mean) / std)
+        y_values = np.array([deviations, z_scores]).flatten()
+        workspace = CreateWorkspace(x_values, y_values, NSpec=2, OutputWorkspace=summary,
+                                    WorkspaceTitle='Tube deviations from averages taken over the bank',
+                                    YUnitLabel='Pixel Units')
+        labels = ('deviation', 'Z-score')
+        axis = TextAxis.create(len(labels))
+        [axis.setLabel(index, label) for index, label in enumerate(labels)]
+        workspace.replaceAxis(1, axis)
 
     return criterium_pass
 
