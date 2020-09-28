@@ -9,7 +9,7 @@ import unittest
 from mantid.api import FunctionFactory, MultiDomainFunction
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from qtpy import QtWidgets
+from qtpy.QtWidgets import QApplication
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
@@ -38,7 +38,7 @@ def retrieve_combobox_info(combo_box):
 def wait_for_thread(thread_model):
     if thread_model:
         thread_model._thread.wait()
-        QtWidgets.QApplication.instance().processEvents()
+        QApplication.sendPostedEvents()
 
 
 def create_multi_domain_function(function_list):
