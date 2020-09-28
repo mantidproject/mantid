@@ -27,7 +27,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
 
         p.close(ws.name())
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("instr")
         self.assert_no_toplevel_widgets()
@@ -41,7 +41,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
 
         p.force_close()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("instr")
         self.assert_no_toplevel_widgets()
