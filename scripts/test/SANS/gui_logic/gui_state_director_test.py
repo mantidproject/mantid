@@ -91,6 +91,20 @@ class GuiStateDirectorTest(unittest.TestCase):
 
         self.assertEqual(expected_dim, state.reduction_dimensionality)
 
+    def test_save_settings_copied_from_gui(self):
+        state_model = mock.Mock(spec=self._get_state_gui_model())
+        state_model.all_states.save = mock.NonCallableMock()
+
+        # Copy the top level model and reset save rather than load a file
+        copied_state = copy.deepcopy(state_model)
+        copied_state.all_states.save = None
+
+        director = GuiStateDirector(state_model, SANSFacility.ISIS)
+        director._load_current_state = mock.Mock(return_value=copied_state)
+        new_state = director.create_state(self._get_row_entry(), row_user_file="NotThere.txt")
+
+        self.assertEqual(state_model.all_states.save, new_state.all_states.save)
+
 
 if __name__ == '__main__':
     unittest.main()

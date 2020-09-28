@@ -741,8 +741,6 @@ class ParsedDictConverter(IStateParser):
         # ---------------------------
         if SetId.CENTRE in self._input_dict:
             beam_centres = self._input_dict[SetId.CENTRE]
-            beam_centres_for_hab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
-                                    is DetectorType.HAB]
             beam_centres_for_lab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
                                     is DetectorType.LAB]
             for beam_centre in beam_centres_for_lab:
@@ -750,16 +748,19 @@ class ParsedDictConverter(IStateParser):
                 pos2 = beam_centre.pos2
                 state_builder.set_LAB_sample_centre_pos1(state_builder.convert_pos1(pos1))
                 state_builder.set_LAB_sample_centre_pos2(state_builder.convert_pos2(pos2))
+                # default both detectors to the same centre position
                 if hasattr(state_builder, "set_HAB_sample_centre_pos1"):
                     state_builder.set_HAB_sample_centre_pos1(state_builder.convert_pos1(pos1))
                 if hasattr(state_builder, "set_HAB_sample_centre_pos2"):
                     state_builder.set_HAB_sample_centre_pos2(state_builder.convert_pos2(pos2))
 
+        if SetId.CENTRE_HAB in self._input_dict:
+            beam_centres = self._input_dict[SetId.CENTRE_HAB]
+            beam_centres_for_hab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
+                                    is DetectorType.HAB]
             for beam_centre in beam_centres_for_hab:
-                pos1 = beam_centre.pos1
-                pos2 = beam_centre.pos2
-                state_builder.set_HAB_sample_centre_pos1(state_builder.convert_pos1(pos1))
-                state_builder.set_HAB_sample_centre_pos2(state_builder.convert_pos2(pos2))
+                state_builder.set_HAB_sample_centre_pos1(state_builder.convert_pos1(beam_centre.pos1))
+                state_builder.set_HAB_sample_centre_pos2(state_builder.convert_pos2(beam_centre.pos2))
 
         return state_builder.build()
 

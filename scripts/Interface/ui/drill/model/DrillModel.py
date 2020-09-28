@@ -115,7 +115,7 @@ class DrillModel(QObject):
         self.visualSettings = None
 
         # set the instrument and default acquisition mode
-        self.setInstrument(config['default.instrument'])
+        self.setInstrument(config['default.instrument'], log=False)
 
         self.tasksPool = DrillAlgorithmPool()
         # setup the thread pool
@@ -125,7 +125,7 @@ class DrillModel(QObject):
         self.tasksPool.signals.progressUpdate.connect(self._onProcessingProgress)
         self.tasksPool.signals.processingDone.connect(self._onProcessingDone)
 
-    def setInstrument(self, instrument):
+    def setInstrument(self, instrument, log=True):
         """
         Set the instrument. This methods change the current instrument and all
         the associated parameters (acquisition mode, algorithm, parameters). It
@@ -138,6 +138,16 @@ class DrillModel(QObject):
         self.samples = list()
         self.settings = dict()
 
+        # When the user changes the facility after DrILL has been started
+        if config['default.facility'] != 'ILL':
+            logger.error('Drill is enabled only if the facility is set to ILL.')
+            self.instrument = None
+            self.acquisitionMode = None
+            self.columns = list()
+            self.algorithm = None
+            self.settings = dict()
+            return
+
         if (instrument in RundexSettings.ACQUISITION_MODES):
             config['default.instrument'] = instrument
             self.instrument = instrument
@@ -149,8 +159,9 @@ class DrillModel(QObject):
                     RundexSettings.SETTINGS[self.acquisitionMode])
             self._initController()
         else:
-            logger.error('Instrument {0} is not supported yet.'
-                         .format(instrument))
+            if log:
+                logger.error('Instrument {0} is not supported yet.'
+                             .format(instrument))
             self.instrument = None
             self.acquisitionMode = None
             self.columns = list()
@@ -165,16 +176,6 @@ class DrillModel(QObject):
             str: the instrument name
         """
         return self.instrument
-
-    def getAvailableTechniques(self):
-        """
-        Get the list of techniques available.
-
-        Returns:
-            list(str): list of techniques
-        """
-        return [technique for (instrument, technique)
-                in RundexSettings.TECHNIQUE.items()]
 
     def setAcquisitionMode(self, mode):
         """
@@ -335,12 +336,16 @@ class DrillModel(QObject):
                 of them uses the setting name as key. The type is a str:
                 "file", "workspace", "combobox", "bool" or "string".
         """
-        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
-        alg.initialize()
-
         types = dict()
         values = dict()
         docs = dict()
+
+        if not self.algorithm:
+            return types, values, docs
+
+        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+        alg.initialize()
+
         for s in self.settings:
             p = alg.getProperty(s)
             if (isinstance(p, FileProperty)):

@@ -76,7 +76,7 @@ class SettingsAdjustmentPresenter(PresenterCommon):
         self._set_on_custom_model("transmission_mn_4_shift", state_model)
         self._set_on_custom_model("transmission_mn_5_shift", state_model)
 
-        self._set_on_view_transmission_fit()
+        self._set_on_state_model_transmission_fit(state_model)
 
         self._set_on_custom_model("pixel_adjustment_det_1", state_model)
         self._set_on_custom_model("pixel_adjustment_det_2", state_model)

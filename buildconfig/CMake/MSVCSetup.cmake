@@ -57,6 +57,9 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}")
 endif()
 
+# HDF5 uses threads::threads target
+find_package (Threads)
+
 # ##############################################################################
 # Qt5 is always in the same place
 # ##############################################################################

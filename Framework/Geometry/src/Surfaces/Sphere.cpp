@@ -33,12 +33,6 @@ namespace Geometry {
 using Kernel::Tolerance;
 using Kernel::V3D;
 
-// The number of slices to use to approximate a sphere
-int Sphere::g_nslices = 5;
-
-// The number of slices to use to approximate a sphere
-int Sphere::g_nstacks = 5;
-
 /**
  * Default constructor
  * make sphere at the origin radius zero
