@@ -312,7 +312,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                             background = row_data['Value']
                         if 'PeakCentre' in row_data['Name']:
                             intensity, peak_pos_guess, peak_pos_expected = single_spectrum_peaks[peak_no]
-                            if (abs(param_table.row(row_no-1)['Value'] / background) > 0.1):
+                            if abs(param_table.row(row_no - 1)['Value'] / background) > 0.1:
                                 results_x[peak_no] = peak_pos_expected
                                 results_y[peak_no] = row_data['Value']
                                 results_e[peak_no] = row_data['Error']
@@ -484,7 +484,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         value = ET.SubElement(param, 'value')
         value.set('val', str(wavelength))
 
-        for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank):
+        for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
             bank = ET.SubElement(param_file, 'component-link')
             bank.set('name', 'bank'+str(bank_no+2))
 
