@@ -4,17 +4,54 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import types
-
-from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QCompleter, QDialog
+from qtpy.QtCore import QObject, QEvent, Qt, Signal
+from qtpy.QtGui import QIcon, QKeyEvent
+from qtpy.QtWidgets import QCompleter, QDialog, QLineEdit
 
 from mantidqt.utils.qt import load_ui
 
 
+class ActivateCompleterOnReturn(QObject):
+    """Event filter to capture key presses from a QLineEdit
+    and activate completion popups if enter is pressed
+    """
+    def __init__(self, lineedit: QLineEdit):
+        """
+        :param lineedit: The QLineEdit whose key presses should be monitored
+        """
+        super().__init__()
+        self._lineedit = lineedit
+
+    def eventFilter(self, _, event: QEvent) -> bool:
+        """Receive events for a QLineEdit and if enter is pressed
+        start completion. Always returns False to indicate the
+        target object should still process the event.
+        """
+        if not isinstance(event, QKeyEvent):
+            return False
+
+        lineedit = self._lineedit
+        completer = lineedit.completer()
+        if event.key() == Qt.Key_Return:
+            # if completion list is of len = 1, accept the completion else continue
+            if completer.completionCount() == 1:
+                completion_text = completer.currentCompletion()
+                if completion_text != lineedit.currentText():
+                    # manually emit the code completion signal
+                    completer.activated.emit(completion_text)
+        elif event.key() in [Qt.Key_Down, Qt.Key_Up]:
+            # If up or down pressed, start the completer
+            completer.complete()
+
+        return False
+
+
 class AddFunctionDialogView(QDialog):
+    # public
     function_added = Signal(str)
+
+    # private
+    _key_filter = None
 
     def __init__(self, parent=None, function_names=None):
         super(AddFunctionDialogView, self).__init__(parent)
@@ -24,15 +61,15 @@ class AddFunctionDialogView(QDialog):
 
     def _setup_ui(self, function_names):
         self.ui = load_ui(__file__, 'add_function_dialog.ui', self)
+        functionBox = self.ui.functionBox
         if function_names:
-            self.ui.functionBox.addItems(function_names)
-        self.ui.functionBox.clearEditText()
-        self.ui.functionBox.completer().setCompletionMode(QCompleter.PopupCompletion)
-        self.ui.functionBox.completer().setFilterMode(Qt.MatchContains)
+            functionBox.addItems(function_names)
+        functionBox.clearEditText()
+        functionBox.completer().setCompletionMode(QCompleter.PopupCompletion)
+        functionBox.completer().setFilterMode(Qt.MatchContains)
+        self._key_filter = ActivateCompleterOnReturn(functionBox)
+        functionBox.installEventFilter(self._key_filter)
         self.ui.errorMessage.hide()
-        # Monkey patch the functionBox keyPressEvent to make use of auto-completion.
-        self.ui.functionBox.keyPressEvent = types.MethodType(keyPressEvent,
-                                                             self.ui.functionBox)
 
     def is_text_in_function_list(self, function):
         return self.ui.functionBox.findText(function, Qt.MatchExactly) != -1
@@ -40,20 +77,3 @@ class AddFunctionDialogView(QDialog):
     def set_error_message(self, text):
         self.ui.errorMessage.setText("<span style='color:red'> %s </span>" % text)
         self.ui.errorMessage.show()
-
-
-# This method monkey patches the keyPressEvent for the QComboBox function box
-# Using this patch, the text will be auto-completed if enter is pressed
-# and the number of possible completions is one.
-def keyPressEvent(self, event):
-    if event.key() == Qt.Key_Return:
-        # if completion list is of len = 1, accept the completion else continue
-        if self.completer().completionCount() == 1:
-            completion_text = self.completer().currentCompletion()
-            if completion_text != self.currentText():  # manually emit the code completion signal
-                self.completer().activated.emit(completion_text)
-    # If up or down pressed, start the completer
-    elif event.key() in [Qt.Key_Down, Qt.Key_Up]:
-        self.completer().complete()
-
-    self.lineEdit().keyPressEvent(event)
