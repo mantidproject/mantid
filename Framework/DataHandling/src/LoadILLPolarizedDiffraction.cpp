@@ -263,9 +263,8 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
       m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(),
                                          entryName);
       if (m_wavelength != 0) {
-        workspace->mutableRun().removeLogData("monochromator.wavelength");
         workspace->mutableRun().addProperty("monochromator.wavelength",
-                                            m_wavelength);
+                                            m_wavelength, true);
       }
     }
     NXclose(&nxHandle);
