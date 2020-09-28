@@ -7,6 +7,7 @@
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_equal
+from os import path
 import unittest
 
 # Mantid imports
@@ -34,14 +35,17 @@ class TestBank(unittest.TestCase):
         CORELLI_124023_banks_14_15
         """
         config.appendDataSearchSubDir('CORELLI/calibration')
+        for directory in config.getDataSearchDirs():
+            if 'UnitTest' in directory:
+                data_dir = path.join(directory, 'CORELLI', 'calibration')
+                break
         cls.cases = dict()
         for bank_case in ('123454_bank58', '124018_bank45', '123555_bank20', '123455_bank20',
                           '124023_bank10', '124023_bank14', '124023_bank15', '124023_banks_14_15'):
             workspace = 'CORELLI_' + bank_case
             # DEBUG
-            #save_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
-            #LoadNexusProcessed(Filename=save_dir + workspace + '.nxs', OutputWorkspace=workspace)
-            LoadNexusProcessed(Filename=workspace + '.nxs', OutputWorkspace=workspace)
+            #data_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
+            LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
             cls.cases[bank_case] = workspace
 
         def assert_missing_tube(cls_other, calibration_table, tube_number):
@@ -139,7 +143,16 @@ class TestBank(unittest.TestCase):
         expected = np.ones(16, dtype=bool)
         assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
 
-        DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
+        # check for the summary workspace
+        fit_bank(self.cases['123455_bank20'], 'bank20')
+        criterium_peak_pixel_position('PeakTable', summary='summary', zscore_threshold=2.5, deviation_threshold=3)
+        assert AnalysisDataService.doesExist('summary')
+        workspace = mtd['summary']
+        axis = workspace.getAxis(1)
+        assert [axis.label(workspace_index) for workspace_index in (0, 1)] == ['deviation', 'Z-score']
+        self.assertAlmostEqual(max(workspace.readY(1)), 1.728, delta=0.001)
+
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'summary'])  # a bit of clean-up
 
     def test_append_bank_number(self):
         with self.assertRaises(AssertionError) as exception_info:
