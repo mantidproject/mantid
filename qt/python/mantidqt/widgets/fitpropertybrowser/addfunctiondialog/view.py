@@ -53,27 +53,37 @@ class AddFunctionDialogView(QDialog):
     # private
     _key_filter = None
 
-    def __init__(self, parent=None, function_names=None):
+    def __init__(self, parent=None, function_names=None, default_function_name=None):
+        """
+        :param parent: An optional parent widget
+        :param function_names: A list of function names to add to the box
+        :param default_function_name: An optional default name to display as a placeholder
+        """
         super(AddFunctionDialogView, self).__init__(parent)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        self._setup_ui(function_names)
+        self._setup_ui(function_names, default_function_name)
 
-    def _setup_ui(self, function_names):
+    def is_text_in_function_list(self, function: str) -> bool:
+        """Return True if the given str is in the function list"""
+        return self.ui.functionBox.findText(function, Qt.MatchExactly) != -1
+
+    def set_error_message(self, text: str):
+        """Show the message as an error on the dialog"""
+        self.ui.errorMessage.setText("<span style='color:red'> %s </span>" % text)
+        self.ui.errorMessage.show()
+
+    # private api
+    def _setup_ui(self, function_names, default_function_name):
         self.ui = load_ui(__file__, 'add_function_dialog.ui', self)
         functionBox = self.ui.functionBox
         if function_names:
             functionBox.addItems(function_names)
+        if default_function_name is not None and default_function_name in function_names:
+            functionBox.lineEdit().setPlaceholderText(default_function_name)
         functionBox.clearEditText()
         functionBox.completer().setCompletionMode(QCompleter.PopupCompletion)
         functionBox.completer().setFilterMode(Qt.MatchContains)
         self._key_filter = ActivateCompleterOnReturn(functionBox)
         functionBox.installEventFilter(self._key_filter)
         self.ui.errorMessage.hide()
-
-    def is_text_in_function_list(self, function):
-        return self.ui.functionBox.findText(function, Qt.MatchExactly) != -1
-
-    def set_error_message(self, text):
-        self.ui.errorMessage.setText("<span style='color:red'> %s </span>" % text)
-        self.ui.errorMessage.show()

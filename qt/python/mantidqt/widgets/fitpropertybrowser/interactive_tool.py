@@ -26,7 +26,7 @@ class FitInteractiveTool(QObject):
 
     default_background = 'LinearBackground'
 
-    def __init__(self, canvas, toolbar_manager, current_peak_type, default_background = None):
+    def __init__(self, canvas, toolbar_manager, current_peak_type, default_background=None):
         """
         Create an instance of FitInteractiveTool.
         :param canvas: A MPL canvas to draw on.
@@ -201,8 +201,9 @@ class FitInteractiveTool(QObject):
         A QAction callback. Start a dialog to choose a peak function name. After that the tool will expect the user
         to click on the canvas to where the peak should be placed.
         """
-        dialog = AddFunctionDialog(self.canvas, self.peak_names)
-        dialog.view.ui.functionBox.lineEdit().setPlaceholderText(self.current_peak_type)
+        dialog = AddFunctionDialog(parent=self.canvas,
+                                   function_names=self.peak_names,
+                                   default_function_name=self.current_peak_type)
         dialog.view.function_added.connect(self.action_peak_added)
         dialog.view.open()
 
@@ -356,8 +357,7 @@ class FitInteractiveTool(QObject):
         """
         return self.fit_range.patch.get_transform()
 
-    def add_to_menu(self, menu, peak_names, current_peak_type, background_names,
-                    other_names):
+    def add_to_menu(self, menu, peak_names, current_peak_type, background_names, other_names):
         """
         Adds the fit tool menu actions to the given menu and returns the menu
 
