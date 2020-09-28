@@ -10,6 +10,7 @@ import functools
 from qtpy.QtWidgets import QMenu, QMessageBox
 from os.path import join, exists
 from mantid import ConfigService
+from mantid.kernel import logger
 from mantidqt.utils.qt import create_action
 from workbench.config import CONF
 
@@ -89,6 +90,10 @@ class RecentlyClosedScriptsMenu(QMenu):
         except KeyError:
             # Happens quite often and should fail silently.
             pass
+        except TypeError:
+            # Happens when garbage data is found in the QSettings .ini file
+            logger.error("Recently Opened Scripts were lost during save, and workbench has recovered from an error.")
+            CONF.set(RECENT_SCRIPTS_KEY, [])
 
         def sort_key(sub_list):
             return sub_list[0]
