@@ -36,7 +36,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         return 'ILL\\Diffraction'
 
     def summary(self):
-        return 'Performs D7 position calibration using YIG scan and returns D7 IPF readable by the NeXus data loader.'
+        return 'Performs D7 position calibration using YIG scan and returns D7 IPF readable by LoadILLPolarizedDiffraction.'
 
     def seeAlso(self):
         return ['LoadILLPolarizedDiffraction']
@@ -57,7 +57,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty("Filenames",
                                                   action=FileAction.OptionalLoad),
-                             doc="The file names (including full or relative path) with a single YIG scan.")
+                             doc="The file names with a single YIG scan.")
 
         self.declareProperty(MatrixWorkspaceProperty('ScanWorkspace', '',
                                                      direction=Direction.Input,
@@ -67,7 +67,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         self.declareProperty(FileProperty('YIGPeaksFile', '',
                                           action=FileAction.Load,
                                           extensions=['.xml']),
-                             doc='The file name file with all YIG peaks in d-spacing.')
+                             doc='The file name with all YIG peaks in d-spacing.')
 
         self.declareProperty(name="ApproximateWavelength",
                              defaultValue=3.1,
@@ -123,30 +123,30 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
 
         self._minDistance = float(self.getPropertyValue("MinimalDistanceBetweenPeaks"))
 
-        # load the YIG peaks from an IPF
+        # loads the YIG peaks from an IPF
         yig_d = self._load_yig_peaks(intensityWS)
-        # check how many and which peaks can be fitted in each row
+        # checks how many and which peaks can be fitted in each row
         yig_peaks_positions = self._get_yig_peaks_positions(intensityWS, yig_d)
         progress.report()
-        # fit gaussian to peaks for each pixel, returns peaks as a function of their expected position
+        # fits gaussian to peaks for each pixel, returns peaks as a function of their expected position
         peaks_positions = self._fit_bragg_peaks(intensityWS, yig_peaks_positions)
         progress.report()
         ReplaceSpecialValues(InputWorkspace='fit_results', OutputWorkspace='fit_results',
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, checkErrorAxis=True)
-        # fit the wavelegnth, bank gradients and individual
+        # fits the wavelength, bank gradients and individual
         detector_parameters = self._fit_detector_positions(peaks_positions)
         progress.report()
         # calculates pixel positions, bank offsets and slopes from the fit output
         wavelength, pixel_offsets, bank_offsets, bank_slopes = self._calculate_pixel_positions(detector_parameters)
         progress.report()
-        # print the Instrument Parameter File that can be used in the ILLPolarizedDiffraction loader
+        # prints the Instrument Parameter File that can be used in the ILLPolarizedDiffraction loader
         self._print_parameter_file(wavelength, pixel_offsets, bank_offsets, bank_slopes)
         progress.report()
 
-        if self.getProperty('DetectorFitOutput').isDefault:
-            pass #will clean up the remaining workspaces
+        if self.getProperty('FitOutputWorkspace').isDefault:
+            RemoveWorkspaces(['det_out_Parameters', intensityWS, peaks_positions])
         else:
-            self.setProperty('DetectorFitOutput', mtd['det_out_Parameters'])
+            self.setProperty('FitOutputWorkspace', mtd['det_out_Parameters'])
 
     def _get_scan_data(self):
         """ Loads YIG scan data, removes monitors, and prepares
