@@ -23,7 +23,6 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
     _RAD_2_DEG = 180.0 / np.pi
     _DEG_2_RAD = 1.0 / _RAD_2_DEG
     # number of detectors
-    _D7NumberBanks = 3
     _D7NumberPixels = 132
     _D7NumberPixelsBank = 44
     # an approximate universal peak width:
@@ -113,7 +112,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         progress.report()
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getPropertyValue("BankOffsets").split(',')
-            for bank_no in range(self._D7NumberBanks):
+            for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
                 ChangeBinOffset(intensityWS, offsets[bank_no],
                                 WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
                                                                     (bank_no+1)*self._D7NumberPixelsBank-1),
@@ -485,7 +484,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         value = ET.SubElement(param, 'value')
         value.set('val', str(wavelength))
 
-        for bank_no in range(self._D7NumberBanks):
+        for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank):
             bank = ET.SubElement(param_file, 'component-link')
             bank.set('name', 'bank'+str(bank_no+2))
 
