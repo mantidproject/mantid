@@ -98,7 +98,7 @@ public:
   /// Returns the name of parameter i
   std::string parameterName(size_t i) const override;
   /// Returns the name of attribute i
-  std::string attributeName(size_t i) const;
+  std::string attributeName(size_t i) const override;
   /// Returns the description of parameter i
   std::string parameterDescription(size_t i) const override;
   /// Checks if a parameter has been set explicitly
@@ -220,7 +220,7 @@ protected:
 
   /// Declare a single attribute
   void declareAttribute(const std::string &name,
-                        const API::IFunction::Attribute &defaultValue) override;
+                        const API::IFunction::Attribute &defaultValue);
   /// Writes itself into a string
   std::string writeToString(
       const std::string &parentLocalAttributesStr = "") const override;

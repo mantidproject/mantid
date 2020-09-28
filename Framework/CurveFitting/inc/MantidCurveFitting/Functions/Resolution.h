@@ -49,7 +49,7 @@ public:
   /// Check if attribute attName exists
   bool hasAttribute(const std::string &attName) const override;
   // return attribute name from ith attribute
-  std::string attributeName(size_t index) const;
+  std::string attributeName(size_t index) const override;
 
 private:
   /// Function that does the actual job

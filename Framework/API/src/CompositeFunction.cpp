@@ -270,7 +270,7 @@ bool CompositeFunction::hasAttribute(const std::string &name) const {
     }
     auto [attributeName, index] = parseName(name);
     return m_functions[index]->hasAttribute(attributeName);
-  } catch (...) {
+  } catch (std::invalid_argument &) {
     return false;
   }
 }

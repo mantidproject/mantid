@@ -402,7 +402,7 @@ void CrystalFieldFunction::buildAttributeNames() const {
     return;
   }
   auto numAttributes = IFunction::nAttributes();
-  for (int i = 0; i < numAttributes; ++i) {
+  for (size_t i = 0; i < numAttributes; ++i) {
     m_attributeNames.emplace_back(IFunction::attributeName(i));
   }
   auto controlAttributeNames = m_control.getAttributeNames();

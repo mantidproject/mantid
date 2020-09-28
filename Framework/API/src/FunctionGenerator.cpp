@@ -222,8 +222,7 @@ size_t FunctionGenerator::nAttributes() const {
 /// Returns a list of attribute names
 std::vector<std::string> FunctionGenerator::getAttributeNames() const {
   checkTargetFunction();
-  std::vector<std::string> attNames = IFunction::getAttributeNames();
-  return attNames;
+  return IFunction::getAttributeNames();
 }
 
 /// Return a value of attribute attName

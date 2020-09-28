@@ -241,7 +241,6 @@ void TabulatedFunction::setAttribute(const std::string &attName,
 
 /// Returns the number of attributes associated with the function
 size_t TabulatedFunction::nAttributes() const {
-  // additional X and Y attributes
   return IFunction::nAttributes();
 }
 

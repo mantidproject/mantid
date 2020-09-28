@@ -587,8 +587,8 @@ protected:
   virtual void declareParameters() {}
 
   /// Declare a single attribute
-  virtual void declareAttribute(const std::string &name,
-                                const API::IFunction::Attribute &defaultValue);
+  void declareAttribute(const std::string &name,
+                        const API::IFunction::Attribute &defaultValue);
   /// Store an attribute's value
   void storeAttributeValue(const std::string &name,
                            const API::IFunction::Attribute &value);
