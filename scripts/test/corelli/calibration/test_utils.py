@@ -7,6 +7,7 @@
 
 import numpy as np
 from numpy.testing import assert_allclose
+from os import path
 import unittest
 
 from corelli.calibration.utils import bank_numbers, calculate_tube_calibration, load_banks
@@ -82,7 +83,9 @@ class TestUtils(unittest.TestCase):
         assert 'File I_am_no_here does not exist' in str(exception_info.exception)
         # loading an event nexus file will take too much time, so it's left as a system test.
         # loading a nexus processed file
-        config.appendDataSearchSubDir('CORELLI/calibration')
+        for directory in config.getDataSearchDirs():
+            if 'UnitTest' in directory:
+                config.appendDataSearchDir(path.join(directory, 'CORELLI', 'calibration'))
         # DEBUG
         #save_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
         #workspace = load_banks(save_dir + 'CORELLI_123454_bank58.nxs', '58', output_workspace='jambalaya')
