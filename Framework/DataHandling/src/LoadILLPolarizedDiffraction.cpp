@@ -364,13 +364,12 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
     IComponent_const_sptr currentBank = instrument->getComponentByName(
         std::string("bank" + std::to_string(bankId)));
 
-    m_wavelength = stod(currentBank->getParameterAsString("wavelength"));
+    m_wavelength = currentBank->getNumberParameter("wavelength")[0];
 
     for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK);
          pixel_no++) {
-      std::string twoThetaRead = currentBank->getParameterAsString(
-          std::string("twoTheta_pixel_" + std::to_string(pixel_no + 1)));
-      twoTheta[pixel_no] = std::stod(twoThetaRead);
+      twoTheta[pixel_no] = currentBank->getNumberParameter(
+          "twoTheta_pixel_" + std::to_string(pixel_no + 1))[0];
     }
   }
   return twoTheta;
@@ -390,10 +389,10 @@ std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(
   IComponent_const_sptr currentBank = instrument->getComponentByName(
       std::string("bank" + std::to_string(bankId)));
 
-  auto slope = currentBank->getParameterAsString(std::string("gradient"));
-  bankParameters.push_back(stod(slope));
-  auto offset = currentBank->getParameterAsString(std::string("offset"));
-  bankParameters.push_back(stod(offset));
+  auto slope = currentBank->getNumberParameter("gradient")[0];
+  bankParameters.push_back(slope);
+  auto offset = currentBank->getNumberParameter("offset")[0];
+  bankParameters.push_back(offset);
 
   return bankParameters;
 }
