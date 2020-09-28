@@ -458,19 +458,19 @@ void IndexPeaks::exec() {
     lattice.setMaxOrder(args.satellites.maxOrder);
     lattice.setCrossTerm(args.satellites.crossTerms);
 
-    if (args.satellites.modVectors.size() >= 1){
+    if (args.satellites.modVectors.size() >= 1) {
       lattice.setModVec1(args.satellites.modVectors[0]);
     } else {
       g_log.warning("empty modVector 1, skipping saving");
     }
 
-    if (args.satellites.modVectors.size() >= 2){
+    if (args.satellites.modVectors.size() >= 2) {
       lattice.setModVec2(args.satellites.modVectors[1]);
     } else {
       g_log.warning("empty modVector 2, skipping saving");
     }
 
-    if (args.satellites.modVectors.size() >= 3){
+    if (args.satellites.modVectors.size() >= 3) {
       lattice.setModVec3(args.satellites.modVectors[2]);
     } else {
       g_log.warning("empty modVector 3, skipping saving");
