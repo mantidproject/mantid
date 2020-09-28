@@ -92,7 +92,18 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="The length of each step during YIG scan (in degrees).")
 
-        self.declareProperty(name='CalibrationFilename',
+        self.declareProperty(name="BraggPeakWidth",
+                             defaultValue=2.0,
+                             validator=FloatBoundedValidator(lower=0),
+                             direction=Direction.Input,
+                             doc="An initial guess for the width of YIG Bragg peaks used for fitting (in degrees).")
+
+        self.declareProperty(name="MaskedBinsRange",
+                             defaultValue='-35.0,15.0',
+                             direction=Direction.Input,
+                             doc="The lower and upper bound for the masked region around the direct beam (in degrees).")
+
+        self.declareProperty(name='CalibrationOutputFilename',
                              defaultValue='',
                              direction=Direction.Input,
                              doc="The output YIG calibration Instrument Parameter File name.")
@@ -120,6 +131,14 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
 
         if not self.getProperty("ScanStepSize").isDefault:
             self._scanStepSize = float(self.getProperty("ScanStepSize")[0])
+
+        if not self.getProperty("BraggPeakWidth").isDefault:
+            self._peakWidth = float(self.getProperty("BraggPeakWidth")[0])
+
+        if not self.getProperty("MaskedBinsRange").isDefault:
+            masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
+            self._beamMask1 = masked_bins_range[0]
+            self._beamMask2 = masked_bins_range[1]
 
         self._minDistance = float(self.getPropertyValue("MinimalDistanceBetweenPeaks"))
 
@@ -504,10 +523,10 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                 value = ET.SubElement(pixel, 'value')
                 value.set('val', str(pixel_offsets[bank_no*self._D7NumberPixelsBank + pixel_no]))
 
-        if self.getProperty("CalibrationFilename").isDefault:
+        if self.getProperty("CalibrationOutputFilename").isDefault:
             filename = "d7_{0}.xml".format(date_today)
         else:
-            filename = self.getPropertyValue("CalibrationFilename")
+            filename = self.getPropertyValue("CalibrationOutputFilename")
         outfile = open(os.path.join(os.getcwd(), filename), "w")
         outfile.write(self._prettify(param_file))
         outfile.close()
