@@ -8,7 +8,7 @@
 from mantid.simpleapi import *
 from mantid.kernel import Direction, FloatBoundedValidator
 from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
-    NumericAxis, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty
+    NumericAxis, Progress, PropertyMode, PythonAlgorithm, ITableWorkspaceProperty
 from datetime import date
 import math
 import numpy as np
@@ -97,10 +97,10 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="The output YIG calibration Instrument Parameter File name.")
 
-        self.declareProperty(WorkspaceProperty('DetectorFitOutput', '',
-                                               direction=Direction.Output,
-                                               optional=PropertyMode.Optional),
-                             doc='The table workspace name that will be used to store all of the calibration parameters.')
+        self.declareProperty(ITableWorkspaceProperty('FitOutputWorkspace', '',
+                                                    direction=Direction.Output,
+                                                    optional=PropertyMode.Optional),
+                             doc="The table workspace name that will be used to store all of the calibration parameters.")
 
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=5)
