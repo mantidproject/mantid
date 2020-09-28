@@ -90,7 +90,7 @@ class TestUtils(unittest.TestCase):
                 break
         # DEBUG
         #data_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
-        workspace = load_banks(path(data_dir, 'CORELLI_123454_bank58.nxs'), '58', output_workspace='jambalaya')
+        workspace = load_banks(path.join(data_dir, 'CORELLI_123454_bank58.nxs'), '58', output_workspace='jambalaya')
         self.assertAlmostEqual(workspace.readY(42)[0], 13297.0)
         DeleteWorkspaces(['jambalaya'])
 
