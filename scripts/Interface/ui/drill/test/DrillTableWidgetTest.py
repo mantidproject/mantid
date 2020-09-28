@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
+from unittest import mock
 import sys
 
 from qtpy.QtWidgets import QApplication, QTableWidgetItem
@@ -172,6 +173,22 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.assertEqual(self.table.item(0, 1).text(), "test2")
         self.table.setRowContents(0, ["test", "test2", "test3"])
 
+    def test_setFoldedColumns(self):
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        self.table.columns = ["test1", "test2", "test3"]
+        self.table.setFoldedColumns(["test"])
+        mHeader.foldSection.assert_not_called()
+        self.table.setFoldedColumns(["test2"])
+        mHeader.foldSection.assert_called_with(1)
+
+    def test_getFoldedColumns(self):
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        mHeader.isSectionFolded.return_value = True
+        self.table.columns = ["test1", "test2", "test3"]
+        folded = self.table.getFoldedColumns()
+        self.assertEqual(folded, ["test1", "test2", "test3"])
 
 if __name__ == "__main__":
     unittest.main()

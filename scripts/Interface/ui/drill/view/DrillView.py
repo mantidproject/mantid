@@ -809,11 +809,10 @@ class DrillView(QMainWindow):
         if ("FoldedColumns" in visualSettings):
             f = list()
             for c in self.columns:
-                if (c not in visualSettings["FoldedColumns"]):
-                    f.append(False)
-                    continue
-                f.append(visualSettings["FoldedColumns"][c])
-            self.table.setHeaderFoldingState(f)
+                if ((c in visualSettings["FoldedColumns"])
+                        and (visualSettings["FoldedColumns"][c])):
+                    f.append(c)
+            self.table.setFoldedColumns(f)
 
     def getVisualSettings(self):
         """
@@ -827,10 +826,10 @@ class DrillView(QMainWindow):
         vs = dict()
         # folding state
         vs["FoldedColumns"] = dict()
-        f = self.table.getHeaderFoldingState()
-        for i in range(len(self.columns)):
-            if f[i]:
-                vs["FoldedColumns"][self.columns[i]] = f[i]
+        folded = self.table.getFoldedColumns()
+        for c in self.columns:
+            if c in folded:
+             vs["FoldedColumns"][c] = True
 
         return vs
 

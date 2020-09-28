@@ -426,19 +426,19 @@ class DrillViewTest(unittest.TestCase):
     def test_setVisualSettings(self):
         self.view.columns = ["test"]
         self.view.setVisualSettings(dict())
-        self.view.table.setHeaderFoldingState.assert_not_called()
+        self.view.table.setFoldedColumns.assert_not_called()
         self.view.setVisualSettings({"FoldedColumns": {}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([False])
+        self.view.table.setFoldedColumns.assert_called_once_with([])
         self.view.table.reset_mock()
         self.view.setVisualSettings({"FoldedColumns": {"test": True}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([True])
+        self.view.table.setFoldedColumns.assert_called_once_with(["test"])
         self.view.table.reset_mock()
         self.view.setVisualSettings({"FoldedColumns": {"test1": True}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([False])
+        self.view.table.setFoldedColumns.assert_called_once_with([])
 
     def test_getVisualSettings(self):
         self.view.columns = ["test1", "test2", "test3"]
-        self.view.table.getHeaderFoldingState.return_value = [True, False, True]
+        self.view.table.getFoldedColumns.return_value = ["test1", "test3"]
         d = {"FoldedColumns": {"test1": True, "test3": True}}
         self.assertDictEqual(self.view.getVisualSettings(), d)
 

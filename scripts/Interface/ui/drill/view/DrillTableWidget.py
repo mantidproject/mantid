@@ -352,31 +352,32 @@ class DrillTableWidget(QTableWidget):
             if item and c < len(tooltips):
                 item.setToolTip(tooltips[c])
 
-    def setHeaderFoldingState(self, columns):
+    def setFoldedColumns(self, columns):
         """
-        Give a folding state for each column.
+        Fold specific columns.
 
         Args:
-            columns(list(bool)): column indexes
-        """
-        if (len(columns) != self.columnCount()):
-            return
-        for i in range(len(columns)):
-            if columns[i]:
-                self.horizontalHeader().foldSection(i)
-
-    def getHeaderFoldingState(self):
-        """
-        Get the folding state of each column.
-
-        Returns:
-            list(bool): True if the column is folded
+            columns (list(str)): list of column labels
         """
         header = self.horizontalHeader()
-        fold = list()
-        for i in range(self.columnCount()):
-            fold.append(header.isSectionFolded(i))
-        return fold
+        for i in range(len(self.columns)):
+            name = self.columns[i]
+            if name in columns:
+                header.foldSection(i)
+
+    def getFoldedColumns(self):
+        """
+        Get the list of folded columns.
+
+        Returns:
+            list(str): list of columns labels
+        """
+        header = self.horizontalHeader()
+        folded = list()
+        for i in range(len(self.columns)):
+            if header.isSectionFolded(i):
+                folded.append(self.columns[i])
+        return folded
 
     def setDisabled(self, state):
         """
