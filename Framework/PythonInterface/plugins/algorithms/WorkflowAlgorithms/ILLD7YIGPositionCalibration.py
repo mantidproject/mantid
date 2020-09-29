@@ -342,13 +342,14 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                 results_e[peak_no] = row_data['Error']
                     peak_no += 1
             try:
-                fit_results
-            except NameError:
-                fit_results = CreateWorkspace(DataX=results_x,
-                                              DataY=results_y,
-                                              DataE=results_e,
-                                              UnitX='degrees',
-                                              NSpec=1)
+                mtd[conjoined_peak_fit_name]
+            except KeyError:
+                CreateWorkspace(OutputWorkspace=conjoined_peak_fit_name,
+                                DataX=results_x,
+                                DataY=results_y,
+                                DataE=results_e,
+                                UnitX='degrees',
+                                NSpec=1)
             else:
                 CreateWorkspace(OutputWorkspace='ws',
                                 DataX=results_x,
@@ -369,7 +370,8 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         single_peak_fit_results_name = 'single_peak_fits_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
         GroupWorkspaces(InputWorkspaces=ws_names, OutputWorkspace=single_peak_fit_results_name)
 
-        GroupWorkspaces(ws_names, OutputWorkspace='single_peaks_fits')
+        #clean up:
+        DeleteWorkspaces(['out_Parameters', 'out_NormalisedCovarianceMatrix'])
 
         return conjoined_peak_fit_name, single_peak_fit_results_name
 
