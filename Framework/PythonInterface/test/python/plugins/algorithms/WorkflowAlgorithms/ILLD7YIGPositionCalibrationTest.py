@@ -17,6 +17,9 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D7/')
+        Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
+        Load('396442_396831.nxs', OutputWorkspace='intermediateWavelengthScan')
+        Load('394458_394882.nxs', OutputWorkspace='longWavelengthScan')
 
     def tearDown(self):
         mtd.clear()
@@ -32,7 +35,6 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
                                       ApproximateWavelength="-1.0")
 
     def test_shortWavelength(self):
-        Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
         approximate_wavelength = '3.14' # Angstrom
         ILLD7YIGPositionCalibration(ScanWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_shortWavelength.xml',
@@ -42,7 +44,6 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
         self._check_load_data_with_calibration('test_shortWavelength.xml')
 
     def test_intermediateWavelength(self):
-        Load('396442_396831.nxs', OutputWorkspace='intermediateWavelengthScan')
         approximate_wavelength = '4.8' # Angstrom
         ILLD7YIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_intermediateWavelength.xml',
@@ -52,7 +53,6 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
         self._check_load_data_with_calibration('test_intermediateWavelength.xml')
 
     def test_longWavelength(self):
-        Load('394458_394882.nxs', OutputWorkspace='longWavelengthScan')
         approximate_wavelength = '5.7' # Angstrom
         ILLD7YIGPositionCalibration(ScanWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_longWavelength.xml',
