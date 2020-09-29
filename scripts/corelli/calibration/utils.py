@@ -13,8 +13,11 @@ from typing import List, Optional, Union
 from mantid.api import AnalysisDataService, mtd
 from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.simpleapi import ApplyCalibration, CloneWorkspace, Integration, LoadEventNexus, LoadNexusProcessed
-from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+try:
+    from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+    from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+except ModuleNotFoundError:
+    InstrumentViewPresenter, QAppThreadCall = None, None
 from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
@@ -144,7 +147,7 @@ def calibrate_instrument(workspace: WorkspaceTypes, calibration_table: InputTabl
     CloneWorkspace(InputWorkspace=workspace, OutputWorkspace=output_workspace)
     ApplyCalibration(Workspace=output_workspace, CalibrationTable=calibration_table)
 
-    if show_instrument is True:
+    if show_instrument is True and None not in (InstrumentViewPresenter, InstrumentViewPresenter):
         instrument_presenter = QAppThreadCall(InstrumentViewPresenter)(mtd[output_workspace])
         QAppThreadCall(instrument_presenter.show_view)()
 
