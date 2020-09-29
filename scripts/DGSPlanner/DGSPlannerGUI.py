@@ -89,7 +89,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         plotControlLayout.addWidget(self.aspectButton, 0, 5)
         plotControlLayout.addWidget(self.helpButton, 0, 6)
         plotControlLayout.addWidget(self.saveButton, 0, 7)
-        plotBoxLayout.addLayout(plotControlLayout)  
+        plotBoxLayout.addLayout(plotControlLayout)
         plotBox = QtWidgets.QGroupBox("Plot Axes")
         plotBox.setLayout(plotBoxLayout)
         controlLayout.addWidget(plotBox)
