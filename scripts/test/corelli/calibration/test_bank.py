@@ -143,24 +143,6 @@ class TestBank(unittest.TestCase):
 
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'summary'])  # a bit of clean-up
 
-    def test_append_bank_number(self):
-        with self.assertRaises(AssertionError) as exception_info:
-            append_bank_number('I am not here', 'bank51')
-        assert 'Cannot process table I am not here' in str(exception_info.exception)
-
-        # overwrite table with an extra column
-        fit_bank(self.cases['123455_bank20'], 'bank20', calibration_table='table')
-        append_bank_number('table', 'bank20')
-        assert mtd['table'].getColumnNames()[2] == 'Bank Number'
-        assert mtd['table'].column(2) == [20] * 4096
-
-        # clone table and append and extra column
-        fit_bank(self.cases['123455_bank20'], 'bank20', calibration_table='table')
-        append_bank_number('table', 'bank20', output_table='other_table')
-        assert mtd['other_table'].getColumnNames()[2] == 'Bank Number'
-        assert mtd['other_table'].column(2) == [20] * 4096
-
-        DeleteWorkspaces(['table', 'other_table', 'PeakTable', 'masked_tubes', 'masked_tubes'])  # a bit of clean-up
 
     def test_purge_table(self):
         with self.assertRaises(AssertionError) as exception_info:
@@ -233,7 +215,7 @@ class TestBank(unittest.TestCase):
         calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14',
                                            calibration_table='calibration_table')
         assert calibration.rowCount() == 256 * (16 - 3)
-        assert calibration.columnCount() == 3
+        assert calibration.columnCount() == 2  # Detector ID, Position
         assert AnalysisDataService.doesExist('calibration_table')
         assert mask.rowCount() == 256 * 3
         assert mask.columnCount() == 1
