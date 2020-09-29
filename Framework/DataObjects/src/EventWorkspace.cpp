@@ -13,6 +13,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -452,7 +453,10 @@ void EventWorkspace::switchEventType(const Mantid::API::EventType type) {
 /// Returns true always - an EventWorkspace always represents histogramm-able
 /// data
 /// @returns If the data is a histogram - always true for an eventWorkspace
-bool EventWorkspace::isHistogramData(std::size_t index) const { return true; }
+bool EventWorkspace::isHistogramData(std::size_t index) const {
+  UNUSED_ARG(index)
+  return true;
+}
 
 /** Return how many entries in the Y MRU list are used.
  * Only used in tests. It only returns the 0-th MRU list size.
