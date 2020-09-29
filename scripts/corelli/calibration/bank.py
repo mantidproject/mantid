@@ -156,35 +156,6 @@ def criterium_peak_pixel_position(peak_table: InputTable, summary: Optional[str]
     return criterium_pass
 
 
-def append_bank_number(calibration_table: InputTable, bank_name: str, output_table: str = None) -> None:
-    r"""
-    Add an additional column to the calibration table containing the bank number, same for each pixel.
-
-    :param calibration_table:
-    :param bank_name:
-    :param output_table: Name of the output table. If `None`, then the input calibration table is overwritten
-    :return:
-    """
-    # validate input
-    message = f'Cannot process table {calibration_table}. Pass the name of an existing TableWorkspace' \
-              ' or a TableWorkspace handle'
-    assert isinstance(calibration_table, (str, TableWorkspace)), message
-    assert AnalysisDataService.doesExist(str(calibration_table)), message
-    assert re.match(r'^bank\d+$', bank_name), 'The bank name must be of the form "bankI" where "I" in an integer'
-
-    if output_table is not None:
-        CloneWorkspace(InputWorkspace=calibration_table, OutputWorkspace=output_table)
-    else:
-        output_table = str(calibration_table)
-    table_workspace = mtd[output_table]
-
-    column_name = 'Bank Number'
-    table_workspace.addColumn('long64', column_name, plottype=0)
-    bank_number = int(bank_name[4:])  # drop 'bank' from bank_name
-    for row_index in range(table_workspace.rowCount()):
-        table_workspace.setCell(column_name, row_index, bank_number)
-
-
 def purge_table(workspace: WorkspaceTypes, bank_name: str, calibration_table: TableWorkspace,
                 tubes_fit_success: np.ndarray,  output_table: str = None) -> None:
     r"""
@@ -278,8 +249,6 @@ def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
     tubes_fit_success = acceptance_criterium('PeakTable', **criterium_kwargs)
     # purge the calibration table of detector ID's with failing tubes
     purge_table(workspace, bank_name, calibration_table, tubes_fit_success)
-    # Append additional column to the calibration table, containing the bank number
-    append_bank_number(calibration_table, bank_name)
     # Create table of masked detector ID's, or None if all tubes were successfully fitted
     mask_table_workspace = mask_bank(bank_name, tubes_fit_success, mask_table)
     DeleteWorkspaces(['PeakTable'])
