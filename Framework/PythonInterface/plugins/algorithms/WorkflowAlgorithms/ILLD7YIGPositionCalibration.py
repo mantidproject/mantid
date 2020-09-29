@@ -125,7 +125,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getPropertyValue("BankOffsets").split(',')
             for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
-                ChangeBinOffset(intensityWS, offsets[bank_no],
+                ChangeBinOffset(InputWorkspace=intensityWS, Offset=offsets[bank_no],
                                 WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
                                                                     (bank_no+1)*self._D7NumberPixelsBank-1),
                                 OutputWorkspace=intensityWS)
@@ -188,20 +188,25 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
             workspace = outGroup.getItem(scan)
             # normalize to monitor1 as monitor2 is sometimes empty:
             if workspace.readY(workspace.getNumberHistograms()-2)[0] != 0:
-                workspace /= workspace.readY(workspace.getNumberHistograms()-2)[0]
+                Divide(LHSWorkspace=workspace,
+                       RHSWorkspace=CreateSingleValuedWorkspace(workspace.readY(workspace.getNumberHistograms()-2)[0]),
+                       OutputWorkspace=workspace)
             # remove Monitors:
-            workspace = RemoveSpectra(workspace, MONITOR_INDICES)
+            RemoveSpectra(InputWorkspace=workspace, WorkspaceIndices=MONITOR_INDICES, OutputWorkspace=workspace)
             # prepare proper label for the axes
             x_axis_label = workspace.run().getProperty('2theta.requested').value
             x_axis.setValue(scan, x_axis_label)
             # convert the x-axis to signedTwoTheta
-            workspace = ConvertAxisByFormula(workspace,
-                                             Axis='X',
-                                             Formula='-180.0 * signedtwotheta / pi')
+            ConvertAxisByFormula(InputWorkspace=workspace,
+                                 Axis='X',
+                                 Formula='-180.0 * signedtwotheta / pi',
+                                 OutputWorkspace=workspace)
             # mask detectors too close to the beam axis or too far away:
-            workspace = MaskBinsIf(workspace, Criterion='x>{0} && x<{1}'.format(self._beamMask1, self._beamMask2))
+            MaskBinsIf(InputWorkspace=workspace,
+                       Criterion='x>{0} && x<{1}'.format(self._beamMask1, self._beamMask2),
+                       OutputWorkspace=workspace)
             # append the new row to a new MatrixWorkspace
-            workspace = ConvertToPointData(InputWorkspace=workspace)
+            ConvertToPointData(InputWorkspace=workspace, OutputWorkspace=workspace)
             try:
                 intensityWS
             except NameError:
@@ -352,7 +357,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                             DataE=results_e,
                                             UnitX='degrees',
                                             NSpec=1)
-                ConjoinWorkspaces(fit_results, workspace,
+                ConjoinWorkspaces(InputWorkspace1=fit_results, InputWorkspace2=workspace,
                                   CheckOverlapping=False,
                                   YAxisLabel='TwoTheta_fit',
                                   YAxisUnit='degrees')
