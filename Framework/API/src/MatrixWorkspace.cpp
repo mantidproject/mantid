@@ -1051,18 +1051,19 @@ void MatrixWorkspace::setDistribution(bool newValue) {
  *  Whether the workspace contains histogram data
  *  @return whether the workspace contains histogram data
  */
-bool MatrixWorkspace::isHistogramData() const {
+bool MatrixWorkspace::isHistogramData(const std::size_t index) const {
   // all spectra *should* have the same behavior
-  bool isHist = (x(0).size() != y(0).size());
+  bool isHist = (x(index).size() != y(index).size());
+
   // TODOHIST temporary sanity check
   if (isHist) {
-    if (getSpectrum(0).histogram().xMode() !=
+    if (getSpectrum(index).histogram().xMode() !=
         HistogramData::Histogram::XMode::BinEdges) {
       throw std::logic_error("In MatrixWorkspace::isHistogramData(): "
                              "Histogram::Xmode is not BinEdges");
     }
   } else {
-    if (getSpectrum(0).histogram().xMode() !=
+    if (getSpectrum(index).histogram().xMode() !=
         HistogramData::Histogram::XMode::Points) {
       throw std::logic_error("In MatrixWorkspace::isHistogramData(): "
                              "Histogram::Xmode is not Points");
@@ -1385,7 +1386,7 @@ std::size_t MatrixWorkspace::yIndexOfX(const double xValue,
     throw std::out_of_range("MatrixWorkspace::yIndexOfX - X value is greater"
                             " than the highest in the current range.");
 
-  if (this->isHistogramData())
+  if (isHistogramData(index))
     return binIndexOfValue(xValues, xValue, ascendingOrder, tolerance);
   else
     return xIndexOfValue(xValues, xValue, tolerance);

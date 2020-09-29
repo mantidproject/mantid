@@ -423,7 +423,7 @@ public:
 
   /// Returns true if the workspace contains data in histogram form (as
   /// opposed to point-like)
-  virtual bool isHistogramData() const;
+  virtual bool isHistogramData(std::size_t index = 0) const;
 
   /// Returns true if the workspace contains common X bins
   virtual bool isCommonBins() const;

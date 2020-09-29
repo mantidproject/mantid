@@ -137,7 +137,7 @@ public:
 
   // Returns true always - an EventWorkspace always represents histogramm-able
   // data
-  bool isHistogramData() const override;
+  bool isHistogramData(std::size_t index) const override;
 
   std::size_t MRUSize() const;
 

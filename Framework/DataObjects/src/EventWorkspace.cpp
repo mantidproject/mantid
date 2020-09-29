@@ -452,7 +452,7 @@ void EventWorkspace::switchEventType(const Mantid::API::EventType type) {
 /// Returns true always - an EventWorkspace always represents histogramm-able
 /// data
 /// @returns If the data is a histogram - always true for an eventWorkspace
-bool EventWorkspace::isHistogramData() const { return true; }
+bool EventWorkspace::isHistogramData(std::size_t index) const { return true; }
 
 /** Return how many entries in the Y MRU list are used.
  * Only used in tests. It only returns the 0-th MRU list size.
