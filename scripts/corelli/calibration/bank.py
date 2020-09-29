@@ -8,21 +8,18 @@
 from copy import deepcopy
 import numpy as np
 import re
-from typing import Any, Callable, Optional, Tuple, Union
-
+from typing import Any, Callable, Dict, Optional, Tuple
+from corelli.calibration.utils import InputTable, WorkspaceTypes  # custom type aliases
 # imports from Mantid
 from mantid import AnalysisDataService, mtd
 from mantid.api import TextAxis, WorkspaceGroup
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateWorkspace, DeleteTableRows,
-                              DeleteWorkspaces, GroupWorkspaces, MaskBTP, RenameWorkspace)
+from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateWorkspace,
+                              DeleteTableRows, DeleteWorkspaces, GroupWorkspaces, MaskBTP, RenameWorkspace)
 from Calibration import tube
 from Calibration.tube_spec import TubeSpec
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, TUBES_IN_BANK, wire_positions
-
-
-WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
 
 
 def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity=10000) -> bool:
@@ -87,9 +84,6 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
         RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=peak_pixel_positions_table)
 
 
-InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
-
-
 def criterium_peak_pixel_position(peak_table: InputTable, summary: Optional[str] = None,
                                   zscore_threshold: float = 2.5, deviation_threshold: float = 3.0) -> np.ndarray:
     r"""
@@ -146,14 +140,15 @@ def criterium_peak_pixel_position(peak_table: InputTable, summary: Optional[str]
 
     # create an analysis summary if so requested
     if isinstance(summary, str) and len(summary) > 0:
+        success = [1 if criterium else 0 for criterium in criterium_pass]
         x_values = list(range(1, 1 + TUBES_IN_BANK))
         mean, std = np.mean(deviations), np.std(deviations)
         z_scores = np.abs((deviations - mean) / std)
-        y_values = np.array([deviations, z_scores]).flatten()
-        workspace = CreateWorkspace(x_values, y_values, NSpec=2, OutputWorkspace=summary,
+        y_values = np.array([success, deviations, z_scores]).flatten()
+        workspace = CreateWorkspace(x_values, y_values, NSpec=3, OutputWorkspace=summary,
                                     WorkspaceTitle='Tube deviations from averages taken over the bank',
                                     YUnitLabel='Pixel Units')
-        labels = ('deviation', 'Z-score')
+        labels = ('success', 'deviation', 'Z-score')
         axis = TextAxis.create(len(labels))
         [axis.setLabel(index, label) for index, label in enumerate(labels)]
         workspace.replaceAxis(1, axis)
@@ -258,6 +253,7 @@ def mask_bank(bank_name: str, tubes_fit_success: np.ndarray, output_table: str) 
 def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
                    calibration_table: str, mask_table: str = 'MaskTable',
                    acceptance_criterium: Callable[[Any], np.ndarray] = criterium_peak_pixel_position,
+                   criterium_kwargs: Dict[str, Any] = {},
                    shadow_height: float = 1000, shadow_width: float = 4, fit_domain: float = 7,
                    minimum_intensity: float = 1000) -> Tuple[TableWorkspace, Optional[TableWorkspace]]:
     r"""
@@ -269,6 +265,7 @@ def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
     :param fit_domain:
     :param minimum_intensity:
     :param acceptance_criterium:
+    :param criterium_kwargs:
     :param calibration_table:
     :param mask_table:
     :return:
@@ -278,7 +275,7 @@ def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
     fit_bank(workspace, bank_name, shadow_height, shadow_width, fit_domain, minimum_intensity,
              calibration_table=calibration_table, peak_pixel_positions_table='PeakTable')
     # Run the acceptance criterium to determine the failing tubes
-    tubes_fit_success = acceptance_criterium('PeakTable')
+    tubes_fit_success = acceptance_criterium('PeakTable', **criterium_kwargs)
     # purge the calibration table of detector ID's with failing tubes
     purge_table(workspace, bank_name, calibration_table, tubes_fit_success)
     # Append additional column to the calibration table, containing the bank number
@@ -290,27 +287,31 @@ def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
 
 
 def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
-                    calibration_group: str = 'calibrations',
-                    mask_group: str = 'masks') -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
+                    calibration_group: str = 'calibrations', mask_group: str = 'masks',
+                    acceptance_group: str = 'acceptances') -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
     r"""
 
     :param workspace:
     :param bank_selection: Example '32-36,38,40-43'
     :param calibration_group:
     :param mask_group:
+    :param acceptance_group:
     :return:
     """
     # create a list of banks names
 
     # Calibrate each bank
-    calibrations, masks = list(), list()
+    calibrations, masks, acceptances = list(), list(), list()
     for n in bank_numbers(bank_selection):
-        calibration, mask = calibrate_bank(workspace, 'bank' + n, 'calib' + n, 'mask' + n)
+        calibration, mask = calibrate_bank(workspace, 'bank' + n, 'calib' + n, 'mask' + n,
+                                           criterium_kwargs={'summary': 'acceptance' + n})
+        acceptances.append(mtd['acceptance' + n])
         calibrations.append(calibration)
         if mask is not None:
             masks.append(mask)
     # Create the group workspaces
     GroupWorkspaces(InputWorkspaces=calibrations, OutputWorkspace=calibration_group)
+    GroupWorkspaces(InputWorkspaces=acceptances, OutputWorkspace=acceptance_group)
     if len(masks) > 0:
         GroupWorkspaces(InputWorkspaces=masks, OutputWorkspace=mask_group)
 
