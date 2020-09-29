@@ -20,7 +20,7 @@ public:
       boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
           subtrees,
       boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
-          subtreeRoots) const;
+          subtreeRoots) const = 0;
   virtual IClipboard *createClipboard() const = 0;
 };
 

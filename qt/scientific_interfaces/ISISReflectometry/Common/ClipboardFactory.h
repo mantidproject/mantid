@@ -8,7 +8,10 @@
 
 #include "Clipboard.h"
 #include "DllConfig.h"
+#include "IClipboard.h"
 #include "IClipboardFactory.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
+#include "MantidQtWidgets/Common/Batch/Subtree.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,7 +23,7 @@ public:
       boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
           subtrees,
       boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
-          subtreeRoots) const {
+          subtreeRoots) const override {
     return new Clipboard(subtrees, subtreeRoots);
   }
   IClipboard *createClipboard() const override { return new Clipboard(); }

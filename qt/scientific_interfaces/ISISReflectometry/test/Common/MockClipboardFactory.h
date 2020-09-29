@@ -16,6 +16,13 @@ namespace ISISReflectometry {
 
 class DLLExport MockClipboardFactory : public IClipboardFactory {
 public:
+  IClipboard *createClipboard(
+      boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
+          subtrees,
+      boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
+          subtreeRoots) const override {
+    return new MockClipboard();
+  }
   IClipboard *createClipboard() const override { return new MockClipboard(); }
 };
 
