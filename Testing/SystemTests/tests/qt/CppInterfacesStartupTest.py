@@ -29,9 +29,9 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
             self.fail("Failed to find the names of the c++ interfaces.")
 
         for interface_name in self._cpp_interface_names:
-            self._attempt_to_open_interface(interface_name)
+            self._attempt_to_open_cpp_interface(interface_name)
 
-    def _attempt_to_open_interface(self, interface_name):
+    def _attempt_to_open_cpp_interface(self, interface_name):
         try:
             interface = self._interface_manager.createSubWindow(interface_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
