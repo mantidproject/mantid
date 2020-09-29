@@ -307,15 +307,15 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                                                                                 peak_intensity,
                                                                                                 0.5*self._peakWidth)
                     constraints = "f1.Height > 0, f1.Sigma < {0}".format(0.75*self._peakWidth)
-                    constraints += ",{0} < f1.PeakCentre < {1}".format(float(peak_centre_guess) - self._minDistance,
-                                                                       float(peak_centre_guess) + self._minDistance)
+                    constraints += ",{0} < f1.PeakCentre < {1}".format(peak_centre_guess - self._minDistance,
+                                                                       peak_centre_guess + self._minDistance)
                     ws_name = 'pixel_{0}_peak_{1}'.format(pixel_no, peak_no)
                     ws_names.append(ws_name)
                     fit_output = Fit(Function=function,
                                      InputWorkspace=ws,
                                      WorkspaceIndex=pixel_no,
-                                     StartX=float(peak_centre_expected) - self._minDistance,
-                                     EndX=float(peak_centre_expected) + self._minDistance,
+                                     StartX=peak_centre_expected - self._minDistance,
+                                     EndX=peak_centre_expected + self._minDistance,
                                      Constraints=constraints,
                                      CreateOutput=True,
                                      IgnoreInvalidData=True,
@@ -459,19 +459,19 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         Returns a list of pixel positions relative to their
         respective bank"""
         intitial_wavelength = self.getProperty('ApproximateWavelength').value
-        wavelength = parameter_table.column(1)[1] * float(intitial_wavelength)
+        wavelength = parameter_table.column(1)[1] * intitial_wavelength
         if parameter_table.column(1)[0] == 0:
             raise RuntimeError('Bank2 slope is equal to 0.')
-        bank2_slope = 1.0 / float(parameter_table.column(1)[0])
-        bank2_offset = self._RAD_2_DEG * float(parameter_table.column(1)[3])
+        bank2_slope = 1.0 / parameter_table.column(1)[0]
+        bank2_offset = self._RAD_2_DEG * parameter_table.column(1)[3]
         if parameter_table.column(1)[3*self._D7NumberPixelsBank] == 0:
             raise RuntimeError('Bank3 slope is equal to 0.')
-        bank3_slope = 1.0 / float(parameter_table.column(1)[4*self._D7NumberPixelsBank])
-        bank3_offset = self._RAD_2_DEG * float(parameter_table.column(1)[4*self._D7NumberPixelsBank+3])
+        bank3_slope = 1.0 / parameter_table.column(1)[4*self._D7NumberPixelsBank]
+        bank3_offset = self._RAD_2_DEG * parameter_table.column(1)[4*self._D7NumberPixelsBank+3]
         if parameter_table.column(1)[6*self._D7NumberPixelsBank] == 0:
             raise RuntimeError('Bank4 slope is equal to 0.')
-        bank4_slope = 1.0 / float(parameter_table.column(1)[8*self._D7NumberPixelsBank])
-        bank4_offset = self._RAD_2_DEG * float(parameter_table.column(1)[8*self._D7NumberPixelsBank+3])
+        bank4_slope = 1.0 / parameter_table.column(1)[8*self._D7NumberPixelsBank]
+        bank4_offset = self._RAD_2_DEG * parameter_table.column(1)[8*self._D7NumberPixelsBank+3]
         bank_slopes = [bank2_slope, bank3_slope, bank4_slope]
         bank_offsets = [bank2_offset, bank3_offset, bank4_offset]
         user_offsets = self.getPropertyValue("BankOffsets").split(',')
