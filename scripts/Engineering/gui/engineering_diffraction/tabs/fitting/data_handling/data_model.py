@@ -7,12 +7,17 @@
 from os import path
 
 from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Plus, Minus, AverageLogData, \
-    CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace
+    CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from mantid.api import AnalysisDataService as ADS
+from mantid.api import TextAxis
 from matplotlib.pyplot import subplots
-from numpy import full, nan
+from numpy import full, nan, max, array, vstack
+from itertools import chain
+
+import pydevd_pycharm
+pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 
 class FittingDataModel(object):
@@ -22,7 +27,8 @@ class FittingDataModel(object):
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
         self._background_workspaces = {}
-        self._fit_results = {} # {WorkspaceName: Setup}
+        self._fit_results = {}  # {WorkspaceName: fit_result_dict}
+        self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
 
@@ -142,30 +148,51 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
-    # def create_fit_table(self):
-    #     # table to store model/setup
-    #     setup = CreateEmptyTableWorkspace()
-    #     setup.addColumn(type="str", name="Setup")
-    #     setup.addColumn(type="int", name="StartX")
-    #     setup.addColumn(type="int", name="EndX")
-    #     # table to store parameters
-    #     self._fit_workspaces = GroupWorkspaces([setup], OutputWorkspace='fit')
-    #
-    # def add_fit_to_table(self, results_dict = None):
-    #     # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
-    #     if not self._fit_workspaces:
-    #         self.create_fit_table()
-
-
     def update_fit(self, row_number, results_dict):
-        ws_name = results_dict['properties']['InputWorkspace']
+        wsname = results_dict['properties']['InputWorkspace']
+        print(results_dict)
         # # at this point we know the fit workspaces output so can collect error setc.
-        # self._fit_results[ws_name] = results_dict['properties']
-        # self._repopulate_fit_table()
+        self._fit_results[wsname] = {'properties': results_dict['properties']}
+        self._fit_results[wsname]['results'] = dict()  # {function_param: [[Y1, E1], [Y2,E2],...] }
+        fnames = [x.split(',')[0] for x in results_dict['properties']['Function'].split('name=') if x]
+        params_dict = ADS.retrieve(results_dict['properties']['Output'] + '_Parameters').toDict()
+        for ifunc, fname in enumerate(fnames):
+            for irow, param_str in enumerate(params_dict['Name']):
+                if param_str.startswith(f'f{ifunc}'):
+                    key = '_'.join([fname,param_str.split('.')[-1]])
+                    if key not in self._fit_results[wsname]['results']:
+                        self._fit_results[wsname]['results'][key] = []
+                    self._fit_results[wsname]['results'][key].append([
+                        params_dict['Value'][irow], params_dict['Error'][irow]])
+        self.create_fit_table()
 
-    # def _repopulate_fit_table(self):
-    #     # could also override fitpropertybrowswer.addFitResultWorkspacesToTableWidget
-    #     # loop over ws_names in group and use ufit results dict
+    def create_fit_table(self):
+        nruns = len(self._loaded_workspaces.keys()) # num of rows of output workspace
+        # get unique set of function parameters across all workspaces
+        func_params = set(chain(*[list(d['results'].keys()) for d in self._fit_results.values()]))
+        for param in func_params:
+            # get max number of repeated func in a model (num columns of output workspace)
+            nfuncs = max([len(d['results'][param]) for d in self._fit_results.values()])
+            # make output workspace
+            ipeak = list(range(1, nfuncs+1))*nruns
+            w = CreateWorkspace(OutputWorkspace=param, DataX=ipeak, DataY=ipeak, NSpec=nruns)
+            # axis for labels in workspace
+            axis = TextAxis.create(nruns)
+            for iws, wsname in enumerate(self._loaded_workspaces.keys()):
+                if wsname in self._fit_results:
+                    if param in self._fit_results[wsname]['results']:
+                        fitvals = array(self._fit_results[wsname]['results'][param])
+                        # pad to max length (with nans)
+                        data = vstack((fitvals, full((nfuncs-fitvals.shape[0],2), nan)))
+                    else:
+                        data = full((nfuncs,2), nan)
+                else:
+                    data = full((nfuncs, 2), nan)
+                w.setY(iws, data[:,0])
+                w.setE(iws, data[:,1])
+                # label row
+                axis.setLabel(iws, wsname)
+            w.replaceAxis(1, axis)
 
     def update_workspace_name(self, old_name, new_name):
         if new_name not in self._loaded_workspaces:
