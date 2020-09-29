@@ -946,6 +946,28 @@ public:
     TS_ASSERT_EQUALS(back_midpt.totalDistInsideObject(), 0.75 * HEIGHT);
   }
 
+  void testTracksForSolidCylinderAngle() {
+    // solid cylinder at origin with symmetry along y axis
+    // using PAC06 dimensions: 2.95mm radius x 5.68mm height
+    // Beam is hitting surface at 45 degree angle from the x axis
+    constexpr double RADIUS{0.00295};
+    constexpr double HEIGHT{0.00568};
+    V3D BOTTOM_CENTRE{0., -.5 * HEIGHT, 0.};
+    V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(
+        RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    constexpr double ANGLE_SIN{sqrt(2.0) * 0.5};        // sin(PI/4)
+    const V3D BEAM_DIRECTION{ANGLE_SIN, ANGLE_SIN, 0.}; // unit vector at angle
+
+    // centre of sample
+    Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    int nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(),
+                     (0.5 * HEIGHT) / ANGLE_SIN);
+  }
+
   void testGeneratePointInsideSphere() {
     using namespace ::testing;
 
