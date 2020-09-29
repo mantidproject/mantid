@@ -131,17 +131,15 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                 OutputWorkspace=intensityWS)
 
         if not self.getProperty("ScanStepSize").isDefault:
-            self._scanStepSize = float(self.getProperty("ScanStepSize")[0])
-
+            self._scanStepSize = self.getProperty("ScanStepSize").value
         if not self.getProperty("BraggPeakWidth").isDefault:
-            self._peakWidth = float(self.getProperty("BraggPeakWidth")[0])
-
+            self._peakWidth = self.getProperty("BraggPeakWidth").value
         if not self.getProperty("MaskedBinsRange").isDefault:
             masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
             self._beamMask1 = masked_bins_range[0]
             self._beamMask2 = masked_bins_range[1]
 
-        self._minDistance = float(self.getPropertyValue("MinimalDistanceBetweenPeaks"))
+        self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # loads the YIG peaks from an IPF
         yig_d = self._load_yig_peaks(intensityWS)
@@ -237,7 +235,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         """Removes YIG peaks with theta above 180 degrees
         and those that are too close to each other,
         and returns a list with peaks positions in 2theta"""
-        wavelength = float(self.getPropertyValue("ApproximateWavelength"))
+        wavelength = self.getProperty("ApproximateWavelength").value
         yig_list = [2.0 * self._RAD_2_DEG * math.asin(wavelength / (2.0 * d_spacing))
                     for d_spacing in yig_list if d_spacing > 0.5*wavelength]
         yig_peaks = []
