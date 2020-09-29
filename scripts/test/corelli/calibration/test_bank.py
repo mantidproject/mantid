@@ -6,14 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numpy as np
-from numpy.testing import assert_allclose, assert_equal
+from numpy.testing import assert_equal
 from os import path
 import unittest
 
 # Mantid imports
 from corelli.calibration.bank import (append_bank_number, calibrate_bank, calibrate_banks,
-                                      criterium_peak_pixel_position, fit_bank,
-                                      mask_bank, purge_table, sufficient_intensity, wire_positions)
+                                      criterium_peak_pixel_position, fit_bank, mask_bank, purge_table,
+                                      sufficient_intensity)
 from mantid import AnalysisDataService, config, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
 
@@ -64,17 +64,6 @@ class TestBank(unittest.TestCase):
     def tearDown(cls) -> None:
         r"""Delete the workspaces associated to the test cases"""
         DeleteWorkspaces(list(cls.cases.values()))
-
-    def test_wire_positions(self):
-        with self.assertRaises(AssertionError) as exception_info:
-            wire_positions(units='mm')
-        assert 'units mm must be one of' in str(exception_info.exception)
-        expected = [-0.396, -0.343, -0.290, -0.238, -0.185, -0.132, -0.079, -0.026,
-                    0.026, 0.079, 0.132, 0.185, 0.238, 0.290, 0.343, 0.396]
-        assert_allclose(wire_positions(units='meters'), np.array(expected), atol=0.001)
-        expected = [15.4, 30.4, 45.4, 60.4, 75.4, 90.5, 105.5, 120.5,
-                    135.5, 150.5, 165.5, 180.6, 195.6, 210.6, 225.6, 240.6]
-        assert_allclose(wire_positions(units='pixels'), np.array(expected), atol=0.1)
 
     def test_sufficient_intensity(self):
         assert sufficient_intensity(self.cases['123555_bank20'], 'bank20') is False

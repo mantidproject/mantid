@@ -10,7 +10,7 @@ from numpy.testing import assert_allclose
 from os import path
 import unittest
 
-from corelli.calibration.utils import bank_numbers, calculate_tube_calibration, load_banks
+from corelli.calibration.utils import bank_numbers, calculate_tube_calibration, load_banks, wire_positions
 from mantid import AnalysisDataService, config
 from mantid.simpleapi import DeleteWorkspaces, LoadEmptyInstrument
 
@@ -67,6 +67,17 @@ class TestUtils(unittest.TestCase):
         self.workspace = 'uncalibrated'
         self.table = 'calibTable'
         self.calibrated_y = y
+
+    def test_wire_positions(self):
+        with self.assertRaises(AssertionError) as exception_info:
+            wire_positions(units='mm')
+        assert 'units mm must be one of' in str(exception_info.exception)
+        expected = [-0.396, -0.343, -0.290, -0.238, -0.185, -0.132, -0.079, -0.026,
+                    0.026, 0.079, 0.132, 0.185, 0.238, 0.290, 0.343, 0.396]
+        assert_allclose(wire_positions(units='meters'), np.array(expected), atol=0.001)
+        expected = [15.4, 30.4, 45.4, 60.4, 75.4, 90.5, 105.5, 120.5,
+                    135.5, 150.5, 165.5, 180.6, 195.6, 210.6, 225.6, 240.6]
+        assert_allclose(wire_positions(units='pixels'), np.array(expected), atol=0.1)
 
     def test_bank_numbers(self):
         assert bank_numbers(' 42 ') == ['42']
