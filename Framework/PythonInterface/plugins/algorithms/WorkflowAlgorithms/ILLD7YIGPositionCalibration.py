@@ -225,7 +225,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
     def _load_yig_peaks(self, ws):
         """Loads YIG peaks provided as an XML Instrument Parameter File"""
         parameterFilename = self.getPropertyValue('YIGPeaksFile')
-        ClearInstrumentParameters(ws) #in case other IPF was loaded there before
+        ClearInstrumentParameters(Workspace=ws) #in case other IPF was loaded there before
         LoadParameterFile(Workspace=ws, Filename=parameterFilename)
         yig_d_set = set()
         instrument = mtd[ws].getInstrument().getComponentByName('detector')
@@ -351,25 +351,28 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                               UnitX='degrees',
                                               NSpec=1)
             else:
-                workspace = CreateWorkspace(DataX=results_x,
-                                            DataY=results_y,
-                                            DataE=results_e,
-                                            UnitX='degrees',
-                                            NSpec=1)
-                ConjoinWorkspaces(InputWorkspace1=fit_results, InputWorkspace2=workspace,
+                CreateWorkspace(OutputWorkspace='ws',
+                                DataX=results_x,
+                                DataY=results_y,
+                                DataE=results_e,
+                                UnitX='degrees',
+                                NSpec=1)
+                ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name, InputWorkspace2='ws',
                                   CheckOverlapping=False,
                                   YAxisLabel='TwoTheta_fit',
                                   YAxisUnit='degrees')
-                fit_results = mtd['fit_results']
 
         y_axis = NumericAxis.create(self._D7NumberPixels)
         for pixel_no in range(self._D7NumberPixels):
             y_axis.setValue(pixel_no, pixel_no+1)
-        fit_results.replaceAxis(1, y_axis)
+        mtd[conjoined_peak_fit_name].replaceAxis(1, y_axis)
+
+        single_peak_fit_results_name = 'single_peak_fits_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
+        GroupWorkspaces(InputWorkspaces=ws_names, OutputWorkspace=single_peak_fit_results_name)
 
         GroupWorkspaces(ws_names, OutputWorkspace='single_peaks_fits')
 
-        return fit_results
+        return conjoined_peak_fit_name, single_peak_fit_results_name
 
     def _fit_detector_positions(self, ws):
         """Fits lambda = 2 * d * sin (m * 2theta + offset),
@@ -393,7 +396,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         lambda_constr = 0.5 # +- 5% of lambda variation from the initial assumption
         constraint_list = ['{0}<f0.lambda<{1}'.format(1-lambda_constr, 1+lambda_constr)]
 
-        for pixel_no in range(ws.getNumberHistograms()):
+        for pixel_no in range(mtd[ws].getNumberHistograms()):
             function = 'name=UserFunction, \
             Formula = {0} * m * ( 2.0 * asin( lambda * sin( 0.5 * {1} * x ) ) + offset+ bank_offset), \
             lambda= 1.0, m = 1.0, offset = {2}, bank_offset = {3}, $domains=i'.format(self._RAD_2_DEG, self._DEG_2_RAD, 0, 0)
@@ -442,12 +445,15 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                              Constraints=constraints,
                              IgnoreInvalidData=True,
                              CreateOutput=True,
-                             Output='det_out',
+                             Output='det_fit_out_{}'.format(fit_output_name),
                              **fit_kwargs)
         except RuntimeError:
             print("Please change initial parameters of the fit")
             raise
         param_table = fit_output.OutputParameters
+
+        #clean up
+        DeleteWorkspace('det_fit_out_{}_NormalisedCovarianceMatrix'.format(fit_output_name))
 
         return param_table
 
