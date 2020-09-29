@@ -14,7 +14,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid {
@@ -159,13 +158,7 @@ double DetectorInfo::twoTheta(const size_t index) const {
   }
 
   const auto sampleDetVec = position(index) - samplePos;
-  try {
-    return sampleDetVec.angle(beamLine);
-  } catch (const std::runtime_error &e) {
-    Kernel::Logger g_log("DetectorInfo");
-    g_log.warning(e.what());
-    return std::numeric_limits<double>::quiet_NaN();
-  }
+  return sampleDetVec.angle(beamLine);
 }
 
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
@@ -183,13 +176,7 @@ double DetectorInfo::twoTheta(const std::pair<size_t, size_t> &index) const {
   }
 
   const auto sampleDetVec = position(index) - samplePos;
-  try {
-    return sampleDetVec.angle(beamLine);
-  } catch (const std::runtime_error &e) {
-    Kernel::Logger g_log("DetectorInfo");
-    g_log.warning(e.what());
-    return std::numeric_limits<double>::quiet_NaN();
-  }
+  return sampleDetVec.angle(beamLine);
 }
 
 /// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
@@ -210,14 +197,7 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
       m_instrument->getReferenceFrame()->vecThetaSign();
 
   const auto sampleDetVec = position(index) - samplePos;
-  double angle = 0.0;
-  try {
-    angle = sampleDetVec.angle(beamLine);
-  } catch (const std::runtime_error &e) {
-    Kernel::Logger g_log("DetectorInfo");
-    g_log.warning(e.what());
-    return std::numeric_limits<double>::quiet_NaN();
-  }
+  double angle = sampleDetVec.angle(beamLine);
 
   const auto cross = beamLine.cross_prod(sampleDetVec);
   const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
@@ -246,14 +226,7 @@ DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
       m_instrument->getReferenceFrame()->vecThetaSign();
 
   const auto sampleDetVec = position(index) - samplePos;
-  double angle = 0.0;
-  try {
-    angle = sampleDetVec.angle(beamLine);
-  } catch (const std::runtime_error &e) {
-    Kernel::Logger g_log("DetectorInfo");
-    g_log.warning(e.what());
-    return std::numeric_limits<double>::quiet_NaN();
-  }
+  double angle = sampleDetVec.angle(beamLine);
 
   const auto cross = beamLine.cross_prod(sampleDetVec);
   const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
