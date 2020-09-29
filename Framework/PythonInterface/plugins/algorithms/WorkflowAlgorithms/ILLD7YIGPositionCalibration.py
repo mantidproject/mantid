@@ -164,9 +164,12 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         progress.report()
 
         if self.getProperty('FitOutputWorkspace').isDefault:
-            RemoveWorkspaces(['det_out_Parameters', intensityWS, peaks_positions])
+            created_ws_names = [intensityWS, peaks_positions, detector_parameters, 'outGroup', 'out_Parameters',
+                                'out_NormalisedCovarianceMatrix', 'det_out_NormalisedCovarianceMatrix', 'det_out_Workspaces',
+                                'single_peaks_fits']
+            DeleteWorkspaces(created_ws_names)
         else:
-            self.setProperty('FitOutputWorkspace', mtd['det_out_Parameters'])
+            self.setProperty('FitOutputWorkspace', detector_parameters)
 
     def _get_scan_data(self):
         """ Loads YIG scan data, removes monitors, and prepares
