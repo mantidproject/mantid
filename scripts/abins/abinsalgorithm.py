@@ -42,10 +42,12 @@ class AbinsAlgorithm:
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
 
+        self._setting = self.getProperty("Setting").value
         instrument_name = self.getProperty("Instrument").value
         if instrument_name in ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
-            self._instrument = get_instrument(self._instrument_name)
+            self._instrument = get_instrument(self._instrument_name,
+                                              setting=self._setting)
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 
@@ -102,6 +104,18 @@ class AbinsAlgorithm:
                              validator=StringListValidator(['1', '2']),
                              doc="Number of quantum order effects included in the calculation "
                                  "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations")
+
+    def declare_instrument_properties(self, *, default="TOSCA", choices=ALL_INSTRUMENTS):
+        self.declareProperty(name="Instrument",
+                             direction=Direction.Input,
+                             defaultValue=default,
+                             validator=StringListValidator(choices),
+                             doc="Name of an instrument for which analysis should be performed.")
+
+        self.declareProperty(name="Setting",
+                             direction=Direction.Input,
+                             defaultValue="",
+                             doc="Setting choice for this instrument (e.g. monochromator)")
 
     def validate_common_inputs(self, issues: dict = None) -> dict:
         """Validate inputs common to Abins 1D and 2D versions
