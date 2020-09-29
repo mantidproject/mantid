@@ -28,12 +28,6 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             ILLD7YIGPositionCalibration()
 
-    def test_algorithm_with_wrong_approximate_wavelength_raises_exception(self):
-        Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
-        with self.assertRaises(ValueError):
-            ILLD7YIGPositionCalibration(ScanWorkspace='shortWavelengthScan', YIGPeaksFile='YIG_peaks.xml',
-                                      ApproximateWavelength="-1.0")
-
     def test_shortWavelength(self):
         approximate_wavelength = '3.14' # Angstrom
         ILLD7YIGPositionCalibration(ScanWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
