@@ -119,17 +119,17 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         # load the chosen YIG scan
         fit_output_name = self.getPropertyValue('FitOutputWorkspace')
         if self.getProperty('InputWorkspace').isDefault:
-            intensityWS = self._get_scan_data()
+            conjoined_scan = self._get_scan_data(fit_output_name)
         else:
-            intensityWS = self.getProperty('InputWorkspace').value
+            conjoined_scan = self.getProperty('InputWorkspace').value
         progress.report()
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getPropertyValue("BankOffsets").split(',')
             for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
-                ChangeBinOffset(InputWorkspace=intensityWS, Offset=offsets[bank_no],
+                ChangeBinOffset(InputWorkspace=conjoined_scan, Offset=offsets[bank_no],
                                 WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
                                                                     (bank_no+1)*self._D7NumberPixelsBank-1),
-                                OutputWorkspace=intensityWS)
+                                OutputWorkspace=conjoined_scan)
 
         if not self.getProperty("ScanStepSize").isDefault:
             self._scanStepSize = self.getProperty("ScanStepSize").value
@@ -139,21 +139,20 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
             masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
             self._beamMask1 = masked_bins_range[0]
             self._beamMask2 = masked_bins_range[1]
-
         self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # loads the YIG peaks from an IPF
-        yig_d = self._load_yig_peaks(intensityWS)
+        yig_d = self._load_yig_peaks(conjoined_scan)
         # checks how many and which peaks can be fitted in each row
-        yig_peaks_positions = self._get_yig_peaks_positions(intensityWS, yig_d)
+        yig_peaks_positions = self._get_yig_peaks_positions(conjoined_scan, yig_d)
         progress.report()
         # fits gaussian to peaks for each pixel, returns peaks as a function of their expected position
-        peaks_positions = self._fit_bragg_peaks(intensityWS, yig_peaks_positions)
+        fitted_peaks_positions, single_peaks_fits  = self._fit_bragg_peaks(conjoined_scan, yig_peaks_positions)
         progress.report()
-        ReplaceSpecialValues(InputWorkspace='fit_results', OutputWorkspace='fit_results',
+        ReplaceSpecialValues(InputWorkspace=fitted_peaks_positions, OutputWorkspace=fitted_peaks_positions,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, checkErrorAxis=True)
         # fits the wavelength, bank gradients and individual
-        detector_parameters = self._fit_detector_positions(peaks_positions)
+        detector_parameters = self._fit_detector_positions(fitted_peaks_positions)
         progress.report()
         # calculates pixel positions, bank offsets and slopes from the fit output
         wavelength, pixel_offsets, bank_offsets, bank_slopes = self._calculate_pixel_positions(detector_parameters)
@@ -163,30 +162,27 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         progress.report()
 
         if self.getProperty('FitOutputWorkspace').isDefault:
-            created_ws_names = [intensityWS, peaks_positions, detector_parameters, 'outGroup', 'out_Parameters',
-                                'out_NormalisedCovarianceMatrix', 'det_out_NormalisedCovarianceMatrix', 'det_out_Workspaces',
-                                'single_peaks_fits']
+            created_ws_names = [conjoined_scan, fitted_peaks_positions, single_peaks_fits, detector_parameters]
             DeleteWorkspaces(created_ws_names)
         else:
             self.setProperty('FitOutputWorkspace', detector_parameters)
 
-    def _get_scan_data(self):
+    def _get_scan_data(self, ws_name):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""
 
         # workspace indices for monitors
-        MONITOR_INDICES = "{0}, {1}".format(self._D7NumberPixels, self._D7NumberPixels+1)
-
-        outGroup = Load(self.getPropertyValue("Filenames"),
-                        OutputWorkspace="outGroup",
-                        PositionCalibration='None')
+        monitor_indices = "{0}, {1}".format(self._D7NumberPixels, self._D7NumberPixels+1)
+        scan_data_name = "scan_data_{}".format(ws_name)
+        Load(Filename=self.getPropertyValue("Filenames"), OutputWorkspace=scan_data_name, PositionCalibration='None')
         # load the group into a single table workspace
-        nfiles = outGroup.getNumberOfEntries()
+        nfiles = mtd[scan_data_name].getNumberOfEntries()
         # new vertical axis
         x_axis = NumericAxis.create(nfiles)
         # Fill the intensity and position tables with all the data from scans
-        for scan in range(nfiles):
-            workspace = outGroup.getItem(scan)
+        conjoined_scan_name = "conjoined_input_{}".format(ws_name)
+        name_list = []
+        for entry_no, entry in enumerate(mtd[scan_data_name]):
             # normalize to monitor1 as monitor2 is sometimes empty:
             if workspace.readY(workspace.getNumberHistograms()-2)[0] != 0:
                 Divide(LHSWorkspace=workspace,
@@ -218,12 +214,13 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
 
         #replace axis and corrects labels
         x_axis.setUnit("Label").setLabel('TwoTheta', 'degrees')
-        intensityWS.replaceAxis(0, x_axis)
+        mtd[conjoined_scan_name].replaceAxis(0, x_axis)
         y_axis = NumericAxis.create(self._D7NumberPixels)
         for pixel_no in range(self._D7NumberPixels):
             y_axis.setValue(pixel_no, pixel_no+1)
-        intensityWS.replaceAxis(1, y_axis)
-        return intensityWS
+        mtd[conjoined_scan_name].replaceAxis(1, y_axis)
+
+        return conjoined_scan_name
 
     def _load_yig_peaks(self, ws):
         """Loads YIG peaks provided as an XML Instrument Parameter File"""
@@ -231,7 +228,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         ClearInstrumentParameters(ws) #in case other IPF was loaded there before
         LoadParameterFile(Workspace=ws, Filename=parameterFilename)
         yig_d_set = set()
-        instrument = ws.getInstrument().getComponentByName('detector')
+        instrument = mtd[ws].getInstrument().getComponentByName('detector')
         for param_name in instrument.getParameterNames(True):
             if 'peak_' in param_name:
                 yig_d_set.add(instrument.getNumberParameter(param_name)[0])
@@ -259,15 +256,15 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         peak_list.sort()
         return peak_list
 
-    def _get_yig_peaks_positions(self, ws, YIG_D):
+    def _get_yig_peaks_positions(self, ws, yig_d_spacing):
         """Returns a list o tuples with peak centre positions and peak height
         used for further fitting. Removes all peaks that would require scattering
         angle above 180 degrees and returns the peak positions in degrees"""
-        yig2theta = self._remove_unwanted_yig_peaks(YIG_D)
+        yig2theta = self._remove_unwanted_yig_peaks(yig_d_spacing)
         peak_list = []
-        for pixel_no in range(ws.getNumberHistograms()):
-            detector_2theta = ws.readX(pixel_no)
-            intensity = ws.readY(pixel_no)
+        for pixel_no in range(mtd[ws].getNumberHistograms()):
+            detector_2theta = mtd[ws].readX(pixel_no)
+            intensity = mtd[ws].readY(pixel_no)
             min2Theta = detector_2theta[0]
             max2Theta = detector_2theta[-1]
             single_spectrum_peaks = []
@@ -299,7 +296,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         max_n_peaks = len(max(yig_peaks, key=len))
         conjoined_peak_fit_name = 'conjoined_peak_fit_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
         ws_names = []
-        for pixel_no in range(ws.getNumberHistograms()):
+        for pixel_no in range(mtd[ws].getNumberHistograms()):
             # create the needed columns in the output workspace
             results_x = np.zeros(max_n_peaks)
             results_y = np.zeros(max_n_peaks)
