@@ -184,34 +184,30 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         name_list = []
         for entry_no, entry in enumerate(mtd[scan_data_name]):
             # normalize to monitor1 as monitor2 is sometimes empty:
-            if workspace.readY(workspace.getNumberHistograms()-2)[0] != 0:
-                Divide(LHSWorkspace=workspace,
-                       RHSWorkspace=CreateSingleValuedWorkspace(workspace.readY(workspace.getNumberHistograms()-2)[0]),
-                       OutputWorkspace=workspace)
+            monitor1_counts = entry.readY(self._D7NumberPixels-2)[0]
+            if monitor1_counts != 0:
+                Divide(LHSWorkspace=entry,
+                       RHSWorkspace=CreateSingleValuedWorkspace(monitor1_counts),
+                       OutputWorkspace=entry)
             # remove Monitors:
-            RemoveSpectra(InputWorkspace=workspace, WorkspaceIndices=MONITOR_INDICES, OutputWorkspace=workspace)
+            RemoveSpectra(InputWorkspace=entry, WorkspaceIndices=monitor_indices, OutputWorkspace=entry)
             # prepare proper label for the axes
-            x_axis_label = workspace.run().getProperty('2theta.requested').value
-            x_axis.setValue(scan, x_axis_label)
+            x_axis_label = entry.run().getProperty('2theta.requested').value
+            x_axis.setValue(entry_no, x_axis_label)
             # convert the x-axis to signedTwoTheta
-            ConvertAxisByFormula(InputWorkspace=workspace,
+            ConvertAxisByFormula(InputWorkspace=entry,
                                  Axis='X',
                                  Formula='-180.0 * signedtwotheta / pi',
-                                 OutputWorkspace=workspace)
+                                 OutputWorkspace=entry)
             # mask detectors too close to the beam axis or too far away:
-            MaskBinsIf(InputWorkspace=workspace,
+            MaskBinsIf(InputWorkspace=entry,
                        Criterion='x>{0} && x<{1}'.format(self._beamMask1, self._beamMask2),
-                       OutputWorkspace=workspace)
+                       OutputWorkspace=entry)
             # append the new row to a new MatrixWorkspace
-            ConvertToPointData(InputWorkspace=workspace, OutputWorkspace=workspace)
-            try:
-                intensityWS
-            except NameError:
-                intensityWS = workspace.clone()
-            else:
-                list = [intensityWS, workspace]
-                intensityWS = ConjoinXRuns(list)
+            ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
+            name_list.append(entry.name())
 
+        ConjoinXRuns(InputWorkspaces=name_list, OutputWorkspace=conjoined_scan_name)
         #replace axis and corrects labels
         x_axis.setUnit("Label").setLabel('TwoTheta', 'degrees')
         mtd[conjoined_scan_name].replaceAxis(0, x_axis)
