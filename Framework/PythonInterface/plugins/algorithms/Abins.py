@@ -58,19 +58,8 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self.declareProperty(name="Scale", defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
 
-        self.declareProperty(name="Instrument",
-                             direction=Direction.Input,
-                             defaultValue="TOSCA",
-                             validator=StringListValidator(ONE_DIMENSIONAL_INSTRUMENTS),
-                             doc="Name of an instrument for which analysis should be performed.")
-
-        self.declareProperty(name="Setting",
-                             direction=Direction.Input,
-                             defaultValue="",
-                             doc="Setting choice for this instrument (e.g. monochromator)")
-
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
-                             doc="Name to give the output workspace.")
+        # Declare Instrument-related properties
+        self.declare_instrument_properties(default="TOSCA", choices=ONE_DIMENSIONAL_INSTRUMENTS)
 
     def validateInputs(self) -> Dict[str,str]:
         issues = dict()

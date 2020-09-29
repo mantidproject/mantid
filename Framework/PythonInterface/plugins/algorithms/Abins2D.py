@@ -26,6 +26,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
     _bin_width = None
     _sample_form = None
     _instrument_name = None
+    _setting = None
     _atoms = None
     _sum_contributions = None
     _save_ascii = None
@@ -45,11 +46,8 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         # Declare properties for all Abins Algorithms
         self.declare_common_properties()
 
-        self.declareProperty(name="Instrument",
-                             direction=Direction.Input,
-                             defaultValue="TwoDMap",
-                             validator=StringListValidator(TWO_DIMENSIONAL_INSTRUMENTS),
-                             doc="Name of an instrument for which analysis should be performed.")
+        # Declare instrument properties
+        self.declare_instrument_properties(default="TwoDMap", choices=TWO_DIMENSIONAL_INSTRUMENTS)
 
         # Declare special properties for 2D instrument
         self.declareProperty(name="Resolution",
