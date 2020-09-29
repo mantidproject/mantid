@@ -949,7 +949,7 @@ public:
   void testTracksForSolidCylinderAngle() {
     // solid cylinder at origin with symmetry along y axis
     // using PAC06 dimensions: 2.95mm radius x 5.68mm height
-    // Beam is hitting surface at 45 degree angle from the x axis
+    // Beam is hitting surface at 45 degree angle from the y-z axis
     constexpr double RADIUS{0.00295};
     constexpr double HEIGHT{0.00568};
     V3D BOTTOM_CENTRE{0., -.5 * HEIGHT, 0.};
@@ -957,8 +957,8 @@ public:
     auto cylinder = ComponentCreationHelper::createCappedCylinder(
         RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
 
-    constexpr double ANGLE_SIN{sqrt(2.0) * 0.5};        // sin(PI/4)
-    const V3D BEAM_DIRECTION{ANGLE_SIN, ANGLE_SIN, 0.}; // unit vector at angle
+    double ANGLE_SIN{sqrt(2.0) * 0.5};                  // sin(PI/4)
+    const V3D BEAM_DIRECTION{0., ANGLE_SIN, ANGLE_SIN}; // unit vector at angle
 
     // centre of sample
     Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
