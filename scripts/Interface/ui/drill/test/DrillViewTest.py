@@ -442,7 +442,9 @@ class DrillViewTest(unittest.TestCase):
     def test_getVisualSettings(self):
         self.view.columns = ["test1", "test2", "test3"]
         self.view.table.getFoldedColumns.return_value = ["test1", "test3"]
-        d = {"FoldedColumns": ["test1", "test3"]}
+        self.view.table.getHiddenColumns.return_value = ["test1", "test2"]
+        d = {"FoldedColumns": ["test1", "test3"],
+             "HiddenColumns": ["test1", "test2"]}
         self.assertDictEqual(self.view.getVisualSettings(), d)
 
 

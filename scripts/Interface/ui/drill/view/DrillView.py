@@ -815,6 +815,10 @@ class DrillView(QMainWindow):
                             if visualSettings["FoldedColumns"][c]]
                         )
 
+        # hidden columns
+        if ("HiddenColumns" in visualSettings):
+            self.table.setHiddenColumns(visualSettings["HiddenColumns"])
+
     def getVisualSettings(self):
         """
         Used by the model to get some visualisation data that should be saved
@@ -828,6 +832,9 @@ class DrillView(QMainWindow):
 
         # folded columns
         vs["FoldedColumns"] = self.table.getFoldedColumns()
+
+        # hidden columns
+        vs["HiddenColumns"] = self.table.getHiddenColumns()
 
         return vs
 
