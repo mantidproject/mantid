@@ -103,14 +103,15 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="The lower and upper bound for the masked region around the direct beam (in degrees).")
 
-        self.declareProperty(name='CalibrationOutputFilename',
-                             defaultValue='',
-                             direction=Direction.Input,
-                             doc="The output YIG calibration Instrument Parameter File name.")
+        self.declareProperty(FileProperty(name='CalibrationOutputFile',
+                                          action=FileAction.Save,
+                                          extensions=['xml'],
+                                          defaultValue='d7_{}.xml'.format(date.today())),
+                             doc="The output YIG calibration Instrument Parameter File.")
 
         self.declareProperty(ITableWorkspaceProperty('FitOutputWorkspace', '',
-                                                    direction=Direction.Output,
-                                                    optional=PropertyMode.Optional),
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
                              doc="The table workspace name that will be used to store all of the calibration parameters.")
 
     def PyExec(self):
@@ -523,13 +524,9 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                 value = ET.SubElement(pixel, 'value')
                 value.set('val', str(pixel_offsets[bank_no*self._D7NumberPixelsBank + pixel_no]))
 
-        if self.getProperty("CalibrationOutputFilename").isDefault:
-            filename = "d7_{0}.xml".format(date_today)
-        else:
-            filename = self.getPropertyValue("CalibrationOutputFilename")
+        filename = self.getPropertyValue('CalibrationOutputFile')
         outfile = open(os.path.join(os.getcwd(), filename), "w")
         outfile.write(self._prettify(param_file))
-        outfile.close()
 
 
 AlgorithmFactory.subscribe(ILLD7YIGPositionCalibration)
