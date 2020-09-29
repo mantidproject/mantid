@@ -819,6 +819,10 @@ class DrillView(QMainWindow):
         if ("HiddenColumns" in visualSettings):
             self.table.setHiddenColumns(visualSettings["HiddenColumns"])
 
+        # columns order
+        if ("ColumnsOrder" in visualSettings):
+            self.table.setColumnsOrder(visualSettings["ColumnsOrder"])
+
     def getVisualSettings(self):
         """
         Used by the model to get some visualisation data that should be saved
@@ -835,6 +839,9 @@ class DrillView(QMainWindow):
 
         # hidden columns
         vs["HiddenColumns"] = self.table.getHiddenColumns()
+
+        # columns order
+        vs["ColumnsOrder"] = self.table.getColumnsOrder()
 
         return vs
 
