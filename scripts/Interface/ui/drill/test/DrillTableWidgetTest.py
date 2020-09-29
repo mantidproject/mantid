@@ -207,6 +207,23 @@ class DrillTableWidgetTest(unittest.TestCase):
         hidden = self.table.getHiddenColumns()
         self.assertEqual(hidden, ["test1", "test2"])
 
+    def test_setColumnsOrder(self):
+        self.table.columns = ["test1", "test2", "test3"]
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        mHeader.visualIndex.side_effect = [3, 1, 0]
+        self.table.setColumnsOrder(["test3", "test2", "test1"])
+        calls = [mock.call(3, 0), mock.call(1, 1), mock.call(0, 2)]
+        mHeader.moveSection.assert_has_calls(calls)
+
+    def test_getColumnsOrder(self):
+        self.table.columns = ["test1", "test2", "test3"]
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        mHeader.visualIndex.side_effect = [2, 1, 0]
+        self.assertEqual(self.table.getColumnsOrder(),
+                         ["test3", "test2", "test1"])
+
 
 if __name__ == "__main__":
     unittest.main()

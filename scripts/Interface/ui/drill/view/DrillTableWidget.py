@@ -406,6 +406,36 @@ class DrillTableWidget(QTableWidget):
                 hidden.append(self.columns[i])
         return hidden
 
+    def setColumnsOrder(self, columns):
+        """
+        Set the columns order by giving a list of labels.
+
+        Args:
+            columns (list(str)): list of labels whose table should follow the
+                                 order
+        """
+        header = self.horizontalHeader()
+        for c in columns:
+            if c not in self.columns:
+                continue
+            indexFrom = header.visualIndex(self.columns.index(c))
+            indexTo = columns.index(c)
+            header.moveSection(indexFrom, indexTo)
+
+    def getColumnsOrder(self):
+        """
+        Get the columns order as a list of labels.
+
+        Returns:
+            list(str): list of columns labels
+        """
+        columns = [""] * len(self.columns)
+        header = self.horizontalHeader()
+        for i in range(len(self.columns)):
+            index = header.visualIndex(i)
+            columns[index] = self.columns[i]
+        return columns
+
     def setDisabled(self, state):
         """
         Override QTableWidget::setDisabled. This methods disables only the table
