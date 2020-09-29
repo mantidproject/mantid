@@ -46,10 +46,9 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        if (self.getProperty('Filenames').isDefault
-                and self.getProperty('InputWorkspace').isDefault):
+        if self.getProperty('Filenames').isDefault and self.getProperty('InputWorkspace').isDefault:
             issues['Filenames'] = 'Either a list of file names containing YIG scan or the workspace with the loaded scan ' \
-                                  'is required for calibration. If both are provided, the Workspace takes precedence'
+                                  'is required for calibration. If both are provided, the InputWorkspace takes precedence.'
             issues['InputWorkspace'] = issues['Filenames']
 
         return issues
