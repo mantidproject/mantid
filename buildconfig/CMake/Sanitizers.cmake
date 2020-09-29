@@ -31,14 +31,11 @@ if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
         if(${USE_SANITIZERS_LOWER} MATCHES "address")
             add_compile_options($<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:/fsanitize=address>)
             add_link_options("$<IF:$<CONFIG:Debug>,/wholearchive:clang_rt.asan_dbg_dynamic-x86_64.lib;/wholearchive:clang_rt.asan_dbg_dynamic_runtime_thunk-x86_64.lib;/wholearchive:vcasand.lib,/wholearchive:clang_rt.asan_dynamic-x86_64.lib;/wholearchive:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib;/wholearchive:vcasan.lib>")
-            # Re additional switches enabled below on gcc:
-            # Equivalent of -fno-omit-frame-pointer in MSVC is /Oy- but documentation says it's not available for x64
-            # Don't think there is a VS equivalent of -fno-optimize-sibling-calls
         else()
             message(FATAL_ERROR "MSVC only supports address sanitizer")
         endif()
     else()
-        # Check and warn if we are not in a mode without debug symbols)
+        # Check and warn if we are not in a mode without debug symbols
         string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type_lower)
         if("${build_type_lower}" MATCHES "release" OR "${build_type_lower}" MATCHES "minsizerel" )
             message(WARNING "You are running address sanitizers without debug information, try RelWithDebInfo")
