@@ -234,9 +234,11 @@ Spectra &Spectra::operator=(Spectra &&vec) {
   return *this;
 }
 
-bool Spectra::empty() const { return m_vec.empty(); }
+[[nodiscard]] bool Spectra::empty() const { return m_vec.empty(); }
 
-FitDomainIndex Spectra::size() const { return FitDomainIndex{m_vec.size()}; }
+FitDomainIndex Spectra::size() const {
+  return FitDomainIndex{m_vec.size()};
+}
 
 std::string Spectra::getString() const {
   if (empty())
@@ -348,7 +350,7 @@ Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const {
 
 const Spectra &IndirectFitData::spectra() const { return m_spectra; }
 
-Spectra IndirectFitData::getMutableSpectra() { return m_spectra; }
+Spectra &IndirectFitData::getMutableSpectra() { return m_spectra; }
 
 WorkspaceIndex IndirectFitData::getSpectrum(FitDomainIndex index) const {
   return m_spectra[index];
