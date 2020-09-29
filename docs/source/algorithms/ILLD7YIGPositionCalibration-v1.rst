@@ -7,6 +7,7 @@
 
 .. properties::
 
+
 Description
 -----------
 
@@ -25,7 +26,8 @@ The provided YIG d-spacing values are loaded from an XML list. The peak position
 
 YIG peaks in the detector's scan are fitted separately using a Gaussian distribution. The fitting results are stored in a new workspace, where the Y axis contains the fitted peak centres and the X axis the calculated peak positions.
 
-The workspace containing the peak fitting results is then fitted using a `Multidomain` function of the form: `2theta_{fit} = m * (2.0 * asin(wavelength / 2d) + pixel_offset + bank_offset)`, where m is the bank slope, pixel_offset is the relative offset to the initial assumption of the position inside the detector bank, and bank_offset is the offset of the entire bank. This function allows to extract the information about the wavelength, detector bank slopes and offsets, and the distribution of detector offsets.
+
+The workspace containing the peak fitting results is then fitted using a `Multidomain` function of the form: $2theta_{fit} = m * (2.0 * asin(wavelength / 2d) + pixel_offset + bank_offset)$, where m is the bank slope, pixel_offset is the relative offset to the initial assumption of the position inside the detector bank, and bank_offset is the offset of the entire bank. This function allows to extract the information about the wavelength, detector bank slopes and offsets, and the distribution of detector offsets.
 
 
 Usage
