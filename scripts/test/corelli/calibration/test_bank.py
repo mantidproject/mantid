@@ -44,7 +44,7 @@ class TestBank(unittest.TestCase):
                           '124023_bank10', '124023_bank14', '124023_bank15', '124023_banks_14_15'):
             workspace = 'CORELLI_' + bank_case
             # DEBUG
-            #data_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
+            data_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
             LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
             cls.cases[bank_case] = workspace
 
@@ -101,7 +101,6 @@ class TestBank(unittest.TestCase):
         DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
 
     def test_criterium_peak_pixel_position(self):
-
         # control bank, it has no problems
         fit_bank(self.cases['123455_bank20'], 'bank20')
         expected = np.ones(16, dtype=bool)
@@ -127,7 +126,7 @@ class TestBank(unittest.TestCase):
         expected = np.array([1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1], dtype=bool)
         assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
 
-        # one spurious shadow in tube14, not enought to flag a discrepancy
+        # one spurious shadow in tube14, not enough to flag a discrepancy
         fit_bank(self.cases['124023_bank15'], 'bank15')
         expected = np.ones(16, dtype=bool)
         assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
@@ -138,8 +137,9 @@ class TestBank(unittest.TestCase):
         assert AnalysisDataService.doesExist('summary')
         workspace = mtd['summary']
         axis = workspace.getAxis(1)
-        assert [axis.label(workspace_index) for workspace_index in (0, 1)] == ['deviation', 'Z-score']
-        self.assertAlmostEqual(max(workspace.readY(1)), 1.728, delta=0.001)
+        assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ['success', 'deviation', 'Z-score']
+        self.assertEqual(min(workspace.readY(0)), 1.0)
+        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)
 
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'summary'])  # a bit of clean-up
 
@@ -220,6 +220,7 @@ class TestBank(unittest.TestCase):
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'masked_tubes'])  # a bit of clean-up
 
     def test_calibrate_bank(self):
+
         # control bank, it has no problems. Thus, no mask to be created
         calibration, mask = calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table')
         assert calibration.rowCount() == 256 * 16
@@ -238,7 +239,17 @@ class TestBank(unittest.TestCase):
         assert mask.columnCount() == 1
         assert AnalysisDataService.doesExist('MaskTable')
 
-        DeleteWorkspaces(['calibration_table', 'MaskTable'])  # a bit of clean-up
+        # check for the summary workspace
+        calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table',
+                       criterium_kwargs=dict(summary='summary'))
+        assert AnalysisDataService.doesExist('summary')
+        workspace = mtd['summary']
+        axis = workspace.getAxis(1)
+        assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ['success', 'deviation', 'Z-score']
+        self.assertEqual(min(workspace.readY(0)), 1.0)
+        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)
+
+        DeleteWorkspaces(['calibration_table', 'MaskTable', 'summary'])  # a bit of clean-up
 
     def test_calibrate_banks(self):
         calibrations, masks = calibrate_banks(self.cases['124023_banks_14_15'], '14-15')
@@ -247,6 +258,10 @@ class TestBank(unittest.TestCase):
         assert mtd['calib14'].rowCount() == 256 * (16 - 3)
         assert mtd['mask14'].rowCount() == 256 * 3
         assert mtd['calib15'].rowCount() == 256 * 16
+        self.assertEqual(mtd['acceptance14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
+        self.assertEqual(mtd['acceptance15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+        DeleteWorkspaces(['calibrations', 'masks', 'acceptances'])
 
 
 if __name__ == "__main__":
