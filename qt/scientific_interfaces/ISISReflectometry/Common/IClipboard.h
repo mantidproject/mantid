@@ -15,8 +15,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IClipboard {
+class DLLExport IClipboard {
 public:
+  virtual ~IClipboard(){};
   virtual bool isInitialized() const = 0;
   virtual int numberOfRoots() const = 0;
   virtual bool isGroupLocation(int rootIndex) const = 0;

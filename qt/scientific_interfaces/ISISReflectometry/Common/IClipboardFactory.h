@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../../ISISReflectometry/Common/IClipboard.h"
 #include "DllConfig.h"
+#include "IClipboard.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IClipboardFactory {
+class DLLExport IClipboardFactory {
 public:
   virtual ~IClipboardFactory(){};
   virtual IClipboard *createClipboard(

@@ -6,22 +6,21 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../../ISISReflectometry/Common/Clipboard.h"
-#include "../../ISISReflectometry/Common/IClipboardFactory.h"
+#include "Clipboard.h"
 #include "DllConfig.h"
+#include "IClipboardFactory.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL ClipboardFactory
-    : public IClipboardFactory {
+class DLLExport ClipboardFactory : public IClipboardFactory {
 public:
   IClipboard *createClipboard(
       boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
           subtrees,
       boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
-          subtreeRoots) const override {
+          subtreeRoots) const {
     return new Clipboard(subtrees, subtreeRoots);
   }
   IClipboard *createClipboard() const override { return new Clipboard(); }

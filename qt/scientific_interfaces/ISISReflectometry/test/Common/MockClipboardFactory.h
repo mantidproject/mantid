@@ -14,8 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL MockClipboardFactory
-    : public IClipboardFactory {
+class DLLExport MockClipboardFactory : public IClipboardFactory {
 public:
   IClipboard *createClipboard() const override { return new MockClipboard(); }
 };
