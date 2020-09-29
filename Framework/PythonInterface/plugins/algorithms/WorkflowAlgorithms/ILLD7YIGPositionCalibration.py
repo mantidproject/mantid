@@ -108,7 +108,8 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                           defaultValue='d7_{}.xml'.format(date.today())),
                              doc="The output YIG calibration Instrument Parameter File.")
 
-        self.declareProperty(ITableWorkspaceProperty('FitOutputWorkspace', '',
+        self.declareProperty(ITableWorkspaceProperty(name='FitOutputWorkspace',
+                                                     defaultValue='fit_output',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc="The table workspace name that will be used to store all of the calibration parameters.")
@@ -116,6 +117,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=5)
         # load the chosen YIG scan
+        fit_output_name = self.getPropertyValue('FitOutputWorkspace')
         if self.getProperty('InputWorkspace').isDefault:
             intensityWS = self._get_scan_data()
         else:
@@ -295,6 +297,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         returns a workspace with fitted peak positions
         on the Y axis and the expected positions on the X axis"""
         max_n_peaks = len(max(yig_peaks, key=len))
+        conjoined_peak_fit_name = 'conjoined_peak_fit_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
         ws_names = []
         for pixel_no in range(ws.getNumberHistograms()):
             # create the needed columns in the output workspace
@@ -379,6 +382,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         gradient for each bank and offset value for each
         pixel."""
 
+        fit_output_name = self.getPropertyValue('FitOutputWorkspace')
         # need to set up a function for each pixel with proper ties
         function_list = []
         ties_lambda_list = []
