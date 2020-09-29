@@ -10,7 +10,8 @@ from numpy.testing import assert_allclose
 from os import path
 import unittest
 
-from corelli.calibration.utils import bank_numbers, calculate_tube_calibration, load_banks, wire_positions
+from corelli.calibration.utils import (bank_numbers, calculate_tube_calibration, calibrate_instrument, load_banks,
+                                       wire_positions)
 from mantid import AnalysisDataService, config
 from mantid.simpleapi import DeleteWorkspaces, LoadEmptyInstrument
 
@@ -120,6 +121,12 @@ class TestUtils(unittest.TestCase):
         table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
         calibrated_y = np.array([v.Y() for v in table.column(1)])
         assert_allclose(calibrated_y, self.calibrated_y, atol=1e-3)
+
+    def test_calibrate_instrument(self) -> None:
+        table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
+        calibrate_instrument(self.workspace, table)
+        assert AnalysisDataService.doesExist('uncalibrated_calibrated')
+        DeleteWorkspaces(['uncalibrated_calibrated', str(table)])
 
     def tearDown(self) -> None:
         to_delete = [w for w in [self.workspace, self.table] if AnalysisDataService.doesExist(w)]

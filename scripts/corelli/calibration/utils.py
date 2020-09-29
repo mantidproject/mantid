@@ -7,16 +7,20 @@
 
 from os import path
 import numpy as np
-from typing import List, Union
+from typing import List, Optional, Union
 
 # imports from Mantid
-from mantid.api import mtd
+from mantid.api import AnalysisDataService, mtd
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import Integration, LoadEventNexus, LoadNexusProcessed
+from mantid.simpleapi import ApplyCalibration, CloneWorkspace, Integration, LoadEventNexus, LoadNexusProcessed
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
-InputWorkspace = Union[str, Workspace2D]  # type alias
+# Type aliases
+InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
+WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
 
 PIXELS_PER_TUBE = 256
 TUBES_IN_BANK = 16
@@ -81,7 +85,7 @@ def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Wor
     return mtd[output_workspace]
 
 
-def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow_height: float = 1000,
+def calculate_tube_calibration(workspace: WorkspaceTypes, tube_name: str, shadow_height: float = 1000,
                                shadow_width: float = 4, fit_domain: float = 7) -> TableWorkspace:
     r"""
     Calibration table for one tube of CORELLI
@@ -119,3 +123,29 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
     calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions, peaks_form, fitPar=fit_par,
                                           outputPeak=True)
     return calibration_table
+
+
+def calibrate_instrument(workspace: WorkspaceTypes, calibration_table: InputTable,
+                         output_workspace: Optional[str] = None, show_instrument: bool = False) -> Workspace2D:
+    r"""
+    Calibrate an instrument, and show it if requested
+
+    :param workspace:
+    :param calibration_table:
+    :param output_workspace:
+    :param show_instrument:
+    :return:
+    """
+    assert AnalysisDataService.doesExist(str(workspace)), f'No worksapce {str(workspace)} found'
+    assert AnalysisDataService.doesExist(str(calibration_table)), f'No table {str(calibration_table)} found'
+    if output_workspace is None:
+        output_workspace = str(workspace) + '_calibrated'
+
+    CloneWorkspace(InputWorkspace=workspace, OutputWorkspace=output_workspace)
+    ApplyCalibration(Workspace=output_workspace, CalibrationTable=calibration_table)
+
+    if show_instrument is True:
+        instrument_presenter = QAppThreadCall(InstrumentViewPresenter)(mtd[output_workspace])
+        QAppThreadCall(instrument_presenter.show_view)()
+
+    return mtd[output_workspace]
