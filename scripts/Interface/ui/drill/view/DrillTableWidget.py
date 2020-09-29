@@ -379,6 +379,33 @@ class DrillTableWidget(QTableWidget):
                 folded.append(self.columns[i])
         return folded
 
+    def setHiddenColumns(self, columns):
+        """
+        Hide specific columns.
+
+        Args:
+            columns(list(str)): list of column labels
+        """
+        header = self.horizontalHeader()
+        for i in range(len(self.columns)):
+            name = self.columns[i]
+            if name in columns:
+                header.hideSection(i)
+
+    def getHiddenColumns(self):
+        """
+        Get the list of hidden columns.
+
+        Returns:
+            list(str): list of column labels
+        """
+        header = self.horizontalHeader()
+        hidden = list()
+        for i in range(len(self.columns)):
+            if header.isSectionHidden(i):
+                hidden.append(self.columns[i])
+        return hidden
+
     def setDisabled(self, state):
         """
         Override QTableWidget::setDisabled. This methods disables only the table

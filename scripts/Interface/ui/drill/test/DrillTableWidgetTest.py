@@ -190,5 +190,23 @@ class DrillTableWidgetTest(unittest.TestCase):
         folded = self.table.getFoldedColumns()
         self.assertEqual(folded, ["test1", "test2", "test3"])
 
+    def test_setHiddenColumns(self):
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        self.table.columns = ["test1", "test2", "test3"]
+        self.table.setHiddenColumns(["test"])
+        mHeader.hideSection.assert_not_called()
+        self.table.setHiddenColumns(["test1"])
+        mHeader.hideSection.assert_called_with(0)
+
+    def test_getHiddenColumns(self):
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        mHeader.isSectionHidden.return_value = True
+        self.table.columns = ["test1", "test2"]
+        hidden = self.table.getHiddenColumns()
+        self.assertEqual(hidden, ["test1", "test2"])
+
+
 if __name__ == "__main__":
     unittest.main()
