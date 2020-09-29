@@ -257,25 +257,28 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         used for further fitting. Removes all peaks that would require scattering
         angle above 180 degrees and returns the peak positions in degrees"""
         yig2theta = self._remove_unwanted_yig_peaks(yig_d_spacing)
+        lower_mask_range = self._beamMask1 - self._peakWidth * 2
+        upper_mask_range = self._beamMask2 + self._peakWidth * 2
         peak_list = []
+
         for pixel_no in range(mtd[ws].getNumberHistograms()):
             detector_2theta = mtd[ws].readX(pixel_no)
             intensity = mtd[ws].readY(pixel_no)
-            min2Theta = detector_2theta[0]
-            max2Theta = detector_2theta[-1]
+            min2Theta = detector_2theta[0] - self._peakWidth * 2
+            max2Theta = detector_2theta[-1] + self._peakWidth * 2
             single_spectrum_peaks = []
             for peak in yig2theta:
-                if ( ((peak - self._peakWidth*2) > min2Theta ) and ( (peak + self._peakWidth*2) < max2Theta)
-                     and (peak+self._peakWidth*2 < self._beamMask1 or peak-self._peakWidth*2 > self._beamMask2)):
+                if min2Theta < peak < max2Theta and not lower_mask_range < peak < upper_mask_range:
                     peak_intensity = 0
                     for bin_no in range(len(detector_2theta)):
                         twoTheta = detector_2theta[bin_no]
-                        if (abs(twoTheta-peak) < 1): # within 1 degree from the expected peak position
+                        if abs(twoTheta - peak) < 1: # within 1 degree from the expected peak position
                             # scan for the local maximum:
                             peak_intensity = intensity[bin_no]
+                            min_index = bin_no-int(self._minDistance / self._scanStepSize)
+                            max_index = bin_no+int(self._minDistance / self._scanStepSize)
                             index_maximum = bin_no
-                            for index in range(bin_no-int((self._minDistance)/self._scanStepSize),
-                                               bin_no+int((self._minDistance)/self._scanStepSize), 1):
+                            for index in range(min_index, max_index):
                                 if intensity[index] > peak_intensity:
                                     peak_intensity = intensity[index]
                                     index_maximum = index
