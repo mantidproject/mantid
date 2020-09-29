@@ -805,14 +805,15 @@ class DrillView(QMainWindow):
             visualSettings (dict): dictionnary containing some visual
                                    parameters that the view can deal with
         """
-        # folding state
+        # folded columns
         if ("FoldedColumns" in visualSettings):
-            f = list()
-            for c in self.columns:
-                if ((c in visualSettings["FoldedColumns"])
-                        and (visualSettings["FoldedColumns"][c])):
-                    f.append(c)
-            self.table.setFoldedColumns(f)
+            if isinstance(visualSettings["FoldedColumns"], list):
+                self.table.setFoldedColumns(visualSettings["FoldedColumns"])
+            else:
+                self.table.setFoldedColumns(
+                        [c for c in visualSettings["FoldedColumns"]
+                            if visualSettings["FoldedColumns"][c]]
+                        )
 
     def getVisualSettings(self):
         """
@@ -824,12 +825,9 @@ class DrillView(QMainWindow):
             dict: visual settings dictionnay
         """
         vs = dict()
-        # folding state
-        vs["FoldedColumns"] = dict()
-        folded = self.table.getFoldedColumns()
-        for c in self.columns:
-            if c in folded:
-             vs["FoldedColumns"][c] = True
+
+        # folded columns
+        vs["FoldedColumns"] = self.table.getFoldedColumns()
 
         return vs
 
