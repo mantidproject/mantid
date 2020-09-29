@@ -47,10 +47,10 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         if (self.getProperty('Filenames').isDefault
-                and self.getProperty('ScanWorkspace').isDefault):
-            issues['Filenames'] = 'Either a list of filenames containing YIG scan \
-                or the workspace with the loaded scan is required for calibration.'
-            issues['ScanWorkspace'] = issues['Filenames']
+                and self.getProperty('InputWorkspace').isDefault):
+            issues['Filenames'] = 'Either a list of file names containing YIG scan or the workspace with the loaded scan ' \
+                                  'is required for calibration. If both are provided, the Workspace takes precedence'
+            issues['InputWorkspace'] = issues['Filenames']
 
         return issues
 
@@ -59,7 +59,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                                   action=FileAction.OptionalLoad),
                              doc="The file names with a single YIG scan.")
 
-        self.declareProperty(MatrixWorkspaceProperty('ScanWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the workspace containing the entire YIG scan.')
@@ -116,10 +116,10 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=5)
         # load the chosen YIG scan
-        if self.getProperty('ScanWorkspace').isDefault:
+        if self.getProperty('InputWorkspace').isDefault:
             intensityWS = self._get_scan_data()
         else:
-            intensityWS = self.getProperty('ScanWorkspace').value
+            intensityWS = self.getProperty('InputWorkspace').value
         progress.report()
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getPropertyValue("BankOffsets").split(',')
