@@ -164,7 +164,7 @@ double DetectorInfo::twoTheta(const size_t index) const {
   } catch (const std::runtime_error &e) {
     Kernel::Logger g_log("DetectorInfo");
     g_log.warning(e.what());
-    return std::nan("");
+    return std::numeric_limits<double>::quiet_NaN();
   }
 }
 
@@ -188,7 +188,7 @@ double DetectorInfo::twoTheta(const std::pair<size_t, size_t> &index) const {
   } catch (const std::runtime_error &e) {
     Kernel::Logger g_log("DetectorInfo");
     g_log.warning(e.what());
-    return std::nan("");
+    return std::numeric_limits<double>::quiet_NaN();
   }
 }
 
@@ -216,6 +216,7 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
   } catch (const std::runtime_error &e) {
     Kernel::Logger g_log("DetectorInfo");
     g_log.warning(e.what());
+    return std::numeric_limits<double>::quiet_NaN();
   }
 
   const auto cross = beamLine.cross_prod(sampleDetVec);
@@ -251,6 +252,7 @@ DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
   } catch (const std::runtime_error &e) {
     Kernel::Logger g_log("DetectorInfo");
     g_log.warning(e.what());
+    return std::numeric_limits<double>::quiet_NaN();
   }
 
   const auto cross = beamLine.cross_prod(sampleDetVec);
