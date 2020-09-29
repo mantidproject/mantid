@@ -19,33 +19,7 @@ from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateW
 from Calibration import tube
 from Calibration.tube_spec import TubeSpec
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
-from corelli.calibration.utils import bank_numbers
-
-
-PIXELS_PER_TUBE = 256
-TUBES_IN_BANK = 16
-
-
-def wire_positions(units: str = 'pixels') -> np.ndarray:
-    r"""
-    Vertical positions of the standar set of 16 wires. It's assumed that the center of the 16 wires
-    coincides with the center of a tube.
-
-    :param units: either one of 'pixels' or 'meters'. If pixels, the bottom of the tube correspons
-    to pixel 1. If 'meters', the center of the tube corresponds to the origin of coordinates.
-
-    :raises: AssertionError when incorrect units are passed
-    """
-    units_valid = ('meters', 'pixels')
-    assert units in units_valid, f'units {units} must be one of {units_valid}'
-    wire_gap = (2 * 25.4 + 2) / 1000  # gap along the Y-coordinate between consecutive wire centers
-    # the center of the 16 wires is aligned with the center of the tube, set to Y == 0
-    wire_meters_positions = np.arange(-7.5 * wire_gap, 8.5 * wire_gap, wire_gap)
-    if units == 'meters':
-        return wire_meters_positions
-    tube_length, pixels_per_tube = 0.9001, 256
-    wire_pixel_positions = (pixels_per_tube / tube_length) * wire_meters_positions + pixels_per_tube / 2
-    return wire_pixel_positions
+from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, TUBES_IN_BANK, wire_positions
 
 
 WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank

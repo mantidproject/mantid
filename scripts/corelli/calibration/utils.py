@@ -18,9 +18,31 @@ from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
 InputWorkspace = Union[str, Workspace2D]  # type alias
 
-TUBE_LENGTH = 0.9001  # in meters
 PIXELS_PER_TUBE = 256
+TUBES_IN_BANK = 16
+TUBE_LENGTH = 0.9001  # in meters
 WIRE_GAP = 52.8 / 1000  # in meters, distance between consecutive wires
+
+
+def wire_positions(units: str = 'pixels') -> np.ndarray:
+    r"""
+    Vertical positions of the standar set of 16 wires. It's assumed that the center of the 16 wires
+    coincides with the center of a tube.
+
+    :param units: either one of 'pixels' or 'meters'. If pixels, the bottom of the tube correspons
+    to pixel 1. If 'meters', the center of the tube corresponds to the origin of coordinates.
+
+    :raises: AssertionError when incorrect units are passed
+    """
+    units_valid = ('meters', 'pixels')
+    assert units in units_valid, f'units {units} must be one of {units_valid}'
+    wire_gap = (2 * 25.4 + 2) / 1000  # gap along the Y-coordinate between consecutive wire centers
+    # the center of the 16 wires is aligned with the center of the tube, set to Y == 0
+    wire_meters_positions = np.arange(-7.5 * wire_gap, 8.5 * wire_gap, wire_gap)
+    if units == 'meters':
+        return wire_meters_positions
+    wire_pixel_positions = (PIXELS_PER_TUBE / TUBE_LENGTH) * wire_meters_positions + PIXELS_PER_TUBE / 2
+    return wire_pixel_positions
 
 
 def bank_numbers(bank_selection: str) -> List[str]:
@@ -69,7 +91,6 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
     :param shadow_height: estimated dip in the background intensity.
     :param shadow_width: estimated width of the shadow cast by the wire, in pixel units
     :param fit_domain: estimated range, in pixel units, over which to carry out the fit.
-
     :return: table containing detector ID and position vector
     """
     message = f'Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle'
@@ -95,4 +116,6 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
     wire_pixel_positions = (PIXELS_PER_TUBE / TUBE_LENGTH) * wire_positions + PIXELS_PER_TUBE / 2
     fit_par = TubeCalibFitParams(wire_pixel_positions, height=peak_height, width=peak_width, margin=fit_domain)
     fit_par.setAutomatic(True)
-    return tube.calibrate(workspace, tube_name, wire_positions, peaks_form, fitPar=fit_par)
+    calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions, peaks_form, fitPar=fit_par,
+                                          outputPeak=True)
+    return calibration_table
