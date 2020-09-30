@@ -418,7 +418,6 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
       else
         twoTheta = spectrumInfo.twoTheta(wsIndex);
     } catch (const std::runtime_error &e) {
-      Kernel::Logger g_log("ConvertUnits");
       g_log.warning(e.what());
       twoTheta = std::numeric_limits<double>::quiet_NaN();
     }
