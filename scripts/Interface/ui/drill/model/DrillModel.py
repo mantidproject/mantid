@@ -383,7 +383,7 @@ class DrillModel(QObject):
             if (isinstance(p, BoolPropertyWithValue)):
                 self.settings[s] = p.value
             else:
-                self.settings[s] = p.valueAsPrettyStr()
+                self.settings[s] = p.getDefault
 
     def checkParameter(self, param, value, sample=-1):
         """
