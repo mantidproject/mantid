@@ -538,10 +538,13 @@ Always returns 0 if the Matrix have different sizes
     for (size_t i = 0; i < m_numRows; i++)
       for (size_t j = 0; j < m_numColumns; j++) {
         const T diff = (m_rawData[i][j] - A.m_rawData[i][j]);
-        // < and > return false if either argument is a NaN
-        if (!(fabs(diff) < maxDiff))
-          maxDiff = fabs(diff);
-        if (!(fabs(m_rawData[i][j]) < maxS))
+        if (std::isnan(static_cast<double>(diff))) {
+          maxDiff = std::numeric_limits<T>::max();
+        } else {
+          if (fabs(diff) > maxDiff)
+            maxDiff = fabs(diff);
+        }
+        if (fabs(m_rawData[i][j]) > maxS)
           maxS = fabs(m_rawData[i][j]);
       }
     if (maxDiff < Tolerance)
