@@ -325,12 +325,10 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                      Output='out')
                     RenameWorkspace(InputWorkspace='out_Workspace', OutputWorkspace=ws_name)
                     param_table = fit_output.OutputParameters
-                    try:
-                        param_table
-                        rowCount = param_table.rowCount()
-                    except NameError:
-                        rowCount = 0
-                    for row_no in range(rowCount):
+                    row_count = 0
+                    if param_table:
+                        row_count = param_table.rowCount()
+                    for row_no in range(row_count):
                         row_data = param_table.row(row_no)
                         if 'A0' in row_data['Name']:
                             background = row_data['Value']
@@ -341,26 +339,20 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                 results_y[peak_no] = row_data['Value']
                                 results_e[peak_no] = row_data['Error']
                     peak_no += 1
+
+            CreateWorkspace(OutputWorkspace='ws',
+                            DataX=results_x,
+                            DataY=results_y,
+                            DataE=results_e,
+                            UnitX='degrees',
+                            NSpec=1)
             try:
-                mtd[conjoined_peak_fit_name]
-            except KeyError:
-                CreateWorkspace(OutputWorkspace=conjoined_peak_fit_name,
-                                DataX=results_x,
-                                DataY=results_y,
-                                DataE=results_e,
-                                UnitX='degrees',
-                                NSpec=1)
-            else:
-                CreateWorkspace(OutputWorkspace='ws',
-                                DataX=results_x,
-                                DataY=results_y,
-                                DataE=results_e,
-                                UnitX='degrees',
-                                NSpec=1)
                 ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name, InputWorkspace2='ws',
                                   CheckOverlapping=False,
                                   YAxisLabel='TwoTheta_fit',
                                   YAxisUnit='degrees')
+            except ValueError:
+                RenameWorkspace(InputWorkspace='ws', OutputWorkspace=conjoined_peak_fit_name)
 
         y_axis = NumericAxis.create(self._D7NumberPixels)
         for pixel_no in range(self._D7NumberPixels):
