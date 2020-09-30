@@ -11,9 +11,8 @@ from os import path
 import unittest
 
 # Mantid imports
-from corelli.calibration.bank import (append_bank_number, calibrate_bank, calibrate_banks,
-                                      criterium_peak_pixel_position, fit_bank, mask_bank, purge_table,
-                                      sufficient_intensity)
+from corelli.calibration.bank import (calibrate_bank, calibrate_banks, criterium_peak_pixel_position, fit_bank,
+                                      mask_bank, purge_table, sufficient_intensity)
 from mantid import AnalysisDataService, config, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
 
@@ -143,28 +142,27 @@ class TestBank(unittest.TestCase):
 
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'summary'])  # a bit of clean-up
 
-
     def test_purge_table(self):
         with self.assertRaises(AssertionError) as exception_info:
-            purge_table('I am not here', 'bank51', 'table', [True, False])
+            purge_table('I am not here', 'table', [True, False])
         assert 'Input workspace I am not here does not exists' in str(exception_info.exception)
 
         with self.assertRaises(AssertionError) as exception_info:
-            purge_table(self.cases['123455_bank20'], 'bank51', 'I am not here', [True, False])
+            purge_table(self.cases['123455_bank20'], 'I am not here', [True, False])
         assert 'Input table I am not here does not exists' in str(exception_info.exception)
 
         # control bank, it has no problems. Thus, no tubes to purge
         fit_bank(self.cases['123455_bank20'], 'bank20')
         tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
         unpurged_row_count = mtd['CalibTable'].rowCount()
-        purge_table(self.cases['123455_bank20'], 'bank20', 'CalibTable', tube_fit_success)
+        purge_table(self.cases['123455_bank20'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count
 
         # tube11 is not working at all. Thus, purge only one tube
         fit_bank(self.cases['124018_bank45'], 'bank45')
         tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
         unpurged_row_count = mtd['CalibTable'].rowCount()
-        purge_table(self.cases['124018_bank45'], 'bank45', 'CalibTable', tube_fit_success)
+        purge_table(self.cases['124018_bank45'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256
         self.assert_missing_tube('CalibTable', 11)
 
@@ -172,7 +170,7 @@ class TestBank(unittest.TestCase):
         fit_bank(self.cases['124023_bank14'], 'bank14')
         tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
         unpurged_row_count = mtd['CalibTable'].rowCount()
-        purge_table(self.cases['124023_bank14'], 'bank14', 'CalibTable', tube_fit_success)
+        purge_table(self.cases['124023_bank14'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256 * 3
         for tube_number in (3, 8, 13):
             self.assert_missing_tube('CalibTable', tube_number)

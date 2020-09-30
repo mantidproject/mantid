@@ -137,7 +137,7 @@ def calibrate_instrument(workspace: WorkspaceTypes, calibration_table: InputTabl
 
     :param workspace: input Workspace2D containing total neutron counts per pixel
     :param calibration_table: a TableWorskpace containing one column for detector ID and one column
-    for its XYZ coordinates, in meters
+    for its calibrated XYZ coordinates, in meters
     :param output_workspace: name of the output workspace containing calibrated detectors
     :param show_instrument: open the instrument view for `output_workspace`
 
