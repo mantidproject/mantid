@@ -376,7 +376,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         return conjoined_peak_fit_name, single_peak_fit_results_name
 
     def _fit_detector_positions(self, ws):
-        """Fits lambda = 2 * d * sin (m * 2theta + offset),
+        """Fits lambda = 2 * d * sin (m * 2theta + detector_offset + bank_offset),
         where lambda, m and offset are parameters,
         to the peak distribution.
         Returns parameter table with fitted wavelength,
