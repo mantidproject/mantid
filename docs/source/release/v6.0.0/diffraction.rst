@@ -12,6 +12,11 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+Bugfixes
+########
+
+- Dummy detectors in polaris workspaces no longer prevent unit conversion.
+
 Engineering Diffraction
 -----------------------
 

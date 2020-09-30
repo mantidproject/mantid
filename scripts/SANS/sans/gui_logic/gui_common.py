@@ -64,6 +64,24 @@ GENERIC_SETTINGS = "Mantid/ISISSANS"
 JSON_SUFFIX = ".json"
 
 
+def meter_2_millimeter(num):
+    '''
+    Converts from m to mm
+    @param float in m
+    @returns float in mm
+    '''
+    return num*1000.
+
+
+def millimeter_2_meter(num):
+    '''
+    Converts from mm to m
+    @param float in mm
+    @returns float in m
+    '''
+    return num/1000.
+
+
 def get_detector_strings_for_gui(instrument=None):
     if instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ:
         return [LAB_STRINGS[instrument], HAB_STRINGS[instrument]]

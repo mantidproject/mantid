@@ -19,10 +19,11 @@ import matplotlib.pyplot as plt
 # local imports
 # register mantid projection
 from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.simpleapi import CreateMDHistoWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from mantid.plots.plotfunctions import (figure_title,
-                                        manage_workspace_names, plot)
+from mantid.plots.plotfunctions import (figure_title, manage_workspace_names,
+                                        plot, plot_md_histo_ws)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -42,11 +43,22 @@ def workspace_names_dummy_func(workspaces):
 class FunctionsTest(unittest.TestCase):
 
     _test_ws = None
+    # MD workspace to test
+    _test_md_ws = None
 
     def setUp(self):
         if self._test_ws is None:
             self.__class__._test_ws = WorkspaceFactory.Instance().create(
                 "Workspace2D", NVectors=2, YLength=5, XLength=5)
+        if self._test_md_ws is None:
+            self._test_md_ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,2,1',
+                                                      ErrorInput='1,1,1,1,1,1',
+                                                      Dimensionality=3,
+                                                      Extents='-1,1,-1,1,0.5,6.5',
+                                                      NumberOfBins='1,1,6',
+                                                      Names='x,y,|Q|',
+                                                      Units='mm,km,AA^-1',
+                                                      OutputWorkspace='test_plot_md_from_names_ws')
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
@@ -188,6 +200,17 @@ class FunctionsTest(unittest.TestCase):
                  if isinstance(collection, matplotlib.collections.PolyCollection)]
 
         self.assertEqual(len(fills), 3)
+
+    def test_plot_1d_md(self):
+        """Test to plot 1D IMDHistoWorkspace
+        """
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_md_ws
+        plot_md_histo_ws([ws], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual(len(ax.lines), 2, msg=f'With overplot on an existing fig, there shall be 2 lines,'
+                                               f'but not {len(ax.lines)} lines.')
 
     # ------------- Failure tests -------------
     def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):

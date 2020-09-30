@@ -14,13 +14,13 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import SeqFittingTabPresenter
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from qtpy import QtWidgets
+from qtpy.QtWidgets import QApplication
 
 
 def wait_for_thread(thread_model):
     if thread_model:
         thread_model._thread.wait()
-        QtWidgets.QApplication.instance().processEvents()
+        QApplication.sendPostedEvents()
 
 
 @start_qapplication

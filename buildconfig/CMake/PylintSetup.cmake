@@ -27,13 +27,14 @@ if ( PYLINT_FOUND )
   set ( PYLINT_INCLUDES
         Framework/PythonInterface/plugins
         scripts
-        Testing/SystemTests/tests/analysis
+        Testing/SystemTests/tests/framework
+        Testing/SystemTests/tests/qt
         tools
         docs/sphinxext/mantiddoc
   )
   set ( PYLINT_EXCLUDES
         scripts/test
-        Testing/SystemTests/tests/analysis/reference
+        Testing/SystemTests/tests/framework/reference
   )
 
   set ( PYLINT_OUTPUT_DIR "" CACHE STRING "Directory used to write the output from each pyint check." )

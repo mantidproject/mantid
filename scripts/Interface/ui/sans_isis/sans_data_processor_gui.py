@@ -987,6 +987,22 @@ class SANSDataProcessorGui(QMainWindow,
     # ==================================================================================================================
     # ==================================================================================================================
 
+    @property
+    def user_file(self):
+        return self.user_file_line_edit.text()
+
+    @user_file.setter
+    def user_file(self, val):
+        self.user_file_line_edit.setText(val)
+
+    @property
+    def batch_file(self):
+        return self.batch_line_edit.text()
+
+    @batch_file.setter
+    def batch_file(self, val):
+        self.batch_line_edit.setText(val)
+
     # -----------------------------------------------------------------
     # Save Options
     # -----------------------------------------------------------------

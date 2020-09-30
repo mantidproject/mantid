@@ -1170,6 +1170,19 @@ public:
     TS_ASSERT_EQUALS(outQ->isDistribution(), true);
   }
 
+  void test_subtract_background_sum_in_q() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmForBackgroundSubtraction(alg, m_multiDetectorWS);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS,
+                          {"ReflectometryBackgroundSubtraction", "ConvertUnits",
+                           "CropWorkspace", "ConvertUnits"});
+  }
+
 private:
   // Do standard algorithm setup
   void setupAlgorithm(ReflectometryReductionOne2 &alg,

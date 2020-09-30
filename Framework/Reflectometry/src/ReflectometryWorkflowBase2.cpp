@@ -378,14 +378,6 @@ std::map<std::string, std::string>
 ReflectometryWorkflowBase2::validateBackgroundProperties() const {
 
   std::map<std::string, std::string> results;
-
-  const bool subtractBackground = getProperty("SubtractBackground");
-  const std::string summationType = getProperty("SummationType");
-  if (subtractBackground && summationType == "SumInQ") {
-    results["SubtractBackground"] =
-        "Background subtraction is not implemented if summing in Q";
-  }
-
   return results;
 }
 

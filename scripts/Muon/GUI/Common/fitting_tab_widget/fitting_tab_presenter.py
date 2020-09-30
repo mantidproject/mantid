@@ -54,6 +54,7 @@ class FittingTabPresenter(object):
 
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
+        self.instrument_changed_observer = GenericObserver(self.instrument_changed)
 
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
             self.update_view_from_model)
@@ -108,6 +109,7 @@ class FittingTabPresenter(object):
 
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
+        self.view.plot_guess_checkbox.setChecked(False)
         self.update_selected_workspace_list_for_fit()
         self.model.create_ws_fit_function_map()
         if self.selected_data:
@@ -606,6 +608,9 @@ class FittingTabPresenter(object):
                 return [FitPlotInformation(input_workspaces=self.selected_data, fit=fit)]
         else:
             return []
+
+    def instrument_changed(self):
+        self.view.tf_asymmetry_mode = False
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs

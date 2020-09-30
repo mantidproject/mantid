@@ -7,7 +7,7 @@
 from mantid.kernel import Logger
 from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
 from sans.state.AllStates import AllStates
-from SANSUtility import (meter_2_millimeter, millimeter_2_meter)
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
 class BeamCentreModel(object):
