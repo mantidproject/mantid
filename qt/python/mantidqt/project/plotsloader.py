@@ -148,18 +148,12 @@ class PlotsLoader(object):
         if dic["title"] is not None:
             ax.set_title(dic["title"])
 
-        # Flatten the creation args and get just the label from each dict.
-        # These labels are for lines associated with workspaces.
-        ws_line_labels = [
-            line_dict['label'] for sublist in self.creation_args for line_dict in sublist
-        ]
-
         # Update the lines
         line_list = dic["lines"]
         for line in line_list:
-            if line['label'] not in ws_line_labels:
+            if line['lineData']:
                 # Then assume this line was created with ax.axvline or hline.
-                points = line['lineData']['data']
+                points = line['lineData']
                 if points[0][0] == points[1][0]:
                     # The x-coords of each point matches, this is a vertical line
                     ax.axvline(points[0][0], ymin=points[0][1], ymax=points[1][1])

@@ -31,7 +31,7 @@ class PlotsLoaderTest(unittest.TestCase):
         plt.plot = mock.MagicMock()
         mantid.plots.axesfunctions.plot = mock.MagicMock()
         self.dictionary = {u'legend': {u'exists': False},
-                           u'lines': [{u'label': 'wsLine'}],
+                           u'lines': [{u'label': 'wsLine', u'lineData': None}],
                            u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
                                            u'frameOn': True, u'visible': True,
                                            u'xAxisProperties': {u'fontSize': 10.0,
@@ -130,8 +130,8 @@ class PlotsLoaderTest(unittest.TestCase):
         ax.axhline = mock.MagicMock()
 
         dict = self.dictionary
-        dict['lines'].append({'label': 'vline', 'lineData': {'exists': True, 'data': [[1.0, 0.0], [1.0, 1.0]]}})
-        dict['lines'].append({'label': 'hline', 'lineData': {'exists': True, 'data': [[0.0, 1.0], [1.0, 1.0]]}})
+        dict['lines'].append({'label': 'vline', 'lineData': [[1.0, 0.0], [1.0, 1.0]]})
+        dict['lines'].append({'label': 'hline', 'lineData': [[0.0, 1.0], [1.0, 1.0]]})
         self.plots_loader.restore_fig_axes(ax, dict)
 
         self.assertEqual(ax.axvline.call_count, 1)

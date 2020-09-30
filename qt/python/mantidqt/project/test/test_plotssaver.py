@@ -62,7 +62,7 @@ class PlotsSaverTest(unittest.TestCase):
                                              u'markerType': u'None',
                                              u'zOrder': 2},
                             u'errorbars': {u'exists': False},
-                            u'lineData': {u'exists': False}}],
+                            u'lineData': None}],
                 u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0),
                                 u'dynamic': True,
                                 u'frameOn': True,
@@ -154,28 +154,25 @@ class PlotsSaverTest(unittest.TestCase):
 
     def test_line_data_not_saved_for_workspace_line(self):
         # if a line is associated with a workspace, the line data should NOT be saved
-        self.plot_saver.figure_creation_args = [{"function": "plot", "label": "ws1: spec 2"}]
         return_value = self.plot_saver.get_dict_from_line_data(self.fig.axes[0].lines[0])
 
-        self.assertEqual(return_value, {"exists": False})
+        self.assertEqual(return_value, None)
 
     def test_line_data_is_saved_for_axvline(self):
         # if the figure contains an axvline, the line data should be saved
-        self.plot_saver.figure_creation_args = [{"function": "plot", "label": "ws1: spec 2"}]
         self.fig.axes[0].axvline(0, ymin=0, ymax=1)
 
         return_value = self.plot_saver.get_dict_from_line_data(self.fig.axes[0].lines[1])
 
-        self.assertEqual(return_value, {'exists': True, 'data': [[0.0, 0.0], [0.0, 1.0]]})
+        self.assertEqual(return_value, [[0.0, 0.0], [0.0, 1.0]])
 
     def test_line_data_is_saved_for_axhline(self):
         # if the figure contains an axvline, the line data should be saved
-        self.plot_saver.figure_creation_args = [{"function": "plot", "label": "ws1: spec 2"}]
         self.fig.axes[0].axhline(0, xmin=0, xmax=1)
 
         return_value = self.plot_saver.get_dict_from_line_data(self.fig.axes[0].lines[1])
 
-        self.assertEqual(return_value, {'exists': True, 'data': [[0.0, 0.0], [1.0, 0.0]]})
+        self.assertEqual(return_value, [[0.0, 0.0], [1.0, 0.0]])
 
     def test_get_dict_from_axes_properties(self):
         return_value = self.plot_saver.get_dict_from_axes_properties(self.fig.axes[0])

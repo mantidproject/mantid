@@ -220,14 +220,14 @@ class PlotsSaver(object):
         return line_dict
 
     def get_dict_from_line_data(self, line):
-        for arg_dict in self.figure_creation_args:
-            if arg_dict['label'] != line.get_label():
-                return {
-                    "exists": True,
-                    "data": line._xy.tolist()
-                }
-            else:
-                return {"exists": False}
+        # For axhlines and axvlines, save their data.
+        # (any lines with constant x or y will also be reproduced by one of these methods.)
+        if line._xy.shape == (2, 2):
+            points = line._xy.tolist()
+            if points[0][0] == points[1][0] or points[0][1] == points[1][1]:
+                # x1 == x2 or y1 == y2
+                return points
+        return None
 
     def get_dict_for_errorbars(self, line):
         if self.figure_creation_args[0]["function"] == "errorbar":
