@@ -42,8 +42,6 @@ class TestBank(unittest.TestCase):
         for bank_case in ('123454_bank58', '124018_bank45', '123555_bank20', '123455_bank20',
                           '124023_bank10', '124023_bank14', '124023_bank15', '124023_banks_14_15'):
             workspace = 'CORELLI_' + bank_case
-            # DEBUG
-            #data_dir = '/home/jbq/repositories/mantidproject/mantid2/Testing/Data/UnitTest/CORELLI/calibration/'
             LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
             cls.cases[bank_case] = workspace
 
