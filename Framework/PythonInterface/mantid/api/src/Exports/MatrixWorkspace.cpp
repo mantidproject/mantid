@@ -70,9 +70,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
 // Overloads for YUnitLabel which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_YUnitLabelOverloads,
                                        YUnitLabel, 0, 2)
-// Overloads for isHistogramData which has 1 optional argument
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_isHistogramDataOverloads,
-                                       MatrixWorkspace::isHistogramData, 0, 1)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -393,10 +390,8 @@ void export_MatrixWorkspace() {
       .def("getAxis", &MatrixWorkspace::getAxis,
            (arg("self"), arg("axis_index")), return_internal_reference<>(),
            "Get a pointer to a workspace axis")
-      .def("isHistogramData", &MatrixWorkspace::isHistogramData,
-           MatrixWorkspace_isHistogramDataOverloads(
-               (arg("self"), arg("index")),
-               "Returns ``True`` if this is considered to be binned data."))
+      .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
+           "Returns ``True`` if this is considered to be binned data.")
       .def("isDistribution",
            (bool (MatrixWorkspace::*)() const) &
                MatrixWorkspace::isDistribution,

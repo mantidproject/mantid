@@ -1051,8 +1051,17 @@ void MatrixWorkspace::setDistribution(bool newValue) {
  *  Whether the workspace contains histogram data
  *  @return whether the workspace contains histogram data
  */
-bool MatrixWorkspace::isHistogramData(const std::size_t index) const {
+bool MatrixWorkspace::isHistogramData() const {
   // all spectra *should* have the same behavior
+  return isHistogramDataByIndex(0);
+}
+
+/**
+ *  Whether the specified histogram contains histogram data (ie bins)
+ *  @param index :: Index of the histogram to be checked
+ *  @return whether the histogram contains histogram data
+ */
+bool MatrixWorkspace::isHistogramDataByIndex(const std::size_t index) const {
   bool isHist = (x(index).size() != y(index).size());
 
   // TODOHIST temporary sanity check
@@ -1386,7 +1395,7 @@ std::size_t MatrixWorkspace::yIndexOfX(const double xValue,
     throw std::out_of_range("MatrixWorkspace::yIndexOfX - X value is greater"
                             " than the highest in the current range.");
 
-  if (isHistogramData(index))
+  if (isHistogramDataByIndex(index))
     return binIndexOfValue(xValues, xValue, ascendingOrder, tolerance);
   else
     return xIndexOfValue(xValues, xValue, tolerance);

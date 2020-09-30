@@ -423,7 +423,7 @@ public:
 
   /// Returns true if the workspace contains data in histogram form (as
   /// opposed to point-like)
-  virtual bool isHistogramData(std::size_t index = 0) const;
+  virtual bool isHistogramData() const;
 
   /// Returns true if the workspace contains common X bins
   virtual bool isCommonBins() const;
@@ -600,6 +600,8 @@ private:
   void setIndexInfoWithoutISpectrumUpdate(const Indexing::IndexInfo &indexInfo);
   void buildDefaultSpectrumDefinitions();
   void rebuildDetectorIDGroupings();
+
+  virtual bool isHistogramDataByIndex(std::size_t index = 0) const;
 
   std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
 
