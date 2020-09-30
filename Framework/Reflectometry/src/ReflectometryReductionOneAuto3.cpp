@@ -805,16 +805,45 @@ void ReflectometryReductionOneAuto3::setOutputWorkspaces(
   setPropertyValue("OutputWorkspaceWavelength", outputGroupNames.iVsLam);
 }
 
+/** Set up the transmission properties on the child algorithm when processing
+ * workspace groups.
+ *
+ * If a transmission input is a matrix workspace, it is applied to all of the
+ * workspaces in the input workspace group. If it is a workspace group, then
+ * only the first workspace in the group is used, and again is applied to all
+ * of the workspaces in the input workspace group.
+ */
+void ReflectometryReductionOneAuto3::setTransmissionProperties(
+    Algorithm_sptr alg, std::string const &propertyName) {
+
+  // Get the input transmission workspace. Note that we have to get it by name
+  // and retrieve it from the ADS because the property type is MatrixWorkspace
+  // so we can't access it using getProperty if it is a WorkspaceGroup.
+  const auto inputName = getPropertyValue(propertyName);
+  if (inputName.empty())
+    return;
+
+  auto inputWS =
+      AnalysisDataService::Instance().retrieveWS<Workspace>(inputName);
+  if (!inputWS)
+    return;
+
+  MatrixWorkspace_sptr transWS;
+  if (inputWS->isGroup()) {
+    g_log.information(
+        std::string("A group has been passed as ") + propertyName +
+        std::string("; only the first workspace in the group will be used"));
+    auto groupWS = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+    transWS = std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
+  } else {
+    transWS = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+  }
+
+  alg->setProperty(propertyName, transWS);
+}
+
 /** Process groups. Groups are processed differently depending on transmission
- * runs and polarization analysis. If transmission run is a matrix workspace,
- * it will be applied to each of the members in the input workspace group. If
- * transmission run is a workspace group, the behaviour is different depending
- * on polarization analysis. If polarization analysis is false each item in the
- * transmission group is associated with the corresponding item in the input
- * workspace group. If polarization analysis is true items in the transmission
- * group will be summed to produce a matrix workspace that will be applied to
- * each of the items in the input workspace group. See documentation of this
- * algorithm for more details.
+ * runs and polarization analysis.
  */
 bool ReflectometryReductionOneAuto3::processGroups() {
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
@@ -842,39 +871,9 @@ bool ReflectometryReductionOneAuto3::processGroups() {
     }
   }
 
-  const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
-
-  // Check if the transmission runs are groups or not
-  const std::string firstTrans = getPropertyValue("FirstTransmissionRun");
-  WorkspaceGroup_sptr firstTransG;
-  MatrixWorkspace_sptr firstTransSum;
-  if (!firstTrans.empty()) {
-    auto firstTransWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
-    firstTransG = std::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
-    if (!firstTransG) {
-      alg->setProperty("FirstTransmissionRun", firstTrans);
-    } else {
-      g_log.information("A group has been passed as the first transmission run "
-                        "so the first run only is being used");
-      alg->setProperty("FirstTransmissionRun", firstTransG->getItem(0));
-    }
-  }
-  const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
-  WorkspaceGroup_sptr secondTransG;
-  MatrixWorkspace_sptr secondTransSum;
-  if (!secondTrans.empty()) {
-    auto secondTransWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
-    secondTransG = std::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
-    if (!secondTransG) {
-      alg->setProperty("SecondTransmissionRun", secondTrans);
-    } else {
-      g_log.information("A group has been passed as the second transmission "
-                        "run so the first run only is being used");
-      alg->setProperty("secondTransmissionRun", secondTransG->getItem(0));
-    }
-  }
+  // Set the transmission workspaces on the child algorithm
+  setTransmissionProperties(alg, "FirstTransmissionRun");
+  setTransmissionProperties(alg, "SecondTransmissionRun");
 
   std::vector<std::string> IvsQBinnedGroup, IvsQGroup, IvsLamGroup;
   std::string runNumber = getRunNumberForWorkspaceGroup(group);
@@ -934,6 +933,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
 
   setOutputWorkspaces(output, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
 
+  const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
   if (!polarizationAnalysisOn) {
     // No polarization analysis. Reduction stops here
     return true;

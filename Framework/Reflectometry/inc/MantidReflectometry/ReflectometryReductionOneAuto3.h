@@ -103,6 +103,8 @@ private:
                            std::vector<std::string> &IvsLamGroup,
                            std::vector<std::string> &IvsQBinnedGroup,
                            std::vector<std::string> &IvsQGroup);
+  void setTransmissionProperties(Algorithm_sptr alg,
+                                 std::string const &propertyName);
   WorkspaceNames getOutputNamesForGroups(const std::string &inputName,
                                          const std::string &runNumber,
                                          const size_t wsGroupNumber);
