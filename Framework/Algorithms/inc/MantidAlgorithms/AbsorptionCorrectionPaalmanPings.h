@@ -108,13 +108,16 @@ private:
 
   API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
+  const Geometry::IObject *m_containerObject; ///< Local cache of container object.
   Kernel::V3D m_beamDirection;             ///< The direction of the beam.
   std::vector<double> m_L1s,               ///< Cached L1 distances
       m_elementVolumes;                    ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
   size_t m_numVolumeElements; ///< The number of volume elements
   double m_sampleVolume;      ///< The total volume of the sample
+  double m_containerVolume;      ///< The total volume of the sample
   Kernel::Material m_material;
+  Kernel::Material m_containerMaterial;
   double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m
   int64_t m_num_lambda; ///< The number of points in wavelength, the rest is
   /// interpolated linearly

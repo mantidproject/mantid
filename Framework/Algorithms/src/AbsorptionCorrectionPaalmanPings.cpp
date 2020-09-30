@@ -47,10 +47,6 @@ namespace {
 // the maximum number of elements to combine at once in the pairwise summation
 constexpr size_t MAX_INTEGRATION_LENGTH{1000};
 
-const std::string CALC_SAMPLE = "Sample";
-const std::string CALC_CONTAINER = "Container";
-const std::string CALC_ENVIRONMENT = "Environment";
-
 inline size_t findMiddle(const size_t start, const size_t stop) {
   auto half =
       static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
@@ -82,14 +78,6 @@ void AbsorptionCorrectionPaalmanPings::init() {
                                                         Direction::Output),
                   "Output workspace name");
 
-  // AbsorbedBy
-  std::vector<std::string> scatter_options{CALC_SAMPLE, CALC_CONTAINER,
-                                           CALC_ENVIRONMENT};
-  declareProperty(
-      "ScatterFrom", CALC_SAMPLE,
-      std::make_shared<StringListValidator>(std::move(scatter_options)),
-      "The component to calculate the absorption for (default: Sample)");
-
   auto positiveInt = std::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
   declareProperty(
@@ -113,35 +101,18 @@ void AbsorptionCorrectionPaalmanPings::init() {
 std::map<std::string, std::string> AbsorptionCorrectionPaalmanPings::validateInputs() {
   std::map<std::string, std::string> result;
 
-  // verify that the container/environment information is there if requested
-  const std::string scatterFrom = getProperty("ScatterFrom");
-  if (scatterFrom != CALC_SAMPLE) {
-    API::MatrixWorkspace_const_sptr wksp = getProperty("InputWorkspace");
-    const auto &sample = wksp->sample();
-    if (sample.hasEnvironment()) {
-      const auto numComponents = sample.getEnvironment().nelements();
-      // first element is assumed to be the container
-      if (scatterFrom == CALC_CONTAINER && numComponents == 0) {
-        result["ScatterFrom"] = "Sample does not have a container defined";
-      } else if (scatterFrom == CALC_ENVIRONMENT) {
-        if (numComponents < 2) {
-          result["ScatterFrom"] = "Sample does not have an environment defined";
-        } else if (numComponents > 2) {
-          std::stringstream msg;
-          msg << "Do not know how to calculate absorption from multiple "
-                 "component sample environment. Encountered "
-              << numComponents << " components";
-          result["ScatterFrom"] = msg.str();
-        }
-      }
-    } else { // customize error message based on selection
-      if (scatterFrom == CALC_CONTAINER)
-        result["ScatterFrom"] = "Sample does not have a container defined";
-      else if (scatterFrom == CALC_ENVIRONMENT)
-        result["ScatterFrom"] = "Sample does not have an environment defined";
+  // verify that the container information is there if requested
+  API::MatrixWorkspace_const_sptr wksp = getProperty("InputWorkspace");
+  const auto &sample = wksp->sample();
+  if (sample.hasEnvironment()) {
+    const auto numComponents = sample.getEnvironment().nelements();
+    // first element is assumed to be the container
+    if (numComponents == 0) {
+      result["InputWorkspace"] = "Sample does not have a container defined";
     }
+  } else {
+    result["InputWorkspace"] = "Sample does not have a container defined";
   }
-
   return result;
 }
 
@@ -291,17 +262,11 @@ std::string AbsorptionCorrectionPaalmanPings::sampleXML() {
 }
 /// Fetch the properties and set the appropriate member variables
 void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
-  const std::string scatterFrom = getProperty("ScatterFrom");
 
   // get the material from the correct component
   const auto &sampleObj = m_inputWS->sample();
-  if (scatterFrom == CALC_SAMPLE) {
-    m_material = sampleObj.getShape().material();
-  } else if (scatterFrom == CALC_CONTAINER) {
-    m_material = sampleObj.getEnvironment().getContainer().material();
-  } else if (scatterFrom == CALC_ENVIRONMENT) {
-    m_material = sampleObj.getEnvironment().getComponent(1).material();
-  }
+  m_material = sampleObj.getShape().material();
+  m_containerMaterial = sampleObj.getEnvironment().getContainer().material();
 
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
@@ -324,36 +289,22 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
 
 /// Create the sample object using the Geometry classes, or use the existing one
 void AbsorptionCorrectionPaalmanPings::constructSample(API::Sample &sample) {
-  const std::string xmlstring = sampleXML();
-  const std::string scatterFrom = getProperty("ScatterFrom");
-  if (xmlstring.empty()) {
-    // Get the shape from the proper object
-    if (scatterFrom == CALC_SAMPLE)
-      m_sampleObject = &sample.getShape();
-    else if (scatterFrom == CALC_CONTAINER)
-      m_sampleObject = &(sample.getEnvironment().getContainer());
-    else if (scatterFrom == CALC_ENVIRONMENT)
-      m_sampleObject = &(sample.getEnvironment().getComponent(1));
-    else
-      throw std::runtime_error("Somebody forgot to fill in an if/else tree");
+  m_sampleObject = &sample.getShape();
+  m_containerObject = &(sample.getEnvironment().getContainer());
 
-    // Check there is one, and fail if not
-    if (!m_sampleObject->hasValidShape()) {
-      const std::string mess(
-          "No shape has been defined for the sample in the input workspace");
-      g_log.error(mess);
-      throw std::invalid_argument(mess);
-    }
-  } else if (scatterFrom != CALC_SAMPLE) { // should never be in this case
-    std::stringstream msg;
-    msg << "Cannot use geometry xml for ScatterFrom=" << scatterFrom;
-    throw std::runtime_error(msg.str());
-  } else { // create a geometry from the sample object
-    std::shared_ptr<IObject> shape = ShapeFactory().createShape(xmlstring);
-    sample.setShape(shape);
-    m_sampleObject = &sample.getShape();
-
-    g_log.information("Successfully constructed the sample object");
+  // Check there is one, and fail if not
+  if (!m_sampleObject->hasValidShape()) {
+    const std::string mess(
+                           "No shape has been defined for the sample in the input workspace");
+    g_log.error(mess);
+    throw std::invalid_argument(mess);
+  }
+  // Check there is one, and fail if not
+  if (!m_containerObject->hasValidShape()) {
+    const std::string mess(
+                           "No shape has been defined for the container in the input workspace");
+    g_log.error(mess);
+    throw std::invalid_argument(mess);
   }
 }
 
