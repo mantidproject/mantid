@@ -27,7 +27,7 @@ class IObject;
 
 namespace Algorithms {
 /** AbsorptionCorrectionPaalmanPings : TODO: DESCRIPTION
-*/
+ */
 /** A base class for absorption correction algorithms.
 
     Common Properties:
@@ -66,12 +66,15 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 04/02/2010
 */
-class MANTID_ALGORITHMS_DLL AbsorptionCorrectionPaalmanPings : public API::Algorithm  {
+class MANTID_ALGORITHMS_DLL AbsorptionCorrectionPaalmanPings
+    : public API::Algorithm {
 public:
   /// (Empty) Constructor
   AbsorptionCorrectionPaalmanPings();
   /// Algorithm's name
-  const std::string name() const override { return "AbsorptionCorrectionPaalmanPings"; }
+  const std::string name() const override {
+    return "AbsorptionCorrectionPaalmanPings";
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";
@@ -108,14 +111,15 @@ private:
 
   API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
-  const Geometry::IObject *m_containerObject; ///< Local cache of container object.
-  Kernel::V3D m_beamDirection;             ///< The direction of the beam.
-  std::vector<double> m_L1s,               ///< Cached L1 distances
-      m_elementVolumes;                    ///< Cached element volumes
+  const Geometry::IObject
+      *m_containerObject;      ///< Local cache of container object.
+  Kernel::V3D m_beamDirection; ///< The direction of the beam.
+  std::vector<double> m_L1s,   ///< Cached L1 distances
+      m_elementVolumes;        ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
   size_t m_numVolumeElements; ///< The number of volume elements
   double m_sampleVolume;      ///< The total volume of the sample
-  double m_containerVolume;      ///< The total volume of the sample
+  double m_containerVolume;   ///< The total volume of the sample
   Kernel::Material m_material;
   Kernel::Material m_containerMaterial;
   double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m
