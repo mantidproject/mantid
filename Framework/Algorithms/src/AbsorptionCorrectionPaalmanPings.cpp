@@ -55,13 +55,11 @@ inline size_t findMiddle(const size_t start, const size_t stop) {
 
 } // namespace
 
-
 AbsorptionCorrectionPaalmanPings::AbsorptionCorrectionPaalmanPings()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.0), m_linearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
-      m_lambdaFixed(0.), EXPONENTIAL(), m_cubeSide(0.0){
-}
+      m_lambdaFixed(0.), EXPONENTIAL(), m_cubeSide(0.0) {}
 
 void AbsorptionCorrectionPaalmanPings::init() {
 
@@ -98,7 +96,8 @@ void AbsorptionCorrectionPaalmanPings::init() {
                   "The size of one side of an integration element cube in mm");
 }
 
-std::map<std::string, std::string> AbsorptionCorrectionPaalmanPings::validateInputs() {
+std::map<std::string, std::string>
+AbsorptionCorrectionPaalmanPings::validateInputs() {
   std::map<std::string, std::string> result;
 
   // verify that the container information is there if requested
@@ -284,7 +283,6 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
   // Call the virtual function for any further properties
   m_cubeSide = getProperty("ElementSize"); // in mm
   m_cubeSide *= 0.001;                     // now in m
-
 }
 
 /// Create the sample object using the Geometry classes, or use the existing one
@@ -295,14 +293,14 @@ void AbsorptionCorrectionPaalmanPings::constructSample(API::Sample &sample) {
   // Check there is one, and fail if not
   if (!m_sampleObject->hasValidShape()) {
     const std::string mess(
-                           "No shape has been defined for the sample in the input workspace");
+        "No shape has been defined for the sample in the input workspace");
     g_log.error(mess);
     throw std::invalid_argument(mess);
   }
   // Check there is one, and fail if not
   if (!m_containerObject->hasValidShape()) {
     const std::string mess(
-                           "No shape has been defined for the container in the input workspace");
+        "No shape has been defined for the container in the input workspace");
     g_log.error(mess);
     throw std::invalid_argument(mess);
   }
@@ -312,8 +310,8 @@ void AbsorptionCorrectionPaalmanPings::constructSample(API::Sample &sample) {
 /// @param detector :: The detector we are working on
 /// @param L2s :: A vector of the sample-detector distance for  each segment of
 /// the sample
-void AbsorptionCorrectionPaalmanPings::calculateDistances(const IDetector &detector,
-                                              std::vector<double> &L2s) const {
+void AbsorptionCorrectionPaalmanPings::calculateDistances(
+    const IDetector &detector, std::vector<double> &L2s) const {
   V3D detectorPos(detector.getPos());
   if (detector.nDets() > 1) {
     // We need to make sure this is right for grouped detectors - should use
@@ -371,10 +369,9 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(const IDetector &detec
 
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
-double AbsorptionCorrectionPaalmanPings::doIntegration(const double linearCoefAbs,
-                                           const std::vector<double> &L2s,
-                                           const size_t startIndex,
-                                           const size_t endIndex) const {
+double AbsorptionCorrectionPaalmanPings::doIntegration(
+    const double linearCoefAbs, const std::vector<double> &L2s,
+    const size_t startIndex, const size_t endIndex) const {
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
