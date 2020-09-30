@@ -41,5 +41,6 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
     def _attempt_to_open_python_interface(self, interface_path):
         try:
             exec(open(interface_path).read())
+            exit()
         except Exception as ex:
             self.fail("Exception thrown when attempting to open the {0} interface: {1}".format(interface_path, str(ex)))
