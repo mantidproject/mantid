@@ -129,7 +129,7 @@ void CrystalFieldMultiSpectrum::init() {
   try {
     buildTargetFunction();
   } catch (std::runtime_error const &ex) {
-    g_log.warning(ex.what());
+    g_log.error(ex.what());
   }
 }
 
