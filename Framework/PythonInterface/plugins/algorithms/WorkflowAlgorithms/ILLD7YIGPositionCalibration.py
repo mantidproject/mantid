@@ -264,8 +264,8 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         for pixel_no in range(mtd[ws].getNumberHistograms()):
             detector_2theta = mtd[ws].readX(pixel_no)
             intensity = mtd[ws].readY(pixel_no)
-            min2Theta = detector_2theta[0] - self._peakWidth * 2
-            max2Theta = detector_2theta[-1] + self._peakWidth * 2
+            min2Theta = detector_2theta[0] + self._peakWidth * 2
+            max2Theta = detector_2theta[-1] - self._peakWidth * 2
             single_spectrum_peaks = []
             for peak in yig2theta:
                 if min2Theta < peak < max2Theta and not lower_mask_range < peak < upper_mask_range:
