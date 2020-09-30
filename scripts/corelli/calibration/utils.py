@@ -54,9 +54,9 @@ def wire_positions(units: str = 'pixels') -> np.ndarray:
 
 def bank_numbers(bank_selection: str) -> List[str]:
     r"""
+    Expand a bank selection string into a list of bank numbers
 
-    :param bank_selection:
-    :return:
+    :param bank_selection: selection string, such as '10,12-15,17-21'
     """
     banks = list()  # list of bank numbers, as string
     ranges = [r.strip() for r in bank_selection.split(',')]  # split by comma
@@ -71,11 +71,13 @@ def bank_numbers(bank_selection: str) -> List[str]:
 
 def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Workspace2D:
     r"""
+    Load events only for the selected banks, and don't load metadata.
 
+    If the file is not an events file, but a Nexus processed file, the bank_selection is ignored.
     :param filename: Filename to an Event nexus file or a processed nexus file
-    :param bank_selection:
-    :param output_workspace:
-    :return:
+    :param bank_selection: selection string, such as '10,12-15,17-21'
+    :param output_workspace: name of the output workspace containing counts per pixel
+    :return: workspace containing counts per pixel. Events in each pixel are integrated into neutron counts.
     """
     assert path.exists(filename), f'File {filename} does not exist'
     bank_names = ','.join(['bank' + b for b in bank_numbers(bank_selection)])
@@ -131,13 +133,15 @@ def calculate_tube_calibration(workspace: WorkspaceTypes, tube_name: str, shadow
 def calibrate_instrument(workspace: WorkspaceTypes, calibration_table: InputTable,
                          output_workspace: Optional[str] = None, show_instrument: bool = False) -> Workspace2D:
     r"""
-    Calibrate an instrument, and show it if requested
+    Calibrate the detector positions with an input table, and open the instrument view if so requested.
 
-    :param workspace:
-    :param calibration_table:
-    :param output_workspace:
-    :param show_instrument:
-    :return:
+    :param workspace: input Workspace2D containing total neutron counts per pixel
+    :param calibration_table: a TableWorskpace containing one column for detector ID and one column
+    for its XYZ coordinates, in meters
+    :param output_workspace: name of the output workspace containing calibrated detectors
+    :param show_instrument: open the instrument view for `output_workspace`
+
+    :raises AssertionError: either `workspace` or `calibration_table` are not found
     """
     assert AnalysisDataService.doesExist(str(workspace)), f'No worksapce {str(workspace)} found'
     assert AnalysisDataService.doesExist(str(calibration_table)), f'No table {str(calibration_table)} found'
