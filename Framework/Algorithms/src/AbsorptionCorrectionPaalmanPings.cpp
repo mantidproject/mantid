@@ -58,8 +58,11 @@ AbsorptionCorrectionPaalmanPings::AbsorptionCorrectionPaalmanPings()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr),
       m_containerObject(nullptr), m_L1s(), m_elementVolumes(),
       m_elementPositions(), m_numVolumeElements(0), m_sampleVolume(0.0),
-      m_containerVolume(0.0), m_linearCoefTotScatt(0), m_num_lambda(0),
-      m_xStep(0), m_cubeSide(0.0) {}
+      m_containerL1s(), m_containerElementVolumes(),
+      m_containerElementPositions(), m_containerNumVolumeElements(0),
+      m_containerVolume(0.0), m_linearCoefTotScatt(0),
+      m_containerLinearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
+      m_cubeSide(0.0) {}
 
 void AbsorptionCorrectionPaalmanPings::init() {
 
@@ -146,7 +149,7 @@ void AbsorptionCorrectionPaalmanPings::exec() {
 
   // Calculate the cached values of L1, element volumes, and geometry size
   initialiseCachedDistances();
-  if (m_L1s.empty()) {
+  if (m_L1s.empty() || m_containerL1s.empty()) {
     throw std::runtime_error(
         "Failed to define any initial scattering gauge volume for geometry");
   }
@@ -234,6 +237,24 @@ void AbsorptionCorrectionPaalmanPings::initialiseCachedDistances() {
   m_L1s = std::move(raster.l1);
   m_elementPositions = std::move(raster.position);
   m_elementVolumes = std::move(raster.volume);
+
+  // now for the container
+  integrationVolume =
+      std::shared_ptr<const IObject>(m_containerObject->clone());
+  if (m_inputWS->run().hasProperty("GaugeVolume")) {
+    integrationVolume = constructGaugeVolume();
+  }
+
+  raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume,
+                                          m_cubeSide);
+  m_containerVolume = raster.totalvolume;
+  if (raster.l1.size() == 0)
+    throw std::runtime_error("Failed to rasterize shape");
+  // move over the information
+  m_containerNumVolumeElements = raster.l1.size();
+  m_containerL1s = std::move(raster.l1);
+  m_containerElementPositions = std::move(raster.position);
+  m_containerElementVolumes = std::move(raster.volume);
 }
 
 std::shared_ptr<const Geometry::IObject>
@@ -248,11 +269,6 @@ AbsorptionCorrectionPaalmanPings::constructGaugeVolume() {
   return volume;
 }
 
-std::string AbsorptionCorrectionPaalmanPings::sampleXML() {
-  // Returning an empty string signals to the base class that it should
-  // use the object already attached to the sample.
-  return std::string();
-}
 /// Fetch the properties and set the appropriate member variables
 void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
 
@@ -265,6 +281,8 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
   // will cancel for mu to give units: cm^-1
   m_linearCoefTotScatt =
       -m_material.totalScatterXSection() * m_material.numberDensity() * 100;
+  m_containerLinearCoefTotScatt = -m_containerMaterial.totalScatterXSection() *
+                                  m_containerMaterial.numberDensity() * 100;
 
   m_num_lambda = getProperty("NumberOfWavelengthPoints");
 
@@ -346,7 +364,7 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
       // AbsorptionCorrection::calculateDistances");
     } else // The normal situation
     {
-      L2s[i] = outgoing.cbegin()->distFromStart;
+      L2s[i] = outgoing.totalDistInsideObject();
     }
   }
 }
