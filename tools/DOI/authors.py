@@ -225,6 +225,7 @@ _translations = {
     'Phil'                    : 'Colebrooke, Phil',
     'Phil Colebrooke'         : 'Colebrooke, Phil',
     'DanielMurphy22'          : 'Murphy, Daniel',
+    'Richard'                 : 'Waite, Richard',
     'RichardWaiteSTFC'        : 'Waite, Richard',
     'Richard Waite'           : 'Waite, Richard',
     'Ciara Nightingale'       : 'Nightingale, Ciara',
@@ -239,7 +240,22 @@ _translations = {
     'William F Godoy'         : 'Godoy, William F',
     'Islam, Fahima F'         : 'Islam, Fahima',
     'Mathieu Tillet'          : 'Tillet, Mathieu',
-    'StephenSmith'            : 'Smith, Stephen'
+    'MathieuTillet'           : 'Tillet, Mathieu',
+    'StephenSmith'            : 'Smith, Stephen',
+    'Toluwalase Agoro'        : 'Agoro, Toluwalase',
+    'tolu28-coder'            : 'Agoro, Toluwalase',
+    'joseph-torsney'          : 'Torsney, Joesph',
+    'Joseph Torsney'          : 'Torsney, Joesph',
+    'YannickMeinerzhagen'     : 'Meinerzhagen, Yannick',
+    'Du Rong'                 : 'Rong, Du',
+    'durong'                  : 'Rong, Du',
+    'durong24'                : 'Rong, Du',
+    'Matt Cumber'             : 'Cumber, Matthew',
+    'Matthew Cumber'          : 'Cumber, Matthew',
+    'Tom Clayton'             : 'Clayton, Tom',
+    'Chen Zhang'              : 'Zhang, Chen',
+    'Guillaume Communie'      : 'Communie, Guillaume',
+    'Dominik Arominski'       : 'Arominski, Dominik'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -258,7 +274,8 @@ _blacklist = [
     'dpaj',
     'Daniel Pajerowski',
     'thomueller',
-    'luz.paz'
+    'luz.paz',
+    'davidvoneshen'
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
