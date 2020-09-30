@@ -199,7 +199,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                  Axis='X',
                                  Formula='-180.0 * signedtwotheta / pi',
                                  OutputWorkspace=entry)
-            # mask detectors too close to the beam axis or too far away:
+            # mask bins too close to the beam axis
             MaskBinsIf(InputWorkspace=entry,
                        Criterion='x>{0} && x<{1}'.format(self._beamMask1, self._beamMask2),
                        OutputWorkspace=entry)
