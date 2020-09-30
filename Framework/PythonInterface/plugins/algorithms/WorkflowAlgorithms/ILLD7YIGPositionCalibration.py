@@ -538,7 +538,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                 value.set('val', str(pixel_offsets[bank_no*self._D7NumberPixelsBank + pixel_no]))
 
         filename = self.getPropertyValue('CalibrationOutputFile')
-        outfile = open(os.path.join(os.getcwd(), filename), "w")
+        outfile = open(os.path.join(ConfigService.Instance().getString('defaultsave.directory'), filename), "w")
         outfile.write(self._prettify(param_file))
 
 
