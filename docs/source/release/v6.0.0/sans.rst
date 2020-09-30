@@ -16,6 +16,7 @@ Improvements
 ############
 
  - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the beam radius can be different for each distance.
+   A new parameter, TransmissionBeamRadius, has been added to set the beam radius for transmission experiments.
 
 
 :ref:`Release 6.0.0 <v6.0.0>`
