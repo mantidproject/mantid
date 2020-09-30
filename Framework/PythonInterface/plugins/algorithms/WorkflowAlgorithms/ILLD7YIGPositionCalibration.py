@@ -458,15 +458,15 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         intitial_wavelength = self.getProperty('ApproximateWavelength').value
         wavelength = parameter_table.column(1)[1] * intitial_wavelength
         if parameter_table.column(1)[0] == 0:
-            raise RuntimeError('Bank2 slope is equal to 0.')
+            raise RuntimeError('Fitting bank gradients failed. Bank2 slope is equal to 0. Consider changing initial parameters')
         bank2_slope = 1.0 / parameter_table.column(1)[0]
         bank2_offset = self._RAD_2_DEG * parameter_table.column(1)[3]
         if parameter_table.column(1)[3*self._D7NumberPixelsBank] == 0:
-            raise RuntimeError('Bank3 slope is equal to 0.')
+            raise RuntimeError('Fitting bank gradients failed. Bank3 slope is equal to 0. Consider changing initial parameters')
         bank3_slope = 1.0 / parameter_table.column(1)[4*self._D7NumberPixelsBank]
         bank3_offset = self._RAD_2_DEG * parameter_table.column(1)[4*self._D7NumberPixelsBank+3]
         if parameter_table.column(1)[6*self._D7NumberPixelsBank] == 0:
-            raise RuntimeError('Bank4 slope is equal to 0.')
+            raise RuntimeError('Fitting bank gradients failed. Bank4 slope is equal to 0. Consider changing initial parameters')
         bank4_slope = 1.0 / parameter_table.column(1)[8*self._D7NumberPixelsBank]
         bank4_offset = self._RAD_2_DEG * parameter_table.column(1)[8*self._D7NumberPixelsBank+3]
         bank_slopes = [bank2_slope, bank3_slope, bank4_slope]
