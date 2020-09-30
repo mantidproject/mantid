@@ -22,7 +22,6 @@
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
@@ -41,10 +40,8 @@ using namespace API;
 using namespace Geometry;
 using HistogramData::interpolateLinearInplace;
 using namespace Kernel;
-using Kernel::DeltaEMode;
 using namespace Mantid::PhysicalConstants;
 using namespace Mantid::DataObjects;
-using PhysicalConstants::E_mev_toNeutronWavenumberSq;
 
 namespace {
 // the maximum number of elements to combine at once in the pairwise summation
@@ -60,11 +57,6 @@ inline size_t findMiddle(const size_t start, const size_t stop) {
   return start + half;
 }
 
-// wavelength = 2 pi / k
-double energyToWavelength(const double energyFixed) {
-  return 2. * M_PI * std::sqrt(E_mev_toNeutronWavenumberSq / energyFixed);
-}
-
 } // namespace
 
 
@@ -72,8 +64,7 @@ AbsorptionCorrectionPaalmanPings::AbsorptionCorrectionPaalmanPings()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.0), m_linearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
-      m_emode(Kernel::DeltaEMode::Undefined), m_lambdaFixed(0.), EXPONENTIAL(),
-      m_cubeSide(0.0){
+      m_lambdaFixed(0.), EXPONENTIAL(), m_cubeSide(0.0){
 }
 
 void AbsorptionCorrectionPaalmanPings::init() {
@@ -127,15 +118,6 @@ void AbsorptionCorrectionPaalmanPings::init() {
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
 
-  std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
-  declareProperty("EMode", "Elastic",
-                  std::make_shared<StringListValidator>(propOptions),
-                  "The energy mode (default: elastic)");
-  declareProperty(
-      "EFixed", 0.0, mustBePositive,
-      "The value of the initial or final energy, as appropriate, in meV.\n"
-      "Will be taken from the instrument definition file, if available.");
-
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero,
@@ -182,8 +164,6 @@ void AbsorptionCorrectionPaalmanPings::exec() {
   m_inputWS = getProperty("InputWorkspace");
   // Cache the beam direction
   m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
-  // Get a reference to the parameter map (used for indirect instruments)
-  const ParameterMap &pmap = m_inputWS->constInstrumentParameters();
 
   // Get the input parameters
   retrieveBaseProperties();
@@ -240,21 +220,6 @@ void AbsorptionCorrectionPaalmanPings::exec() {
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det, L2s);
 
-    // If an indirect instrument, see if there's an efixed in the parameter map
-    double lambdaFixed = m_lambdaFixed;
-    if (m_emode == DeltaEMode::Indirect) {
-      try {
-        Parameter_sptr par = pmap.get(&det, "Efixed");
-        if (par) {
-          lambdaFixed = energyToWavelength(par->value<double>());
-        }
-      } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use single
-                                          provided value */
-      }
-    }
-
-    // calculate the absorption coefficient for fixed wavelength
-    const double linearCoefAbsFixed = -m_material.linearAbsorpCoef(lambdaFixed);
     const auto wavelengths = m_inputWS->points(i);
     // these need to have the minus sign applied still
     const auto linearCoefAbs =
@@ -265,18 +230,7 @@ void AbsorptionCorrectionPaalmanPings::exec() {
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      if (m_emode == DeltaEMode::Elastic) {
-        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
-      } else if (m_emode == DeltaEMode::Direct) {
-        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s,
-                                   0, L2s.size());
-      } else if (m_emode == DeltaEMode::Indirect) {
-        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s,
-                                   0, L2s.size());
-      } else { // should never happen
-        throw std::runtime_error(
-            "AbsorptionCorrection doesn't have a known DeltaEMode defined");
-      }
+      Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
       Y[j] /= m_sampleVolume; // Divide by total volume of the shape
 
       // Make certain that last point is calculated
@@ -403,27 +357,6 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
   else if (exp_string == "FastApprox") // Use the compact approximation
     EXPONENTIAL = fast_exp;
 
-  // Get the energy mode
-  const std::string emodeStr = getProperty("EMode");
-  // Convert back to an integer representation
-  if (emodeStr == "Direct")
-    m_emode = DeltaEMode::Direct;
-  else if (emodeStr == "Indirect")
-    m_emode = DeltaEMode::Indirect;
-  else if (emodeStr == "Elastic")
-    m_emode = DeltaEMode::Elastic;
-  else {
-    std::stringstream msg;
-    msg << "Unknown EMode \"" << emodeStr << "\"";
-    throw std::runtime_error(msg.str());
-  }
-
-  // If inelastic, get the fixed energy and convert it to a wavelength
-  if (m_emode != DeltaEMode::Elastic) {
-    const double efixed = getProperty("Efixed");
-    m_lambdaFixed = energyToWavelength(efixed);
-  }
-
   // Call the virtual function for any further properties
   m_cubeSide = getProperty("ElementSize"); // in mm
   m_cubeSide *= 0.001;                     // now in m
@@ -544,34 +477,6 @@ double AbsorptionCorrectionPaalmanPings::doIntegration(const double linearCoefAb
     for (size_t i = startIndex; i < endIndex; ++i) {
       const double exponent =
           (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
-      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
-    }
-
-    return integral;
-  }
-}
-
-/// Carries out the numerical integration over the sample for inelastic
-/// instruments
-double AbsorptionCorrectionPaalmanPings::doIntegration(const double linearCoefAbsL1,
-                                           const double linearCoefAbsL2,
-                                           const std::vector<double> &L2s,
-                                           const size_t startIndex,
-                                           const size_t endIndex) const {
-  if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
-    size_t middle = findMiddle(startIndex, endIndex);
-
-    return doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, startIndex,
-                         middle) +
-           doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, middle,
-                         endIndex);
-  } else {
-    double integral = 0.0;
-
-    // Iterate over all the elements, summing up the integral
-    for (size_t i = startIndex; i < endIndex; ++i) {
-      double exponent = (linearCoefAbsL1 + m_linearCoefTotScatt) * m_L1s[i];
-      exponent += (linearCoefAbsL2 + m_linearCoefTotScatt) * L2s[i];
       integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
     }
 
