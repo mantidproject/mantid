@@ -896,6 +896,115 @@ public:
     TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5 * RADIUS);
   }
 
+  void testTracksForHollowCylinder() {
+    // hollow cylinder at the origin with the symmetry axis along y
+    // using PAC06 dimensions: 2.95mm inner radius, 3.15mm outer radius
+    //   x 5.68mm height
+    constexpr double INNER_RADIUS{0.00295};
+    constexpr double OUTER_RADIUS{0.00315};
+    constexpr double WALL_THICKNESS{OUTER_RADIUS - INNER_RADIUS};
+    constexpr double HEIGHT{0.00568};
+    constexpr double TOLERANCE{1e-12};
+    constexpr V3D BOTTOM_CENTRE{0., -.5 * HEIGHT, 0.};
+    constexpr V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createHollowCylinder(
+        INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    constexpr V3D BEAM_DIRECTION{0., 0., 1.}; // along z-axis
+
+    // centre of sample
+    Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    cylinder->interceptSurface(origin);
+    // this test should equal wall thickness since this track should
+    //  only be summing distances on the inside of an object
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), WALL_THICKNESS, TOLERANCE);
+
+    constexpr double WALL_CENTER{0.5 * (OUTER_RADIUS + INNER_RADIUS)};
+    // Right midpoint in wall between origin and radius (front wrt beam dir)
+    Track front_midpt(V3D{0., 0., WALL_CENTER}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_DELTA(front_midpt.totalDistInsideObject(), 0.5 * WALL_THICKNESS,
+                    TOLERANCE);
+
+    // Left midpoint in wall between origin and radius (back wrt beam dir)
+    Track back_midpt(V3D{0., 0., -WALL_CENTER}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 1.5 * WALL_THICKNESS,
+                    TOLERANCE);
+
+    // Add a quarter offset to the midpoint
+    constexpr double WALL_CENTER_OFFSET{0.25 * INNER_RADIUS +
+                                        0.75 * OUTER_RADIUS};
+
+    front_midpt = Track(V3D{0., 0., WALL_CENTER_OFFSET}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_DELTA(front_midpt.totalDistInsideObject(), 0.25 * WALL_THICKNESS,
+                    TOLERANCE);
+
+    // Left midpoint in wall between origin and radius (back wrt beam dir)
+    back_midpt = Track(V3D{0., 0., -WALL_CENTER_OFFSET}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 1.75 * WALL_THICKNESS,
+                    TOLERANCE);
+  }
+
+  void testTracksForHollowCylinderShifted() {
+    // hollow cylinder shifted right with the symmetry axis along z
+    // using PAC06 dimensions: 2.95mm inner radius, 3.15mm outer radius
+    //   x 5.68mm height
+    constexpr double INNER_RADIUS{0.00295};
+    constexpr double OUTER_RADIUS{0.00315};
+    constexpr double WALL_THICKNESS{OUTER_RADIUS - INNER_RADIUS};
+    constexpr double HEIGHT{0.00568};
+    constexpr double TOLERANCE{1e-12};
+    V3D BOTTOM_CENTRE{0.0, 0.0, -0.5 * HEIGHT};
+
+    // Put the cylinder with the symmetry axis along Z, this should go
+    //  straight through
+    constexpr V3D AXIS_SYMM{0., 0., 1.};
+    auto cylinder = ComponentCreationHelper::createHollowCylinder(
+        INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    constexpr V3D BEAM_DIRECTION{0., 0., 1.}; // along z-axis
+
+    Track origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.0);
+
+    // Now shift the cylinder over a bit to the test a line through the wall
+    // midpoint
+    BOTTOM_CENTRE = V3D{1.0 - OUTER_RADIUS, 0.0, -0.5 * HEIGHT};
+    cylinder = ComponentCreationHelper::createHollowCylinder(
+        INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    // Front midpoint between right wall and top (height/2)
+    Track front_midpt =
+        Track(V3D{1.0 - WALL_THICKNESS, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_DELTA(front_midpt.totalDistInsideObject(), 0.25 * HEIGHT,
+                    TOLERANCE);
+
+    // Back midpoint between right wall and bottom (-height/2)
+    Track back_midpt =
+        Track(V3D{1.0 - WALL_THICKNESS, 0.0, -0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 0.75 * HEIGHT,
+                    TOLERANCE);
+
+    // Offset from the midpoint
+    front_midpt = Track(V3D{1.0 - 0.5 * WALL_THICKNESS, 0.0, 0.25 * HEIGHT},
+                        BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_DELTA(front_midpt.totalDistInsideObject(), 0.25 * HEIGHT,
+                    TOLERANCE);
+
+    back_midpt = Track(V3D{1.0 - 0.5 * WALL_THICKNESS, 0.0, -0.25 * HEIGHT},
+                       BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 0.75 * HEIGHT,
+                    TOLERANCE);
+  }
+
   void testGeneratePointInsideSphere() {
     using namespace ::testing;
 
