@@ -386,12 +386,14 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         gradient_constr = 0.5 # +-5% around the m = 1.0 value
         lambda_constr = 0.5 # +- 5% of lambda variation from the initial assumption
         constraint_list = ['{0}<f0.lambda<{1}'.format(1-lambda_constr, 1+lambda_constr)]
+        function = 'name=UserFunction, \
+        Formula = {0} * m * ( 2.0 * asin( lambda * sin( 0.5 * {1} * x ) ) + offset+ bank_offset), \
+        lambda= 1.0, m = 1.0, offset = {2}, bank_offset = {3}, $domains=i'.format(self._RAD_2_DEG,
+                                                                                  self._DEG_2_RAD,
+                                                                                  0, 0)
+        function_list = mtd[ws].getNumberHistograms() * [function]
 
         for pixel_no in range(mtd[ws].getNumberHistograms()):
-            function = 'name=UserFunction, \
-            Formula = {0} * m * ( 2.0 * asin( lambda * sin( 0.5 * {1} * x ) ) + offset+ bank_offset), \
-            lambda= 1.0, m = 1.0, offset = {2}, bank_offset = {3}, $domains=i'.format(self._RAD_2_DEG, self._DEG_2_RAD, 0, 0)
-            function_list.append(function)
             constraint_list.append('-{0} < f{1}.offset < {0}'.format(pixel_offset_constr,
                                                                      pixel_no))
             constraint_list.append('-{0} < f{1}.bank_offset < {0}'.format(bank_offset_constr,
