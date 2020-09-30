@@ -22,14 +22,13 @@ from Calibration.tube_calib_fit_params import TubeCalibFitParams
 from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, TUBES_IN_BANK, wire_positions
 
 
-def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity=10000) -> bool:
+def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity:float = 10000) -> bool:
     r"""
     Assert if the average intensity per pixel in the bank surpasses a minimum threshold.
 
-    :param input_workspace:
-    :param bank_name:
-    :minimum_intensity:
-    :return:
+    :param input_workspace: input Workspace2D containing total neutron counts per pixel
+    :param bank_name: a string of the form 'bankI' where 'I' is a bank number
+    :minimum_intensity: neutron counts averaged over all pixels
     """
     workspace = mtd[str(input_workspace)]
     tube_set = TubeSpec(workspace)
@@ -45,17 +44,26 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
              fit_domain: float = 7, minimum_intensity: float = 1000,
              calibration_table: str = 'CalibTable', peak_pixel_positions_table: str = 'PeakTable') -> None:
     r"""
+    Find the position of the wire shadow on each tube in the bank, in units of pixel positions
 
-    :param workspace:
-    :param bank_name:
-    :param shadow_height:
-    :param shadow_width:
-    :param fit_domain:
-    :param minimum_intensity:
-    :param calibration_table:
-    :param peak_pixel_positions_table:
-    :return:
-    :return:
+    :param workspace: input Workspace2D containing total neutron counts per pixel
+    :param bank_name: a string of the form 'bankI' where 'I' is a bank number
+    :param shadow_height: initial guess for the decrease in neutron counts caused by the calibrating wire
+    :param shadow_width: initial guess for the number of pixels shadowed by the calibrating wire
+    :param fit_domain: number of pixels over which a calibrating wire may have any significant influence
+    :param minimum_intensity: mininum number of neutron counts per pixel to warrant a significant fit
+    session. This number is compared against the neutron counts per pixel, averaged over all pixels in the bank
+    :param calibration_table: output TableWorkspace containing one column for detector ID and one column
+    for its calibrated XYZ coordinates, in meters
+    :param peak_pixel_positions_table: output table containing the positions of the wire shadows for each tube, in
+    units of pixel coordinates
+
+    :raises AssertionError: the input workspace is of incorrect type or cannot be found
+    :raises AssertionError: the input `shadow_height` is a non-positive value
+    :raises AssertionError: the `bank_name` if not of the form 'bankI'
+    :raises AssertionError: insufficient neutron counts per pixel
+
+    :return: workspace handles to the calibration and peak table
     """
     message = f'Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle'
     assert isinstance(workspace, (str, Workspace2D)), message
@@ -156,7 +164,7 @@ def criterium_peak_pixel_position(peak_table: InputTable, summary: Optional[str]
     return criterium_pass
 
 
-def purge_table(workspace: WorkspaceTypes, bank_name: str, calibration_table: TableWorkspace,
+def purge_table(workspace: WorkspaceTypes, calibration_table: TableWorkspace,
                 tubes_fit_success: np.ndarray,  output_table: str = None) -> None:
     r"""
     Remove the detectorID's corresponding to the failing tubes from the calibration table
@@ -165,11 +173,11 @@ def purge_table(workspace: WorkspaceTypes, bank_name: str, calibration_table: Ta
     - Each tube has PIXELS_PER_TUBE number of pixels
     - detector ID's in the calibration table are sorted according to tube number
 
-    :param workspace:
-    :param bank_name:
-    :param calibration_table:
+    :param workspace: input Workspace2D containing total neutron counts per pixel
+    :param calibration_table: input TableWorkspace containing one column for detector ID and one column
+    for its calibrated XYZ coordinates, in meters
     :param tubes_fit_success: array of booleans of length TUBES_IN_BANK. `False` if a tube was unsuccessfully fitted.
-    :param output_table:
+    :param output_table: name of the purged table. If `None`, the input `calibration_table` is purged.
     """
     # validate input arguments
     if False not in tubes_fit_success:
@@ -198,13 +206,16 @@ def purge_table(workspace: WorkspaceTypes, bank_name: str, calibration_table: Ta
 def mask_bank(bank_name: str, tubes_fit_success: np.ndarray, output_table: str) -> Optional[TableWorkspace]:
     r"""
     Creates a single-column `TableWorkspace` object containing the detector ID's of the
-    unsuccessfully fitted tubes.
+    unsuccessfully fitted tubes
 
     If all tubes were fit successfully, no `TableWorkspace` is created, and `None` is returned.
 
-    :param bank_name:
-    :param tubes_fit_success:
-    :param mask_workspace: name of the
+    :param bank_name: a string of the form 'bankI' where 'I' is a bank number
+    :param tubes_fit_success: array of boolean containing a True/False entry for each tube, indicating wether
+    the tube was successfully calibrated.
+    :param output_table: name of the output TableWorkspace containing one column for detector ID from tubes
+    not successfully calibrated.
+
     :raise AssertionError: the string bank_name does not follow the pattern 'bankI' where 'I' in an integer
     :return: name of the mask TableWorkspace. Returns `None` if no TableWorkspace is created.
     """
@@ -218,6 +229,8 @@ def mask_bank(bank_name: str, tubes_fit_success: np.ndarray, output_table: str) 
     table = CreateEmptyTableWorkspace(OutputWorkspace=output_table)
     table.addColumn('long64', 'DETECTOR ID')
     [table.addRow([detector_id]) for detector_id in detector_ids.tolist()]
+    if AnalysisDataService.doesExist('CORELLIMaskBTP'):
+        DeleteWorkspaces(['CORELLIMaskBTP'])
     return mtd[output_table]
 
 
@@ -228,18 +241,24 @@ def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
                    shadow_height: float = 1000, shadow_width: float = 4, fit_domain: float = 7,
                    minimum_intensity: float = 1000) -> Tuple[TableWorkspace, Optional[TableWorkspace]]:
     r"""
+    Calibrate the tubes in a bank and assess their goodness-of-fit with an acceptance function. Creates a
+    table of calibrated detector IDs and a table of non-calibrated detector IDs
 
-    :param workspace:
-    :param bank_name:
-    :param shadow_height:
-    :param shadow_width:
-    :param fit_domain:
-    :param minimum_intensity:
-    :param acceptance_criterium:
-    :param criterium_kwargs:
-    :param calibration_table:
-    :param mask_table:
-    :return:
+    :param workspace: input Workspace2D containing total neutron counts per pixel
+    :param bank_name: a string of the form 'bankI' where 'I' is a bank number
+    :param shadow_height: initial guess for the decrease in neutron counts caused by the calibrating wire
+    :param shadow_width: initial guess for the number of pixels shadowed by the calibrating wire
+    :param fit_domain: number of pixels over which a calibrating wire may have any significant influence
+    :param minimum_intensity: mininum number of neutron counts per pixel to warrant a significant fit
+    session. This number is compared against the neutron counts per pixel, averaged over all pixels in the bank
+    :param acceptance_criterium: a function the determines wether each pixel in the tube was calibrated correctly
+    :param criterium_kwargs: optional arguments to the `acceptance_criterium` function.
+    :param calibration_table: output TableWorkspace containing one column for detector ID and one column
+    for its calibrated XYZ coordinates, in meters
+    :param mask_table: output TableWorkspace containing containing the detector ID's of the
+    unsuccessfully fitted tubes
+
+    :return: Workspace2D handles for the calibration and mask tables
     """
     # Validate inputs are taken care in function fit_bank
     # Fit the tubes in the bank
@@ -248,7 +267,7 @@ def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
     # Run the acceptance criterium to determine the failing tubes
     tubes_fit_success = acceptance_criterium('PeakTable', **criterium_kwargs)
     # purge the calibration table of detector ID's with failing tubes
-    purge_table(workspace, bank_name, calibration_table, tubes_fit_success)
+    purge_table(workspace, calibration_table, tubes_fit_success)
     # Create table of masked detector ID's, or None if all tubes were successfully fitted
     mask_table_workspace = mask_bank(bank_name, tubes_fit_success, mask_table)
     DeleteWorkspaces(['PeakTable'])
@@ -259,13 +278,19 @@ def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
                     calibration_group: str = 'calibrations', mask_group: str = 'masks',
                     acceptance_group: str = 'acceptances') -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
     r"""
+    Calibrate the tubes in a selection of banks, and assess their goodness-of-fit with an acceptance function.
 
-    :param workspace:
-    :param bank_selection: Example '32-36,38,40-43'
-    :param calibration_group:
-    :param mask_group:
-    :param acceptance_group:
-    :return:
+    For each bank, creates a table of calibrated detector IDs, a table of non-calibrated detector IDs, and one
+    'acceptance' Workspace2D object containing, for each tube, the typical deviation for the position of the wire shadows
+    with respect to the average positions for the while bank. A Z-score measure of these deviations is also stored.
+
+    :param workspace: input Workspace2D containing total neutron counts per pixel
+    :param bank_selection: selection string, such as '32-36,38,40-43'
+    :param calibration_group: name of the output WorkspaceGroup containing the calibration tables for each bank
+    :param mask_group: name of the output WorkspaceGroup containing the mask tables for each bank
+    :param acceptance_group: name of the output WorkspaceGroup containing the acceptance workspaces
+
+    :return: handles to the calibrations and masks WorkspaceGroup objects
     """
     # create a list of banks names
 
