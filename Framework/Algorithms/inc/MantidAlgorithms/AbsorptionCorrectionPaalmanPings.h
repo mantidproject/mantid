@@ -35,16 +35,8 @@ namespace Algorithms {
     <LI> InputWorkspace  - The name of the input workspace. </LI>
     <LI> OutputWorkspace - The name of the output workspace. Can be the same as
    the input one. </LI>
-    <LI> AttenuationXSection - The attenuation cross-section for the sample
-   material in barns. </LI>
-    <LI> ScatteringXSection - The scattering cross-section for the sample
-   material in barns. </LI>
-    <LI> SampleNumberDensity - The number density of the sample in
-   Angstrom^-3.</LI>
     <LI> NumberOfWavelengthPoints - The number of wavelength points for which
    numerical integral is calculated (default: all points). </LI>
-    <LI> ExpMethod - The method to calculate exponential function (Normal of
-   Fast approximation). </LI>
     </UL>
 
     This class, which must be overridden to provide the specific sample geometry
@@ -103,11 +95,6 @@ private:
                               const std::vector<double> &L2s,
                               const size_t startIndex,
                               const size_t endIndex) const;
-  inline double doIntegration(const double linearCoefAbsL1,
-                              const double linearCoefAbsL2,
-                              const std::vector<double> &L2s,
-                              const size_t startIndex,
-                              const size_t endIndex) const;
 
   API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
@@ -126,13 +113,7 @@ private:
   int64_t m_num_lambda; ///< The number of points in wavelength, the rest is
   /// interpolated linearly
   int64_t m_xStep; ///< The step in bin number between adjacent points
-  Kernel::DeltaEMode::Type m_emode;
-  double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy,
   /// if provided
-
-  using expfunction =
-      double (*)(double);  ///< Typedef pointer to exponential function
-  expfunction EXPONENTIAL; ///< Pointer to exponential function
 
   void defineProperties();
   void retrieveProperties();

@@ -22,7 +22,6 @@
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -56,10 +55,11 @@ inline size_t findMiddle(const size_t start, const size_t stop) {
 } // namespace
 
 AbsorptionCorrectionPaalmanPings::AbsorptionCorrectionPaalmanPings()
-    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
-      m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
-      m_sampleVolume(0.0), m_linearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
-      m_lambdaFixed(0.), EXPONENTIAL(), m_cubeSide(0.0) {}
+    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr),
+      m_containerObject(nullptr), m_L1s(), m_elementVolumes(),
+      m_elementPositions(), m_numVolumeElements(0), m_sampleVolume(0.0),
+      m_containerVolume(0.0), m_linearCoefTotScatt(0), m_num_lambda(0),
+      m_xStep(0), m_cubeSide(0.0) {}
 
 void AbsorptionCorrectionPaalmanPings::init() {
 
@@ -83,12 +83,6 @@ void AbsorptionCorrectionPaalmanPings::init() {
       positiveInt,
       "The number of wavelength points for which the numerical integral is\n"
       "calculated (default: all points)");
-
-  std::vector<std::string> exp_options{"Normal", "FastApprox"};
-  declareProperty(
-      "ExpMethod", "Normal", std::make_shared<StringListValidator>(exp_options),
-      "Select the method to use to calculate exponentials, normal or a\n"
-      "fast approximation (default: Normal)");
 
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
@@ -274,12 +268,6 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
 
   m_num_lambda = getProperty("NumberOfWavelengthPoints");
 
-  std::string exp_string = getProperty("ExpMethod");
-  if (exp_string == "Normal") // Use the system exp function
-    EXPONENTIAL = exp;
-  else if (exp_string == "FastApprox") // Use the compact approximation
-    EXPONENTIAL = fast_exp;
-
   // Call the virtual function for any further properties
   m_cubeSide = getProperty("ElementSize"); // in mm
   m_cubeSide *= 0.001;                     // now in m
@@ -384,7 +372,7 @@ double AbsorptionCorrectionPaalmanPings::doIntegration(
     for (size_t i = startIndex; i < endIndex; ++i) {
       const double exponent =
           (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
-      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+      integral += (exp(exponent) * (m_elementVolumes[i]));
     }
 
     return integral;
