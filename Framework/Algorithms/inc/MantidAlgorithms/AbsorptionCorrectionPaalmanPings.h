@@ -95,6 +95,9 @@ private:
                               const std::vector<double> &L2s,
                               const size_t startIndex,
                               const size_t endIndex) const;
+  void defineProperties();
+  void retrieveProperties();
+  void initialiseCachedDistances();
 
   API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
@@ -104,21 +107,23 @@ private:
   std::vector<double> m_L1s,   ///< Cached L1 distances
       m_elementVolumes;        ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
-  size_t m_numVolumeElements; ///< The number of volume elements
-  double m_sampleVolume;      ///< The total volume of the sample
-  double m_containerVolume;   ///< The total volume of the sample
+  size_t m_numVolumeElements;         ///< The number of volume elements
+  double m_sampleVolume;              ///< The total volume of the sample
+  std::vector<double> m_containerL1s, ///< Cached L1 distances
+      m_containerElementVolumes;      ///< Cached element volumes
+  std::vector<Kernel::V3D>
+      m_containerElementPositions;     ///< Cached element positions
+  size_t m_containerNumVolumeElements; ///< The number of volume elements
+  double m_containerVolume;            ///< The total volume of the sample
   Kernel::Material m_material;
   Kernel::Material m_containerMaterial;
   double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m
+  double m_containerLinearCoefTotScatt; ///< The total scattering cross-section
+                                        ///< in 1/m
   int64_t m_num_lambda; ///< The number of points in wavelength, the rest is
   /// interpolated linearly
   int64_t m_xStep; ///< The step in bin number between adjacent points
-  /// if provided
 
-  void defineProperties();
-  void retrieveProperties();
-  std::string sampleXML();
-  void initialiseCachedDistances();
   /// Create the gague volume for the correction
   std::shared_ptr<const Geometry::IObject> constructGaugeVolume();
   double m_cubeSide; ///< The length of the side of an element cube in m
