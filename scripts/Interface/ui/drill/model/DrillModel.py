@@ -359,6 +359,8 @@ class DrillModel(QObject):
                         t = "string"
                 elif (isinstance(p, BoolPropertyWithValue)):
                     t = "bool"
+                elif (isinstance(p, FloatArrayProperty)):
+                    t = "array"
                 else:
                     t = "string"
 
@@ -380,10 +382,7 @@ class DrillModel(QObject):
 
         for s in self.settings:
             p = alg.getProperty(s)
-            if (isinstance(p, BoolPropertyWithValue)):
-                self.settings[s] = p.value
-            else:
-                self.settings[s] = p.getDefault
+            self.settings[s] = p.value
 
     def checkParameter(self, param, value, sample=-1):
         """

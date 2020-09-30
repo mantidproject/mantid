@@ -54,7 +54,7 @@ class DrillModelTest(unittest.TestCase):
 
         # mock properties
         self.mSapi.AlgorithmManager.createUnmanaged.return_value.getProperty \
-            .return_value.valueAsPrettyStr.return_value = "test"
+            .return_value.value = "test"
 
         # mock open
         patch = mock.patch('Interface.ui.drill.model.DrillModel.open')
