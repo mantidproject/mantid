@@ -9,4 +9,9 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Bugfixes
+########
+
+- Fixed an issue where `import CaChannel` on Linux would cause a hard crash.
+
 :ref:`Release 6.0.0 <v6.0.0>`
