@@ -90,20 +90,6 @@ void AbsorptionCorrectionPaalmanPings::init() {
       std::make_shared<StringListValidator>(std::move(scatter_options)),
       "The component to calculate the absorption for (default: Sample)");
 
-  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
-  declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
-                  "The ABSORPTION cross-section, at 1.8 Angstroms, for the "
-                  "sample material in barns. Column 8 of a table generated "
-                  "from http://www.ncnr.nist.gov/resources/n-lengths/.");
-  declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
-                  "The (coherent + incoherent) scattering cross-section for "
-                  "the sample material in barns. Column 7 of a table generated "
-                  "from http://www.ncnr.nist.gov/resources/n-lengths/.");
-  declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-                  "The number density of the sample in number of atoms per "
-                  "cubic angstrom if not set with SetSampleMaterial");
-
   auto positiveInt = std::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
   declareProperty(
@@ -305,13 +291,8 @@ std::string AbsorptionCorrectionPaalmanPings::sampleXML() {
 }
 /// Fetch the properties and set the appropriate member variables
 void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
-  double sigma_atten = getProperty("AttenuationXSection"); // in barns
-  double sigma_s = getProperty("ScatteringXSection");      // in barns
-  double rho = getProperty("SampleNumberDensity");         // in Angstroms-3
   const std::string scatterFrom = getProperty("ScatterFrom");
 
-  bool createMaterial =
-      !(isEmpty(rho) && isEmpty(sigma_s) && isEmpty(sigma_atten));
   // get the material from the correct component
   const auto &sampleObj = m_inputWS->sample();
   if (scatterFrom == CALC_SAMPLE) {
@@ -320,28 +301,6 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
     m_material = sampleObj.getEnvironment().getContainer().material();
   } else if (scatterFrom == CALC_ENVIRONMENT) {
     m_material = sampleObj.getEnvironment().getComponent(1).material();
-  }
-
-  if (createMaterial) {
-    // get values from the existing material
-    if (isEmpty(rho))
-      rho = m_material.numberDensity();
-    if (isEmpty(sigma_s))
-      sigma_s = m_material.totalScatterXSection();
-    if (isEmpty(sigma_atten))
-      sigma_atten = m_material.absorbXSection(NeutronAtom::ReferenceLambda);
-
-    // create the new material
-    NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
-
-    // Save input in Sample with wrong atomic number and name
-    auto shape = std::shared_ptr<IObject>(
-        m_inputWS->sample().getShape().cloneWithMaterial(
-            Material("SetInAbsorptionCorrection", neutron, rho)));
-    m_inputWS->mutableSample().setShape(shape);
-
-    // get the material back
-    m_material = m_inputWS->sample().getShape().material();
   }
 
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
