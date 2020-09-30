@@ -601,6 +601,8 @@ private:
   void buildDefaultSpectrumDefinitions();
   void rebuildDetectorIDGroupings();
 
+  virtual bool isHistogramDataByIndex(std::size_t index = 0) const;
+
   std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
 
   /// Has this workspace been initialised?
