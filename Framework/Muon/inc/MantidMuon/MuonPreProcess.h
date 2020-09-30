@@ -54,6 +54,10 @@ private:
   MatrixWorkspace_sptr applyTimeOffset(MatrixWorkspace_sptr ws,
                                        const double &offset);
 
+  MatrixWorkspace_sptr
+  applyTimeZeroVector(MatrixWorkspace_sptr ws,
+                      const std::vector<double> &timeZeros);
+
   MatrixWorkspace_sptr applyCropping(MatrixWorkspace_sptr ws,
                                      const double &xMin, const double &xMax);
 
