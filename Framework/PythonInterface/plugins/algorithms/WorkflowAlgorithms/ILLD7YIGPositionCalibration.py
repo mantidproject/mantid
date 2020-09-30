@@ -295,6 +295,8 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         max_n_peaks = len(max(yig_peaks, key=len))
         conjoined_peak_fit_name = 'conjoined_peak_fit_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
         ws_names = []
+        function = "name=LinearBackground, A0=1e-4, A1=1e-4;name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}"
+        constraints = "f1.Height > 0, f1.Sigma < {0}, {1} < f1.PeakCentre < {2}"
         for pixel_no in range(mtd[ws].getNumberHistograms()):
             # create the needed columns in the output workspace
             results_x = np.zeros(max_n_peaks)
@@ -304,22 +306,18 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
             if len(single_spectrum_peaks) >= 1:
                 peak_no = 0
                 for peak_intensity, peak_centre_guess, peak_centre_expected in single_spectrum_peaks:
-                    function = "name=LinearBackground, A0=1e-4, A1=1e-4;\n"
-                    function += "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2};\n".format(
-                                                                                                peak_centre_guess,
-                                                                                                peak_intensity,
-                                                                                                0.5*self._peakWidth)
-                    constraints = "f1.Height > 0, f1.Sigma < {0}".format(0.75*self._peakWidth)
-                    constraints += ",{0} < f1.PeakCentre < {1}".format(peak_centre_guess - self._minDistance,
-                                                                       peak_centre_guess + self._minDistance)
+                    fit_function = function.format(float(peak_centre_guess), peak_intensity, 0.5*self._peakWidth)
+                    fit_constraints = constraints.format(0.75 * self._peakWidth,
+                                       peak_centre_guess - self._minDistance,
+                                       peak_centre_guess + self._minDistance)
                     ws_name = 'pixel_{0}_peak_{1}'.format(pixel_no, peak_no)
                     ws_names.append(ws_name)
-                    fit_output = Fit(Function=function,
+                    fit_output = Fit(Function=fit_function,
                                      InputWorkspace=ws,
                                      WorkspaceIndex=pixel_no,
                                      StartX=peak_centre_expected - self._minDistance,
                                      EndX=peak_centre_expected + self._minDistance,
-                                     Constraints=constraints,
+                                     Constraints=fit_constraints,
                                      CreateOutput=True,
                                      IgnoreInvalidData=True,
                                      Output='out')
