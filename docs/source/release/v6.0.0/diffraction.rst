@@ -23,6 +23,8 @@ Engineering Diffraction
 Single Crystal Diffraction
 --------------------------
 
+- Fix problem that was causing matrix diagonalization to return NaNs in certain cases. The diagonalization is used in :ref:`CalculateUMatrix <algm-CalculateUMatrix>` and :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
+
 Imaging
 -------
 
