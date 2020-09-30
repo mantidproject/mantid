@@ -16,7 +16,7 @@ from mantid.simpleapi import ApplyCalibration, CloneWorkspace, Integration, Load
 try:
     from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
     from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
-except ModuleNotFoundError:
+except (ImportError, ModuleNotFoundError):
     InstrumentViewPresenter, QAppThreadCall = None, None
 from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
