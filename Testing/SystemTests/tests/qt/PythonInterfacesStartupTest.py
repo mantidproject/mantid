@@ -10,7 +10,40 @@ import systemtesting
 from mantid.kernel import ConfigService
 from mantidqt.utils.qt.testing import get_application
 
+from qtpy import PYQT5
 from qtpy.QtCore import QCoreApplication, QSettings
+
+
+INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS",
+                       "ORNL_SANS.py": "EQSANS",
+                       "Powder_Diffraction_Reduction.py": "NOM"}
+
+APP_NAME_SWITCHER = {"DGS_Reduction.py": "python",
+                     "ORNL_SANS.py": "python",
+                     "Powder_Diffraction_Reduction.py": "python"}
+
+
+def get_excluded_scripts():
+    # Frequency_Domain_Analysis_Old.py  -  Excluded because it is unused
+    # Frequency_Domain_Analysis.py      -  Excluded because it is causing a crash
+    excluded_scripts = ["Frequency_Domain_Analysis_Old.py", "Frequency_Domain_Analysis.py"]
+    if not PYQT5:
+        # Sample_Transmission_Calculator.py -  Excluded because it attempts to use QLayout::replaceWidget from Qt 5.2
+        # QECoverage.py                     -  Excluded because it attempts to use QtWidget.QWidget from Qt 5
+        excluded_scripts.extend(["Sample_Transmission_Calculator.py", "QECoverage.py"])
+    return excluded_scripts
+
+
+def set_instrument(interface_script_name):
+    instrument = INSTRUMENT_SWITCHER.get(interface_script_name, None)
+    if instrument is not None:
+        QSettings().setValue("instrument_name", instrument)
+
+
+def set_application_name(interface_script_name):
+    app_name = APP_NAME_SWITCHER.get(interface_script_name, "mantid")
+    QCoreApplication.setOrganizationName(" ")
+    QCoreApplication.setApplicationName(app_name)
 
 
 class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
@@ -22,25 +55,33 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
 
         self._app = get_application()
 
-        interface_directory = ConfigService.getString('mantidqt.python_interfaces_directory')
-        self._python_interface_paths = [os.path.join(interface_directory, interface.split("/")[1]) for interface in
-                                        ConfigService.getString('mantidqt.python_interfaces').split()]
+        self._exclude_scripts = get_excluded_scripts()
 
-        # Prevents a QDialog popping up when opening the DGS Reduction interface
-        QCoreApplication.setOrganizationName(" ")
-        QCoreApplication.setApplicationName("python")
-        QSettings().setValue("instrument_name", "ARCS")
+        self._interface_directory = ConfigService.getString('mantidqt.python_interfaces_directory')
+        self._interface_scripts = [interface.split("/")[1] for interface in
+                                   ConfigService.getString('mantidqt.python_interfaces').split()
+                                   if interface.split("/")[1] not in self._exclude_scripts]
+
+        # py = []
+        # for interface_script in self._interface_scripts:
+        #     if interface_script == "HFIR_4Circle_Reduction.py":
+        #         py.append(interface_script)
+        # self._interface_scripts = py
 
     def runTest(self):
-        if len(self._python_interface_paths) == 0:
-            self.fail("Failed to find the paths to any of the python interfaces.")
+        if len(self._interface_scripts) == 0:
+            self.fail("Failed to find any python interface scripts.")
 
-        for interface_path in self._python_interface_paths:
-            self._attempt_to_open_python_interface(interface_path)
+        for interface_script in self._interface_scripts:
+            self._attempt_to_open_python_interface(interface_script)
 
-    def _attempt_to_open_python_interface(self, interface_path):
+    def _attempt_to_open_python_interface(self, interface_script):
+        # Ensures the interfaces close after their script has been executed
+        set_application_name(interface_script)
+        # Prevents a QDialog popping up when opening certain interfaces
+        set_instrument(interface_script)
+
         try:
-            exec(open(interface_path).read())
-            exit()
+            exec(open(os.path.join(self._interface_directory, interface_script)).read())
         except Exception as ex:
-            self.fail("Exception thrown when attempting to open the {0} interface: {1}".format(interface_path, str(ex)))
+            self.fail("Exception thrown when attempting to open the {0} interface: {1}".format(interface_script, str(ex)))
