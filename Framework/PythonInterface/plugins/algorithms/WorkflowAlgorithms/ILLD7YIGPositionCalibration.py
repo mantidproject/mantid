@@ -118,10 +118,12 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         progress = Progress(self, start=0.0, end=1.0, nreports=5)
         # load the chosen YIG scan
         fit_output_name = self.getPropertyValue('FitOutputWorkspace')
+        conjoined_scan = "conjoined_input_{}".format(fit_output_name)
         if self.getProperty('InputWorkspace').isDefault:
-            conjoined_scan = self._get_scan_data(fit_output_name)
+            self._get_scan_data()
         else:
-            conjoined_scan = self.getProperty('InputWorkspace').value
+            input_name = self.getPropertyValue('InputWorkspace')
+            RenameWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
         progress.report()
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getPropertyValue("BankOffsets").split(',')
@@ -167,7 +169,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         else:
             self.setProperty('FitOutputWorkspace', detector_parameters)
 
-    def _get_scan_data(self, ws_name):
+    def _get_scan_data(self):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""
 
