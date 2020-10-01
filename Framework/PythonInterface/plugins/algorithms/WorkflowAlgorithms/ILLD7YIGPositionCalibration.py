@@ -441,8 +441,9 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                              Output='det_fit_out_{}'.format(fit_output_name),
                              **fit_kwargs)
         except RuntimeError:
-            print("Please change initial parameters of the fit")
-            raise
+            import traceback
+            traceback.print_exc()
+            raise Exception('Fitting detector positions and wavelength failed, consider changing initial parameters')
         param_table = fit_output.OutputParameters
 
         #clean up
