@@ -362,7 +362,7 @@ class DrillModel(QObject):
                     t = "string"
             elif (isinstance(p, BoolPropertyWithValue)):
                 t = "bool"
-            elif (isinstance(p, FloatArrayProperty)):
+            elif (isinstance(p, (FloatArrayProperty, IntArrayProperty))):
                 t = "array"
             else:
                 t = "string"
