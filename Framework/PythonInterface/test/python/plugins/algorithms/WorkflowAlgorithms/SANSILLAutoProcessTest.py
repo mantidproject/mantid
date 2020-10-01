@@ -23,7 +23,7 @@ class SANSILLAutoProcessTest(unittest.TestCase):
         config["default.instrument"] = self._instrument
         mtd.clear()
 
-    def test_validateInut(self):
+    def test_validateInput(self):
         # no sample runs
         self.assertRaises(RuntimeError, SANSILLAutoProcess)
 
