@@ -27,9 +27,12 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
 
     def tearDown(self):
         mtd.clear()
-        os.remove('test_shortWavelength.xml')
-        os.remove('test_intermediateWavelength.xml')
-        os.remove('longWavelengthScan.xml')
+        if path.exists('test_shortWavelength.xml'):
+            os.remove('test_shortWavelength.xml')
+        if path.exists('test_intermediateWavelength.xml'):
+            os.remove('test_intermediateWavelength.xml')
+        if path.exists('test_longWavelength.xml'):
+            os.remove('test_longWavelength.xml')
 
     def test_algorithm_with_no_input_workspace_raises_exception(self):
         with self.assertRaises(RuntimeError):
