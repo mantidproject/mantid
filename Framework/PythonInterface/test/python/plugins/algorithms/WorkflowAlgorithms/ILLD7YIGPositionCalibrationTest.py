@@ -41,9 +41,9 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
     def test_shortWavelength(self):
         approximate_wavelength = '3.14' # Angstrom
         ILLD7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                    YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_shortWavelength.xml',
+                                    YIGPeaksFile='YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
                                     MinimalDistanceBetweenPeaks=1.75, BankOffsets="-3,-3,1",
-                                    DetectorFitOutput='test_shortWavelength')
+                                    FitOutputWorkspace='test_shortWavelength')
         self.assertTrue(path.exists('test_shortWavelength.xml'))
         self._check_fit_output('test_shortWavelength')
         self._check_load_data_with_calibration('test_shortWavelength.xml')
@@ -51,9 +51,9 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
     def test_intermediateWavelength(self):
         approximate_wavelength = '4.8' # Angstrom
         ILLD7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                    YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_intermediateWavelength.xml',
+                                    YIGPeaksFile='YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
                                     MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
-                                    DetectorFitOutput='test_intermediateWavelength')
+                                    FitOutputWorkspace='test_intermediateWavelength')
         self.assertTrue(path.exists('test_intermediateWavelength.xml'))
         self._check_fit_output('test_intermediateWavelength')
         self._check_load_data_with_calibration('test_intermediateWavelength.xml')
@@ -61,9 +61,9 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
     def test_longWavelength(self):
         approximate_wavelength = '5.7' # Angstrom
         ILLD7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                    YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_longWavelength.xml',
+                                    YIGPeaksFile='YIG_peaks.xml', CalibrationOutputFile='test_longWavelength.xml',
                                     MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
-                                    DetectorFitOutput='test_longWavelength')
+                                    FitOutputWorkspace='test_longWavelength')
         self.assertTrue(path.exists('test_longWavelength.xml'))
         self._check_fit_output('test_longWavelength')
         self._check_load_data_with_calibration('test_longWavelength.xml')
