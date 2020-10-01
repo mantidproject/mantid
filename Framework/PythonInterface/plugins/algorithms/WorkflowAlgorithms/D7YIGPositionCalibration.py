@@ -136,8 +136,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         self._scanStepSize = self.getProperty("ScanStepSize").value
         self._peakWidth = self.getProperty("BraggPeakWidth").value
         masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
-        self._beamMask1 = masked_bins_range[0]
-        self._beamMask2 = masked_bins_range[1]
+        self._beamMask1 = float(masked_bins_range[0])
+        self._beamMask2 = float(masked_bins_range[1])
         self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # loads the YIG peaks from an IPF
