@@ -90,11 +90,15 @@ private:
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
   void calculateDistances(const Geometry::IDetector &detector,
-                          std::vector<double> &L2s) const;
-  inline double doIntegration(const double linearCoefAbs,
-                              const std::vector<double> &L2s,
-                              const size_t startIndex,
-                              const size_t endIndex) const;
+                          std::vector<double> &sample_L2s,
+                          std::vector<double> &sample_container_L2s,
+                          std::vector<double> &container_L2s,
+                          std::vector<double> &container_sample_L2s) const;
+  inline double
+  doIntegration(const double linearCoefAbs, const double linearCoefTotScatt,
+                const std::vector<double> &elementVolumes,
+                const std::vector<double> &L1s, const std::vector<double> &L2s,
+                const size_t startIndex, const size_t endIndex) const;
   void defineProperties();
   void retrieveProperties();
   void initialiseCachedDistances();

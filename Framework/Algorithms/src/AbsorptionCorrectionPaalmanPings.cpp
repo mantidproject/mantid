@@ -122,13 +122,22 @@ void AbsorptionCorrectionPaalmanPings::exec() {
   retrieveBaseProperties();
 
   // Create the output workspace
-  MatrixWorkspace_sptr correctionFactors = create<HistoWorkspace>(*m_inputWS);
-  correctionFactors->setDistribution(
-      true);                       // The output of this is a distribution
-  correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
-  correctionFactors->setYUnitLabel("Attenuation factor");
+  MatrixWorkspace_sptr sampleCorrectionFactors =
+      create<HistoWorkspace>(*m_inputWS);
+  sampleCorrectionFactors->setDistribution(
+      true); // The output of this is a distribution
+  sampleCorrectionFactors->setYUnit(
+      ""); // Need to explicitly set YUnit to nothing
+  sampleCorrectionFactors->setYUnitLabel("Attenuation factor");
+  MatrixWorkspace_sptr containerCorrectionFactors =
+      create<HistoWorkspace>(*m_inputWS);
+  containerCorrectionFactors->setDistribution(
+      true); // The output of this is a distribution
+  containerCorrectionFactors->setYUnit(
+      ""); // Need to explicitly set YUnit to nothing
+  containerCorrectionFactors->setYUnitLabel("Attenuation factor");
 
-  constructSample(correctionFactors->mutableSample());
+  constructSample(sampleCorrectionFactors->mutableSample());
 
   const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
@@ -157,11 +166,13 @@ void AbsorptionCorrectionPaalmanPings::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *sampleCorrectionFactors,
+                                     *containerCorrectionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over bins
-    correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
+    sampleCorrectionFactors->setSharedX(i, m_inputWS->sharedX(i));
+    containerCorrectionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
     if (!spectrumInfo.hasDetectors(i)) {
       g_log.information() << "Spectrum " << i
@@ -170,22 +181,36 @@ void AbsorptionCorrectionPaalmanPings::exec() {
     }
     const auto &det = spectrumInfo.detector(i);
 
-    std::vector<double> L2s(m_numVolumeElements);
-    calculateDistances(det, L2s);
+    std::vector<double> sample_L2s(m_numVolumeElements);
+    std::vector<double> sample_container_L2s(m_numVolumeElements);
+    std::vector<double> container_L2s(m_containerNumVolumeElements);
+    std::vector<double> container_sample_L2s(m_containerNumVolumeElements);
+    calculateDistances(det, sample_L2s, sample_container_L2s, container_L2s,
+                       container_sample_L2s);
 
     const auto wavelengths = m_inputWS->points(i);
     // these need to have the minus sign applied still
     const auto linearCoefAbs =
         m_material.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
+    const auto containerLinearCoefAbs = m_containerMaterial.linearAbsorpCoef(
+        wavelengths.cbegin(), wavelengths.cend());
 
     // Get a reference to the Y's in the output WS for storing the factors
-    auto &Y = correctionFactors->mutableY(i);
+    auto &sY = sampleCorrectionFactors->mutableY(i);
+    auto &cY = containerCorrectionFactors->mutableY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
-      Y[j] /= m_sampleVolume; // Divide by total volume of the shape
+      sY[j] = this->doIntegration(-linearCoefAbs[j], m_linearCoefTotScatt,
+                                  m_elementVolumes, m_L1s, sample_L2s, 0,
+                                  m_numVolumeElements);
+      sY[j] /= m_sampleVolume; // Divide by total volume of the shape
 
+      cY[j] = this->doIntegration(
+          -containerLinearCoefAbs[j], m_containerLinearCoefTotScatt,
+          m_containerElementVolumes, m_containerL1s, container_L2s, 0,
+          m_containerNumVolumeElements);
+      cY[j] /= m_containerVolume; // Divide by total volume of the shape
       // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
         j = specSize - m_xStep - 1;
@@ -195,9 +220,12 @@ void AbsorptionCorrectionPaalmanPings::exec() {
     // Interpolate linearly between points separated by m_xStep,
     // last point required
     if (m_xStep > 1) {
-      auto histnew = correctionFactors->histogram(i);
+      auto histnew = sampleCorrectionFactors->histogram(i);
       interpolateLinearInplace(histnew, m_xStep);
-      correctionFactors->setHistogram(i, histnew);
+      sampleCorrectionFactors->setHistogram(i, histnew);
+      auto histnew2 = containerCorrectionFactors->histogram(i);
+      interpolateLinearInplace(histnew2, m_xStep);
+      containerCorrectionFactors->setHistogram(i, histnew2);
     }
 
     prog.report();
@@ -208,7 +236,7 @@ void AbsorptionCorrectionPaalmanPings::exec() {
 
   g_log.information() << "Total number of elements in the integration was "
                       << m_L1s.size() << '\n';
-  setProperty("OutputWorkspace", correctionFactors);
+  setProperty("OutputWorkspace", sampleCorrectionFactors);
 
   // Now do some cleaning-up since destructor may not be called immediately
   m_L1s.clear();
@@ -317,7 +345,10 @@ void AbsorptionCorrectionPaalmanPings::constructSample(API::Sample &sample) {
 /// @param L2s :: A vector of the sample-detector distance for  each segment of
 /// the sample
 void AbsorptionCorrectionPaalmanPings::calculateDistances(
-    const IDetector &detector, std::vector<double> &L2s) const {
+    const IDetector &detector, std::vector<double> &sample_L2s,
+    std::vector<double> &sample_container_L2s,
+    std::vector<double> &container_L2s,
+    std::vector<double> &container_sample_L2s) const {
   V3D detectorPos(detector.getPos());
   if (detector.nDets() > 1) {
     // We need to make sure this is right for grouped detectors - should use
@@ -329,11 +360,12 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
   }
 
   for (size_t i = 0; i < m_numVolumeElements; ++i) {
-    // Create track for distance in cylinder between scattering point and
-    // detector
+    // Create track for distance between scattering point in sample and detector
     const V3D direction = normalize(detectorPos - m_elementPositions[i]);
     Track outgoing(m_elementPositions[i], direction);
     int temp = m_sampleObject->interceptSurface(outgoing);
+    Track outgoing2(m_elementPositions[i], direction);
+    int temp2 = m_containerObject->interceptSurface(outgoing2);
 
     /* Most of the time, the number of hits is 1. Sometime, we have more than
      * one intersection due to
@@ -352,7 +384,7 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
       // WHICH I RECKON WILL MAKE A
       // NEGLIGIBLE DIFFERENCE ANYWAY (ALWAYS SEEMS TO HAPPEN WITH ELEMENT RIGHT
       // AT EDGE OF SAMPLE)
-      L2s[i] = 0.0;
+      sample_L2s[i] = 0.0;
 
       // std::ostringstream message;
       // message << "Problem with detector at " << detectorPos << " ID:" <<
@@ -364,7 +396,37 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
       // AbsorptionCorrection::calculateDistances");
     } else // The normal situation
     {
-      L2s[i] = outgoing.totalDistInsideObject();
+      sample_L2s[i] = outgoing.totalDistInsideObject();
+    }
+    if (temp2 < 1) {
+      sample_container_L2s[i] = 0.0;
+    } else // The normal situation
+    {
+      sample_container_L2s[i] = outgoing2.totalDistInsideObject();
+    }
+  }
+
+  for (size_t i = 0; i < m_containerNumVolumeElements; ++i) {
+    // Create track for distance between scattering point in container and
+    // detector
+    const V3D direction =
+        normalize(detectorPos - m_containerElementPositions[i]);
+    Track outgoing(m_containerElementPositions[i], direction);
+    int temp = m_sampleObject->interceptSurface(outgoing);
+    Track outgoing2(m_containerElementPositions[i], direction);
+    int temp2 = m_containerObject->interceptSurface(outgoing2);
+
+    if (temp < 1) {
+      container_L2s[i] = 0.0;
+    } else // The normal situation
+    {
+      container_L2s[i] = outgoing.totalDistInsideObject();
+    }
+    if (temp2 < 1) {
+      container_sample_L2s[i] = 0.0;
+    } else // The normal situation
+    {
+      container_sample_L2s[i] = outgoing2.totalDistInsideObject();
     }
   }
 }
@@ -376,21 +438,25 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
 double AbsorptionCorrectionPaalmanPings::doIntegration(
-    const double linearCoefAbs, const std::vector<double> &L2s,
-    const size_t startIndex, const size_t endIndex) const {
+    const double linearCoefAbs, const double linearCoefTotScatt,
+    const std::vector<double> &elementVolumes, const std::vector<double> &L1s,
+    const std::vector<double> &L2s, const size_t startIndex,
+    const size_t endIndex) const {
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
-    return doIntegration(linearCoefAbs, L2s, startIndex, middle) +
-           doIntegration(linearCoefAbs, L2s, middle, endIndex);
+    return doIntegration(linearCoefAbs, linearCoefTotScatt, elementVolumes, L1s,
+                         L2s, startIndex, middle) +
+           doIntegration(linearCoefAbs, linearCoefTotScatt, elementVolumes, L1s,
+                         L2s, middle, endIndex);
   } else {
     double integral = 0.0;
 
     // Iterate over all the elements, summing up the integral
     for (size_t i = startIndex; i < endIndex; ++i) {
       const double exponent =
-          (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
-      integral += (exp(exponent) * (m_elementVolumes[i]));
+          (linearCoefAbs + linearCoefTotScatt) * (L1s[i] + L2s[i]);
+      integral += (exp(exponent) * (elementVolumes[i]));
     }
 
     return integral;
