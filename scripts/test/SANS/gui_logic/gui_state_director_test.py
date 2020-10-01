@@ -5,19 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
-import os
 import unittest
 from unittest import mock
 
-from sans.common.enums import SANSFacility, SANSInstrument
+from sans.common.enums import SANSFacility
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.models.table_model import TableModel
 from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
-from sans.state.AllStates import AllStates
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
-from sans.user_file.user_file_reader import UserFileReader
 
 
 class GuiStateDirectorTest(unittest.TestCase):
@@ -90,6 +86,20 @@ class GuiStateDirectorTest(unittest.TestCase):
         state = director.create_state(self._get_row_entry(), row_user_file="NotThere.txt")
 
         self.assertEqual(expected_dim, state.reduction_dimensionality)
+
+    def test_save_settings_copied_from_gui(self):
+        state_model = mock.Mock(spec=self._get_state_gui_model())
+        state_model.all_states.save = mock.NonCallableMock()
+
+        # Copy the top level model and reset save rather than load a file
+        copied_state = copy.deepcopy(state_model)
+        copied_state.all_states.save = None
+
+        director = GuiStateDirector(state_model, SANSFacility.ISIS)
+        director._load_current_state = mock.Mock(return_value=copied_state)
+        new_state = director.create_state(self._get_row_entry(), row_user_file="NotThere.txt")
+
+        self.assertEqual(state_model.all_states.save, new_state.all_states.save)
 
 
 if __name__ == '__main__':

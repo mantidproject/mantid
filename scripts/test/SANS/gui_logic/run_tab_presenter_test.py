@@ -91,7 +91,6 @@ class RunTabPresenterTest(unittest.TestCase):
         # Allows us to use mock objs as the method tries to directly use int/floats
         self.presenter.update_view_from_table_model = mock.Mock()
 
-
     def tearDown(self):
         config["default.facility"] = self._backup_facility
         config["default.instrument"] = self._backup_instrument
@@ -809,6 +808,7 @@ class RunTabPresenterTest(unittest.TestCase):
             remove_file(user_file_path)
         if batch_file_path:
             remove_file(batch_file_path)
+
 
 if __name__ == '__main__':
     unittest.main()

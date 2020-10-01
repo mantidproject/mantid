@@ -4,13 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from itertools import product
 import unittest
-import numpy as np
-from numpy.testing import assert_array_almost_equal, assert_array_equal
+from itertools import product
 
 import abins
+import numpy as np
 from abins.constants import FIRST_OVERTONE, FUNDAMENTALS, INT_TYPE, FLOAT_TYPE
+from numpy.testing import assert_array_equal
 
 
 class FrequencyPowderGeneratorTest(unittest.TestCase):
@@ -182,9 +182,9 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         # Check doubles are in the right places and the maths is just a sum
         self.assertTrue(np.any(fundamentals[0] * 2 == doubles))
         self.assertTrue(np.any(fundamentals[2] + fundamentals[3] == doubles))
-        self.assertEqual((fundamentals[double_coeffs[20,0]]
-                          + fundamentals[double_coeffs[20,1]]),
-                          doubles[20])
+        self.assertEqual((fundamentals[double_coeffs[20, 0]]
+                          + fundamentals[double_coeffs[20, 1]]),
+                         doubles[20])
 
 
 if __name__ == '__main__':

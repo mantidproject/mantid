@@ -5,19 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
-from mantid.api import FileFinder
 from unittest import mock
-from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities import load_utils
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view_new
-from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
+from mantidqt.utils.qt.testing import start_qapplication
 
-from Muon.GUI.Common.utilities.algorithm_utils import convert_to_field
+from mantid.api import FileFinder
 
 GROUP_LIST = ['top', 'bkwd', 'bottom', 'fwd']
 EXAMPLE_PAIR = 'test_pair'
@@ -336,7 +334,7 @@ class FFTPresenterTest(unittest.TestCase):
         field_mock.assert_called_once_with(fft_mock_return)
         self.presenter.add_fft_workspace_to_ADS.assert_called_once_with(name, Im_name, field_mock_return)
 
-    def test_selection_removed_genWorkspaceName(self):
+    def test_selection_removed_WorkspaceName(self):
         # Remove first group from selection
         self.remove_from_group_selection('top')
 

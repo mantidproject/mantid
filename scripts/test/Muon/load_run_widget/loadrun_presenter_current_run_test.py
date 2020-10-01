@@ -7,16 +7,16 @@
 import unittest
 from unittest import mock
 from unittest.mock import patch
-from mantidqt.utils.qt.testing import start_qapplication
-from qtpy.QtWidgets import QApplication, QMessageBox, QWidget
 
 import Muon.GUI.Common.utilities.muon_file_utils as fileUtils
-import Muon.GUI.Common.message_box as messageBox
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.thread_model import ThreadModel, ThreadModelWorker
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.Common.thread_model import ThreadModel, ThreadModelWorker
+from mantidqt.utils.qt.testing import start_qapplication
+from qtpy.QtWidgets import QApplication, QWidget
+
 
 # this class is required to keep track of error signal emissions since the output is garbage collected by the time
 # we reach the equal assertion
@@ -48,7 +48,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QApplication.instance().processEvents()
+            QApplication.sendPostedEvents()
 
     def create_fake_workspace(self):
         return {'MainFieldDirection': 'transverse'}

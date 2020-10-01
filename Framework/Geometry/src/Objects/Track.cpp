@@ -235,6 +235,19 @@ void Track::buildLink() {
   m_surfPoints.clear();
 }
 
+/**
+ * Sums each link's distance inside an object to get a total
+ * interior distance for the track. This is needed when there
+ * are multiple intersection points through an object.
+ * @returns Sum of all links distInsideObject
+ */
+double Track::totalDistInsideObject() const {
+  return std::accumulate(m_links.begin(), m_links.end(), 0.,
+                         [](double total, const auto &link) {
+                           return total + link.distInsideObject;
+                         });
+}
+
 std::ostream &operator<<(std::ostream &os, TrackDirection direction) {
   switch (direction) {
   case TrackDirection::ENTERING:

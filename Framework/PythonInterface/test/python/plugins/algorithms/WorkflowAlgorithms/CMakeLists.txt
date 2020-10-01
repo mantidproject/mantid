@@ -13,6 +13,7 @@ set(TEST_PY_FILES
     DirectILLIntegrateVanadiumTest.py
     DirectILLReductionTest.py
     DirectILLSelfShieldingTest.py
+    ElasticWindowMultipleTest.py
     EnergyWindowScanTest.py
     FitGaussianPeaksTest.py
     FindPeakAutomaticTest.py

@@ -222,7 +222,7 @@ if __name__ == "__main__":
 
     data_root = r'd:\Data\MantidDevArea\Datastore\DataCopies'
     data_dir = os.path.join(data_root, r'Testing\Data\SystemTest')
-    ref_data_dir = os.path.join(data_root, r'Testing\SystemTests\tests\analysis\reference')
+    ref_data_dir = os.path.join(data_root, r'Testing\SystemTests\tests\framework\reference')
     result_dir = r'd:/Data/Mantid_Testing/14_12_15'
 
     config.setDataSearchDirs('{0};{1};{2}'.format(data_dir, ref_data_dir, result_dir))
