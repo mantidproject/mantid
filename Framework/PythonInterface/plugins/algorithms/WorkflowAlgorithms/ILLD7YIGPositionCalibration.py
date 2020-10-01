@@ -26,11 +26,11 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
     _D7NumberPixels = 132
     _D7NumberPixelsBank = 44
     # an approximate universal peak width:
-    _peakWidth = 2.0 # in degrees
-    _beamMask1 = -35.0
-    _beamMask2 = 15.0
+    _peakWidth = None
+    _beamMask1 = None
+    _beamMask2 = None
     _minDistance = None
-    _scanStepSize = 0.25
+    _scanStepSize = None
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -105,7 +105,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         self.declareProperty(FileProperty(name='CalibrationOutputFile',
                                           action=FileAction.Save,
                                           extensions=['xml'],
-                                          defaultValue='d7_{}.xml'.format(date.today())),
+                                          defaultValue=''),
                              doc="The output YIG calibration Instrument Parameter File.")
 
         self.declareProperty(ITableWorkspaceProperty(name='FitOutputWorkspace',
@@ -133,14 +133,11 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                                                                     (bank_no+1)*self._D7NumberPixelsBank-1),
                                 OutputWorkspace=conjoined_scan)
 
-        if not self.getProperty("ScanStepSize").isDefault:
-            self._scanStepSize = self.getProperty("ScanStepSize").value
-        if not self.getProperty("BraggPeakWidth").isDefault:
-            self._peakWidth = self.getProperty("BraggPeakWidth").value
-        if not self.getProperty("MaskedBinsRange").isDefault:
-            masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
-            self._beamMask1 = masked_bins_range[0]
-            self._beamMask2 = masked_bins_range[1]
+        self._scanStepSize = self.getProperty("ScanStepSize").value
+        self._peakWidth = self.getProperty("BraggPeakWidth").value
+        masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
+        self._beamMask1 = masked_bins_range[0]
+        self._beamMask2 = masked_bins_range[1]
         self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # loads the YIG peaks from an IPF
