@@ -19,6 +19,8 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D7/')
+
+    def setUp(self):
         Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
         Load('396442_396831.nxs', OutputWorkspace='intermediateWavelengthScan')
         Load('394458_394882.nxs', OutputWorkspace='longWavelengthScan')
