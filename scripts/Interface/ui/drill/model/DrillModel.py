@@ -352,8 +352,8 @@ class DrillModel(QObject):
                 t = "file"
             elif (isinstance(p, MultipleFileProperty)):
                 t = "files"
-            elif ((isinstance(p, WorkspaceGroupProperty))
-                  or (isinstance(p, MatrixWorkspaceProperty))):
+            elif (isinstance(p, (WorkspaceGroupProperty,
+                                 MatrixWorkspaceProperty))):
                 t = "workspace"
             elif (isinstance(p, StringPropertyWithValue)):
                 if (p.allowedValues):
