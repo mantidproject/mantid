@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import BaseDirective #pylint: disable=unused-import
+from mantiddoc.directives.base import BaseDirective  #pylint: disable=unused-import
 import os
 
-class InterfaceDirective(BaseDirective):
 
+class InterfaceDirective(BaseDirective):
     """
     Adds a screenshot of the custom interface
 
@@ -18,7 +18,7 @@ class InterfaceDirective(BaseDirective):
     """
 
     required_arguments, optional_arguments = 1, 0
-    option_spec = {"widget":str, "align":str, "width":int}
+    option_spec = {"widget": str, "align": str, "width": int}
 
     def run(self):
         """
@@ -37,14 +37,15 @@ class InterfaceDirective(BaseDirective):
         Called by Sphinx when the ..interface:: directive is encountered
         """
         picture = self._create_screenshot(widget_name=self.options.get("widget", None))
-        self._insert_screenshot_link(picture, align=self.options.get("align", None),
+        self._insert_screenshot_link(picture,
+                                     align=self.options.get("align", None),
                                      width=self.options.get("width", None))
         return []
 
     def interface_name(self):
         return self.arguments[0]
 
-    def _create_screenshot(self, widget_name = None):
+    def _create_screenshot(self, widget_name=None):
         """
         Creates a screenshot for the named interface in the "images/screenshots"
         subdirectory.
@@ -105,7 +106,7 @@ class InterfaceDirective(BaseDirective):
             # relative path to image
             rel_path = os.path.relpath(screenshots_dir, env.srcdir)
             # This is a href link so is expected to be in unix style
-            rel_path = rel_path.replace("\\","/")
+            rel_path = rel_path.replace("\\", "/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = "/" + rel_path + "/" + filename
         else:
@@ -131,9 +132,13 @@ class InterfaceDirective(BaseDirective):
         try:
             return os.environ["SCREENSHOTS_DIR"]
         except:
-            raise RuntimeError("The '.. interface::' directive requires a SCREENSHOTS_DIR environment variable to be set.")
+            raise RuntimeError(
+                "The '.. interface::' directive requires a SCREENSHOTS_DIR environment variable to be set."
+            )
+
 
 #------------------------------------------------------------------------------------------------------------
+
 
 def setup(app):
     """
