@@ -155,7 +155,7 @@ def criterium_peak_pixel_position(peak_table: InputTable, summary: Optional[str]
         y_values = np.array([success, deviations, z_scores]).flatten()
         workspace = CreateWorkspace(x_values, y_values, NSpec=3, OutputWorkspace=summary,
                                     WorkspaceTitle='Tube deviations from averages taken over the bank',
-                                    YUnitLabel='Pixel Units')
+                                    YUnitLabel='Pixel Units', EnableLogging=False)
         labels = ('success', 'deviation', 'Z-score')
         axis = TextAxis.create(len(labels))
         [axis.setLabel(index, label) for index, label in enumerate(labels)]
