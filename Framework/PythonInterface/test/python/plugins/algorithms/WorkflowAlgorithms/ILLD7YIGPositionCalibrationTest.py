@@ -91,7 +91,7 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
 
     def _check_load_data_with_calibration(self, ipf_name):
         tree = ET.parse(ipf_name)
-        self.assertNotEquals(tree, None)
+        self.assertNotEqual(tree, None)
         root = tree.getroot()
         bank_offsets = []
         bank_gradients = []
@@ -108,10 +108,10 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
                         bank_offsets.append(value)
         positionCalibration = [pixel_offset + bank_offsets[math.floor(pixel_no / self._pixels_per_bank)]
                                for pixel_no, pixel_offset in enumerate(pixel_offsets)]
-        self.assertEquals(len(positionCalibration), 132) # number of pixels
+        self.assertEqual(len(positionCalibration), 132) # number of pixels
         LoadILLPolarizedDiffraction('401800', OutputWorkspace='output', PositionCalibration='YIGFile',
                                     YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
-        self.assertNotEquals('output', None)
+        self.assertNotEqual('output', None)
         nexus_bank_offsets = [ mtd['output'].getItem(0).getRun().getLogData('2theta.actual_bank{}'.format(bank_no+2)).value
                                for bank_no in range(3) ]
 
