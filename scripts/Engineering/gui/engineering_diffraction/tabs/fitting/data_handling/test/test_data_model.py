@@ -228,12 +228,28 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
         self.model._background_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
         self.model._bg_params = {"name1": [True, 80, 1000, False]}
+        self.model._log_values = {"name1": 1, "name2": 2}
 
         self.model.update_workspace_name("name1", "new_name")
 
         self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._loaded_workspaces)
         self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._background_workspaces)
         self.assertEqual({"new_name": [True, 80, 1000, False]}, self.model._bg_params)
+        self.assertEqual({"new_name": 1, "name2": 2}, self.model._log_values)
+
+    @patch(file_path + ".FittingDataModel.update_log_group_name")
+    @patch(file_path + ".AverageLogData")
+    def test_reload_calculated_log_values(self, mock_avglogs, mock_update_logname):
+        # grouped ws acts like a container/list of ws here
+        self.model._log_workspaces = [mock.MagicMock(), mock.MagicMock()]  # first one is run_info not related to a log
+        self.model._log_workspaces[1].name.return_value = "LogName"
+        self.model._log_values = {"name1": {"LogName": [2, 1]}}
+
+        self.model.add_log_to_table("name1", self.mock_ws)
+
+        self.model._log_workspaces[1].addRow.assert_called_with([2, 1])
+        mock_avglogs.assert_not_called()
+        mock_update_logname.assert_called_once()
 
 
 if __name__ == '__main__':

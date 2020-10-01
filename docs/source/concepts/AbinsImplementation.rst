@@ -138,7 +138,7 @@ result scaling and splitting into atomic contributions.
 
 System tests
 ~~~~~~~~~~~~
-System tests are defined in *Testing/SystemTests/tests/analysis/AbinsTest.py*.
+System tests are defined in *Testing/SystemTests/tests/framework/AbinsTest.py*.
 These tests compare the output workspaces of Abins runs with reference Nexus files,
 using the standard setup described in
 `the main developer docs <http://developer.mantidproject.org/SystemTests.html>`_.

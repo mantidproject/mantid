@@ -27,7 +27,7 @@ void Logarithm::defineProperties() {
                   "or less than 0. Default value is 0");
   declareProperty("Natural", true,
                   "Logical value which specifies if user "
-                  "wands to calculate natural or base 10 "
+                  "wants to calculate natural or base 10 "
                   "logarithm.");
 }
 

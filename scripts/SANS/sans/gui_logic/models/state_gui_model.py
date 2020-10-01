@@ -15,7 +15,7 @@ from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStep
 from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
-from SANSUtility import (meter_2_millimeter, millimeter_2_meter)
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
 class StateGuiModel(ModelCommon):
@@ -24,6 +24,10 @@ class StateGuiModel(ModelCommon):
             "Expected AllStates, got %r, could be a legacy API caller" % repr(user_file_items)
         super(StateGuiModel, self).__init__(user_file_items)
         self._user_file_items = user_file_items
+
+        # This is transformed in State* objects so it's purely GUI facing
+        # so store in the GUI model
+        self._wavelength_range = ''
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -177,6 +181,7 @@ class StateGuiModel(ModelCommon):
     @reduction_dimensionality.setter
     def reduction_dimensionality(self, value):
         if value is ReductionDimensionality.ONE_DIM or value is ReductionDimensionality.TWO_DIM:
+            self._user_file_items.convert_to_q.reduction_dimensionality = value
             self._user_file_items.reduction.reduction_dimensionality = value
         else:
             raise ValueError("A reduction dimensionality was expected, got instead {}".format(value))
@@ -383,7 +388,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_range(self):
-        val = self.wavelength_range
+        val = self._wavelength_range
         return val if val else ""
 
     @wavelength_range.setter
@@ -393,7 +398,7 @@ class StateGuiModel(ModelCommon):
         wavelength_stop = [max(wavelength_stop)] + wavelength_stop
         self.wavelength_min = wavelength_start
         self.wavelength_max = wavelength_stop
-        self.wavelength_range = value
+        self._wavelength_range = value
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale properties

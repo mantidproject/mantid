@@ -178,7 +178,7 @@ class CreateSANSWavelengthPixelAdjustment(object):
         wavelength_low = wavelength_and_pixel_adjustment_state.wavelength_low[0]
         wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_high[0]
         wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_step
-        wavelength_step_type = -1.0 if wavelength_and_pixel_adjustment_state.wavelength_step_type \
+        wavelength_step_type = -1.0 if wavelength_and_pixel_adjustment_state.wavelength_step_type_lin_log \
                                        is RangeStepType.LOG else 1.0  # noqa
 
         # Create a rebin string from the wavelength information

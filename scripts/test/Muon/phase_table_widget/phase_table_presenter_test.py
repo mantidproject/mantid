@@ -22,7 +22,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QApplication.instance().processEvents()
+            QApplication.sendPostedEvents()
 
     def setUp(self):
         self.view = PhaseTableView()

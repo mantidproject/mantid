@@ -67,7 +67,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
     :param axes: The axes being plotted on
     """
-    normalize_by_bin_width = kwargs.get('normalize_by_bin_width', None)
+    normalize_by_bin_width = kwargs.pop('normalize_by_bin_width', None)
     if normalize_by_bin_width is not None:
         return normalize_by_bin_width, kwargs
     distribution = kwargs.get('distribution', None)
@@ -505,9 +505,13 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         x_centers = np.linspace(min_value, max_value, num=num_edges)
         y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
     else:
-        x_edges = np.linspace(extent[0], extent[1], int(xbins + 1))
+        x_low, x_high, y_low, y_high = extent[0], extent[1], extent[2], extent[3]
+        if transpose:
+            x_low, x_high, y_low, y_high = extent[2], extent[3], extent[0], extent[1]
+
+        x_edges = np.linspace(x_low, x_high, int(xbins + 1))
         x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
-        y = np.linspace(extent[2], extent[3], int(ybins))
+        y = np.linspace(y_low, y_high, int(ybins))
 
     counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info)
 
