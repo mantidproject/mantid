@@ -12,7 +12,7 @@ Diffraction Changes
 New features
 ------------
 
-- New algorithm :ref:`ILLD7YIGPositionCalibration <algm-ILLD7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
+- New algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
     
 Powder Diffraction
 ------------------

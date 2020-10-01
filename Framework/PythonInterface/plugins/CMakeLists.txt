@@ -97,7 +97,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
   algorithms/WorkflowAlgorithms/IndirectReplaceFitResult.py
   algorithms/WorkflowAlgorithms/ILL_utilities.py
-  algorithms/WorkflowAlgorithms/ILLD7YIGPositionCalibration.py
+  algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
   algorithms/WorkflowAlgorithms/PowderILLParameterScan.py
   algorithms/WorkflowAlgorithms/ReactorSANSResolution.py
   algorithms/WorkflowAlgorithms/ReflectometryILLSumForeground.py

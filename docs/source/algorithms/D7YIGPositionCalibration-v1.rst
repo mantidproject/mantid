@@ -38,13 +38,13 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
-**Example - ILLD7YIGPositionCalibration - calibration at the intermediate wavelength**
+**Example - D7YIGPositionCalibration - calibration at the intermediate wavelength**
 
-.. testcode:: ILLD7YIGCalibrationIntermediateExample
+.. testcode:: D7YIGCalibrationIntermediateExample
 
    Load('ILL/D7/396442_396831.nxs', OutputWorkspace='intermediateWavelengthScan')
    approximate_wavelength = '4.8' # Angstrom
-   ILLD7YIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
+   D7YIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                YIGPeaksFile='ILL/D7/YIG_peaks.xml', CalibrationFilename='test_intermediateWavelength.xml',
                                MinimalDistanceBetweenPeaks=1.5, BankOffsets="-4,-4,0",
                                DetectorFitOutput='intermediateWavelength')
@@ -56,7 +56,7 @@ Usage
 
 Output:
 
-.. testoutput:: ILLD7YIGCalibrationIntermediateExample
+.. testoutput:: D7YIGCalibrationIntermediateExample
 
    The calibrated wavelength is: 4.86
    The bank2 gradient is: 0.992

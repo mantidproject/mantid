@@ -17,7 +17,7 @@ from xml.dom import minidom
 import xml.etree.ElementTree as ET
 
 
-class ILLD7YIGPositionCalibration(PythonAlgorithm):
+class D7YIGPositionCalibration(PythonAlgorithm):
 
     # helper conversions
     _RAD_2_DEG = 180.0 / np.pi
@@ -42,7 +42,7 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         return ['LoadILLPolarizedDiffraction']
 
     def name(self):
-        return 'ILLD7YIGPositionCalibration'
+        return 'D7YIGPositionCalibration'
 
     def validateInputs(self):
         issues = dict()
@@ -534,4 +534,4 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
         outfile.write(self._prettify(param_file))
 
 
-AlgorithmFactory.subscribe(ILLD7YIGPositionCalibration)
+AlgorithmFactory.subscribe(D7YIGPositionCalibration)
