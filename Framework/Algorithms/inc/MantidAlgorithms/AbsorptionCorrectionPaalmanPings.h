@@ -51,12 +51,6 @@ namespace Algorithms {
    each element
     and a numerical integration is carried out using these path lengths over the
    volume elements.
-
-    This algorithm assumes that the beam comes along the Z axis, that Y is up
-    and that the sample is at the origin.
-
-    @author Russell Taylor, Tessella plc
-    @date 04/02/2010
 */
 class MANTID_ALGORITHMS_DLL AbsorptionCorrectionPaalmanPings
     : public API::Algorithm {
@@ -99,6 +93,13 @@ private:
                 const std::vector<double> &elementVolumes,
                 const std::vector<double> &L1s, const std::vector<double> &L2s,
                 const size_t startIndex, const size_t endIndex) const;
+  inline double doCrossIntegration(
+      const double linearCoefAbs, const double linearCoefTotScatt,
+      const std::vector<double> &elementVolumes, const std::vector<double> &L1s,
+      const std::vector<double> &L2s, const double linearCoefAbs2,
+      const double linearCoefTotScatt2, const std::vector<double> &L1s2,
+      const std::vector<double> &L2s2, const size_t startIndex,
+      const size_t endIndex) const;
   void defineProperties();
   void retrieveProperties();
   void initialiseCachedDistances();
@@ -109,12 +110,16 @@ private:
       *m_containerObject;      ///< Local cache of container object.
   Kernel::V3D m_beamDirection; ///< The direction of the beam.
   std::vector<double> m_L1s,   ///< Cached L1 distances
-      m_elementVolumes;        ///< Cached element volumes
+      m_sample_containerL1s, ///< Cached L1 distances through container hitting
+                             ///< sample
+      m_elementVolumes;      ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
   size_t m_numVolumeElements;         ///< The number of volume elements
   double m_sampleVolume;              ///< The total volume of the sample
   std::vector<double> m_containerL1s, ///< Cached L1 distances
-      m_containerElementVolumes;      ///< Cached element volumes
+      m_container_sampleL1s,     ///< Cached L1 distances through sample hitting
+                                 ///< container
+      m_containerElementVolumes; ///< Cached element volumes
   std::vector<Kernel::V3D>
       m_containerElementPositions;     ///< Cached element positions
   size_t m_containerNumVolumeElements; ///< The number of volume elements
