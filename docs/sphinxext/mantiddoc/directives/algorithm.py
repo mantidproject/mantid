@@ -79,7 +79,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         # title
         title = "%s v%d" % (alg_name, version)
         self.add_rst(self.make_header(title, True))
-        self.add_rst(u"\n.. index:: %s-v%d\n\n" % (alg_name, version))
+        self.add_rst("\n.. index:: %s-v%d\n\n" % (alg_name, version))
 
     def _insert_toc(self):
         """
