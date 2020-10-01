@@ -308,8 +308,8 @@ class ILLD7YIGPositionCalibration(PythonAlgorithm):
                 for peak_intensity, peak_centre_guess, peak_centre_expected in single_spectrum_peaks:
                     fit_function = function.format(float(peak_centre_guess), peak_intensity, 0.5*self._peakWidth)
                     fit_constraints = constraints.format(0.75 * self._peakWidth,
-                                       peak_centre_guess - self._minDistance,
-                                       peak_centre_guess + self._minDistance)
+                                                         peak_centre_guess - self._minDistance,
+                                                         peak_centre_guess + self._minDistance)
                     ws_name = 'pixel_{0}_peak_{1}'.format(pixel_no, peak_no)
                     ws_names.append(ws_name)
                     fit_output = Fit(Function=fit_function,
