@@ -34,7 +34,7 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
 
     def test_shortWavelength(self):
         approximate_wavelength = '3.14' # Angstrom
-        ILLD7YIGPositionCalibration(ScanWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        ILLD7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_shortWavelength.xml',
                                   MinimalDistanceBetweenPeaks=1.75, BankOffsets="-3,-3,1",
                                   DetectorFitOutput='test_shortWavelength')
@@ -44,7 +44,7 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
 
     def test_intermediateWavelength(self):
         approximate_wavelength = '4.8' # Angstrom
-        ILLD7YIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        ILLD7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_intermediateWavelength.xml',
                                   MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
                                   DetectorFitOutput='test_intermediateWavelength')
@@ -54,7 +54,7 @@ class ILLD7YIGPositionCalibrationTest(unittest.TestCase):
 
     def test_longWavelength(self):
         approximate_wavelength = '5.7' # Angstrom
-        ILLD7YIGPositionCalibration(ScanWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        ILLD7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                   YIGPeaksFile='YIG_peaks.xml', CalibrationFilename='test_longWavelength.xml',
                                   MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
                                   DetectorFitOutput='test_longWavelength')
