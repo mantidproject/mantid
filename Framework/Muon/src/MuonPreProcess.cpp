@@ -131,7 +131,6 @@ std::map<std::string, std::string> MuonPreProcess::validateInputs() {
   // Check length of time zero vector is one or matches number of spectra
   if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     const std::vector<double> timeZeros = this->getProperty("TimeZeroVector");
-    // Need to make this optional
     if (!timeZeros.empty()) {
       if (timeZeros.size() != 1) {
         if (timeZeros.size() != ws->getNumberHistograms()) {
@@ -161,7 +160,7 @@ void MuonPreProcess::exec() {
 
   allPeriodsWS = correctWorkspaces(allPeriodsWS);
 
-  addPreProcessSampleLogs(allPeriodsWS);
+  //addPreProcessSampleLogs(allPeriodsWS);
 
   setProperty("OutputWorkspace", allPeriodsWS);
 }
@@ -248,18 +247,18 @@ MuonPreProcess::applyTimeZeroVector(MatrixWorkspace_sptr ws,
   } else {
     // Loop ws spectra and update x with offset values
     const auto numSpec = ws->getNumberHistograms();
-    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+    //PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int i = 0; i < numSpec; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      //PARALLEL_START_INTERUPT_REGION
 
       auto &xData = ws->mutableX(i);
       const double offset = timeZeros[i];
       std::transform(xData.begin(), xData.end(), xData.begin(),
                      [offset](double x) { return x + offset; });
 
-      PARALLEL_END_INTERUPT_REGION
+      //PARALLEL_END_INTERUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    //PARALLEL_CHECK_INTERUPT_REGION
 
     return ws;
   }
@@ -269,6 +268,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws,
                                                    const double &xMin,
                                                    const double &xMax) {
   if (xMin != EMPTY_DBL() || xMax != EMPTY_DBL()) {
+    std::cout << "xMin : " << xMin << " , xMax : " << xMax << std::endl;
     IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
     crop->setProperty("InputWorkspace", ws);
     if (xMin != EMPTY_DBL())
