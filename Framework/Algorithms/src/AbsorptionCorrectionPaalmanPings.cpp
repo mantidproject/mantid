@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
@@ -75,8 +76,8 @@ void AbsorptionCorrectionPaalmanPings::init() {
       std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                             Direction::Input, wsValidator),
       "The X values for the input workspace must be in units of wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output workspace name");
 
   auto positiveInt = std::make_shared<BoundedValidator<int64_t>>();
@@ -236,12 +237,33 @@ void AbsorptionCorrectionPaalmanPings::exec() {
 
   g_log.information() << "Total number of elements in the integration was "
                       << m_L1s.size() << '\n';
-  setProperty("OutputWorkspace", sampleCorrectionFactors);
+
+  const std::string outWSName = getProperty("OutputWorkspace");
+
+  std::vector<std::string> names;
+  names.emplace_back(outWSName + "_ass");
+  API::AnalysisDataService::Instance().addOrReplace(names.back(),
+                                                    sampleCorrectionFactors);
+  names.emplace_back(outWSName + "_acc");
+  API::AnalysisDataService::Instance().addOrReplace(names.back(),
+                                                    containerCorrectionFactors);
+
+  auto group = createChildAlgorithm("GroupWorkspaces");
+  group->initialize();
+  group->setProperty("InputWorkspaces", names);
+  group->setProperty("OutputWorkspace", outWSName);
+  group->execute();
+  API::WorkspaceGroup_sptr outWS = group->getProperty("OutputWorkspace");
+
+  setProperty("OutputWorkspace", outWS);
 
   // Now do some cleaning-up since destructor may not be called immediately
   m_L1s.clear();
   m_elementVolumes.clear();
   m_elementPositions.clear();
+  m_containerL1s.clear();
+  m_containerElementVolumes.clear();
+  m_containerElementPositions.clear();
 }
 
 /// Calculate the distances for L1 and element size for each element in the
