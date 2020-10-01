@@ -434,9 +434,9 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
     const V3D direction =
         normalize(detectorPos - m_containerElementPositions[i]);
     Track outgoing(m_containerElementPositions[i], direction);
-    int temp = m_sampleObject->interceptSurface(outgoing);
+    int temp = m_containerObject->interceptSurface(outgoing);
     Track outgoing2(m_containerElementPositions[i], direction);
-    int temp2 = m_containerObject->interceptSurface(outgoing2);
+    int temp2 = m_sampleObject->interceptSurface(outgoing2);
 
     if (temp < 1) {
       container_L2s[i] = 0.0;
