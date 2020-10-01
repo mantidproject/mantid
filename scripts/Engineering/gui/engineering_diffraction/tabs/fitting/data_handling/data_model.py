@@ -15,10 +15,7 @@ from mantid.api import TextAxis
 from matplotlib.pyplot import subplots
 from numpy import full, nan, max, array, vstack
 from itertools import chain
-
-import pydevd_pycharm
-pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True, suspend=False)
-
+from re import findall
 
 class FittingDataModel(object):
     def __init__(self):
@@ -154,7 +151,7 @@ class FittingDataModel(object):
         # # at this point we know the fit workspaces output so can collect error setc.
         self._fit_results[wsname] = {'properties': results_dict['properties']}
         self._fit_results[wsname]['results'] = dict()  # {function_param: [[Y1, E1], [Y2,E2],...] }
-        fnames = [x.split(',')[0] for x in results_dict['properties']['Function'].split('name=') if x]
+        fnames =[x.split('=')[-1] for x in findall('name=[^,]*', results_dict['properties']['Function'])]
         params_dict = ADS.retrieve(results_dict['properties']['Output'] + '_Parameters').toDict()
         for ifunc, fname in enumerate(fnames):
             for irow, param_str in enumerate(params_dict['Name']):
@@ -164,9 +161,11 @@ class FittingDataModel(object):
                         self._fit_results[wsname]['results'][key] = []
                     self._fit_results[wsname]['results'][key].append([
                         params_dict['Value'][irow], params_dict['Error'][irow]])
-        self.create_fit_table()
+        self.create_fit_tables()
 
-    def create_fit_table(self):
+    def create_fit_tables(self):
+        wslist = [] # ws to be grouped
+        # extract fit parameters and errors
         nruns = len(self._loaded_workspaces.keys()) # num of rows of output workspace
         # get unique set of function parameters across all workspaces
         func_params = set(chain(*[list(d['results'].keys()) for d in self._fit_results.values()]))
@@ -193,6 +192,21 @@ class FittingDataModel(object):
                 # label row
                 axis.setLabel(iws, wsname)
             w.replaceAxis(1, axis)
+            wslist += [w]
+        # table for model summary/info
+        model = CreateEmptyTableWorkspace()
+        model.addColumn(type="str", name="Workspace")
+        model.addColumn(type="str", name="Model")
+        for wsname in self._loaded_workspaces:
+            if wsname in self._fit_results:
+                properties = self._fit_results[wsname]['results']
+                row = self._fit_results[wsname]['results']
+                model.addRow([wsname, self._fit_results[wsname]['properties']['Function']])
+            else:
+                model.addRow(['',''])
+        wslist += [model]
+        group_name = self._log_workspaces.name().split('_log')[0] + '_fits'
+        self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
 
     def update_workspace_name(self, old_name, new_name):
         if new_name not in self._loaded_workspaces:
