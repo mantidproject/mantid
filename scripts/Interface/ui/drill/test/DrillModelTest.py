@@ -340,6 +340,26 @@ class DrillModelTest(unittest.TestCase):
                                     "float": "test doc",
                                     "bool": "test doc"})
 
+        # array property
+        self.mSapi.reset_mock()
+        prop = mock.Mock(spec=FloatArrayProperty)
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "array",
+                                     "int": "array",
+                                     "float": "array",
+                                     "bool": "array"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
+
         # other property
         self.mSapi.reset_mock()
         prop = mock.Mock()
@@ -359,6 +379,20 @@ class DrillModelTest(unittest.TestCase):
                                     "int": "test doc",
                                     "float": "test doc",
                                     "bool": "test doc"})
+
+    def test_setDefaultSettings(self):
+        alg = self.mSapi.AlgorithmManager.createUnmanaged.return_value
+        self.mSapi.reset_mock()
+        alg.getProperty.return_value.value = "defaultValue"
+
+        self.model._setDefaultSettings()
+        self.mSapi.AlgorithmManager.createUnmanaged.assert_called_once_with(
+                self.model.algorithm)
+        alg.initialize.assert_called_once()
+        self.assertDictEqual(self.model.settings,  {"str": "defaultValue",
+                                                    "int": "defaultValue",
+                                                    "float": "defaultValue",
+                                                    "bool": "defaultValue"})
 
     def test_changeParameter(self):
         self.model.samples = [{}, {}]
