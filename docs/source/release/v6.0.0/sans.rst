@@ -17,7 +17,7 @@ Improvements
 
  - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the beam radius can be different for each distance.
    A new parameter, TransmissionBeamRadius, has been added to set the beam radius for transmission experiments.
-   The default value of all beam radii is now 0.5cm.
+   The default value of all beam radii is now 0.1m.
 
 
 :ref:`Release 6.0.0 <v6.0.0>`
