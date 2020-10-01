@@ -12,6 +12,7 @@
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidKernel/Strings.h"
 #else
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
 #include <QHash>
@@ -29,6 +30,8 @@ namespace {
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 auto constexpr ERROR_CAPSIZE = 3;
+
+Mantid::Kernel::Logger g_log("IndirectPlotter");
 #endif
 
 template <typename BeginIter, typename Iterable>
@@ -165,9 +168,10 @@ std::string createPlotTiledString(std::string const &workspaceName,
  * @param kwargs Other arguments for plotting
  * @param figure The figure to plot on top of
  */
+using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
-Python::Object
+boost::optional<Python::Object>
 workbenchPlot(QStringList const &workspaceNames,
               std::vector<int> const &indices, bool errorBars,
               boost::optional<QHash<QString, QVariant>> kwargs = boost::none,
@@ -179,8 +183,13 @@ workbenchPlot(QStringList const &workspaceNames,
     plotKwargs["capsize"] = ERROR_CAPSIZE;
 
   using MantidQt::Widgets::MplCpp::plot;
-  return plot(workspaceNames, boost::none, indices, std::move(figure),
-              plotKwargs, boost::none, boost::none, errorBars);
+  try {
+    return plot(workspaceNames, boost::none, indices, std::move(figure),
+                plotKwargs, boost::none, boost::none, errorBars);
+  } catch (PythonException const &ex) {
+    g_log.error() << ex.what();
+    return boost::none;
+  }
 }
 #endif
 
@@ -259,9 +268,10 @@ void IndirectPlotter::plotCorrespondingSpectra(
       workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])),
                     {workspaceIndices[0]}, errorBars);
   for (auto i = 1u; i < workspaceNames.size(); ++i) {
-    figure =
-        workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])),
-                      {workspaceIndices[i]}, errorBars, boost::none, figure);
+    if (figure)
+      figure = workbenchPlot(
+          QStringList(QString::fromStdString(workspaceNames[i])),
+          {workspaceIndices[i]}, errorBars, boost::none, figure.get());
   }
 #endif
 }

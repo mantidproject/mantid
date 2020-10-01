@@ -636,6 +636,7 @@ def imshow(axes, workspace, *args, **kwargs):
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
         (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
+        kwargs['normalize_by_bin_width'] = normalize_by_bin_width
         _setLabels2D(axes,
                      workspace,
                      transpose=transpose,

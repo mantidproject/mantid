@@ -124,6 +124,14 @@ class DrillView(QMainWindow):
 
         self._presenter = DrillPresenter(self)
 
+    def show(self):
+        """
+        Override QMainWindow::show. It calls the base class method and
+        updates the instrument.
+        """
+        super(DrillView, self).show()
+        self._changeInstrument(self.instrumentselector.currentText())
+
     def setup_header(self):
         """
         Setup the window header. Set the buttons icons and connect the signals.
@@ -244,6 +252,8 @@ class DrillView(QMainWindow):
         Args:
             instrument(str): instrument name
         """
+        if self.isHidden():
+            return
         if self.isWindowModified():
             self._saveDataQuestion()
         self.instrumentChanged.emit(instrument)
@@ -586,16 +596,6 @@ class DrillView(QMainWindow):
     ###########################################################################
     # for model calls                                                         #
     ###########################################################################
-
-    def set_available_instruments(self, techniques):
-        """
-        Change the available instruments in the comboxbox based on the
-        supported techniques.
-
-        Args:
-            techniques (list(str)): list of supported techniques
-        """
-        self.instrumentselector.setTechniques(techniques)
 
     def set_available_modes(self, modes):
         """

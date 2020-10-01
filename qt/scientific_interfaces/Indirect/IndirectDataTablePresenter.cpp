@@ -136,18 +136,17 @@ QString IndirectDataTablePresenter::getText(FitDomainIndex row,
 
 void IndirectDataTablePresenter::removeSelectedData() {
   auto selectedIndices = m_dataTable->selectionModel()->selectedIndexes();
-
-  for (auto item : selectedIndices) {
-    m_model->removeDataByIndex(FitDomainIndex(item.row()));
+  std::sort(selectedIndices.begin(), selectedIndices.end());
+  for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
+    --item;
+    m_model->removeDataByIndex(FitDomainIndex(item->row()));
   }
-
   updateTableFromModel();
 }
 
 void IndirectDataTablePresenter::updateTableFromModel() {
   ScopedFalse _signalBlock(m_emitCellChanged);
   m_dataTable->setRowCount(0);
-
   for (auto domainIndex = FitDomainIndex{0};
        domainIndex < m_model->getNumberOfDomains(); domainIndex++) {
     addTableEntry(domainIndex);

@@ -125,7 +125,7 @@ Data Loading
 ~~~~~~~~~~~~
 
 In the Data Loading step, a sequence of runs are loaded through the field **Runs** by entering a valid range. 
-Instead of choosing a range, after entering a valid first file the **Auto** checkbox can be ticked. In this case, 
+Instead of choosing a range, after entering a valid first file the **Auto Find Current Run** checkbox can be ticked. In this case, 
 the runs text box is disabled and the interface automatically tries to find all valid runs in the range of the first file 
 and the most recently modified file found in the same directory as the first file provided. 
 
