@@ -39,6 +39,10 @@ In the ``Runs`` tab:
 #. Tick the ``Sample Geometry`` button - some extra columns should appear.
 #. Create multiple rows in the table with different data e.g. one row with
    an output name, one row without.
+#. Try changing a random setting in the settings tab and remember what you set
+   it to.
+#. Make some more edits to the table. Check that the setting is still showing
+   the value you changed it to, rather than the original.
 #. Click the ``Export Table`` button and save the table as a csv file. Check
    the file in an editor or Excel and ensure it looks like a sensible
    representation of the table in the format ``key,value,key,value,...``. All
@@ -48,13 +52,11 @@ In the ``Runs`` tab:
    columns regardless of whether these are ticked.
 #. Click ``Load Batch file`` and select the newly saved table. All columns
    that were saved should be loaded.
-#. Try changing a random setting in the settings tab and remember what you set
-   it to.
 #. Try deleting and/or reordering some of the columns in the saved file and
    re-load it. All of the values in the file should be populated in the correct
    columns.
-#. Check that the setting is still showing the value you changed it to, rather
-   than the original.
+#. Check again that the setting you changed is still showing the value you
+   changed it to, rather than the original.
 #. Re-load the original batch file.
 
 User files
