@@ -29,9 +29,6 @@ General Setup
 The master node is set to a fixed TCP port for JNLP agents under
 http://builds.mantidproject.org/configureSecurity.
 
-The anonymous jenkins user has the following rights: Overall Read,
-Slave Connect, Job Read, View Read.
-
 Setting up a New Agent
 ######################
 
