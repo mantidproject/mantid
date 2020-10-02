@@ -20,11 +20,6 @@ Jenkins works on a 'master -> worker' principle.
 The master node is responsible for orchestrating jobs and managing the agents, where the work is actually performed.
 The master node is located at http://builds.mantidproject.org and each facility is responsible for providing hardware to act as agents for the various required configurations.
 
-General Setup
-#############
-
-The master node is set to a fixed TCP port for JNLP agents under http://builds.mantidproject.org/configureSecurity.
-
 Setting up a New Agent
 ######################
 
