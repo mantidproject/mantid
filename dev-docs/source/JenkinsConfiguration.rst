@@ -44,6 +44,11 @@ Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS. 
    may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`). The same
    options should be used as for the full install.
 
+Linux
+-----
+
+If you are deploying a new Linux based agent, it is recommended that you use the container based approach as described `here <https://github.com/mantidproject/dockerfiles/tree/master/jenkins-node>`__.
+
 Windows
 -------
 
