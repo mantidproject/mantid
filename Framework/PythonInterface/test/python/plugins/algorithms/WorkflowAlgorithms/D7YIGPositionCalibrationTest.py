@@ -41,7 +41,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
     def test_shortWavelength(self):
         approximate_wavelength = '3.14' # Angstrom
         D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                 YIGPeaksFile='YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
                                  MinimalDistanceBetweenPeaks=1.75, BankOffsets="-3,-3,1",
                                  FitOutputWorkspace='test_shortWavelength')
         self.assertTrue(path.exists('test_shortWavelength.xml'))
@@ -51,7 +51,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
     def test_intermediateWavelength(self):
         approximate_wavelength = '4.8' # Angstrom
         D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                 YIGPeaksFile='YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
                                  FitOutputWorkspace='test_intermediateWavelength')
         self.assertTrue(path.exists('test_intermediateWavelength.xml'))
@@ -61,7 +61,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
     def test_longWavelength(self):
         approximate_wavelength = '5.7' # Angstrom
         D7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                 YIGPeaksFile='YIG_peaks.xml', CalibrationOutputFile='test_longWavelength.xml',
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_longWavelength.xml',
                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
                                  FitOutputWorkspace='test_longWavelength')
         self.assertTrue(path.exists('test_longWavelength.xml'))
