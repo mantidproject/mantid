@@ -104,7 +104,7 @@ Service" has completed you should
 Linux
 -----
 
-Install an ssh server, ``ccache``, ``curl`` and ``xvfb``.
+Install OpenSSH server, ``ccache``, ``curl`` and ``xvfb``.
 
 From the ``builder`` account run ``ccache --max-size=20G``.
 
@@ -112,8 +112,6 @@ Any machines acting as performance test servers will require ``mysqldb`` to be i
 
 Ubuntu
 ^^^^^^
-
-Configure `automatic security updates <https://help.ubuntu.com/community/AutomaticSecurityUpdates>`__.
 
 Install ``gdebi-core`` package to allow installing ``.deb`` files.
 
