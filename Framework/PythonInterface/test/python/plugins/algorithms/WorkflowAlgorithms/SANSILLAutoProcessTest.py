@@ -7,6 +7,7 @@
 
 import unittest
 from mantid.simpleapi import SANSILLAutoProcess, config, mtd
+from mantid.api import WorkspaceGroup, MatrixWorkspace
 
 
 class SANSILLAutoProcessTest(unittest.TestCase):
@@ -23,76 +24,15 @@ class SANSILLAutoProcessTest(unittest.TestCase):
         config["default.instrument"] = self._instrument
         mtd.clear()
 
-    def test_validateInput(self):
-        # no sample runs
-        self.assertRaises(RuntimeError, SANSILLAutoProcess)
+    def test_minimal(self):
+        ws = SANSILLAutoProcess(SampleRuns="010462")
 
-        # no output workspace
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462")
-
-        # minimum
-        SANSILLAutoProcess(SampleRuns="010462", OutputWorkspace="ws")
-
-        # sample dim
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          AbsorberRuns="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          BeamRuns="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          ContainerRuns="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          MaskFiles="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          ReferenceFiles="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          SensitivityMaps="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          FluxRuns="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          MaxQxy="1,1",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          DeltaQ="1,1",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          BeamRadius="1,1",
-                          OutputWorkspace="ws")
-
-        # single transmission
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462,010462",
-                          SampleTransmissionRuns="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462,010462",
-                          ContainerTransmissionRuns="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462,010462",
-                          TransmissionBeamRuns="010462,010462",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462,010462",
-                          TransmissionAbsorberRuns="010462,010462",
-                          OutputWorkspace="ws")
+        self.assertTrue(isinstance(ws, WorkspaceGroup))
+        self.assertEqual(ws.getNumberOfEntries(), 1)
+        item = ws.getItem(0)
+        self.assertTrue(isinstance(item, MatrixWorkspace))
+        self.assertEqual(item.getAxis(0).getUnit().unitID(), "MomentumTransfer")
+        self.assertEquals(item.getNumberHistograms(), 1)
 
 
 if __name__ == "__main__":
