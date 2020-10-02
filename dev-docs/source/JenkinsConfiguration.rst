@@ -23,6 +23,9 @@ The master node is located at https://builds.mantidproject.org and each facility
 Setting up a New Agent
 ######################
 
+.. note::
+  If you are deploying a new Linux based agent, it is recommended that you use the container based approach as described `here <https://github.com/mantidproject/dockerfiles/tree/master/jenkins-node>`__.
+
 Machine Setup
 -------------
 
@@ -36,15 +39,10 @@ Do not use the embeddable zip, use the full installer and ensure python.exe is o
    For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__ may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`).
    The same options should be used as for the full install.
 
-Linux
------
-
-If you are deploying a new Linux based agent, it is recommended that you use the container based approach as described `here <https://github.com/mantidproject/dockerfiles/tree/master/jenkins-node>`__.
-
 Windows
 -------
 
-* Ensure that the location of ``msbuild.exe`` (``C:\Windows\Microsoft.NET\Framework64\v4.0.30319``) is on the ``PATH``
+Ensure that the location of ``msbuild.exe`` (``C:\Windows\Microsoft.NET\Framework64\v4.0.30319``) is on the ``PATH``.
 
 Agent Connection
 ^^^^^^^^^^^^^^^^
@@ -146,7 +144,7 @@ Finally, disable saved application states that cause a dialog to be raised after
 Linux/Mac Connection Notes
 --------------------------
 
-The jenkins JNLP connections are maintained by a crontab entry.
+The Jenkins JNLP connections are maintained by a crontab entry.
 The script is in the `mantid repository <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/jenkins-slave.sh>`__.
 
 The comments at the top describe a typical crontab entry for the script.
