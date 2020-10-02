@@ -44,7 +44,7 @@ Usage
 
    Load('ILL/D7/396442_396831.nxs', OutputWorkspace='intermediateWavelengthScan')
    approximate_wavelength = '4.8' # Angstrom
-   D7YIGPositionCalibration(ScanWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
+   D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                YIGPeaksFile='ILL/D7/YIG_peaks.xml', CalibrationFilename='test_intermediateWavelength.xml',
                                MinimalDistanceBetweenPeaks=1.5, BankOffsets="-4,-4,0",
                                DetectorFitOutput='intermediateWavelength')
