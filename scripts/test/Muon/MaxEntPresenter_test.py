@@ -22,7 +22,6 @@ class MaxEntPresenterTest(unittest.TestCase):
 
         # Model
         self.model = mock.create_autospec(maxent_model.MaxEntWrapper, spec_set=True)
-        self.model.cancel = mock.Mock()
 
         # View
         self.view = mock.create_autospec(maxent_view_new.MaxEntView, spec_set=True)
@@ -30,10 +29,8 @@ class MaxEntPresenterTest(unittest.TestCase):
         # needed for connect in presenter
         self.view.maxEntButtonSignal = mock.Mock()
         self.view.cancelSignal = mock.Mock()
-        # functions
-        self.view.addItems = mock.MagicMock()
-        self.view.deactivateCalculateButton = mock.Mock()
-        self.view.activateCalculateButton = mock.Mock()
+
+        # Default Values
         self.view.input_workspace = "TEST00000001"
         self.view.phase_table = "Construct"
         self.view.num_points = 2048
@@ -50,13 +47,6 @@ class MaxEntPresenterTest(unittest.TestCase):
 
         # make thread
         self.thread = mock.create_autospec(thread_model.ThreadModel)
-        self.thread.start = mock.Mock()
-        self.thread.started = mock.Mock()
-        self.thread.finished = mock.Mock()
-        self.thread.setInputs = mock.Mock()
-        self.thread.loadData = mock.Mock()
-        self.thread.threadWrapperSetup = mock.Mock()
-        self.thread.threadWrapperTearDown = mock.Mock()
 
     def test_connects(self):
         self.assertEqual(1,self.view.cancelSignal.connect.call_count)
@@ -113,6 +103,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.view.activateCalculateButton.call_count)
         self.assertEqual(1, self.view.warning_popup.call_count)
         self.view.warning_popup.assert_called_with("Error message")
+
 
 if __name__ == '__main__':
     unittest.main()
