@@ -22,7 +22,7 @@ Calibration method
 
 A YIG scan data is loaded into a single 2D Workspace where the X axis contains detector positions during each step of the scan, and the Y axis the measured intensities normalized to monitor. The Y axis data is also 2D with each row representing full scan for a single detector. Scan points between -35 and 15 degrees are masked to remove the impact of the direct neutron beam.
 
-The provided YIG d-spacing values are loaded from an XML list. The peak positions are converted into 2theta positions using the initial assumption of the neutron wavelength. All peaks that would require the 2theta to be above 180 degrees are removed.
+The provided YIG d-spacing values are loaded from an XML list. The default d-spacing is coming from Ref. [2]. The peak positions are converted into 2theta positions using the initial assumption of the neutron wavelength. All peaks that would require the 2theta to be above 180 degrees are removed.
 
 YIG peaks in the detector's scan are fitted separately using a Gaussian distribution. The fitting results are stored in a new workspace, where the Y axis contains the fitted peak centres and the X axis the calculated peak positions.
 
@@ -67,6 +67,12 @@ Output:
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,
    Nuclear Instruments and Methods in Physics Research A **857** (2017) 24–30
    `doi: 10.1016/j.nima.2017.03.024 <https://doi.org/10.1016/j.nima.2017.03.024>`_
+
+#. A. Nakatsuka, A. Yoshiasa, and S. Takeno.
+   *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure
+   Acta Crystallographica Section B **51** (1995) 737–745
+   `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
+
 
 .. categories::
 
