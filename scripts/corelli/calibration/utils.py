@@ -5,22 +5,92 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from os import path
 import numpy as np
-from typing import Union
+from typing import List, Optional, Union
 
 # imports from Mantid
+from mantid.api import AnalysisDataService, mtd
 from mantid.dataobjects import TableWorkspace, Workspace2D
+from mantid.simpleapi import ApplyCalibration, CloneWorkspace, Integration, LoadEventNexus, LoadNexusProcessed
+try:
+    from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+    from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+except (ImportError, ModuleNotFoundError):
+    InstrumentViewPresenter, QAppThreadCall = None, None
 from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
-InputWorkspace = Union[str, Workspace2D]  # type alias
+# Type aliases
+InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
+WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
 
-TUBE_LENGTH = 0.9001  # in meters
 PIXELS_PER_TUBE = 256
+TUBES_IN_BANK = 16
+TUBE_LENGTH = 0.9001  # in meters
 WIRE_GAP = 52.8 / 1000  # in meters, distance between consecutive wires
 
 
-def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow_height: float = 1000,
+def wire_positions(units: str = 'pixels') -> np.ndarray:
+    r"""
+    Vertical positions of the standar set of 16 wires. It's assumed that the center of the 16 wires
+    coincides with the center of a tube.
+
+    :param units: either one of 'pixels' or 'meters'. If pixels, the bottom of the tube correspons
+    to pixel 1. If 'meters', the center of the tube corresponds to the origin of coordinates.
+
+    :raises: AssertionError when incorrect units are passed
+    """
+    units_valid = ('meters', 'pixels')
+    assert units in units_valid, f'units {units} must be one of {units_valid}'
+    wire_gap = (2 * 25.4 + 2) / 1000  # gap along the Y-coordinate between consecutive wire centers
+    # the center of the 16 wires is aligned with the center of the tube, set to Y == 0
+    wire_meters_positions = np.arange(-7.5 * wire_gap, 8.5 * wire_gap, wire_gap)
+    if units == 'meters':
+        return wire_meters_positions
+    wire_pixel_positions = (PIXELS_PER_TUBE / TUBE_LENGTH) * wire_meters_positions + PIXELS_PER_TUBE / 2
+    return wire_pixel_positions
+
+
+def bank_numbers(bank_selection: str) -> List[str]:
+    r"""
+    Expand a bank selection string into a list of bank numbers
+
+    :param bank_selection: selection string, such as '10,12-15,17-21'
+    """
+    banks = list()  # list of bank numbers, as string
+    ranges = [r.strip() for r in bank_selection.split(',')]  # split by comma
+    for r in ranges:
+        if '-' in r:
+            start, end = [int(n.strip()) for n in r.split('-')]
+            banks.extend([str(n) for n in range(start, end + 1)])
+        else:
+            banks.append(r)
+    return banks
+
+
+def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Workspace2D:
+    r"""
+    Load events only for the selected banks, and don't load metadata.
+
+    If the file is not an events file, but a Nexus processed file, the bank_selection is ignored.
+    :param filename: Filename to an Event nexus file or a processed nexus file
+    :param bank_selection: selection string, such as '10,12-15,17-21'
+    :param output_workspace: name of the output workspace containing counts per pixel
+    :return: workspace containing counts per pixel. Events in each pixel are integrated into neutron counts.
+    """
+    assert path.exists(filename), f'File {filename} does not exist'
+    bank_names = ','.join(['bank' + b for b in bank_numbers(bank_selection)])
+    try:
+        LoadEventNexus(Filename=filename, OutputWorkspace=output_workspace,
+                       BankName=bank_names, LoadMonitors=False, LoadLogs=False)
+    except (RuntimeError, ValueError):
+        LoadNexusProcessed(Filename=filename, OutputWorkspace=output_workspace)
+    Integration(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
+    return mtd[output_workspace]
+
+
+def calculate_tube_calibration(workspace: WorkspaceTypes, tube_name: str, shadow_height: float = 1000,
                                shadow_width: float = 4, fit_domain: float = 7) -> TableWorkspace:
     r"""
     Calibration table for one tube of CORELLI
@@ -30,7 +100,6 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
     :param shadow_height: estimated dip in the background intensity.
     :param shadow_width: estimated width of the shadow cast by the wire, in pixel units
     :param fit_domain: estimated range, in pixel units, over which to carry out the fit.
-
     :return: table containing detector ID and position vector
     """
     message = f'Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle'
@@ -56,4 +125,34 @@ def calculate_tube_calibration(workspace: InputWorkspace, tube_name: str, shadow
     wire_pixel_positions = (PIXELS_PER_TUBE / TUBE_LENGTH) * wire_positions + PIXELS_PER_TUBE / 2
     fit_par = TubeCalibFitParams(wire_pixel_positions, height=peak_height, width=peak_width, margin=fit_domain)
     fit_par.setAutomatic(True)
-    return tube.calibrate(workspace, tube_name, wire_positions, peaks_form, fitPar=fit_par)
+    calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions, peaks_form, fitPar=fit_par,
+                                          outputPeak=True)
+    return calibration_table
+
+
+def apply_calibration(workspace: WorkspaceTypes, calibration_table: InputTable,
+                      output_workspace: Optional[str] = None, show_instrument: bool = False) -> Workspace2D:
+    r"""
+    Calibrate the detector positions with an input table, and open the instrument view if so requested.
+
+    :param workspace: input Workspace2D containing total neutron counts per pixel
+    :param calibration_table: a TableWorskpace containing one column for detector ID and one column
+    for its calibrated XYZ coordinates, in meters
+    :param output_workspace: name of the output workspace containing calibrated detectors
+    :param show_instrument: open the instrument view for `output_workspace`
+
+    :raises AssertionError: either `workspace` or `calibration_table` are not found
+    """
+    assert AnalysisDataService.doesExist(str(workspace)), f'No worksapce {str(workspace)} found'
+    assert AnalysisDataService.doesExist(str(calibration_table)), f'No table {str(calibration_table)} found'
+    if output_workspace is None:
+        output_workspace = str(workspace) + '_calibrated'
+
+    CloneWorkspace(InputWorkspace=workspace, OutputWorkspace=output_workspace)
+    ApplyCalibration(Workspace=output_workspace, CalibrationTable=calibration_table)
+
+    if show_instrument is True and None not in (InstrumentViewPresenter, InstrumentViewPresenter):
+        instrument_presenter = QAppThreadCall(InstrumentViewPresenter)(mtd[output_workspace])
+        QAppThreadCall(instrument_presenter.show_view)()
+
+    return mtd[output_workspace]

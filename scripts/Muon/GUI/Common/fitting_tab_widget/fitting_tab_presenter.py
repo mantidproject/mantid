@@ -109,6 +109,7 @@ class FittingTabPresenter(object):
 
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
+        self.view.plot_guess_checkbox.setChecked(False)
         self.update_selected_workspace_list_for_fit()
         self.model.create_ws_fit_function_map()
         if self.selected_data:

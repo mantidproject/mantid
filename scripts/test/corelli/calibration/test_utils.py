@@ -7,9 +7,12 @@
 
 import numpy as np
 from numpy.testing import assert_allclose
+from os import path
 import unittest
 
-from corelli.calibration.utils import calculate_tube_calibration
+from corelli.calibration.utils import (apply_calibration, bank_numbers, calculate_tube_calibration, load_banks,
+                                       wire_positions)
+from mantid import AnalysisDataService, config
 from mantid.simpleapi import DeleteWorkspaces, LoadEmptyInstrument
 
 
@@ -66,6 +69,41 @@ class TestUtils(unittest.TestCase):
         self.table = 'calibTable'
         self.calibrated_y = y
 
+    def test_wire_positions(self):
+        with self.assertRaises(AssertionError) as exception_info:
+            wire_positions(units='mm')
+        assert 'units mm must be one of' in str(exception_info.exception)
+        expected = [-0.396, -0.343, -0.290, -0.238, -0.185, -0.132, -0.079, -0.026,
+                    0.026, 0.079, 0.132, 0.185, 0.238, 0.290, 0.343, 0.396]
+        assert_allclose(wire_positions(units='meters'), np.array(expected), atol=0.001)
+        expected = [15.4, 30.4, 45.4, 60.4, 75.4, 90.5, 105.5, 120.5,
+                    135.5, 150.5, 165.5, 180.6, 195.6, 210.6, 225.6, 240.6]
+        assert_allclose(wire_positions(units='pixels'), np.array(expected), atol=0.1)
+
+    def test_bank_numbers(self):
+        assert bank_numbers(' 42 ') == ['42']
+        assert bank_numbers(' 32 , 42 ') == ['32', '42']
+        assert bank_numbers(' 32 - 34 ') == ['32', '33', '34']
+        assert bank_numbers(' 32 - 34 , 37 ') == ['32', '33', '34', '37']
+        assert bank_numbers(' 32 - 34 , 37 -  38 ') == ['32', '33', '34', '37', '38']
+        assert bank_numbers(' 32 - 34 , 37 , 39 - 41 ') == ['32', '33', '34', '37', '39', '40', '41']
+
+    def test_load_banks(self):
+        # loading a non-existing file
+        with self.assertRaises(AssertionError) as exception_info:
+            load_banks('I_am_no_here', '58', output_workspace='jambalaya')
+        assert 'File I_am_no_here does not exist' in str(exception_info.exception)
+        # loading an event nexus file will take too much time, so it's left as a system test.
+        # loading a nexus processed file
+        for directory in config.getDataSearchDirs():
+            if 'UnitTest' in directory:
+                data_dir = path.join(directory, 'CORELLI', 'calibration')
+                config.appendDataSearchDir(path.join(directory, 'CORELLI', 'calibration'))
+                break
+        workspace = load_banks(path.join(data_dir, 'CORELLI_123454_bank58.nxs'), '58', output_workspace='jambalaya')
+        self.assertAlmostEqual(workspace.readY(42)[0], 13297.0)
+        DeleteWorkspaces(['jambalaya'])
+
     def test_calculate_tube_calibration(self) -> None:
         # Check the validators are doing what they're supposed to do
         with self.assertRaises(AssertionError) as exception_info:
@@ -82,8 +120,16 @@ class TestUtils(unittest.TestCase):
         calibrated_y = np.array([v.Y() for v in table.column(1)])
         assert_allclose(calibrated_y, self.calibrated_y, atol=1e-3)
 
+    def test_apply_calibration(self) -> None:
+        table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
+        apply_calibration(self.workspace, table)
+        assert AnalysisDataService.doesExist('uncalibrated_calibrated')
+        DeleteWorkspaces(['uncalibrated_calibrated', str(table)])
+
     def tearDown(self) -> None:
-        DeleteWorkspaces([self.workspace, self.table])
+        to_delete = [w for w in [self.workspace, self.table] if AnalysisDataService.doesExist(w)]
+        if len(to_delete) > 0:
+            DeleteWorkspaces(to_delete)
 
 
 if __name__ == "__main__":
