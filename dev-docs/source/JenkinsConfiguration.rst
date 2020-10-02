@@ -18,7 +18,7 @@ Introduction
 
 Jenkins works on a 'master -> worker' principle.
 The master node is responsible for orchestrating jobs and managing the agents, where the work is actually performed.
-The master node is located at http://builds.mantidproject.org and each facility is responsible for providing hardware to act as agents for the various required configurations.
+The master node is located at https://builds.mantidproject.org and each facility is responsible for providing hardware to act as agents for the various required configurations.
 
 Setting up a New Agent
 ######################
@@ -51,10 +51,10 @@ Agent Connection
 
 There are following additional steps required to be able to connect a Windows agent using JNLP as a Windows service:
 
-#. Setup the agent on the master node using "New Node" under http://builds.mantidproject.org/computer/.
+#. Setup the agent on the master node using "New Node" under https://builds.mantidproject.org/computer/.
    If "New Node" is not visible then you do not have the required permissions - ask an admin for help.
    It is recommended that you copy from an existing node of a similar type.
-#. Once configured on the master, remote desktop to the agent, open a browser and connect to the webpage of the agent, .e.g. http://builds.mantidproject.org/computer/ornl-pc73896/
+#. Once configured on the master, remote desktop to the agent, open a browser and connect to the webpage of the agent, .e.g. https://builds.mantidproject.org/computer/ornl-pc73896/
 #. Click on the **connect** button to launch the JNLP client.
 #. Once the client is launched, you can select "Install as Windows Service" from the clients menu.
    If you have a proxy then see the section below for further configuration steps.
@@ -157,13 +157,13 @@ On macOS ``latex`` and ``sysctl`` should be available.
 Post-Connection Setup - All Systems
 -----------------------------------
 
-Ensure the new machine is added to the relevant `ParaView build job <http://builds.mantidproject.org/view/ParaView/>`__ and build ParaView.
+Ensure the new machine is added to the relevant `ParaView build job <https://builds.mantidproject.org/view/ParaView/>`__ and build ParaView.
 Set the ``PARAVIEW_DIR`` & ``PARAVIEW_NEXT_DIR`` variables (it's easiest to just look at the configuration for one of the other nodes of a similar type.
 
 Misc Groovy Scripts
 ###################
 
-The following is a collection of groovy scripts that can be run either at http://builds.mantidproject.org/script (for master node) or on a given node, e.g `isis-mantidx3 <http://builds.mantidproject.org/computer/isis-mantidlx3/script>`__.
+The following is a collection of groovy scripts that can be run either at https://builds.mantidproject.org/script (for master node) or on a given node, e.g `isis-mantidx3 <https://builds.mantidproject.org/computer/isis-mantidlx3/script>`__.
 You must have admin privileges to run them.
 
 https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler was helpful for coming up with some of these.
