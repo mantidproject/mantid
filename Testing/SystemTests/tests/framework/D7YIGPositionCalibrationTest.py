@@ -32,9 +32,12 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         mtd.clear()
-        os.remove('test_shortWavelength.xml')
-        os.remove('test_intermediateWavelength.xml')
-        os.remove('test_longWavelength.xml')
+        os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                               'test_shortWavelength.xml'))
+        os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                               'test_intermediateWavelength.xml'))
+        os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                               'test_longWavelength.xml'))
 
     def d7_short_wavelength_test(self):
         approximate_wavelength = '3.14' # Angstrom
@@ -42,9 +45,11 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
                                  MinimalDistanceBetweenPeaks=1.75, BankOffsets="-3,-3,1",
                                  FitOutputWorkspace='test_shortWavelength')
-        self.assertTrue(path.exists('test_shortWavelength.xml'))
+        calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                                               'test_shortWavelength.xml')
+        self.assertTrue(calibration_output_path)
         self._check_fit_output('test_shortWavelength')
-        self._check_load_data_with_calibration('test_intermediateWavelength.xml')
+        self._check_load_data_with_calibration(calibration_output_path)
 
     def d7_intermediate_wavelength_test(self):
         approximate_wavelength = '4.8' # Angstrom
@@ -52,9 +57,11 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
                                  FitOutputWorkspace='test_intermediateWavelength')
-        self.assertTrue(path.exists('test_intermediateWavelength.xml'))
+        calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                                               'test_intermediateWavelength.xml')
+        self.assertTrue(path.exists(calibration_output_path))
         self._check_fit_output('test_intermediateWavelength')
-        self._check_load_data_with_calibration('test_intermediateWavelength.xml')
+        self._check_load_data_with_calibration(calibration_output_path)
 
     def d7_long_wavelength_test(self):
         approximate_wavelength = '5.7' # Angstrom
@@ -62,9 +69,11 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_longWavelength.xml',
                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
                                  FitOutputWorkspace='test_longWavelength')
-        self.assertTrue(path.exists('test_longWavelength.xml'))
+        calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                                               'test_longWavelength.xml')
+        self.assertTrue(path.exists(calibration_output_path))
         self._check_fit_output('test_longWavelength')
-        self._check_load_data_with_calibration('test_longWavelength.xml')
+        self._check_load_data_with_calibration(calibration_output_path)
 
     def _check_fit_output(self, fitTableName):
         """ Checks the TableWorkspace if the output values are reasonable,
