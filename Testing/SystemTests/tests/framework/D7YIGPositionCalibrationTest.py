@@ -14,7 +14,7 @@ import os
 class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        super(D7_intermediate_wavelength_Test, self).__init__()
+        super(D7YIGPositionCalibrationTest, self).__init__()
         self.setUp()
 
     def setUp(self):
