@@ -17,28 +17,28 @@ aims to describe the general setup of the system.
 Introduction
 ############
 
-Jenkins works on a 'master->slave' principle. The master node is
-responsible for orchestrating jobs and managing the slave nodes, where the
+Jenkins works on a 'master -> worker' principle. The master node is
+responsible for orchestrating jobs and managing the agents, where the
 work is actually performed. The master node is located at
 http://builds.mantidproject.org and each facility is responsible for providing
-hardware to act as slaves for the various required configurations.
+hardware to act as agents for the various required configurations.
 
 General Setup
 #############
 
-The master node is set to a fixed TCP port for JNLP slave agents under
+The master node is set to a fixed TCP port for JNLP agents under
 http://builds.mantidproject.org/configureSecurity.
 
 The anonymous jenkins user has the following rights: Overall Read,
 Slave Connect, Job Read, View Read.
 
-Setting up a New Slave
+Setting up a New Agent
 ######################
 
 Machine Setup
 -------------
 
-Set up a local ``builder`` account that will be used by the slave.
+Set up a local ``builder`` account that will be used by the agent.
 
 Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS. In addition, install a standalone `Python <https://www.python.org/downloads/windows/>`__ interpreter so the system tests are able to install the mantid package. Do not use the embeddable zip, use the full installer and ensure python.exe is on the `PATH`. 
 
@@ -52,18 +52,18 @@ Windows
 
 * Ensure that the location of ``msbuild.exe`` (``C:\Windows\Microsoft.NET\Framework64\v4.0.30319``) is on the ``PATH``
 
-Slave Connection
+Agent Connection
 ^^^^^^^^^^^^^^^^
 
 There are following additional steps required to be able to connect a
-Windows slave using JNLP as a Windows service :
+Windows agent using JNLP as a Windows service :
 
-#. Setup the slave on the master node using "New Node" under
+#. Setup the agent on the master node using "New Node" under
    http://builds.mantidproject.org/computer/. If "New Node" is not visible
    then you do not have the required permissions - ask an admin for help. It is
    recommended that you copy from an existing node of a similar type.
-#. Once configured on the master, remote desktop to the slave, open a browser and connect to the webpage of the
-   slave, .e.g. http://builds.mantidproject.org/computer/ornl-pc73896/
+#. Once configured on the master, remote desktop to the agent, open a browser and connect to the webpage of the
+   agent, .e.g. http://builds.mantidproject.org/computer/ornl-pc73896/
 #. Click on the **connect** button to launch the JNLP client.
 #. Once the client is launched, you can select "Install as Windows
    Service" from the clients menu. If you have a proxy then see the
@@ -77,7 +77,7 @@ Windows slave using JNLP as a Windows service :
    the builder account
 #. Change the "Startup type:" of the service to be "Automatic (Delayed Start)"
 #. Ensure the msbuild directory is on the ``PATH``
-#. Finally reboot the slave (this is the easiest way for the Jenkins to
+#. Finally reboot the agent (this is the easiest way for the Jenkins to
    start trying to reconnect to it)
 
 Note that changes to ``PATH`` require restarting the Jenkins service in
@@ -86,13 +86,13 @@ order to be reflected in the build environment.
 Connecting Through a Proxy Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-It is a little more tricky to windows slaves connected through a
-proxy.To do this you must modify the java arguments that are used to
+It is a little more tricky to add Windows agents connected through a
+proxy. To do this you must modify the java arguments that are used to
 start the ``jenkins-slave`` process. Once the "Install as a Windows
 Service" has completed you should
 
 #. Find a directory on the machine such as ``C:\Jenkins``` or whatever
-   was configured in the slave config.
+   was configured in the agent config.
 #. Open the ``jenkins-slave.xml`` file
 #. Edit the tag and add ``-Dhttp.proxyHost=PROXYHOST``
    ``-Dhttp.proxyPort=PROXYPORT`` to the list
@@ -152,7 +152,7 @@ exception for ``builder``::
     Defaults!/bin/cp        !requiretty
     Defaults!/bin/rm        !requiretty
 
-In order to run the Qt tests, which require a connection to the windowing system, the user that is running the jenkins slave must
+In order to run the Qt tests, which require a connection to the windowing system, the user that is running the Jenkins agent must
 have logged in. This is most easily done by VNC - connect, log in,
 then disconnect. If you see errors such as::
 
@@ -174,7 +174,7 @@ The jenkins JNLP connections are maintained by a crontab entry. The
 script is in the `mantid repository
 <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/jenkins-slave.sh>`__.
 
-The comments at the top describe a typical crontab entry for the script. This needs to be manually set for each slave. Ensure the script is
+The comments at the top describe a typical crontab entry for the script. This needs to be manually set for each agent. Ensure the script is
 marked executable after downloading it. Also ensure the entry in the crontab
 has the correct ``PATH`` setting (by default cron uses a reduced ``PATH`` entry). On macOS ``latex`` and ``sysctl``
 should be available.
@@ -230,8 +230,8 @@ Update ParaView variables on nodes
 ----------------------------------
 
 **After running this script the variables look like they are updated but
-are in fact cached on the slaves so the new values don't take effect
-without disconnecting and forcing each slave to reconnect**
+are in fact cached on the agents so the new values don't take effect
+without disconnecting and forcing each agent to reconnect**
 
 .. code-block:: groovy
 
