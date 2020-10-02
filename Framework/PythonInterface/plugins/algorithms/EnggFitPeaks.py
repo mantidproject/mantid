@@ -8,6 +8,7 @@ import math
 
 from mantid.kernel import *
 from mantid.api import *
+from mantid.simpleapi import *
 
 import mantid.simpleapi as mantid
 
@@ -264,24 +265,22 @@ class EnggFitPeaks(PythonAlgorithm):
         peak.setParameter('I', intensity)
 
         # Fit using predicted window and a proper function with approximated initial values
-        fit_alg = self.createChildAlgorithm('Fit')
         fit_function = 'name=LinearBackground;{0}'.format(peak)
-        fit_alg.setProperty('Function', fit_function)
-        fit_alg.setProperty('InputWorkspace', wks)
-        fit_alg.setProperty('WorkspaceIndex', wks_index)
-        fit_alg.setProperty('CreateOutput', True)
-
         (startx, endx) = self._estimate_start_end_fitting_range(center, width)
-        fit_alg.setProperty('StartX', startx)
-        fit_alg.setProperty('EndX', endx)
         self.log().debug("Fitting for peak expected in (d-spacing): {0}, Fitting peak function: "
                          "{1}, with startx: {2}, endx: {3}".
                          format(expected_center, fit_function, startx, endx))
-        fit_alg.execute()
-        param_table = fit_alg.getProperty('OutputParameters').value
-        chi_over_dof = fit_alg.getProperty('OutputChi2overDoF').value
 
-        return param_table, chi_over_dof
+        fit_output = Fit(
+            Function=fit_function,
+            InputWorkspace=wks,
+            WorkspaceIndex=wks_index,
+            CreateOutput=True,
+            StartX=startx,
+            EndX=endx
+        )
+
+        return fit_output.OutputParameters, fit_output.OutputChi2overDoF
 
     def _peaks_from_find_peaks(self, in_wks, expected_peaks_tof, wks_index):
         """
