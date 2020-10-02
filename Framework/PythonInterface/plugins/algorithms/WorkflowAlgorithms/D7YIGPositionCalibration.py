@@ -120,7 +120,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         fit_output_name = self.getPropertyValue('FitOutputWorkspace')
         conjoined_scan = "conjoined_input_{}".format(fit_output_name)
         if self.getProperty('InputWorkspace').isDefault:
-            self._get_scan_data()
+            self._get_scan_data(fit_output_name)
         else:
             input_name = self.getPropertyValue('InputWorkspace')
             RenameWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
@@ -166,7 +166,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         else:
             self.setProperty('FitOutputWorkspace', detector_parameters)
 
-    def _get_scan_data(self):
+    def _get_scan_data(self, ws_name):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""
 
