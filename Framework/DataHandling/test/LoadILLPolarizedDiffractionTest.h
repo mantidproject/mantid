@@ -457,7 +457,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "YIGFile"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("YIGFilename", "D7_YIG_calibration.xml"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("YIGFilename", "D7_YIG_calibration.xml"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
