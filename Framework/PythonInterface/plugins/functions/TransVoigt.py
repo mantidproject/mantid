@@ -20,12 +20,12 @@ def voigtFunction(X, Y):
     Y = abs(Y)
     S = abs(X)+Y
     T = Y - (X * 1j)
-
+        
     # Determine values based on value of S
     # REGION 1
     if S >= 15:
         W = T*0.5641896/(0.5+T*T)
-
+        
     # REGION 2
     else:
         if S >= 5.5:
@@ -39,16 +39,16 @@ def voigtFunction(X, Y):
     # REGION 4
             else:
                 U = T * T
-                step = (1540.787 - U * (219.0313 - U * (35.76683 - U * (1.320522 - U * 0.56419))))
-                W = T * (36183.31 - U * (3321.9905 - U * step))
+                W = T * (36183.31 - U * (3321.9905 - U * (1540.787 - U * (219.0313 - U * (35.76683 - U * (1.320522 - U *
+                                                                                                          0.56419))))))
                 step = (9022.228 - U * (2186.181 - U * (364.2191 - U * (61.57037 - U * (1.841439 - U)))))
                 W /= (32066.6 - U * (24322.84 - U * step))
                 W = (np.exp(np.real(U))*np.cos(np.imag(U)) + 0j) - W
     return np.real(W)
 
 
-class PEARLTransVoigt(IFunction1D):
-
+class TransVoigt(IFunction1D):
+    
     def init(self):
         # Starting parameters as fitted from run PRL111643
         self.declareParameter("Position", 1096.3)
@@ -56,10 +56,10 @@ class PEARLTransVoigt(IFunction1D):
         self.declareParameter("Gaussian FWHM", 25.227)
         self.declareParameter("Amplitude", 2.08)
         # Legacy parameters from Transfit v1:
-        self.declareParameter("bg0", 25)
-        self.declareParameter("bg1", 0.015)
-        self.declareParameter("bg2", 0)
-
+        self.declareParameter("bg0",25)
+        self.declareParameter("bg1",0.015)
+        self.declareParameter("bg2",0)
+       
     def function1D(self, xvals):
         # Vectorise the function to allow if/else statements to work quickly
         vVoigtFunction = vectorize(voigtFunction)
@@ -71,11 +71,11 @@ class PEARLTransVoigt(IFunction1D):
         # Legacy parameters from Transfit v1:
         bg0 = self.getParameterValue("bg0")
         bg1 = self.getParameterValue("bg1")
-        bg2 = self.getParameterValue("bg2")
+        bg3 = self.getParameterValue("bg3")
         #
         # Legacy background function included from Transfit v1
         # Define background function
-        bg = bg0 + bg1 ** xvals + bg2 * xvals * xvals
+        bg = bg0 + bg1 ** xvals + bg3 * xvals * xvals
         # Correct using Beer's law to fit measured absorption, not Xsection
         # np.sqrt(np.log(2)) replaced with 1 as legacy
         width = 1 / gaussFWHM
@@ -85,4 +85,4 @@ class PEARLTransVoigt(IFunction1D):
         return outVal
 
 
-FunctionFactory.subscribe(PEARLTransVoigt)
+FunctionFactory.subscribe(TransVoigt)
