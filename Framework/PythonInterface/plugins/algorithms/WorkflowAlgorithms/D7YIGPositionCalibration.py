@@ -116,6 +116,14 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=5)
+
+        self._scanStepSize = self.getProperty("ScanStepSize").value
+        self._peakWidth = self.getProperty("BraggPeakWidth").value
+        masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
+        self._beamMask1 = float(masked_bins_range[0])
+        self._beamMask2 = float(masked_bins_range[1])
+        self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
+
         # load the chosen YIG scan
         fit_output_name = self.getPropertyValue('FitOutputWorkspace')
         conjoined_scan = "conjoined_input_{}".format(fit_output_name)
@@ -132,13 +140,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                 WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
                                                                     (bank_no+1)*self._D7NumberPixelsBank-1),
                                 OutputWorkspace=conjoined_scan)
-
-        self._scanStepSize = self.getProperty("ScanStepSize").value
-        self._peakWidth = self.getProperty("BraggPeakWidth").value
-        masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
-        self._beamMask1 = float(masked_bins_range[0])
-        self._beamMask2 = float(masked_bins_range[1])
-        self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # loads the YIG peaks from an IPF
         yig_d = self._load_yig_peaks(conjoined_scan)
