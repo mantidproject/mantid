@@ -8,10 +8,15 @@ import systemtesting
 from mantid.simpleapi import *
 from mantid.api import ITableWorkspace
 
-import os
+import math
+import os.path
+from os import path
+import xml.etree.ElementTree as ET
 
 
 class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
+
+    _pixels_per_bank = 44
 
     def __init__(self):
         super(D7YIGPositionCalibrationTest, self).__init__()
