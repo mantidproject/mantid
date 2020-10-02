@@ -127,12 +127,12 @@ struct IntersectionPoint {
   }
 
   inline bool operator==(const IntersectionPoint &other) const {
-    if(direction != other.direction) {
+    if (direction != other.direction) {
       return false;
     }
 
     const double diff = fabs(distFromStart - other.distFromStart);
-    if(diff > Kernel::Tolerance) {
+    if (diff > Kernel::Tolerance) {
       return false;
     }
 
