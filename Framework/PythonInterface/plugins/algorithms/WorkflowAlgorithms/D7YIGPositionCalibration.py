@@ -440,7 +440,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              Output='det_fit_out_{}'.format(fit_output_name),
                              **fit_kwargs)
         except RuntimeError as e:
-            raise RuntimeError("Fitting detector positions and wavelength failed due to {}.\nConsider changing initial parameters.".format(e))
+            raise RuntimeError("Fitting detector positions and wavelength failed due to {}."
+                               "\nConsider changing initial parameters.".format(e))
         param_table = fit_output.OutputParameters
 
         #clean up
