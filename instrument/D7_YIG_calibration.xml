@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="D7" date="2020-05-15 00:00:00">
+<parameter-file instrument="D7">
 
+  <component-link name="detector">
+    <parameter name="wavelength">
+      <value val="3.09"/>
+    </parameter>  
+  </component-link>
   <component-link name="bank2">
     <parameter name="gradient">
       <value val="1.0" />
