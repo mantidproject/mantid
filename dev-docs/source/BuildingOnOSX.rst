@@ -38,11 +38,9 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 .. code-block:: sh
 
    brew install git
-   brew tap homebrew/science
    brew tap mantidproject/mantid
-   brew tap caskroom/cask
+   brew tap homebrew/cask
    brew tap cartr/qt4
-   brew tap-pin cartr/qt4
    brew cask install xquartz
    brew cask install mactex
 
@@ -76,6 +74,9 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 
    # Assume we are using bash
    echo 'export PATH="/usr/local/opt/python@3.8/bin:$PATH"' >> ~/.bash_profile
+
+   # If you have enabled Zsh
+   echo 'export PATH="/usr/local/opt/python@3.8/bin:$PATH"' >> ~/.zshenv
 
 10. Downgrade setuptools to 48.0.0 until https://github.com/mantidproject/mantid/issues/29010 is fixed.
 
