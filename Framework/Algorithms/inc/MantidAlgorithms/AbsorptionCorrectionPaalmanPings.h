@@ -9,9 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 
