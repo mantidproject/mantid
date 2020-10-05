@@ -119,9 +119,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         self.fit_status_chi_squared.setText('Chi squared: {:.4g}'.format(output_chi_squared))
 
-    def update_global_fit_state(self, output_list):
+    def update_global_fit_state(self, output_list, index):
         if self.fit_type == self.simultaneous_fit:
-            indexed_fit = output_list[self.get_index_for_start_end_times()]
+            indexed_fit = output_list[index]
             boolean_list = [indexed_fit == 'success'] if indexed_fit else []
         else:
             boolean_list = [output == 'success' for output in output_list if output]
@@ -269,7 +269,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         warning(message, parent=self)
 
     def get_index_for_start_end_times(self):
-        current_index = self.parameter_display_combo.currentIndex()
+        box = self.parameter_display_combo
+        print([box.itemText(i) for i in range(box.count())])
+        current_index = box.currentIndex()
         return current_index if current_index != -1 else 0
 
     def get_global_parameters(self):
