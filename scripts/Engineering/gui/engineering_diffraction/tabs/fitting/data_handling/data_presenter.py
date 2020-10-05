@@ -38,10 +38,7 @@ class FittingDataPresenter(object):
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
 
     def fit_completed(self, results_dict):
-        # result_dict = eval(fit_result.replace('true', 'True').replace('false', 'False'))
-        ws_name = results_dict["properties"]["InputWorkspace"]
-        self.model.update_fit(self.row_numbers[ws_name], results_dict)
-
+        self.model.update_fit(results_dict)
 
     def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))

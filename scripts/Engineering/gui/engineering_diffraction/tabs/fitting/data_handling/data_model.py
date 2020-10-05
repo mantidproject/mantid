@@ -17,6 +17,7 @@ from numpy import full, nan, max, array, vstack
 from itertools import chain
 from re import findall
 
+
 class FittingDataModel(object):
     def __init__(self):
         self._log_names = []
@@ -145,35 +146,38 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
-    def update_fit(self, row_number, results_dict):
+    def update_fit(self, results_dict):
         wsname = results_dict['properties']['InputWorkspace']
-        print(results_dict)
-        # # at this point we know the fit workspaces output so can collect error setc.
-        self._fit_results[wsname] = {'properties': results_dict['properties']}
+        self._fit_results[wsname] = {'model': results_dict['properties']['Function']}
         self._fit_results[wsname]['results'] = dict()  # {function_param: [[Y1, E1], [Y2,E2],...] }
-        fnames =[x.split('=')[-1] for x in findall('name=[^,]*', results_dict['properties']['Function'])]
+        fnames = [x.split('=')[-1] for x in findall('name=[^,]*', results_dict['properties']['Function'])]
+        # get num params for each function (first elem empty as str begins with 'name='
+        nparams = [s.count('=') for s in results_dict['properties']['Function'].split('name=')[1:]]
         params_dict = ADS.retrieve(results_dict['properties']['Output'] + '_Parameters').toDict()
+        # loop over rows in output workspace to get value and error for each parameter
+        istart = 0
         for ifunc, fname in enumerate(fnames):
-            for irow, param_str in enumerate(params_dict['Name']):
-                if param_str.startswith(f'f{ifunc}'):
-                    key = '_'.join([fname,param_str.split('.')[-1]])
-                    if key not in self._fit_results[wsname]['results']:
-                        self._fit_results[wsname]['results'][key] = []
-                    self._fit_results[wsname]['results'][key].append([
-                        params_dict['Value'][irow], params_dict['Error'][irow]])
+            for iparam in range(0, nparams[ifunc]):
+                irow = istart + iparam
+                key = '_'.join([fname, params_dict['Name'][irow].split('.')[-1]])  # funcname_param
+                if key not in self._fit_results[wsname]['results']:
+                    self._fit_results[wsname]['results'][key] = []
+                self._fit_results[wsname]['results'][key].append([
+                    params_dict['Value'][irow], params_dict['Error'][irow]])
+            istart += nparams[ifunc]
         self.create_fit_tables()
 
     def create_fit_tables(self):
-        wslist = [] # ws to be grouped
+        wslist = []  # ws to be grouped
         # extract fit parameters and errors
-        nruns = len(self._loaded_workspaces.keys()) # num of rows of output workspace
+        nruns = len(self._loaded_workspaces.keys())  # num of rows of output workspace
         # get unique set of function parameters across all workspaces
         func_params = set(chain(*[list(d['results'].keys()) for d in self._fit_results.values()]))
         for param in func_params:
             # get max number of repeated func in a model (num columns of output workspace)
-            nfuncs = max([len(d['results'][param]) for d in self._fit_results.values()])
+            nfuncs = max([len(d['results'][param]) for d in self._fit_results.values() if param in d['results']])
             # make output workspace
-            ipeak = list(range(1, nfuncs+1))*nruns
+            ipeak = list(range(1, nfuncs + 1)) * nruns
             w = CreateWorkspace(OutputWorkspace=param, DataX=ipeak, DataY=ipeak, NSpec=nruns)
             # axis for labels in workspace
             axis = TextAxis.create(nruns)
@@ -182,28 +186,27 @@ class FittingDataModel(object):
                     if param in self._fit_results[wsname]['results']:
                         fitvals = array(self._fit_results[wsname]['results'][param])
                         # pad to max length (with nans)
-                        data = vstack((fitvals, full((nfuncs-fitvals.shape[0],2), nan)))
+                        data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
                     else:
-                        data = full((nfuncs,2), nan)
+                        data = full((nfuncs, 2), nan)
                 else:
                     data = full((nfuncs, 2), nan)
-                w.setY(iws, data[:,0])
-                w.setE(iws, data[:,1])
+                w.setY(iws, data[:, 0])
+                w.setE(iws, data[:, 1])
                 # label row
                 axis.setLabel(iws, wsname)
             w.replaceAxis(1, axis)
             wslist += [w]
         # table for model summary/info
-        model = CreateEmptyTableWorkspace()
+        model = CreateEmptyTableWorkspace(OutputWorkspace='model')
         model.addColumn(type="str", name="Workspace")
         model.addColumn(type="str", name="Model")
-        for wsname in self._loaded_workspaces:
+        for iws, wsname in enumerate(self._loaded_workspaces.keys()):
             if wsname in self._fit_results:
-                properties = self._fit_results[wsname]['results']
-                row = self._fit_results[wsname]['results']
-                model.addRow([wsname, self._fit_results[wsname]['properties']['Function']])
+                row = [wsname, self._fit_results[wsname]['model']]
+                self.write_table_row(model, row, iws)
             else:
-                model.addRow(['',''])
+                self.write_table_row(model, ['', ''], iws)
         wslist += [model]
         group_name = self._log_workspaces.name().split('_log')[0] + '_fits'
         self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
