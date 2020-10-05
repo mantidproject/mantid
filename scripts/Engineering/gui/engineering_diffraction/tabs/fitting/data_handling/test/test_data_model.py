@@ -8,7 +8,7 @@ import unittest
 
 from unittest import mock
 from unittest.mock import patch
-from numpy import nan, full, isnan
+from numpy import isnan
 from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model"
