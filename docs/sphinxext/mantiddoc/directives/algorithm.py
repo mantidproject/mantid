@@ -88,24 +88,20 @@ class AlgorithmDirective(AlgorithmBaseDirective):
 
     def _create_screenshot(self):
         """
-        Creates a screenshot for the named algorithm in the "images/screenshots"
-        subdirectory.
+        Creates a screenshot for the named algorithm in the directory provided
+        by the SCREENSHOTS_DIR environment variable.
 
         The file will be named "algorithmname-vX_dlg.png", e.g. Rebin-v1_dlg.png
 
         Returns:
           screenshot: A mantiddoc.tools.Screenshot object
         """
-        try:
-            screenshots_dir = self._screenshot_directory()
-        except RuntimeError:
-            return None
+        screenshots_dir = self.screenshots_dir
+        if screenshots_dir is None:
+            return
 
         # Generate image
         from mantiddoc.tools.screenshot import algorithm_screenshot
-        if not os.path.exists(screenshots_dir):
-            os.makedirs(screenshots_dir)
-
         try:
             picture = algorithm_screenshot(self.algorithm_name(),
                                            screenshots_dir,
@@ -155,33 +151,14 @@ class AlgorithmDirective(AlgorithmBaseDirective):
             rel_path = rel_path.replace("\\", "/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = "/" + rel_path + "/" + filename
+            caption = "**" + self.algorithm_name() + "** dialog."
         else:
             # use stock not found image
             path = "/images/ImageNotFound.png"
             width = 200
+            caption = "Screenshot generation was disabled"
 
-        caption = "**" + self.algorithm_name() + "** dialog."
         self.add_rst(format_str % (path, width, caption))
-
-    def _screenshot_directory(self):
-        """
-        Returns a full path where the screenshots should be generated. They are
-        put in a screenshots subdirectory of the main images directory in the source
-        tree. Sphinx then handles copying them to the final location
-
-        Arguments:
-          env (BuildEnvironment): Allows access to find the source directory
-
-        Returns:
-          str: A string containing a path to where the screenshots should be created. This will
-          be a filesystem path
-        """
-        try:
-            return os.environ["SCREENSHOTS_DIR"]
-        except:
-            raise RuntimeError(
-                "The '.. algorithm::' directive requires a SCREENSHOTS_DIR environment variable to be set."
-            )
 
     def _insert_deprecation_warning(self):
         """

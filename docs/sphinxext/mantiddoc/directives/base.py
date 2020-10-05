@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from docutils import statemachine
 from docutils.parsers.rst import Directive  # pylint: disable=unused-import
+import os
 import re
 from mantid.api import AlgorithmFactory, AlgorithmManager, FunctionFactory
 from mantiddoc import get_logger
@@ -69,6 +70,17 @@ class BaseDirective(Directive):
     final_argument_whitespace = True
 
     rst_lines = None
+
+    @property
+    def screenshots_dir(self):
+        """
+        Return the directory to be used to store auto-generated screenshots
+        """
+        screenshots_dir = os.environ.get("SCREENSHOTS_DIR", None)
+        if screenshots_dir is None or screenshots_dir == "":
+            return None
+        else:
+            return screenshots_dir
 
     def add_rst(self, text):
         """
