@@ -7,7 +7,7 @@
 from mantiddoc.directives.base import AlgorithmBaseDirective  #pylint: disable=unused-import
 
 
-class relatedalgorithmsDirective(AlgorithmBaseDirective):
+class RelatedalgorithmsDirective(AlgorithmBaseDirective):
     """
     Obtains the see also section for a given algorithm based on it's name.
     This lists similar algorithms and aliases
@@ -56,4 +56,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('relatedalgorithms', relatedalgorithmsDirective)
+    app.add_directive('relatedalgorithms', RelatedalgorithmsDirective)

@@ -98,7 +98,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         """
         screenshots_dir = self.screenshots_dir
         if screenshots_dir is None:
-            return
+            return []
 
         # Generate image
         from mantiddoc.tools.screenshot import algorithm_screenshot

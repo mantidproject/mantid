@@ -75,7 +75,8 @@ class DiagramDirective(BaseDirective):
         diagrams_dir = self.diagrams_dir
         if diagrams_dir is None:
             self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" +
-                         "    Diagram generation was disabled")
+                         "    diagram generation was disabled")
+            return []
 
         try:
             dot_executable = os.environ["DOT_EXECUTABLE"]

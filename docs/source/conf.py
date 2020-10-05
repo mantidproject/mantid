@@ -38,10 +38,18 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.doctest',
-    'mantiddoc.directives',
+    'mantiddoc.directives.algorithm',
+    'mantiddoc.directives.attributes',
+    'mantiddoc.directives.categories',
+    'mantiddoc.directives.diagram',
+    'mantiddoc.directives.interface',
+    'mantiddoc.directives.plot_directive',
+    'mantiddoc.directives.properties',
+    'mantiddoc.directives.relatedalgorithms',
+    'mantiddoc.directives.sourcelink',
+    'mantiddoc.directives.summary',
     'mantiddoc.autodoc',
     'mantiddoc.doctest',
-    'matplotlib.sphinxext.plot_directive'
 ]
 # Deal with math extension. Can be overridden with MATH_EXT environment variable
 # If set to imgmath we deal with the fact that < 1.8 is was called pngmath

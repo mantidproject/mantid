@@ -4,10 +4,7 @@
 
     Provides functions to take a screenshot of a QWidgets.
 
-    It currently assumes that the functions are called within the
-    MantidPlot Python environment
-
-    :copyright: Copyright 2014
+    :copyright: Copyright 2020
         ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 """
 from functools import wraps
