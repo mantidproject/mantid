@@ -12,6 +12,10 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+New features
+############
+- Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
+
 Bugfixes
 ########
 
