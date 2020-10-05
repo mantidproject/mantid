@@ -61,6 +61,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
         ws = AnalysisDataService.retrieve(name)
         self.do_plot(ws, plot_diff=self.plotDiff())
+        self.fit_result_ws_name = name
         # self.loadFunction("name=BackToBackExponential,I=1000,A=0.0361794,B=0.0215356,X0=38821.8,S=30.5841") # I=1677.09
         self.saveFunction(self.workspaceName())
         results_dict = eval(self.getFitAlgorithmParameters().replace('true', 'True').replace('false', 'False'))
