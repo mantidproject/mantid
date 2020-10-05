@@ -11,6 +11,7 @@ import unittest
 import numpy as np
 import pathlib
 from datetime import datetime
+import tempfile
 
 from mantid.dataobjects import TableWorkspace
 from mantid.api import WorkspaceGroup
@@ -21,10 +22,12 @@ from corelli.calibration.database import combine_spatial_banks, init_corelli_tab
 
 class TestCorelliDatabase(unittest.TestCase):
 
+    test_dir = tempfile.TemporaryDirectory('_data_corelli')
+
     def setUp(self) -> None:
 
         # create a mock database and tests save_bank_table and load_bank_table
-        self.database_path:str = 'data/corelli'
+        self.database_path:str = TestCorelliDatabase.test_dir.name
 
         calibratedWS10 = init_corelli_table()
         calibratedWS10.addRow( [28672,[2.291367950578997, -1.2497636826045173, -0.7778867990739283]])
@@ -64,28 +67,22 @@ class TestCorelliDatabase(unittest.TestCase):
 
     def test_filename_bank_table(self):
 
-        # calibration
-        abs_subdir:str = str(pathlib.Path(self.database_path + '/bank001/').resolve())
+        abs_subdir:str = self.database_path + '/bank001/'
         time:str = datetime.now().strftime('%Y%m%d') # format YYYYMMDD
-        expected_filename = abs_subdir + '/calibration_corelli_bank001_' + time + '.nxs.h5'
 
+        # calibration
+        expected_filename = str(pathlib.Path(abs_subdir + '/calibration_corelli_bank001_' + time + '.nxs.h5').resolve())
         filename = filename_bank_table(1, self.database_path, 'calibration')
         self.assertEqual(filename, expected_filename)
 
         # mask
-        abs_subdir:str = str(pathlib.Path(self.database_path + '/bank001/').resolve())
-        time:str = datetime.now().strftime('%Y%m%d') # format YYYYMMDD
-        expected_filename = abs_subdir + '/mask_corelli_bank001_' + time + '.nxs.h5'
-
+        expected_filename = str(pathlib.Path(abs_subdir + '/mask_corelli_bank001_' + time + '.nxs.h5').resolve())
         filename = filename_bank_table(1, self.database_path, 'mask')
         self.assertEqual(filename, expected_filename)
 
         # acceptance
-        abs_subdir:str = str(pathlib.Path(self.database_path + '/bank001/').resolve())
-        time:str = datetime.now().strftime('%Y%m%d') # format YYYYMMDD
-        expected_filename = abs_subdir + '/mask_corelli_bank001_' + time + '.nxs.h5'
-
-        filename = filename_bank_table(1, self.database_path, 'mask')
+        expected_filename = str(pathlib.Path(abs_subdir + '/acceptance_corelli_bank001_' + time + '.nxs.h5').resolve())
+        filename = filename_bank_table(1, self.database_path, 'acceptance')
         self.assertEqual(filename, expected_filename)
 
         # verify assertion is raised for invalid name
@@ -120,7 +117,7 @@ class TestCorelliDatabase(unittest.TestCase):
 
         remove(filename_bank_table(10, self.database_path))
         remove(filename_bank_table(20, self.database_path))
-        return
+        TestCorelliDatabase.test_dir.cleanup()
 
 
 if __name__ == "__main__":

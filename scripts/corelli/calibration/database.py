@@ -48,17 +48,15 @@ def filename_bank_table( bankID:int, database_path:str, table_type:str = 'calibr
     :param type 'calibration', 'mask' or 'acceptance'
     """
     subdirectory:str = database_path + '/' + 'bank' + str(bankID).zfill(3)
-    abs_subdir:str = str(pathlib.Path(subdirectory).resolve())
-    # Windows debug
-    print ("relative location: " + subdirectory)
-    print ("absolute location: " + abs_subdir)
-
-    pathlib.Path(abs_subdir).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(subdirectory).mkdir(parents=True, exist_ok=True)
     message = f'{"Cannot process Corelli filename_bank_table, table_type must be calibration, mask or acceptance"}'
     assert table_type == 'calibration' or table_type == 'mask' or table_type == 'acceptance', message
 
     time:str = datetime.now().strftime('%Y%m%d') # format YYYYMMDD
-    return abs_subdir + '/' + table_type + '_corelli_bank' + str(bankID).zfill(3) + '_' + time + '.nxs.h5'
+    filename = subdirectory + '/' + table_type + '_corelli_bank' + str(bankID).zfill(3) + '_' + time + '.nxs.h5'
+    # make it portable
+    filename = str(pathlib.Path(filename).resolve())
+    return filename
 
 
 def save_bank_table( data:Workspace, bankID:int, database_path:str, table_type:str = 'calibration' ) -> None:
