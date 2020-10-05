@@ -270,7 +270,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     def get_index_for_start_end_times(self):
         box = self.parameter_display_combo
-        print([box.itemText(i) for i in range(box.count())])
         current_index = box.currentIndex()
         return current_index if current_index != -1 else 0
 
