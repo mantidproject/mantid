@@ -27,11 +27,14 @@ using PreviewRegister =
  */
 class MANTID_API_DLL PreviewManagerImpl {
 public:
+  PreviewManagerImpl() = default;
+  PreviewManagerImpl(const PreviewManagerImpl &) = delete;
+  PreviewManagerImpl &operator=(const PreviewManagerImpl &) = delete;
   std::vector<std::string> getPreviews(const std::string &facility,
-                                       const std::string &technique = "");
+                                       const std::string &technique = "") const;
   const IPreview &getPreview(const std::string &facility,
                              const std::string &technique,
-                             const std::string &preview);
+                             const std::string &preview) const;
   template <class T> void subscribe() {
     static_assert(std::is_base_of<IPreview, T>::value);
     IPreview_uptr preview = std::make_unique<T>();
@@ -47,11 +50,11 @@ public:
   }
 
 private:
-  bool checkFacility(const std::string &facility);
+  bool checkFacility(const std::string &facility) const;
   bool checkTechnique(const std::string &facility,
-                      const std::string &technique);
+                      const std::string &technique) const;
   bool checkPreview(const std::string &facility, const std::string &technique,
-                    const std::string &preview);
+                    const std::string &preview) const;
   PreviewRegister m_previews;
 };
 
