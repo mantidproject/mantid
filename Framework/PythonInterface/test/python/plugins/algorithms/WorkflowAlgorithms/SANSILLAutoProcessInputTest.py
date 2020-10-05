@@ -23,43 +23,56 @@ class SANSILLAutoProcessInputTest(unittest.TestCase):
         config["default.instrument"] = self._instrument
         mtd.clear()
 
-    def test_validateInput(self):
-        # no sample runs
+    def test_noSampleRun(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess)
 
-        # no output workspace
+    def test_noOutputWs(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462")
 
-        # sample dim
+    def test_wrongAbsorberDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462",
                           AbsorberRuns="010462,010462",
                           OutputWorkspace="ws")
+
+    def test_wrongBeamDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462",
                           BeamRuns="010462,010462",
                           OutputWorkspace="ws")
+
+    def test_wrongContainerDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462",
                           ContainerRuns="010462,010462",
                           OutputWorkspace="ws")
+
+    def test_wrongMaskDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462",
                           MaskFiles="010462,010462",
                           OutputWorkspace="ws")
+
+    def test_wrongReferenceDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462",
                           ReferenceFiles="010462,010462",
                           OutputWorkspace="ws")
+
+    def test_wrongSensivityDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462",
                           SensitivityMaps="010462,010462",
                           OutputWorkspace="ws")
+
+    def test_wrongFluxDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462",
                           FluxRuns="010462,010462",
                           OutputWorkspace="ws")
+
+    def test_wrongParametersDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462",
                           MaxQxy="1,1",
@@ -73,7 +86,7 @@ class SANSILLAutoProcessInputTest(unittest.TestCase):
                           BeamRadius="1,1",
                           OutputWorkspace="ws")
 
-        # single transmission
+    def test_wrongTransmissionDim(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess,
                           SampleRuns="010462,010462",
                           SampleTransmissionRuns="010462,010462",
