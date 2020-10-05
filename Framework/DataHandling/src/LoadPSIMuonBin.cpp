@@ -127,6 +127,11 @@ void LoadPSIMuonBin::init() {
                       "TimeZeroList", Kernel::Direction::Output),
                   "A vector of time zero values");
   declareProperty(
+      std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          "TimeZeroTable", "", Mantid::Kernel::Direction::Output,
+          Mantid::API::PropertyMode::Optional),
+      "A table containing the time zero values");
+  declareProperty(
       "CorrectTime", true,
       "Boolean flag controlling whether time should be corrected by timezero.",
       Kernel::Direction::Input);
@@ -225,6 +230,9 @@ void LoadPSIMuonBin::exec() {
   setProperty("TimeZero", absTimeZero);
   setProperty("TimeZeroList", correctedTimeZeroList);
 
+  // create time zero table
+  makeTimeZeroTable(correctedTimeZeroList);
+
   auto firstGoodDataSpecIndex = static_cast<int>(
       *std::max_element(m_header.firstGood, m_header.firstGood + 16));
 
@@ -260,6 +268,25 @@ void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
     row << static_cast<int>(i) + 1 << 0.0;
   }
   setProperty("DeadTimeTable", deadTimeTable);
+}
+
+void LoadPSIMuonBin::makeTimeZeroTable(
+    const std::vector<double> &timeZeroList) {
+  if (getPropertyValue("TimeZeroTable").empty())
+    return;
+  Mantid::DataObjects::TableWorkspace_sptr timeZeroTable =
+      std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+          Mantid::API::WorkspaceFactory::Instance().createTable(
+              "TableWorkspace"));
+  assert(timeZeroTable);
+  timeZeroTable->addColumn("double", "time zero");
+
+  for (size_t i = 0; i < timeZeroList.size(); ++i) {
+    Mantid::API::TableRow row = timeZeroTable->appendRow();
+    row << timeZeroList[i];
+  }
+
+  setProperty("TimeZeroTable", timeZeroTable);
 }
 
 std::string LoadPSIMuonBin::getFormattedDateTime(const std::string &date,

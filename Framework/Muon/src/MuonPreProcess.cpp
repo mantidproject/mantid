@@ -10,6 +10,7 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -66,10 +67,22 @@ void MuonPreProcess::init() {
                   "become 0.0 seconds.",
                   Direction::Input);
 
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("TimeOffsetVector",
+                                              Direction::Input),
+      "An array of time offsets which correspond to each spectra, if "
+      "length one the same offset is assumed for all spectra");
+
   declareProperty(std::make_unique<ArrayProperty<double>>("TimeZeroVector",
                                                           Direction::Input),
                   "An array of time zeros which correspond to each spectra, if "
                   "length one the same time zero is assumed for all spectra");
+
+  declareProperty(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "TimeZeroTable", "", Direction::Input, PropertyMode::Optional),
+      "TableWorkspace with time zero information, used to apply time zero "
+      "correction");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<TableWorkspace>>(
@@ -99,14 +112,25 @@ std::map<std::string, std::string> MuonPreProcess::validateInputs() {
     }
   }
 
-  // Checks for dead time table
+  // Checks for dead time table and time zero table
   Workspace_sptr inputWS = this->getProperty("InputWorkspace");
   if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+    // Dead time
     TableWorkspace_sptr deadTimeTable = this->getProperty("DeadTimeTable");
     if (deadTimeTable) {
       if (deadTimeTable->rowCount() > ws->getNumberHistograms()) {
         errors["DeadTimeTable"] = "DeadTimeTable must have as many rows as "
                                   "there are spectra in InputWorkspace.";
+      }
+    }
+    // Time zero
+    TableWorkspace_sptr timeZeroTable = this->getProperty("TimeZeroTable");
+    if (timeZeroTable) {
+      if (timeZeroTable->rowCount() > ws->getNumberHistograms()) {
+        errors["TimeZeroTable"] =
+            "TimeZeroTable must have as many rows as "
+            "there are spectra in InputWorkspace. Use TimeOffset to apply same "
+            "time correcton to all data";
       }
     }
   }
@@ -123,20 +147,6 @@ std::map<std::string, std::string> MuonPreProcess::validateInputs() {
           errors["InputWorkspace"] =
               "Numbers of spectra should be identical across all workspaces in "
               "the workspace group.";
-        }
-      }
-    }
-  }
-
-  // Check length of time zero vector is one or matches number of spectra
-  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
-    const std::vector<double> timeZeros = this->getProperty("TimeZeroVector");
-    if (!timeZeros.empty()) {
-      if (timeZeros.size() != 1) {
-        if (timeZeros.size() != ws->getNumberHistograms()) {
-          errors["TimeZeroVector"] =
-              "Number of time zeros should match number of spectra or should "
-              "only contain one value.";
         }
       }
     }
@@ -160,7 +170,7 @@ void MuonPreProcess::exec() {
 
   allPeriodsWS = correctWorkspaces(allPeriodsWS);
 
-  //addPreProcessSampleLogs(allPeriodsWS);
+  addPreProcessSampleLogs(allPeriodsWS);
 
   setProperty("OutputWorkspace", allPeriodsWS);
 }
@@ -193,12 +203,14 @@ MatrixWorkspace_sptr MuonPreProcess::correctWorkspace(MatrixWorkspace_sptr ws) {
   double xMin = getProperty("TimeMin");
   double xMax = getProperty("TimeMax");
   std::vector<double> rebinParams = getProperty("RebinArgs");
+  std::vector<double> offsets = getProperty("TimeOffsetVector");
   std::vector<double> timeZeros = getProperty("TimeZeroVector");
   TableWorkspace_sptr deadTimes = getProperty("DeadTimeTable");
+  TableWorkspace_sptr timeZeroTable = getProperty("TimeZeroTable");
 
   ws = applyDTC(ws, deadTimes);
   ws = applyTimeOffset(ws, offset);
-  ws = applyTimeZeroVector(ws, timeZeros);
+  ws = applyTimeZeroTable(ws, timeZeroTable);
   ws = applyCropping(ws, xMin, xMax);
   ws = applyRebinning(ws, rebinParams);
 
@@ -237,29 +249,19 @@ MatrixWorkspace_sptr MuonPreProcess::applyTimeOffset(MatrixWorkspace_sptr ws,
 }
 
 MatrixWorkspace_sptr
-MuonPreProcess::applyTimeZeroVector(MatrixWorkspace_sptr ws,
-                                    const std::vector<double> &timeZeros) {
-  if (timeZeros.empty())
-    return ws;
-
-  if (timeZeros.size() == 1) {
-    return applyTimeOffset(ws, timeZeros[0]);
-  } else {
-    // Loop ws spectra and update x with offset values
+MuonPreProcess::applyTimeZeroTable(MatrixWorkspace_sptr ws,
+                                   const TableWorkspace_sptr &tz) {
+  if (tz != nullptr) {
     const auto numSpec = ws->getNumberHistograms();
-    //PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-    for (int i = 0; i < numSpec; ++i) {
-      //PARALLEL_START_INTERUPT_REGION
-
-      auto &xData = ws->mutableX(i);
-      const double offset = timeZeros[i];
-      std::transform(xData.begin(), xData.end(), xData.begin(),
-                     [offset](double x) { return x + offset; });
-
-      //PARALLEL_END_INTERUPT_REGION
+    for (auto specNum = 0u; specNum < numSpec; ++specNum) {
+      auto &xData = ws->mutableX(specNum);
+      for (auto &xValue : xData) {
+        API::TableRow row = tz->getRow(specNum);
+        xValue -= row.Double(0);
+      }
     }
-    //PARALLEL_CHECK_INTERUPT_REGION
-
+    return ws;
+  } else {
     return ws;
   }
 }

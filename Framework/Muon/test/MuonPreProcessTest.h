@@ -68,14 +68,14 @@ IAlgorithm_sptr setUpAlgorithmWithTimeOffset(const MatrixWorkspace_sptr &ws,
   return alg;
 }
 
-// Set up algorithm with TimeZeroVectors applied
+// Set up algorithm with TimeZeroTable applied
 IAlgorithm_sptr
-setUpAlgorithmWithTimeZeroVector(const MatrixWorkspace_sptr &ws,
-                                 const std::vector<double> &timeZeros) {
+setUpAlgorithmWithTimeZeroTable(const MatrixWorkspace_sptr &ws,
+                                const ITableWorkspace_sptr &timeZeroTable) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
       algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
-  alg->setProperty("TimeZeroVector", timeZeros);
+  alg->setProperty("TimeZeroTable", timeZeroTable);
   return alg;
 }
 
@@ -229,28 +229,34 @@ public:
   }
 
   // --------------------------------------------------------------------------
-  // Input property validation : Time Zero vector
+  // Input property validation : Time Zero Table
   // --------------------------------------------------------------------------
 
-  void
-  test_validation_fails_if_timezerovector_length_is_greater_than_number_of_spectra() {
-    // Workspace has 2 spectra, time zero vector has 3 values
-    auto ws = createCountsWorkspace(2, 10, 0.0);
-    std::vector<double> timeZeros = {0.5, 0.75, 0.5};
+  void test_successful_execution_with_valid_time_zero_table() {
+    // workspace has 2 spectra, dead time table has 5 rows
+    auto ws = createCountsWorkspace(5, 10, 0.0);
+    std::vector<double> timeZeros = {0.5, 1.0, 1.5, 2.0, 2.5};
+    ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(5, timeZeros);
 
-    auto alg = setUpAlgorithmWithTimeZeroVector(ws, timeZeros);
-
-    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
-  }
-
-  void test_validation_okay_if_timezerovector_length_one() {
-    // Workspace has 2 spectra, time zero vector has 1 value
-    auto ws = createCountsWorkspace(2, 10, 0.0);
-    std::vector<double> timeZeros = {0.5};
-
-    auto alg = setUpAlgorithmWithTimeZeroVector(ws, timeZeros);
+    auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
+  }
+
+  void test_cannot_execute_on_invalid_time_zero_table() {
+    // workspace has 2 spectra, dead time table has 5 rows
+    auto ws = createCountsWorkspace(2, 10, 0.0);
+    std::vector<double> timeZeros = {0.5, 1.0, 1.5, 2.0, 2.5};
+    ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(5, timeZeros);
+
+    auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
+    auto errors = alg->validateInputs();
+    const auto expected = "TimeZeroTable must have as many rows as there are "
+                          "spectra in InputWorkspace. Use TimeOffset to apply "
+                          "same time correcton to all data";
+
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    TS_ASSERT_EQUALS(errors["TimeZeroTable"], expected);
   }
 
   // --------------------------------------------------------------------------
@@ -361,65 +367,41 @@ public:
   }
 
   // --------------------------------------------------------------------------
-  // Correct output : Time Zero Vector
+  // Correct output : Time Zero Table
   // --------------------------------------------------------------------------
 
-  void test_vector_size_one_applied_correctly() {
-    auto ws = createCountsWorkspace(3, 10, 0.0);
+  void test_that_empty_time_zero_table_applied_correctly() {
+    auto ws = createCountsWorkspace(2, 2, 0.0);
+    std::vector<double> timeZeros = {0, 0};
+    auto timeZeroTable = createTimeZeroTable(2, timeZeros);
 
-    const std::vector<double> timeZeros = {0.5};
-    auto alg = setUpAlgorithmWithTimeZeroVector(ws, timeZeros);
-
+    auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-
-    // x-values
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.100 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[10], 1.000 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(1)[0], 0.000 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(1)[1], 0.100 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(1)[10], 1.000 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(2)[0], 0.000 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(2)[1], 0.100 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(2)[10], 1.000 + 0.500, 0.001);
-    // y-values
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 9.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(1)[0], 10.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(1)[9], 19.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(2)[0], 20.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(2)[9], 29.0, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.5, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(0)[2], 1.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[0], 0.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[1], 0.5, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[2], 1.0, 0.01);
   }
 
-  void test_vector_size_same_as_number_spectra_applied_correctly() {
-    auto ws = createCountsWorkspace(3, 10, 0.0);
+  void test_not_empty_time_zero_table_applied_correctly() {
+    auto ws = createCountsWorkspace(2, 2, 0.0);
+    std::vector<double> timeZeros = {0.25, -0.25}; // Applied as minus in alg
+    auto timeZeroTable = createTimeZeroTable(2, timeZeros);
 
-    const std::vector<double> timeZeros = {0.25, 0.5, 0.75};
-    auto alg = setUpAlgorithmWithTimeZeroVector(ws, timeZeros);
-
+    auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-
-    // x-values
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000 + 0.250, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.100 + 0.250, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[10], 1.000 + 0.250, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(1)[0], 0.000 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(1)[1], 0.100 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(1)[10], 1.000 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(2)[0], 0.000 + 0.750, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(2)[1], 0.100 + 0.750, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(2)[10], 1.000 + 0.750, 0.001);
-    // y-values
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 9.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(1)[0], 10.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(1)[9], 19.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(2)[0], 20.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(2)[9], 29.0, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.0 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.5 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(0)[2], 1.0 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[0], 0.0 + 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[1], 0.5 + 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[2], 1.0 + 0.25, 0.01);
   }
 
   // --------------------------------------------------------------------------
