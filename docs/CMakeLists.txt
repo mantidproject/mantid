@@ -5,6 +5,7 @@ option(DOCS_DOTDIAGRAMS "If enabled include workflow diagrams generated with dot
 option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots of interfaces" OFF)
 set(DOCS_MATH_EXT "sphinx.ext.mathjax" CACHE STRING "Sphinx extension to be used for rendering math equations. Default uses mathjax for speed")
 set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
+option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
 
 # Build layout
 set(SPHINX_CONF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
@@ -24,6 +25,11 @@ if(DOCS_SCREENSHOTS)
 else()
   set(SCREENSHOTS_DIR "")
 endif()
+if(DOCS_PLOTDIRECTIVE)
+  set(ENABLE_PLOTDIRECTIVE 1)
+else()
+  set(ENABLE_PLOTDIRECTIVE "")
+endif()
 
 # Add a sphinx build target to build documentation
 #   builder - Name of the sphinx builder: html, qthelp etc
@@ -40,7 +46,11 @@ function (add_sphinx_build_target builder)
   add_custom_target(${target_name}
       COMMAND
         ${CMAKE_COMMAND} -E env
-             SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR} DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${DOCS_MATH_EXT}
+             SCREENSHOTS_DIR=${SCREENSHOTS_DIR}
+             DIAGRAMS_DIR=${DIAGRAMS_DIR}
+             DOT_EXECUTABLE=${DOT_EXECUTABLE}
+             MATH_EXT=${DOCS_MATH_EXT}
+             ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
              ${runner} ${runner_args} -m sphinx --no-color -b ${builder} -d ${DOCTREES_DIR} ${SPHINX_CONF_DIR} ${output_dir}
       DEPENDS Framework
               mantidqt
