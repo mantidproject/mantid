@@ -58,13 +58,12 @@ class InterfaceDirective(BaseDirective):
         Returns:
           screenshot: A mantiddoc.tools.Screenshot object
         """
-        screenshots_dir = self._screenshot_directory()
+        screenshots_dir = self.screenshots_dir
+        if screenshots_dir is None:
+            return None
 
         # Generate image
         from mantiddoc.tools.screenshot import custominterface_screenshot
-        if not os.path.exists(screenshots_dir):
-            os.makedirs(screenshots_dir)
-
         return custominterface_screenshot(self.interface_name(),
                                           screenshots_dir,
                                           widget_name=widget_name)
@@ -86,7 +85,7 @@ class InterfaceDirective(BaseDirective):
                      "   :class: screenshot\n"\
                      "   :width: %dpx"
 
-        if align != None:
+        if align is not None:
             format_str += "\n   :align: " + align
 
         format_str += "\n\n"
@@ -113,26 +112,6 @@ class InterfaceDirective(BaseDirective):
             width = 200
 
         self.add_rst(format_str % (path, width))
-
-    def _screenshot_directory(self):
-        """
-        Returns a full path where the screenshots should be generated. They are
-        put in a screenshots subdirectory of the main images directory in the source
-        tree. Sphinx then handles copying them to the final location
-
-        Arguments:
-          env (BuildEnvironment): Allows access to find the source directory
-
-        Returns:
-          str: A string containing a path to where the screenshots should be created. This will
-          be a filesystem path
-        """
-        try:
-            return os.environ["SCREENSHOTS_DIR"]
-        except:
-            raise RuntimeError(
-                "The '.. interface::' directive requires a SCREENSHOTS_DIR environment variable to be set."
-            )
 
 
 #------------------------------------------------------------------------------------------------------------

@@ -49,12 +49,15 @@ def algorithm_screenshot(name: str, directory: str, version: int = -1, ext: str 
     Returns:
       A full path to the image file
     """
+    ensure_directory_exists(directory)
+
     suffix = ""
     if version != -1:
         suffix = f"-v{version}"
     filename = os.path.join(directory, f"{name}{suffix}_dlg{ext}")
     manager = InterfaceManager()
     dialog = manager.createDialogFromName(name, version, None, True)
+    dialog.adjustSize()
     try:
         take_picture(dialog, filename)
         picture = Screenshot(filename, dialog.width(), dialog.height())
@@ -82,11 +85,13 @@ def custominterface_screenshot(name: str,
     Returns:
       str: A full path to the image file
     """
+    ensure_directory_exists(directory)
 
     iface_mgr = InterfaceManager()
     window = iface_mgr.createSubWindow(name)
     if window is None:
         raise RuntimeError(f"Interface '{name}' could not be created")
+    window.adjustSize()
 
     image_widget = window
     if widget_name is not None:
@@ -104,6 +109,15 @@ def custominterface_screenshot(name: str,
         window.close()
 
     return picture
+
+
+def ensure_directory_exists(directory: str):
+    """
+    If the given directory does not exist then create it
+    :param directory: The path to a directory that might not exist
+    """
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 
 def take_picture(widget: QWidget, filename: str) -> str:
