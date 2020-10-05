@@ -1,28 +1,51 @@
 # Sphinx documentation
 
+# Build options
+option(DOCS_DOTDIAGRAMS "If enabled include workflow diagrams generated with dot" OFF)
+option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots of interfaces" OFF)
+set(DOCS_MATH_EXT "sphinx.ext.mathjax" CACHE STRING "Sphinx extension to be used for rendering math equations. Default uses mathjax for speed")
+set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
+
+# Build layout
 set(SPHINX_CONF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(SPHINX_BUILD_DIR ${DOCS_BUILDDIR})
 set(DOCTREES_DIR ${DOCS_BUILDDIR}/doctrees)
-set(SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots)
-set(DIAGRAMS_DIR ${SPHINX_BUILD_DIR}/diagrams)
-set(DOT_EXECUTABLE ${DOXYGEN_DOT_EXECUTABLE})
-set(DOCS_RUNNER ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython)
-set(DOCS_RUNNER_ARGS "--classic")
+if(DOCS_DOTDIAGRAMS)
+  if(NOT DOXYGEN_DOT_EXECUTABLE)
+    message(FATAL_ERROR "DOCS_DOTDIAGRAMS enabled but dot executable cannot be found")
+  endif()
+  set(DOT_EXECUTABLE ${DOXYGEN_DOT_EXECUTABLE})
+  set(DIAGRAMS_DIR ${SPHINX_BUILD_DIR}/diagrams)
+else()
+  set(DIAGRAMS_DIR "")
+endif()
+if(DOCS_SCREENSHOTS)
+  set(SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots)
+else()
+  set(SCREENSHOTS_DIR "")
+endif()
 
 # Add a sphinx build target to build documentation
-#   builder -  Name of the sphinx builder: html, qthelp etc
+#   builder - Name of the sphinx builder: html, qthelp etc
+#   target_name - Optional target name. Default=docs-${builder}
 function (add_sphinx_build_target builder)
-  set(target_name docs-${builder})
+  set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython)
+  set(runner_args "--classic")
+  if(ARGC GREATER 1)
+    set(target_name ${ARGV1})
+  else()
+    set(target_name docs-${builder})
+  endif()
   set(output_dir ${SPHINX_BUILD_DIR}/${builder})
   add_custom_target(${target_name}
       COMMAND
         ${CMAKE_COMMAND} -E env
-             SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR}
-             ${DOCS_RUNNER} ${DOCS_RUNNER_ARGS} -m sphinx --no-color -b html -d ${DOCTREES_DIR} ${SPHINX_CONF_DIR} ${output_dir}
+             SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR} DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${DOCS_MATH_EXT}
+             ${runner} ${runner_args} -m sphinx --no-color -b ${builder} -d ${DOCTREES_DIR} ${SPHINX_CONF_DIR} ${output_dir}
       DEPENDS Framework
               mantidqt
               ${SPHINX_CONF_DIR}/conf.py
-              ${SPHINX_CONF_DIR}/conf-html.py
+              ${SPHINX_CONF_DIR}/conf-${builder}.py
       COMMENT "Building ${builder} documentation"
   )
   # Group within VS and exclude from whole build
@@ -33,114 +56,23 @@ function (add_sphinx_build_target builder)
   )
 endfunction()
 
+# Documentation types
+add_sphinx_build_target(html)
+add_sphinx_build_target(doctest)
 
-
-# qthelp target
-# if(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-#   set(BUILDER qthelp)
-#   configure_file(runsphinx.py.in runsphinx_qthelp.py @ONLY)
-
-#   set_source_files_properties(dummyoutput_alwaysrun PROPERTIES SYMBOLIC 1)
-
-#   add_custom_command(OUTPUT qthelp/MantidProject.qhcp qthelp/MantidProject.qhp dummyoutput_alwaysrun
-#                      COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_qthelp.py
-#                      DEPENDS Framework AllQt4
-#                              ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_qthelp.py
-#                      COMMENT "Building qt-assistant index files")
-
-#   add_custom_command(OUTPUT qthelp/MantidProject.qhc
-#                      COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE}
-#                              qthelp/MantidProject.qhcp
-#                      DEPENDS qthelp/MantidProject.qhcp
-#                      COMMENT "Compiling Qt help documentation")
-
-#   add_custom_target(${TARGET_PREFIX}-qthelp
-#                     DEPENDS qthelp/MantidProject.qhc ${SPHINX_CONF_DIR}/conf.py
-#                             ${SPHINX_CONF_DIR}/conf-qthelp.py)
-
-#   # Group within VS and exclude from whole build
-#   set_target_properties(${TARGET_PREFIX}-qthelp
-#                         PROPERTIES FOLDER
-#                                    "Documentation"
-#                                    EXCLUDE_FROM_DEFAULT_BUILD
-#                                    1
-#                                    EXCLUDE_FROM_ALL
-#                                    1)
-
-# else(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-#   message(
-#     WARNING " Did not find qcollectiongenerator - cannot create Qt help files")
-# endif(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-
-# HTML target
-option(DOCS_HTML "Add target for building html docs" ON)
-if(DOCS_HTML)
-  add_sphinx_build_target(html)
-#   #configure_file(runsphinx.py.in runsphinx_html.py @ONLY)
-#   add_custom_target(${TARGET_PREFIX}-html
-#                     COMMAND ${DOCS_RUNNER_EXE} -m sphinx -b html
-#                     DEPENDS Framework
-#                             mantidqt
-#                             ${SPHINX_CONF_DIR}/conf.py
-#                             ${SPHINX_CONF_DIR}/conf-html.py
-#                     COMMENT "Building html documentation")
-#   # Group within VS and exclude from whole build
-#   set_target_properties(${TARGET_PREFIX}-html
-#                         PROPERTIES FOLDER
-#                                    "Documentation"
-#                                    EXCLUDE_FROM_DEFAULT_BUILD
-#                                    1
-#                                    EXCLUDE_FROM_ALL
-#                                    1)
+# qthelp
+if(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+  add_sphinx_build_target(qthelp docs-qtassistant)
+  add_custom_target(docs-qthelp
+                    COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} qthelp/MantidProject.qhcp
+                    COMMENT "Compiling Qt help documentation")
+  add_dependencies(docs-qthelp docs-qtassistant)
+else()
+  message(WARNING "Did not find qcollectiongenerator - cannot create docs-qthelp target.")
 endif()
 
-# # LINKCHECK target
-# set(BUILDER linkcheck)
-# configure_file(runsphinx.py.in runsphinx_linkcheck.py @ONLY)
-# add_custom_target(${TARGET_PREFIX}-linkcheck
-#                   COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_linkcheck.py
-#                   DEPENDS Framework
-#                           AllQt4
-#                           ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_linkcheck.py
-#                           ${SPHINX_CONF_DIR}/conf.py
-#                   COMMENT "Checking documentation links")
-# # Group within VS and exclude from whole build
-# set_target_properties(${TARGET_PREFIX}-linkcheck
-#                       PROPERTIES FOLDER
-#                                  "Documentation"
-#                                  EXCLUDE_FROM_DEFAULT_BUILD
-#                                  1
-#                                  EXCLUDE_FROM_ALL
-#                                  1)
-
-# Tests (It would be nice to have this is a test sub directory but the
-#        configure of the runsphinx file doesn't like being in two directories.
-#        Ninja complains about multiple targets creating runsphinx.py.in)
-
-# set(BUILDER doctest)
-# configure_file(runsphinx.py.in runsphinx_doctest.py @ONLY)
-# add_custom_target(${TARGET_PREFIX}-test
-#                   COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
-#                   DEPENDS Framework
-#                           AllQt4
-#                           ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py
-#                           ${SPHINX_CONF_DIR}/conf.py
-#                   COMMENT "Running documentation tests")
-# # Group within VS and exclude from whole build
-# set_target_properties(${TARGET_PREFIX}-test
-#                       PROPERTIES FOLDER
-#                                  "Documentation"
-#                                  EXCLUDE_FROM_DEFAULT_BUILD
-#                                  1
-#                                  EXCLUDE_FROM_ALL
-#                                  1)
-
 # Installation settings
-
-# Allow control over whether the documentation is packaged
-option(PACKAGE_DOCS
-       "If true the html documentation is installed in the share/doc directory of the package")
-
+option(PACKAGE_DOCS "If true the qthelp documentation is bundled with the package" OFF)
 if(PACKAGE_DOCS)
   set(HTML_DOCS_DEST share/doc)
   foreach(_bundle ${BUNDLES})
