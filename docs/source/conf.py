@@ -43,10 +43,13 @@ extensions = [
     'mantiddoc.doctest',
     'matplotlib.sphinxext.plot_directive'
 ]
-if LooseVersion(sphinx_version) > LooseVersion("1.8"):
-    extensions.append('sphinx.ext.imgmath')
-else:
+# Deal with math extension. Can be overridden with MATH_EXT environment variable
+# If set to imgmath we deal with the fact that < 1.8 is was called pngmath
+mathext = os.environ.get('MATH_EXT', 'sphinx.ext.imgmath')
+if mathext.endswith('imgmath') and LooseVersion(sphinx_version) <= LooseVersion("1.8"):
     extensions.append('sphinx.ext.pngmath')
+else:
+    extensions.append(mathext)
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
