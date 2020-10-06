@@ -1007,6 +1007,20 @@ public:
 
     TS_ASSERT_DELTA(origin.totalDistInsideObject(),
                     sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
+
+    // Test sample at the top corner
+    BEAM_DIRECTION = V3D{0.0, HEIGHT * 0.5, RADIUS};
+    BEAM_DIRECTION.normalize();
+    ANGLE = atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z());
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    // Since this is at the corner, triangle sides should be the same as the
+    // cylinder dimensions
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(),
+                    sqrt(pow(HEIGHT * 0.5, 2) + pow(RADIUS, 2)), TOLERANCE);
   }
 
   void testTracksForHollowCylinder() {
