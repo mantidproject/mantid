@@ -86,18 +86,15 @@ private:
                           std::vector<double> &sample_container_L2s,
                           std::vector<double> &container_L2s,
                           std::vector<double> &container_sample_L2s) const;
-  inline double
-  doIntegration(const double linearCoefAbs, const double linearCoefTotScatt,
+  void
+  doIntegration(double &integral, double &crossIntegral,
+                const double linearCoefAbs, const double linearCoefTotScatt,
                 const std::vector<double> &elementVolumes,
                 const std::vector<double> &L1s, const std::vector<double> &L2s,
-                const size_t startIndex, const size_t endIndex) const;
-  inline double doCrossIntegration(
-      const double linearCoefAbs, const double linearCoefTotScatt,
-      const std::vector<double> &elementVolumes, const std::vector<double> &L1s,
-      const std::vector<double> &L2s, const double linearCoefAbs2,
-      const double linearCoefTotScatt2, const std::vector<double> &L1s2,
-      const std::vector<double> &L2s2, const size_t startIndex,
-      const size_t endIndex) const;
+                const double linearCoefAbs2, const double linearCoefTotScatt2,
+                const std::vector<double> &L1s2,
+                const std::vector<double> &L2s2, const size_t startIndex,
+                const size_t endIndex) const;
   void defineProperties();
   void retrieveProperties();
   void initialiseCachedDistances();
