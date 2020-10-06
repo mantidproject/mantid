@@ -33,6 +33,20 @@ def get_mantid_executable_path(platform):
     raise RuntimeError("Could not find path to {0}.".format(workbench_exe))
 
 
+def create_test_script(test_file_path):
+    test_script_path = ConfigService.getString('defaultsave.directory') + '/test_script.py'
+    with open(test_script_path, 'w') as file:
+        file.write("test_file_path = '" + test_file_path + "'")
+        file.write("\nwith open(test_file_path, 'w') as file:")
+        file.write("\n    file.write('Hello Mantid')")
+    return test_script_path
+
+
+def remove_file(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+
 class WorkbenchStartupTest(systemtesting.MantidSystemTest):
     """
     A system test for testing that Mantid Workbench opens ok for Linux, MacOS and Windows.
@@ -40,17 +54,21 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
     def __init__(self):
         super(WorkbenchStartupTest, self).__init__()
 
+        self._test_file = ConfigService.getString('defaultsave.directory') + '/test_file.txt'
+        self._test_script = create_test_script(self._test_file)
+
         self._executable = get_mantid_executable_path(sys.platform)
 
+        self._cmd = self._executable + " --execute " + self._test_script + " --quit"
+
     def runTest(self):
-        process = subprocess.Popen(self._executable, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(self._cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        # Assert that mantid workbench is running
-        self.assertTrue(process.poll() is None)
+        # Assert the process was executed successfully
+        self.assertTrue(process.poll() == 0)
+        # Assert that the test script runs successfully by creating a .txt file
+        self.assertTrue(os.path.exists(self._test_file))
 
-        out, _ = process.communicate()
-        self.assertTrue(b'ConfigService-[Information] This is Mantid' in out)
-
-        # Assert that mantid workbench has stopped running
-        process.kill()
-        self.assertTrue(process.poll())
+    def cleanup(self):
+        remove_file(self._test_script)
+        remove_file(self._test_file)
