@@ -57,7 +57,6 @@ set(TEST_PY_FILES
     ResNorm2Test.py
     SANSDarkRunBackgroundCorrectionTest.py
     SANSFitShiftScaleTest.py
-    SANSILLAutoProcessInputTest.py
     SANSILLAutoProcessTest.py
     SANSILLIntegrationTest.py
     SANSILLReductionTest.py
