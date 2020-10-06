@@ -201,29 +201,29 @@ void AbsorptionCorrectionPaalmanPings::exec() {
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      assY[j] = this->doIntegration(-linearCoefAbs[j], m_linearCoefTotScatt,
-                                    m_elementVolumes, m_L1s, sample_L2s, 0,
-                                    m_numVolumeElements);
-      assY[j] /= m_sampleVolume; // Divide by total volume of the shape
+      double integral = 0.0;
+      double crossIntegral = 0.0;
 
-      asscY[j] = this->doCrossIntegration(
-          -linearCoefAbs[j], m_linearCoefTotScatt, m_elementVolumes, m_L1s,
-          sample_L2s, -containerLinearCoefAbs[j], m_containerLinearCoefTotScatt,
-          m_sample_containerL1s, sample_container_L2s, 0, m_numVolumeElements);
-      asscY[j] /= m_sampleVolume; // Divide by total volume of the shape
+      doIntegration(integral, crossIntegral, -linearCoefAbs[j],
+                    m_linearCoefTotScatt, m_elementVolumes, m_L1s, sample_L2s,
+                    -containerLinearCoefAbs[j], m_containerLinearCoefTotScatt,
+                    m_sample_containerL1s, sample_container_L2s, 0,
+                    m_numVolumeElements);
+      assY[j] = integral / m_sampleVolume;
+      asscY[j] =
+          crossIntegral / m_sampleVolume; // Divide by total volume of the shape
 
-      accY[j] = this->doIntegration(
-          -containerLinearCoefAbs[j], m_containerLinearCoefTotScatt,
-          m_containerElementVolumes, m_containerL1s, container_L2s, 0,
-          m_containerNumVolumeElements);
-      accY[j] /= m_containerVolume; // Divide by total volume of the shape
-
-      acscY[j] = this->doCrossIntegration(
-          -containerLinearCoefAbs[j], m_containerLinearCoefTotScatt,
-          m_containerElementVolumes, m_containerL1s, container_L2s,
-          -linearCoefAbs[j], m_linearCoefTotScatt, m_container_sampleL1s,
-          container_sample_L2s, 0, m_containerNumVolumeElements);
-      acscY[j] /= m_containerVolume; // Divide by total volume of the shape
+      integral = 0.0;
+      crossIntegral = 0.0;
+      doIntegration(integral, crossIntegral, -containerLinearCoefAbs[j],
+                    m_containerLinearCoefTotScatt, m_containerElementVolumes,
+                    m_containerL1s, container_L2s, -linearCoefAbs[j],
+                    m_linearCoefTotScatt, m_container_sampleL1s,
+                    container_sample_L2s, 0, m_containerNumVolumeElements);
+      accY[j] =
+          integral / m_containerVolume; // Divide by total volume of the shape
+      acscY[j] = crossIntegral /
+                 m_containerVolume; // Divide by total volume of the shape
 
       // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
@@ -332,22 +332,16 @@ void AbsorptionCorrectionPaalmanPings::initialiseCachedDistances() {
   m_sample_containerL1s.reserve(m_numVolumeElements);
   for (size_t i = 0; i < m_numVolumeElements; ++i) {
     Track outgoing(m_elementPositions[i], -m_beamDirection);
-    if (m_containerObject->interceptSurface(outgoing) > 0) {
-      m_sample_containerL1s[i] = outgoing.totalDistInsideObject();
-    } else {
-      m_sample_containerL1s[i] = 0;
-    }
+    m_containerObject->interceptSurface(outgoing);
+    m_sample_containerL1s[i] = outgoing.totalDistInsideObject();
   }
 
   // L1s for passing through sample to be scattered by the container
   m_container_sampleL1s.reserve(m_containerNumVolumeElements);
   for (size_t i = 0; i < m_containerNumVolumeElements; ++i) {
     Track outgoing(m_containerElementPositions[i], -m_beamDirection);
-    if (m_sampleObject->interceptSurface(outgoing) > 0) {
-      m_container_sampleL1s[i] = outgoing.totalDistInsideObject();
-    } else {
-      m_container_sampleL1s[i] = 0;
-    }
+    m_sampleObject->interceptSurface(outgoing);
+    m_container_sampleL1s[i] = outgoing.totalDistInsideObject();
   }
 }
 
@@ -429,18 +423,12 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
     // Create track for distance between scattering point in sample and detector
     const V3D direction = normalize(detectorPos - m_elementPositions[i]);
     Track outgoing(m_elementPositions[i], direction);
-    if (m_sampleObject->interceptSurface(outgoing) > 0) {
-      sample_L2s[i] = outgoing.totalDistInsideObject();
-    } else {
-      sample_L2s[i] = 0;
-    }
+    m_sampleObject->interceptSurface(outgoing);
+    sample_L2s[i] = outgoing.totalDistInsideObject();
 
-    Track outgoing2(m_elementPositions[i], direction);
-    if (m_containerObject->interceptSurface(outgoing2) > 0) {
-      sample_container_L2s[i] = outgoing2.totalDistInsideObject();
-    } else {
-      sample_container_L2s[i] = 0;
-    }
+    outgoing.clearIntersectionResults();
+    m_containerObject->interceptSurface(outgoing);
+    sample_container_L2s[i] = outgoing.totalDistInsideObject();
   }
 
   for (size_t i = 0; i < m_containerNumVolumeElements; ++i) {
@@ -449,17 +437,12 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
     const V3D direction =
         normalize(detectorPos - m_containerElementPositions[i]);
     Track outgoing(m_containerElementPositions[i], direction);
-    if (m_containerObject->interceptSurface(outgoing) > 0) {
-      container_L2s[i] = outgoing.totalDistInsideObject();
-    } else {
-      container_L2s[i] = 0;
-    }
-    Track outgoing2(m_containerElementPositions[i], direction);
-    if (m_sampleObject->interceptSurface(outgoing2) > 0) {
-      container_sample_L2s[i] = outgoing2.totalDistInsideObject();
-    } else {
-      container_sample_L2s[i] = 0;
-    }
+    m_containerObject->interceptSurface(outgoing);
+    container_L2s[i] = outgoing.totalDistInsideObject();
+
+    outgoing.clearIntersectionResults();
+    m_sampleObject->interceptSurface(outgoing);
+    container_sample_L2s[i] = outgoing.totalDistInsideObject();
   }
 }
 
@@ -469,60 +452,33 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
 
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
-double AbsorptionCorrectionPaalmanPings::doIntegration(
-    const double linearCoefAbs, const double linearCoefTotScatt,
-    const std::vector<double> &elementVolumes, const std::vector<double> &L1s,
-    const std::vector<double> &L2s, const size_t startIndex,
-    const size_t endIndex) const {
+
+void AbsorptionCorrectionPaalmanPings::doIntegration(
+    double &integral, double &crossIntegral, const double linearCoefAbs,
+    const double linearCoefTotScatt, const std::vector<double> &elementVolumes,
+    const std::vector<double> &L1s, const std::vector<double> &L2s,
+    const double linearCoefAbs2, const double linearCoefTotScatt2,
+    const std::vector<double> &L1s2, const std::vector<double> &L2s2,
+    const size_t startIndex, const size_t endIndex) const {
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
-    return doIntegration(linearCoefAbs, linearCoefTotScatt, elementVolumes, L1s,
-                         L2s, startIndex, middle) +
-           doIntegration(linearCoefAbs, linearCoefTotScatt, elementVolumes, L1s,
-                         L2s, middle, endIndex);
+    doIntegration(integral, crossIntegral, linearCoefAbs, linearCoefTotScatt,
+                  elementVolumes, L1s, L2s, linearCoefAbs2, linearCoefTotScatt2,
+                  L1s2, L2s2, startIndex, middle);
+    doIntegration(integral, crossIntegral, linearCoefAbs, linearCoefTotScatt,
+                  elementVolumes, L1s, L2s, linearCoefAbs2, linearCoefTotScatt2,
+                  L1s2, L2s2, middle, endIndex);
   } else {
-    double integral = 0.0;
-
-    // Iterate over all the elements, summing up the integral
-    for (size_t i = startIndex; i < endIndex; ++i) {
-      const double exponent =
-          (linearCoefAbs + linearCoefTotScatt) * (L1s[i] + L2s[i]);
-      integral += (exp(exponent) * (elementVolumes[i]));
-    }
-
-    return integral;
-  }
-}
-
-double AbsorptionCorrectionPaalmanPings::doCrossIntegration(
-    const double linearCoefAbs, const double linearCoefTotScatt,
-    const std::vector<double> &elementVolumes, const std::vector<double> &L1s,
-    const std::vector<double> &L2s, const double linearCoefAbs2,
-    const double linearCoefTotScatt2, const std::vector<double> &L1s2,
-    const std::vector<double> &L2s2, const size_t startIndex,
-    const size_t endIndex) const {
-  if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
-    size_t middle = findMiddle(startIndex, endIndex);
-
-    return doCrossIntegration(linearCoefAbs, linearCoefTotScatt, elementVolumes,
-                              L1s, L2s, linearCoefAbs2, linearCoefTotScatt2,
-                              L1s2, L2s2, startIndex, middle) +
-           doCrossIntegration(linearCoefAbs, linearCoefTotScatt, elementVolumes,
-                              L1s, L2s, linearCoefAbs2, linearCoefTotScatt2,
-                              L1s2, L2s2, middle, endIndex);
-  } else {
-    double integral = 0.0;
 
     // Iterate over all the elements, summing up the integral
     for (size_t i = startIndex; i < endIndex; ++i) {
       double exponent =
           (linearCoefAbs + linearCoefTotScatt) * (L1s[i] + L2s[i]);
-      exponent += (linearCoefAbs2 + linearCoefTotScatt2) * (L1s2[i] + L2s2[i]);
       integral += (exp(exponent) * (elementVolumes[i]));
+      exponent += (linearCoefAbs2 + linearCoefTotScatt2) * (L1s2[i] + L2s2[i]);
+      crossIntegral += (exp(exponent) * (elementVolumes[i]));
     }
-
-    return integral;
   }
 }
 
