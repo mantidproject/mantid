@@ -4,29 +4,18 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantidqt package
-#
-#
-import typing
 
-from PyQt5 import sip
-from qtpy.QtCore import Qt, Signal, Slot, QObject
-
-import matplotlib.pyplot
-from mantid import logger
-from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
-from mantidqt.plotting.functions import plot
+from qtpy.QtCore import Qt, Slot, QObject
+from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace
 from mantidqt.utils.qt import import_qt
 
 PropertyHandler = import_qt('.._common', 'mantidqt.widgets', 'PropertyHandler')
 
 
-class PropertyHandlerType(PropertyHandler):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-
 class FitPropertyBrowserPlotInteraction(QObject):
+    """
+    Defines an interface between the FitPropertyBrowser and the Matplotlib plot
+    """
 
     def __init__(self, fit_browser, canvas, parent=None):
         super().__init__(parent)
@@ -41,6 +30,9 @@ class FitPropertyBrowserPlotInteraction(QObject):
         self.guess_lines = {}
 
     def _connect_signals(self):
+        """
+        Connect this object with signals from the FitPropertyBrowser
+        """
         self.fit_browser.plotGuess.connect(self.plot_guess_all_slot, Qt.QueuedConnection)
         self.fit_browser.plotCurrentGuess.connect(self.plot_current_guess_slot, Qt.QueuedConnection)
         self.fit_browser.removeCurrentGuess.connect(self.remove_current_guess_slot, Qt.QueuedConnection)
@@ -50,7 +42,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
     @Slot()
     def plot_guess_all_slot(self):
         """
-        Toggle the guess plot.
+        Toggle the guess all line
         """
         if self.guess_all_line:
             self.remove_guess_all()
@@ -60,29 +52,27 @@ class FitPropertyBrowserPlotInteraction(QObject):
     @Slot()
     def plot_current_guess_slot(self):
         """
-        Toggle the guess plot.
+        Plots the guess workspace for the current function,
+        which is currently selected Handler
         """
         self.fit_browser.currentHandler().setHasPlot(True)
         self.plot_current_guess()
 
     @Slot()
-    def remove_guess_all_slot(self):
-        """
-        Toggle the guess plot.
-        """
-        self.fit_browser.currentHandler().setHasPlot(False)
-        self.remove_guess_all()
-
-    @Slot()
     def remove_current_guess_slot(self):
         """
-        Toggle the guess plot.
+        Removes the guess workspace for the current function,
+        which is currently selected Handler
         """
         self.fit_browser.currentHandler().setHasPlot(False)
         self.remove_current_guess()
 
     @Slot(str)
     def parameters_changed_slot(self, prefix):
+        """
+        Responds to parameters being changed in the FitPropertyBrowser
+        :param prefix of the function which the parameters have been changed (unused)
+        """
         if not self.fit_browser.currentHandler():
             return
         name = self._get_current_prefixed_function_name()
@@ -93,6 +83,11 @@ class FitPropertyBrowserPlotInteraction(QObject):
 
     @Slot()
     def slot_for_function_removed(self):
+        """
+        Responds to a function being removed from the FitPropertyBrowser,
+        the function is found from the currently selected handler
+        If the function, or guess all is plotted the plot is updated accordingly
+        """
         if not self.fit_browser.currentHandler():
             return
         prefix = self.fit_browser.currentHandler().functionPrefix()
@@ -103,7 +98,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
 
     def plot_current_guess(self):
         """
-        Plot the guess curve of the currently selected function.
+        Plot the guess workspace of the currently selected function
         """
         fun = self.fit_browser.currentHandler().ifun()
         ws_name = self.fit_browser.workspaceName()
@@ -117,6 +112,13 @@ class FitPropertyBrowserPlotInteraction(QObject):
             self.guess_lines[self._get_current_prefixed_function_name()] = line
 
     def evaluate_function(self, ws_name, fun, out_ws_name):
+        """
+        Evaluates the guess workspace for the input workspace and function
+        :param ws_name: Name of the workspace in the ADS
+        :param fun: Function to be evaluated
+        :param out_ws_name: Output workspace name
+        :return: Output guess workspace
+        """
         ws_index = self.fit_browser.workspaceIndex()
         startX = self.fit_browser.startX()
         endX = self.fit_browser.endX()
@@ -142,7 +144,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
 
     def plot_guess_all(self):
         """
-        Plot the guess curve for the full function.
+        Plot the guess workspace for the full function
         """
         fun = self.fit_browser.getFittingFunction()
         ws_name = self.fit_browser.workspaceName()
@@ -157,6 +159,9 @@ class FitPropertyBrowserPlotInteraction(QObject):
             self.fit_browser.setTextPlotGuess('Remove Guess')
 
     def remove_guess_all(self):
+        """
+        Removes the guess all workspace from the plot
+        """
         if self.guess_all_line is None:
             return
         self.guess_all_line.remove()
@@ -167,7 +172,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
 
     def remove_current_guess(self):
         """
-        Remove the guess curve from the plot.
+        Removes the currently selected function from the plot
         """
         if not self.guess_lines:
             return
@@ -181,7 +186,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
 
     def update_guess(self):
         """
-        Update the guess curve.
+        Update the guess all curve. This function is called by the FitPropertyBrowser
         """
         if self.guess_all_line is None:
             return
@@ -189,7 +194,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
 
     def update_current_handler_guess(self):
         """
-        Plot the guess curve of the currently selected function.
+        Updates the guess workspace for the currently selected function
         """
         fun = self.fit_browser.currentHandler().ifun()
         ws_name = self.fit_browser.workspaceName()
@@ -206,7 +211,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
 
     def update_guess_all(self):
         """
-        Plot the guess curve of the currently selected function.
+        Updates the guess all workspace
         """
         fun = self.fit_browser.getFittingFunction()
         ws_name = self.fit_browser.workspaceName()
@@ -222,7 +227,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
 
     def update_legend(self):
         """
-        This needs to be called to update plot's legend after removing lines.
+        Updates the legend, which is necessary after removing/adding lines
         """
         ax = self.canvas.figure.get_axes()[0]
         # only create a legend if the plot already had one
@@ -237,10 +242,22 @@ class FitPropertyBrowserPlotInteraction(QObject):
         return self.canvas.figure.get_axes()[0]
 
     def _get_current_prefixed_function_name(self):
+        """
+        Returns the prefixed function name, e.g f0.LinearBackground
+        :return: Prefixed function name
+        """
         return self.fit_browser.currentHandler().functionPrefix() + '.' + \
-               self.fit_browser.currentHandler().ifun().name()
+            self.fit_browser.currentHandler().ifun().name()
 
     def _plot_guess_workspace(self, workspace_name, function, output_workspace_name, **plotkwargs):
+        """
+        Private method which plot the guess workspace provided in the inputs
+        :param workspace_name: name of the workspace stored in the fit browser
+        :param function: The function to be evaluated
+        :param output_workspace_name: Name of the output guess workspace
+        :param plotkwargs: Optional arguments to the plot, e.g color='C1'
+        :return: The matplotlib Line2D object
+        """
         try:
             out_ws = self.evaluate_function(workspace_name, function, output_workspace_name)
         except RuntimeError:
@@ -261,7 +278,13 @@ class FitPropertyBrowserPlotInteraction(QObject):
         return line
 
     def _shift_stored_prefixes(self, removed_prefix):
-        # Skip if no guess lines plotted, or removing last function in browser
+        """
+        Shifts the stored prefixes, e.g if f0.A, f1.B, f2.C plotted and f1.B removed
+        stored prefixes become f0.A, f1.C. Skips if no guess lines plotted,
+        or removing last function in browser
+        :param removed_prefix: Prefix of the function removed e.g f0
+        :return:
+        """
         if not self.guess_lines or removed_prefix[1] == len(self.guess_lines):
             return
         for prefixed_function in reversed(list(self.guess_lines)):
@@ -275,9 +298,11 @@ class FitPropertyBrowserPlotInteraction(QObject):
         self._refresh_legend()
 
     def _refresh_legend(self):
+        """Refreshes the legend of the plot.
+        Necessary if we change the line label for example (using set_label)
+        """
         ax = self.get_axes()
         legend = ax.get_legend()
         if legend:
             ax.make_legend()
         self.canvas.draw()
-
