@@ -191,7 +191,7 @@ class Pearl(AbstractInst):
             path_key='path'
             for atten_file in self._inst_settings.attenuation_files:
                 if any (required_key not in atten_file for required_key in [name_key,path_key]):
-                    logger.warning("A dictionary in attenuation_files has been ignored because " +
+                    logger.warning("A dictionary in attenuation_files has been ignored because "
                                    "it doesn't contain both {} and {} entries".format(name_key,path_key))
                 elif atten_file[name_key] == self._inst_settings.attenuation_file:
                     attenuation_path = atten_file[path_key]
