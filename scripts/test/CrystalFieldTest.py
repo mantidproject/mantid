@@ -304,6 +304,15 @@ class CrystalFieldTests(unittest.TestCase):
         np.testing.assert_allclose(np.array(cf.getEigenvalues()), np.array([0.0, 0.0, 360.0, 360.0, 360.0, 360.0]))
         np.testing.assert_allclose(np.array(cf.getPeakList()[0]), np.array([360.0, 0.0]))
 
+    def test_api_CrystalField_when_setting_a_structures_symmetry_as_being_cubic(self):
+        from CrystalField import CrystalField
+
+        cf = CrystalField('Ce', 'C1', B40=1, B60=0.1, Temperature=0.01, FWHM=1)
+        cf.Symmetry = 'Oh'
+
+        np.testing.assert_allclose(np.array(cf.getEigenvalues()), np.array([0.0, 0.0, 360.0, 360.0, 360.0, 360.0]))
+        np.testing.assert_allclose(np.array(cf.getPeakList()[0]), np.array([360.0, 0.0]))
+
     def test_api_CrystalField_spectrum_background(self):
         from CrystalField import CrystalField, Background, Function
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,

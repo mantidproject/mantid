@@ -394,6 +394,8 @@ class CrystalField(object):
         self._dirty_eigensystem = True
         self._dirty_peaks = True
 
+        self.crystalFieldFunction.initialize()
+
     @property
     def ToleranceEnergy(self):
         """Get energy tolerance"""
