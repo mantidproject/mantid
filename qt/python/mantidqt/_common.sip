@@ -438,6 +438,38 @@ public:
 };
 
 // ---------------------------------
+// Property Handler
+// ---------------------------------
+class PropertyHandler
+    : public QObject {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/extract.hpp>
+#include <boost/python/to_python_value.hpp>
+%End
+public:
+    PropertyHandler(SIP_PYOBJECT, SIP_PYOBJECT, FitPropertyBrowser *)[(const Mantid::API::IFunction_sptr &,
+ Mantid::API::CompositeFunction_sptr,  FitPropertyBrowser *)];
+    %MethodCode
+    auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+    auto compositeFunction = boost::python::extract<Mantid::API::CompositeFunction_sptr>(a1)();
+    sipCpp = new sipPropertyHandler(function, compositeFunction,  a2);
+    %End
+    SIP_PYOBJECT ifun();
+    %MethodCode
+    sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
+    %End
+    void setHasPlot(bool);
+    QString functionPrefix() const;
+    PropertyHandler * findHandler(SIP_PYOBJECT);
+    %MethodCode
+    auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+    sipRes = sipCpp->findHandler(function);
+    %End
+};
+
+// ---------------------------------
 // Fit Property Browser
 // ---------------------------------
 class FitPropertyBrowser : public QDockWidget {
@@ -484,6 +516,7 @@ public:
     void postDeleteHandle(const std::string &wsName);
     void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
+    PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -535,14 +568,20 @@ SIP_PYOBJECT defaultBackgroundType();
 
 signals:
     void functionChanged();
+    void functionRemoved();
     void startXChanged(double);
     void endXChanged(double);
     void changedParameterOf(const QString &prefix);
     void algorithmFinished(const QString &);
     void removeFitCurves();
+    void removeGuess();
+    void removeCurrentGuess();
     void plotGuess();
+    void plotCurrentGuess();
     void sequentialFitDone() const;
     void workspaceClicked(const QString &);
+    void removePlotSignal(PropertyHandler *);
+
 };
 
 // ---------------------------------
