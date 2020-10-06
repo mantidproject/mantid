@@ -182,10 +182,12 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       if (std::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
         menu->addAction(m_showDetectors);
       }
-    } else if (std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+    } else if (auto md_ws = std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
-      menu->addAction(m_sliceViewer);
+      if (md_ws->isMDHistoWorkspace() || md_ws->getNumNonIntegratedDims() > 1) {
+        menu->addAction(m_sliceViewer);
+      }
     } else if (auto wsGroup =
                    std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
       auto workspaces = wsGroup->getAllItems();
