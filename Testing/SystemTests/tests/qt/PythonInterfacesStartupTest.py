@@ -10,7 +10,6 @@ import systemtesting
 from mantid.kernel import ConfigService
 from mantidqt.utils.qt.testing import get_application
 
-from qtpy import PYQT5
 from qtpy.QtCore import QCoreApplication, QSettings
 
 
@@ -24,14 +23,9 @@ APP_NAME_SWITCHER = {"DGS_Reduction.py": "python",
 
 
 def get_excluded_scripts():
-    # Frequency_Domain_Analysis_Old.py  -  Excluded because it is unused
+    # Frequency_Domain_Analysis_Old.py  -  Excluded because is being deleted in Mantid Version 6.0
     # Frequency_Domain_Analysis.py      -  Excluded because it is causing a crash
-    excluded_scripts = ["Frequency_Domain_Analysis_Old.py", "Frequency_Domain_Analysis.py"]
-    if not PYQT5:
-        # Sample_Transmission_Calculator.py -  Excluded because it attempts to use QLayout::replaceWidget from Qt 5.2
-        # QECoverage.py                     -  Excluded because it attempts to use QtWidget.QWidget from Qt 5
-        excluded_scripts.extend(["Sample_Transmission_Calculator.py", "QECoverage.py"])
-    return excluded_scripts
+    return ["Frequency_Domain_Analysis_Old.py", "Frequency_Domain_Analysis.py"]
 
 
 def set_instrument(interface_script_name):
@@ -61,12 +55,6 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._interface_scripts = [interface.split("/")[1] for interface in
                                    ConfigService.getString('mantidqt.python_interfaces').split()
                                    if interface.split("/")[1] not in self._exclude_scripts]
-
-        # py = []
-        # for interface_script in self._interface_scripts:
-        #     if interface_script == "HFIR_4Circle_Reduction.py":
-        #         py.append(interface_script)
-        # self._interface_scripts = py
 
     def runTest(self):
         if len(self._interface_scripts) == 0:
