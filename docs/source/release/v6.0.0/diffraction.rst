@@ -11,6 +11,10 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+New features
+############
+
+- Add ability to store multiple alternative attenuation file paths in the Pearl yaml configuration file
 
 Bugfixes
 ########

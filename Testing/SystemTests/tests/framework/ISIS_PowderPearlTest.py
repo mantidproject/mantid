@@ -291,7 +291,8 @@ def run_focus(inst_object, tt_mode):
     shutil.copy(original_splined_path, spline_path)
 
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
-                             perform_attenuation=True, attenuation_file_path=attenuation_path, tt_mode=tt_mode)
+                             perform_attenuation=True, attenuation_file='ZTA',
+                             attenuation_files=[{"name": "ZTA", "path": attenuation_path}], tt_mode=tt_mode)
 
 
 def run_focus_with_absorb_corrections():
