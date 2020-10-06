@@ -132,7 +132,6 @@ class FittingDataPresenter(object):
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
         self._repopulate_table()
-        # self.model.update_log_table()
 
     def _remove_all_tracked_workspaces(self):
         self.clear_workspaces()
