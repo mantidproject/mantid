@@ -10,6 +10,7 @@ import sys
 import systemtesting
 
 from mantid.kernel import ConfigService
+from qtpy import PYQT5
 
 
 EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"],
@@ -60,6 +61,9 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
         self._executable = get_mantid_executable_path(sys.platform)
 
         self._cmd = self._executable + " --execute " + self._test_script + " --quit"
+
+    def skipTests(self):
+        return not PYQT5
 
     def runTest(self):
         process = subprocess.Popen(self._cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
