@@ -9,6 +9,7 @@ Improvements
 ############
 
 - Enable workbench to plot 1D spectrum from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
+- Removed dialogs for the Load and Fit algorithms as the dialogs were previously deprecated
 
 Bugfixes
 ########
