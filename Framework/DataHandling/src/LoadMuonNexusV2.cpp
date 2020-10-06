@@ -126,6 +126,11 @@ void LoadMuonNexusV2::init() {
                   "A vector of time zero values");
 
   declareProperty(
+      std::make_unique<WorkspaceProperty<Workspace>>(
+          "TimeZeroTable", "", Direction::Output, PropertyMode::Optional),
+      "TableWorkspace containing time zero values per spectra.");
+
+  declareProperty(
       "CorrectTime", true,
       "Boolean flag controlling whether time should be corrected by timezero.",
       Direction::Input);
@@ -170,6 +175,14 @@ void LoadMuonNexusV2::execLoader() {
   auto deadtimeTable = m_loadMuonStrategy->loadDeadTimeTable();
   if (!getPropertyValue("DeadTimeTable").empty()) {
     setProperty("DeadTimeTable", deadtimeTable);
+  }
+
+  // Time Zero table should be returned if found
+  const std::vector<double> timeZeros = getProperty("TimeZeroList");
+  if (!timeZeros.empty()) {
+    // Create table and set property
+    //setProperty("TimeZeroTable",
+      //          m_loadMuonStrategy->createTimeZeroTable(timeZeros));
   }
 }
 

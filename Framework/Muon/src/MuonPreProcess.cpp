@@ -68,17 +68,6 @@ void MuonPreProcess::init() {
                   Direction::Input);
 
   declareProperty(
-      std::make_unique<ArrayProperty<double>>("TimeOffsetVector",
-                                              Direction::Input),
-      "An array of time offsets which correspond to each spectra, if "
-      "length one the same offset is assumed for all spectra");
-
-  declareProperty(std::make_unique<ArrayProperty<double>>("TimeZeroVector",
-                                                          Direction::Input),
-                  "An array of time zeros which correspond to each spectra, if "
-                  "length one the same time zero is assumed for all spectra");
-
-  declareProperty(
       std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "TimeZeroTable", "", Direction::Input, PropertyMode::Optional),
       "TableWorkspace with time zero information, used to apply time zero "
@@ -203,8 +192,6 @@ MatrixWorkspace_sptr MuonPreProcess::correctWorkspace(MatrixWorkspace_sptr ws) {
   double xMin = getProperty("TimeMin");
   double xMax = getProperty("TimeMax");
   std::vector<double> rebinParams = getProperty("RebinArgs");
-  std::vector<double> offsets = getProperty("TimeOffsetVector");
-  std::vector<double> timeZeros = getProperty("TimeZeroVector");
   TableWorkspace_sptr deadTimes = getProperty("DeadTimeTable");
   TableWorkspace_sptr timeZeroTable = getProperty("TimeZeroTable");
 

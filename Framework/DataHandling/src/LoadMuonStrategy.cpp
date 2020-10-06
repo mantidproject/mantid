@@ -124,5 +124,25 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(
   return deadTimesTable;
 }
 
+/**
+ * Creates a timezero table for the loaded detectors
+ * @param timeZeros :: Vector containing time zero values for each spectra
+ * @return TableWorkspace of time zeros
+ */
+DataObjects::TableWorkspace_sptr LoadMuonStrategy::createTimeZeroTable(
+    const std::vector<double> &timeZeros) const {
+  auto timeZeroTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+      API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+
+  timeZeroTable->addColumn("double", "time zero");
+
+  for (size_t i = 0; i < timeZeros.size(); ++i) {
+    API::TableRow row = timeZeroTable->appendRow();
+    row << timeZeros[i];
+  }
+
+  return timeZeroTable;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

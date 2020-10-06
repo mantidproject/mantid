@@ -42,6 +42,9 @@ protected:
   createDeadTimeTable(const std::vector<detid_t> &detectorsLoaded,
                       const std::vector<double> &deadTimes) const;
 
+  DataObjects::TableWorkspace_sptr LoadMuonStrategy::createTimeZeroTable(
+      const std::vector<double> &timeZeros) const;
+
   API::Workspace_sptr loadDefaultDetectorGrouping(
       const DataObjects::Workspace2D &localWorkspace) const;
 

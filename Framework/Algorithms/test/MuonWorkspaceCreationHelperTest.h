@@ -263,8 +263,6 @@ public:
     std::vector<double> timeZeros = {0.5, 1.0, 1.5};
     ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(3, timeZeros);
 
-    const auto test = timeZeroTable->getRow(0);
-
     TS_ASSERT_EQUALS(timeZeroTable->columnCount(), 1);
     TS_ASSERT_EQUALS(timeZeroTable->rowCount(), 3);
     TS_ASSERT_DELTA(timeZeroTable->getColumn(0)->toDouble(0), 0.5, 0.01);
