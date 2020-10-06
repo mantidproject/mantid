@@ -1019,6 +1019,7 @@ public:
     auto cylinder = ComponentCreationHelper::createHollowCylinder(
         INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
 
+    // Test at 45 degrees
     V3D BEAM_DIRECTION{0.0, sin(45.0 * (M_PI / 180.0)),
                        cos(45.0 * (M_PI / 180.0))};
     BEAM_DIRECTION.normalize();
@@ -1068,6 +1069,21 @@ public:
         V3D{0.0, sin(60.0 * (M_PI / 180.0)), cos(60.0 * (M_PI / 180.0))};
     BEAM_DIRECTION.normalize();
     ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+    dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test sample from the top corner
+    BEAM_DIRECTION = V3D{0.0, HEIGHT * 0.5, OUTER_RADIUS};
+    BEAM_DIRECTION.normalize();
+    ANGLE = atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z());
 
     origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
     nsegments = cylinder->interceptSurface(origin);
