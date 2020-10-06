@@ -185,3 +185,5 @@ Focused Run Files
 
 Peak Positions
     A comma separated list of peak positions to be used when performing the fit.
+
+.. categories:: Interfaces Diffraction
