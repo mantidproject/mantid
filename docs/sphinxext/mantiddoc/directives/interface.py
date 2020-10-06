@@ -81,14 +81,6 @@ class InterfaceDirective(BaseDirective):
           width: The width to use (in pixels, defaults to width of screenshot)
         """
         env = self.state.document.settings.env
-        format_str = ".. figure:: %s\n"\
-                     "   :class: screenshot\n"\
-                     "   :width: %dpx"
-
-        if align is not None:
-            format_str += "\n   :align: " + align
-
-        format_str += "\n\n"
 
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
         # conf.py file and a relative path is relative to the directory where the current rst file
@@ -106,12 +98,24 @@ class InterfaceDirective(BaseDirective):
             rel_path = rel_path.replace("\\", "/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = "/" + rel_path + "/" + filename
+            caption = ""
         else:
             # use stock not found image
             path = "/images/ImageNotFound.png"
             width = 200
+            caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 
-        self.add_rst(format_str % (path, width))
+        if align is not None:
+            self.add_rst(f".. figure:: {path}\n"
+                         f"   :class: screenshot\n"
+                         f"   :width: {width}px\n"
+                         f"   :align: {align}\n\n"
+                         f"   {caption}\n\n")
+        else:
+            self.add_rst(f".. figure:: {path}\n"
+                         f"   :class: screenshot\n"
+                         f"   :width: {width}px\n\n"
+                         f"   {caption}\n\n")
 
 
 #------------------------------------------------------------------------------------------------------------

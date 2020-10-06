@@ -156,7 +156,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
             # use stock not found image
             path = "/images/ImageNotFound.png"
             width = 200
-            caption = "Screenshot generation was disabled"
+            caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 
         self.add_rst(format_str % (path, width, caption))
 

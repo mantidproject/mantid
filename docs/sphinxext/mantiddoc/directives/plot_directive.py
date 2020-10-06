@@ -77,7 +77,7 @@ def insert_placeholder_caption(state_machine):
         "   :class: screenshot",
         "   :width: 200px",
         "",
-        "   plot generation was disabled", ""
+        "   Enable :plots: using DOCS_PLOTDIRECTIVE in CMake", ""
     ]
     # yapf: enable
 
