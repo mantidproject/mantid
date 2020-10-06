@@ -171,7 +171,7 @@ public:
         new MDHistoDimension("Qy", "Qy", frame, -2, +2, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
-    TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(),2);
+    TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
     std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws);
     TS_ASSERT(g.hasOriginalWorkspace());

@@ -156,8 +156,8 @@ size_t MDGeometry::getNumDims() const { return m_dimensions.size(); }
 /** @return the number of non-integrated dimensions in this workspace */
 size_t MDGeometry::getNumNonIntegratedDims() const {
   return std::count_if(
-    m_dimensions.cbegin(), m_dimensions.cend(),
-    [](const auto &dimension) { return !dimension->getIsIntegrated(); });
+      m_dimensions.cbegin(), m_dimensions.cend(),
+      [](const auto &dimension) { return !dimension->getIsIntegrated(); });
 }
 
 // --------------------------------------------------------------------------------------------
