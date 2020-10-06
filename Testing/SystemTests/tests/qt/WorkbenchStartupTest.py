@@ -10,7 +10,6 @@ import sys
 import systemtesting
 
 from mantid.kernel import ConfigService
-from qtpy import PYQT5
 
 
 EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"],
@@ -35,8 +34,8 @@ def get_mantid_executable_path(platform):
 
 
 def create_test_script(test_file_path):
-    test_script_path = ConfigService.getString('defaultsave.directory') + '/test_script.py'
-    with open(test_script_path, 'w') as file:
+    test_script_path = ConfigService.getString("defaultsave.directory") + "/test_script.py"
+    with open(test_script_path, "w") as file:
         file.write("test_file_path = '" + test_file_path + "'")
         file.write("\nwith open(test_file_path, 'w') as file:")
         file.write("\n    file.write('Hello Mantid')")
@@ -55,21 +54,22 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
     def __init__(self):
         super(WorkbenchStartupTest, self).__init__()
 
-        self._test_file = ConfigService.getString('defaultsave.directory') + '/test_file.txt'
+        self._test_file = ConfigService.getString("defaultsave.directory") + "/test_file.txt"
         self._test_script = create_test_script(self._test_file)
 
         self._executable = get_mantid_executable_path(sys.platform)
 
         self._cmd = self._executable + " --execute " + self._test_script + " --quit"
 
-    def skipTests(self):
-        return not PYQT5
-
     def runTest(self):
         process = subprocess.Popen(self._cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+        _, error = process.communicate()
+
+        # Assert that an error message is not returned from stderr
+        self.assertTrue(not error)
         # Assert the process was executed successfully
-        self.assertTrue(process.poll() == 0)
+        self.assertTrue(process.returncode == 0)
         # Assert that the test script runs successfully by creating a .txt file
         self.assertTrue(os.path.exists(self._test_file))
 
