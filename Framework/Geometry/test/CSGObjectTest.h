@@ -1035,35 +1035,33 @@ public:
     double height = base * tan(ANGLE);
     double dist = sqrt(pow(height, 2) + pow(base, 2));
 
-    TS_ASSERT_DELTA(origin.totalDistInsideObject(),
-                    dist, TOLERANCE);
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
 
     // Test at same angle, but through entire cylinder:
     Track bottom_right(V3D{0., -0.5 * HEIGHT, -OUTER_RADIUS}, BEAM_DIRECTION);
     nsegments = cylinder->interceptSurface(bottom_right);
     TS_ASSERT_EQUALS(nsegments, 2);
 
-    // Assuming the origin test above passed, this should technically be twice 
+    // Assuming the origin test above passed, this should technically be twice
     //  that distance due to symmetry
-    TS_ASSERT_DELTA(bottom_right.totalDistInsideObject(),
-                    dist * 2.0, TOLERANCE);
+    TS_ASSERT_DELTA(bottom_right.totalDistInsideObject(), dist * 2.0,
+                    TOLERANCE);
 
     // Test at 30 degrees
-    BEAM_DIRECTION = V3D{0.0, sin(30.0 * (M_PI / 180.0)),
-                       cos(30.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION =
+        V3D{0.0, sin(30.0 * (M_PI / 180.0)), cos(30.0 * (M_PI / 180.0))};
     BEAM_DIRECTION.normalize();
     ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
 
     origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
     nsegments = cylinder->interceptSurface(origin);
     TS_ASSERT_EQUALS(nsegments, 1);
-    
+
     base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
     height = base * tan(ANGLE);
     dist = sqrt(pow(height, 2) + pow(base, 2));
 
-    TS_ASSERT_DELTA(origin.totalDistInsideObject(),
-                    dist, TOLERANCE);
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
   }
 
   void testTracksForFlatPlate() {
