@@ -246,6 +246,8 @@ public:
     MDGeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
     xmlParser.execute();
     TSM_ASSERT_EQUALS("Returned wrong number of non integrated dimensions", 3,
+                      xmlParser.getNumNonIntegratedDims());
+    TSM_ASSERT_EQUALS("Returned wrong number of non integrated dimensions", 3,
                       xmlParser.getNonIntegratedDimensions().size());
   }
 
