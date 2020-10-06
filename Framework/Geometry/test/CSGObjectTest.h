@@ -1062,6 +1062,22 @@ public:
     dist = sqrt(pow(height, 2) + pow(base, 2));
 
     TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test at 60 degrees
+    BEAM_DIRECTION =
+        V3D{0.0, sin(60.0 * (M_PI / 180.0)), cos(60.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+    dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
   }
 
   void testTracksForFlatPlate() {
