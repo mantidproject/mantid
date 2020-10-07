@@ -254,6 +254,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
+    inc/MantidQtWidgets/Common/IGUILauncher.h
     inc/MantidQtWidgets/Common/ImageInfoModel.h
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
@@ -628,10 +629,12 @@ set(
   inc/MantidQtWidgets/Common/FileDialogHandler.h
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/GraphOptions.h
+  inc/MantidQtWidgets/Common/GUIRegistry.h
   inc/MantidQtWidgets/Common/DistributionOptions.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFunctionView.h
+  inc/MantidQtWidgets/Common/IGUILauncher.h
   inc/MantidQtWidgets/Common/ImageInfoModel.h
   inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
   inc/MantidQtWidgets/Common/ImageInfoModelMD.h

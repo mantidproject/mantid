@@ -24,6 +24,48 @@ qRegisterMetaType<Message>("Message");
 // Classes
 // ----------------------------------------------------------------------------
 
+class IGUILauncher {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/IGUILauncher.h"
+%End
+public:
+  virtual QString name() const = 0;
+  virtual QString category() const = 0;
+  virtual void show() const = 0;
+};
+
+class GUIRegistryImpl {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/GUIRegistry.h"
+#include <boost/python/extract.hpp>
+%End
+public:
+QMenu *getMenu() const;
+static SIP_PYOBJECT Instance() const;
+%MethodCode
+  auto &cppInstance = MantidQt::API::GUIRegistry::Instance();
+  return sipConvertFromType(&cppInstance, sipType_GUIRegistryImpl, nullptr);
+%End
+void subscribe(SIP_PYOBJECT);
+%MethodCode
+try {
+    sipCpp->subscribe(boost::python::extract<MantidQt::API::IGUILauncher_sptr>(a0));
+} catch (std::runtime_error &sipExceptionRef)
+{
+   const char *detail = sipExceptionRef.what();
+   SIP_BLOCK_THREADS
+   PyErr_SetString(PyExc_ValueError, detail);
+   SIP_UNBLOCK_THREADS
+   return NULL;
+}
+catch (...)
+{
+   sipRaiseUnknownException();
+   return NULL;
+}
+%End
+};
+
 class Configurable {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/Configurable.h"
