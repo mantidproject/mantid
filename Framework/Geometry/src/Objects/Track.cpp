@@ -164,6 +164,16 @@ int Track::addLink(const V3D &firstPoint, const V3D &secondPoint,
     m_links.emplace_back(newLink);
     index = 0;
   } else {
+    // Check if the same Link has already been added before adding newLink
+    // This might not be the most efficient method of testing this, but
+    //  the similar/identical link is not necessarily the one at the end of
+    //  the m_links array.. so we have to loop over and check each
+    for (auto it = m_links.begin(); it != m_links.end(); ++it) {
+      if (newLink == *it) {
+        return static_cast<int>(std::distance(m_links.begin(), m_links.end()));
+      }
+    }
+
     auto linkPtr = std::lower_bound(m_links.begin(), m_links.end(), newLink);
     // must extract the distance before you insert otherwise the iterators are
     // incompatible
