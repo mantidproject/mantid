@@ -181,8 +181,8 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
   std::map<std::string, std::string> errorMap;
   IMDHistoWorkspace_sptr shapeWS = this->getProperty("ShapeWorkspace");
   IMDHistoWorkspace_sptr dataWS = this->getProperty("DataWorkspace");
-  if (shapeWS->getNonIntegratedDimensions().size() !=
-      dataWS->getNonIntegratedDimensions().size() + 1) {
+  if (shapeWS->getNumNonIntegratedDims() !=
+      dataWS->getNumNonIntegratedDims() + 1) {
     errorMap.emplace(
         "DataWorkspace",
         "Expect to have n-1 non-interated dimensions of ShapeWorkspace");

@@ -1028,7 +1028,7 @@ void WorkspaceTreeWidget::addMDEventWorkspaceMenuItems(
     m_showVatesGui->setEnabled(false);
 #endif
   } else {
-    std::size_t nDim = WS->getNonIntegratedDimensions().size();
+    std::size_t nDim = WS->getNumNonIntegratedDims();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
   }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
