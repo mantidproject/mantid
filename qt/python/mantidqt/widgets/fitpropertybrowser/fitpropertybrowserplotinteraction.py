@@ -150,7 +150,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
         ws_name = self.fit_browser.workspaceName()
         if fun == '' or ws_name == '':
             return
-        out_ws_name = '{}_guess'.format(ws_name)
+        out_ws_name = f'{ws_name}_guess'
 
         line = self._plot_guess_workspace(ws_name, fun, out_ws_name)
 
@@ -217,7 +217,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
         ws_name = self.fit_browser.workspaceName()
         if fun == '' or ws_name == '':
             return
-        out_ws_name = '{}_guess'.format(ws_name)
+        out_ws_name = f'{ws_name}_guess'
         old_line = self.guess_all_line
         color = old_line.get_color()
         old_line.remove()
