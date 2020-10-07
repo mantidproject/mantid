@@ -196,8 +196,8 @@ MatrixWorkspace_sptr MuonPreProcess::correctWorkspace(MatrixWorkspace_sptr ws) {
   TableWorkspace_sptr timeZeroTable = getProperty("TimeZeroTable");
 
   ws = applyDTC(ws, deadTimes);
-  ws = applyTimeOffset(ws, offset);
   ws = applyTimeZeroTable(ws, timeZeroTable);
+  ws = applyTimeOffset(ws, offset);
   ws = applyCropping(ws, xMin, xMax);
   ws = applyRebinning(ws, rebinParams);
 
