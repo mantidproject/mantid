@@ -179,6 +179,9 @@ set(PYTHON_PLUGINS
     algorithms/VesuvioThickness.py
     algorithms/ViewBOA.py
     algorithms/VisionReduction.py
+    algorithms/dnsdata.py
+    algorithms/fractional_indexing.py
+    algorithms/roundinghelper.py
     algorithms/WorkflowAlgorithms/AddSampleLogMultiple.py
     algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
     algorithms/WorkflowAlgorithms/BayesQuasi.py
@@ -292,9 +295,6 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/USANSReduction.py
     algorithms/WorkflowAlgorithms/VesuvioDiffractionReduction.py
     algorithms/WorkflowAlgorithms/WANDPowderReduction.py
-    algorithms/dnsdata.py
-    algorithms/fractional_indexing.py
-    algorithms/roundinghelper.py
     functions/AFMLF.py
     functions/AFMZF.py
     functions/Bessel.py
@@ -307,8 +307,6 @@ set(PYTHON_PLUGINS
     functions/EISFDiffCylinder.py
     functions/EISFDiffSphere.py
     functions/EISFDiffSphereAlkyl.py
-    functions/Examples/Example1DFunction.py
-    functions/Examples/ExamplePeakFunction.py
     functions/FickDiffusion.py
     functions/FmuF.py
     functions/GauBroadGauKT.py
@@ -349,6 +347,8 @@ set(PYTHON_PLUGINS
     functions/ZFdipole.py
     functions/ZFelectronDipole.py
     functions/ZFprotonDipole.py
+    functions/Examples/Example1DFunction.py
+    functions/Examples/ExamplePeakFunction.py
 )
 
 # Generate an absolute path for each relative one. 
