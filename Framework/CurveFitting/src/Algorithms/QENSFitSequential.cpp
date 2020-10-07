@@ -423,15 +423,15 @@ void QENSFitSequential::init() {
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
                   "numbers.");
-  declareProperty("StartX", EMPTY_DBL(),
-                  "A value of x in, or on the low x "
-                  "boundary of, the first bin to "
-                  "include in\n"
-                  "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(),
-                  "A value in, or on the high x boundary "
-                  "of, the last bin the fitting range\n"
-                  "(default the highest value of x)");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+      "StartX"), "A value of x in, or on the low x "
+                "boundary of, the first bin to "
+                "include in\n"
+                "the fit (default lowest value of x)");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+      "EndX"), "A value in, or on the high x boundary "
+              "of, the last bin the fitting range\n"
+              "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "
@@ -528,10 +528,10 @@ std::map<std::string, std::string> QENSFitSequential::validateInputs() {
       errors["SpecMin"] = "SpecMin must be less than or equal to SpecMax.";
   }
 
-  const double startX = getProperty("StartX");
-  const double endX = getProperty("EndX");
-  if (startX >= endX)
-    errors["StartX"] = "StartX must be less than EndX";
+  //const double startX = getProperty("StartX");
+  //const double endX = getProperty("EndX");
+  //if (startX >= endX)
+  //  errors["StartX"] = "StartX must be less than EndX";
 
   return errors;
 }
@@ -617,8 +617,10 @@ QENSFitSequential::getAdditionalLogStrings() const {
 std::map<std::string, std::string>
 QENSFitSequential::getAdditionalLogNumbers() const {
   std::map<std::string, std::string> logs;
-  logs["start_x"] = getPropertyValue("StartX");
-  logs["end_x"] = getPropertyValue("EndX");
+  std::vector<double> startX = getProperty("StartX");
+  std::vector<double> endX = getProperty("EndX");
+  logs["start_x"] = std::to_string(startX[0]);
+  logs["end_x"] = std::to_string(endX[0]);
   return logs;
 }
 
@@ -632,7 +634,6 @@ void QENSFitSequential::addAdditionalLogs(
     const Workspace_sptr &resultWorkspace) {
   auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
   logAdder->setProperty("Workspace", resultWorkspace);
-
   Progress logAdderProg(this, 0.99, 1.00, 6);
   logAdder->setProperty("LogType", "String");
   for (const auto &log : getAdditionalLogStrings()) {
@@ -641,8 +642,8 @@ void QENSFitSequential::addAdditionalLogs(
     logAdder->executeAsChildAlg();
     logAdderProg.report("Add text logs");
   }
-
-  logAdder->setProperty("LogType", "Number");
+  auto foo = resultWorkspace->getName();
+  logAdderProg.report("Add number logs");
   for (const auto &log : getAdditionalLogNumbers()) {
     logAdder->setProperty("LogName", log.first);
     logAdder->setProperty("LogText", log.second);
