@@ -17,7 +17,7 @@ from mantid.dataobjects import TableWorkspace
 from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from corelli.calibration.database import combine_spatial_banks, init_corelli_table, save_bank_table, filename_bank_table,\
-    load_bank_table, has_valid_columns
+    load_bank_table, has_valid_columns, save_manifest_file
 
 
 class TestCorelliDatabase(unittest.TestCase):
@@ -26,7 +26,8 @@ class TestCorelliDatabase(unittest.TestCase):
 
     def setUp(self) -> None:
 
-        # create a mock database and tests save_bank_table and load_bank_table
+        # create a mock database
+        # tests save_bank_table and load_bank_table, save_manifest
         self.database_path:str = TestCorelliDatabase.test_dir.name
 
         calibratedWS10 = init_corelli_table()
@@ -112,6 +113,31 @@ class TestCorelliDatabase(unittest.TestCase):
 
         for i,expected_array in enumerate(expected_dict['Detector Position']):
             self.assertAlmostEqual( expected_array.all(), combined_dict['Detector Position'][i].all() )
+
+    def test_save_manifest_file(self):
+
+        time:str = datetime.now().strftime('%Y%m%d') # format YYYYMMDD
+        filename = self.database_path + '/manifest_corelli_' + time + '.csv'
+
+        # writing
+        ts = datetime.now().replace(microsecond=0).isoformat()
+        save_manifest_file( [10,11], self.database_path )
+        self.assertTrue(pathlib.Path(filename).is_file())
+
+        file_contents = pathlib.Path(filename).read_text() # safe one liner
+        expected_manifest = f'bankID, timestamp\n10, {ts}\n11, {ts}\n'
+        self.assertEqual(file_contents, expected_manifest)
+
+        # appending
+        ts = datetime.now().replace(microsecond=0).isoformat()
+        save_manifest_file( [12], self.database_path )
+        self.assertTrue(pathlib.Path(filename).is_file())
+
+        file_contents = pathlib.Path(filename).read_text() # safe one liner
+        expected_manifest = f'bankID, timestamp\n10, {ts}\n11, {ts}\n12, {ts}\n'
+        self.assertEqual(file_contents, expected_manifest)
+
+        remove(filename)
 
     def tearDown(self) -> None:
 

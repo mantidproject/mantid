@@ -59,6 +59,35 @@ def filename_bank_table( bankID:int, database_path:str, table_type:str = 'calibr
     return filename
 
 
+def save_manifest_file( bankIDs:list, database_path:str)->None:
+    """
+    Function that saves or updates an existing manifest_corelli_date.csv file.
+    There is one file stored for each calibration day. If file exist it will append two columns:
+    bankID, timestamp (ISO format)
+    :param bankIDs input of bankIDs that have been calibrated
+    :param database_path location of the corelli database (absolute or relative)
+           Example: database/corelli/ for manifest file:
+                    database/corelli/manifest_corelli_YYYYMMDD.csv
+    """
+
+    time:str = datetime.now().strftime('%Y%m%d') # format YYYYMMDD
+    filename = database_path + '/manifest_corelli_' + time + '.csv'
+
+    if pathlib.Path(filename).is_file():
+        file = open(filename, 'a+')
+    else:
+        file = open(filename, 'w')
+        file.write('bankID, timestamp\n') # header
+
+    iso_timestamp = datetime.now().replace(microsecond=0).isoformat()
+    lines:str = ''
+    for bankID in bankIDs:
+        lines += str(bankID) + ', ' + str(iso_timestamp) + '\n'
+
+    file.write(lines)
+    file.close()
+
+
 def save_bank_table( data:Workspace, bankID:int, database_path:str, table_type:str = 'calibration' ) -> None:
     """
     Function that saves a bank calibrated TableWorkspace into a single HDF5 file
