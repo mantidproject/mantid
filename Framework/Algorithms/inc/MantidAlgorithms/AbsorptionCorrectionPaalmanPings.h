@@ -49,6 +49,12 @@ public:
            "and single scattering in a generic sample shape for all "
            "Paalmin-pings terms.";
   }
+
+  const std::vector<std::string> seeAlso() const override {
+    return {"SetSampleMaterial", "AbsorptionCorrection",
+            "ApplyPaalmanPingsCorrection"};
+  }
+
   /// Algorithm's version
   int version() const override { return (1); }
 
