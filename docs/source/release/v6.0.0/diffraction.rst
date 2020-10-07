@@ -15,6 +15,10 @@ New features
 ############
 - New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 
+Improvements
+############
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
+
 Engineering Diffraction
 -----------------------
 
