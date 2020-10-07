@@ -5,6 +5,12 @@ Direct Geometry Changes
 .. contents:: Table of Contents
    :local:
 
+Improvements
+------------
+
+- The instrument geometry of PANTHER has been corrected according to the findins during the hot commissioning.
+
+
 DGSPlanner
 ----------
 
