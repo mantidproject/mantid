@@ -337,8 +337,8 @@ class Background(object):
         if index < len(self._functions):
             self._functions[index].update(func)
         else:
-            raise ValueError("Invalid index ({0}) provided: Background object is made up of only {0} functions.".
-                             format(str(index), str(len(self._functions))))
+            raise ValueError(f"Invalid index ({index}) provided: Background object is made up of only "
+                             f"{len(self._functions)} functions.")
 
 
 class ResolutionModel:
