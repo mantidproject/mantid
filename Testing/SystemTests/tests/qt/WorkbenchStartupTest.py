@@ -13,6 +13,10 @@ from mantid.kernel import ConfigService
 from tempfile import NamedTemporaryFile
 
 
+TEST_MESSAGE = "Hello Mantid!"
+TEST_FILE = NamedTemporaryFile(suffix=".txt", delete=False).name.replace('\\', '/')
+TEST_SCRIPT = NamedTemporaryFile(suffix=".py", delete=False).name.replace('\\', '/')
+
 EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"],
                        "darwin": ["MantidWorkbench"],
                        "win32": ["MantidWorkbench.exe"]}
@@ -34,13 +38,10 @@ def get_mantid_executable_path(platform):
     raise RuntimeError(f"Could not find path to {workbench_exe}.")
 
 
-def create_test_script(test_file_path):
-    test_script_path = NamedTemporaryFile(suffix=".py").name
-    with open(test_script_path, "w") as file:
-        file.write(f"test_file_path = '{test_file_path}'")
-        file.write("\nwith open(test_file_path, 'w') as file:")
-        file.write("\n    file.write('Hello Mantid')")
-    return test_script_path
+def write_test_script():
+    with open(TEST_SCRIPT, "w") as file:
+        file.write(f"\nwith open('{TEST_FILE}', 'w') as file:")
+        file.write(f"\n    file.write('{TEST_MESSAGE}')")
 
 
 def remove_file(file_path):
@@ -58,21 +59,21 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
     def __init__(self):
         super(WorkbenchStartupTest, self).__init__()
 
-        #self._test_file = NamedTemporaryFile(suffix=".txt").name()
-        self._test_file = ConfigService.getString("defaultsave.directory") + "/test_file.txt"
-        self._test_script = create_test_script(self._test_file)
+        write_test_script()
 
         self._executable = get_mantid_executable_path(sys.platform)
 
     def runTest(self):
-        process = subprocess.Popen([self._executable, "--execute", self._test_script, "--quit"],
+        process = subprocess.Popen([self._executable, "--execute", TEST_SCRIPT, "--quit"],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Wait for the process to finish execution, and assert it was successfully
         self.assertTrue(process.wait() == 0)
-        # Assert that the test script runs successfully by creating a .txt file
-        self.assertTrue(os.path.exists(self._test_file))
+        # Assert that the test script runs successfully by writing to a .txt file
+        with open(TEST_FILE, "r") as file:
+            self.assertTrue(file.readline() == TEST_MESSAGE)
 
-    def cleanup(self):
-        remove_file(self._test_script)
-        remove_file(self._test_file)
+    @staticmethod
+    def cleanup():
+        remove_file(TEST_SCRIPT)
+        remove_file(TEST_FILE)
