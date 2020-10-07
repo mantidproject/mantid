@@ -299,6 +299,10 @@ class Background(object):
             aCopy.add_function(function.clone())
         return aCopy
 
+    def functions(self):
+        """Return the list of functions which make up the Background object."""
+        return self._functions
+
     def add_function(self, function):
         """
         Add a function to the background object.
@@ -322,23 +326,19 @@ class Background(object):
                 function_string += function.toString()
             return function_string + ')'
 
-    def update(self, func1, func2=None):
+    def update(self, func, index=0):
         """
         Update values of the fitting parameters. If both arguments are given
             the first one updates the peak and the other updates the background.
 
-        @param func1: First IFunction object containing new parameter values.
-        @param func2: Second IFunction object containing new parameter values.
+        @param func: The IFunction object containing new parameter values.
+        @param index: The index of the function to update in the Background object.
         """
-        if func2 is not None:
-            if self.peak is None or self.background is None:
-                raise RuntimeError('Background has peak or background undefined.')
-            self.peak.update(func1)
-            self.background.update(func2)
-        elif self.peak is None:
-            self.background.update(func1)
+        if index < len(self._functions):
+            self._functions[index].update(func)
         else:
-            self.peak.update(func1)
+            raise ValueError("Invalid index ({0}) provided: Background object is made up of only {0} functions.".
+                             format(str(index), str(len(self._functions))))
 
 
 class ResolutionModel:

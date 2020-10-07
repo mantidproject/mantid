@@ -619,16 +619,15 @@ class CrystalField(object):
 
     def _makeBackgroundObject(self, value, prefix=''):
         from .function import Background, Function
-        if value.peak is not None and value.background is not None:
-            peak = Function(self.function, prefix=prefix + 'f0.f0.')
-            background = Function(self.function, prefix=prefix + 'f0.f1.')
-        elif value.peak is not None:
-            peak = Function(self.function, prefix=prefix + 'f0.')
-            background = None
-        elif value.background is not None:
-            peak = None
-            background = Function(self.function, prefix=prefix + 'f0.')
-        return Background(peak=peak, background=background)
+        background_object = Background()
+
+        if len(value.functions()) == 1:
+            background_object.add_function(Function(self.function, prefix=prefix + 'f0.'))
+            return background_object
+        else:
+            for i in range(len(value.functions())):
+                background_object.add_function(Function(self.function, prefix=prefix + 'f0.f' + str(i) + '.'))
+            return background_object
 
     @property
     def PhysicalProperty(self):
@@ -961,18 +960,19 @@ class CrystalField(object):
             createWS.execute()
             plotSpectrum(ws_name, 0)
 
-    def update(self, func):
+    def update(self, func, index=0):
         """
         Update values of the fitting parameters.
         @param func: A IFunction object containing new parameter values.
+        @param index: The index of the function to update in the Background object.
         """
         self.function = func
         if self._background is not None:
             if isinstance(self._background, list):
                 for background in self._background:
-                    background.update(func)
+                    background.update(func, index)
             else:
-                self._background.update(func)
+                self._background.update(func, index)
         self._setPeaks()
 
     def calc_xmin_xmax(self, i):
