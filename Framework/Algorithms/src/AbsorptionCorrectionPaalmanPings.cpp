@@ -51,11 +51,12 @@ inline size_t findMiddle(const size_t start, const size_t stop) {
 
 AbsorptionCorrectionPaalmanPings::AbsorptionCorrectionPaalmanPings()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr),
-      m_containerObject(nullptr), m_L1s(), m_elementVolumes(),
-      m_elementPositions(), m_numVolumeElements(0), m_sampleVolume(0.0),
-      m_containerL1s(), m_containerElementVolumes(),
-      m_containerElementPositions(), m_containerNumVolumeElements(0),
-      m_containerVolume(0.0), m_linearCoefTotScatt(0),
+      m_containerObject(nullptr), m_sampleL1s(), m_sample_containerL1s(),
+      m_sampleElementVolumes(), m_sampleElementPositions(),
+      m_numSampleVolumeElements(0), m_sampleVolume(0.0), m_containerL1s(),
+      m_container_sampleL1s(), m_containerElementVolumes(),
+      m_containerElementPositions(), m_numContainerVolumeElements(0),
+      m_containerVolume(0.0), m_ampleLinearCoefTotScatt(0),
       m_containerLinearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
       m_cubeSide(0.0) {}
 
@@ -116,19 +117,26 @@ void AbsorptionCorrectionPaalmanPings::exec() {
   // Get the input parameters
   retrieveBaseProperties();
 
-  // Create the output workspace
+  // Create the output workspaces
+
+  // A_s,s - absorption factor for scattering and self-absorption in sample
   MatrixWorkspace_sptr ass = create<HistoWorkspace>(*m_inputWS);
   ass->setDistribution(true); // The output of this is a distribution
   ass->setYUnit("");          // Need to explicitly set YUnit to nothing
   ass->setYUnitLabel("Attenuation factor");
+  // A_s,sc - absorption factor for scattering in sample and absorption in both
+  // sample and container
   MatrixWorkspace_sptr assc = create<HistoWorkspace>(*m_inputWS);
   assc->setDistribution(true); // The output of this is a distribution
   assc->setYUnit("");          // Need to explicitly set YUnit to nothing
   assc->setYUnitLabel("Attenuation factor");
+  // A_c,c - absorption factor for scattering and self-absorption in container
   MatrixWorkspace_sptr acc = create<HistoWorkspace>(*m_inputWS);
   acc->setDistribution(true); // The output of this is a distribution
   acc->setYUnit("");          // Need to explicitly set YUnit to nothing
   acc->setYUnitLabel("Attenuation factor");
+  // A_c,sc - absorption factor for scattering in container and absorption in
+  // both sample and container
   MatrixWorkspace_sptr acsc = create<HistoWorkspace>(*m_inputWS);
   acsc->setDistribution(true); // The output of this is a distribution
   acsc->setYUnit("");          // Need to explicitly set YUnit to nothing
@@ -155,7 +163,7 @@ void AbsorptionCorrectionPaalmanPings::exec() {
 
   // Calculate the cached values of L1, element volumes, and geometry size
   initialiseCachedDistances();
-  if (m_L1s.empty() || m_containerL1s.empty()) {
+  if (m_sampleL1s.empty() || m_containerL1s.empty()) {
     throw std::runtime_error(
         "Failed to define any initial scattering gauge volume for geometry");
   }
@@ -179,16 +187,25 @@ void AbsorptionCorrectionPaalmanPings::exec() {
     }
     const auto &det = spectrumInfo.detector(i);
 
-    std::vector<double> sample_L2s(m_numVolumeElements);
-    std::vector<double> sample_container_L2s(m_numVolumeElements);
-    std::vector<double> container_L2s(m_containerNumVolumeElements);
-    std::vector<double> container_sample_L2s(m_containerNumVolumeElements);
+    // scattering and self-absorption in sample L2 distances, used for A_s,s and
+    // A_s,sc
+    std::vector<double> sample_L2s(m_numSampleVolumeElements);
+    // scattering in sample and absorption in both sample and container L2
+    // distance, used for A_s,sc
+    std::vector<double> sample_container_L2s(m_numSampleVolumeElements);
+    // absorption factor for scattering and self-absorption in container L2
+    // distances, used for A_c,c and A_c,sc
+    std::vector<double> container_L2s(m_numContainerVolumeElements);
+    // scattering in container and absorption in both sample and container L2
+    // distances, used for A_c,sc
+    std::vector<double> container_sample_L2s(m_numContainerVolumeElements);
+
     calculateDistances(det, sample_L2s, sample_container_L2s, container_L2s,
                        container_sample_L2s);
 
     const auto wavelengths = m_inputWS->points(i);
     // these need to have the minus sign applied still
-    const auto linearCoefAbs =
+    const auto sampleLinearCoefAbs =
         m_material.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
     const auto containerLinearCoefAbs = m_containerMaterial.linearAbsorpCoef(
         wavelengths.cbegin(), wavelengths.cend());
@@ -204,12 +221,13 @@ void AbsorptionCorrectionPaalmanPings::exec() {
       double integral = 0.0;
       double crossIntegral = 0.0;
 
-      doIntegration(integral, crossIntegral, -linearCoefAbs[j],
-                    m_linearCoefTotScatt, m_elementVolumes, m_L1s, sample_L2s,
-                    -containerLinearCoefAbs[j], m_containerLinearCoefTotScatt,
-                    m_sample_containerL1s, sample_container_L2s, 0,
-                    m_numVolumeElements);
-      assY[j] = integral / m_sampleVolume;
+      doIntegration(integral, crossIntegral, -sampleLinearCoefAbs[j],
+                    m_ampleLinearCoefTotScatt, m_sampleElementVolumes,
+                    m_sampleL1s, sample_L2s, -containerLinearCoefAbs[j],
+                    m_containerLinearCoefTotScatt, m_sample_containerL1s,
+                    sample_container_L2s, 0, m_numSampleVolumeElements);
+      assY[j] =
+          integral / m_sampleVolume; // Divide by total volume of the shape
       asscY[j] =
           crossIntegral / m_sampleVolume; // Divide by total volume of the shape
 
@@ -217,9 +235,9 @@ void AbsorptionCorrectionPaalmanPings::exec() {
       crossIntegral = 0.0;
       doIntegration(integral, crossIntegral, -containerLinearCoefAbs[j],
                     m_containerLinearCoefTotScatt, m_containerElementVolumes,
-                    m_containerL1s, container_L2s, -linearCoefAbs[j],
-                    m_linearCoefTotScatt, m_container_sampleL1s,
-                    container_sample_L2s, 0, m_containerNumVolumeElements);
+                    m_containerL1s, container_L2s, -sampleLinearCoefAbs[j],
+                    m_ampleLinearCoefTotScatt, m_container_sampleL1s,
+                    container_sample_L2s, 0, m_numContainerVolumeElements);
       accY[j] =
           integral / m_containerVolume; // Divide by total volume of the shape
       acscY[j] = crossIntegral /
@@ -255,7 +273,7 @@ void AbsorptionCorrectionPaalmanPings::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   g_log.information() << "Total number of elements in the integration was "
-                      << m_L1s.size() << '\n';
+                      << m_sampleL1s.size() << '\n';
 
   const std::string outWSName = getProperty("OutputWorkspace");
 
@@ -279,16 +297,17 @@ void AbsorptionCorrectionPaalmanPings::exec() {
   setProperty("OutputWorkspace", outWS);
 
   // Now do some cleaning-up since destructor may not be called immediately
-  m_L1s.clear();
-  m_elementVolumes.clear();
-  m_elementPositions.clear();
+  m_sampleL1s.clear();
+  m_sampleElementVolumes.clear();
+  m_sampleElementPositions.clear();
   m_containerL1s.clear();
   m_containerElementVolumes.clear();
   m_containerElementPositions.clear();
 }
 
-/// Calculate the distances for L1 and element size for each element in the
-/// sample
+/// Calculate the distances for L1 (for both self-absorption and
+/// absorption by other object) and element size for each element in
+/// the sample and container
 void AbsorptionCorrectionPaalmanPings::initialiseCachedDistances() {
   // First, check if a 'gauge volume' has been defined. If not, it's the same as
   // the sample.
@@ -304,10 +323,10 @@ void AbsorptionCorrectionPaalmanPings::initialiseCachedDistances() {
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
   // move over the information
-  m_numVolumeElements = raster.l1.size();
-  m_L1s = std::move(raster.l1);
-  m_elementPositions = std::move(raster.position);
-  m_elementVolumes = std::move(raster.volume);
+  m_numSampleVolumeElements = raster.l1.size();
+  m_sampleL1s = std::move(raster.l1);
+  m_sampleElementPositions = std::move(raster.position);
+  m_sampleElementVolumes = std::move(raster.volume);
 
   // now for the container
   integrationVolume =
@@ -322,23 +341,24 @@ void AbsorptionCorrectionPaalmanPings::initialiseCachedDistances() {
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
   // move over the information
-  m_containerNumVolumeElements = raster.l1.size();
+  m_numContainerVolumeElements = raster.l1.size();
   m_containerL1s = std::move(raster.l1);
   m_containerElementPositions = std::move(raster.position);
   m_containerElementVolumes = std::move(raster.volume);
 
   // Get the L1s for the cross terms
-  // L1s for passing through container to be scattered by the sample
-  m_sample_containerL1s.reserve(m_numVolumeElements);
-  for (size_t i = 0; i < m_numVolumeElements; ++i) {
-    Track outgoing(m_elementPositions[i], -m_beamDirection);
+
+  // L1s for absorbed by the container to be scattered by the sample
+  m_sample_containerL1s.reserve(m_numSampleVolumeElements);
+  for (size_t i = 0; i < m_numSampleVolumeElements; ++i) {
+    Track outgoing(m_sampleElementPositions[i], -m_beamDirection);
     m_containerObject->interceptSurface(outgoing);
     m_sample_containerL1s[i] = outgoing.totalDistInsideObject();
   }
 
-  // L1s for passing through sample to be scattered by the container
-  m_container_sampleL1s.reserve(m_containerNumVolumeElements);
-  for (size_t i = 0; i < m_containerNumVolumeElements; ++i) {
+  // L1s for absorbed by the sample to be scattered by the container
+  m_container_sampleL1s.reserve(m_numContainerVolumeElements);
+  for (size_t i = 0; i < m_numContainerVolumeElements; ++i) {
     Track outgoing(m_containerElementPositions[i], -m_beamDirection);
     m_sampleObject->interceptSurface(outgoing);
     m_container_sampleL1s[i] = outgoing.totalDistInsideObject();
@@ -367,7 +387,7 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
 
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
-  m_linearCoefTotScatt =
+  m_ampleLinearCoefTotScatt =
       -m_material.totalScatterXSection() * m_material.numberDensity() * 100;
   m_containerLinearCoefTotScatt = -m_containerMaterial.totalScatterXSection() *
                                   m_containerMaterial.numberDensity() * 100;
@@ -401,9 +421,6 @@ void AbsorptionCorrectionPaalmanPings::constructSample(API::Sample &sample) {
 }
 
 /// Calculate the distances traversed by the neutrons within the sample
-/// @param detector :: The detector we are working on
-/// @param L2s :: A vector of the sample-detector distance for  each segment of
-/// the sample
 void AbsorptionCorrectionPaalmanPings::calculateDistances(
     const IDetector &detector, std::vector<double> &sample_L2s,
     std::vector<double> &sample_container_L2s,
@@ -419,28 +436,36 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
                           detector.getPhi() * 180.0 / M_PI);
   }
 
-  for (size_t i = 0; i < m_numVolumeElements; ++i) {
+  for (size_t i = 0; i < m_numSampleVolumeElements; ++i) {
     // Create track for distance between scattering point in sample and detector
-    const V3D direction = normalize(detectorPos - m_elementPositions[i]);
-    Track outgoing(m_elementPositions[i], direction);
+    const V3D direction = normalize(detectorPos - m_sampleElementPositions[i]);
+    Track outgoing(m_sampleElementPositions[i], direction);
+
+    // find distance in sample
     m_sampleObject->interceptSurface(outgoing);
     sample_L2s[i] = outgoing.totalDistInsideObject();
 
     outgoing.clearIntersectionResults();
+
+    // find distance in container
     m_containerObject->interceptSurface(outgoing);
     sample_container_L2s[i] = outgoing.totalDistInsideObject();
   }
 
-  for (size_t i = 0; i < m_containerNumVolumeElements; ++i) {
+  for (size_t i = 0; i < m_numContainerVolumeElements; ++i) {
     // Create track for distance between scattering point in container and
     // detector
     const V3D direction =
         normalize(detectorPos - m_containerElementPositions[i]);
     Track outgoing(m_containerElementPositions[i], direction);
+
+    // find distance in container
     m_containerObject->interceptSurface(outgoing);
     container_L2s[i] = outgoing.totalDistInsideObject();
 
     outgoing.clearIntersectionResults();
+
+    // find distance in sample
     m_sampleObject->interceptSurface(outgoing);
     container_sample_L2s[i] = outgoing.totalDistInsideObject();
   }
