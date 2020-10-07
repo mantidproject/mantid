@@ -43,6 +43,9 @@ function (add_sphinx_build_target builder)
     set(target_name docs-${builder})
   endif()
   set(output_dir ${SPHINX_BUILD_DIR}/${builder})
+  if(EXISTS ${SPHINX_CONF_DIR}/conf-${builder}.py)
+    set(conf_builder ${SPHINX_CONF_DIR}/conf-${builder}.py)
+  endif()
   add_custom_target(${target_name}
       COMMAND
         ${CMAKE_COMMAND} -E env
@@ -55,7 +58,7 @@ function (add_sphinx_build_target builder)
       DEPENDS Framework
               mantidqt
               ${SPHINX_CONF_DIR}/conf.py
-              ${SPHINX_CONF_DIR}/conf-${builder}.py
+              ${conf_builder}
       COMMENT "Building ${builder} documentation"
   )
   # Group within VS and exclude from whole build

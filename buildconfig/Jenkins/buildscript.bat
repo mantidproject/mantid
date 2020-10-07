@@ -222,15 +222,7 @@ echo MultiThreaded.MaxCores=2 > %USERPROPS%
 call ctest.exe -C %BUILD_CONFIG%  --no-compress-output -T Test -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Run docs-tests if in the special Debug builds
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 echo Note: not running doc-test target as it currently takes too long
-:: if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
-::   del /Q %USERPROPS%
-::   call cmake.exe --build . --target StandardTestData
-::   call cmake.exe --build . --target docs-test
-:: )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if required
