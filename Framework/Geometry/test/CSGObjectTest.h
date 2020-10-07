@@ -1094,6 +1094,15 @@ public:
     dist = sqrt(pow(height, 2) + pow(base, 2));
 
     TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test sample from the inner top corner (should miss and be 0)
+    BEAM_DIRECTION = V3D{0.0, HEIGHT * 0.5, INNER_RADIUS};
+    BEAM_DIRECTION.normalize();
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 0);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.0);
   }
 
   void testTracksForFlatPlate() {
