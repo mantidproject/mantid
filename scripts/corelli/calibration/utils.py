@@ -130,8 +130,8 @@ def calculate_tube_calibration(workspace: WorkspaceTypes, tube_name: str, shadow
     return calibration_table
 
 
-def calibrate_instrument(workspace: WorkspaceTypes, calibration_table: InputTable,
-                         output_workspace: Optional[str] = None, show_instrument: bool = False) -> Workspace2D:
+def apply_calibration(workspace: WorkspaceTypes, calibration_table: InputTable,
+                      output_workspace: Optional[str] = None, show_instrument: bool = False) -> Workspace2D:
     r"""
     Calibrate the detector positions with an input table, and open the instrument view if so requested.
 
