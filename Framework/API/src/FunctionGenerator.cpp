@@ -270,9 +270,9 @@ bool FunctionGenerator::hasAttribute(const std::string &attName) const {
  * Return the name of the ith attribute. This method assumes that:
  * The first [0,IFunction::nAttributes()) belong to the function held in this
  * class. The next [IFunction::nAttributes, IFunction::nAttributes +
- * m_source->nAttributes()) belong to the m_source function. And finally, the remaining
- * attributes belong to the m_target function
- * @param index :: Index of the attribute to return
+ * m_source->nAttributes()) belong to the m_source function. And finally, the
+ * remaining attributes belong to the m_target function
+ * @param i:: Index of the attribute to return
  */
 std::string FunctionGenerator::attributeName(size_t i) const {
   if (i < IFunction::nAttributes()) {

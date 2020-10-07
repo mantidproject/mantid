@@ -545,7 +545,9 @@ public:
   [[nodiscard]] double getChiSquared() const { return m_chiSquared; }
 
   /// Set the parallel hint
-  void setParallel(bool on) { m_isParallel = on; }
+  void setParallel(bool on) {
+    m_isParallel = on;
+  }
   /// Get the parallel hint
   [[nodiscard]] bool isParallel() const { return m_isParallel; }
 
@@ -560,7 +562,12 @@ public:
   /// FixedByDefault:  Fixed by default, don't show in ties of
   ///         the output string.
   /// Tied:   Value depends on values of other parameters.
-  enum ParameterStatus { Active, Fixed, FixedByDefault, Tied };
+  enum ParameterStatus {
+    Active,
+    Fixed,
+    FixedByDefault,
+    Tied
+  };
   /// Change status of parameter
   virtual void setParameterStatus(size_t i, ParameterStatus status) = 0;
   /// Get status of parameter
