@@ -8,11 +8,13 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/MultiPeriodLoadMuonStrategy.h"
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -178,11 +180,10 @@ void LoadMuonNexusV2::execLoader() {
   }
 
   // Time Zero table should be returned if found
-  const std::vector<double> timeZeros = getProperty("TimeZeroList");
-  if (!timeZeros.empty()) {
-    // Create table and set property
-    //setProperty("TimeZeroTable",
-      //          m_loadMuonStrategy->createTimeZeroTable(timeZeros));
+  if (!getPropertyValue("TimeZerotable").empty()) {
+    // Create table and set property]
+    auto timeZeroTable = m_loadMuonStrategy->setTimeZeroTable();
+    setProperty("TimeZeroTable", timeZeroTable);
   }
 }
 

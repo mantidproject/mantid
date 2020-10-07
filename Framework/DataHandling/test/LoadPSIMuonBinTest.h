@@ -219,22 +219,25 @@ public:
 
     alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
     alg.setProperty("OutputWorkspace", "ws");
-    alg.setProperty("TimeZeroTable", "tzt");
+    alg.setPropertyValue("TimeZeroTable", "tzt");
     alg.execute();
 
     ITableWorkspace_sptr tbl;
     TS_ASSERT_THROWS_NOTHING(
-        tbl = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("tzt"));
+        tbl =
+            AnalysisDataService::Instance().retrieveWS<TableWorkspace>("tzt"));
 
+    TS_ASSERT(tbl);
     TS_ASSERT_EQUALS(tbl->columnCount(), 1);
-    TS_ASSERT_EQUALS(tbl->getColumnNames(), std::vector<std::string>{"time zero"});
+    TS_ASSERT_EQUALS(tbl->getColumnNames(),
+                     std::vector<std::string>{"time zero"});
     TS_ASSERT_EQUALS(tbl->rowCount(), 4);
     TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(0), 0.1582, 0.0001);
     TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(1), 0.1553, 0.0001);
     TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(2), 0.1592, 0.0001);
     TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(3), 0.1602, 0.0001);
   }
-  
+
   void test_dead_time_table_loaded_correctly() {
     LoadPSIMuonBin alg;
     alg.initialize();
@@ -243,7 +246,7 @@ public:
 
     alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
     alg.setProperty("OutputWorkspace", "ws");
-    alg.setProperty("DeadTimeTable", "dtt");
+    alg.setPropertyValue("DeadTimeTable", "dtt");
     alg.execute();
 
     ITableWorkspace_sptr tbl;
@@ -251,8 +254,9 @@ public:
         tbl =
             AnalysisDataService::Instance().retrieveWS<TableWorkspace>("dtt"));
 
+    TS_ASSERT(tbl);
     TS_ASSERT_EQUALS(tbl->columnCount(), 2);
-    std::vector<std::string> colNames{"spectrum","dead-time"};
+    std::vector<std::string> colNames{"spectrum", "dead-time"};
     TS_ASSERT_EQUALS(tbl->getColumnNames(), colNames);
     TS_ASSERT_EQUALS(tbl->rowCount(), 4);
     TS_ASSERT_EQUALS(tbl->getColumn(0)->toDouble(0), 1.0);
@@ -264,7 +268,7 @@ public:
     TS_ASSERT_EQUALS(tbl->getColumn(0)->toDouble(3), 4.0);
     TS_ASSERT_EQUALS(tbl->getColumn(1)->toDouble(3), 0.0);
   }
-  
+
   void test_uncorected_time_loaded_if_corrected_time_flag_is_false() {
     LoadPSIMuonBin alg;
     alg.initialize();

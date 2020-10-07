@@ -130,15 +130,17 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(
  * @return TableWorkspace of time zeros
  */
 DataObjects::TableWorkspace_sptr LoadMuonStrategy::createTimeZeroTable(
-    const std::vector<double> &timeZeros) const {
-  auto timeZeroTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
-
+    const size_t numSpec, const std::vector<double> &timeZeros) const {
+  Mantid::DataObjects::TableWorkspace_sptr timeZeroTable =
+      std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+          Mantid::API::WorkspaceFactory::Instance().createTable(
+              "TableWorkspace"));
+  assert(timeZeroTable);
   timeZeroTable->addColumn("double", "time zero");
 
-  for (size_t i = 0; i < timeZeros.size(); ++i) {
-    API::TableRow row = timeZeroTable->appendRow();
-    row << timeZeros[i];
+  for (size_t specNum = 0; specNum < numSpec; ++specNum) {
+    Mantid::API::TableRow row = timeZeroTable->appendRow();
+    row << timeZeros[specNum];
   }
 
   return timeZeroTable;

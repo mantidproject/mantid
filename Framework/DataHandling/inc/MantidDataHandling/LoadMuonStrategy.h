@@ -31,6 +31,8 @@ public:
   virtual API::Workspace_sptr loadDetectorGrouping() const = 0;
   // Load dead time table
   virtual API::Workspace_sptr loadDeadTimeTable() const = 0;
+  // Set time zero table
+  virtual API::Workspace_sptr setTimeZeroTable() const = 0;
 
 protected:
   // Create grouping table
@@ -42,8 +44,9 @@ protected:
   createDeadTimeTable(const std::vector<detid_t> &detectorsLoaded,
                       const std::vector<double> &deadTimes) const;
 
-  DataObjects::TableWorkspace_sptr LoadMuonStrategy::createTimeZeroTable(
-      const std::vector<double> &timeZeros) const;
+  DataObjects::TableWorkspace_sptr
+  createTimeZeroTable(const size_t numSpec,
+                      const std::vector<double> &timeZeros) const;
 
   API::Workspace_sptr loadDefaultDetectorGrouping(
       const DataObjects::Workspace2D &localWorkspace) const;
