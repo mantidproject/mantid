@@ -68,5 +68,4 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         try:
             exec(open(os.path.join(self._interface_directory, interface_script)).read())
         except Exception as ex:
-            self.fail("Exception thrown when attempting to open the {0} interface: {1}".format(interface_script,
-                                                                                               str(ex)))
+            self.fail(f"Exception thrown when attempting to open the {interface_script} interface: {ex}.")

@@ -38,4 +38,4 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
             interface.show()
             interface.close()
         except Exception as ex:
-            self.fail("Exception thrown when attempting to open the {0} interface: {1}".format(interface_name, str(ex)))
+            self.fail(f"Exception thrown when attempting to open the {interface_name} interface: {ex}.")
