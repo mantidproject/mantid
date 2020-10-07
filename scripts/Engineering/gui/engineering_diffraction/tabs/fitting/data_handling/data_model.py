@@ -51,9 +51,9 @@ class FittingDataModel(object):
                         f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
             else:
                 logger.warning(f"File {ws_name} has already been loaded")
-        self.update_log_table()
+        self.update_log_workspace_group()
 
-    def create_log_table(self):
+    def create_log_workspace_group(self):
         # run information table
         run_info = self.make_runinfo_table()
         self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs')
@@ -80,10 +80,10 @@ class FittingDataModel(object):
         run_info.addColumn(type="str", name="Title")
         return run_info
 
-    def update_log_table(self):
+    def update_log_workspace_group(self):
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
         if not self._log_workspaces:
-            self.create_log_table()
+            self.create_log_workspace_group()
         else:
             for log in self._log_names:
                 if not ADS.doesExist(log):

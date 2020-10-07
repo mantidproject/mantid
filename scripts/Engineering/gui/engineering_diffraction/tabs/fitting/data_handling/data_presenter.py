@@ -49,10 +49,10 @@ class FittingDataPresenter(object):
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
             self.model.remove_log_rows([self.row_numbers[ws_name]])
-            self.model.update_log_table()
+            self.model.update_log_workspace_group()
             self._repopulate_table()
         elif ws_name in self.model.get_log_workspaces_name():
-            self.model.update_log_table()
+            self.model.update_log_workspace_group()
 
     def rename_workspace(self, old_name, new_name):
         if old_name in self.get_loaded_workspaces():
@@ -61,7 +61,7 @@ class FittingDataPresenter(object):
                 self.plotted.remove(old_name)
                 self.plotted.add(new_name)
             self._repopulate_table()
-            self.model.update_log_table()  # so matches new table
+            self.model.update_log_workspace_group()  # so matches new table
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()

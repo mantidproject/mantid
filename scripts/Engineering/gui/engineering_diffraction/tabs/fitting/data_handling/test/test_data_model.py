@@ -240,6 +240,56 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual({"new_name": [True, 80, 1000, False]}, self.model._bg_params)
         self.assertEqual({"new_name": 1, "name2": 2}, self.model._log_values)
 
+    @patch(file_path + ".FittingDataModel.create_log_workspace_group")
+    @patch(file_path + ".FittingDataModel.add_log_to_table")
+    def test_update_logs_initial(self, mock_add_log, mock_create_log_group):
+        self.model._loaded_workspaces = {"name1": self.mock_ws}
+        self.model._log_workspaces = None
+
+        self.model.update_log_workspace_group()
+        mock_create_log_group.assert_called_once()
+        mock_add_log.assert_called_with("name1", self.mock_ws, 0)
+
+    @patch(file_path + ".FittingDataModel.make_log_table")
+    @patch(file_path + ".FittingDataModel.make_runinfo_table")
+    @patch(file_path + ".FittingDataModel.create_log_workspace_group")
+    @patch(file_path + ".FittingDataModel.add_log_to_table")
+    @patch(file_path + ".ADS")
+    def test_update_logs_deleted(self, mock_ads, mock_add_log, mock_create_log_group, mock_make_runinfo,
+                                 mock_make_log_table):
+        self.model._loaded_workspaces = {"name1": self.mock_ws}
+        self.model._log_workspaces = mock.MagicMock()
+        self.model._log_names = ['LogName1', 'LogName2']
+        # simulate LogName2 and run_info tables being deleted
+        mock_ads.doesExist = lambda ws_name: ws_name == 'LogName1'
+
+        self.model.update_log_workspace_group()
+        mock_create_log_group.assert_not_called()
+        mock_make_runinfo.assert_called_once()
+        mock_make_log_table.assert_called_once_with('LogName2')
+        self.model._log_workspaces.add.assert_any_call("run_info")
+        self.model._log_workspaces.add.assert_any_call("LogName2")
+        mock_add_log.assert_called_with("name1", self.mock_ws, 0)
+
+    @patch(file_path + ".FittingDataModel.make_log_table")
+    @patch(file_path + ".FittingDataModel.make_runinfo_table")
+    @patch(file_path + ".get_setting")
+    @patch(file_path + ".GroupWorkspaces")
+    def test_create_log_workspace_group(self, mock_group, mock_get_setting, mock_make_runinfo, mock_make_log_table):
+        log_names = ['LogName1', 'LogName2']
+        mock_get_setting.return_value = ','.join(log_names)
+        mock_group_ws = mock.MagicMock()
+        mock_group.return_value = mock_group_ws
+
+        self.model.create_log_workspace_group()
+
+        mock_group.assert_called_once()
+        for log in log_names:
+            mock_group_ws.add.assert_any_call(log)
+        self.assertEqual(self.model._log_names, log_names)
+        mock_make_runinfo.assert_called_once()
+        self.assertEqual(mock_make_log_table.call_count, len(log_names))
+
     @patch(file_path + ".FittingDataModel.write_table_row")
     @patch(file_path + ".ADS")
     @patch(file_path + ".FittingDataModel.update_log_group_name")
