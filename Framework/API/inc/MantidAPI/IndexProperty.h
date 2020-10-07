@@ -36,7 +36,7 @@ public:
                     Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   IndexProperty(const IndexProperty &) = default;
-  IndexProperty &operator=(const IndexProperty &) = default;
+  IndexProperty &operator=(const IndexProperty &) = delete;
 
   IndexProperty *clone() const override;
 
