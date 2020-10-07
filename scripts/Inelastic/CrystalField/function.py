@@ -285,32 +285,42 @@ class Background(object):
     background.
     """
 
-    def __init__(self, peak=None, background=None):
+    def __init__(self, functions=[]):
         """
         Initialise new instance.
-        @param peak: An instance of Function class meaning to be the elastic peak.
-        @param background: An instance of Function class serving as the background.
+        @param functions: A list of Function class instances which make up the background.
         """
-        self.peak = peak
-        self.background = background
+        self._functions = functions
 
     def clone(self):
         """Make a copy of self."""
         aCopy = Background()
-        if self.peak is not None:
-            aCopy.peak = self.peak.clone()
-        if self.background is not None:
-            aCopy.background = self.background.clone()
+        for function in self._functions:
+            aCopy.add_function(function.clone())
         return aCopy
 
+    def add_function(self, function):
+        """
+        Add a function to the background object.
+        @param function: The Function class instance to add to the Background object.
+        """
+        if isinstance(function, Function):
+            self._functions.append(function)
+        else:
+            raise TypeError("Expected to add a Function object to the Background object.")
+
     def toString(self):
-        if self.peak is None and self.background is None:
+        """Return the Background object in string format."""
+        if len(self._functions) == 0:
             return ''
-        if self.peak is None:
-            return self.background.toString()
-        if self.background is None:
-            return self.peak.toString()
-        return '(%s;%s)' % (self.peak.toString(), self.background.toString())
+        elif len(self._functions) == 1:
+            return self._functions[0].toString()
+        else:
+            function_string = '(' + self._functions[0].toString()
+            for function in self._functions[1:]:
+                function_string += ';'
+                function_string += function.toString()
+            return function_string + ')'
 
     def update(self, func1, func2=None):
         """
