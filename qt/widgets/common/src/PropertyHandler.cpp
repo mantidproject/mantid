@@ -992,9 +992,6 @@ void PropertyHandler::clearError(QtProperty *prop) {
  */
 Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
   if (prop == m_type) {
-    // if (!m_parent) return m_browser->compositeFunction();// dont replace
-    // the root composite function
-
     // Create new function
     int i = m_browser->m_enumManager->value(prop);
     QStringList functionNames = m_browser->m_enumManager->enumNames(prop);

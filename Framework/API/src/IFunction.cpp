@@ -1342,9 +1342,9 @@ void IFunction::setAttributeValue(const std::string &attName,
  */
 void IFunction::setAttributeValue(const std::string &attName,
                                   const std::string &value) {
-  Attribute att = this->getAttribute(attName);
+  Attribute att = getAttribute(attName);
   att.setString(value);
-  this->setAttribute(attName, att);
+  setAttribute(attName, att);
 }
 
 /// Returns the pointer to a child function
@@ -1355,16 +1355,19 @@ IFunction_sptr IFunction::getFunction(std::size_t) const {
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
-  names.reserve(this->nAttributes());
-  for (size_t i = 0; i < this->nAttributes(); ++i) {
-    names.emplace_back(this->attributeName(i));
+  names.reserve(nAttributes());
+  for (size_t i = 0; i < nAttributes(); ++i) {
+    names.emplace_back(attributeName(i));
   }
   return names;
 }
 
-// Name of ith attribute
+/**
+ * Return the name of the ith attribute by querying the stored attributes in m_attrs
+ * @param index :: Index of the attribute to return
+ */
 std::string IFunction::attributeName(size_t index) const {
-  if (index >= this->nAttributes()) {
+  if (index >= nAttributes()) {
     throw std::out_of_range("Function attribute index out of range.");
   }
   auto itr = std::next(m_attrs.begin(), index);
