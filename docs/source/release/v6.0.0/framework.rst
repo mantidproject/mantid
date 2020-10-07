@@ -15,6 +15,8 @@ Concepts
 Algorithms
 ----------
 
+- The calculation of a distance has been updated in Track to correctly calculate the distance for objects that have multiple intercepting surfaces, e.g. hollow cylinder. This affect algorithms such as :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` where you may now get slightly different values.
+
 Data Objects
 ------------
 
