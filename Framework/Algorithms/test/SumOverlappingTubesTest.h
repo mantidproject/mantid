@@ -702,7 +702,8 @@ public:
     TS_ASSERT_EQUALS(yAxis->length(), 256)
 
     for (size_t i = 0; i < 256; i++) {
-      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256, 1e-6)
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256,
+                      1e-6)
     }
 
     TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 17)
@@ -739,7 +740,8 @@ public:
     TS_ASSERT_EQUALS(yAxis->length(), 256)
 
     for (size_t i = 0; i < 256; i++) {
-      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256, 1e-6)
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256,
+                      1e-6)
     }
 
     TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 40)
