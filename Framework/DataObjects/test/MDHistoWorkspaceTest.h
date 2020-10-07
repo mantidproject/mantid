@@ -441,7 +441,7 @@ public:
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
     TS_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated",
-                     ws.getNumNonIntegratedDims(), 3)
+                     ws.getNumNonIntegratedDims(), 3);
     Mantid::Geometry::VecIMDDimension_const_sptr vecNonIntegratedDims =
         ws.getNonIntegratedDimensions();
     TSM_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated", 3,
