@@ -122,7 +122,7 @@ class TestUtils(unittest.TestCase):
 
     def test_apply_instrument(self) -> None:
         table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
-        apply_instrument(self.workspace, table)
+        apply_calibration(self.workspace, table)
         assert AnalysisDataService.doesExist('uncalibrated_calibrated')
         DeleteWorkspaces(['uncalibrated_calibrated', str(table)])
 
