@@ -426,7 +426,7 @@ if [[ ${DO_DOCTESTS_USER} == true ]]; then
     fi
     # Build HTML to verify that no referencing errors have crept in.
     run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
-    run_with_xvfb ${CMAKE_EXE} --build . --target docs-test
+    run_with_xvfb ${CMAKE_EXE} --build . --target docs-doctest
 fi
 
 ###############################################################################
