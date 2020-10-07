@@ -1363,7 +1363,8 @@ std::vector<std::string> IFunction::getAttributeNames() const {
 }
 
 /**
- * Return the name of the ith attribute by querying the stored attributes in m_attrs
+ * Return the name of the ith attribute by querying the stored attributes in
+ * m_attrs
  * @param index :: Index of the attribute to return
  */
 std::string IFunction::attributeName(size_t index) const {

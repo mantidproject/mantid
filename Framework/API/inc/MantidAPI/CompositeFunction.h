@@ -68,7 +68,7 @@ public:
   /// Set i-th parameter description
   void setParameterDescription(size_t, const std::string &description) override;
   /// Get i-th parameter
-  double getParameter(size_t i) const override;
+  [[nodiscard]] double getParameter(size_t i) const override;
   /// Set parameter by name.
   void setParameter(const std::string &name, const double &value,
                     bool explicitlySet = true) override;
@@ -76,54 +76,58 @@ public:
   void setParameterDescription(const std::string &name,
                                const std::string &description) override;
   /// Get parameter by name.
-  double getParameter(const std::string &name) const override;
+  [[nodiscard]] double getParameter(const std::string &name) const override;
   /// Check if function has a parameter with this name.
   bool hasParameter(const std::string &name) const override;
   /// Check if a function has an attribute with this name.
   bool hasAttribute(const std::string &name) const override;
   /// Return a value of attribute attName
-  Attribute getAttribute(const std::string &name) const override;
+  [[nodiscard]] Attribute getAttribute(const std::string &name) const override;
   // Set an attribute value
   void setAttribute(const std::string &name,
                     const API::IFunction::Attribute &value) override;
   /// Total number of parameters
-  size_t nParams() const override;
+  [[nodiscard]] size_t nParams() const override;
   // Total number of attributes, which includes global and local function
   // attributes
-  size_t nAttributes() const override;
+  [[nodiscard]] size_t nAttributes() const override;
   // Total number of global attributes, defined at the composite function level
-  size_t nGlobalAttributes() const noexcept { return IFunction::nAttributes(); }
+  [[nodiscard]] size_t nGlobalAttributes() const noexcept {
+    return IFunction::nAttributes();
+  }
   /// Returns the index of parameter name
-  size_t parameterIndex(const std::string &name) const override;
+  [[nodiscard]] size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i
-  std::string parameterName(size_t i) const override;
+  [[nodiscard]] std::string parameterName(size_t i) const override;
   /// Returns the name of attribute i
-  std::string attributeName(size_t i) const override;
+  [[nodiscard]] std::string attributeName(size_t i) const override;
   /// Returns the description of parameter i
-  std::string parameterDescription(size_t i) const override;
+  [[nodiscard]] std::string parameterDescription(size_t i) const override;
   /// Checks if a parameter has been set explicitly
-  bool isExplicitlySet(size_t i) const override;
+  [[nodiscard]] bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter
-  double getError(size_t i) const override;
+  [[nodiscard]] double getError(size_t i) const override;
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
-  double activeParameter(size_t i) const override;
+  [[nodiscard]] double activeParameter(size_t i) const override;
   /// Set new value of i-th active parameter. Override this method to make
   /// fitted parameters different from the declared
   void setActiveParameter(size_t i, double value) override;
   /// Update parameters after a fitting iteration
   void updateActive(const double *in);
   /// Returns the name of active parameter i
-  std::string nameOfActive(size_t i) const override;
+  [[nodiscard]] std::string nameOfActive(size_t i) const override;
   /// Returns the name of active parameter i
-  std::string descriptionOfActive(size_t i) const override;
+  [[nodiscard]] std::string descriptionOfActive(size_t i) const override;
 
   /// Return parameter index from a parameter reference.
-  size_t getParameterIndex(const ParameterReference &ref) const override;
+  [[nodiscard]] size_t
+  getParameterIndex(const ParameterReference &ref) const override;
   /// Get the containing function
-  IFunction_sptr getContainingFunction(const ParameterReference &ref) const;
+  [[nodiscard]] IFunction_sptr
+  getContainingFunction(const ParameterReference &ref) const;
 
   /// Apply the ties
   void applyTies() override;
@@ -135,23 +139,25 @@ public:
   /// Removes i-th parameter's tie
   bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
-  ParameterTie *getTie(size_t i) const override;
+  [[nodiscard]] ParameterTie *getTie(size_t i) const override;
 
   /// Get constraint of i-th parameter
-  IConstraint *getConstraint(size_t i) const override;
+  [[nodiscard]] IConstraint *getConstraint(size_t i) const override;
   /// Prepare function for a fit
   void setUpForFit() override;
   /// Remove a constraint
   void removeConstraint(const std::string &parName) override;
   /// Get number of domains required by this function
-  size_t getNumberDomains() const override;
+  [[nodiscard]] size_t getNumberDomains() const override;
   /// Split this function (if needed) into a list of independent functions.
-  std::vector<std::shared_ptr<IFunction>>
+  [[nodiscard]] std::vector<std::shared_ptr<IFunction>>
   createEquivalentFunctions() const override;
   /// Returns the pointer to i-th function
-  IFunction_sptr getFunction(std::size_t i) const override;
+  [[nodiscard]] IFunction_sptr getFunction(std::size_t i) const override;
   /// Number of functions
-  std::size_t nFunctions() const override { return m_functions.size(); }
+  [[nodiscard]] std::size_t nFunctions() const override {
+    return m_functions.size();
+  }
 
   /* CompositeFunction own methods */
 
@@ -165,12 +171,14 @@ public:
   void replaceFunctionPtr(const IFunction_sptr &f_old,
                           const IFunction_sptr &f_new);
   /// Get the function index
-  std::size_t functionIndex(std::size_t i) const;
-  std::size_t attributeFunctionIndex(std::size_t i) const;
+  [[nodiscard]] std::size_t functionIndex(std::size_t i) const;
+  [[nodiscard]] std::size_t attributeFunctionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function
-  size_t parameterLocalIndex(size_t i, bool recursive = false) const;
+  [[nodiscard]] size_t parameterLocalIndex(size_t i,
+                                           bool recursive = false) const;
   /// Returns the name of parameter i as it declared in its function
-  std::string parameterLocalName(size_t i, bool recursive = false) const;
+  [[nodiscard]] std::string parameterLocalName(size_t i,
+                                               bool recursive = false) const;
   /// Check the function.
   void checkFunction();
   /// Remove all member functions
