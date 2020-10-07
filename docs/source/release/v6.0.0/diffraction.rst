@@ -14,7 +14,9 @@ Powder Diffraction
 
 New features
 ############
+
 - Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
+- Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
 
 Bugfixes
 ########
@@ -32,7 +34,5 @@ New features
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - Fix problem that was causing matrix diagonalization to return NaNs in certain cases. The diagonalization is used in :ref:`CalculateUMatrix <algm-CalculateUMatrix>` and :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
 
-Imaging
--------
 
 :ref:`Release 6.0.0 <v6.0.0>`

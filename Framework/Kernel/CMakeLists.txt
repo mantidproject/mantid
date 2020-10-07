@@ -687,10 +687,8 @@ endif()
 set(CONSOLECHANNELCLASS "StdoutChannel")
 configure_file(../Properties/Mantid.properties.template
                ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-        DESTINATION ${BIN_DIR}
-        RENAME Mantid.properties)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-        DESTINATION ${WORKBENCH_BIN_DIR}
-        RENAME Mantid.properties)
+mtd_install_files(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+                  INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR}
+                  RENAME Mantid.properties)
+

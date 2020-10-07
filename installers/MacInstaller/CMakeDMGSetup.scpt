@@ -39,9 +39,11 @@ on run argv
         set statusbar visible to false
         set toolbar visible to false
         set the bounds to { 400, 000, 900, 540 }
-        set position of item "MantidPlot.app" to { 110, 220 }
+        set position of item "MantidWorkbench.app" to { 110, 220 }
         set position of item "Applications" to { 380, 220 }
-        set position of item "MantidWorkbench" to { 110, 400 }
+	if exists file "MantidPlot.app"
+          set position of item "MantidPlot.app" to { 110, 400 }
+	end if
       end tell
       update without registering applications
       delay 5
