@@ -562,7 +562,7 @@ void Shape2DCollection::pasteCopiedShapes() {
 
       shape->setDouble("endAngle", shape->getDouble("endAngle") + angleOffset);
     } else {
-      shape->moveBy(QPointF(0.1, 0.1));
+      shape->moveBy(QPointF(0.1, -0.1));
     }
     newShape = shape->clone();
     newShape->setFillColor(shape->getFillColor());
