@@ -11,6 +11,9 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+New features
+############
+- New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 
 Engineering Diffraction
 -----------------------
