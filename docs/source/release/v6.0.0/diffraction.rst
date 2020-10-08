@@ -15,6 +15,7 @@ Powder Diffraction
 New features
 ############
 
+- Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
 - Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
 
 Bugfixes
