@@ -144,6 +144,8 @@ class GeneralSettings(object):
 
     def action_prompt_deleting_workspace(self, state):
         CONF.set(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, bool(state))
+        if self.settings_presenter is not None:
+            self.settings_presenter.register_change_needs_restart("Prompt when deleting workspaces")
 
     def action_use_notifications_modified(self, state):
         ConfigService.setString(GeneralProperties.USE_NOTIFICATIONS.value, "On" if bool(state) else "Off")
