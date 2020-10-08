@@ -293,6 +293,7 @@ set(PYTHON_PLUGINS
   algorithms/CompareSampleLogs.py
   algorithms/MuonMaxent.py
   algorithms/SaveP2D.py
+  algorithms/ClipPeaks.py
   functions/AFMZF.py
   functions/PCRmagnetZFKT.py
   functions/StretchedExpFTHelper.py
@@ -364,15 +365,9 @@ set(PACKAGE_FILE ${CMAKE_CURRENT_BINARY_DIR}/python-plugin-manifest.txt.install)
 list(JOIN PYTHON_PLUGINS "\n" PYTHON_PLUGINS)
 file(WRITE ${PACKAGE_FILE} ${PYTHON_PLUGINS})
 
-install(
+mtd_install_files(
     FILES ${PACKAGE_FILE}
-    DESTINATION ${WORKBENCH_PLUGINS_DIR}/python
-    RENAME "python-plugin-manifest.txt"
-)
-
-install(
-    FILES ${PACKAGE_FILE}
-    DESTINATION ${PLUGINS_DIR}/python
+    INSTALL_DIRS ${PLUGINS_DIR}/python ${WORKBENCH_PLUGINS_DIR}/python
     RENAME "python-plugin-manifest.txt"
 )
 

@@ -25,7 +25,7 @@ class MatrixWorkspaceDisplayViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_widget_created()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("work")
@@ -41,7 +41,7 @@ class MatrixWorkspaceDisplayViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_widget_created()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("work")

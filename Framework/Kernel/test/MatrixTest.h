@@ -150,6 +150,22 @@ public:
     TS_ASSERT(!(A == B));
   }
 
+  void test_not_equal_NaN() {
+    Matrix<double> A(3, 3, true);
+    Matrix<double> B(3, 3, true);
+
+    A[0][0] = std::numeric_limits<double>::quiet_NaN();
+
+    TS_ASSERT(A != B);
+    TS_ASSERT(!(A == B));
+
+    // require that two NaN values aren't equal
+    B[0][0] = std::numeric_limits<double>::quiet_NaN();
+
+    TS_ASSERT(A != B);
+    TS_ASSERT(!(A == B));
+  }
+
   /**
   Check that we can swap rows and columns
   */

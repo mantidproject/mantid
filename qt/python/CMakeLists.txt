@@ -11,9 +11,15 @@ endif()
 # mantidqt
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   if(APPLE)
-    set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
+    set(_install_lib_dirs)
+    if(ENABLE_WORKBENCH)
+      list(APPEND _install_lib_dirs ${WORKBENCH_SITE_PACKAGES})
+    endif()
+    if(ENABLE_MANTIDPLOT)
+      list(APPEND _install_lib_dirs ${SITE_PACKAGES})
+    endif()
   else()
-    set(_install_lib_dirs "${WORKBENCH_SITE_PACKAGES}")
+    set(_install_lib_dirs "${SITE_PACKAGES}")
   endif()
   add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
 
@@ -110,6 +116,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
         mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
         mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
+        mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
         mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py

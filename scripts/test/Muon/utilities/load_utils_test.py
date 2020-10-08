@@ -10,7 +10,6 @@ import unittest
 
 from mantid import simpleapi, ConfigService
 from mantid.api import AnalysisDataService, ITableWorkspace
-from unittest import mock
 
 
 def create_simple_workspace(data_x, data_y, run_number=0):
@@ -77,7 +76,6 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(run, 22725)
 
     def test_load_workspace_from_filename_for_file_path(self):
-        mock_alg = mock.MagicMock()
         filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
         inputs = {
               "DeadTimeTable": "__notUsed",
@@ -85,6 +83,7 @@ class MuonFileUtilsTest(unittest.TestCase):
 
         alg, _ = utils.create_load_algorithm(filename,inputs)
         self.assertTrue(filename in alg.getProperty("Filename").value)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

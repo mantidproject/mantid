@@ -24,10 +24,14 @@ public:
     return true;
   }
 
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
+  // Removed as it causes a segfault on Ubuntu 20.04 due to PyQt claiming
+  // the Qapplication object and deleting it before tearDownWorld occurs.
+  // the memory leak caused by m_app not being deleted in some circumstances
+  // Doesn't matter as it executes this on exit
+  // bool tearDownWorld() override {
+  //   delete m_app;
+  //   return true;
+  // }
 
   int m_argc = 1;
   GNU_DIAG_OFF("pedantic")

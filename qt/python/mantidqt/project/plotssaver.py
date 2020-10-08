@@ -26,7 +26,7 @@ class PlotsSaver(object):
     def __init__(self):
         self.figure_creation_args = {}
 
-    def save_plots(self, plot_dict):
+    def save_plots(self, plot_dict, is_project_recovery=False):
         # if arguement is none return empty dictionary
         if plot_dict is None:
             return []
@@ -40,7 +40,12 @@ class PlotsSaver(object):
                 # have built your project.
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt
-                logger.warning("A plot was unable to be saved")
+
+                error_string = "Plot: " + str(index) + " was not saved. Error: " + str(e)
+                if not is_project_recovery:
+                    logger.warning(error_string)
+                else:
+                    logger.debug(error_string)
         return plot_list
 
     def get_dict_from_fig(self, fig):

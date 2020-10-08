@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
 import sys
 
 from mantid.kernel import mpisetup
@@ -272,7 +273,13 @@ def get_merge_bundle_for_merge_request(output_bundles, parent_alg):
     merger = merge_factory.create_merger(state)
 
     # Run the merger and return the merged output workspace
-    return merger.merge(reduction_mode_vs_output_bundles, parent_alg)
+    merged = merger.merge(reduction_mode_vs_output_bundles, parent_alg)
+    replace_prop = True
+    if state.save.user_file:
+        merged.merged_workspace.getRun().addProperty("UserFile", os.path.basename(state.save.user_file), replace_prop)
+    if state.save.batch_file:
+        merged.merged_workspace.getRun().addProperty("BatchFile", os.path.basename(state.save.batch_file), replace_prop)
+    return merged
 
 
 def get_reduction_mode_vs_output_bundles(output_bundles):
