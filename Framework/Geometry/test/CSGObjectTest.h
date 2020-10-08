@@ -1005,6 +1005,106 @@ public:
                     TOLERANCE);
   }
 
+  void testTracksForHollowCylinderAngle() {
+    // hollow cylinder at origin with symmetry along y axis
+    // using PAC06 dimensions: 2.95mm radius x 5.68cm height
+    // Beam is hitting surface at 30, 45, and 60 degrees from the y-z axis
+    constexpr double INNER_RADIUS{0.00295};
+    constexpr double OUTER_RADIUS{0.00315};
+    constexpr double HEIGHT{0.0568};
+    constexpr double TOLERANCE{1e-12};
+    V3D BOTTOM_CENTRE{0.0, -0.5 * HEIGHT, 0.0};
+
+    constexpr V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createHollowCylinder(
+        INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    // Test at 45 degrees
+    V3D BEAM_DIRECTION{0.0, sin(45.0 * (M_PI / 180.0)),
+                       cos(45.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    double ANGLE{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    // centre of sample
+    Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    int nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    // Treat pt where beam exits wall as triangle, so same case as
+    // solid cylinder, just with a smaller and shifted triangle
+    double base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    double height = base * tan(ANGLE);
+    double dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test at same angle, but through entire cylinder:
+    Track bottom_right(V3D{0., -0.5 * HEIGHT, -OUTER_RADIUS}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(bottom_right);
+    TS_ASSERT_EQUALS(nsegments, 2);
+
+    // Assuming the origin test above passed, this should technically be twice
+    //  that distance due to symmetry
+    TS_ASSERT_DELTA(bottom_right.totalDistInsideObject(), dist * 2.0,
+                    TOLERANCE);
+
+    // Test at 30 degrees
+    BEAM_DIRECTION =
+        V3D{0.0, sin(30.0 * (M_PI / 180.0)), cos(30.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+    dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test at 60 degrees
+    BEAM_DIRECTION =
+        V3D{0.0, sin(60.0 * (M_PI / 180.0)), cos(60.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+    dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test sample from the top corner
+    BEAM_DIRECTION = V3D{0.0, HEIGHT * 0.5, OUTER_RADIUS};
+    BEAM_DIRECTION.normalize();
+    ANGLE = atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z());
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+    dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test sample from the inner top corner (should miss and be 0)
+    BEAM_DIRECTION = V3D{0.0, HEIGHT * 0.5, INNER_RADIUS};
+    BEAM_DIRECTION.normalize();
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 0);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.0);
+  }
+
   void testTracksForFlatPlate() {
     // Flat plate centered at origin, 5 mm x 5 mm x 2 mm
     // Thin side of plate (2mm) is facing the beam
@@ -1061,6 +1161,66 @@ public:
         Track(V3D{-0.25 * WIDTH, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
     plate->interceptSurface(back_midpoint);
     TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 0.75 * WIDTH);
+  }
+
+  void testTracksForFlatPlateAngle() {
+    // Flat plate centered at origin, 5 mm x 5 mm x 2 mm
+    // Thin side of plate (2mm) is facing the beam
+    constexpr double WIDTH{0.005};  // along x axis
+    constexpr double LENGTH{0.005}; // along y axis
+    constexpr double HEIGHT{0.002}; // along z axis
+    constexpr double TOLERANCE{1e-12};
+
+    V3D BEAM_DIRECTION{0.0, sin(30.0 * (M_PI / 180.0)),
+                       cos(30.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    double ANGLE{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    auto plate = ComponentCreationHelper::createCuboid(
+        0.5 * WIDTH, 0.5 * LENGTH, 0.5 * HEIGHT, 0.0, BEAM_DIRECTION);
+
+    // Test center of plate at 30 degrees
+    Track origin(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    int nsegments = plate->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    double base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    double height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(),
+                    sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
+
+    // Test at 45 degrees
+    BEAM_DIRECTION =
+        V3D{0.0, sin(45.0 * (M_PI / 180.0)), cos(45.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    nsegments = plate->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(),
+                    sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
+
+    // Test at 60 degrees
+    BEAM_DIRECTION =
+        V3D{0.0, sin(60.0 * (M_PI / 180.0)), cos(60.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    nsegments = plate->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(),
+                    sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
   }
 
   void testGeneratePointInsideSphere() {
