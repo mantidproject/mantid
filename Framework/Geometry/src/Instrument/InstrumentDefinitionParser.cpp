@@ -2268,13 +2268,15 @@ void InstrumentDefinitionParser::setLogfile(
         pParamElem->getElementsByTagName("formula");
     size_t numberFormula = pNLFormula->length();
 
-    if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula > 1) {
+    if ((numberValueEle > 0 &&
+         numberLogfileEle + numberLookUp + numberFormula > 0) ||
+        (numberValueEle == 0 &&
+         numberLogfileEle + numberLookUp + numberFormula > 1)) {
       g_log.warning() << "XML element with name or type = " << comp->getName()
-                      << " contains <parameter> element where the value of "
-                         "the parameter has been specified"
-                      << " more than once. See www.mantidproject.org/IDF for "
-                         "how the value"
-                      << " of the parameter is set in this case.";
+                      << " contains <parameter> element where the value of the "
+                      << "parameter has been specified more than once. See "
+                      << "www.mantidproject.org/IDF for how the value of the "
+                      << "parameter is set in this case.";
     }
 
     if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula == 0) {
