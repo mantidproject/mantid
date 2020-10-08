@@ -251,7 +251,6 @@ def pcolormesh(workspaces, fig=None):
     # If there are multiple plots limits are the min and max of all the plots
     colorbar_min = min(pt.norm.vmin for pt in plots)
     colorbar_max = max(pt.norm.vmax for pt in plots)
-    print("MIN MAX ARE", colorbar_min, colorbar_max)
     for pt in plots:
         pt.set_clim(colorbar_min, colorbar_max)
 

@@ -5,6 +5,11 @@ Mantid Workbench Changes
 .. contents:: Table of Contents
    :local:
 
+New Features
+############
+
+- Added a colorbar scale option to the workbench plot settings. This allows the user to choose between a linear (default) or logarithmic scale.
+
 Improvements
 ############
 
