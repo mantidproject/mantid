@@ -134,7 +134,8 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.declareProperty('SampleThickness', 0.1,
                              validator=FloatBoundedValidator(lower=-1),
-                             doc='Sample thickness [cm]')
+                             doc='Sample thickness [cm] (if -1, the value is '
+                             'taken from the nexus file).')
 
         self.setPropertySettings('SampleThickness', sample)
 
