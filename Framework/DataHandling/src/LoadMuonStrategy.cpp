@@ -126,6 +126,7 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(
 
 /**
  * Creates a timezero table for the loaded detectors
+ * @param numSpec :: Numer of spectra (number of rows in table)
  * @param timeZeros :: Vector containing time zero values for each spectra
  * @return TableWorkspace of time zeros
  */

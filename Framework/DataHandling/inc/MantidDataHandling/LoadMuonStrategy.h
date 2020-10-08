@@ -44,6 +44,7 @@ protected:
   createDeadTimeTable(const std::vector<detid_t> &detectorsLoaded,
                       const std::vector<double> &deadTimes) const;
 
+  // Create time zero table
   DataObjects::TableWorkspace_sptr
   createTimeZeroTable(const size_t numSpec,
                       const std::vector<double> &timeZeros) const;

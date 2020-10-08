@@ -175,17 +175,17 @@ Output:
 .. testcode:: ExampleTimeZero
 
     dataX = [0, 1, 2, 3, 4, 5] * 4
-	dataY = [100, 200, 300, 200, 100] * 4
-	input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
-	
-	# Create a time zero table
-	time_zero_table = CreateEmptyTableWorkspace()
-	time_zero_table.addColumn("double", "time zero")
-	[time_zero_table.addRow([i+2]) for i in range(4)]
-	
-	output_workspace = MuonPreProcess(InputWorkspace=input_workspace, 
-	                                  TimeZeroTable=time_zero_table)
-	print("X values are : {}".format(output_workspace[0].readX(0)))
+    dataY = [100, 200, 300, 200, 100] * 4
+    input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
+    
+    # Create a time zero table
+    time_zero_table = CreateEmptyTableWorkspace()
+    time_zero_table.addColumn("double", "time zero")
+    [time_zero_table.addRow([i+2]) for i in range(4)]
+    
+    output_workspace = MuonPreProcess(InputWorkspace=input_workspace, 
+                                      TimeZeroTable=time_zero_table)
+    print("X values are : {}".format(output_workspace[0].readX(0)))
     print("Y values are : {}".format(output_workspace[0].readY(0)))						  
 	
 Output:
