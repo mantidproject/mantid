@@ -472,7 +472,8 @@ QString ProjectionSurface::getInfoText() const {
     return "Click on a detector then click on the mini-plot to add a peak.";
   case DrawRegularMode:
     return "Select a tool button to draw a new shape. "
-           "Click on shapes to select. Click and move to edit.";
+           "Click on shapes to select. Click and move to edit. Press Ctrl+C "
+           "/ Ctrl+V to copy/paste";
   case DrawFreeMode:
     return "Draw by holding the left button down. "
            "Erase with the right button.";
