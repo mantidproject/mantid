@@ -24,7 +24,7 @@ class SamplingImage(mimage.AxesImage):
                  filternorm=1,
                  filterrad=4.0,
                  resample=False,
-                 normalization=None,
+                 normalize_by_bin_width=None,
                  **kwargs):
         super().__init__(ax,
                          cmap=cmap,
@@ -42,10 +42,12 @@ class SamplingImage(mimage.AxesImage):
         except Exception:
             self.spectrum_info = None
         self.transpose = transpose
-        self.normalization = normalization
+        self.normalize_by_bin_width = normalize_by_bin_width
         self._resize_cid, self._xlim_cid, self._ylim_cid = None, None, None
         self._resample_required = True
         self._full_extent = extent
+        self.orig_shape = (workspace.getDimension(0).getNBins(),
+                           workspace.getDimension(1).getNBins())
         self._xbins, self._ybins = 100, 100
         self.origin = origin
 
@@ -100,8 +102,14 @@ class SamplingImage(mimage.AxesImage):
             if xbins is None or ybins is None:
                 xbins, ybins = self._calculate_bins_from_extent()
 
-            x, y, data = get_matrix_2d_ragged(self.ws, self.normalization, histogram2D=True, transpose=self.transpose,
-                                              extent=extent, xbins=xbins, ybins=ybins, spec_info=self.spectrum_info)
+            x, y, data = get_matrix_2d_ragged(self.ws,
+                                              self.normalize_by_bin_width,
+                                              histogram2D=True,
+                                              transpose=self.transpose,
+                                              extent=extent,
+                                              xbins=xbins,
+                                              ybins=ybins,
+                                              spec_info=self.spectrum_info)
 
             # Data is an MxN matrix.
             # If origin = upper extent is set as [xmin, xmax, ymax, ymin].
@@ -134,19 +142,13 @@ class SamplingImage(mimage.AxesImage):
 def imshow_sampling(axes,
                     workspace,
                     cmap=None,
-                    norm=None,
-                    aspect=None,
-                    interpolation=None,
                     alpha=None,
                     vmin=None,
                     vmax=None,
-                    origin=None,
-                    extent=None,
                     shape=None,
                     filternorm=1,
                     filterrad=4.0,
                     imlim=None,
-                    resample=None,
                     url=None,
                     **kwargs):
     """Copy of imshow but replaced AxesImage with SamplingImage and added
@@ -161,13 +163,20 @@ def imshow_sampling(axes,
     im = imshow_sampling(ax, workspace, aspect='auto', origin='lower')
     fig.show()
     """
+    normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
     transpose = kwargs.pop('transpose', False)
-    normalization, _ = get_normalize_by_bin_width(workspace, axes, **kwargs)
+    extent = kwargs.pop('extent', None)
+    interpolation = kwargs.pop('interpolation', None)
+    origin = kwargs.pop('origin', None)
+    norm = kwargs.pop('norm', None)
+    resample = kwargs.pop('resample', False)
     kwargs.pop('distribution', None)
 
     if not extent:
-        x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
-                          workspace.getDimension(1).getMinimum(), workspace.getDimension(1).getMaximum())
+        x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(),
+                          workspace.getDimension(0).getMaximum(),
+                          workspace.getDimension(1).getMinimum(),
+                          workspace.getDimension(1).getMaximum())
         if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
             width = workspace.getDimension(1).getBinWidth()
             y0 -= width / 2
@@ -183,9 +192,10 @@ def imshow_sampling(axes,
     # from matplotlib.axes.Axes.imshow
     if norm is not None and not isinstance(norm, matplotlib.colors.Normalize):
         raise ValueError("'norm' must be an instance of 'mcolors.Normalize'")
-    if aspect is None:
-        aspect = matplotlib.rcParams['image.aspect']
+
+    aspect = kwargs.pop('aspect', matplotlib.rcParams['image.aspect'])
     axes.set_aspect(aspect)
+
     im = SamplingImage(axes,
                        workspace,
                        transpose,
@@ -197,7 +207,7 @@ def imshow_sampling(axes,
                        filternorm=filternorm,
                        filterrad=filterrad,
                        resample=resample,
-                       normalization=normalization,
+                       normalize_by_bin_width=normalize_by_bin_width,
                        **kwargs)
     im._resample_image(100, 100)
 

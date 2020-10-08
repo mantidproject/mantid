@@ -10,6 +10,7 @@
 
 import json
 import copy
+from typing import List
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
@@ -84,39 +85,39 @@ class StateMaskDetectors(metaclass=JsonSerializable):
     def __init__(self):
         super(StateMaskDetectors, self).__init__()
         # Vertical strip masks
-        self.single_vertical_strip_mask = None  # : List[Int] (Positive)
-        self.range_vertical_strip_start = None  # : List[Int] (Positive)
-        self.range_vertical_strip_stop = None  # : List[Int] (Positive)
+        self.single_vertical_strip_mask: List[int] = []
+        self.range_vertical_strip_start: List[int] = []
+        self.range_vertical_strip_stop: List[int] = []
 
         # Horizontal strip masks
-        self.single_horizontal_strip_mask = None  # : List[Int] (Positive)
-        self.range_horizontal_strip_start = None  # : List[Int] (Positive)
-        self.range_horizontal_strip_stop = None  # : List[Int] (Positive)
+        self.single_horizontal_strip_mask: List[int] = []
+        self.range_horizontal_strip_start: List[int] = []
+        self.range_horizontal_strip_stop: List[int] = []
 
         # Spectrum Block
-        self.block_horizontal_start = None  # : List[Int] (Positive)
-        self.block_horizontal_stop = None  # : List[Int] (Positive)
-        self.block_vertical_start = None  # : List[Int] (Positive)
-        self.block_vertical_stop = None  # : List[Int] (Positive)
+        self.block_horizontal_start: List[int] = []
+        self.block_horizontal_stop: List[int] = []
+        self.block_vertical_start: List[int] = []
+        self.block_vertical_stop: List[int] = []
 
         # Spectrum block cross
-        self.block_cross_horizontal = None  # : List[Int] (Positive)
-        self.block_cross_vertical = None  # : List[Int] (Positive)
+        self.block_cross_horizontal: List[int] = []
+        self.block_cross_vertical: List[int] = []
 
         # Time/Bin mask
-        self.bin_mask_start = None  # : List[Float]
-        self.bin_mask_stop = None  # : List[Float]
+        self.bin_mask_start: List[float] = []
+        self.bin_mask_stop: List[float] = []
 
         # Name of the detector
         self.detector_name = None  # : Str()
         self.detector_name_short = None  # : Str()
 
         # Single Spectra
-        self.single_spectra = None  # : List[Int] (Positive)
+        self.single_spectra: List[int] = []
 
         # Spectrum Range
-        self.spectrum_range_start = None  # : List[Int] (Positive)
-        self.spectrum_range_stop = None  # : List[Int] (Positive)
+        self.spectrum_range_start: List[int] = []
+        self.spectrum_range_stop: List[int] = []
 
     def validate(self):
         is_invalid = {}
@@ -176,11 +177,11 @@ class StateMask(metaclass=JsonSerializable):
         self.radius_max = None  # : Float
 
         # Bin mask
-        self.bin_mask_general_start = None  # : List[Float]
-        self.bin_mask_general_stop = None  # : List[Float]
+        self.bin_mask_general_start: List[float] = []
+        self.bin_mask_general_stop: List[float] = []
 
         # Mask files
-        self.mask_files = None  # : List[Str]
+        self.mask_files: List[str] = []
 
         # Angle masking
         self.phi_min = -90.0
@@ -188,10 +189,10 @@ class StateMask(metaclass=JsonSerializable):
         self.use_mask_phi_mirror = True
 
         # Beam stop
-        self.beam_stop_arm_width = None  # : Float (Positive)
-        self.beam_stop_arm_angle = None  # : Float
-        self.beam_stop_arm_pos1 = None  # : Float
-        self.beam_stop_arm_pos2 = None  # : Float
+        self.beam_stop_arm_width: float = 0.0
+        self.beam_stop_arm_angle: float = 0.0
+        self.beam_stop_arm_pos1: float = 0.0
+        self.beam_stop_arm_pos2: float = 0.0
 
         # Clear commands
         self.clear = None  # : Bool
@@ -210,8 +211,8 @@ class StateMask(metaclass=JsonSerializable):
         # Radius Mask
         # --------------------
         # Radius mask rule: the min radius must be less or equal to the max radius
-        if self.radius_max is not None and self.radius_min is not None and\
-           self.radius_max != -1 and self.radius_min != -1:  # noqa
+        if self.radius_max is not None and self.radius_min is not None and \
+                self.radius_max != -1 and self.radius_min != -1:  # noqa
             if self.radius_min > 0 and self.radius_max > 0 and (self.radius_min > self.radius_max):
                 entry = validation_message("Incorrect radius bounds.",
                                            "Makes sure that the lower radius bound is smaller than the"
@@ -290,15 +291,28 @@ class StateMaskZOOM(StateMask):
         super(StateMaskZOOM, self).validate()
 
 
+class StateMaskNoInst(StateMask):
+    def __init__(self):
+        super(StateMaskNoInst, self).__init__()
+        # Setup the detectors
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(),
+                          DetectorType.HAB.value: StateMaskDetectors()}
+
+    def validate(self):
+        pass
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
+
+
 def setup_idf_and_ipf_content(move_info, data_info):
     # Get the IDF and IPF path since they contain most of the import information
     idf_file_path = data_info.idf_file_path
     ipf_file_path = data_info.ipf_file_path
     # Set the detector names
-    set_detector_names(move_info, ipf_file_path)
+    if ipf_file_path:
+        set_detector_names(move_info, ipf_file_path)
     # Set the idf path
     move_info.idf_path = idf_file_path
 
@@ -309,7 +323,8 @@ class StateMaskBuilder(object):
         super(StateMaskBuilder, self).__init__()
         self._data = data_info
         self.state = state
-        setup_idf_and_ipf_content(self.state, data_info)
+        if data_info.instrument is not SANSInstrument.NO_INSTRUMENT:
+            setup_idf_and_ipf_content(self.state, data_info)
 
     def set_single_spectra_on_detector(self, single_spectra):
         """
@@ -360,7 +375,6 @@ class StateMaskBuilder(object):
                     self.state.detectors[detector_bank_start.value].spectrum_range_stop = [stop]
 
     def build(self):
-        self.state.validate()
         return copy.copy(self.state)
 
 
@@ -377,6 +391,8 @@ def get_mask_builder(data_info):
         return StateMaskBuilder(data_info, StateMaskLARMOR())
     elif instrument is SANSInstrument.ZOOM:
         return StateMaskBuilder(data_info, StateMaskZOOM())
+    elif instrument is SANSInstrument.NO_INSTRUMENT:
+        return StateMaskBuilder(data_info, StateMaskNoInst())
     else:
         raise NotImplementedError("StateMaskBuilder: Could not find any valid mask builder for the "
-                                  "specified StateData object {0}".format(str(data_info)))
+                                  "specified StateData object {0}".format(str(instrument)))

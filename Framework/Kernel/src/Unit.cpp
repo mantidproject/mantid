@@ -1216,6 +1216,9 @@ double Degrees::conversionTOFMin() const {
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
 
+// Phi
+DECLARE_UNIT(Phi)
+
 // ================================================================================
 /* Temperature in kelvin
  * ================================================================================

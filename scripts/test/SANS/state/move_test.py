@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 
 from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType, SANSInstrument)
 from sans.state.StateObjects.StateData import get_data_builder
@@ -121,7 +122,6 @@ class StateMoveWorkspaceZOOMTest(unittest.TestCase):
 # ----------------------------------------------------------------------------------------------------------------------
 class StateMoveBuilderTest(unittest.TestCase):
     def test_that_state_for_loq_can_be_built(self):
-        # Arrange
         facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
         data_builder = get_data_builder(facility, file_information)
@@ -168,6 +168,17 @@ class StateMoveBuilderTest(unittest.TestCase):
         self.assertEqual(state.detectors[DetectorType.LAB.value].detector_name,  "rear-detector")
         self.assertEqual(state.monitor_names[str(4)],  "monitor4")
         self.assertEqual(len(state.monitor_names),  4)
+
+    def test_state_with_no_file_info_can_be_built(self):
+        data_info = mock.NonCallableMock()
+        data_info.instrument = SANSInstrument.LARMOR
+        data_info.idf_file_path = None
+        data_info.ipf_file_path = None
+        # This will happen if the user has not selected a run number
+        data_info.sample_scatter_run_number = None
+
+        builder = get_move_builder(data_info)
+        self.assertEqual(1., builder.conversion_value)
 
     def test_that_state_for_larmor_can_be_built(self):
         # Arrange

@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/Load.h"
@@ -16,6 +17,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid::API;
@@ -58,6 +60,28 @@ public:
     LoadILLDiffraction alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+  }
+
+  void test_D20_transposed_2theta() {
+    // Tests the axis conversion and transposition
+    // for non-detector scan D20 data from cycle 203
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "170607.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertAxisAndTranspose", true))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 3072)
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "Degrees")
   }
 
   void test_D20_no_scan() {

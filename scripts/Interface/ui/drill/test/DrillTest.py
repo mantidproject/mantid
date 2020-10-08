@@ -148,10 +148,22 @@ class DrillTest(unittest.TestCase):
                 'Interface.ui.drill.model.DrillModel.DrillParameterController')
         self.mController = patch.start()
         self.addCleanup(patch.stop)
+        # mock logger
+        patch = mock.patch(
+                'Interface.ui.drill.model.DrillModel.logger')
+        self.mLogger = patch.start()
+        self.addCleanup(patch.stop)
 
         self.view = DrillView()
         self.presenter = self.view._presenter
         self.model = self.presenter.model
+
+        # mock popup
+        self.view._saveDataQuestion = mock.Mock()
+
+        # shown window
+        self.view.isHidden = mock.Mock()
+        self.view.isHidden.return_value = False
 
     def tearDown(self):
         config['default.facility'] = self.facility
@@ -165,25 +177,19 @@ class DrillTest(unittest.TestCase):
             mColumns = self.model.columns
             mAlgorithm = self.model.algorithm
             mSettings = self.model.settings
-            if mInstrument is None:
-                # if instrument is not supported
-                self.assertIsNone(mInstrument)
-                self.assertIsNone(mAcquisitionMode)
-                self.assertEqual(mColumns, [])
-                self.assertIsNone(mAlgorithm)
-                self.assertEqual(mSettings, {})
-                continue
-
-            self.assertEqual(mInstrument,
-                             self.view.instrumentselector.currentText())
-            self.assertEqual(mAcquisitionMode,
-                             RundexSettings.ACQUISITION_MODES[mInstrument][0])
-            self.assertEqual(mColumns,
-                             RundexSettings.COLUMNS[mAcquisitionMode])
-            self.assertEqual(mAlgorithm,
-                             RundexSettings.ALGORITHM[mAcquisitionMode])
-            self.assertDictEqual(mSettings,
-                                 RundexSettings.SETTINGS[mAcquisitionMode])
+            if not self.mLogger.error.mock_calls:
+                self.assertEqual(mInstrument,
+                                 self.view.instrumentselector.currentText())
+                self.assertEqual(mAcquisitionMode,
+                                 RundexSettings.ACQUISITION_MODES[mInstrument][0])
+                self.assertEqual(mColumns,
+                                 RundexSettings.COLUMNS[mAcquisitionMode])
+                self.assertEqual(mAlgorithm,
+                                 RundexSettings.ALGORITHM[mAcquisitionMode])
+                self.assertDictEqual(mSettings,
+                                     RundexSettings.SETTINGS[mAcquisitionMode])
+            else:
+                self.mLogger.reset_mock()
 
     def test_changeAcquisitionMode(self):
         # D17 has two acquisition modes

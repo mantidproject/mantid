@@ -54,6 +54,6 @@ class SettingsViewTest(unittest.TestCase, QtWidgetFinder):
 
             widget.view.close()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()

@@ -169,6 +169,7 @@ signals:
   void modificationChanged(bool m);
   void textZoomedIn();
   void textZoomedOut();
+  void progressMade(const int);
 
 private:
   ScriptEditor(const ScriptEditor&);
@@ -384,6 +385,7 @@ signals:
   void sliceViewerClicked(const QStringList &workspaceNames);
   void showInstrumentClicked(const QStringList &workspaceNames);
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
+  void plotMDHistoClicked(const QStringList &workspaceNames);
 };
 
 class AlgorithmHistoryWindow : public QDialog {
@@ -480,6 +482,7 @@ public:
     void addFitResultWorkspacesToTableWidget();
     void setWorkspaceName(const QString &wsName);
     void postDeleteHandle(const std::string &wsName);
+    void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
 
     SIP_PYOBJECT defaultPeakType();

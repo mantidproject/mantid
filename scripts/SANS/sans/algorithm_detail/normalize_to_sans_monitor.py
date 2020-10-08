@@ -155,7 +155,7 @@ def _convert_to_wavelength(workspace, normalize_to_monitor_state):
     wavelength_low = normalize_to_monitor_state.wavelength_low[0]
     wavelength_high = normalize_to_monitor_state.wavelength_high[0]
     wavelength_step = normalize_to_monitor_state.wavelength_step
-    wavelength_step_type = normalize_to_monitor_state.wavelength_step_type
+    wavelength_step_type = normalize_to_monitor_state.wavelength_step_type_lin_log
     wavelength_rebin_mode = normalize_to_monitor_state.rebin_type
     convert_name = "SANSConvertToWavelengthAndRebin"
     convert_options = {"InputWorkspace": workspace,

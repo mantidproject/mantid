@@ -164,6 +164,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_plot);
+  collapsePlotPanel();
 
   m_selectionType = Single;
 
@@ -273,7 +274,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_peakSelect, 1, 3);
   toolBox->addWidget(m_peakCompare, 1, 4);
   toolBox->addWidget(m_peakAlign, 1, 5);
-  toolBox->setColumnStretch(6, 1);
+  toolBox->setColumnStretch(8, 1);
   toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -294,6 +295,16 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   layout->addWidget(m_activeTool);
   layout->addLayout(toolBox);
   layout->addWidget(panelStack);
+}
+
+/**
+ * If the workspace is monochromatic, the plot panel is useless and should be
+ * collapsed
+ */
+void InstrumentWidgetPickTab::collapsePlotPanel() {
+  if (!m_instrWidget->isIntegrable()) {
+    m_plotPanel->collapseCaption();
+  }
 }
 
 /**

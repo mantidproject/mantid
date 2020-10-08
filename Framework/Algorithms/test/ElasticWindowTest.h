@@ -193,6 +193,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "__ElasticWindowTest_outputQsq");
     verifyQ2workspace(q2Ws);
+    TS_ASSERT(q2Ws->YUnitLabel() == "ln(" + qWs->YUnitLabel() + ")");
   }
 
 private:

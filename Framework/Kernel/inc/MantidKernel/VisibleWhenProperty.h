@@ -9,6 +9,8 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/System.h"
 
+#include <stdexcept>
+
 namespace Mantid {
 namespace Kernel {
 

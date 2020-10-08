@@ -145,6 +145,6 @@ private:
     auto threadPool = QThreadPool::globalInstance();
     threadPool->start(worker);
     threadPool->waitForDone();
-    QCoreApplication::processEvents();
+    QCoreApplication::sendPostedEvents();
   }
 };

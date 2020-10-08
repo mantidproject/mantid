@@ -728,6 +728,11 @@ class SANSFileInformation(metaclass=ABCMeta):
 
         self._run_number = self._init_run_number()
 
+    def __eq__(self, other):
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
     @abstractmethod
     def get_file_name(self):
         pass

@@ -677,11 +677,11 @@ class FittingTabModel(object):
         workspace_names = []
         for run in runs:
             for group_or_pair in groups_and_pairs:
-                period_string = run_list_to_string(self.context.group_pair_context[group_or_pair].periods)
                 if group_or_pair in self.context.group_pair_context.selected_pairs:
-                    workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run, period_string,
+                    workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run,
                                                                 not self.fitting_options["fit_to_raw"])]
-                else:
+                elif group_or_pair in self.context.group_pair_context.selected_groups:
+                    period_string = run_list_to_string(self.context.group_pair_context[group_or_pair].periods)
                     workspace_names += [get_group_asymmetry_name(self.context, group_or_pair, run, period_string,
                                                                  not self.fitting_options["fit_to_raw"])]
 
@@ -711,6 +711,8 @@ class FittingTabModel(object):
 
     @staticmethod
     def get_fit_function_parameter_values(fit_function):
+        if fit_function is None:
+            return []
         number_of_parameters = fit_function.nParams()
         parameters = [fit_function.parameterName(i) for i in range(number_of_parameters)]
         parameter_values = [fit_function.getParameterValue(parameters[i]) for i in

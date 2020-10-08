@@ -340,12 +340,6 @@ class DrillViewTest(unittest.TestCase):
         self.view.show_directory_manager()
         self.mUserDir.ManageUserDirectories.assert_called_once()
 
-    def test_setAvailableInstruments(self):
-        self.view.instrumentselector = mock.Mock()
-        self.view.set_available_instruments("test")
-        self.view.instrumentselector.setTechniques.assert_called_once_with(
-                "test")
-
     def test_setAvailableModes(self):
         self.view.modeSelector = mock.Mock()
         self.view.set_available_modes(["test", "test"])

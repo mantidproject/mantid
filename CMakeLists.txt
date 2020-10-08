@@ -244,7 +244,7 @@ add_subdirectory(scripts)
 # Docs requirements
 option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
 if (ENABLE_DOCS)
-  find_package(Sphinx 1.2)
+  find_package(Sphinx)
   if(SPHINX_FOUND)
     # run python to see if the theme is installed
     execute_process(COMMAND ${Python_EXECUTABLE} -c
@@ -291,8 +291,10 @@ endif()
 
 # Installation settings
 
-# N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+if(ENABLE_MANTIDPLOT)
+  # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
+  install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+endif()
 
 # Install the files (.desktop and icon) to create a menu items
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
