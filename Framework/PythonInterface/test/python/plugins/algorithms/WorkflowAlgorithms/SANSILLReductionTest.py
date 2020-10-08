@@ -71,7 +71,8 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['sens'], 'Sensitivity')
 
     def test_sample(self):
-        SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
+        SANSILLReduction(Run='010569', ProcessAs='Sample', SampleThickness=-1,
+                         OutputWorkspace='sample')
         self._check_output(mtd['sample'], True, 1, 128*128+2)
         self._check_process_flag(mtd['sample'], 'Sample')
 
