@@ -411,8 +411,8 @@ def plotMD(source, plot_axis=-2, normalization=DEFAULT_MD_NORMALIZATION, error_b
     __checkPlotMDWorkspaces(workspace_names)
 
     for name in workspace_names:
-        non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
-        if not len(non_integrated_dims) == 1:
+        non_integrated_dims = mantid.api.mtd[name].getNumNonIntegratedDims()
+        if not non_integrated_dims == 1:
             raise ValueError(
                 "'%s' must have a single non-integrated dimension in order to be rendered via plotMD" % name)
 

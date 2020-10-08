@@ -43,6 +43,7 @@ SliceViewer and Vates Simple Interface
 
 Improvements
 ############
+- Member function: MDGeometry::getNumNonIntegratedDims() returns the number of non-integrated dimensions present.
 
 Bugfixes
 ########
