@@ -17,12 +17,15 @@ import numpy as np
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
-                                       create_subplots, raise_if_not_sequence
+                                       create_subplots, raise_if_not_sequence, plot_md_histo_ws
+
 from mantid.kernel import Logger, ConfigService
 from mantid.plots.datafunctions import add_colorbar_label
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
+from mantid.api import IMDHistoWorkspace
+
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -75,6 +78,31 @@ def current_figure_or_none():
         return None
 
 
+def plot_md_ws_from_names(names, errors, overplot, fig=None):
+    """
+    Given a list of names of 1-dimensional IMDHistoWorkspaces and plot
+
+    :param names: A list of workspaces names
+    :param errors: If true then error bars will be plotted on the points
+    :param overplot: If true then the add to the current figure if one
+                     exists and it is a compatible figure
+    :param fig: If not None then use this figure object to plot
+    :return: The figure containing the plot or None if selection was cancelled
+    """
+    # Get workspaces
+    workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
+
+    # Check input workspace type
+    for ws in workspaces:
+        if not isinstance(ws, IMDHistoWorkspace):
+            raise RuntimeError(f'Workspace {str(ws)} is {type(ws)} but not an IMDHistoWorkspace')
+
+    # Plot for various cases
+    if len(workspaces) > 0:
+        return plot_md_histo_ws(workspaces, errors=errors, overplot=overplot, fig=fig,
+                                ax_properties=None, window_title=None)
+
+
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False):
     """
     Given a list of names of workspaces, raise a dialog asking for the
@@ -88,8 +116,11 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     :param advanced: If true then the advanced options will be shown in the spectra selector dialog.
     :return: The figure containing the plot or None if selection was cancelled
     """
+    # Get workspaces from ADS with names
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
+
     try:
+        # Get selected spectra from all MatrixWorkspaces
         selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot,
                                           advanced=advanced)
     except Exception as exc:
@@ -99,6 +130,7 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     if selection is None:
         return None
     elif selection == 'colorfill':
+        # plot mesh for color fill
         return pcolormesh_from_names(names)
 
     log_values = None
