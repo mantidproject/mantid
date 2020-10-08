@@ -17,6 +17,7 @@ from numpy import full, nan
 
 class FittingDataModel(object):
     def __init__(self):
+        self._log_names = []
         self._log_workspaces = None
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
@@ -42,7 +43,6 @@ class FittingDataModel(object):
                         if ws_name not in self._background_workspaces:
                             self._background_workspaces[ws_name] = None
                         self._last_added.append(ws_name)
-                        self.add_log_to_table(ws_name, ws)
                     else:
                         logger.warning(
                             f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
@@ -51,51 +51,74 @@ class FittingDataModel(object):
                         f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
             else:
                 logger.warning(f"File {ws_name} has already been loaded")
+        self.update_log_workspace_group()
 
-    def create_log_table(self):
+    def create_log_workspace_group(self):
         # run information table
+        run_info = self.make_runinfo_table()
+        self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs')
+        # a table per logs
+        logs = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, "logs")
+        if logs:
+            self._log_names = logs.split(',')
+            for log in self._log_names:
+                self.make_log_table(log)
+                self._log_workspaces.add(log)
+
+    def make_log_table(self, log):
+        ws_log = CreateEmptyTableWorkspace(OutputWorkspace=log)
+        ws_log.addColumn(type="float", name="avg")
+        ws_log.addColumn(type="float", name="stdev")
+        return ws_log
+
+    def make_runinfo_table(self):
         run_info = CreateEmptyTableWorkspace()
         run_info.addColumn(type="str", name="Instrument")
         run_info.addColumn(type="int", name="Run")
         run_info.addColumn(type="int", name="Bank")
         run_info.addColumn(type="float", name="uAmps")
         run_info.addColumn(type="str", name="Title")
-        self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs')
-        # a table per logs
-        logs = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, "logs")
-        if logs:
-            for log in logs.split(','):
-                ws = CreateEmptyTableWorkspace(OutputWorkspace=log)
-                ws.addColumn(type="float", name="avg")
-                ws.addColumn(type="float", name="stdev")
-                self._log_workspaces.add(log)
+        return run_info
 
-    def add_log_to_table(self, ws_name, ws):
+    def update_log_workspace_group(self):
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
         if not self._log_workspaces:
-            self.create_log_table()
+            self.create_log_workspace_group()
+        else:
+            for log in self._log_names:
+                if not ADS.doesExist(log):
+                    self.make_log_table(log)
+                    self._log_workspaces.add(log)
+            if not ADS.doesExist("run_info"):
+                self.make_runinfo_table()
+                self._log_workspaces.add("run_info")
+        # update log tables
+        for irow, (ws_name, ws) in enumerate(self._loaded_workspaces.items()):
+            self.add_log_to_table(ws_name, ws, irow)  # rename write_log_row
+
+    def add_log_to_table(self, ws_name, ws, irow):
+        # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
         # make dict for run if doesn't exist
         if ws_name not in self._log_values:
             self._log_values[ws_name] = dict()
         # add run info
         run = ws.getRun()
-        self._log_workspaces[0].addRow(
-            [ws.getInstrument().getFullName(), ws.getRunNumber(), run.getProperty('bankid').value,
-             run.getProtonCharge(), ws.getTitle()])
+        row = [ws.getInstrument().getFullName(), ws.getRunNumber(), run.getProperty('bankid').value,
+               run.getProtonCharge(), ws.getTitle()]
+        self.write_table_row(ADS.retrieve("run_info"), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
-        for ilog in range(1, len(self._log_workspaces)):
-            log_name = self._log_workspaces[ilog].name()
-            if log_name in self._log_values[ws_name]:
-                avg, stdev = self._log_values[ws_name][log_name]
+        for log in self._log_names:
+            if log in self._log_values[ws_name]:
+                avg, stdev = self._log_values[ws_name][log]
             else:
                 try:
-                    avg, stdev = AverageLogData(ws_name, LogName=log_name, FixZero=False)
-                    self._log_values[ws_name][log_name] = [avg, stdev]
+                    avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
+                    self._log_values[ws_name][log] = [avg, stdev]
                 except RuntimeError:
                     avg, stdev = full(2, nan)
                     logger.error(
-                        f"File {ws.name()} does not contain log {self._log_workspaces[ilog].name()}")
-            self._log_workspaces[ilog].addRow([avg, stdev])
+                        f"File {ws.name()} does not contain log {log}")
+            self.write_table_row(ADS.retrieve(log), [avg, stdev], irow)
         self.update_log_group_name()
 
     def remove_log_rows(self, row_numbers):
@@ -107,11 +130,6 @@ class FittingDataModel(object):
             ws_name = self._log_workspaces.name()
             self._log_workspaces = None
             DeleteWorkspace(ws_name)
-
-    def repopulate_logs(self):
-        self.clear_logs()
-        for ws_name, ws in self._loaded_workspaces.items():
-            self.add_log_to_table(ws_name, ws)
 
     def update_log_group_name(self):
         run_info = ADS.retrieve('run_info')
@@ -191,6 +209,12 @@ class FittingDataModel(object):
 
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
+
+    @staticmethod
+    def write_table_row(ws_table, row, irow):
+        if irow > ws_table.rowCount() - 1:
+            ws_table.setRowCount(irow + 1)
+        [ws_table.setCell(irow, icol, row[icol]) for icol in range(0, len(row))]
 
     @staticmethod
     def _generate_workspace_name(filepath, xunit):
