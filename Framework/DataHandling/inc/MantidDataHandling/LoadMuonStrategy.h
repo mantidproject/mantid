@@ -31,8 +31,8 @@ public:
   virtual API::Workspace_sptr loadDetectorGrouping() const = 0;
   // Load dead time table
   virtual API::Workspace_sptr loadDeadTimeTable() const = 0;
-  // Set time zero table
-  virtual API::Workspace_sptr setTimeZeroTable() const = 0;
+  // Get time zero table
+  virtual API::Workspace_sptr getTimeZeroTable() = 0;
 
 protected:
   // Create grouping table

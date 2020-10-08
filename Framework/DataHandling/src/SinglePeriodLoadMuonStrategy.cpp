@@ -94,13 +94,12 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
   return createDeadTimeTable(m_detectors, deadTimes);
 }
 /**
- * Sets time zero table from loaded time zeros
+ * Gets time zero table from loaded time zeros
  * @returns :: Time zero table
  */
-Workspace_sptr SinglePeriodLoadMuonStrategy::setTimeZeroTable() const {
-  const double timeZero = m_nexusLoader.loadTimeZeroFromNexusFile();
+Workspace_sptr SinglePeriodLoadMuonStrategy::getTimeZeroTable() {
   const auto numSpec = m_workspace.getNumberHistograms();
-  std::vector<double> timeZeros(numSpec, timeZero);
+  auto timeZeros = m_nexusLoader.loadTimeZeroListFromNexusFile(numSpec);
   return createTimeZeroTable(numSpec, timeZeros);
 }
 /**
