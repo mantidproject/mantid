@@ -648,6 +648,8 @@ class DrillView(QMainWindow):
         self.table.setHorizontalHeaderLabels(columns)
         if tooltips:
             self.table.setColumnHeaderToolTips(tooltips)
+        for i in range(len(columns)):
+            self.table.setColumnHidden(i, False)
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
 
