@@ -560,6 +560,8 @@ class SANSILLReduction(PythonAlgorithm):
             try:
                 run = mtd[ws].getRun()
                 thickness = run.getLogData('sample.thickness').value
+                self.log().information("Sample thickness read from the sample "
+                                       "logs: {0} cm.".format(thickness))
             except:
                 thickness = self.getProperty("SampleThickness").getDefault
                 thickness = float(thickness)
