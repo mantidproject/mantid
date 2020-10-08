@@ -23,6 +23,8 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTypes/Core/DateAndTime.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -2185,7 +2187,7 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
  */
 void InstrumentDefinitionParser::setLogfile(
     const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
-    InstrumentParameterCache &logfileCache) {
+    InstrumentParameterCache &logfileCache, std::string requestedDate) {
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
   // The purpose below is to have a quicker way to judge if pElem contains a
@@ -2230,8 +2232,19 @@ void InstrumentDefinitionParser::setLogfile(
       continue;
     }
 
+    DateAndTime validityDate;
+
+    if (requestedDate.empty()) {
+      validityDate = DateAndTime::getCurrentTime();
+    } else {
+      validityDate.setFromISO8601(requestedDate);
+    }
+
     std::string logfileID;
     std::string value;
+
+    DateAndTime validFrom;
+    DateAndTime validTo;
 
     std::string type = "double";               // default
     std::string extractSingleValueAs = "mean"; // default
@@ -2272,18 +2285,51 @@ void InstrumentDefinitionParser::setLogfile(
       continue;
     }
 
-    // if more than one <value> specified for a parameter use only the first
-    // <value> element
+    DateAndTime currentValidFrom;
+    DateAndTime currentValidTo;
+    currentValidFrom.setToMinimum();
+    currentValidTo.setToMaximum();
+
+    // if more than one <value> specified for a parameter, check the validity
+    // range
     if (numberValueEle >= 1) {
-      pValueElem = static_cast<Element *>(pNLvalue->item(0));
-      if (!pValueElem->hasAttribute("val"))
+      bool hasValue = false;
+
+      for (size_t i = 0; i < numberValueEle; i++) {
+        pValueElem = static_cast<Element *>(pNLvalue->item(i));
+
+        if (!pValueElem->hasAttribute(("val")))
+          continue;
+        hasValue = true;
+
+        validFrom.setToMinimum();
+        if (pValueElem->hasAttribute("valid-from"))
+          validFrom.setFromISO8601(pValueElem->getAttribute("valid-from"));
+
+        validTo.setToMaximum();
+        if (pValueElem->hasAttribute("valid-to"))
+          validTo.setFromISO8601(pValueElem->getAttribute("valid-to"));
+
+        if (validFrom <= validityDate && validityDate <= validTo &&
+            (validFrom > currentValidFrom ||
+             (validFrom == currentValidFrom && validTo < currentValidTo))) {
+
+          currentValidFrom = validFrom;
+          currentValidTo = validTo;
+        } else
+          continue;
+
+        value = pValueElem->getAttribute("val");
+      }
+
+      if (!hasValue) {
         throw Kernel::Exception::InstrumentDefinitionError(
             "XML element with name or type = " + comp->getName() +
                 " contains <parameter> element with invalid syntax for its "
-                "subelement <value>." +
-                " Correct syntax is <value val=\"\"/>",
+                "subelement <value>. Correct syntax is <value val=\"\"/>",
             filename);
-      value = pValueElem->getAttribute("val");
+      }
+
     } else if (numberLogfileEle >= 1) {
       // <logfile > tag was used at least once.
       pLogfileElem = static_cast<Element *>(pNLlogfile->item(0));
@@ -2483,7 +2529,8 @@ void InstrumentDefinitionParser::setLogfile(
  */
 void InstrumentDefinitionParser::setComponentLinks(
     std::shared_ptr<Geometry::Instrument> &instrument,
-    Poco::XML::Element *pRootElem, Kernel::ProgressBase *progress) {
+    Poco::XML::Element *pRootElem, Kernel::ProgressBase *progress,
+    std::string requestedDate) {
   // check if any logfile cache units set. As of this writing the only unit to
   // check is if "angle=radian"
   std::map<std::string, std::string> &units = instrument->getLogfileUnit();
@@ -2576,9 +2623,10 @@ void InstrumentDefinitionParser::setComponentLinks(
           // Not empty Component
           if (sharedComp->isParametrized()) {
             setLogfile(sharedComp->base(), curElem,
-                       instrument->getLogfileCache());
+                       instrument->getLogfileCache(), requestedDate);
           } else {
-            setLogfile(ptr.get(), curElem, instrument->getLogfileCache());
+            setLogfile(ptr.get(), curElem, instrument->getLogfileCache(),
+                       requestedDate);
           }
         }
       }
