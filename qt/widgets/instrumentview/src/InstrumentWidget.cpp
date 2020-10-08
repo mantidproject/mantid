@@ -138,6 +138,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   // Create the display widget
   m_InstrumentDisplay = new MantidGLWidget(this);
   m_InstrumentDisplay->installEventFilter(this);
+  m_InstrumentDisplay->setMinimumWidth(600);
   connect(this, SIGNAL(enableLighting(bool)), m_InstrumentDisplay,
           SLOT(enableLighting(bool)));
 
