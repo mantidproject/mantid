@@ -7,7 +7,8 @@
 
 import os
 
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
+from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, \
+                           QMenu, QAction
 from qtpy.QtCore import *
 from qtpy import uic
 
@@ -650,8 +651,34 @@ class DrillView(QMainWindow):
             self.table.setColumnHeaderToolTips(tooltips)
         for i in range(len(columns)):
             self.table.setColumnHidden(i, False)
+        self.menuAddRemoveColumn.aboutToShow.connect(
+                lambda : self.setAddRemoveColumnMenu(columns))
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
+
+    def setAddRemoveColumnMenu(self, columns):
+        """
+        Fill the "add/remove column" menu. This function is triggered each time
+        the menu is displayed to display a correct icon depending on the status
+        of the column (hidden or not).
+
+        Args:
+            columns (list(str)): list of column titles
+        """
+        if self.menuAddRemoveColumn.receivers(QMenu.triggered):
+            self.menuAddRemoveColumn.triggered.disconnect()
+        self.menuAddRemoveColumn.clear()
+        hidden = self.table.getHiddenColumns()
+        for c in columns:
+            action = QAction(c, self.menuAddRemoveColumn)
+            if c in hidden:
+                action.setIcon(icons.get_icon("mdi.close"))
+            else:
+                action.setIcon(icons.get_icon("mdi.check"))
+            self.menuAddRemoveColumn.addAction(action)
+
+        self.menuAddRemoveColumn.triggered.connect(
+                lambda action: self.table.toggleColumnVisibility(action.text()))
 
     def fill_table(self, rows_contents):
         """

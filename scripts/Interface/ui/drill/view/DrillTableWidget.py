@@ -392,6 +392,22 @@ class DrillTableWidget(QTableWidget):
             if name in columns:
                 header.hideSection(i)
 
+    def toggleColumnVisibility(self, column):
+        """
+        Change the visibility state of a column by giving its name.
+
+        Args:
+            column (str): column name
+        """
+        if column not in self.columns:
+            return
+        header = self.horizontalHeader()
+        i = self.columns.index(column)
+        if header.isSectionHidden(i):
+            header.showSection(i)
+        else:
+            header.hideSection(i)
+
     def getHiddenColumns(self):
         """
         Get the list of hidden columns.

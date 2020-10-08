@@ -448,11 +448,29 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <addaction name="actionAddRow"/>
-    <addaction name="actionDelRow"/>
-    <addaction name="actionCopyRow"/>
-    <addaction name="actionCutRow"/>
-    <addaction name="actionPasteRow"/>
+    <widget class="QMenu" name="menuRow_s">
+     <property name="title">
+      <string>Row(s)</string>
+     </property>
+     <addaction name="actionAddRow"/>
+     <addaction name="actionDelRow"/>
+     <addaction name="actionCopyRow"/>
+     <addaction name="actionCutRow"/>
+     <addaction name="actionPasteRow"/>
+    </widget>
+    <widget class="QMenu" name="menuColumns_s">
+     <property name="title">
+      <string>Columns(s)</string>
+     </property>
+     <widget class="QMenu" name="menuAddRemoveColumn">
+      <property name="title">
+       <string>Add/remove column</string>
+      </property>
+     </widget>
+     <addaction name="menuAddRemoveColumn"/>
+    </widget>
+    <addaction name="menuColumns_s"/>
+    <addaction name="menuRow_s"/>
     <addaction name="actionErase"/>
    </widget>
    <widget class="QMenu" name="menuProcess_2">
@@ -571,6 +589,11 @@
   <action name="actionHelp">
    <property name="text">
     <string>DrILL help</string>
+   </property>
+  </action>
+  <action name="actiona">
+   <property name="text">
+    <string>a</string>
    </property>
   </action>
  </widget>
