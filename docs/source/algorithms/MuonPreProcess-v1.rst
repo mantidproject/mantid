@@ -185,15 +185,22 @@ Output:
     
     output_workspace = MuonPreProcess(InputWorkspace=input_workspace, 
                                       TimeZeroTable=time_zero_table)
-    print("X values are : {}".format(output_workspace[0].readX(0)))
-    print("Y values are : {}".format(output_workspace[0].readY(0)))						  
+    
+    print("X values are : [{:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}]".format(
+        output_workspace[0].readX(0)[0],output_workspace[0].readX(0)[1],
+        output_workspace[0].readX(0)[2],output_workspace[0].readX(0)[3],
+        output_workspace[0].readX(0)[4],output_workspace[0].readX(0)[5]))
+    print("Y values are : [{:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}]".format(
+        output_workspace[0].readY(0)[0],output_workspace[0].readY(0)[1],
+        output_workspace[0].readY(0)[2],output_workspace[0].readY(0)[3],
+        output_workspace[0].readY(0)[4]))
 	
 Output:
 
 .. testoutput:: ExampleTimeZero
 
-    X values are : [ -2.  -1.  0.  1.  2.  3.]
-    Y values are : [ 100.  200.  300.0  200.0  100.]
+    X values are : [-2, -1, 0, 1, 2, 3]
+    Y values are : [100, 200, 300, 200, 100]
 	
 .. categories::
 
