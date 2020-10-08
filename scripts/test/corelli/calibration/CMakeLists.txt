@@ -2,6 +2,7 @@
 
 set(TEST_PY_FILES
     test_utils.py
+    test_database.py
     )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

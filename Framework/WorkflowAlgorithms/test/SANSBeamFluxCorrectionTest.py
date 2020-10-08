@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid
 from mantid.simpleapi import *
+
 
 class SANSBeamFluxCorrectionTest(unittest.TestCase):
 
@@ -45,6 +45,7 @@ class SANSBeamFluxCorrectionTest(unittest.TestCase):
         ref_value = 0.1/(49152*0.1)/(49152*0.1)
         output_y = output[0].readY(0)
         self.assertAlmostEqual(ref_value, output_y[0], 6)
+
 
 if __name__ == '__main__':
     unittest.main()

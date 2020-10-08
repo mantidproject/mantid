@@ -245,7 +245,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertCountEqual(self.model.loaded_filenames,
-                             ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs", "C:/dir1/file3.nxs"])
+                              ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs", "C:/dir1/file3.nxs"])
         self.assertCountEqual(self.model.loaded_workspaces, [workspace_1, workspace_2, workspace_3])
         self.assertCountEqual(self.model.loaded_runs, [[1234], [1235], [1236]])
 

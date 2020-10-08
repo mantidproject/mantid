@@ -5,19 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
-import os
 import unittest
 from unittest import mock
 
-from sans.common.enums import SANSFacility, SANSInstrument
+from sans.common.enums import SANSFacility
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.models.table_model import TableModel
 from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
-from sans.state.AllStates import AllStates
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
-from sans.user_file.user_file_reader import UserFileReader
 
 
 class GuiStateDirectorTest(unittest.TestCase):

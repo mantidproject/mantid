@@ -10,10 +10,6 @@ from mantid.py3compat import mock
 from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator
 
 
-class toml_v1_schema_test(object):
-    pass
-
-
 class SchemaV1ValidatorTest(unittest.TestCase):
     def test_paths_build_for_nested_dict(self):
         test_grid = [({"A": None}, ["A"]),
@@ -75,4 +71,3 @@ class SchemaV1ValidatorTest(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             TomlSchemaV1Validator(invalid_example).validate()
-

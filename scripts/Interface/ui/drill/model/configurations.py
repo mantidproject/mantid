@@ -116,6 +116,7 @@ class RundexSettings(object):
                 "NormaliseBy",
                 "SampleThickness",
                 "BeamRadius",
+                "TransmissionBeamRadius",
                 "WaterCrossSection",
                 "OutputType",
                 "CalculateResolution",

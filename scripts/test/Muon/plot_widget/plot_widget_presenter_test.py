@@ -45,7 +45,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.presenter = PlotWidgetPresenterCommon(view=self.view, model=self.model, context=self.context,
                                                    figure_presenter=self.figure_presenter,
-                                                   get_selected_fit_workspaces = self.get_selected_fit_workspaces(),
+                                                   get_selected_fit_workspaces=self.get_selected_fit_workspaces(),
                                                    external_plotting_view=self.external_plotting_view,
                                                    external_plotting_model=self.external_plotting_model)
 
@@ -266,8 +266,8 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
     def test_handle_plot_selected_fits_correctly_calls_model(self):
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                            ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                            ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
+                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
 
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
                                                                  [1]]
@@ -276,7 +276,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.view.is_plot_diff.return_value = False
         self.presenter.handle_plot_selected_fits([fit_information])
-        self.model.get_fit_workspace_and_indices.assert_called_once_with(fit,False)
+        self.model.get_fit_workspace_and_indices.assert_called_once_with(fit, False)
 
     def test_handle_external_plot_pressed(self):
         expected_axes = mock.NonCallableMock()
@@ -296,20 +296,17 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_names, True), ws_names)
 
-
     def test_match_raw_selection_True_False(self):
         self.context.fitting_context.fit_raw = True
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_names, False), ws_rebin_names)
 
-
     def test_match_raw_selection_False_True(self):
         self.context.fitting_context.fit_raw = False
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, True), ws_names)
-
 
     def test_match_raw_selection_False_False(self):
         self.context.fitting_context.fit_raw = False
