@@ -280,8 +280,6 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
             PACKAGE_SUFFIX="qa"
         elif [[ ${JOB_NAME} == master* ]]; then
             PACKAGE_SUFFIX="nightly"
-        elif [[ ${JOB_NAME} == *pvnext* ]]; then
-            PACKAGE_SUFFIX="mantidunstable-pvnext"
         else
             PACKAGE_SUFFIX="unstable"
         fi
