@@ -18,6 +18,8 @@ The main changes are:
 
 - fixed a bug where `import CaChannel` would cause a hard crash within MantidWorkbench on Linux.
 
+- updated the ISIS Reflectometry live data monitor to work with new instrument PV names
+
 Citation
 --------
 
