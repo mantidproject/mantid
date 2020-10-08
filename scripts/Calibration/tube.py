@@ -941,8 +941,9 @@ class _CalibrationParameterHelper(object):
     def _get_fit_par(self, args, tube_set, ideal_tube):
         if self.FITPAR in args:
             fit_par = args[self.FITPAR]
-            # fitPar must be a TubeCalibFitParams
-            if not isinstance(fit_par, TubeCalibFitParams):
+            try:
+                assert getattr(fit_par, 'setAutomatic')  # duck typing check for correct type
+            except AssertionError:
                 raise RuntimeError(
                     "Wrong argument {0}. This argument, when given, must be a valid TubeCalibFitParams object".
                     format(self.FITPAR))
