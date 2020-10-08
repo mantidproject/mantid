@@ -709,6 +709,19 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_once_with('No data selected to fit')
         self.presenter.perform_fit.assert_not_called()
 
+    def test_update_fit_status_information_in_view(self):
+        self.view.get_index_for_start_end_times = mock.MagicMock(return_value = 1)
+        self.view.update_global_fit_state = mock.MagicMock()
+        self.view.update_global_fit_outputs = mock.MagicMock()
+
+        self._fit_function = ["FlatBackground", "LinearBackground"]
+        self._fit_status = ["failure", "success"]
+        self._fit_chi_squared = [23.0, 3.2]
+
+        self.presenter.update_fit_status_information_in_view()
+        self.view.update_global_fit_outputs.assert_called_with("LinearBackground", "success", 3.2)
+        self.view.update_global_fit_state.assert_called_with(self._fit_status, 1)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
