@@ -13,4 +13,6 @@ Improvements
 Bugfixes
 ########
 
+- Only display slice viewer widget for MDEventWorkspaces with 2 or more dimensions.
+
 :ref:`Release 6.0.0 <v6.0.0>`
