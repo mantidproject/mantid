@@ -222,7 +222,12 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       if (add_slice_viewer) {
         menu->addAction(m_sliceViewer);
       } else if (add_1d_plot) {
-        menu->addAction(m_plotMDHisto1D);
+        QMenu *plotSubMenu(new QMenu("Plot", menu));
+        plotSubMenu->addAction(m_plotMDHisto1D);
+        plotSubMenu->addAction(m_overplotMDHisto1D);
+        plotSubMenu->addAction(m_plotMDHisto1DWithErrs);
+        plotSubMenu->addAction(m_overplotMDHisto1DWithErrs);
+        menu->addMenu(plotSubMenu);
       }
 
     } else if (auto wsGroup =
