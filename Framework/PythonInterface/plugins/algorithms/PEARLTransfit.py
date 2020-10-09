@@ -129,10 +129,10 @@ class PEARLTransfit(PythonAlgorithm):
             wsBgGuess = mtd[fileName_monitor]
             bg0guess = 0.86 * wsBgGuess.readY(0)[0]
             # New Voigt function as from Igor pro function
-            Fit(Function='name=PEARLTransVoigt,Position=' + str(peakPosGuess) + ',Lorentzian FWHM=' + str(
-                lorentzFWHM) + ',Gaussian FWHM=' + str(width_300) + ',Amplitude=1.6,bg0=' + str(
-                bg0guess) + ',bg1=0.0063252,bg2=0,constraints=(1<Lorentzian FWHM,' + str(width_300)
-                + '<Gaussian FWHM)', InputWorkspace=fileName_monitor, MaxIterations=200, Output='S_fit')
+            Fit(Function='name=PEARLTransVoigt,Position=' + str(peakPosGuess) + ',LorentzianFWHM=' + str(
+                lorentzFWHM) + ',GaussianFWHM=' + str(width_300) + ',Amplitude=1.6,Bg0=' + str(
+                bg0guess) + ',Bg1=0.0063252,Bg2=0,constraints=(1<LorentzianFWHM,' + str(width_300)
+                + '<GaussianFWHM)', InputWorkspace=fileName_monitor, MaxIterations=200, Output='S_fit')
             #
             DeleteWorkspace('S_fit_NormalisedCovarianceMatrix')
             DeleteWorkspace(fileName_monitor)
@@ -150,11 +150,11 @@ class PEARLTransfit(PythonAlgorithm):
                 gaussianFWHM_inst = 0
             #
             # New Voigt function as from Igor pro function
-            Fit(Function='name=PEARLTransVoigt,Position=' + str(S_fit.column(1)[0]) + ',Lorentzian FWHM='
-                         + str(lorentzFWHM) + ',Gaussian FWHM=' + str(gaussianFWHM) + ',Amplitude='
-                         + str(S_fit.column(1)[3]) + ',bg0=' + str(S_fit.column(1)[4]) + ',bg1='
-                         + str(S_fit.column(1)[5]) + ',bg2=' + str(S_fit.column(1)[6]) + ',constraints=('
-                         + str(gaussianFWHM) + '<Gaussian FWHM),ties=(Lorentzian FWHM=' + str(lorentzFWHM) + ')',
+            Fit(Function='name=PEARLTransVoigt,Position=' + str(S_fit.column(1)[0]) + ',LorentzianFWHM='
+                         + str(lorentzFWHM) + ',GaussianFWHM=' + str(gaussianFWHM) + ',Amplitude='
+                         + str(S_fit.column(1)[3]) + ',Bg0=' + str(S_fit.column(1)[4]) + ',Bg1='
+                         + str(S_fit.column(1)[5]) + ',Bg2=' + str(S_fit.column(1)[6]) + ',constraints=('
+                         + str(gaussianFWHM) + '<GaussianFWHM),ties=(LorentzianFWHM=' + str(lorentzFWHM) + ')',
                 InputWorkspace=fnNoExt + '_monitor', MaxIterations=200, Output='T_fit')
             #
             DeleteWorkspace('T_fit_NormalisedCovarianceMatrix')

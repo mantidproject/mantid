@@ -52,13 +52,13 @@ class PEARLTransVoigt(IFunction1D):
     def init(self):
         # Starting parameters as fitted from run PRL111643
         self.declareParameter("Position", 1096.3)
-        self.declareParameter("Lorentzian FWHM", 45.8)
-        self.declareParameter("Gaussian FWHM", 25.227)
+        self.declareParameter("LorentzianFWHM", 45.8)
+        self.declareParameter("GaussianFWHM", 25.227)
         self.declareParameter("Amplitude", 2.08)
         # Legacy parameters from Transfit v1:
-        self.declareParameter("bg0", 25)
-        self.declareParameter("bg1", 0.015)
-        self.declareParameter("bg2", 0)
+        self.declareParameter("Bg0", 25)
+        self.declareParameter("Bg1", 0.015)
+        self.declareParameter("Bg2", 0)
 
     def function1D(self, xvals):
         # Vectorise the function to allow if/else statements to work quickly
@@ -66,12 +66,12 @@ class PEARLTransVoigt(IFunction1D):
         # Declare fitting parameters
         pos = self.getParameterValue("Position")
         amp = self.getParameterValue("Amplitude")
-        lorFWHM = self.getParameterValue("Lorentzian FWHM")
-        gaussFWHM = self.getParameterValue("Gaussian FWHM")
+        lorFWHM = self.getParameterValue("LorentzianFWHM")
+        gaussFWHM = self.getParameterValue("GaussianFWHM")
         # Legacy parameters from Transfit v1:
-        bg0 = self.getParameterValue("bg0")
-        bg1 = self.getParameterValue("bg1")
-        bg2 = self.getParameterValue("bg2")
+        bg0 = self.getParameterValue("Bg0")
+        bg1 = self.getParameterValue("Bg1")
+        bg2 = self.getParameterValue("Bg2")
         #
         # Legacy background function included from Transfit v1
         # Define background function
