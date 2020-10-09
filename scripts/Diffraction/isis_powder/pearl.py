@@ -189,6 +189,8 @@ class Pearl(AbstractInst):
         if self._inst_settings.perform_atten:
             name_key='name'
             path_key='path'
+            if isinstance(self._inst_settings.attenuation_files, str):
+                self._inst_settings.attenuation_files = eval(self._inst_settings.attenuation_files)
             for atten_file in self._inst_settings.attenuation_files:
                 if any (required_key not in atten_file for required_key in [name_key,path_key]):
                     logger.warning("A dictionary in attenuation_files has been ignored because "
