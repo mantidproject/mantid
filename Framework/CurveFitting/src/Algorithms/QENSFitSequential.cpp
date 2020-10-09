@@ -586,9 +586,22 @@ void QENSFitSequential::exec() {
 
   deleteTemporaryWorkspaces(outputBaseName);
 
-  addAdditionalLogs(resultWs);
-  copyLogs(std::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)),
-           groupWs);
+  size_t itter = 0;
+  for (auto results : resultWs->getAllItems()) {
+    addAdditionalLogs(results);
+    std::string resultWsName = results->getName();
+    auto endLoc = resultWsName.find("__Result");
+    std::string baseName = resultWsName.erase(endLoc);
+    for (auto workspace : groupWs->getAllItems()) {
+      std::string wsName = workspace->getName();
+      if (wsName.find(baseName) != wsName.npos) {
+        copyLogs(std::dynamic_pointer_cast<MatrixWorkspace>(results), groupWs);
+        addFitRangeLogs(workspace, itter);
+        itter++;
+      }
+    }
+    addFitRangeLogs(results, itter - 1);
+  }
 
   setProperty("OutputWorkspace", resultWs);
   setProperty("OutputParameterWorkspace", parameterWs);
@@ -616,12 +629,7 @@ QENSFitSequential::getAdditionalLogStrings() const {
 
 std::map<std::string, std::string>
 QENSFitSequential::getAdditionalLogNumbers() const {
-  std::map<std::string, std::string> logs;
-  std::vector<double> startX = getProperty("StartX");
-  std::vector<double> endX = getProperty("EndX");
-  logs["start_x"] = std::to_string(startX[0]);
-  logs["end_x"] = std::to_string(endX[0]);
-  return logs;
+  return std::map<std::string, std::string>();
 }
 
 void QENSFitSequential::addAdditionalLogs(
@@ -642,7 +650,6 @@ void QENSFitSequential::addAdditionalLogs(
     logAdder->executeAsChildAlg();
     logAdderProg.report("Add text logs");
   }
-  auto foo = resultWorkspace->getName();
   logAdderProg.report("Add number logs");
   for (const auto &log : getAdditionalLogNumbers()) {
     logAdder->setProperty("LogName", log.first);
@@ -650,6 +657,22 @@ void QENSFitSequential::addAdditionalLogs(
     logAdder->executeAsChildAlg();
     logAdderProg.report("Add number logs");
   }
+}
+
+void QENSFitSequential::addFitRangeLogs(const API::Workspace_sptr &resultWorkspace,
+                                        size_t itter) {
+  auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
+  logAdder->setProperty("Workspace", resultWorkspace);
+  Progress logAdderProg(this, 0.99, 1.00, 6);
+  logAdder->setProperty("LogType", "String");
+  std::vector<double> startX = getProperty("StartX");
+  logAdder->setProperty("LogName", "start_x");
+  logAdder->setProperty("LogText", std::to_string(startX[itter]));
+  logAdder->executeAsChildAlg();
+  std::vector<double> endX = getProperty("EndX");
+  logAdder->setProperty("LogName", "end_x");
+  logAdder->setProperty("LogText", std::to_string(endX[itter]));
+  logAdder->executeAsChildAlg();
 }
 
 std::string QENSFitSequential::getOutputBaseName() const {
@@ -872,7 +895,6 @@ void QENSFitSequential::copyLogs(
     std::vector<MatrixWorkspace_sptr> const &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("OutputWorkspace", resultWorkspace->getName());
-
   for (auto const &workspace : workspaces) {
     logCopier->setProperty("InputWorkspace", workspace);
     logCopier->executeAsChildAlg();
