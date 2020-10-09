@@ -6,6 +6,7 @@
 # set:
 #  SPHINX_FOUND
 #  SPHINX_PACKAGE_DIR
+#  SPHINX_VERSION
 #
 #=============================================================
 # main()
@@ -27,7 +28,7 @@ execute_process (COMMAND ${Python_EXECUTABLE} ${_find_sphinx_py} OUTPUT_VARIABLE
 string (STRIP "${sphinx_output}" sphinx_output)
 
 if (${sphinx_result} STREQUAL "0")
-  list(GET sphinx_output 0 Sphinx_VERSION)
+  list(GET sphinx_output 0 SPHINX_VERSION)
   list(GET sphinx_output 1 SPHINX_PACKAGE_DIR)
 else()
   message(STATUS "failed to run FindSphinx.py returned ${sphinx_result}")
@@ -35,4 +36,5 @@ endif ()
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(Sphinx DEFAULT_MSG SPHINX_PACKAGE_DIR)
+find_package_handle_standard_args(Sphinx REQUIRED_VARS SPHINX_PACKAGE_DIR SPHINX_VERSION
+                                  VERSION_VAR SPHINX_VERSION)
