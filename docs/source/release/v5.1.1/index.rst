@@ -35,6 +35,7 @@ Changes in this version
 -----------------------
 
 - `29672 <https://github.com/mantidproject/mantid/pull/29672>`_ Fixed muon fitting bugs
+- `29695 <https://github.com/mantidproject/mantid/pull/29695>`_ Workaround crash with importing CaChannel on Linux
 
 Summary of impact
 -----------------
@@ -44,6 +45,7 @@ Summary of impact
 |       |                                              |          | Probability  |
 +=======+==============================================+==========+==============+
 | 29672 | Fixed muon fitting bugs                      |          | **low**      |
++-------+----------------------------------------------+----------+--------------+
 | 29695 | Fixes cachannel import on Linux in workbench |          | **medium**   |
 +-------+----------------------------------------------+----------+--------------+
 
