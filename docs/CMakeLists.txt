@@ -31,6 +31,16 @@ else()
   set(ENABLE_PLOTDIRECTIVE "")
 endif()
 
+# sphinx.__main__ was introduced in version 1.3.
+# Prior to this we need to pass sphinx.__init__ to -m
+if(SPHINX_VERSION VERSION_GREATER_EQUAL "1.3")
+  set(SPHINX_MAIN "sphinx")
+  set(SPHINX_NOCOLOR "--no-color")
+else()
+  set(SPHINX_MAIN "sphinx.__init__")
+  set(SPHINX_NOCOLOR "")
+endif()
+
 # Add a sphinx build target to build documentation
 #   builder - Name of the sphinx builder: html, qthelp etc
 #   target_name - Optional target name. Default=docs-${builder}
@@ -54,7 +64,7 @@ function (add_sphinx_build_target builder)
              DOT_EXECUTABLE=${DOT_EXECUTABLE}
              MATH_EXT=${DOCS_MATH_EXT}
              ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
-             ${runner} ${runner_args} -m sphinx --no-color -b ${builder} -d ${DOCTREES_DIR} ${SPHINX_CONF_DIR} ${output_dir}
+             ${runner} ${runner_args} -m ${SPHINX_MAIN} ${SPHINX_NOCOLOR} -b ${builder} -d ${DOCTREES_DIR} ${SPHINX_CONF_DIR} ${output_dir}
       DEPENDS Framework
               mantidqt
               ${SPHINX_CONF_DIR}/conf.py
