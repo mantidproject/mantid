@@ -339,5 +339,17 @@ void WorkspaceTreeWidgetSimple::onPlotMDHistoWorkspaceClicked() {
   emit plotMDHistoClicked(getSelectedWorkspaceNamesAsQList());
 }
 
+void WorkspaceTreeWidgetSimple::onOverPlotMDHistoWorkspaceClicked() {
+  emit overplotMDHistoClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotMDHistoWorkspaceWithErrorsClicked() {
+  emit plotMDHistoWithErrorsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onOverPlotMDHistoWorkspaceWithErrorsClicked() {
+  emit overplotMDHistoWithErrorsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt
