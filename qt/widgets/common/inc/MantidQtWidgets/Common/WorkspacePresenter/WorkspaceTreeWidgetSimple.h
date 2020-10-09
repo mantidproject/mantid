@@ -95,9 +95,9 @@ private:
       *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs, *m_plotColorfill,
       *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData,
       *m_showAlgorithmHistory, *m_showDetectors, *m_plotAdvanced,
-      *m_plotSurface, *m_plotWireframe, *m_plotContour, 
-      *m_plotMDHisto1D, *m_overplotMDHisto1D, 
-      *m_plotMDHisto1DWithErrs, *m_overplotMDHisto1DWithErrs;
+      *m_plotSurface, *m_plotWireframe, *m_plotContour, *m_plotMDHisto1D,
+      *m_overplotMDHisto1D, *m_plotMDHisto1DWithErrs,
+      *m_overplotMDHisto1DWithErrs;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

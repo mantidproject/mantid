@@ -56,8 +56,10 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_plotContour(new QAction("Contour", this)),
       m_plotMDHisto1D(new QAction("Plot 1D MDHistogram...", this)),
       m_overplotMDHisto1D(new QAction("Overplot 1D MDHistogram...", this)),
-      m_plotMDHisto1DWithErrs(new QAction("Plot 1D MDHistogram with errors...", this)),
-      m_overplotMDHisto1DWithErrs(new QAction("Overplot 1D MDHistogram with errors...", this)) {
+      m_plotMDHisto1DWithErrs(
+          new QAction("Plot 1D MDHistogram with errors...", this)),
+      m_overplotMDHisto1DWithErrs(
+          new QAction("Overplot 1D MDHistogram with errors...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) {
@@ -194,7 +196,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       if (std::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
         menu->addAction(m_showDetectors);
       }
-    } else if (auto md_ws = std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+    } else if (auto md_ws =
+                   std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
 
