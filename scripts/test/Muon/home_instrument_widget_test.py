@@ -261,7 +261,6 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_once_with("File does not appear to contain dead time data.")
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
 
-
     @mock.patch(
         'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
     def test_browse_clicked_does_nothing_if_no_file_selected(self, load_deadtime_mock):

@@ -31,7 +31,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QApplication.instance().processEvents()
+            QApplication.sendPostedEvents()
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
@@ -114,7 +114,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def test_that_decrement_run_loads_the_data_correctly(self):
         new_run = self._loaded_run - 1
         new_filename = "EMU00001233.nxs"
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename, False))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
+            return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename, False))
 
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
@@ -129,7 +130,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def test_that_increment_run_loads_the_data_correctly(self):
         new_run = self._loaded_run + 1
         new_filename = "EMU00001235.nxs"
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename, False))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
+            return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename, False))
 
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)

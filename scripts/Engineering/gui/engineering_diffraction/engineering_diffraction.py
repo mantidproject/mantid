@@ -41,7 +41,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         else:
             super(EngineeringDiffractionGui, self).__init__(parent)
 
-    # Main Window
+        # Main Window
         self.setupUi(self)
         self.doc = "Engineering Diffraction"
         self.tabs = self.tab_main
@@ -66,7 +66,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         # Setup status bar
         self.status_label = QtWidgets.QLabel()
         self.savedir_label = QtWidgets.QLabel()
-        self.savedir_label.setMaximumWidth(self.status_savdirMaxwidth )
+        self.savedir_label.setMaximumWidth(self.status_savdirMaxwidth)
         self.setup_statusbar()
 
         # Setup notifiers
@@ -82,6 +82,9 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
                                                      "Engineering Diffraction", False)
         except ImportError:
             pass
+
+    def closeEvent(self, event):
+        self.fitting_presenter.data_widget.ads_observer.unsubscribe()
 
     def setup_settings(self):
         model = SettingsModel()

@@ -15,7 +15,7 @@ from Engineering.EnginX import main
 
 DIRS = config['datasearch.directories'].split(';')
 ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))),
-                       "SystemTests", "tests", "analysis", "reference")
+                       "SystemTests", "tests", "framework", "reference")
 root_directory = os.path.join(DIRS[0], "ENGINX")
 cal_directory = os.path.join(root_directory, "cal")
 focus_directory = os.path.join(root_directory, "focus")

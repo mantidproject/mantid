@@ -120,7 +120,7 @@ class TestUtils(unittest.TestCase):
         calibrated_y = np.array([v.Y() for v in table.column(1)])
         assert_allclose(calibrated_y, self.calibrated_y, atol=1e-3)
 
-    def test_apply_instrument(self) -> None:
+    def test_apply_calibration(self) -> None:
         table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
         apply_calibration(self.workspace, table)
         assert AnalysisDataService.doesExist('uncalibrated_calibrated')

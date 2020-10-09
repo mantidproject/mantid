@@ -187,6 +187,16 @@ void InputControllerDrawShape::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Backspace:
     emit removeSelectedShapes();
     break;
+  case Qt::Key_C:
+    if (event->modifiers() == Qt::CTRL) {
+      emit copySelectedShapes();
+    }
+    break;
+  case Qt::Key_V:
+    if (event->modifiers() == Qt::CTRL) {
+      emit pasteCopiedShapes();
+    }
+    break;
   }
 }
 

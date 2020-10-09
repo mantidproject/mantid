@@ -45,8 +45,8 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_widget_created()
         pres.view.close()
 
-        QApplication.processEvents()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
+        QApplication.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
 
@@ -56,10 +56,10 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
             pres,
             (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES))
         line_plots_action.trigger()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         non_ortho_action.trigger()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assertTrue(non_ortho_action.isChecked())
         self.assertFalse(line_plots_action.isChecked())
@@ -75,10 +75,10 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
             pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION))
         line_plots_action.trigger()
         region_sel_action.trigger()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         line_plots_action.trigger()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assertFalse(line_plots_action.isChecked())
         self.assertFalse(region_sel_action.isChecked())
