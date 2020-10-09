@@ -291,8 +291,10 @@ endif()
 
 # Installation settings
 
-# N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+if(ENABLE_MANTIDPLOT)
+  # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
+  install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+endif()
 
 # Install the files (.desktop and icon) to create a menu items
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
