@@ -16,6 +16,8 @@ The main changes are:
 
 - a bug in the Muon interface that lead to error bars being lost on fitted data has been fixed
 
+- fixed a bug where `import CaChannel` would cause a hard crash within MantidWorkbench on Linux.
+
 Citation
 --------
 
@@ -37,12 +39,13 @@ Changes in this version
 Summary of impact
 -----------------
 
-+-------+-------------------------+----------+--------------+
-| Issue | Impact                  | Solution | Side Effect  |
-|       |                         |          | Probability  |
-+=======+=========================+==========+==============+
-| 29672 | Fixed muon fitting bugs |          | **low**      |
-+-------+-------------------------+----------+--------------+
++-------+----------------------------------------------+----------+--------------+
+| Issue | Impact                                       | Solution | Side Effect  |
+|       |                                              |          | Probability  |
++=======+==============================================+==========+==============+
+| 29672 | Fixed muon fitting bugs                      |          | **low**      |
+| 29695 | Fixes cachannel import on Linux in workbench |          | **medium**   |
++-------+----------------------------------------------+----------+--------------+
 
 .. _download page: http://download.mantidproject.org
 
