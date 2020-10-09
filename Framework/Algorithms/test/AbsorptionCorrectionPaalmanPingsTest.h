@@ -107,37 +107,37 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         ass = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWSgroup + "_ass")));
-    TS_ASSERT_DELTA(ass->readY(0)[0], 0.1466219, 1e-6);
-    TS_ASSERT_DELTA(ass->readY(1)[0], 0.1977505, 1e-6);
-    TS_ASSERT_DELTA(ass->readY(2)[0], 0.2517314, 1e-6);
-    TS_ASSERT_DELTA(ass->readY(3)[0], 0.1622037, 1e-6);
+    TS_ASSERT_DELTA(ass->readY(0)[0], 0.1466219, 1e-7);
+    TS_ASSERT_DELTA(ass->readY(1)[0], 0.1977505, 1e-7);
+    TS_ASSERT_DELTA(ass->readY(2)[0], 0.2517314, 1e-7);
+    TS_ASSERT_DELTA(ass->readY(3)[0], 0.1622336, 1e-7);
 
     Mantid::API::MatrixWorkspace_sptr assc;
     TS_ASSERT_THROWS_NOTHING(
         assc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWSgroup + "_assc")));
-    TS_ASSERT_DELTA(assc->readY(0)[0], 0.1406871, 1e-6);
-    TS_ASSERT_DELTA(assc->readY(1)[0], 0.1903367, 1e-6);
-    TS_ASSERT_DELTA(assc->readY(2)[0], 0.2422601, 1e-6);
-    TS_ASSERT_DELTA(assc->readY(3)[0], 0.1550081, 1e-6);
+    TS_ASSERT_DELTA(assc->readY(0)[0], 0.1406871, 1e-7);
+    TS_ASSERT_DELTA(assc->readY(1)[0], 0.1903367, 1e-7);
+    TS_ASSERT_DELTA(assc->readY(2)[0], 0.2422601, 1e-7);
+    TS_ASSERT_DELTA(assc->readY(3)[0], 0.1550374, 1e-7);
 
     Mantid::API::MatrixWorkspace_sptr acc;
     TS_ASSERT_THROWS_NOTHING(
         acc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWSgroup + "_acc")));
-    TS_ASSERT_DELTA(acc->readY(0)[0], 0.9591239, 1e-6);
-    TS_ASSERT_DELTA(acc->readY(1)[0], 0.9571221, 1e-6);
-    TS_ASSERT_DELTA(acc->readY(2)[0], 0.9591919, 1e-6);
-    TS_ASSERT_DELTA(acc->readY(3)[0], 0.9463792, 1e-6);
+    TS_ASSERT_DELTA(acc->readY(0)[0], 0.9489914, 1e-7);
+    TS_ASSERT_DELTA(acc->readY(1)[0], 0.9471159, 1e-7);
+    TS_ASSERT_DELTA(acc->readY(2)[0], 0.9493414, 1e-7);
+    TS_ASSERT_DELTA(acc->readY(3)[0], 0.9365069, 1e-7);
 
     Mantid::API::MatrixWorkspace_sptr acsc;
     TS_ASSERT_THROWS_NOTHING(
         acsc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWSgroup + "_acsc")));
-    TS_ASSERT_DELTA(acsc->readY(0)[0], 0.2946355, 1e-6);
-    TS_ASSERT_DELTA(acsc->readY(1)[0], 0.4178945, 1e-6);
-    TS_ASSERT_DELTA(acsc->readY(2)[0], 0.5571234, 1e-6);
-    TS_ASSERT_DELTA(acsc->readY(3)[0], 0.3999440, 1e-6);
+    TS_ASSERT_DELTA(acsc->readY(0)[0], 0.2919232, 1e-7);
+    TS_ASSERT_DELTA(acsc->readY(1)[0], 0.4162723, 1e-7);
+    TS_ASSERT_DELTA(acsc->readY(2)[0], 0.5561810, 1e-7);
+    TS_ASSERT_DELTA(acsc->readY(3)[0], 0.3984180, 1e-7);
 
     // Compare to the AbsorptionCorrection algorithm, the A_s,s should
     // match the ScatterFrom='Sample', and A_c,c should match
