@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # -----------------------------------------------------------------------
 # Transfit v2 - translated from Fortran77 to Python/Mantid
@@ -25,10 +25,78 @@ from mantid.simpleapi import (LoadRaw, DeleteWorkspace, CropWorkspace, Normalise
                               ConvertUnits, CreateWorkspace, Fit, Plus, Multiply, RenameWorkspace,
                               CreateSingleValuedWorkspace)
 from os import path
+from scipy import constants
 import numpy as np
 
 
 class PEARLTransfit(PythonAlgorithm):
+
+    # Resonance constants broadly consistent with those reported from
+    # 'Neutron cross sections Vol 1, Resonance Parameters'
+    # S.F. Mughabghab and D.I. Garber
+    # June 1973, BNL report 325
+    # Mass in atomic units, En in eV, temperatures in K, gamma factors in eV
+    ResParamsDict = {
+        # Hf01
+        "Hf01_Mass": 177.0,
+        "Hf01_En": 1.098,
+        "Hf01_TD": 252.0,
+        "Hf01_TwogG": 0.00192,
+        "Hf01_Gg": 0.0662,
+        "Hf01_startE": 0.6,
+        "Hf01_Ediv": 0.01,
+        "Hf01_endE": 1.7,
+        # Hf02
+        "Hf02_Mass": 177.0,
+        "Hf02_En": 2.388,
+        "Hf02_TD": 252.0,
+        "Hf02_TwogG": 0.009,
+        "Hf02_Gg": 0.0608,
+        "Hf02_startE": 2.0,
+        "Hf02_Ediv": 0.01,
+        "Hf02_endE": 2.7,
+        # Ta10
+        "Ta10_Mass": 181.0,
+        "Ta10_En": 10.44,
+        "Ta10_TD": 240.0,
+        "Ta10_TwogG": 0.00335,
+        "Ta10_Gg": 0.0069,
+        "Ta10_startE": 9.6,
+        "Ta10_Ediv": 0.01,
+        "Ta10_endE": 11.4,
+        # Irp6
+        "Irp6_Mass": 191.0,
+        "Irp6_En": 0.6528,
+        "Irp6_TD": 420.0,
+        "Irp6_TwogG": 0.000547,
+        "Irp6_Gg": 0.072,
+        "Irp6_startE": 0.1,
+        "Irp6_Ediv": 0.01,
+        "Irp6_endE": 0.9,
+        # Iro5
+        "Iro5_Mass": 191.0,
+        "Iro5_En": 5.36,
+        "Iro5_TD": 420.0,
+        "Iro5_TwogG": 0.006,
+        "Iro5_Gg": 0.082,
+        "Iro5_startE": 4.9,
+        "Iro5_Ediv": 0.01,
+        "Iro5_endE": 6.3,
+        # Iro9
+        "Iro9_Mass": 191.0,
+        "Iro9_En": 9.3,
+        "Iro9_TD": 420.0,
+        "Iro9_TwogG": 0.0031,
+        "Iro9_Gg": 0.082,
+        "Iro9_startE": 8.7,
+        "Iro9_Ediv": 0.01,
+        "Iro9_endE": 9.85
+    }
+
+    # Physical constants
+    k = constants.k
+    e = constants.e
+    Pi = np.pi
 
     def version(self):
         return 1
@@ -90,14 +158,14 @@ class PEARLTransfit(PythonAlgorithm):
         foilType = self.getProperty("FoilType").value
         divE = float(self.getProperty("Ediv").value)
         isCalib = self.getProperty("Calibration").value
-        mass = ResParamsDict[foilType + '_Mass']
-        TD = ResParamsDict[foilType + '_TD']
+        mass = self.ResParamsDict[foilType + '_Mass']
+        TD = self.ResParamsDict[foilType + '_TD']
         # Energy parameters are in eV
-        energy = ResParamsDict[foilType + '_En']
-        TwogG = ResParamsDict[foilType+'_TwogG']
-        Gg = ResParamsDict[foilType+'_Gg']
-        startE = ResParamsDict[foilType+'_startE']
-        endE = ResParamsDict[foilType+'_endE']
+        energy = self.ResParamsDict[foilType + '_En']
+        TwogG = self.ResParamsDict[foilType+'_TwogG']
+        Gg = self.ResParamsDict[foilType+'_Gg']
+        startE = self.ResParamsDict[foilType+'_startE']
+        endE = self.ResParamsDict[foilType+'_endE']
         refTemp = float(self.getProperty("ReferenceTemp").value)
         isDebug = self.getProperty("Debug").value
 
@@ -115,7 +183,7 @@ class PEARLTransfit(PythonAlgorithm):
         # Define the gaussian width at the reference temperature
         # Factor of 1e3 converting to meV for Mantid
 
-        width_300 = 1000.0 * np.sqrt(4 * energy * k * refTemp * mass / (e * (1 + mass) ** 2))
+        width_300 = 1000.0 * np.sqrt(4 * energy * self.k * refTemp * mass / (self.e * (1 + mass) ** 2))
 
         # ----------------------------------------------------------
         # Perform fits based on whether isCalib is flagged (calibration or measurement)
@@ -163,11 +231,12 @@ class PEARLTransfit(PythonAlgorithm):
             gaussian_FWHM_fitted = T_fit.column(1)[2]
             width_T = np.sqrt(gaussian_FWHM_fitted ** 2 - gaussianFWHM_inst ** 2)
             # Factor of 1e-3 converts back from meV to eV
-            Teff = (((width_T * 1e-3) ** 2) * e * ((1 + mass) ** 2)) / (4 * 1e-3 * T_fit.column(1)[0] * k * mass)
-            Teff_low = ((((width_T - T_fit.column(2)[2]) * 1e-3) ** 2) * e
-                        * ((1 + mass) ** 2))/(4 * 1e-3 * (T_fit.column(1)[0] + T_fit.column(2)[0]) * k * mass)
-            Teff_high = ((((width_T + T_fit.column(2)[2]) * 1e-3) ** 2) * e * ((1 + mass) ** 2)) /\
-                        (4 * 1e-3 * (T_fit.column(1)[0] - T_fit.column(2)[0]) * k * mass)
+            Teff = (((width_T * 1e-3) ** 2) * self.e * ((1 + mass) ** 2)) / (4 * 1e-3 * T_fit.column(1)[0] * self.k
+                                                                             * mass)
+            Teff_low = ((((width_T - T_fit.column(2)[2]) * 1e-3) ** 2) * self.e
+                        * ((1 + mass) ** 2))/(4 * 1e-3 * (T_fit.column(1)[0] + T_fit.column(2)[0]) * self.k * mass)
+            Teff_high = ((((width_T + T_fit.column(2)[2]) * 1e-3) ** 2) * self.e * ((1 + mass) ** 2)) /\
+                        (4 * 1e-3 * (T_fit.column(1)[0] - T_fit.column(2)[0]) * self.k * mass)
             errTeff = 0.5*(Teff_high-Teff_low)
             # ----------------------------------------------------------
             # If the temperature is too far below the Debye temperature, then the result is inaccurate. Else the
@@ -189,7 +258,7 @@ class PEARLTransfit(PythonAlgorithm):
             if Terror < 5.0:
                 Terror_flag = 1
                 Terror = 10.0
-            if isDebug == 'True':
+            if isDebug:
                 self.log().information("-----------------------------")
                 self.log().information("Debugging....")
                 self.log().information("The Debye temperature is " + str(TD) + " K")
@@ -252,8 +321,8 @@ class PEARLTransfit(PythonAlgorithm):
     def TransfitRebin(self, inputWS, outputWSName, foilType, divE):
         ws2D = mtd[inputWS]
         # Expand the limits for rebinning to prevent potential issues at the boundaries
-        startE = ResParamsDict[foilType + '_startE']
-        endE = ResParamsDict[foilType + '_endE']
+        startE = self.ResParamsDict[foilType + '_startE']
+        endE = self.ResParamsDict[foilType + '_endE']
         startEp = 0.99 * startE
         endEp = 1.01 * endE
         CropWorkspace(InputWorkspace=ws2D, OutputWorkspace=ws2D, XMin=1000 * startEp, XMax=1000 * endEp)
@@ -293,79 +362,5 @@ class PEARLTransfit(PythonAlgorithm):
         CropWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWS, XMin=1000 * startE, XMax=1000 * endE)
         RenameWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWSName)
 
-
-# Physical constants
-k = 1.38066e-23
-e = 1.60218e-19
-Pi = np.pi
-m = 1.e0
-mn = 1.67493e-27
-h = 6.62608e-34
-Na = 6.02214e+23
-flightpath = 13.805
-t0 = 1598e-9
-t_stnd = 19.0
-
-# Resonance constants broadly consistent with those reported from
-# 'Neutron cross sections Vol 1, Resonance Parameters'
-# S.F. Mughabghab and D.I. Garber
-# June 1973, BNL report 325
-# Mass in atomic units, En in eV, temperatures in K, gamma factors in eV
-ResParamsDict = {
-    # Hf01
-    "Hf01_Mass": 177.0,
-    "Hf01_En": 1.098,
-    "Hf01_TD": 252.0,
-    "Hf01_TwogG": 0.00192,
-    "Hf01_Gg": 0.0662,
-    "Hf01_startE": 0.6,
-    "Hf01_Ediv": 0.01,
-    "Hf01_endE": 1.7,
-    # Hf02
-    "Hf02_Mass": 177.0,
-    "Hf02_En":  2.388,
-    "Hf02_TD": 252.0,
-    "Hf02_TwogG": 0.009,
-    "Hf02_Gg": 0.0608,
-    "Hf02_startE": 2.0,
-    "Hf02_Ediv": 0.01,
-    "Hf02_endE": 2.7,
-    # Ta10
-    "Ta10_Mass": 181.0,
-    "Ta10_En": 10.44,
-    "Ta10_TD": 240.0,
-    "Ta10_TwogG": 0.00335,
-    "Ta10_Gg": 0.0069,
-    "Ta10_startE": 9.6,
-    "Ta10_Ediv": 0.01,
-    "Ta10_endE": 11.4,
-    # Irp6
-    "Irp6_Mass": 191.0,
-    "Irp6_En": 0.6528,
-    "Irp6_TD": 420.0,
-    "Irp6_TwogG": 0.000547,
-    "Irp6_Gg": 0.072,
-    "Irp6_startE": 0.1,
-    "Irp6_Ediv": 0.01,
-    "Irp6_endE": 0.9,
-    # Iro5
-    "Iro5_Mass": 191.0,
-    "Iro5_En": 5.36,
-    "Iro5_TD": 420.0,
-    "Iro5_TwogG": 0.006,
-    "Iro5_Gg": 0.082,
-    "Iro5_startE": 4.9,
-    "Iro5_Ediv": 0.01,
-    "Iro5_endE": 6.3,
-    # Iro9
-    "Iro9_Mass": 191.0,
-    "Iro9_En": 9.3,
-    "Iro9_TD": 420.0,
-    "Iro9_TwogG": 0.0031,
-    "Iro9_Gg": 0.082,
-    "Iro9_startE": 8.7,
-    "Iro9_Ediv": 0.01,
-    "Iro9_endE": 9.85
-}
 
 AlgorithmFactory.subscribe(PEARLTransfit)

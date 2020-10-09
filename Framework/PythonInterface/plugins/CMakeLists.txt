@@ -134,6 +134,7 @@ set(PYTHON_PLUGINS
     algorithms/PDToGUDRUN.py
     algorithms/PDToPDFgetN.py
     algorithms/PearlMCAbsorption.py
+    algorithms/PEARLTransfit.py
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
@@ -165,7 +166,6 @@ set(PYTHON_PLUGINS
     algorithms/TOFTOFCropWorkspace.py
     algorithms/TOFTOFMergeRuns.py
     algorithms/TestWorkspaceGroupProperty.py
-    algorithms/PEARLTransfit.py
     algorithms/USANSSimulation.py
     algorithms/UpdatePeakParameterTableValue.py
     algorithms/VelocityAutoCorrelations.py
@@ -329,6 +329,7 @@ set(PYTHON_PLUGINS
     functions/PCRmagnet.py
     functions/PCRmagnetZFKT.py
     functions/PCRmagnetfnorm.py
+    functions/PEARLTransVoigt.py
     functions/Porod.py
     functions/PrimStretchedExpFT.py
     functions/RFresonance.py
@@ -342,7 +343,6 @@ set(PYTHON_PLUGINS
     functions/StretchedKT.py
     functions/TFMuonium.py
     functions/TeixeiraWater.py
-    functions/PEARLTransVoigt.py
     functions/ZFMuonium.py
     functions/ZFdipole.py
     functions/ZFelectronDipole.py
