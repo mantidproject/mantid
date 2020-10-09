@@ -69,6 +69,12 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
   // connect event m_plotMDHisto1D to signal slot onPlotMDHistoWorkspaceClicked
   connect(m_plotMDHisto1D, SIGNAL(triggered()), this,
           SLOT(onPlotMDHistoWorkspaceClicked()));
+  connect(m_overplotMDHisto1D, SIGNAL(triggered()), this,
+          SLOT(onOverPlotMDHistoWorkspaceClicked()));
+  connect(m_plotMDHisto1DWithErrs, SIGNAL(triggered()), this,
+          SLOT(onPlotMDHistoWorkspaceWithErrorsClicked()));
+  connect(m_overplotMDHisto1DWithErrs, SIGNAL(triggered()), this,
+          SLOT(onOverPlotMDHistoWorkspaceWithErrorsClicked()));
 
   connect(m_plotBin, SIGNAL(triggered()), this, SLOT(onPlotBinClicked()));
   connect(m_overplotSpectrum, SIGNAL(triggered()), this,
