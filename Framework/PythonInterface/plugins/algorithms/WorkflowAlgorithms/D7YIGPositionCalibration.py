@@ -115,7 +115,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="The table workspace name that will be used to store all of the calibration parameters.")
 
     def PyExec(self):
-        progress = Progress(self, start=0.0, end=1.0, nreports=5)
+        progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
         self._scanStepSize = self.getProperty("ScanStepSize").value
         self._peakWidth = self.getProperty("BraggPeakWidth").value
@@ -128,11 +128,11 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         fit_output_name = self.getPropertyValue('FitOutputWorkspace')
         conjoined_scan = "conjoined_input_{}".format(fit_output_name)
         if self.getProperty('InputWorkspace').isDefault:
-            self._get_scan_data(fit_output_name)
+            self._get_scan_data(fit_output_name, progress)
         else:
             input_name = self.getPropertyValue('InputWorkspace')
             RenameWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
-        progress.report()
+            progress.report(3, 'Loading YIG scan data')
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getPropertyValue("BankOffsets").split(',')
             for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
@@ -144,22 +144,22 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         # loads the YIG peaks from an IPF
         yig_d = self._load_yig_peaks(conjoined_scan)
         # checks how many and which peaks can be fitted in each row
+        progress.report(0, 'Getting YIG peaks positions')
         yig_peaks_positions = self._get_yig_peaks_positions(conjoined_scan, yig_d)
-        progress.report()
         # fits gaussian to peaks for each pixel, returns peaks as a function of their expected position
+        progress.report('Fitting YIG peaks')
         fitted_peaks_positions, single_peaks_fits  = self._fit_bragg_peaks(conjoined_scan, yig_peaks_positions)
-        progress.report()
         ReplaceSpecialValues(InputWorkspace=fitted_peaks_positions, OutputWorkspace=fitted_peaks_positions,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, checkErrorAxis=True)
         # fits the wavelength, bank gradients and individual
+        progress.report('Fitting bank and detector parameters')
         detector_parameters = self._fit_detector_positions(fitted_peaks_positions)
-        progress.report()
         # calculates pixel positions, bank offsets and slopes from the fit output
+        progress.report('Calculating detector positions')
         wavelength, pixel_offsets, bank_offsets, bank_slopes = self._calculate_pixel_positions(detector_parameters)
-        progress.report()
         # prints the Instrument Parameter File that can be used in the ILLPolarizedDiffraction loader
+        progress.report('Printing out calibration')
         self._print_parameter_file(wavelength, pixel_offsets, bank_offsets, bank_slopes)
-        progress.report()
 
         if self.getProperty('FitOutputWorkspace').isDefault:
             created_ws_names = [conjoined_scan, fitted_peaks_positions, single_peaks_fits, detector_parameters]
@@ -167,14 +167,17 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         else:
             self.setProperty('FitOutputWorkspace', detector_parameters)
 
-    def _get_scan_data(self, ws_name):
+    def _get_scan_data(self, ws_name, progress):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""
 
         # workspace indices for monitors
         monitor_indices = "{0}, {1}".format(self._D7NumberPixels, self._D7NumberPixels+1)
         scan_data_name = "scan_data_{}".format(ws_name)
-        Load(Filename=self.getPropertyValue("Filenames"), OutputWorkspace=scan_data_name, PositionCalibration='None')
+        progress.report(0, 'Loading YIG scan data')
+        LoadAndMerge(Filename=self.getPropertyValue("Filenames"), OutputWorkspace=scan_data_name, LoaderName='LoadILLPolarizedDiffraction',
+                     startProgress=0.0, endProgress=0.6)
+        progress.report(6, 'Conjoining the scan data')
         # load the group into a single table workspace
         nfiles = mtd[scan_data_name].getNumberOfEntries()
         # new vertical axis
@@ -210,7 +213,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
             name_list.append(entry.name())
 
-        ConjoinXRuns(InputWorkspaces=name_list, OutputWorkspace=conjoined_scan_name)
+        ConjoinXRuns(InputWorkspaces=name_list, OutputWorkspace=conjoined_scan_name,
+                     startProgress=0.6, endProgress=0.65)
         #replace axis and corrects labels
         x_axis.setUnit("Label").setLabel('TwoTheta', 'degrees')
         mtd[conjoined_scan_name].replaceAxis(0, x_axis)
@@ -218,7 +222,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         for pixel_no in range(self._D7NumberPixels):
             y_axis.setValue(pixel_no, pixel_no+1)
         mtd[conjoined_scan_name].replaceAxis(1, y_axis)
-
         return conjoined_scan_name
 
     def _load_yig_peaks(self, ws):
