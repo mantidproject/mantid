@@ -12,6 +12,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -746,6 +747,13 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   // Add a log called timer with the value of duration
   const double duration = entry.getFloat("duration");
   runDetails.addProperty<double>("timer", duration);
+
+  // Get the starting date of the measure, as it is needed by the instrument and
+  // parameter loaders later
+  std::string startDate = entry.getString("start_time");
+  LoadHelper loadHelper = LoadHelper();
+  runDetails.addProperty<std::string>(
+      "run_start", loadHelper.dateTimeInIsoFormat(startDate));
 }
 
 /**

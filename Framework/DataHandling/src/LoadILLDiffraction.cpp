@@ -229,7 +229,7 @@ void LoadILLDiffraction::loadDataScan() {
     initMovingWorkspace(scan, start_time);
     fillMovingInstrumentScan(data, scan);
   } else {
-    initStaticWorkspace();
+    initStaticWorkspace(start_time);
     fillStaticInstrumentScan(data, scan, twoTheta0);
   }
 
@@ -268,7 +268,7 @@ void LoadILLDiffraction::loadMetaData() {
  * Initializes the output workspace based on the resolved instrument, scan
  * points, and scan type
  */
-void LoadILLDiffraction::initStaticWorkspace() {
+void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
   size_t nSpectra = m_numberDetectorsActual + NUMBER_MONITORS;
   size_t nBins = 1;
 
@@ -280,6 +280,8 @@ void LoadILLDiffraction::initStaticWorkspace() {
 
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                                        nBins, nBins);
+
+  m_outWorkspace->mutableRun().addProperty("run_start", start_time);
 }
 
 /**

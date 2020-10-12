@@ -220,7 +220,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     }
 
     // load the instrument
-    loadInstrument(workspace);
+    loadInstrument(workspace, start_time);
 
     // rotate detectors to their position during measurement
     moveTwoTheta(entry, workspace);
@@ -311,7 +311,12 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
  * @param workspace : workspace with data from the first entry
  */
 void LoadILLPolarizedDiffraction::loadInstrument(
-    API::MatrixWorkspace_sptr workspace) {
+    API::MatrixWorkspace_sptr workspace, std::string startTime) {
+
+  // the instrument and parameter loaders need to know the time the data was
+  // measured to choose the correct version
+  workspace->mutableRun().addProperty("run_start", startTime);
+
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", m_instName + "_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
