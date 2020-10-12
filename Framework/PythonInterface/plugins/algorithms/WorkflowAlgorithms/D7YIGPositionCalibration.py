@@ -81,7 +81,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="The minimal allowable distance between two YIG peaks (in degrees 2theta).")
 
         self.declareProperty(name="BankOffsets",
-                             defaultValue='0,0,0',
+                             defaultValue=[0, 0, 0],
                              direction=Direction.Input,
                              doc="List of values of offset for each bank (in degrees).")
 
@@ -134,7 +134,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
             progress.report(3, 'Loading YIG scan data')
         if not self.getProperty("BankOffsets").isDefault:
-            offsets = self.getPropertyValue("BankOffsets").split(',')
+            offsets = self.getProperty("BankOffsets").value
             for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
                 ChangeBinOffset(InputWorkspace=conjoined_scan, Offset=offsets[bank_no],
                                 WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
