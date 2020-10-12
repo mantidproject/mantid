@@ -294,6 +294,7 @@ set(PYTHON_PLUGINS
   algorithms/MuonMaxent.py
   algorithms/SaveP2D.py
   algorithms/ClipPeaks.py
+  algorithms/LoadElementalAnalysisData.py
   functions/AFMZF.py
   functions/PCRmagnetZFKT.py
   functions/StretchedExpFTHelper.py
