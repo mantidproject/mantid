@@ -98,7 +98,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="An initial guess for the width of YIG Bragg peaks used for fitting (in degrees).")
 
         self.declareProperty(name="MaskedBinsRange",
-                             defaultValue='-35.0,15.0',
+                             defaultValue=[-35.0, 15.0],
                              direction=Direction.Input,
                              doc="The lower and upper bound for the masked region around the direct beam (in degrees).")
 
@@ -119,9 +119,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
         self._scanStepSize = self.getProperty("ScanStepSize").value
         self._peakWidth = self.getProperty("BraggPeakWidth").value
-        masked_bins_range = self.getPropertyValue("MaskedBinsRange").split(',')
-        self._beamMask1 = float(masked_bins_range[0])
-        self._beamMask2 = float(masked_bins_range[1])
+        masked_bins_range = self.getProperty("MaskedBinsRange").value
+        self._beamMask1 = masked_bins_range[0]
+        self._beamMask2 = masked_bins_range[1]
         self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # load the chosen YIG scan
@@ -337,7 +337,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                 results_y[peak_no] = row_data['Value']
                                 results_e[peak_no] = row_data['Error']
                     peak_no += 1
-
             CreateWorkspace(OutputWorkspace='ws',
                             DataX=results_x,
                             DataY=results_y,
