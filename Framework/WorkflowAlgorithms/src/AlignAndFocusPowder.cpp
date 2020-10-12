@@ -260,7 +260,7 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
   m_inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   if (m_inputEW && m_inputEW->getNumberEvents() <= 0)
-    result[PropertyNames::INPUT_WKSP] = 
+    result[PropertyNames::INPUT_WKSP] =
         "Empty workspace encounter, possibly due to beam down."
         "Please plot the pCharge-time to identify suitable range for "
         "re-time-slicing";
