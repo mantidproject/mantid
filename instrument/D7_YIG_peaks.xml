@@ -1,4 +1,10 @@
 <?xml version="1.0" ?>
+<!-- The values below are d-spacing of yttrium iron garnet (YIG) in Angstroem, based on:
+#. A. Nakatsuka, A. Yoshiasa, and S. Takeno.
+   *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure
+   Acta Crystallographica Section B **51** (1995) 737–745
+   `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
+-->
 <parameter-file date="2020-08-04" instrument="D7">
   <component-link name="detector">
     <parameter name="peak_1">
