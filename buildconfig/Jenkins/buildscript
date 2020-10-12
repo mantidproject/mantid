@@ -272,17 +272,22 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         # Use different suffix for linux builds if parameter is not defined
         if [[ -n "${PACKAGE_SUFFIX}" ]]; then
             echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
-            elif [[ ${JOB_NAME} == *release* ]]; then
+        elif [[ ${JOB_NAME} == release* ]]; then  # starts with "release"
             PACKAGE_SUFFIX=""
-            elif [[ ${JOB_NAME} == *master* ]]; then
+        elif [[ ${JOB_NAME} == ornl ]]; then
+            PACKAGE_SUFFIX=""
+        elif [[ ${JOB_NAME} == ornl-qa ]]; then
+            PACKAGE_SUFFIX="qa"
+        elif [[ ${JOB_NAME} == master* ]]; then
             PACKAGE_SUFFIX="nightly"
-            elif [[ ${JOB_NAME} == *pvnext* ]]; then
-            PACKAGE_SUFFIX="mantidunstable-pvnext"
         else
             PACKAGE_SUFFIX="unstable"
         fi
 
-        if [[ ${JOB_NAME} == *release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+        if [[ ${JOB_NAME} == release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+            # Traditional install path for release build
+            PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
+        elif [[ ${JOB_NAME} == ornl ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else

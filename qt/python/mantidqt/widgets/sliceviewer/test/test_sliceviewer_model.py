@@ -123,6 +123,7 @@ def _create_mock_workspace(ws_type,
     ws = MagicMock(spec=ws_type)
     if hasattr(ws, 'getExperimentInfo'):
         ws.getNumDims.return_value = ndims
+        ws.getNumNonIntegratedDims.return_value = ndims
         if ws_type == IMDHistoWorkspace:
             ws.isMDHistoWorkspace.return_value = True
             ws.getNonIntegratedDimensions.return_value = [MagicMock(), MagicMock()]

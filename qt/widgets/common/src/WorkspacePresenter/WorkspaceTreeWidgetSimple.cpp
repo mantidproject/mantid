@@ -27,11 +27,7 @@ using namespace Mantid::Kernel;
 
 namespace {
 bool singleValued(const MatrixWorkspace &ws) {
-  if (ws.getNumberHistograms() == 1 && ws.blocksize() == 1) {
-    return true;
-  } else {
-    return false;
-  }
+  return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1);
 }
 } // namespace
 
@@ -189,7 +185,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       if (std::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
         menu->addAction(m_showDetectors);
       }
-    } else if (std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+    } else if (auto md_ws =
+                   std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
 
@@ -197,11 +194,10 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       bool add_slice_viewer = false;
       bool add_1d_plot = false;
 
-      auto mdhist_ws = std::dynamic_pointer_cast<IMDHistoWorkspace>(workspace);
-      if (mdhist_ws) {
+      if (md_ws->isMDHistoWorkspace()) {
         // if the number of non-integral  if the number of non-integrated
         // dimensions is 1.
-        auto num_dims = mdhist_ws->getNonIntegratedDimensions().size();
+        auto num_dims = md_ws->getNumNonIntegratedDims();
         if (num_dims == 1) {
           // number of non-integral dimension is 1: show menu item to plot
           // spectrum
@@ -211,7 +207,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           // to launch slice view
           add_slice_viewer = true;
         }
-      } else {
+      } else if (md_ws->getNumDims() > 1) {
         add_slice_viewer = true;
       }
 
