@@ -292,8 +292,8 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   m_acquisitionMode = acquisitionMode[0];
   if (m_acquisitionMode == TOF_MODE_ON) {
     if (getPropertyValue("TOFUnits") == "TimeChannels") {
-      std::shared_ptr<Kernel::Units::Label> lblUnit =
-          std::dynamic_pointer_cast<Kernel::Units::Label>(
+      auto lblUnit =
+              std::dynamic_pointer_cast<Kernel::Units::Label>(
               UnitFactory::Instance().create("Label"));
       lblUnit->setLabel("Time channel", Units::Symbol::EmptyLabel);
       workspace->getAxis(0)->unit() = lblUnit;
@@ -431,10 +431,9 @@ LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
     for (auto channel_no = 0;
          channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
       if (getPropertyValue("TOFUnits") == "UncalibratedTime") {
-        axes.push_back(
-            static_cast<double>(tofDelay + channel_no * channelWidth));
+        axes.push_back(tofDelay + channel_no * channelWidth);
       } else {
-        axes.push_back(static_cast<double>(channel_no));
+        axes.push_back(channel_no);
       }
     }
   } else {
