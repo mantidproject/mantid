@@ -136,6 +136,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
     _charTable = None
     iparmFile = None
     _info = None
+    _absMethod = None
 
     def category(self):
         return "Diffraction\\Reduction"
@@ -214,6 +215,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
         self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
+
+        # absorption correction
+        self.declareProperty("TypeOfCorrection", "None",
+                             StringListValidator(["None", "SampleOnly", "SampleAndContainer", "FullPaalmanPings"]))
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
@@ -1281,6 +1286,33 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         AnalysisDataService.addOrReplace(absName, absorptionWS)
 
         return absName
+
+    def _create_donor_ws(self, filename, nbins, material, geometry, containerGeom=None, containerMat=None):
+        """
+        Creates a workspace to be used as an input to an Absorption Correction algorithm. This workspace
+        contains the wavelength range, instrument geometry, and calls SetSample with the associated sample
+        and container material and geometry.
+        :param filename:
+        :param nbins:
+        :param material:
+        :param geometry:
+        :param containerGeom:
+        :param containerMat:
+        :return:
+        """
+
+        # Call the existing function to create the donor workspace
+        donorWS = _create_absorption_input(filename, nbins)
+
+        # Set the material, geometry, and container info
+        api.SetSample(InputWorkspace=donorWS,
+                      Material=material,
+                      Geometry=geometry,
+                      ContainerGeometry=containerGeom,
+                      ContainerMaterial=containerMat)
+
+        return donorWS
+
 
     def _process_vanadium_runs(self, van_run_number_list, samRunIndex, **dummy_focuspos):
         """
