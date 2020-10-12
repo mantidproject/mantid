@@ -295,14 +295,6 @@ void AbsorptionCorrectionPaalmanPings::exec() {
   API::WorkspaceGroup_sptr outWS = group->getProperty("OutputWorkspace");
 
   setProperty("OutputWorkspace", outWS);
-
-  // Now do some cleaning-up since destructor may not be called immediately
-  m_sampleL1s.clear();
-  m_sampleElementVolumes.clear();
-  m_sampleElementPositions.clear();
-  m_containerL1s.clear();
-  m_containerElementVolumes.clear();
-  m_containerElementPositions.clear();
 }
 
 /// Calculate the distances for L1 (for both self-absorption and
