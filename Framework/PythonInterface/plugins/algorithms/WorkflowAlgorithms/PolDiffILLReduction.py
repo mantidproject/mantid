@@ -278,12 +278,20 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                                  EnabledWhenProperty(vanadium, sample, LogicOperator.Or),
                                                                  LogicOperator.And))
 
-        self.declareProperty(FileProperty('InstrumentParameterFile', '',
+        self.declareProperty(name="ScatteringAngleBinSize",
+                             defaultValue=0.5,
+                             validator=IntBoundedValidator(lower=0),
+                             direction=Direction.Input,
+                             doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
+
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'SumScans'))
+
+        self.declareProperty(FileProperty('InstrumentCalibration', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.xml']),
                              doc='The path to the calibrated Instrument Parameter File.')
 
-        self.setPropertySettings('InstrumentParameterFile', scan)
+        self.setPropertySettings('InstrumentCalibration', scan)
 
     def _figure_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
@@ -331,7 +339,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                     Divide(LHSWorkspace=name, RHSWorkspace=CreateSingleValuedWorkspace(len(numors)), OutputWorkspace=name)
                 else:
                     SumOverlappingTubes(','.join(list_pol), OutputWorkspace=name,
-                                        OutputType='1D', ScatteringAngleBinning=0.5, Normalise=True, HeightAxis='-0.1,0.1')
+                                        OutputType='1D', ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
+                                        Normalise=True, HeightAxis='-0.1,0.1')
                 names_list.append(name)
             DeleteWorkspaces(ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
@@ -783,11 +792,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         ws = '__' + self.getPropertyValue('OutputWorkspace')
 
         calibration_setting = 'YIGFile'
-        if self.getProperty('InstrumentParameterFile').isDefault:
+        if self.getProperty('InstrumentCalibration').isDefault:
             calibration_setting = 'None'
 
         Load(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
-             PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentParameterFile'),
+             PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentCalibration'),
              TOFUnits=self.getPropertyValue('TOFUnits'), OutputWorkspace=ws)
 
         self._instrument = mtd[ws].getItem(0).getInstrument().getName()
