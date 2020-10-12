@@ -8,14 +8,16 @@
 from os import path
 from mantidqt.utils.observer_pattern import Observable
 
-SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str}
+SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
+                 "primary_log": str}
 
 DEFAULT_SETTINGS = {
     "full_calibration": "",
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
     "recalc_vanadium": False,
     "logs": ','.join(
-        ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go'])
+        ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
+    "primary_log": 'strain'
 }
 
 ALL_LOGS = ','.join(
@@ -30,6 +32,10 @@ ALL_LOGS = ','.join(
      'strain_sp_rbv', 'strain_step_time', 'stress', 'stress_sp_rbv', 'stress_step_time', 'stressrig_go',
      'wave_running', 'wave_start', 'wave_type'])
 
+import pydevd_pycharm
+
+pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True, suspend=False)
+
 
 class SettingsPresenter(object):
     def __init__(self, model, view):
@@ -40,12 +46,14 @@ class SettingsPresenter(object):
 
         # add logs to list in view
         self.view.add_log_checkboxs(ALL_LOGS)
+        # self.view.set_primary_log(self.settings['primary_log'])
 
         # Connect view signals
         self.view.set_on_apply_clicked(self.save_new_settings)
         self.view.set_on_ok_clicked(self.save_and_close_dialog)
         self.view.set_on_cancel_clicked(self.close_dialog)
-        self.view.set_on_log_changed(self.save_new_settings)
+        self.view.set_on_log_changed(self.update_logs)
+        self.view.set_on_primary_log_changed(self.update_primary_log)
 
     def show(self):
         self.view.show()
@@ -61,6 +69,13 @@ class SettingsPresenter(object):
         self.save_new_settings()
         self.close_dialog()
 
+    def update_logs(self):
+        self.view.set_primary_log_combobox(self.settings["primary_log"])
+        self.save_new_settings()
+
+    def update_primary_log(self):
+        self.save_new_settings()
+
     def save_new_settings(self):
         self._collect_new_settings_from_view()
         self._save_settings_to_file()
@@ -70,6 +85,7 @@ class SettingsPresenter(object):
         self.settings["full_calibration"] = self.view.get_full_calibration()
         self.settings["recalc_vanadium"] = self.view.get_van_recalc()
         self.settings["logs"] = self.view.get_checked_logs()
+        self.settings["primary_log"] = self.view.get_primary_log()
 
     def _show_settings_in_view(self):
         if self._validate_settings(self.settings):
@@ -77,6 +93,7 @@ class SettingsPresenter(object):
             self.view.set_full_calibration(self.settings["full_calibration"])
             self.view.set_van_recalc(self.settings["recalc_vanadium"])
             self.view.set_checked_logs(self.settings["logs"])
+            self.view.set_primary_log_combobox(self.settings["primary_log"])
         self._find_files()
 
     def _find_files(self):

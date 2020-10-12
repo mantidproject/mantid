@@ -41,6 +41,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def set_on_log_changed(self, slot):
         self.log_list.itemChanged.connect(slot)
 
+    def set_on_primary_log_changed(self, slot):
+        self.primary_log.currentTextChanged.connect(slot)
+
     # =================
     # Component Getters
     # =================
@@ -57,6 +60,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_checked_logs(self):
         return ','.join([self.log_list.item(ilog).text() for ilog in range(self.log_list.count()) if
                          self.log_list.item(ilog).checkState() == QtCore.Qt.Checked])
+
+    def get_primary_log(self):
+        return self.primary_log.currentText()
 
     # =================
     # Component Setters
@@ -79,9 +85,21 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
             self.log_list.addItem(item)
 
     def set_checked_logs(self, logs):
+        # block signal so as not to reset primary log
+        self.log_list.blockSignals(True)
         for log in logs.split(','):
             items = self.log_list.findItems(log, QtCore.Qt.MatchExactly)
             items[0].setCheckState(QtCore.Qt.Checked)
+        self.log_list.blockSignals(False)
+
+    def set_primary_log_combobox(self, primary_log):
+        checked_logs = self.get_checked_logs().split(',') + ['']
+        self.primary_log.clear()
+        self.primary_log.addItems(checked_logs)
+        if primary_log in checked_logs:
+            self.primary_log.setCurrentText(primary_log)
+        else:
+            self.primary_log.setCurrentText('')
 
     # =================
     # Force Actions
