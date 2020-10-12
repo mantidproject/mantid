@@ -13,7 +13,7 @@ from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from matplotlib.pyplot import subplots
-from numpy import full, nan, max, array, vstack
+from numpy import full, nan, max, array, vstack, argsort
 from itertools import chain
 from re import findall
 from collections import defaultdict
@@ -146,6 +146,14 @@ class FittingDataModel(object):
                 RenameWorkspace(InputWorkspace=self._log_workspaces.name(), OutputWorkspace=name)
         else:
             self.clear_logs()
+
+    def get_ws_sorted_by_primary_log(self):
+        primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+                                  "primary_log")
+        log_table = ADS.retrieve(primary_log)
+        isort = argsort(array(log_table.column('avg')))
+        ws_list = list(self._loaded_workspaces.keys())
+        return [ws_list[iws] for iws in isort]
 
     def update_fit(self, results_dict):
         wsname = results_dict['properties']['InputWorkspace']

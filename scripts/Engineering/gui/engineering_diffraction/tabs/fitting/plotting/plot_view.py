@@ -120,6 +120,11 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             ax.autoscale()
         self.update_figure()
 
+    def fit_ws(self, ws_name):
+        # set workspace to fit
+        self.fit_browser.setWorkspaceName(ws_name)
+        self.fit_browser.fit()
+
     # =================
     # Component Getters
     # =================

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver, GenericObservable
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
 
@@ -25,6 +25,8 @@ class FittingPlotPresenter(object):
         self.workspace_added_observer = GenericObserverWithArgPassing(self.add_workspace_to_plot)
         self.workspace_removed_observer = GenericObserverWithArgPassing(self.remove_workspace_from_plot)
         self.all_workspaces_removed_observer = GenericObserver(self.clear_plot)
+        self.apply_fit_observer = GenericObserverWithArgPassing(self.apply_fit)
+        self.seq_fit_done_notifier = GenericObservable()
 
     def add_workspace_to_plot(self, ws):
         axes = self.view.get_axes()
@@ -43,3 +45,8 @@ class FittingPlotPresenter(object):
             self.model.remove_all_workspaces_from_plot(ax)
         self.view.clear_figure()
         self.view.update_fitbrowser()
+
+    def apply_fit(self, ws_list):
+        for ws in ws_list:
+            self.view.fit_ws(ws)
+        self.seq_fit_done_notifier.notify_subscribers()

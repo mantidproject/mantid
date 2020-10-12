@@ -7,7 +7,7 @@
 from Engineering.gui.engineering_diffraction.tabs.common import create_error_message
 from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
-from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing, GenericObserver
 
 
 class FittingDataPresenter(object):
@@ -15,6 +15,7 @@ class FittingDataPresenter(object):
         self.model = model
         self.view = view
         self.worker = None
+        self.iplot = []
 
         self.row_numbers = TwoWayRowDict()  # {ws_name: table_row} and {table_row: ws_name}
         self.plotted = set()  # List of plotted workspace names
@@ -26,6 +27,7 @@ class FittingDataPresenter(object):
         self.view.set_on_remove_selected_clicked(self._remove_selected_tracked_workspaces)
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
+        self.view.set_on_apply_fit_clicked(self._applyFit)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
         self.view.set_on_xunit_changed(self._log_xunit_change)
         self.view.set_table_selection_changed(self._handle_selection_changed)
@@ -34,10 +36,25 @@ class FittingDataPresenter(object):
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
+        self.apply_fit_notifier = GenericObservable()
         # Obeservers
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
+        self.seq_fit_observer = GenericObserver(self.seq_fit_completed)
+
+    def _applyFit(self):
+        ws_list = self.model.get_ws_sorted_by_primary_log()
+        # plot all runs not currently plotted
+        self.iplot = [irow for irow in range(len(self.get_loaded_workspaces())) if not self.view.get_item_checked(irow, 2)]
+        [self.view.set_item_checkstate(irow, 2, True) for irow in self.iplot]
+        # set off sequential fit
+        self.apply_fit_notifier.notify_subscribers(ws_list)
+
+    def seq_fit_completed(self):
+        [self.view.set_item_checkstate(irow, 2, False) for irow in self.iplot]
 
     def fit_completed(self, results_dict):
+        if self.get_loaded_workspaces():
+            self.view.set_apply_fit_button_enabled(True)
         self.model.update_fit(results_dict)
 
     def _log_xunit_change(self, xunit):
