@@ -42,10 +42,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return 'ILL\\Diffraction'
 
     def summary(self):
-        return 'Performs polarized diffraction data reduction at the ILL.'
-
-    def seeAlso(self):
-        return ['PolDIffILLAutoProcess']
+        return 'Performs polarized diffraction and spectroscopy data reduction for the D7 instrument at the ILL.'
 
     def name(self):
         return 'PolDiffILLReduction'
@@ -123,31 +120,22 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output,
-                                                    optional=PropertyMode.Optional),
                              doc='The output workspace based on the value of ProcessAs.')
 
         absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Absorber')
-
         beam = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Beam')
-
         container = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Container')
-
         sample = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Sample')
-
         quartz = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Quartz')
-
         transmission = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Transmission')
-
         vanadium = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Vanadium')
-
         reduction = EnabledWhenProperty(quartz, EnabledWhenProperty(vanadium, sample, LogicOperator.Or), LogicOperator.Or)
-
         scan = EnabledWhenProperty(reduction, EnabledWhenProperty(absorber, container, LogicOperator.Or), LogicOperator.Or)
 
         self.declareProperty(WorkspaceGroupProperty('AbsorberInputWorkspace', '',
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
-                             doc='The name of the absorber workspace.')
+                             doc='The name of the absorber workspace group.')
 
         self.setPropertySettings('AbsorberInputWorkspace',
                                  EnabledWhenProperty(quartz,
@@ -161,12 +149,12 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('BeamInputWorkspace', transmission)
 
-        self.declareProperty(MatrixWorkspaceProperty('CadmiumTransmissionInputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('AbsorberTransmissionInputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='The name of the cadmium transmission input workspace.')
+                             doc='The name of the absorber transmission input workspace.')
 
-        self.setPropertySettings('CadmiumTransmissionInputWorkspace', EnabledWhenProperty(transmission, beam, LogicOperator.Or))
+        self.setPropertySettings('AbsorberTransmissionInputWorkspace', EnabledWhenProperty(transmission, beam, LogicOperator.Or))
 
         self.declareProperty(MatrixWorkspaceProperty('TransmissionInputWorkspace', '',
                                                      direction=Direction.Input,
