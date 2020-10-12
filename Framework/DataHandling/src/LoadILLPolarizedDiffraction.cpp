@@ -292,9 +292,8 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   m_acquisitionMode = acquisitionMode[0];
   if (m_acquisitionMode == TOF_MODE_ON) {
     if (getPropertyValue("TOFUnits") == "TimeChannels") {
-      auto lblUnit =
-              std::dynamic_pointer_cast<Kernel::Units::Label>(
-              UnitFactory::Instance().create("Label"));
+      auto lblUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
+          UnitFactory::Instance().create("Label"));
       lblUnit->setLabel("Time channel", Units::Symbol::EmptyLabel);
       workspace->getAxis(0)->unit() = lblUnit;
     } else {
