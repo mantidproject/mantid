@@ -254,8 +254,21 @@ void PlotPeakByLogValue::exec() {
     IFunction_sptr ifun =
         setupFunction(individual, passWSIndexToFunction, inputFunction,
                       initialParams, isMultiDomainFunction, i, data);
-    auto fit = runSingleFit(createFitOutput, outputCompositeMembers,
-                            outputConvolvedMembers, ifun, data, startX[i], endX[i]);
+    std::shared_ptr<Algorithm> fit;
+    if (startX.size() == 0) {
+      fit =
+          runSingleFit(createFitOutput, outputCompositeMembers,
+                         outputConvolvedMembers, ifun, data, EMPTY_DBL(),
+                         EMPTY_DBL());
+    } else if (startX.size() == 1) {
+      fit =
+          runSingleFit(createFitOutput, outputCompositeMembers,
+                       outputConvolvedMembers, ifun, data, startX[0], endX[0]);
+    } else {
+      fit =
+          runSingleFit(createFitOutput, outputCompositeMembers,
+                       outputConvolvedMembers, ifun, data, startX[i], endX[i]);
+    }
 
     ifun = fit->getProperty("Function");
     double chi2 = fit->getProperty("OutputChi2overDoF");

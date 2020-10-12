@@ -527,11 +527,25 @@ std::map<std::string, std::string> QENSFitSequential::validateInputs() {
     if (specMin > specMax)
       errors["SpecMin"] = "SpecMin must be less than or equal to SpecMax.";
   }
-
-  //const double startX = getProperty("StartX");
-  //const double endX = getProperty("EndX");
-  //if (startX >= endX)
-  //  errors["StartX"] = "StartX must be less than EndX";
+  const auto inputWorkspaces = getWorkspaces();
+  const auto workspaces = convertInputToElasticQ(inputWorkspaces);
+  const auto inputString = getInputString(workspaces);
+  const auto spectra = getSpectra(inputString);
+  
+  const std::vector<double> startX = getProperty("StartX");
+  const std::vector<double> endX = getProperty("EndX");
+  if (startX.size() != endX.size()) {
+    errors["StartX"] = "StartX have the same size as EndX";
+  } else if (startX.size() != spectra.size() && startX.size() != 1) {
+    errors["StartX"] =
+        "StartX must be a single value or have a value for each spectra.";
+  } else {
+    for (size_t i = 0; i < startX.size(); i++) {
+      if (startX[i] >= endX[i]) {
+        errors["StartX"] = "StartX must be less than EndX";
+      }
+    }
+  }
 
   return errors;
 }
@@ -665,13 +679,23 @@ void QENSFitSequential::addFitRangeLogs(const API::Workspace_sptr &resultWorkspa
   logAdder->setProperty("Workspace", resultWorkspace);
   Progress logAdderProg(this, 0.99, 1.00, 6);
   logAdder->setProperty("LogType", "String");
+  
   std::vector<double> startX = getProperty("StartX");
   logAdder->setProperty("LogName", "start_x");
-  logAdder->setProperty("LogText", std::to_string(startX[itter]));
+  if (startX.size() == 1) {
+    logAdder->setProperty("LogText", std::to_string(startX[0]));
+  } else {
+    logAdder->setProperty("LogText", std::to_string(startX[itter]));
+  }
   logAdder->executeAsChildAlg();
+
   std::vector<double> endX = getProperty("EndX");
   logAdder->setProperty("LogName", "end_x");
-  logAdder->setProperty("LogText", std::to_string(endX[itter]));
+  if (endX.size() == 1) {
+    logAdder->setProperty("LogText", std::to_string(endX[0]));
+  } else {
+    logAdder->setProperty("LogText", std::to_string(endX[itter]));
+  }
   logAdder->executeAsChildAlg();
 }
 
