@@ -293,7 +293,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('InstrumentCalibration', scan)
 
-    def _figure_measurement_method(self, ws):
+    def _figure_out_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
         entries_per_numor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
         if entries_per_numor == 10:
@@ -807,7 +807,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         elif self._mode == 'TOF' and run['acquisition_mode'].value == 0:
             raise RuntimeError("TOF measurement method chosen but data contains monochromatic results.")
         self._user_method = self.getPropertyValue('ComponentSeparationMethod')
-        self._figure_measurement_method(ws)
+        self._figure_out_measurement_method(ws)
         progress.report()
         if process in ['Beam', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
