@@ -110,12 +110,12 @@ void LoadILLPolarizedDiffraction::init() {
 
   declareProperty(std::make_unique<FileProperty>(
                       "YIGFilename", "", FileProperty::OptionalLoad, ".xml"),
-                  "File path of the YIG calibration data file to load");
+                  "File path of the YIG calibration data file to load.");
   setPropertySettings("YIGFilename",
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "PositionCalibration", IS_EQUAL_TO, "YIGFile"));
   declareProperty("ConvertToScatteringAngle", false,
-                  "Convert the bin edges to scattering angle",
+                  "Convert the bin edges to scattering angle.",
                   Direction::Input);
   declareProperty("TransposeMonochromatic", false,
                   "Transpose the 2D workspace with monochromatic data",
@@ -124,7 +124,7 @@ void LoadILLPolarizedDiffraction::init() {
                                                 "TimeChannels"};
   declareProperty("TOFUnits", TOFUnitOptions[0],
                   std::make_shared<StringListValidator>(TOFUnitOptions),
-                  "Transpose the 2D workspace with monochromatic data");
+                  "The choice of X-axis units for Time-Of-Flight data.");
 }
 
 std::map<std::string, std::string>
