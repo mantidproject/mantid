@@ -8,7 +8,7 @@ Mantid Workbench Changes
 Improvements
 ############
 
-- Enable workbench to plot 1D spectrum from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
+- Enable workbench to plot 1D spectrum (plot, overplot, plot_with_error, overplot_with_error) from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
 - Add the possibility to copy and paste shapes in the instrument viewer using Ctrl + C and Ctrl + V.
 
 Bugfixes
