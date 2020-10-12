@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>943</width>
-    <height>466</height>
+    <height>482</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,6 +33,32 @@
           <string>Data</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <layout class="QHBoxLayout" name="instrumentLayout">
+            <property name="leftMargin">
+             <number>5</number>
+            </property>
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="instrumentLabel">
+              <property name="text">
+               <string>Instrument</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="instrument"/>
+            </item>
+           </layout>
+          </item>
           <item>
            <layout class="QGridLayout" name="runLayout">
             <property name="leftMargin">
@@ -643,8 +669,8 @@ Current Run</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="deadTimeCorrType"/>
   <buttongroup name="calculationType"/>
   <buttongroup name="detectorGroupingType"/>
+  <buttongroup name="deadTimeCorrType"/>
  </buttongroups>
 </ui>
