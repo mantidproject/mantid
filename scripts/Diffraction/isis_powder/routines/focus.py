@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import WorkspaceGroup
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
@@ -35,13 +36,19 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # The user has not supplied a sample empty
     is_run_empty = common.runs_overlap(run_number, run_details.empty_runs)
     if not is_run_empty and instrument.should_subtract_empty_inst() and not run_details.sample_empty:
-        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
-                                                      empty_sample_ws_string=run_details.empty_runs)
+        if os.path.isfile(run_details.summed_empty_file_path):
+            logger.warning('Pre-summed empty instrument workspace found at ' + run_details.summed_empty_file_path)
+            summed_empty = mantid.LoadNexus(Filename=run_details.summed_empty_file_path)
+        else:
+            summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_runs,
+                                                       instrument=instrument)
     elif run_details.sample_empty:
         # Subtract a sample empty if specified
-        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
-                                                      empty_sample_ws_string=run_details.sample_empty,
-                                                      scale_factor=instrument._inst_settings.sample_empty_scale)
+        summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.sample_empty,
+                                                   instrument=instrument,
+                                                   scale_factor=instrument._inst_settings.sample_empty_scale)
+    input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace,
+                                                  empty_sample=summed_empty)
 
     # Crop to largest acceptable TOF range
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)

@@ -42,6 +42,8 @@ attr_mapping = [
     ParamMapEntry(ext_name="raw_data_tof_cropping", int_name="raw_data_crop_vals"),
     ParamMapEntry(ext_name="run_in_cycle", int_name="run_in_range"),
     ParamMapEntry(ext_name="run_number", int_name="run_number"),
+    ParamMapEntry(ext_name="sample_empty", int_name="sample_empty", optional=True),
+    ParamMapEntry(ext_name="sample_empty_scale", int_name="sample_empty_scale"),
     ParamMapEntry(ext_name="spline_coefficient", int_name="spline_coefficient"),
     ParamMapEntry(ext_name="subtract_empty_instrument", int_name="subtract_empty_inst"),
     ParamMapEntry(ext_name="suffix", int_name="suffix", optional=True),

@@ -25,6 +25,8 @@ New features
 
 - Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
 - Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
+- Speed up focus action in ISIS powder diffraction scripts by saving pre-summed empty instrument workspace during calibration step
+- Add sample_empty and sample_empty_scale into Pearl configuration for ISIS powder diffraction scripts
 
 Bugfixes
 ########
