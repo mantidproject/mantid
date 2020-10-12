@@ -237,27 +237,25 @@ MatrixWorkspace_sptr MuonPreProcess::applyTimeOffset(MatrixWorkspace_sptr ws,
 
 MatrixWorkspace_sptr
 MuonPreProcess::applyTimeZeroTable(MatrixWorkspace_sptr ws,
-                                   const TableWorkspace_sptr &tz) {
-  if (tz != nullptr) {
-    const auto numSpec = ws->getNumberHistograms();
+                                   const TableWorkspace_sptr &timeZeroTable) {
+  auto cloneWs = cloneWorkspace(ws);
+  if (timeZeroTable != nullptr) {
+    const auto numSpec = cloneWs->getNumberHistograms();
     for (auto specNum = 0u; specNum < numSpec; ++specNum) {
-      auto &xData = ws->mutableX(specNum);
+      auto &xData = cloneWs->mutableX(specNum);
       for (auto &xValue : xData) {
-        API::TableRow row = tz->getRow(specNum);
+        API::TableRow row = timeZeroTable->getRow(specNum);
         xValue -= row.Double(0);
       }
     }
-    return ws;
-  } else {
-    return ws;
   }
+  return cloneWs;
 }
 
 MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws,
                                                    const double &xMin,
                                                    const double &xMax) {
   if (xMin != EMPTY_DBL() || xMax != EMPTY_DBL()) {
-    std::cout << "xMin : " << xMin << " , xMax : " << xMax << std::endl;
     IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
     crop->setProperty("InputWorkspace", ws);
     if (xMin != EMPTY_DBL())

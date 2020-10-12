@@ -18,6 +18,29 @@
 namespace Mantid {
 namespace DataHandling {
 
+/**
+ * Creates a timezero table for the loaded detectors
+ * @param numSpec :: Numer of spectra (number of rows in table)
+ * @param timeZeros :: Vector containing time zero values for each spectra
+ * @return TableWorkspace of time zeros
+ */
+DataObjects::TableWorkspace_sptr
+createTimeZeroTable(const size_t numSpec,
+                    const std::vector<double> &timeZeros) {
+  Mantid::DataObjects::TableWorkspace_sptr timeZeroTable =
+      std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+          Mantid::API::WorkspaceFactory::Instance().createTable(
+              "TableWorkspace"));
+  timeZeroTable->addColumn("double", "time zero");
+
+  for (size_t specNum = 0; specNum < numSpec; ++specNum) {
+    Mantid::API::TableRow row = timeZeroTable->appendRow();
+    row << timeZeros[specNum];
+  }
+
+  return timeZeroTable;
+}
+
 // Constructor
 LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log, std::string filename,
                                    LoadMuonNexusV2NexusHelper &nexusLoader)
@@ -122,29 +145,6 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(
   }
 
   return deadTimesTable;
-}
-
-/**
- * Creates a timezero table for the loaded detectors
- * @param numSpec :: Numer of spectra (number of rows in table)
- * @param timeZeros :: Vector containing time zero values for each spectra
- * @return TableWorkspace of time zeros
- */
-DataObjects::TableWorkspace_sptr LoadMuonStrategy::createTimeZeroTable(
-    const size_t numSpec, const std::vector<double> &timeZeros) const {
-  Mantid::DataObjects::TableWorkspace_sptr timeZeroTable =
-      std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
-          Mantid::API::WorkspaceFactory::Instance().createTable(
-              "TableWorkspace"));
-  assert(timeZeroTable);
-  timeZeroTable->addColumn("double", "time zero");
-
-  for (size_t specNum = 0; specNum < numSpec; ++specNum) {
-    Mantid::API::TableRow row = timeZeroTable->appendRow();
-    row << timeZeros[specNum];
-  }
-
-  return timeZeroTable;
 }
 
 } // namespace DataHandling

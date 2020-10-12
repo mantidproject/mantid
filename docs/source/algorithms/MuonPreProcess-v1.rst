@@ -9,7 +9,7 @@
 Description
 -----------
 
-When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group and pair asymmetry are performed on data. As part of the workflow, several "pre-processing" steps are also necessary; such as rebinning and cropping the data, applying dead time corrections, applying time zero corrections, and shifting the time axis by a fixed amount (sometimes referred to as "first good data").
+When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group and pair asymmetry are performed on data. As part of the workflow, several "pre-processing" steps are also necessary; such as rebinning and cropping the data, applying dead time corrections and applying time zero corrections/shifting the time axis by a fixed amount (sometimes referred to as "first good data").
 
 This algorithm intends to capture the common pre-processing steps, which are not muon physics specific concepts, and apply them all at once to produce data which is ready for the muon-specific operations. This way, scripting the workflows of the :ref:`Muon_Analysis-ref` interface is much more intuitive and simple.
 
