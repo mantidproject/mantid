@@ -34,7 +34,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
         self.assertTrue(mtd['shortWavelengthScan'])
         D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
-                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets="-3,-3,1",
+                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1],
                                  FitOutputWorkspace='test_shortWavelength')
         self.assertTrue(path.exists('test_shortWavelength.xml'))
         self.assertTrue(mtd['test_shortWavelength'])

@@ -43,7 +43,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         approximate_wavelength = '3.14' # Angstrom
         D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
-                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets="-3,-3,1",
+                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1],
                                  FitOutputWorkspace='test_shortWavelength')
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                                'test_shortWavelength.xml')
@@ -55,7 +55,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         approximate_wavelength = '4.8' # Angstrom
         D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
-                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
+                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1],
                                  FitOutputWorkspace='test_intermediateWavelength')
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                                'test_intermediateWavelength.xml')
@@ -67,7 +67,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         approximate_wavelength = '5.7' # Angstrom
         D7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_longWavelength.xml',
-                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1",
+                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1],
                                  FitOutputWorkspace='test_longWavelength')
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                                'test_longWavelength.xml')
