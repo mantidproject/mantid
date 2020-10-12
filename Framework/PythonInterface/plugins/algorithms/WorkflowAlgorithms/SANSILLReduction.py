@@ -568,6 +568,8 @@ class SANSILLReduction(PythonAlgorithm):
                 self.log().warning("Sample thickness not found in the sample "
                                    "logs. Using the default value: {:.2f}"
                                    .format(thickness))
+            finally:
+                self.setProperty('SampleThickness', thickness)
         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws,
                              SampleThickness=thickness)
 
