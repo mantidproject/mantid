@@ -59,13 +59,13 @@ class PolDiffILLReduction(PythonAlgorithm):
             issues['ContainerInputWorkspace'] = 'Both Container and Absorber input workspaces are mandatory for background subtraction.'
 
         if process == 'Quartz' and self.getProperty('TransmissionInputWorkspace').isDefault:
-            issues['TransmissionInputWorkspace'] = 'Quartz transmission is mandatory for polarization correction calculation.'
+            issues['TransmissionInputWorkspace'] = 'Quartz transmission is mandatory for polarisation correction calculation.'
 
         if process == 'Vanadium' and self.getProperty('TransmissionInputWorkspace').isDefault :
             issues['TransmissionInputWorkspace'] = 'Vanadium transmission is mandatory for vanadium data reduction.'
 
         if process == 'Sample' or process == 'Vanadium':
-            if self.getProperty('SamplePropertiesDictionary').isDefault:
+            if len(self.getProperty('SamplePropertiesDictionary').value) == 0:
                 issues['SamplePropertiesDictionary'] = 'Sample parameters need to be defined.'
 
             sampleProperties = self.getProperty('SamplePropertiesDictionary').value
@@ -340,7 +340,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                                         OutputType='1D', ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
                                         Normalise=True, HeightAxis='-0.1,0.1')
                 names_list.append(name)
-            DeleteWorkspaces(ws)
+            DeleteWorkspaces(WorkspaceList=ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
         return ws
 
@@ -359,7 +359,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     Integration(InputWorkspace=mon, OutputWorkspace=mon)
                 Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
                 RemoveSpectra(entry, WorkspaceIndices=monitor_indices, OutputWorkspace=entry)
-                DeleteWorkspace(mon)
+                DeleteWorkspace(Workspace=mon)
         return ws
 
     def _calculate_transmission(self, ws, beam_ws):
@@ -392,18 +392,19 @@ class PolDiffILLReduction(PythonAlgorithm):
                 raise RuntimeError("TOF requires elastic channel definition")
         return ws
 
-    def _calculate_polarizing_efficiencies(self, ws):
-        """Calculates the polarizing efficiencies using quartz data."""
+    def _calculate_polarising_efficiencies(self, ws):
+        """Calculates the polarising efficiencies using quartz data."""
         flipper_eff = 1.0 # this could be extracted from data if 4 measurements are done
         nMeasurementsPerPOL = 2
         tmp_names = []
         index = 0
+
         if self.getProperty('OutputTreatment').value == 'AverageScans':
             ws = self._merge_polarisations(ws, average_detectors=True)
         for entry_no in range(1, mtd[ws].getNumberOfEntries()+1, nMeasurementsPerPOL):
             # two polarizer-analyzer states, fixed flipper_eff
-            ws_00 = mtd[ws].getItem(entry_no).name()
-            ws_01 = mtd[ws].getItem(entry_no-1).name()
+            ws_00 = mtd[ws][entry_no].name()
+            ws_01 = mtd[ws][entry_no-1].name()
             tmp_name = '{0}_{1}_{2}'.format(ws[2:], mtd[ws_00].getRun().getLogData('POL.actual_state').value, index)
             Divide(LHSWorkspace=mtd[ws_00]-mtd[ws_01],
                    RHSWorkspace=(2*flipper_eff-1)*mtd[ws_00]+mtd[ws_01],
@@ -432,7 +433,7 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _frame_overlap_correction(self, ws):
         pass
 
-    def _apply_polarization_corrections(self, ws, pol_eff_ws):
+    def _apply_polarisation_corrections(self, ws, pol_eff_ws):
         """Applies the polarisation correction based on the output from quartz reduction."""
         fp = 1 # flipper efficiency, placeholder
         nPolarisations = None
@@ -577,6 +578,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             nComponents = 2
 
         tmp_names = []
+
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
             dataY_nuclear = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
             dataY_incoherent = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
@@ -589,10 +591,10 @@ class PolDiffILLReduction(PythonAlgorithm):
                     dataY_incoherent[spectrum] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
                     dataY_magnetic[spectrum] = 0 # Magnetic
                 elif nMeasurements == 6 or nMeasurements == 10:
-                    sigma_y_sf = mtd[ws].getItem(entry_no+2).readY(spectrum)
-                    sigma_y_nsf = mtd[ws].getItem(entry_no+3).readY(spectrum)
-                    sigma_x_sf = mtd[ws].getItem(entry_no+4).readY(spectrum)
-                    sigma_x_nsf = mtd[ws].getItem(entry_no+5).readY(spectrum)
+                    sigma_y_sf = mtd[ws][entry_no+2].readY(spectrum)
+                    sigma_y_nsf = mtd[ws][entry_no+3].readY(spectrum)
+                    sigma_x_sf = mtd[ws][entry_no+4].readY(spectrum)
+                    sigma_x_nsf = mtd[ws][entry_no+5].readY(spectrum)
                     if nMeasurements == 6:
                         # Magnetic component
                         magnetic_component = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
@@ -603,16 +605,16 @@ class PolDiffILLReduction(PythonAlgorithm):
                         # Incoherent component
                         dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magnetic_component
                     else:
-                        sigma_xmy_sf = mtd[ws].getItem(entry_no+6).readY(spectrum)
-                        sigma_xmy_nsf = mtd[ws].getItem(entry_no+7).readY(spectrum)
-                        sigma_xpy_sf = mtd[ws].getItem(entry_no+8).readY(spectrum)
-                        sigma_xpy_nsf = mtd[ws].getItem(entry_no+9).readY(spectrum)
+                        sigma_xmy_sf = mtd[ws][entry_no+6].readY(spectrum)
+                        sigma_xmy_nsf = mtd[ws][entry_no+7].readY(spectrum)
+                        sigma_xpy_sf = mtd[ws][entry_no+8].readY(spectrum)
+                        sigma_xpy_nsf = mtd[ws][entry_no+9].readY(spectrum)
                         # Magnetic component
                         try:
                             theta_0 = self._sampleProperties['theta_offset'].value
                         except KeyError:
                             raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
-                        theta = mtd[ws].getItem(entry_no).detectorInfo().twoTheta(spectrum)
+                        theta = mtd[ws][entry_no].detectorInfo().twoTheta(spectrum)
                         alpha = theta - 0.5*np.pi - theta_0
                         c0 = math.pow(math.cos(alpha), 2)
                         c4 = math.pow(math.cos(alpha - np.pi/4.0), 2)
@@ -629,9 +631,9 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             dataY = [dataY_nuclear, dataY_incoherent, dataY_magnetic]
             for component in range(nComponents):
-                dataX = mtd[ws].getItem(entry_no).readX(0)
+                dataX = mtd[ws][entry_no].readX(0)
                 dataE = np.sqrt(abs(dataY[component]))
-                tmp_name = str(mtd[ws].getItem(entry_no).name())[:-1] + componentNames[component]
+                tmp_name = str(mtd[ws][entry_no].name())[:-1] + componentNames[component]
                 tmp_names.append(tmp_name)
                 CreateWorkspace(DataX=dataX, DataY=dataY[component], dataE=dataE,
                                 Nspec=mtd[ws].getItem(entry_no).getNumberHistograms(),
@@ -788,7 +790,7 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _finalize(self, ws, process):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
-        mtd[ws].getItem(0).getRun().addProperty('ProcessedAs', process, True)
+        mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
@@ -841,7 +843,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 progress.report()
 
             if process == 'Quartz':
-                self._calculate_polarizing_efficiencies(ws)
+                self._calculate_polarising_efficiencies(ws)
                 progress.report()
 
             if process in ['Vanadium', 'Sample']:
@@ -850,7 +852,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     progress.report()
                 pol_eff_ws = self.getPropertyValue('QuartzInputWorkspace')
                 if pol_eff_ws:
-                    self._apply_polarization_corrections(ws, pol_eff_ws)
+                    self._apply_polarisation_corrections(ws, pol_eff_ws)
                     progress.report()
                 if self._mode == 'TOF':
                     self._detector_analyser_energy_efficiency(ws)
