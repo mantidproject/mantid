@@ -44,6 +44,7 @@ set(TEST_PY_FILES
     MSDFitTest.py
     OSIRISDiffractionReductionTest.py
     PaalmanPingsMonteCarloAbsorptionTest.py
+    PolDiffILLReductionTest.py
     PowderILLDetectorScanTest.py
     PowderILLParameterScanTest.py
     ReflectometryILLAutoProcessTest.py
