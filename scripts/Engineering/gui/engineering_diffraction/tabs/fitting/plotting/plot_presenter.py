@@ -47,6 +47,7 @@ class FittingPlotPresenter(object):
         self.view.update_fitbrowser()
 
     def apply_fit(self, ws_list):
+        fitprop_list = []
         for ws in ws_list:
-            self.view.fit_ws(ws)
-        self.seq_fit_done_notifier.notify_subscribers()
+            fitprop_list += [self.view.fit_ws(ws)]
+        self.seq_fit_done_notifier.notify_subscribers(fitprop_list)
