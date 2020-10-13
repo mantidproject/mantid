@@ -120,7 +120,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output,
-                             doc='The output workspace based on the value of ProcessAs.')
+                             doc='The output workspace based on the value of ProcessAs.'))
 
         absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Absorber')
         beam = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Beam')
@@ -761,7 +761,9 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _set_units(self, ws):
         output_unit = self.getPropertyValue('OutputUnits')
         if output_unit == 'TwoTheta':
-            if self.getProperty('OutputTreatment').value == 'SumScans' and isinstance(mtd[ws], WorkspaceGroup) and mtd[ws].getNumberOfEntries() > 1:
+            if (self.getProperty('OutputTreatment').value == 'SumScans'
+                    and isinstance(mtd[ws], WorkspaceGroup)
+                    and mtd[ws].getNumberOfEntries() > 1):
                 self._merge_polarisations(ws)
             else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta')
