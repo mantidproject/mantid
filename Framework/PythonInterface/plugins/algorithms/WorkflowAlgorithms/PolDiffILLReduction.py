@@ -52,7 +52,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         process = self.getPropertyValue('ProcessAs')
         if process == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
             issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
-            issues['AbsorberTransmissionInputWorkspace'] = 'Absorber transmission input workspace is mandatory for transmission calculation.'
 
         if ( (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault)
              or (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault) ):
