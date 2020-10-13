@@ -8,8 +8,8 @@
 from mantid.api import FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
     NumericAxis, PropertyMode, Progress, PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty, \
     FileAction, AlgorithmFactory
-from mantid.kernel import Direction, EnabledWhenProperty, IntBoundedValidator, LogicOperator, \
-    PropertyCriterion, PropertyManagerProperty, StringListValidator
+from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, IntBoundedValidator, \
+    LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
 
 from mantid.simpleapi import *
 
@@ -52,7 +52,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         process = self.getPropertyValue('ProcessAs')
         if process == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
             issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
-            issues['CadmiumTransmissionInputWorkspace'] = 'Cadmium transmission input workspace is mandatory for transmission calculation.'
+            issues['AbsorberTransmissionInputWorkspace'] = 'Absorber transmission input workspace is mandatory for transmission calculation.'
 
         if ( (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault)
              or (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault) ):
@@ -87,7 +87,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             for key in required_keys:
                 if key not in sampleGeometry:
                     issues['ExperimentPropertiesDictionary'] = '{} needs to be defined.'.format(key)
-                    # raise RuntimeError('{} needs to be defined in the dictionary'.format(key))
 
         if process == 'Sample':
             if self.getProperty('TransmissionInputWorkspace').isDefault :
@@ -119,8 +118,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc='Choose the process type.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output,
-                             doc='The output workspace based on the value of ProcessAs.'))
+                                                    direction=Direction.Output),
+                             doc='The output workspace based on the value of ProcessAs.')
 
         absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Absorber')
         beam = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Beam')
@@ -280,7 +279,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="ScatteringAngleBinSize",
                              defaultValue=0.5,
-                             validator=IntBoundedValidator(lower=0),
+                             validator=FloatBoundedValidator(lower=0),
                              direction=Direction.Input,
                              doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
 
@@ -365,7 +364,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _calculate_transmission(self, ws, beam_ws):
-        """Calculates transmission based on the measurement of the current sample, empty beam, and cadmium."""
+        """Calculates transmission based on the measurement of the current sample, empty beam, and absorber."""
         # extract Monitor2 values
         if 0 in mtd[ws].getItem(0).readY(0):
             raise RuntimeError('Cannot calculate transmission; monitor has 0 counts.')
@@ -375,7 +374,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _subtract_background(self, ws, container_ws, transmission_ws):
-        """Subtracts empty container and cadmium scaled by transmission."""
+        """Subtracts empty container and absorber scaled by transmission."""
         if self._mode != 'TOF':
             absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
             if absorber_ws == "":
@@ -814,9 +813,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         if process in ['Beam', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws, average_detectors=True)
-            cadmium_ws = self.getPropertyValue('CadmiumTransmissionInputWorkspace')
-            if cadmium_ws:
-                Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
+            absorber_transmission_ws = self.getPropertyValue('AbsorberTransmissionInputWorkspace')
+            if absorber_transmission_ws:
+                Minus(LHSWorkspace=ws, RHSWorkspace=absorber_transmission_ws, OutputWorkspace=ws)
             monID = 100001 # monitor 2
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
             if process in ['Transmission']:
