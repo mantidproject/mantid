@@ -11,6 +11,10 @@ from .toscainstrument import ToscaInstrument
 from .twodmap import TwoDMap
 from .instrument import Instrument
 
+instruments = {"lagrange": LagrangeInstrument,
+               "tosca": ToscaInstrument,
+               "twodmap": TwoDMap}
+
 def get_instrument(name: str, setting: str = '') -> Instrument:
     """Instantiate a named Instrument
 
@@ -26,11 +30,13 @@ def get_instrument(name: str, setting: str = '') -> Instrument:
         Instrument object
 
     """
-    if name not in ALL_INSTRUMENTS:
-        raise ValueError("Unknown instrument: %s" % name)
-    elif name == "Lagrange":
-        return LagrangeInstrument("Lagrange", setting=setting)
-    elif name == "TOSCA":
-        return ToscaInstrument("TOSCA")
-    elif name == "TwoDMap":
-        return TwoDMap("TwoDMap")
+    if name.lower() in instruments:
+        return instruments.get(name.lower())(setting=setting)
+    elif name not in ALL_INSTRUMENTS:
+        raise ValueError(f'Unknown instrument: "{name}". Known instruments: '
+                         + ', '.join(ALL_INSTRUMENTS))
+    else:
+        raise NotImplementedError(
+            f"Instrument {name} is defined in abins.constants, but was not "
+            "accessible from abins.instruments.get_instrument(). "
+            "Please report this error to the Mantid team.")

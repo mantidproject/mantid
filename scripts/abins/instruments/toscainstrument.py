@@ -19,10 +19,10 @@ class ToscaInstrument(IndirectInstrument):
     """
     parameters = abins.parameters.instruments['TOSCA']
 
-    def __init__(self, name: str, setting: str = ''):
-        super().__init__(name=name, setting=setting)
+    def __init__(self, setting: str = ''):
+        super().__init__(name='TOSCA', setting=setting)
 
-        if setting != '':
+        if self._setting != '':
             raise ValueError('TOSCA Instrument does not use multiple settings')
 
     @classmethod
