@@ -645,8 +645,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
 
-  Run run = m_localWorkspace->mutableRun();
-  m_loader.addNexusFieldsToWsRun(nxfileID, run);
+  m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
   NXclose(&nxfileID);
 }
 

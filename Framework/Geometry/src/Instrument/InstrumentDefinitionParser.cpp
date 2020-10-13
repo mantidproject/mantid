@@ -2302,7 +2302,6 @@ void InstrumentDefinitionParser::setLogfile(
 
         if (!pValueElem->hasAttribute(("val")))
           continue;
-        hasValue = true;
 
         validFrom.setToMinimum();
         if (pValueElem->hasAttribute("valid-from"))
@@ -2314,13 +2313,13 @@ void InstrumentDefinitionParser::setLogfile(
 
         if (validFrom <= validityDate && validityDate <= validTo &&
             (validFrom > currentValidFrom ||
-             (validFrom == currentValidFrom && validTo < currentValidTo))) {
+             (validFrom == currentValidFrom && validTo <= currentValidTo))) {
 
           currentValidFrom = validFrom;
           currentValidTo = validTo;
         } else
           continue;
-
+        hasValue = true;
         value = pValueElem->getAttribute("val");
       }
 
