@@ -92,7 +92,9 @@ Table filling
 
 When selecting the instrument and the acquisition mode, the table is updated
 with the needed column headers. To obtain information about a column, a tooltip
-is displayed when moving the mouse over the corresponding header.
+is displayed when moving the mouse over the corresponding header. To facilitate
+filling, columns can be collapsed (button in the header), hidden (right click or
+menu bar) and their order can be changed by drag-and-drop.
 
 Each cell can be edited manually or filled programmatically by using some of the
 tool buttons.
