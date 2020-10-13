@@ -334,7 +334,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                     else:
                         list_pol.append('{0}_{1}'.format(numor, direction))
                 if average_detectors:
-                    Divide(LHSWorkspace=name, RHSWorkspace=CreateSingleValuedWorkspace(len(numors)), OutputWorkspace=name)
+                    CreateSingleValuedWorkspace(DataValue=len(numors), OutputWorkspace='norm')
+                    Divide(LHSWorkspace=name, RHSWorkspace='norm', OutputWorkspace=name)
+                    DeleteWorkspace(Workspace='norm')
                 else:
                     SumOverlappingTubes(','.join(list_pol), OutputWorkspace=name,
                                         OutputType='1D', ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
@@ -378,6 +380,10 @@ class PolDiffILLReduction(PythonAlgorithm):
             absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
             if absorber_ws == "":
                 raise RuntimeError("Absorber input workspace needs to be provided for non-TOF background subtraction.")
+        unit_ws = 'unit_ws'
+        CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
+        background_ws = 'background_ws'
+        tmp_names = [unit_ws, background_ws]
         for entry_no, entry in enumerate(mtd[ws]):
             container_entry = mtd[container_ws].getItem(entry_no).name()
             mtd[container_entry].setYUnit('Counts/Counts')
@@ -385,18 +391,32 @@ class PolDiffILLReduction(PythonAlgorithm):
             if self._mode != 'TOF':
                 absorber_entry = mtd[absorber_ws].getItem(entry_no).name()
                 mtd[absorber_entry].setYUnit('Counts/Counts')
+                container_corr = container_entry + '_corr'
+                tmp_names.append(container_corr)
+                Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=container_entry, OutputWorkspace=container_corr)
+                transmission_corr = transmission_ws + '_corr'
+                tmp_names.append(transmission_corr)
+                Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
+                absorber_corr = absorber_entry + '_corr'
+                tmp_names.append(absorber_corr)
+                Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=absorber_entry, OutputWorkspace=absorber_corr)
+                Plus(LHSWorkspace=container_corr, RHSWorkspace=absorber_corr, OutputWorkspace=background_ws)
                 Minus(LHSWorkspace=entry,
-                      RHSWorkspace=mtd[transmission_ws] * mtd[container_entry] + (1-mtd[transmission_ws]) * mtd[absorber_entry],
+                      RHSWorkspace=background_ws,
                       OutputWorkspace=entry)
             else:
                 raise RuntimeError("TOF requires elastic channel definition")
+        DeleteWorkspaces(WorkspaceList=tmp_names)
         return ws
 
     def _calculate_polarising_efficiencies(self, ws):
         """Calculates the polarising efficiencies using quartz data."""
         flipper_eff = 1.0 # this could be extracted from data if 4 measurements are done
+        flipper_corr_ws = 'flipper_corr_ws'
+        CreateSingleValuedWorkspace(DataValue=(2*flipper_eff-1), OutputWorkspace=flipper_corr_ws)
         nMeasurementsPerPOL = 2
         tmp_names = []
+        names_to_delete = [flipper_corr_ws]
         index = 0
 
         if self.getProperty('OutputTreatment').value == 'AverageScans':
@@ -406,8 +426,13 @@ class PolDiffILLReduction(PythonAlgorithm):
             ws_00 = mtd[ws][entry_no].name()
             ws_01 = mtd[ws][entry_no-1].name()
             tmp_name = '{0}_{1}_{2}'.format(ws[2:], mtd[ws_00].getRun().getLogData('POL.actual_state').value, index)
-            Divide(LHSWorkspace=mtd[ws_00]-mtd[ws_01],
-                   RHSWorkspace=(2*flipper_eff-1)*mtd[ws_00]+mtd[ws_01],
+            Minus(LHSWorkspace=ws_00, RHSWorkspace=ws_01, OutputWorkspace='nominator')
+            ws_00_corr = ws_00 + '_corr'
+            names_to_delete.append(ws_00_corr)
+            Multiply(LHSWorkspace=flipper_corr_ws, RHSWorkspace=ws_00, OutputWorkspace=ws_00_corr)
+            Plus(LHSWorkspace=ws_00_corr, RHSWorkspace=ws_01, OutputWorkspace='denominator')
+            Divide(LHSWorkspace='nominator',
+                   RHSWorkspace='denominator',
                    OutputWorkspace=tmp_name)
             tmp_names.append(tmp_name)
             if self._method_data_structure == 'Uniaxial' and entry_no % 2 == 1:
@@ -416,8 +441,10 @@ class PolDiffILLReduction(PythonAlgorithm):
                 index += 1
             elif self._method_data_structure == '10p' and entry_no % 10 == 9:
                 index += 1
+        names_to_delete += ['nominator', 'denominator']
         GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace='tmp')
-        DeleteWorkspaces(ws)
+        DeleteWorkspaces(WorkspaceList=names_to_delete)
+        DeleteWorkspace(Workspace=ws)
         RenameWorkspace(InputWorkspace='tmp', OutputWorkspace=ws)
         return ws
 
@@ -758,11 +785,14 @@ class PolDiffILLReduction(PythonAlgorithm):
         Integration(InputWorkspace=ws, OutputWorkspace=ws)
         return ws
 
-    def _output_vanadium(self, ws, n_atoms):
+    def _output_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
         if self._mode == 'TOF':
             ws = self._sum_TOF_data(ws)
-        Divide(LHSWorkspace=CreateSingleValuedWorkspace(0.404*n_atoms), RHSWorkspace=ws, OutputWorkspace=ws)
+        CreateSingleValuedWorkspace(DataValue=0.404 * self._sampleProperties['n_atoms'].value,
+                                    OutputWorkspace='norm')
+        Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
+        DeleteWorkspace(Workspace='norm')
         return ws
 
     def _set_units(self, ws):
@@ -869,7 +899,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     component_ws = ''
                 progress.report()
                 if process == 'Vanadium':
-                    self._output_vanadium(ws, self._sampleProperties['n_atoms'].value)
+                    self._output_vanadium(ws)
                 else:
                     self._detector_efficiency_correction(ws, component_ws)
                     progress.report()
