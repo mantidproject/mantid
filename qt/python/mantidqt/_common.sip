@@ -459,6 +459,7 @@ public:
     int sizeOfFunctionsGroup() const;
     void loadFunction(QString funStr);
     void saveFunction(const QString &fnName);
+    void executeCustomSetupRemove(const QString &name);
     double startX() const;
     void setStartX(double start);
     double endX() const;

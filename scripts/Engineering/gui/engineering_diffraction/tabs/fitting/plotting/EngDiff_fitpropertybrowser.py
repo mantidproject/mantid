@@ -34,6 +34,13 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         """
         return None
 
+    def get_fitprop(self):
+        return eval(self.getFitAlgorithmParameters().replace('true', 'True').replace('false', 'False'))
+
+    def save_current_setup(self, name):
+        self.executeCustomSetupRemove(name)
+        self.saveFunction(name)
+
     def _get_allowed_spectra(self):
         """
         Get the workspaces and spectra that can be fitted from the
@@ -58,10 +65,8 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
-
         ws = AnalysisDataService.retrieve(name)
         self.do_plot(ws, plot_diff=self.plotDiff())
         self.fit_result_ws_name = name
-        self.saveFunction(self.workspaceName())
-        results_dict = eval(self.getFitAlgorithmParameters().replace('true', 'True').replace('false', 'False'))
-        self.fit_notifier.notify_subscribers(results_dict)
+        self.save_current_setup(self.workspaceName())
+        self.fit_notifier.notify_subscribers(self.get_fitprop())
