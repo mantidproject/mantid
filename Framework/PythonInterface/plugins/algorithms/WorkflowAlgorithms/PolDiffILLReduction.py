@@ -594,25 +594,17 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         nMeasurements, nComponents = self._data_structure_helper()
         componentNames = ['Coherent', 'Incoherent', 'Magnetic']
-        if self._user_method == '10p':
-            nMeasurements = 10
-            nComponents = 3
-        elif self._user_method == 'XYZ':
-            nMeasurements = 6
-            nComponents = 3
-        elif self._user_method == 'Uniaxial':
-            nMeasurements = 2
-            nComponents = 2
-
+        number_histograms = mtd[ws][0].getNumberHistograms()
+        block_size = mtd[ws][0].blocksize()
         tmp_names = []
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
-            dataY_nuclear = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
-            dataY_incoherent = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
-            dataY_magnetic = np.zeros(shape=(mtd[ws].getItem(entry_no).getNumberHistograms(), mtd[ws].getItem(entry_no).blocksize()))
-            for spectrum in range(mtd[ws].getItem(entry_no).getNumberHistograms()):
-                sigma_z_sf = mtd[ws].getItem(entry_no).readY(spectrum)
-                sigma_z_nsf = mtd[ws].getItem(entry_no+1).readY(spectrum)
+            dataY_nuclear = np.zeros(shape=(number_histograms, block_size))
+            dataY_incoherent = np.zeros(shape=(number_histograms, block_size))
+            dataY_magnetic = np.zeros(shape=(number_histograms, block_size))
+            for spectrum in range(number_histograms):
+                sigma_z_sf = mtd[ws][entry_no].readY(spectrum)
+                sigma_z_nsf = mtd[ws][entry_no+1].readY(spectrum)
                 if nMeasurements == 2:
                     dataY_nuclear[spectrum] = 2.0 * sigma_z_nsf - sigma_z_sf  # Nuclear coherent
                     dataY_incoherent[spectrum] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
