@@ -423,15 +423,15 @@ void QENSFitSequential::init() {
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
                   "numbers.");
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-      "StartX"), "A value of x in, or on the low x "
-                "boundary of, the first bin to "
-                "include in\n"
-                "the fit (default lowest value of x)");
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-      "EndX"), "A value in, or on the high x boundary "
-              "of, the last bin the fitting range\n"
-              "(default the highest value of x)");
+  declareProperty(std::make_unique<ArrayProperty<double>>("StartX"),
+                  "A value of x in, or on the low x "
+                  "boundary of, the first bin to "
+                  "include in\n"
+                  "the fit (default lowest value of x)");
+  declareProperty(std::make_unique<ArrayProperty<double>>("EndX"),
+                  "A value in, or on the high x boundary "
+                  "of, the last bin the fitting range\n"
+                  "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "
@@ -531,7 +531,6 @@ std::map<std::string, std::string> QENSFitSequential::validateInputs() {
   const auto workspaces = convertInputToElasticQ(inputWorkspaces);
   const auto inputString = getInputString(workspaces);
   const auto spectra = getSpectra(inputString);
-  
   const std::vector<double> startX = getProperty("StartX");
   const std::vector<double> endX = getProperty("EndX");
   if (startX.size() != endX.size()) {
@@ -546,7 +545,6 @@ std::map<std::string, std::string> QENSFitSequential::validateInputs() {
       }
     }
   }
-
   return errors;
 }
 
@@ -673,13 +671,13 @@ void QENSFitSequential::addAdditionalLogs(
   }
 }
 
-void QENSFitSequential::addFitRangeLogs(const API::Workspace_sptr &resultWorkspace,
-                                        size_t itter) {
+void QENSFitSequential::addFitRangeLogs(
+    const API::Workspace_sptr &resultWorkspace, size_t itter) {
   auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
   logAdder->setProperty("Workspace", resultWorkspace);
   Progress logAdderProg(this, 0.99, 1.00, 6);
   logAdder->setProperty("LogType", "String");
-  
+
   std::vector<double> startX = getProperty("StartX");
   logAdder->setProperty("LogName", "start_x");
   if (startX.size() == 1) {

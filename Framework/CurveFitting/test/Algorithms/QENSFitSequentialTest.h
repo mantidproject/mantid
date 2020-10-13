@@ -103,7 +103,8 @@ public:
       startX.push_back(0.0);
       endX.push_back(10.0);
     }
-    auto outputBaseName = runMultipleFit(createReducedWorkspaces(names, totalBins, totalHist),
+    auto outputBaseName =
+        runMultipleFit(createReducedWorkspaces(names, totalBins, totalHist),
                        peakFunction(), startX, endX);
     testFitOutput(outputBaseName, names.size() * 3);
     AnalysisDataService::Instance().clear();

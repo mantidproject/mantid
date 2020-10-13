@@ -256,8 +256,7 @@ void PlotPeakByLogValue::exec() {
                       initialParams, isMultiDomainFunction, i, data);
     std::shared_ptr<Algorithm> fit;
     if (startX.size() == 0) {
-      fit =
-          runSingleFit(createFitOutput, outputCompositeMembers,
+      fit = runSingleFit(createFitOutput, outputCompositeMembers,
                          outputConvolvedMembers, ifun, data, EMPTY_DBL(),
                          EMPTY_DBL());
     } else if (startX.size() == 1) {

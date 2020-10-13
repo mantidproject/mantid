@@ -617,7 +617,7 @@ public:
     AnalysisDataService::Instance().remove("PLOTPEAKBYLOGVALUETEST_WS");
   }
 
-void test_startX_multiple_value() {
+  void test_startX_multiple_value() {
     auto ws = createTestWorkspace();
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
