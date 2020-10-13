@@ -228,10 +228,13 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty("MassFraction", defaultValue=0.0,
                              validator=FloatBoundedValidator(lower=0., exclusive=False))
         self.declareProperty("SampleShape", "Cylinder", StringListValidator(["Cylinder", "Sphere"]))
+        # This should be swapped with using environment definitions instead?
         self.declareProperty("Radius", defaultValue=0.0, validator=FloatBoundedValidator(lower=0., exclusive=False),
                              doc="Radius of sample in cm for absorption correction.")
-        self.declareProperty("PackingFraction", defaultValue=0.0,
-                             validator=FloatBoundedValidator(lower=0., exclusive=False))
+        fraction_validator = FloatBoundedValidator(lower=0., upper=2.)
+        fraction_validator.setLowerExclusive(True)
+        fraction_validator.setUpperExclusive(False)
+        self.declareProperty("PackingFraction", defaultValue=0.0, validator=fraction_validator)
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
