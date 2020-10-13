@@ -90,9 +90,10 @@ Exercise 3
 #. Load the MUSR00015189 data set
 #. Plot spectrum number 64 of the second workspace in the group
 #. Open the Fit property browser
-#. As described earlier, add a UserFunction with the with Formula = h*exp(-a*x)
-#. Set h = 5000 and **Tie** it to this value
-#. Fit the data.
+#. As described earlier, add a UserFunction with the with Formula = `h*exp(-a*x)`
+#. Set `h = 5000` and **Fix** it to this value
+#. Give `a` some positive intial value such as `1.0`
+#. Fit the data
 
 .. figure:: /images/ExerciseFittingMBCfit_3MUSR.png
    :alt: ExerciseFittingMBCfit_3MUSR.png
