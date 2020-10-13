@@ -10,9 +10,9 @@ from .broadening import broaden_spectrum, prebin_required_schemes
 
 class TwoDMap(Instrument):
     """An instrument for q-resolved 2D maps"""
-    def __init__(self, name):
-        super().__init__()
-        self._name = name
+    def __init__(self, setting=''):
+        super().__init__(setting=setting)
+        self._name = 'TwoDMap'
         self._e_init = None
         self._angle = None
 

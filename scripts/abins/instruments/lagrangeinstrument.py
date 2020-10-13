@@ -19,21 +19,8 @@ class LagrangeInstrument(IndirectInstrument):
 
     _q_model_warning_given = False
 
-    def __init__(self, name, setting='Cu(220)'):
-        super().__init__(name=name, setting=setting)
-
-        if setting in self.parameters['settings']:
-            self._setting = setting
-        elif setting == '':
-            self._setting = self.parameters['default_setting']
-            print(f'No setting specified for instrument {self.get_name()}. '
-                  f'Using default "{self._setting}". Supported settings: '
-                  + ', '.join(sorted(self.parameters['settings'].keys())))
-        else:
-            raise ValueError('Setting "{}" is unknown for Lagrange '
-                             'instrument. Supported settings: {}'.format(
-                                 setting,
-                                 ', '.join(sorted(self.parameters['settings'].keys()))))
+    def __init__(self, setting='Cu(220)'):
+        super().__init__(name='Lagrange', setting=setting)
 
     def get_sigma(self, frequencies):
         ei_resolution = self.parameters['settings'][self._setting].get('ei_resolution', 0)

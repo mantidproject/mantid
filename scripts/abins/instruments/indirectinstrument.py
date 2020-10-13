@@ -17,7 +17,7 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
     """
     def __init__(self, name: str, setting: str = ''):
         self._name = name
-        super().__init__()
+        super().__init__(setting=setting)
 
     @classmethod
     def calculate_q_powder(cls, input_data=None):
