@@ -665,8 +665,8 @@ IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
   fitAlgorithm->setProperty("LogName", getResultLogName());
   std::stringstream startX;
   std::stringstream endX;
-  for (FitDomainIndex i = 0; i < m_fitDataModel->getNumberOfDomains(); i++) {
-    const auto range = m_fitDataModel->getFittingRange(i);
+  for (size_t i = 0; i < m_fitDataModel->getNumberOfDomains(); i++) {
+    const auto range = m_fitDataModel->getFittingRange(FitDomainIndex(i));
     startX << range.first << ",";
     endX << range.second << ",";
   }
