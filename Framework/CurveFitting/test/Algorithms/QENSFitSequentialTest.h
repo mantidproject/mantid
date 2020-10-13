@@ -187,7 +187,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             outputBaseName + "_Result"));
-    size_t foo = groupWorkspace->size();
     TS_ASSERT_EQUALS(groupWorkspace->size(), expectedGroupSize);
   }
 
