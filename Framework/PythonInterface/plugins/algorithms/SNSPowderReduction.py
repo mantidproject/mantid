@@ -137,6 +137,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
     iparmFile = None
     _info = None
     _absMethod = None
+    _sampleFormula = None
+    _massDensity = None
+    _sampleShape = None
+    _sampleRadius = None
+    _packingFrac = None
 
     def category(self):
         return "Diffraction\\Reduction"
@@ -219,6 +224,14 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # absorption correction
         self.declareProperty("TypeOfCorrection", "None",
                              StringListValidator(["None", "SampleOnly", "SampleAndContainer", "FullPaalmanPings"]))
+        self.declareProperty("SampleFormula", "")
+        self.declareProperty("MassFraction", defaultValue=0.0,
+                             validator=FloatBoundedValidator(lower=0., exclusive=False))
+        self.declareProperty("SampleShape", "Cylinder", StringListValidator(["Cylinder", "Sphere"]))
+        self.declareProperty("Radius", defaultValue=0.0, validator=FloatBoundedValidator(lower=0., exclusive=False),
+                             doc="Radius of sample in cm for absorption correction.")
+        self.declareProperty("PackingFraction", defaultValue=0.0,
+                             validator=FloatBoundedValidator(lower=0., exclusive=False))
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
