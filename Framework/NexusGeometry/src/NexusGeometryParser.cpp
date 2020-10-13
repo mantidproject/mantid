@@ -674,7 +674,7 @@ private:
       throw std::runtime_error("Expect to have as many detector_face entries "
                                "as detector_number entries");
     if (detFaces.size() % 2 != 0)
-      throw std::runtime_error("Unequal pairs of face incides to detector "
+      throw std::runtime_error("Unequal pairs of face indices to detector "
                                "indices in detector_faces");
     if (detFaces.size() / 2 > faceIndices.size())
       throw std::runtime_error(
