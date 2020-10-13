@@ -1239,7 +1239,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         return can_run_ws_name
 
-    def _create_absorption_input(self, filename, num_wl_bins):
+    def _create_absorption_input(self, filename, num_wl_bins, material=None, geometry=None, environment=None):
         '''
         Create an input workspace for carpenter or other absorption corrections
         '''
@@ -1295,37 +1295,30 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             absorptionWS.setX(i, xaxis)
         absorptionWS.getAxis(0).setUnit('Wavelength')
 
+        # Make sure one is set before calling SetSample
+        if material != None or geometry != None or environment != None:
+            self._setup_sample(absorptionWS, material, geometry, environment)
+
         # this effectively deletes the metadata only workspace
         AnalysisDataService.addOrReplace(absName, absorptionWS)
 
         return absName
 
-    def _create_donor_ws(self, filename, nbins, material, geometry, containerGeom=None, containerMat=None):
+    def _setup_sample(self, donor_ws, material, geometry, environment):
         """
-        Creates a workspace to be used as an input to an Absorption Correction algorithm. This workspace
-        contains the wavelength range, instrument geometry, and calls SetSample with the associated sample
-        and container material and geometry.
-        :param filename:
-        :param nbins:
+        Calls SetSample with the associated sample and container material and geometry for use
+        in creating an input workspace for an Absorption Correction algorithm
+        :param donor_ws:
         :param material:
         :param geometry:
-        :param containerGeom:
-        :param containerMat:
-        :return:
+        :param environment:
         """
 
-        # Call the existing function to create the donor workspace
-        donorWS = _create_absorption_input(filename, nbins)
-
         # Set the material, geometry, and container info
-        api.SetSample(InputWorkspace=donorWS,
+        api.SetSample(InputWorkspace=donor_ws,
                       Material=material,
                       Geometry=geometry,
-                      ContainerGeometry=containerGeom,
-                      ContainerMaterial=containerMat)
-
-        return donorWS
-
+                      Environment=environment)
 
     def _process_vanadium_runs(self, van_run_number_list, samRunIndex, **dummy_focuspos):
         """
