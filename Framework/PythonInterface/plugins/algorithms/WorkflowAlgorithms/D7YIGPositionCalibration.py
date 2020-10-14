@@ -552,8 +552,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         output_path = filename
         if not os.path.isabs(filename):
             output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'), filename)
-        outfile = open(output_path, "w")
-        outfile.write(self._prettify(param_file))
+        with open(output_path, "w") as outfile:
+            outfile.write(self._prettify(param_file))
 
 
 AlgorithmFactory.subscribe(D7YIGPositionCalibration)
