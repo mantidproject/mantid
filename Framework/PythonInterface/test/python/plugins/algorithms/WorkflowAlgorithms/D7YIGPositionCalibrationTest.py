@@ -33,8 +33,9 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
     def test_shortWavelength(self):
         approximate_wavelength = '3.14' # Angstrom
         self.assertTrue(mtd['shortWavelengthScan'])
+        output_filename = os.path.join(tempfile.gettempdir(), 'test_shortWavelength.xml')
         D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=output_filename,
                                  MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1],
                                  FitOutputWorkspace='test_shortWavelength')
         self.assertTrue(path.exists('test_shortWavelength.xml'))
