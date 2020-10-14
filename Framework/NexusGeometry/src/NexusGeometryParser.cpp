@@ -485,8 +485,9 @@ private:
         Eigen::AngleAxisd rotation(angle, transformVector);
         transforms = rotation * transforms;
       } else {
-        throw std::runtime_error(
-            "Unknown Transform type in Nexus Geometry Parsing");
+        throw std::runtime_error("Unknown Transform type \"" + transformType +
+                                 "\" found in " + H5_OBJ_NAME(transformation) +
+                                 " when parsing Nexus geometry");
       }
     }
     return transforms;
