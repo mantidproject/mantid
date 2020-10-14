@@ -6,6 +6,7 @@ option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots 
 set(DOCS_MATH_EXT "sphinx.ext.mathjax" CACHE STRING "Sphinx extension to be used for rendering math equations. Default uses mathjax for speed")
 set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
+option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation" ON)
 
 # Build layout
 set(SPHINX_CONF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
@@ -83,15 +84,14 @@ endfunction()
 add_sphinx_build_target(html)
 add_sphinx_build_target(doctest)
 
-# qthelp
-if(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+# qthelp if building workbench
+if(DOCS_QTHELP AND ENABLE_WORKBENCH)
+  find_package(Qt5 COMPONENTS Help REQUIRED)
   add_sphinx_build_target(qthelp docs-qtassistant)
   add_custom_target(docs-qthelp
-                    COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} qthelp/MantidProject.qhcp
-                    COMMENT "Compiling Qt help documentation")
+                      COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
+                      COMMENT "Compiling Qt help documentation")
   add_dependencies(docs-qthelp docs-qtassistant)
-else()
-  message(WARNING "Did not find qcollectiongenerator - cannot create docs-qthelp target.")
 endif()
 
 # Installation settings
@@ -99,7 +99,7 @@ option(PACKAGE_DOCS "If true the qthelp documentation is bundled with the packag
 if(PACKAGE_DOCS)
   set(HTML_DOCS_DEST share/doc)
   foreach(_bundle ${BUNDLES})
-    if(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+    if(TARGET Qt5::qcollectiongenerator)
       # must "make docs-qthelp" before "make package" otherwise there will be a
       # build failure
       install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc
