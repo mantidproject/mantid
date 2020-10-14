@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>620</height>
+    <width>922</width>
+    <height>704</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,9 +32,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
-        <width>767</width>
-        <height>971</height>
+        <y>-126</y>
+        <width>885</width>
+        <height>810</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -539,6 +539,27 @@
             <string>Images</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_16">
+              <item>
+               <widget class="QLabel" name="colorbar_scale_label">
+                <property name="text">
+                 <string>Colorbar Scale</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="colorbar_scale">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_13">
               <property name="spacing">

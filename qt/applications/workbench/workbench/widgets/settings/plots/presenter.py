@@ -39,6 +39,7 @@ class PlotProperties(Enum):
     SHOW_MINOR_TICKS = "plots.ShowMinorTicks"
     SHOW_MINOR_GRIDLINES = "plots.ShowMinorGridlines"
     COLORMAP = "plots.images.Colormap"
+    COLORBAR_SCALE = "plots.images.ColorBarScale"
 
 
 class PlotSettings(object):
@@ -67,6 +68,7 @@ class PlotSettings(object):
         self.view.draw_style.addItems(VALID_DRAW_STYLE)
         self.view.marker_style.addItems(MARKER_STYLES.keys())
         self.view.default_colormap_combo_box.addItems(get_colormap_names())
+        self.view.colorbar_scale.addItems(self.AXES_SCALE)
 
     def load_general_setting_values(self):
         normalize_to_bin_width = "on" == ConfigService.getString(PlotProperties.NORMALIZATION.value).lower()
@@ -144,6 +146,11 @@ class PlotSettings(object):
             self.view.default_colormap_combo_box.setCurrentIndex(
                 self.view.default_colormap_combo_box.findText(colormap[:-2]))
             self.view.reverse_colormap_check_box.setChecked(True)
+        colorbar_scale = ConfigService.getString(PlotProperties.COLORBAR_SCALE.value)
+        if colorbar_scale in self.AXES_SCALE:
+            self.view.colorbar_scale.setCurrentIndex(self.view.colorbar_scale.findText(colorbar_scale))
+        else:
+            self.view.colorbar_scale.setCurrentIndex(0)
 
     @staticmethod
     def _setup_style_combo_boxes(current_style, style_combo, combo_items):
@@ -173,6 +180,7 @@ class PlotSettings(object):
         self.view.default_colormap_combo_box.currentTextChanged.connect(self.action_default_colormap_changed)
         self.view.reverse_colormap_check_box.stateChanged.connect(self.action_default_colormap_changed)
         self.view.plot_font.currentTextChanged.connect(self.action_font_combo_changed)
+        self.view.colorbar_scale.currentTextChanged.connect(self.action_colorbar_scale_changed)
 
     def action_normalization_changed(self, state):
         ConfigService.setString(PlotProperties.NORMALIZATION.value, "On" if state == Qt.Checked else "Off")
@@ -231,6 +239,9 @@ class PlotSettings(object):
 
     def action_legend_size_changed(self, value):
         ConfigService.setString(PlotProperties.LEGEND_FONT_SIZE.value, str(value))
+
+    def action_colorbar_scale_changed(self, value):
+        ConfigService.setString(PlotProperties.COLORBAR_SCALE.value, value)
 
     def action_default_colormap_changed(self):
         colormap = self.view.default_colormap_combo_box.currentText()
