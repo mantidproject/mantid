@@ -8,6 +8,7 @@
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/StringTokenizer.h"
+#include <NeXusException.hpp>
 #include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
 #include <memory>
@@ -69,8 +70,8 @@ Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
  */
 Material::Material()
     : m_name(), m_chemicalFormula(), m_atomTotal(0.0), m_numberDensity(0.0),
-      m_temperature(0.0), m_pressure(0.0), m_linearAbsorpXSectionByWL(0.0),
-      m_totalScatterXSection(0.0) {}
+      m_packingFraction(1.0), m_temperature(0.0), m_pressure(0.0),
+      m_linearAbsorpXSectionByWL(0.0), m_totalScatterXSection(0.0) {}
 
 /**
  * Construct a material object
@@ -81,10 +82,11 @@ Material::Material()
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
 Material::Material(const std::string &name, const ChemicalFormula &formula,
-                   const double numberDensity, const double temperature,
-                   const double pressure)
+                   const double numberDensity, const double packingFraction,
+                   const double temperature, const double pressure)
     : m_name(name), m_atomTotal(0.0), m_numberDensity(numberDensity),
-      m_temperature(temperature), m_pressure(pressure) {
+      m_packingFraction(packingFraction), m_temperature(temperature),
+      m_pressure(pressure) {
   m_chemicalFormula.assign(formula.begin(), formula.end());
   this->countAtoms();
   this->calculateLinearAbsorpXSectionByWL();
@@ -101,11 +103,11 @@ Material::Material(const std::string &name, const ChemicalFormula &formula,
  */
 Material::Material(const std::string &name,
                    const PhysicalConstants::NeutronAtom &atom,
-                   const double numberDensity, const double temperature,
-                   const double pressure)
+                   const double numberDensity, const double packingFraction,
+                   const double temperature, const double pressure)
     : m_name(name), m_chemicalFormula(), m_atomTotal(1.0),
-      m_numberDensity(numberDensity), m_temperature(temperature),
-      m_pressure(pressure) {
+      m_numberDensity(numberDensity), m_packingFraction(packingFraction),
+      m_temperature(temperature), m_pressure(pressure) {
   if (atom.z_number == 0) { // user specified atom
     m_chemicalFormula.emplace_back(atom, 1.);
   } else if (atom.a_number > 0) { // single isotope
@@ -201,6 +203,21 @@ const Material::ChemicalFormula &Material::chemicalFormula() const {
  * @returns The number density of the material in atoms / Angstrom^3
  */
 double Material::numberDensity() const { return m_numberDensity; }
+
+/**
+ * Get the effective number density
+ * @returns The number density of the material in atoms / Angstrom^3
+ */
+double Material::numberDensityEffective() const {
+  return m_numberDensity * m_packingFraction;
+}
+
+/**
+ * Get the packing fraction. This should be a number 0<f<=1. However,
+ * this is sometimes used as a fudge factor and is allowed to vary 0<f<2.
+ * @returns The packing fraction
+ */
+double Material::packingFraction() const { return m_packingFraction; }
 
 /**
  * Get the temperature
@@ -530,6 +547,7 @@ void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
   }
 
   file->writeData("number_density", m_numberDensity);
+  file->writeData("packing_fraction", m_packingFraction);
   file->writeData("temperature", m_temperature);
   file->writeData("pressure", m_pressure);
   file->closeGroup();
@@ -595,6 +613,11 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
   this->calculateTotalScatterXSection();
 
   file->readData("number_density", m_numberDensity);
+  try {
+    file->readData("packing_fraction", m_packingFraction);
+  } catch (NeXus::Exception &) {
+    m_packingFraction = 1.;
+  }
   file->readData("temperature", m_temperature);
   file->readData("pressure", m_pressure);
   file->closeGroup();
