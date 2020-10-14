@@ -172,6 +172,83 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.assertEqual(self.table.item(0, 1).text(), "test2")
         self.table.setRowContents(0, ["test", "test2", "test3"])
 
+    def test_setRowBackground(self):
+        self.table.setColumnCount(2)
+        self.table.setRowBackground(0, "#11223344")
+        for c in range(self.table.columnCount()):
+            item = self.table.item(0, c)
+            a = item.background().color().alpha()
+            r = item.background().color().red()
+            g = item.background().color().green()
+            b = item.background().color().blue()
+            self.assertEqual(a, int("11", 16))
+            self.assertEqual(r, int("22", 16))
+            self.assertEqual(g, int("33", 16))
+            self.assertEqual(b, int("44", 16))
+
+    def test_removeRowBackground(self):
+        self.table.setColumnCount(2)
+        self.table.setRowBackground(0, "#11223344")
+        self.table.removeRowBackground(0)
+        for c in range(self.table.columnCount()):
+            item = self.table.item(0, c)
+            a = item.background().color().alpha()
+            r = item.background().color().red()
+            g = item.background().color().green()
+            b = item.background().color().blue()
+            self.assertEqual(a, 255)
+            self.assertEqual(r, 0)
+            self.assertEqual(g, 0)
+            self.assertEqual(b, 0)
+
+    def test_setCellBackground(self):
+        self.table.setColumnCount(2)
+        self.table.setCellBackground(0, 0, "#11223344")
+        item = self.table.item(0, 0)
+        a = item.background().color().alpha()
+        r = item.background().color().red()
+        g = item.background().color().green()
+        b = item.background().color().blue()
+        self.assertEqual(a, int("11", 16))
+        self.assertEqual(r, int("22", 16))
+        self.assertEqual(g, int("33", 16))
+        self.assertEqual(b, int("44", 16))
+        item = self.table.item(0, 1)
+        self.assertIsNone(item)
+
+    def test_removeCellBackground(self):
+        self.table.setColumnCount(2)
+        self.table.setRowBackground(0, "#11223344")
+        self.table.removeCellBackground(0, 0)
+        item = self.table.item(0, 0)
+        a = item.background().color().alpha()
+        r = item.background().color().red()
+        g = item.background().color().green()
+        b = item.background().color().blue()
+        self.assertEqual(a, 255)
+        self.assertEqual(r, 0)
+        self.assertEqual(g, 0)
+        self.assertEqual(b, 0)
+        item = self.table.item(0, 1)
+        a = item.background().color().alpha()
+        r = item.background().color().red()
+        g = item.background().color().green()
+        b = item.background().color().blue()
+        self.assertEqual(a, int("11", 16))
+        self.assertEqual(r, int("22", 16))
+        self.assertEqual(g, int("33", 16))
+        self.assertEqual(b, int("44", 16))
+
+    def test_setCellToolTip(self):
+        self.table.setCellToolTip(0, 0, "test")
+        self.assertEqual(self.table.item(0, 0).toolTip(), "test")
+
+    def test_setColumnHeaderToolTips(self):
+        self.table.setHorizontalHeaderLabels(["label"])
+        self.table.setColumnHeaderToolTips(["tooltip"])
+        self.assertEqual(self.table.horizontalHeaderItem(0).toolTip(),
+                         "tooltip")
+
 
 if __name__ == "__main__":
     unittest.main()
