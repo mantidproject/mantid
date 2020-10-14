@@ -16,11 +16,10 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D7/')
-
-    def setUp(self):
         Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         mtd.clear()
         output_path = os.path.join(tempfile.gettempdir(), 'test_shortWavelength.xml')
         if path.exists(output_path):
