@@ -26,6 +26,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
         self.fit_notifier = GenericObservable()
+        self.func_changed_notifier = GenericObservable()
 
     def set_output_window_names(self):
         """
@@ -35,7 +36,13 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         return None
 
     def get_fitprop(self):
-        return eval(self.getFitAlgorithmParameters().replace('true', 'True').replace('false', 'False'))
+        # evalaute string to make a dict (replace case of bool values)
+        dict_str = self.getFitAlgorithmParameters()
+        if dict_str:
+            return eval(dict_str.replace('true', 'True').replace('false', 'False'))
+        else:
+            return None
+
 
     def save_current_setup(self, name):
         self.executeCustomSetupRemove(name)
@@ -69,4 +76,13 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.do_plot(ws, plot_diff=self.plotDiff())
         self.fit_result_ws_name = name
         self.save_current_setup(self.workspaceName())
-        self.fit_notifier.notify_subscribers(self.get_fitprop())
+        self.fit_notifier.notify_subscribers([self.get_fitprop()])  # needs to be passed a list
+
+    @Slot()
+    def function_changed_slot(self):
+        """
+        Update the peak editing tool after function structure has changed in
+        the browser: functions added and/or removed.
+        """
+        super(EngDiffFitPropertyBrowser, self).function_changed_slot()
+        self.func_changed_notifier.notify_subscribers(self.isFitEnabled())

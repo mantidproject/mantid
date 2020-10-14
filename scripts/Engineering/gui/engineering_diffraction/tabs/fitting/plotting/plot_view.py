@@ -16,7 +16,6 @@ from workbench.plotting.toolbar import ToolbarStateManager
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
 from mantid.simpleapi import Fit
 
-
 if is_pyqt5():
     from matplotlib.backends.backend_qt5agg import FigureCanvas
 else:
@@ -123,13 +122,20 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.update_figure()
 
     def fit_ws(self, ws_name):
-        # get input properties from fitproperty browser
-        fitprop = self.fit_browser.get_fitprop()
-        fitprop['properties']['InputWorkspace'] = ws_name
-        fitprop['properties']['Output'] = ws_name
+        # populate dict with input params for fit in same dict format as fit_browser.getFitAlgorithmParameters()
+        fitprop = {'properties': {'InputWorkspace': ws_name,
+                                  'Output': ws_name,
+                                  'StartX': self.fit_browser.startX(),
+                                  'EndX': self.fit_browser.endX(),
+                                  'Function': self.fit_browser.getFunctionString(),
+                                  'ConvolveMembers': True,
+                                  'OutputCompositeMembers': True}}
+        exclude = self.fit_browser.getExcludeRange()
+        if exclude:
+            fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
         fit_output = Fit(**fitprop['properties'])
         fitprop['properties']['Function'] = str(fit_output.Function.fun)
-        # update fitproperty browser function and save setup
+        # update browser with output function and save setup
         self.fit_browser.loadFunction(fitprop['properties']['Function'])
         self.fit_browser.save_current_setup(ws_name)
         return fitprop

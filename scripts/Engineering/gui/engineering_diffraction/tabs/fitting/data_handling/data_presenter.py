@@ -39,15 +39,13 @@ class FittingDataPresenter(object):
         self.apply_fit_notifier = GenericObservable()
         # Obeservers
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
-        self.seq_fit_observer = GenericObserverWithArgPassing(self.seq_fit_completed)
+        self.func_changed_observer = GenericObserverWithArgPassing(self.func_changed)
+        self.seq_fit_observer = GenericObserverWithArgPassing(self.fit_completed)
 
+    def func_changed(self, fit_enabled):
+        self.view.set_apply_fit_button_enabled(fit_enabled)
 
-    def fit_completed(self, fitprop):
-        if self.get_loaded_workspaces():
-            self.view.set_apply_fit_button_enabled(True)
-        self.model.update_fit([fitprop])
-
-    def seq_fit_completed(self, fitprops):
+    def fit_completed(self, fitprops):
         self.model.update_fit(fitprops)
 
     def _start_seq_fit(self):

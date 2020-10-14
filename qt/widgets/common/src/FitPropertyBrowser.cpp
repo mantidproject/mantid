@@ -1646,8 +1646,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    auto function = getFittingFunction();
-    const std::string funStr = function->asString();
+    const std::string funStr = getFunctionString();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -1758,6 +1757,12 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   if (m_compositeFunction->name() == "MultiBG") {
     emit multifitFinished();
   }
+}
+
+std::string FitPropertyBrowser::getFunctionString() const{
+  auto function = getFittingFunction();
+  std::string funStr = function->asString();
+  return funStr;
 }
 
 /// Display the status string returned from Fit

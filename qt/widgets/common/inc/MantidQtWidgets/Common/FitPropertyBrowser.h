@@ -182,6 +182,8 @@ public:
   /// Get the X limits of the workspace
   QVector<double> getXRange();
 
+  /// Get the function as a string
+  std::string getFunctionString() const;
   /// Get the start X
   double startX() const;
   /// Set the start X

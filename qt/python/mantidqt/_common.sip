@@ -457,6 +457,8 @@ public:
     }
 %End
     int sizeOfFunctionsGroup() const;
+    bool isFitEnabled() const;
+    std::string getFunctionString() const;
     void loadFunction(QString funStr);
     void saveFunction(const QString &fnName);
     void executeCustomSetupRemove(const QString &name);
@@ -466,6 +468,7 @@ public:
     void setEndX(double end);
     void setXRange(double start, double end);
     QVector<double> getXRange() throw(std::invalid_argument);
+    std::string getExcludeRange() const;
     QString getXColumnName() const;
     QString getYColumnName() const;
     QString getErrColumnName() const;
