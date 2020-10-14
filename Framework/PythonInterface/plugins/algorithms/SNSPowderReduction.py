@@ -234,7 +234,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         fraction_validator = FloatBoundedValidator(lower=0., upper=2.)
         fraction_validator.setLowerExclusive(True)
         fraction_validator.setUpperExclusive(False)
-        self.declareProperty("PackingFraction", defaultValue=0.0, validator=fraction_validator)
+        self.declareProperty("PackingFraction", defaultValue=0.1, validator=fraction_validator)
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
@@ -1298,12 +1298,12 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             absorptionWS.setX(i, xaxis)
         absorptionWS.getAxis(0).setUnit('Wavelength')
 
-        # Make sure one is set before calling SetSample
-        if material != None or geometry != None or environment != None:
-            self._setup_sample(absorptionWS, material, geometry, environment)
-
         # this effectively deletes the metadata only workspace
         AnalysisDataService.addOrReplace(absName, absorptionWS)
+
+        # Make sure one is set before calling SetSample
+        if material != None or geometry != None or environment != None:
+            self._setup_sample(absName, material, geometry, environment)
 
         return absName
 
@@ -1354,15 +1354,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self.log().notice('Processing vanadium {}'.format(van_run_ws_name))
 
             # create the donor workspace for calculating the sample correction
-            absWksp = self._create_absorption_input(van_run_number, num_wl_bins=1000)  # TODO should this be hard coded?
-
-            # set material as Vanadium and correct for multiple scattering
-            api.SetSample(InputWorkspace=absWksp,
-                          Material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
-                          Geometry={'Shape': 'Cylinder',
-                                    'Height':7.,  # cm - shouldn't be hard coded
-                                    'Radius':self._vanRadius,
-                                    'Center': [0., 0., 0.]})
+            # TODO should num_wl_bins be hard coded?
+            absWksp = self._create_absorption_input(van_run_number, num_wl_bins=1000,
+                                                    material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
+                                                    geometry={'Radius': self._vanRadius},
+                                                    environment={'Name': 'InAir', 'Container': 'PG3Van'})
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
