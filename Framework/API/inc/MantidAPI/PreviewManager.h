@@ -63,6 +63,13 @@ using PreviewManager = Mantid::Kernel::SingletonHolder<PreviewManagerImpl>;
 } // namespace API
 } // namespace Mantid
 
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::PreviewManagerImpl>;
+}
+} // namespace Mantid
+
 #define DECLARE_PREVIEW(classname)                                             \
   namespace {                                                                  \
   Mantid::Kernel::RegistrationHelper register_preview_##classname(             \

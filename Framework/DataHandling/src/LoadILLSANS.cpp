@@ -876,5 +876,6 @@ LoadILLSANS::getVariableTimeBinning(const NXEntry &entry,
   }
   return binEdges;
 }
+
 } // namespace DataHandling
 } // namespace Mantid
